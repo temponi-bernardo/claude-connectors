@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   REMOTE_ROUTES,
   createRemoteHandler,
@@ -16,12 +16,14 @@ import {
   readForm,
   readJsonBody,
   redirectWithCode,
+  renewSecretQuietly,
   routeRemoteRequest,
   withCors,
   type RemoteApp,
   type RemoteConnector,
 } from './handler.js';
 import { pkceChallenge } from './oauth.js';
+import { issueTokenSet } from './tokens.js';
 
 const ISSUER = 'https://canvas.exemplo.dev';
 const CALLBACK = 'https://claude.ai/api/mcp/auth_callback';
@@ -287,5 +289,49 @@ describe('auxiliares do roteador', () => {
     expect(withCors(new Response()).headers.get('access-control-allow-origin')).toBe('*');
     const res = await routeRemoteRequest(makeApp(), new Request(`${ISSUER}/authorize/`));
     expect(res.headers.get('access-control-allow-origin')).toBe('*');
+  });
+});
+
+describe('handleToken — renovação da credencial', () => {
+  function refreshApp(renewSecret: (secret: string) => Promise<void>) {
+    const app = makeApp();
+    const withRenew: RemoteApp = { ...app, connector: { ...connector, renewSecret } };
+    const { refresh_token } = issueTokenSet('bom', app.settings, app.now());
+    return {
+      app: withRenew,
+      refresh: form('/token', { grant_type: 'refresh_token', refresh_token }),
+    };
+  }
+
+  it('no refresh, pede ao conector para renovar a credencial e devolve os tokens', async () => {
+    const renew = vi.fn(() => Promise.resolve());
+    const { app, refresh } = refreshApp(renew);
+    const res = await handleToken(app, refresh);
+    expect(res.status).toBe(200);
+    expect(renew).toHaveBeenCalledWith('bom');
+    expect(((await res.json()) as { token_type: string }).token_type).toBe('Bearer');
+  });
+
+  it('se a renovação falha, o refresh continua valendo', async () => {
+    const { app, refresh } = refreshApp(() => Promise.reject(new Error('Canvas fora')));
+    expect((await handleToken(app, refresh)).status).toBe(200);
+  });
+
+  it('a troca do código não renova a credencial', async () => {
+    const renew = vi.fn(() => Promise.resolve());
+    const handle = createRemoteHandler({
+      ...makeApp(),
+      connector: { ...connector, renewSecret: renew },
+    });
+    await accessToken(handle);
+    expect(renew).not.toHaveBeenCalled();
+  });
+});
+
+describe('renewSecretQuietly', () => {
+  it('ignora conector sem renovação e engole a falha dela', async () => {
+    await expect(renewSecretQuietly(connector, 'bom')).resolves.toBeUndefined();
+    const failing = { ...connector, renewSecret: () => Promise.reject(new Error('x')) };
+    await expect(renewSecretQuietly(failing, 'bom')).resolves.toBeUndefined();
   });
 });

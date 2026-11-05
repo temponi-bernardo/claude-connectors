@@ -132,6 +132,9 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
      com `verifyCanvasToken()` e devolve o código de `issueAuthorizationCode()` por `redirectWithCode()`.
   6. `handleToken()` troca o código em `redeemTokenRequest()` (`redeemAuthorizationCode()` confere PKCE com
      `pkceChallenge()`) e responde com `issueTokenSet()`; depois, o refresh passa por `redeemRefreshToken()`.
+  7. A cada refresh, `handleToken()` chama `renewSecretQuietly()`: no Canvas, `renewCanvasToken()` lista os tokens
+     com `canvasTokenApi()`, acha o próprio com `matchesVisibleToken()` e, se `planTokenRenewal()` mandar, estende a
+     validade para agora + 30 dias (o máximo que a PUC aceita). Falha na renovação só vira aviso no log.
 - **Resultado:** o conector aparece conectado no Claude (web, Cowork e celular); o servidor não guardou nada.
 - **Falhas:** token recusado → a página volta com o erro; pedido com mais de 15 minutos → 400; retorno fora de
   `OAUTH_REDIRECT_HOSTS` → registro recusado; troca da `SEAL_KEY` → todos reconectam.
@@ -146,5 +149,6 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
   3. `serveMcpRequest()` atende a requisição sem sessão, em JSON, e fecha o servidor; a ferramenta segue o P03
      a partir do passo 2.
 - **Resultado:** a mesma resposta do conector local, sem navegador nem arquivo no servidor.
-- **Falhas:** access token vencido → 401 e o Claude usa o refresh token; token do Canvas vencido (30 dias na PUC)
-  → `unauthorizedError()` devolve a orientação de gerar outro token e reconectar (P08).
+- **Falhas:** access token vencido → 401 e o Claude usa o refresh token (e o P08 passo 7 estende o token do
+  Canvas); token do Canvas vencido (mais de 30 dias sem uso, ou revogado) → `unauthorizedError()` devolve a
+  orientação de gerar outro token e reconectar (P08).

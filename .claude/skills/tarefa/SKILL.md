@@ -16,7 +16,8 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
    novos. Só abra código que FUNCTIONS.md apontar.
 2. **Marque a tarefa como 🟨** no ROADMAP.
 3. **Branch** a partir da `main` atualizada: `git switch -c <tipo>/<id>-<descricao>` (ver
-   `docs/WORKFLOW.md`).
+   `docs/WORKFLOW.md`). Num worktree novo (`.claude/worktrees/...`), rode `npm ci` antes: sem `node_modules`
+   próprio, o teste de `PLAYWRIGHT_VERSION` falha e o `check` não fica verde.
 4. **Implemente com `/testes-primeiro`**: teste → falhar → código mínimo → refatorar, uma função por vez,
    respeitando `docs/CODING-STANDARDS.md`. Antes de criar função, procure equivalente em FUNCTIONS.md.
 5. **Documente com `/atualizar-docs`** no mesmo conjunto de mudanças.

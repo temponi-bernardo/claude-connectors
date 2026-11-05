@@ -73,7 +73,9 @@ Para testar local antes: `npm run worker:dev` (precisa de `SEAL_KEY`, ex.: `--va
    **Conectar**. A aba volta para o claude.ai com o conector vinculado.
 4. O conector fica disponível na web, no Cowork e no app do celular.
 
-O token da PUC vale 30 dias. Quando vencer, as ferramentas avisam: gere outro e reconecte o conector.
+O token da PUC vale no máximo 30 dias, mas o conector estende a validade dele sozinho a cada renovação do
+acesso (ADR 0011). Só se você ficar mais de 30 dias sem usar o conector (ou revogar o token) as ferramentas
+avisam: gere outro e reconecte o conector.
 
 **Outros hosts (Docker):**
 

@@ -28,6 +28,8 @@ export interface RemoteConnector {
   readonly verifySecret: (secret: string) => Promise<void>;
   /** Cria o servidor MCP com as ferramentas ligadas à credencial do usuário. */
   readonly createServer: (secret: string) => McpServer;
+  /** Opcional: estende a validade da credencial no serviço a cada refresh do OAuth. */
+  readonly renewSecret?: (secret: string) => Promise<void>;
 }
 
 /** Dependências do roteador: configuração OAuth, conector e relógio em segundos Unix. */
@@ -153,12 +155,28 @@ export async function handleAuthorizeSubmit(app: RemoteApp, request: Request): P
   );
 }
 
-/** `POST /token`: troca código ou refresh token por tokens. */
+/** Renova a credencial pelo conector, se ele souber; falha só vira aviso no log (o refresh segue). */
+export async function renewSecretQuietly(
+  connector: RemoteConnector,
+  secret: string,
+): Promise<void> {
+  try {
+    await connector.renewSecret?.(secret);
+  } catch (error) {
+    console.warn(
+      'Não consegui renovar a credencial:',
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
+/** `POST /token`: troca código ou refresh token por tokens; no refresh, renova a credencial. */
 export async function handleToken(app: RemoteApp, request: Request): Promise<Response> {
   const result = redeemTokenRequest(await readForm(request), app.settings, app.now());
   if (!result.ok)
     return jsonResponse({ error: result.error, error_description: result.description }, 400);
-  return jsonResponse(result.value);
+  if (result.value.refreshed) await renewSecretQuietly(app.connector, result.value.secret);
+  return jsonResponse(result.value.tokens);
 }
 
 /** `/mcp`: exige o access token e atende com o servidor MCP do usuário. */

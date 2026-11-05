@@ -25,6 +25,13 @@ export interface TokenSet {
   readonly refresh_token: string;
 }
 
+/** Resultado do `/token`: os tokens novos, o segredo selado neles e se veio de um refresh. */
+export interface RedeemedGrant {
+  readonly tokens: TokenSet;
+  readonly secret: string;
+  readonly refreshed: boolean;
+}
+
 /** Pedido aprovado: o pedido validado e o segredo que o usuário informou. */
 export interface ApprovedGrant {
   readonly request: AuthorizeRequest;
@@ -119,13 +126,18 @@ export function redeemTokenRequest(
   form: URLSearchParams,
   settings: OAuthSettings,
   now: number,
-): OAuthResult<TokenSet> {
+): OAuthResult<RedeemedGrant> {
   const grantType = form.get('grant_type');
   let secret: OAuthResult<string>;
   if (grantType === 'authorization_code') secret = redeemAuthorizationCode(form, settings, now);
   else if (grantType === 'refresh_token') secret = redeemRefreshToken(form, settings, now);
   else return oauthError('unsupported_grant_type', 'Use authorization_code ou refresh_token.');
-  return secret.ok ? { ok: true, value: issueTokenSet(secret.value, settings, now) } : secret;
+  if (!secret.ok) return secret;
+  const tokens = issueTokenSet(secret.value, settings, now);
+  return {
+    ok: true,
+    value: { tokens, secret: secret.value, refreshed: grantType === 'refresh_token' },
+  };
 }
 
 /** Lê o segredo de um header `Authorization: Bearer <access token>`; nulo se ausente ou inválido. */
