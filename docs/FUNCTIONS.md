@@ -24,6 +24,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/canvas-puc/src/session.ts`: [`sessionFilePath`](#sessionfilepath), [`cookieHeader`](#cookieheader), [`csrfToken`](#csrftoken), [`isCanvasSession`](#iscanvassession), [`loadSession`](#loadsession), [`saveSession`](#savesession), [`clearSession`](#clearsession)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasServiceTools`](#canvasservicetools), [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
+- `connectors/canvas-puc/src/worker.ts`: [`toEnvVars`](#toenvvars), [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
 - `src/core/env.ts`: [`envValue`](#envvalue), [`parseFlag`](#parseflag)
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
@@ -32,7 +33,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage)
 - `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
-- `src/remote/oauth.ts`: [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
+- `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
 - `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed)
 - `src/remote/tokens.ts`: [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessSecret`](#readaccesssecret)
 - `tools/docs/ast.ts`: [`toPosixRelative`](#toposixrelative), [`globToRegExp`](#globtoregexp), [`isAnalyzedSource`](#isanalyzedsource), [`openProject`](#openproject), [`signatureOf`](#signatureof), [`collectFileFunctions`](#collectfilefunctions), [`collectFunctions`](#collectfunctions), [`isDataDeclaration`](#isdatadeclaration), [`collectFileConstants`](#collectfileconstants), [`collectConstants`](#collectconstants), [`isIgnoredReference`](#isignoredreference), [`ownerLabelOf`](#ownerlabelof), [`findDeclaration`](#finddeclaration), [`buildReferenceIndex`](#buildreferenceindex), [`buildCallGraph`](#buildcallgraph)
@@ -2251,7 +2252,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/env.ts`
 - **Assinatura:** `envValue(env: EnvVars, key: string): string | null`
-- **Usada por:** `readCanvasConfig()`, `readCanvasRemoteSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`
+- **Usada por:** `createWorkerApp()`, `readCanvasConfig()`, `readCanvasRemoteSettings()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`
 - **Processos:** P03, P08
 
 <!-- gerado:fim -->
@@ -2733,7 +2734,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Entrada:** Nenhuma (lê o ambiente do processo).
 - **Saída:** Nada.
 - **Efeitos:** Abre a porta HTTP e escreve no stdout.
-- **Erros:** Lança se `PUBLIC_URL`/`RENDER_EXTERNAL_URL` ou `SEAL_KEY` faltarem ou forem inválidas.
+- **Erros:** Lança se `PUBLIC_URL` ou `SEAL_KEY` faltarem ou forem inválidas.
 
 ## `connectors/canvas-puc/src/remote.ts`
 
@@ -2743,7 +2744,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `readCanvasRemoteSettings(env: EnvVars): CanvasRemoteSettings`
-- **Usada por:** `startCanvasRemoteServer()`
+- **Usada por:** `createWorkerApp()`, `startCanvasRemoteServer()`
 - **Processos:** P08
 
 <!-- gerado:fim -->
@@ -2828,7 +2829,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector`
-- **Usada por:** `startCanvasRemoteServer()`
+- **Usada por:** `createWorkerApp()`, `startCanvasRemoteServer()`
 - **Processos:** P08, P09
 
 <!-- gerado:fim -->
@@ -3068,7 +3069,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `createRemoteHandler(app: RemoteApp): (request: Request) => Promise<Response>`
-- **Usada por:** `startCanvasRemoteServer()`
+- **Usada por:** `handleWorkerFetch()`, `startCanvasRemoteServer()`
 - **Processos:** P08
 
 <!-- gerado:fim -->
@@ -3164,7 +3165,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Lê a URL pública do servidor (`PUBLIC_URL` ou `RENDER_EXTERNAL_URL`).
+- **Faz:** Lê a URL pública do servidor (`PUBLIC_URL`).
 - **Entrada:** `env`: variáveis de ambiente.
 - **Saída:** URL sem barra final.
 - **Efeitos:** Nenhum (pura).
@@ -3444,6 +3445,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+### `readOAuthSettings`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `readOAuthSettings(env: EnvVars, issuer: string): OAuthSettings`
+- **Usada por:** `createWorkerApp()`, `readRemoteServerConfig()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a configuração OAuth do ambiente com o emissor dado.
+- **Entrada:** `env`: variáveis (`SEAL_KEY`, `OAUTH_REDIRECT_HOSTS`); `issuer`: URL pública.
+- **Saída:** `OAuthSettings`; hosts padrão `DEFAULT_REDIRECT_HOSTS` se a variável não vier.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Os de `parseSealKey` (chave ausente ou de tamanho errado).
+
 ## `src/remote/seal.ts`
 
 ### `parseSealKey`
@@ -3452,7 +3470,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `parseSealKey(raw: string | null): Buffer`
-- **Usada por:** `readRemoteServerConfig()`
+- **Usada por:** `readOAuthSettings()`
 - **Processos:** P08
 
 <!-- gerado:fim -->
@@ -3652,6 +3670,59 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+## `connectors/canvas-puc/src/worker.ts`
+
+### `toEnvVars`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/worker.ts`
+- **Assinatura:** `toEnvVars(env: Readonly<Record<string, unknown>>): EnvVars`
+- **Usada por:** `handleWorkerFetch()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o ambiente do Worker em variáveis de texto.
+- **Entrada:** `env`: variáveis, secrets e bindings do Worker.
+- **Saída:** Só as entradas cujo valor é texto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `createWorkerApp`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/worker.ts`
+- **Assinatura:** `createWorkerApp(env: EnvVars, origin: string): RemoteApp`
+- **Usada por:** `handleWorkerFetch()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o app remoto do Canvas para o Worker.
+- **Entrada:** `env`: variáveis de texto; `origin`: origem da requisição (emissor sem `PUBLIC_URL`).
+- **Saída:** `RemoteApp` com OAuth, conector do Canvas e relógio em segundos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Os de `readOAuthSettings` (sem `SEAL_KEY`).
+
+### `handleWorkerFetch`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/worker.ts`
+- **Assinatura:** `async handleWorkerFetch(request: Request, env: Readonly<Record<string, unknown>>): Promise<Response>`
+- **Usada por:** `connectors/canvas-puc/src/worker.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende uma requisição no Cloudflare Workers.
+- **Entrada:** `request`; `env`: ambiente do Worker.
+- **Saída:** Resposta do handler remoto; 500 com a explicação se a configuração for inválida.
+- **Efeitos:** Os do handler remoto (rede para o Canvas).
+- **Erros:** Nenhum: configuração inválida vira 500.
+
 ## Dados e constantes
 
 | Nome                     | Arquivo                                           | O que é                                                                                                                     |
@@ -3697,5 +3768,5 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `LOGIN_PAGE_CSS`         | `src/remote/login-page.ts`                        | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                             |
 | `CORS_HEADERS`           | `src/remote/handler.ts`                           | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                                       |
 | `REMOTE_ROUTES`          | `src/remote/handler.ts`                           | Tabela `MÉTODO caminho` → função do servidor remoto.                                                                        |
-| `DEFAULT_REDIRECT_HOSTS` | `src/remote/node-server.ts`                       | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                                         |
+| `DEFAULT_REDIRECT_HOSTS` | `src/remote/oauth.ts`                             | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                                         |
 | `MAX_BODY_BYTES`         | `src/remote/node-server.ts`                       | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                               |

@@ -118,7 +118,9 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
   1. Na subida, `startCanvasRemoteServer()` lê `readRemoteServerConfig()` (`readPublicUrl()`, `parseSealKey()`) e
      `readCanvasRemoteSettings()`, monta `canvasRemoteConnector()` e sobe `startRemoteHttpServer()` com
      `createRemoteHandler()`; cada requisição passa por `serveNodeRequest()` (`readNodeBody()`, `toWebRequest()`,
-     `writeWebResponse()`) e `routeRemoteRequest()`.
+     `writeWebResponse()`) e `routeRemoteRequest()`. No Cloudflare Workers (ADR 0010), `handleWorkerFetch()`
+     converte o ambiente com `toEnvVars()` e monta o app com `createWorkerApp()` (`readOAuthSettings()`), usando a
+     origem da requisição como emissor.
   2. O Claude chama `/mcp` sem token e recebe `mcpUnauthorizedResponse()`; lê os metadados de
      `protectedResourceMetadata()` e `authorizationServerMetadata()`.
   3. `handleRegister()` registra o cliente com `registerClient()`: `isAllowedRedirect()` confere o retorno e o

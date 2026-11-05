@@ -14263,6 +14263,16 @@ function mcpUnauthorizedResponse(issuer) {
 // src/remote/oauth.ts
 import { createHash } from "node:crypto";
 
+// src/core/env.ts
+function envValue(env, key) {
+  const value = env[key]?.trim();
+  if (!value || value.startsWith("${")) return null;
+  return value;
+}
+function parseFlag(value) {
+  return ["1", "true", "sim", "yes"].includes((value ?? "").toLowerCase());
+}
+
 // src/remote/seal.ts
 import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 var SEAL_KEY_BYTES = 32;
@@ -14307,6 +14317,15 @@ function openSealed(sealed, key, expected) {
 
 // src/remote/oauth.ts
 var CLIENT_TTL_SECONDS = 10 * 365 * 24 * 3600;
+var DEFAULT_REDIRECT_HOSTS = ["claude.ai", "claude.com", "localhost"];
+function readOAuthSettings(env, issuer) {
+  const hosts = envValue(env, "OAUTH_REDIRECT_HOSTS")?.split(",").map((host) => host.trim()).filter(Boolean);
+  return {
+    issuer,
+    key: parseSealKey(envValue(env, "SEAL_KEY")),
+    redirectHosts: hosts ?? DEFAULT_REDIRECT_HOSTS
+  };
+}
 function oauthError(error2, description) {
   return { ok: false, error: error2, description };
 }
@@ -14579,22 +14598,9 @@ function createRemoteHandler(app) {
 
 // src/remote/node-server.ts
 import { createServer } from "node:http";
-
-// src/core/env.ts
-function envValue(env, key) {
-  const value = env[key]?.trim();
-  if (!value || value.startsWith("${")) return null;
-  return value;
-}
-function parseFlag(value) {
-  return ["1", "true", "sim", "yes"].includes((value ?? "").toLowerCase());
-}
-
-// src/remote/node-server.ts
-var DEFAULT_REDIRECT_HOSTS = ["claude.ai", "claude.com", "localhost"];
 var MAX_BODY_BYTES = 1e6;
 function readPublicUrl(env) {
-  const raw = envValue(env, "PUBLIC_URL") ?? envValue(env, "RENDER_EXTERNAL_URL");
+  const raw = envValue(env, "PUBLIC_URL");
   if (!raw || !URL.canParse(raw))
     throw new Error("Defina PUBLIC_URL com o endere\xE7o p\xFAblico do servidor.");
   const url = new URL(raw);
@@ -14604,14 +14610,9 @@ function readPublicUrl(env) {
   return raw.replace(/\/+$/, "");
 }
 function readRemoteServerConfig(env) {
-  const hosts = envValue(env, "OAUTH_REDIRECT_HOSTS")?.split(",").map((host) => host.trim());
   return {
     port: Number(envValue(env, "PORT") ?? 8080),
-    settings: {
-      issuer: readPublicUrl(env),
-      key: parseSealKey(envValue(env, "SEAL_KEY")),
-      redirectHosts: hosts?.filter(Boolean) ?? DEFAULT_REDIRECT_HOSTS
-    }
+    settings: readOAuthSettings(env, readPublicUrl(env))
   };
 }
 async function readNodeBody(req) {
@@ -23541,7 +23542,8 @@ function readCanvasRemoteSettings(env) {
   return {
     baseUrl: baseUrl.replace(/\/+$/, ""),
     allowWrite: parseFlag(envValue(env, "CANVAS_ALLOW_WRITE")),
-    fetchFn: fetch
+    // Arrow: no Workers, o fetch global chamado como método de outro objeto dá "Illegal invocation".
+    fetchFn: (input, init) => fetch(input, init)
   };
 }
 function canvasLoginText(baseUrl) {

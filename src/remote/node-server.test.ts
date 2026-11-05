@@ -3,8 +3,8 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { Readable } from 'node:stream';
 import { afterAll, describe, expect, it, vi } from 'vitest';
+import { DEFAULT_REDIRECT_HOSTS } from './oauth.js';
 import {
-  DEFAULT_REDIRECT_HOSTS,
   MAX_BODY_BYTES,
   readNodeBody,
   readPublicUrl,
@@ -37,14 +37,6 @@ describe('readRemoteServerConfig', () => {
     });
     expect(config.port).toBe(8080);
     expect(config.settings.redirectHosts).toEqual(['claude.ai', 'exemplo.dev']);
-  });
-
-  it('usa RENDER_EXTERNAL_URL quando PUBLIC_URL não vem', () => {
-    const config = readRemoteServerConfig({
-      RENDER_EXTERNAL_URL: 'https://r.onrender.com',
-      SEAL_KEY: KEY,
-    });
-    expect(config.settings.issuer).toBe('https://r.onrender.com');
   });
 
   it('exige PUBLIC_URL em https (exceto localhost) e SEAL_KEY', () => {

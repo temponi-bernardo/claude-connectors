@@ -26,7 +26,8 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
    checklist de documentação preenchido item a item. Antes, rode `npm run pr:check -- "<título do PR>"`
    (não há CI, ADR 0006); corrija até ficar verde; responda comentários.
 9. **Merge:** o Claude mergeia com `pr:check` verde (`docs/WORKFLOW.md`). Rode o `pr:check` de novo na
-   branch final e então `gh pr merge --squash --delete-branch`.
+   branch final e então `gh pr merge --squash --delete-branch`. Se o PR mexeu no conector Canvas, publique
+   o remoto na `main` atualizada: `npm run worker:deploy` (precisa de `CLOUDFLARE_API_TOKEN`, ADR 0010).
 10. **Feche a tarefa:** ✅ no ROADMAP, "Próxima tarefa" atualizada, entrada no CHANGELOG se visível ao
     usuário. Isso pode ir no mesmo PR (preferido) ou em um PR `docs(docs): ...` imediato.
 11. **`/melhorar-skills`**: algo se repetiu ou mudou? Atualize a skill no mesmo PR.

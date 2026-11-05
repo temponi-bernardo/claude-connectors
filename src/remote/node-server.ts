@@ -3,11 +3,7 @@
  */
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { envValue, type EnvVars } from '../core/env.js';
-import type { OAuthSettings } from './oauth.js';
-import { parseSealKey } from './seal.js';
-
-/** Hosts de retorno OAuth aceitos por padrão: Claude na web e Claude Code (localhost). */
-export const DEFAULT_REDIRECT_HOSTS: readonly string[] = ['claude.ai', 'claude.com', 'localhost'];
+import { readOAuthSettings, type OAuthSettings } from './oauth.js';
 
 /** Maior corpo de requisição aceito (1 MB). */
 export const MAX_BODY_BYTES = 1_000_000;
@@ -25,9 +21,9 @@ export interface NodeServerOptions {
   readonly port: number;
 }
 
-/** Lê `PUBLIC_URL` (ou `RENDER_EXTERNAL_URL`, preenchida pelo Render): https, sem barra final. */
+/** Lê `PUBLIC_URL`: obrigatória, em https (http só em localhost), sem barra final. */
 export function readPublicUrl(env: EnvVars): string {
-  const raw = envValue(env, 'PUBLIC_URL') ?? envValue(env, 'RENDER_EXTERNAL_URL');
+  const raw = envValue(env, 'PUBLIC_URL');
   if (!raw || !URL.canParse(raw))
     throw new Error('Defina PUBLIC_URL com o endereço público do servidor.');
   const url = new URL(raw);
@@ -39,16 +35,9 @@ export function readPublicUrl(env: EnvVars): string {
 
 /** Monta a configuração a partir do ambiente (`PUBLIC_URL`, `SEAL_KEY`, `PORT`, `OAUTH_REDIRECT_HOSTS`). */
 export function readRemoteServerConfig(env: EnvVars): RemoteServerConfig {
-  const hosts = envValue(env, 'OAUTH_REDIRECT_HOSTS')
-    ?.split(',')
-    .map((host) => host.trim());
   return {
     port: Number(envValue(env, 'PORT') ?? 8080),
-    settings: {
-      issuer: readPublicUrl(env),
-      key: parseSealKey(envValue(env, 'SEAL_KEY')),
-      redirectHosts: hosts?.filter(Boolean) ?? DEFAULT_REDIRECT_HOSTS,
-    },
+    settings: readOAuthSettings(env, readPublicUrl(env)),
   };
 }
 

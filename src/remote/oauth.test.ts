@@ -1,8 +1,10 @@
 import { randomBytes } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
+  DEFAULT_REDIRECT_HOSTS,
   authorizationServerMetadata,
   clientRedirectUris,
+  readOAuthSettings,
   isAllowedRedirect,
   oauthError,
   parseAuthorizeQuery,
@@ -173,5 +175,25 @@ describe('auxiliares do OAuth', () => {
     });
     expect(readCodeChallenge(ok)).toEqual({ ok: true, value: 'c' });
     expect(readCodeChallenge(new URLSearchParams())).toMatchObject({ ok: false });
+  });
+});
+
+describe('readOAuthSettings', () => {
+  const key = randomBytes(32).toString('base64');
+
+  it('usa o emissor dado, a chave e os hosts padrão', () => {
+    const read = readOAuthSettings({ SEAL_KEY: key }, 'https://x.dev');
+    expect(read.issuer).toBe('https://x.dev');
+    expect(read.key.length).toBe(32);
+    expect(read.redirectHosts).toEqual(DEFAULT_REDIRECT_HOSTS);
+  });
+
+  it('aceita hosts separados por vírgula e exige SEAL_KEY', () => {
+    const read = readOAuthSettings(
+      { SEAL_KEY: key, OAUTH_REDIRECT_HOSTS: 'a.dev, ,b.dev' },
+      'https://x',
+    );
+    expect(read.redirectHosts).toEqual(['a.dev', 'b.dev']);
+    expect(() => readOAuthSettings({}, 'https://x.dev')).toThrow(/SEAL_KEY/);
   });
 });

@@ -33,6 +33,18 @@ describe('readCanvasRemoteSettings', () => {
     expect(settings.baseUrl).toBe('https://outro.instructure.com');
     expect(settings.allowWrite).toBe(true);
   });
+
+  it('chama o fetch global sem depender do objeto (o Workers recusa fetch com outro this)', async () => {
+    const global = vi.fn<typeof fetch>(function (this: unknown) {
+      if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation');
+      return Promise.resolve(new Response('ok'));
+    });
+    vi.stubGlobal('fetch', global);
+    const settings = readCanvasRemoteSettings({});
+    await expect(settings.fetchFn('https://x.dev')).resolves.toBeInstanceOf(Response);
+    expect(global).toHaveBeenCalledWith('https://x.dev', undefined);
+    vi.unstubAllGlobals();
+  });
 });
 
 describe('createTokenAuthProvider', () => {
