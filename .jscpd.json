@@ -12,7 +12,11 @@
     "package-lock.json",
     "CHANGELOG.md",
     "docs/FUNCTIONS.md",
-    "docs/adr/**"
+    "docs/adr/**",
+    "connectors/*/server/**",
+    "connectors/*/package-lock.json",
+    "connectors/*/.claude-plugin/**",
+    "connectors/*/.mcp.json"
   ],
   "format": ["typescript", "javascript", "markdown", "json", "yaml"],
   "gitignore": true,

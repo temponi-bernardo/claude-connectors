@@ -12,3 +12,4 @@ marca o antigo como "Substituído por NNNN". Modelo em [0000-modelo.md](0000-mod
 | [0005](0005-state-md-local-por-clone.md)                  | `docs/STATE.md` como estado local de cada clone           | Aceito                        | 2026-10-19 |
 | [0006](0006-sem-github-actions-checagens-locais.md)       | Sem GitHub Actions: checagens e release locais            | Aceito                        | 2026-11-05 |
 | [0007](0007-conectores-como-extensoes-mcpb.md)            | Conectores como extensões `.mcpb` com sessão do navegador | Aceito                        | 2026-11-05 |
+| [0008](0008-conectores-como-plugins-do-marketplace.md)    | Conectores também como plugins de um marketplace          | Aceito                        | 2026-11-05 |

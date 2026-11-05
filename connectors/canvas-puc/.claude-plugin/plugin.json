@@ -1,0 +1,31 @@
+{
+  "name": "canvas-puc",
+  "description": "Tarefas, prazos, notas, avisos, módulos e arquivos do Canvas da PUC Minas, com login pelo navegador.",
+  "author": {
+    "name": "Bernardo Temponi"
+  },
+  "repository": "https://github.com/temponi-bernardo/claude-connectors",
+  "userConfig": {
+    "base_url": {
+      "type": "string",
+      "title": "Endereço do Canvas",
+      "description": "URL do Canvas da instituição",
+      "default": "https://pucminas.instructure.com",
+      "required": true
+    },
+    "allow_write": {
+      "type": "boolean",
+      "title": "Permitir envios",
+      "description": "Libera entregar tarefa e responder fórum (o Claude sempre confirma antes)",
+      "default": true,
+      "required": false
+    },
+    "api_token": {
+      "type": "string",
+      "title": "Token de acesso (opcional)",
+      "description": "Reserva caso o login pelo navegador falhe. Pode deixar em branco.",
+      "sensitive": true,
+      "required": false
+    }
+  }
+}

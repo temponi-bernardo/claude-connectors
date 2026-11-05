@@ -1,0 +1,9 @@
+{
+  "name": "canvas-puc",
+  "version": "1.2.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "playwright-core": "1.64.1"
+  }
+}

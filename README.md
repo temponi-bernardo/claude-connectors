@@ -17,7 +17,12 @@ npm run check                   # formato, lint, tipos, testes, docs, segredos
 npm run pack -- canvas-puc      # gera dist/connectors/canvas-puc-<versão>.mcpb
 ```
 
-Instale o `.mcpb` no Claude Desktop em **Configurações → Extensões → Instalar extensão**.
+### Instalar no Claude
+
+- **Como plugin (recomendado):** no Claude, **Adicionar marketplace** → `temponi-bernardo/claude-connectors`
+  e instale o plugin desejado. O repo é privado: o PC precisa ter acesso git ao GitHub (SSH ou
+  `gh auth setup-git`).
+- **Como extensão:** `npm run pack -- <conector>` e instale o `.mcpb` em **Configurações → Extensões**.
 
 Requisitos: Node 22, Chrome ou Edge (login dos conectores) e gitleaks (`winget install Gitleaks.Gitleaks`).
 

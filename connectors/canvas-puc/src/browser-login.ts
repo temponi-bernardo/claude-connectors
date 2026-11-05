@@ -4,7 +4,8 @@
  * renovação silenciosa (navegador oculto) costuma funcionar sem o usuário ver nada.
  */
 import { join } from 'node:path';
-import { chromium, type BrowserContext, type Page } from 'playwright-core';
+import type { BrowserContext, Page } from 'playwright-core';
+import { loadPlaywright } from './playwright-runtime.js';
 import type { LoginMode } from './auth.js';
 import type { CanvasSession } from './session.js';
 
@@ -34,6 +35,7 @@ export async function launchLoginBrowser(
   dataDir: string,
   headless: boolean,
 ): Promise<BrowserContext> {
+  const { chromium } = await loadPlaywright(dataDir);
   let lastError: unknown;
   for (const channel of BROWSER_CHANNELS) {
     try {

@@ -40,11 +40,18 @@ O Claude chama uma ferramenta → `src/mcp` valida os argumentos (zod) → a fer
 da API → o cliente autentica e pagina → as respostas são reduzidas a objetos enxutos em português → o
 resultado volta como texto JSON. Detalhe em [PROCESSES.md](PROCESSES.md) (P03–P05).
 
-## Empacotamento
+## Empacotamento e instalação
 
-`npm run pack:all` (P05) une o código de cada conector num único `server/index.js` com o esbuild. Só o que
-não pode ser unido (`RUNTIME_EXTERNALS`, hoje `playwright-core`) vai em `node_modules` dentro do pacote.
-Resultado: `dist/connectors/<nome>-<versão>.mcpb` (o do Canvas tem ~3 MB).
+`npm run pack:all` (P05) une o código de cada conector num único `connectors/<nome>/server/index.js` com o
+esbuild e grava ao lado um `package.json`/`package-lock.json` só com o que não pode ser unido
+(`RUNTIME_EXTERNALS`, hoje `playwright-core`). Esse runtime é versionado e serve a dois formatos:
+
+| Formato                  | Como instala                                                        | Decisão  |
+| ------------------------ | ------------------------------------------------------------------- | -------- |
+| Plugin do marketplace    | Claude → Adicionar marketplace `temponi-bernardo/claude-connectors` | ADR 0008 |
+| Extensão `.mcpb` (~3 MB) | Claude Desktop → Configurações → Extensões → Instalar extensão      | ADR 0007 |
+
+O `playwright-core` só é carregado quando o login pelo navegador é necessário (`loadPlaywright()`).
 
 ## Serviços externos
 

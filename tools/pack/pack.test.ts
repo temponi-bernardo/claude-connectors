@@ -3,9 +3,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  BUNDLE_PATH,
   RUNTIME_EXTERNALS,
+  RUNTIME_FILES,
   bundleOptions,
   listConnectors,
+  pluginManifest,
+  pluginMcpConfig,
   readManifestIdentity,
   runtimePackageJson,
 } from './pack.js';
@@ -71,5 +75,59 @@ describe('bundleOptions', () => {
     });
     expect(opts.external).toEqual([...RUNTIME_EXTERNALS]);
     expect(opts.banner?.js).toContain('createRequire');
+  });
+});
+
+describe('RUNTIME_FILES', () => {
+  it('inclui manifesto, package.json, lockfile e o bundle', () => {
+    expect(RUNTIME_FILES).toEqual([
+      'manifest.json',
+      'package.json',
+      'package-lock.json',
+      BUNDLE_PATH,
+    ]);
+  });
+});
+
+describe('pluginManifest e pluginMcpConfig', () => {
+  const manifest = {
+    name: 'c',
+    description: 'd',
+    author: { name: 'A' },
+    repository: { url: 'https://g.test/r' },
+    server: {
+      mcp_config: {
+        command: 'node',
+        args: ['${__dirname}/server/index.js'],
+        env: { X: '${user_config.x}' },
+      },
+    },
+    user_config: { x: { type: 'string', title: 'X', description: 'x' } },
+  };
+
+  it('gera o plugin.json com nome, autor, repositório e userConfig do manifesto', () => {
+    expect(pluginManifest(manifest)).toEqual({
+      name: 'c',
+      description: 'd',
+      author: { name: 'A' },
+      repository: 'https://g.test/r',
+      userConfig: manifest.user_config,
+    });
+  });
+
+  it('gera o .mcp.json trocando ${__dirname} por ${CLAUDE_PLUGIN_ROOT}', () => {
+    expect(pluginMcpConfig(manifest)).toEqual({
+      mcpServers: {
+        c: {
+          command: 'node',
+          args: ['${CLAUDE_PLUGIN_ROOT}/server/index.js'],
+          env: { X: '${user_config.x}' },
+        },
+      },
+    });
+    const noEnv = { ...manifest, server: { mcp_config: { command: 'node', args: [] } } };
+    expect(pluginMcpConfig(noEnv)).toEqual({
+      mcpServers: { c: { command: 'node', args: [], env: {} } },
+    });
   });
 });

@@ -1,0 +1,14 @@
+{
+  "name": "claude-connectors",
+  "owner": { "name": "Bernardo Temponi" },
+  "metadata": {
+    "description": "Conectores MCP para o Claude, começando pelo Canvas da PUC Minas."
+  },
+  "plugins": [
+    {
+      "name": "canvas-puc",
+      "source": "./connectors/canvas-puc",
+      "description": "Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, módulos, arquivos e fóruns, com login pelo navegador."
+    }
+  ]
+}

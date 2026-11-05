@@ -18,6 +18,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
 - `connectors/canvas-puc/src/main.ts`: [`startCanvasServer`](#startcanvasserver)
+- `connectors/canvas-puc/src/playwright-runtime.ts`: [`runtimeDir`](#runtimedir), [`npmInstallArgs`](#npminstallargs), [`resolveFrom`](#resolvefrom), [`installPlaywright`](#installplaywright), [`loadPlaywright`](#loadplaywright)
 - `connectors/canvas-puc/src/session.ts`: [`sessionFilePath`](#sessionfilepath), [`cookieHeader`](#cookieheader), [`csrfToken`](#csrftoken), [`isCanvasSession`](#iscanvassession), [`loadSession`](#loadsession), [`saveSession`](#savesession), [`clearSession`](#clearsession)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools)
@@ -32,8 +33,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `tools/docs/markdown.ts`: [`firstGroup`](#firstgroup), [`stripCodeBlocks`](#stripcodeblocks), [`extractCalledNames`](#extractcallednames), [`sliceBetween`](#slicebetween), [`replaceBetween`](#replacebetween), [`extractFunctionSections`](#extractfunctionsections), [`buildSection`](#buildsection), [`extractProcessCitations`](#extractprocesscitations), [`extractDocumentedDirs`](#extractdocumenteddirs), [`extractBacktickedNames`](#extractbacktickednames)
 - `tools/docs/render.ts`: [`formatList`](#formatlist), [`renderGeneratedBlock`](#rendergeneratedblock), [`renderNewSection`](#rendernewsection), [`renderModuleIndex`](#rendermoduleindex), [`computeGeneratedData`](#computegenerateddata), [`closureOf`](#closureof), [`processesByFunction`](#processesbyfunction), [`replaceSectionBlock`](#replacesectionblock), [`appendSection`](#appendsection), [`insertBeforeDataTable`](#insertbeforedatatable), [`removeSection`](#removesection), [`removeEmptyModules`](#removeemptymodules), [`pruneOrphanSections`](#pruneorphansections), [`applyGenerated`](#applygenerated)
 - `tools/docs/run.ts`: [`readOptional`](#readoptional), [`readDocsTexts`](#readdocstexts), [`formatIssues`](#formatissues), [`runCheck`](#runcheck), [`generateFunctionsDoc`](#generatefunctionsdoc), [`runGenerate`](#rungenerate)
-- `tools/pack/cli.ts`: [`installedExternalVersions`](#installedexternalversions), [`runNodeBin`](#runnodebin), [`packConnector`](#packconnector), [`runPackCli`](#runpackcli)
-- `tools/pack/pack.ts`: [`listConnectors`](#listconnectors), [`readManifestIdentity`](#readmanifestidentity), [`runtimePackageJson`](#runtimepackagejson), [`bundleOptions`](#bundleoptions)
+- `tools/pack/cli.ts`: [`installedExternalVersions`](#installedexternalversions), [`runNodeBin`](#runnodebin), [`writeJson`](#writejson), [`buildConnectorRuntime`](#buildconnectorruntime), [`packMcpb`](#packmcpb), [`runPackCli`](#runpackcli)
+- `tools/pack/pack.ts`: [`listConnectors`](#listconnectors), [`pluginManifest`](#pluginmanifest), [`pluginMcpConfig`](#pluginmcpconfig), [`readManifestIdentity`](#readmanifestidentity), [`runtimePackageJson`](#runtimepackagejson), [`bundleOptions`](#bundleoptions)
 
 <!-- indice:fim -->
 
@@ -2365,7 +2366,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `tools/pack/cli.ts`
 - **Assinatura:** `installedExternalVersions(root: string): Record<string, string>`
-- **Usada por:** `packConnector()`
+- **Usada por:** `buildConnectorRuntime()`
 - **Processos:** P05
 
 <!-- gerado:fim -->
@@ -2382,7 +2383,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `tools/pack/cli.ts`
 - **Assinatura:** `runNodeBin(bin: 'npm' | 'npx', args: readonly string[], cwd: string): void`
-- **Usada por:** `packConnector()`
+- **Usada por:** `buildConnectorRuntime()`, `packMcpb()`
 - **Processos:** P05
 
 <!-- gerado:fim -->
@@ -2392,23 +2393,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Nada.
 - **Efeitos:** Executa processo filho com saída herdada (stdout/stderr).
 - **Erros:** Lança se o comando sair com código diferente de zero.
-
-### `packConnector`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `async packConnector(root: string, name: string): Promise<string>`
-- **Usada por:** `runPackCli()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Gera o `.mcpb` de um conector a partir de uma pasta de staging.
-- **Entrada:** `root`: raiz do repositório; `name`: nome da pasta do conector.
-- **Saída:** Promise com o caminho do `.mcpb` gerado em `dist/connectors`.
-- **Efeitos:** Apaga e grava `dist/stage/<nome>`, roda esbuild, `npm install` e `mcpb pack`, grava o pacote.
-- **Erros:** Propaga erros de manifesto, build, instalação e empacotamento.
 
 ### `runPackCli`
 
@@ -2426,6 +2410,57 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Promise vazia.
 - **Efeitos:** Gera pacotes em disco; imprime o caminho de cada um no stdout.
 - **Erros:** Rejeita com a mensagem de uso se nenhum conector for informado; propaga erros de `packConnector()`.
+
+### `buildConnectorRuntime`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/cli.ts`
+- **Assinatura:** `async buildConnectorRuntime(root: string, name: string): Promise<void>`
+- **Usada por:** `runPackCli()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera na pasta do conector o runtime usado pelo plugin: bundle `server/index.js`, `package.json` e `package-lock.json`.
+- **Entrada:** `root`: raiz do repositório; `name`: nome da pasta do conector em `connectors/`.
+- **Saída:** Promise vazia quando termina.
+- **Efeitos:** Escreve arquivos na pasta do conector; roda o esbuild e `npm install --package-lock-only` (rede).
+- **Erros:** Rejeita se o manifesto não tiver nome/versão, se o esbuild falhar ou se o npm sair com erro.
+
+### `packMcpb`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/cli.ts`
+- **Assinatura:** `packMcpb(root: string, name: string): string`
+- **Usada por:** `runPackCli()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o staging com `RUNTIME_FILES` do conector, instala as externas e gera o `.mcpb`.
+- **Entrada:** `root`: raiz do repositório; `name`: nome da pasta do conector.
+- **Saída:** Caminho do `.mcpb` gerado em `dist/connectors/<nome>-<versão>.mcpb`.
+- **Efeitos:** Apaga e recria `dist/stage/<nome>`; roda `npm ci` (rede) e `mcpb pack`; escreve em `dist/connectors/`.
+- **Erros:** Lança se faltar um arquivo de runtime (rode `buildConnectorRuntime` antes) ou se npm/mcpb falharem.
+
+### `writeJson`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/cli.ts`
+- **Assinatura:** `writeJson(file: string, data: unknown): void`
+- **Usada por:** `buildConnectorRuntime()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava um valor como JSON indentado com quebra de linha final.
+- **Entrada:** `file`: caminho do arquivo; `data`: valor serializável.
+- **Saída:** Nada.
+- **Efeitos:** Escreve o arquivo no disco (sobrescreve).
+- **Erros:** Lança se o disco recusar a escrita.
 
 ## `tools/pack/pack.ts`
 
@@ -2452,7 +2487,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `tools/pack/pack.ts`
 - **Assinatura:** `readManifestIdentity(manifestPath: string): { name: string; version: string }`
-- **Usada por:** `packConnector()`
+- **Usada por:** `buildConnectorRuntime()`, `packMcpb()`
 - **Processos:** P05
 
 <!-- gerado:fim -->
@@ -2469,7 +2504,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `tools/pack/pack.ts`
 - **Assinatura:** `runtimePackageJson(identity: { name: string; version: string }, installedVersions: Readonly<Record<string, string>>): RuntimePackageJson`
-- **Usada por:** `packConnector()`
+- **Usada por:** `buildConnectorRuntime()`
 - **Processos:** P05
 
 <!-- gerado:fim -->
@@ -2486,7 +2521,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `tools/pack/pack.ts`
 - **Assinatura:** `bundleOptions(entry: string, outfile: string): BuildOptions`
-- **Usada por:** `packConnector()`
+- **Usada por:** `buildConnectorRuntime()`
 - **Processos:** P05
 
 <!-- gerado:fim -->
@@ -2497,34 +2532,157 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+### `pluginManifest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/pack.ts`
+- **Assinatura:** `pluginManifest(manifest: McpbManifest): Record<string, unknown>`
+- **Usada por:** `buildConnectorRuntime()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera o `plugin.json` do plugin a partir do manifesto `.mcpb`, fonte única de nome, descrição e configuração.
+- **Entrada:** `manifest`: manifesto `.mcpb` do conector.
+- **Saída:** Objeto com `name`, `description`, `author`, `repository` (URL) e `userConfig` (= `user_config` do manifesto).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pluginMcpConfig`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/pack.ts`
+- **Assinatura:** `pluginMcpConfig(manifest: McpbManifest): Record<string, unknown>`
+- **Usada por:** `buildConnectorRuntime()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera o `.mcp.json` do plugin com o comando do `.mcpb`, trocando `${__dirname}` por `${CLAUDE_PLUGIN_ROOT}`.
+- **Entrada:** `manifest`: manifesto `.mcpb` do conector.
+- **Saída:** `{ mcpServers: { <nome>: { command, args, env } } }`; `env` vazio se o manifesto não tiver.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/canvas-puc/src/playwright-runtime.ts`
+
+### `runtimeDir`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
+- **Assinatura:** `runtimeDir(dataDir: string): string`
+- **Usada por:** `loadPlaywright()`
+- **Processos:** P03, P04, P07
+
+<!-- gerado:fim -->
+
+- **Faz:** Devolve a pasta onde o playwright-core é instalado sob demanda.
+- **Entrada:** `dataDir`: pasta de dados do conector (padrão `~/.canvas-puc`).
+- **Saída:** `<dataDir>/runtime`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `npmInstallArgs`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
+- **Assinatura:** `npmInstallArgs(version: string): string[]`
+- **Usada por:** `installPlaywright()`
+- **Processos:** P03, P04, P07
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta os argumentos do `npm install` que instala uma versão fixa do playwright-core.
+- **Entrada:** `version`: versão exata do playwright-core.
+- **Saída:** Lista de argumentos para o npm (sem dependências de desenvolvimento, sem audit/fund, silencioso).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `resolveFrom`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
+- **Assinatura:** `resolveFrom(dir: string, pkg: string): string | null`
+- **Usada por:** `loadPlaywright()`
+- **Processos:** P03, P04, P07
+
+<!-- gerado:fim -->
+
+- **Faz:** Resolve o arquivo de entrada de um pacote instalado numa pasta.
+- **Entrada:** `dir`: pasta que contém (ou não) `node_modules`; `pkg`: nome do pacote.
+- **Saída:** Caminho absoluto do arquivo de entrada; `null` se o pacote não estiver instalado ali.
+- **Efeitos:** Lê o disco (resolução de módulos do Node).
+- **Erros:** Nenhum (falhas viram `null`).
+
+### `installPlaywright`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
+- **Assinatura:** `installPlaywright(dir: string): void`
+- **Usada por:** `loadPlaywright()`
+- **Processos:** P03, P04, P07
+
+<!-- gerado:fim -->
+
+- **Faz:** Instala o playwright-core na pasta de runtime com o npm do sistema.
+- **Entrada:** `dir`: pasta de runtime (criada se não existir).
+- **Saída:** Nada.
+- **Efeitos:** Cria a pasta e um `package.json` mínimo; roda `npm install` (rede, disco).
+- **Erros:** Lança se o npm não estiver no PATH ou sair com erro.
+
+### `loadPlaywright`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
+- **Assinatura:** `async loadPlaywright(dataDir: string): Promise<PlaywrightModule>`
+- **Usada por:** `launchLoginBrowser()`
+- **Processos:** P03, P04, P07
+
+<!-- gerado:fim -->
+
+- **Faz:** Carrega o playwright-core do node_modules normal, da pasta de runtime ou instalando nela.
+- **Entrada:** `dataDir`: pasta de dados do conector.
+- **Saída:** Promise com o módulo do playwright-core.
+- **Efeitos:** Importa módulos dinamicamente; na primeira vez sem o pacote, instala com `installPlaywright()` (rede).
+- **Erros:** Rejeita com "Não consegui instalar o playwright-core" se a instalação não deixar o pacote resolvível.
+
 ## Dados e constantes
 
-| Nome                     | Arquivo                                      | O que é                                                                                         |
-| ------------------------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `TEST_EXCEPTIONS`        | `src/test-exceptions.ts`                     | Lista única de funções sem teste automatizado, com motivo e teste manual.                       |
-| `DEFAULT_DOCS_CONFIG`    | `tools/docs/config.ts`                       | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                            |
-| `MODULE_SCOPE_SUFFIX`    | `tools/docs/ast.ts`                          | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                       |
-| `WALK_IGNORED_DIRS`      | `tools/docs/inventory.ts`                    | Pastas puladas ao percorrer o disco sem git.                                                    |
-| `GENERATED_START`        | `tools/docs/markdown.ts`                     | Marcador de início do bloco gerado em FUNCTIONS.md.                                             |
-| `GENERATED_END`          | `tools/docs/markdown.ts`                     | Marcador de fim do bloco gerado.                                                                |
-| `INDEX_START`            | `tools/docs/markdown.ts`                     | Marcador de início do índice por módulo.                                                        |
-| `INDEX_END`              | `tools/docs/markdown.ts`                     | Marcador de fim do índice por módulo.                                                           |
-| `PLACEHOLDER`            | `tools/docs/markdown.ts`                     | Texto `_preencher_` deixado nos campos manuais novos.                                           |
-| `MANUAL_FIELDS`          | `tools/docs/render.ts`                       | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                            |
-| `HTML_TEXT_REPLACEMENTS` | `src/core/html.ts`                           | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                              |
-| `CONNECTORS_DIR`         | `tools/pack/pack.ts`                         | Pasta dos conectores relativa à raiz (`connectors`).                                            |
-| `PACK_OUT_DIR`           | `tools/pack/pack.ts`                         | Pasta de saída dos pacotes `.mcpb` (`dist/connectors`).                                         |
-| `RUNTIME_EXTERNALS`      | `tools/pack/pack.ts`                         | Dependências que o esbuild não une e vão para `node_modules` do pacote.                         |
-| `CONNECTOR_ENTRY`        | `tools/pack/pack.ts`                         | Arquivo de entrada de cada conector (`src/main.ts`).                                            |
-| `BUNDLE_PATH`            | `tools/pack/pack.ts`                         | Caminho do bundle dentro do pacote (`server/index.js`).                                         |
-| `LOGIN_TIMEOUT_MS`       | `connectors/canvas-puc/src/browser-login.ts` | Tempo máximo de espera do login por modo (`silent` 25 s, `window` 5 min).                       |
-| `BROWSER_CHANNELS`       | `connectors/canvas-puc/src/browser-login.ts` | Navegadores tentados em ordem no login (`chrome`, `msedge`).                                    |
-| `CANVAS_PAGE_SIZE`       | `connectors/canvas-puc/src/client.ts`        | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                 |
-| `DEFAULT_MAX_ITEMS`      | `connectors/canvas-puc/src/client.ts`        | Limite padrão de itens somados entre páginas em `getAll`.                                       |
-| `DEFAULT_CANVAS_URL`     | `connectors/canvas-puc/src/config.ts`        | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                        |
-| `DEFAULT_LOGIN_BUTTON`   | `connectors/canvas-puc/src/config.ts`        | Trecho do texto do botão da instituição na tela de login, usado sem `CANVAS_LOGIN_BUTTON`.      |
-| `MAX_TEXT_LENGTH`        | `connectors/canvas-puc/src/format.ts`        | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                           |
-| `ASSIGNMENT_BUCKETS`     | `connectors/canvas-puc/src/helpers.ts`       | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                   |
-| `CANVAS_READ_TOOLS`      | `connectors/canvas-puc/src/tools-read.ts`    | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                     |
-| `CANVAS_WRITE_TOOLS`     | `connectors/canvas-puc/src/tools-write.ts`   | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`. |
-| `CANVAS_ACCOUNT_TOOLS`   | `connectors/canvas-puc/src/tools.ts`         | Ferramentas MCP de conexão: `conectar_canvas` e `desconectar_canvas`.                           |
+| Nome                     | Arquivo                                           | O que é                                                                                                                     |
+| ------------------------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `TEST_EXCEPTIONS`        | `src/test-exceptions.ts`                          | Lista única de funções sem teste automatizado, com motivo e teste manual.                                                   |
+| `DEFAULT_DOCS_CONFIG`    | `tools/docs/config.ts`                            | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                                        |
+| `MODULE_SCOPE_SUFFIX`    | `tools/docs/ast.ts`                               | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                                   |
+| `WALK_IGNORED_DIRS`      | `tools/docs/inventory.ts`                         | Pastas puladas ao percorrer o disco sem git.                                                                                |
+| `GENERATED_START`        | `tools/docs/markdown.ts`                          | Marcador de início do bloco gerado em FUNCTIONS.md.                                                                         |
+| `GENERATED_END`          | `tools/docs/markdown.ts`                          | Marcador de fim do bloco gerado.                                                                                            |
+| `INDEX_START`            | `tools/docs/markdown.ts`                          | Marcador de início do índice por módulo.                                                                                    |
+| `INDEX_END`              | `tools/docs/markdown.ts`                          | Marcador de fim do índice por módulo.                                                                                       |
+| `PLACEHOLDER`            | `tools/docs/markdown.ts`                          | Texto `_preencher_` deixado nos campos manuais novos.                                                                       |
+| `MANUAL_FIELDS`          | `tools/docs/render.ts`                            | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                                        |
+| `HTML_TEXT_REPLACEMENTS` | `src/core/html.ts`                                | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                          |
+| `CONNECTORS_DIR`         | `tools/pack/pack.ts`                              | Pasta dos conectores relativa à raiz (`connectors`).                                                                        |
+| `PACK_OUT_DIR`           | `tools/pack/pack.ts`                              | Pasta de saída dos pacotes `.mcpb` (`dist/connectors`).                                                                     |
+| `RUNTIME_EXTERNALS`      | `tools/pack/pack.ts`                              | Dependências que o esbuild não une e vão para `node_modules` do pacote.                                                     |
+| `PLAYWRIGHT_VERSION`     | `connectors/canvas-puc/src/playwright-runtime.ts` | Versão do playwright-core instalada sob demanda; um teste garante que é a mesma do `package.json`.                          |
+| `RUNTIME_FILES`          | `tools/pack/pack.ts`                              | Arquivos de runtime de cada conector (manifesto, `package.json`, lockfile e bundle), versionados e copiados para o `.mcpb`. |
+| `CONNECTOR_ENTRY`        | `tools/pack/pack.ts`                              | Arquivo de entrada de cada conector (`src/main.ts`).                                                                        |
+| `BUNDLE_PATH`            | `tools/pack/pack.ts`                              | Caminho do bundle dentro do pacote (`server/index.js`).                                                                     |
+| `LOGIN_TIMEOUT_MS`       | `connectors/canvas-puc/src/browser-login.ts`      | Tempo máximo de espera do login por modo (`silent` 25 s, `window` 5 min).                                                   |
+| `BROWSER_CHANNELS`       | `connectors/canvas-puc/src/browser-login.ts`      | Navegadores tentados em ordem no login (`chrome`, `msedge`).                                                                |
+| `CANVAS_PAGE_SIZE`       | `connectors/canvas-puc/src/client.ts`             | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                             |
+| `DEFAULT_MAX_ITEMS`      | `connectors/canvas-puc/src/client.ts`             | Limite padrão de itens somados entre páginas em `getAll`.                                                                   |
+| `DEFAULT_CANVAS_URL`     | `connectors/canvas-puc/src/config.ts`             | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                                    |
+| `DEFAULT_LOGIN_BUTTON`   | `connectors/canvas-puc/src/config.ts`             | Trecho do texto do botão da instituição na tela de login, usado sem `CANVAS_LOGIN_BUTTON`.                                  |
+| `MAX_TEXT_LENGTH`        | `connectors/canvas-puc/src/format.ts`             | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                                                       |
+| `ASSIGNMENT_BUCKETS`     | `connectors/canvas-puc/src/helpers.ts`            | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                                               |
+| `CANVAS_READ_TOOLS`      | `connectors/canvas-puc/src/tools-read.ts`         | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                                 |
+| `CANVAS_WRITE_TOOLS`     | `connectors/canvas-puc/src/tools-write.ts`        | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`.                             |
+| `CANVAS_ACCOUNT_TOOLS`   | `connectors/canvas-puc/src/tools.ts`              | Ferramentas MCP de conexão: `conectar_canvas` e `desconectar_canvas`.                                                       |

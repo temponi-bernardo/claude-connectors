@@ -19,6 +19,14 @@ export const RUNTIME_EXTERNALS: readonly string[] = ['playwright-core'];
 export const CONNECTOR_ENTRY = join('src', 'main.ts');
 export const BUNDLE_PATH = join('server', 'index.js');
 
+/** Arquivos de runtime de um conector, versionados na pasta dele e copiados para o `.mcpb`. */
+export const RUNTIME_FILES: readonly string[] = [
+  'manifest.json',
+  'package.json',
+  'package-lock.json',
+  BUNDLE_PATH,
+];
+
 /** `package.json` mínimo gravado no pacote para instalar as dependências externas. */
 export interface RuntimePackageJson {
   readonly name: string;
@@ -36,6 +44,40 @@ export function listConnectors(rootDir: string): string[] {
     .filter((entry) => entry.isDirectory() && existsSync(join(dir, entry.name, 'manifest.json')))
     .map((entry) => entry.name)
     .sort();
+}
+
+/** Partes do manifesto `.mcpb` usadas para gerar os arquivos do plugin do Claude Code. */
+export interface McpbManifest {
+  readonly name: string;
+  readonly description?: string;
+  readonly author?: { readonly name: string };
+  readonly repository?: { readonly url: string };
+  readonly server: {
+    readonly mcp_config: {
+      readonly command: string;
+      readonly args: readonly string[];
+      readonly env?: Readonly<Record<string, string>>;
+    };
+  };
+  readonly user_config?: Readonly<Record<string, unknown>>;
+}
+
+/** Gera o `plugin.json` do plugin a partir do manifesto `.mcpb` (fonte única de nome e configuração). */
+export function pluginManifest(manifest: McpbManifest): Record<string, unknown> {
+  return {
+    name: manifest.name,
+    description: manifest.description,
+    author: manifest.author,
+    repository: manifest.repository?.url,
+    userConfig: manifest.user_config,
+  };
+}
+
+/** Gera o `.mcp.json` do plugin: o mesmo comando do `.mcpb`, com `${__dirname}` → `${CLAUDE_PLUGIN_ROOT}`. */
+export function pluginMcpConfig(manifest: McpbManifest): Record<string, unknown> {
+  const { command, args, env } = manifest.server.mcp_config;
+  const pluginArgs = args.map((arg) => arg.replaceAll('${__dirname}', '${CLAUDE_PLUGIN_ROOT}'));
+  return { mcpServers: { [manifest.name]: { command, args: pluginArgs, env: env ?? {} } } };
 }
 
 /** Lê `name` e `version` do manifesto de um conector. */
@@ -82,7 +124,7 @@ export function bundleOptions(entry: string, outfile: string): BuildOptions {
     target: 'node18',
     external: [...RUNTIME_EXTERNALS],
     banner: {
-      js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);",
+      js: "import { createRequire as __bundleCreateRequire } from 'node:module'; const require = __bundleCreateRequire(import.meta.url);",
     },
     logLevel: 'warning',
   };
