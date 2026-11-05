@@ -19,3 +19,6 @@ updates:
       # zod 4 muda a API dos esquemas das ferramentas: migração é tarefa própria (ROADMAP F2.4)
       - dependency-name: zod
         update-types: ['version-update:semver-major']
+      # TypeScript 7 (compilador nativo) precisa de typescript-eslint e ts-morph compatíveis (ROADMAP F2.5)
+      - dependency-name: typescript
+        update-types: ['version-update:semver-major']
