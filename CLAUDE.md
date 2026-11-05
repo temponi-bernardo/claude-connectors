@@ -22,6 +22,7 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
    tabela de `docs/DOCUMENTATION.md`.
 6. **Interface só com o design system** (`docs/UI.md`), quando houver.
 7. **Nada direto na `main`** — branch por tarefa, PR, `pr:check` verde, squash merge (`docs/WORKFLOW.md`).
+   O Claude mergeia sozinho com o `pr:check` verde, sem pedir confirmação.
 8. **Conventional Commits** com descrição em português: `feat(canvas): adicionar ferramenta de notas`.
 9. **Skills sempre atualizadas** — passo repetido, comando ou regra nova → skill no mesmo PR.
 10. Docs e mensagens ao usuário em **português**; identificadores em **inglês**.
