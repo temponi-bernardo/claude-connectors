@@ -14471,7 +14471,12 @@ function redeemTokenRequest(form, settings, now) {
   if (grantType === "authorization_code") secret = redeemAuthorizationCode(form, settings, now);
   else if (grantType === "refresh_token") secret = redeemRefreshToken(form, settings, now);
   else return oauthError("unsupported_grant_type", "Use authorization_code ou refresh_token.");
-  return secret.ok ? { ok: true, value: issueTokenSet(secret.value, settings, now) } : secret;
+  if (!secret.ok) return secret;
+  const tokens = issueTokenSet(secret.value, settings, now);
+  return {
+    ok: true,
+    value: { tokens, secret: secret.value, refreshed: grantType === "refresh_token" }
+  };
 }
 function readAccessSecret(authorization, settings, now) {
   const match = /^Bearer\s+(\S+)$/i.exec(authorization ?? "");
@@ -14563,11 +14568,22 @@ async function handleAuthorizeSubmit(app, request) {
     issueAuthorizationCode({ request: pending, secret }, app.settings, app.now())
   );
 }
+async function renewSecretQuietly(connector, secret) {
+  try {
+    await connector.renewSecret?.(secret);
+  } catch (error2) {
+    console.warn(
+      "N\xE3o consegui renovar a credencial:",
+      error2 instanceof Error ? error2.message : error2
+    );
+  }
+}
 async function handleToken(app, request) {
   const result = redeemTokenRequest(await readForm(request), app.settings, app.now());
   if (!result.ok)
     return jsonResponse({ error: result.error, error_description: result.description }, 400);
-  return jsonResponse(result.value);
+  if (result.value.refreshed) await renewSecretQuietly(app.connector, result.value.secret);
+  return jsonResponse(result.value.tokens);
 }
 function handleMcp(app, request) {
   const secret = readAccessSecret(request.headers.get("authorization"), app.settings, app.now());
@@ -23560,7 +23576,7 @@ function readCanvasRemoteSettings(env) {
 function canvasLoginText(baseUrl) {
   return {
     title: "Conectar o Canvas ao Claude",
-    intro: "Cole um token de acesso do Canvas (Conta \u2192 Configura\xE7\xF5es \u2192 Novo token de acesso). O token n\xE3o fica guardado neste servidor.",
+    intro: "Cole um token de acesso do Canvas (Conta \u2192 Configura\xE7\xF5es \u2192 Novo token de acesso). O token n\xE3o fica guardado neste servidor e, enquanto voc\xEA usar o conector, a validade dele \xE9 renovada sozinha.",
     secretLabel: "Token de acesso do Canvas",
     helpUrl: `${baseUrl}/profile/settings`,
     helpLabel: "Abrir a p\xE1gina de tokens do Canvas",
@@ -23593,10 +23609,49 @@ async function verifyCanvasToken(settings, token) {
   }
   if (!res.ok) throw new Error(`O Canvas respondeu ${res.status}. Tente de novo em instantes.`);
 }
+var TOKEN_RENEWAL_SECONDS = 30 * 24 * 3600 - 3600;
+var RENEWAL_SLACK_MS = 24 * 3600 * 1e3;
+function matchesVisibleToken(visible, token) {
+  const prefix = visible.replace(/\.+$/, "");
+  return prefix.length > 0 && token.startsWith(prefix);
+}
+function planTokenRenewal(list, token, now) {
+  const mine = list.find((item) => matchesVisibleToken(item.visible_token, token));
+  if (!mine?.expires_at) return null;
+  const target = now.getTime() + TOKEN_RENEWAL_SECONDS * 1e3;
+  if (Date.parse(mine.expires_at) > target - RENEWAL_SLACK_MS) return null;
+  return { id: mine.id, expiresAt: new Date(target).toISOString() };
+}
+async function canvasTokenApi(settings, token, request) {
+  const hasBody = request.body !== void 0;
+  const res = await settings.fetchFn(`${settings.baseUrl}${request.path}`, {
+    method: request.method ?? "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/json",
+      ...hasBody ? { "Content-Type": "application/json" } : {}
+    },
+    ...hasBody ? { body: JSON.stringify(request.body) } : {}
+  });
+  if (!res.ok) throw new Error(`O Canvas respondeu ${res.status} em ${request.path}.`);
+  return res.json();
+}
+async function renewCanvasToken(settings, token, now) {
+  const path = "/api/v1/users/self/user_generated_tokens?per_page=100";
+  const list = await canvasTokenApi(settings, token, { path });
+  const plan = planTokenRenewal(list, token, now);
+  if (!plan) return;
+  await canvasTokenApi(settings, token, {
+    path: `/api/v1/users/self/tokens/${plan.id}`,
+    method: "PUT",
+    body: { token: { expires_at: plan.expiresAt } }
+  });
+}
 function canvasRemoteConnector(settings) {
   return {
     loginText: canvasLoginText(settings.baseUrl),
     verifySecret: (secret) => verifyCanvasToken(settings, secret),
+    renewSecret: (secret) => renewCanvasToken(settings, secret, /* @__PURE__ */ new Date()),
     createServer: (secret) => {
       const auth = createTokenAuthProvider(secret);
       const client = createCanvasClient({
