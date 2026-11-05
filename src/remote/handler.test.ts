@@ -12,6 +12,7 @@ import {
   htmlResponse,
   jsonResponse,
   loginPageFor,
+  pageSecurityPolicy,
   readForm,
   readJsonBody,
   redirectWithCode,
@@ -268,6 +269,18 @@ describe('auxiliares do roteador', () => {
     const html = await loginPageFor(makeApp(), request, 'ops').text();
     expect(html).toContain('claude.ai');
     expect(html).toContain('ops');
+  });
+
+  it('loginPageFor libera no form-action a origem do retorno (o Chrome bloqueia o 302 sem isso)', () => {
+    const csp = loginPageFor(makeApp(), request, null).headers.get('content-security-policy');
+    expect(csp).toContain("form-action 'self' https://claude.ai;");
+  });
+
+  it('pageSecurityPolicy só libera o próprio servidor quando não há retorno', () => {
+    expect(pageSecurityPolicy(null)).toContain("form-action 'self';");
+    expect(pageSecurityPolicy('https://claude.ai')).toContain(
+      "form-action 'self' https://claude.ai;",
+    );
   });
 
   it('withCors e routeRemoteRequest liberam qualquer origem', async () => {
