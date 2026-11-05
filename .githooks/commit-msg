@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# Conventional Commits com tipos e escopos do projeto (commitlint.config.js, docs/WORKFLOW.md).
+set -e
+npx --no-install commitlint --edit "$1"

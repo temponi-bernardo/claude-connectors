@@ -1,0 +1,26 @@
+name: Ideia
+description: Funcionalidade ou melhoria
+labels: [ideia]
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: Que problema isso resolve
+    validations:
+      required: true
+  - type: textarea
+    id: proposta
+    attributes:
+      label: Proposta
+      description: Como funcionaria, do ponto de vista de quem usa.
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas consideradas
+  - type: dropdown
+    id: fase
+    attributes:
+      label: Encaixa em qual fase do roadmap?
+      options: [MVP, Depois do MVP, Não sei]

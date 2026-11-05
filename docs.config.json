@@ -1,0 +1,11 @@
+{
+  "sourceDirs": ["src", "tools"],
+  "ignore": ["**/fixtures/**"],
+  "testSuffix": ".test.ts",
+  "testExceptionsFile": "src/test-exceptions.ts",
+  "uiDir": null,
+  "functionsDoc": "docs/FUNCTIONS.md",
+  "processesDoc": "docs/PROCESSES.md",
+  "structureDoc": "docs/STRUCTURE.md",
+  "uiDoc": "docs/UI.md"
+}

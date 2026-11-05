@@ -1,0 +1,20 @@
+{
+  "threshold": 0,
+  "minTokens": 50,
+  "minLines": 5,
+  "reporters": ["consoleFull"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/*.test.ts",
+    "**/fixtures/**",
+    "package-lock.json",
+    "CHANGELOG.md",
+    "docs/FUNCTIONS.md",
+    "docs/adr/**"
+  ],
+  "format": ["typescript", "javascript", "markdown", "json", "yaml"],
+  "gitignore": true,
+  "exitCode": 1
+}

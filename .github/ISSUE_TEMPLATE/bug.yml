@@ -1,0 +1,32 @@
+name: Bug
+description: Algo não funciona como documentado
+labels: [bug]
+body:
+  - type: textarea
+    id: comportamento
+    attributes:
+      label: O que acontece
+      description: Inclua a mensagem de erro completa, se houver.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que deveria acontecer
+      description: Cite o processo (P01...) ou a função do docs/ se souber.
+    validations:
+      required: true
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Como reproduzir
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: versao
+    attributes:
+      label: Versão
+      placeholder: v0.1.0 ou hash do commit
