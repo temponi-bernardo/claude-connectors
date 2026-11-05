@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   CANVAS_USER_AGENT,
+  TOKEN_RENEWAL_SECONDS,
+  canvasTokenApi,
+  matchesVisibleToken,
+  planTokenRenewal,
+  renewCanvasToken,
   withCanvasUserAgent,
   canvasLoginText,
   canvasRemoteConnector,
@@ -129,5 +134,96 @@ describe('canvasRemoteConnector', () => {
     expect(connector.loginText.title).toContain('Canvas');
     await expect(connector.verifySecret('abc')).resolves.toBeUndefined();
     expect(connector.createServer('abc').isConnected()).toBe(false);
+  });
+
+  it('renova a validade do token pelo Canvas', async () => {
+    const settings = settingsWith(new Response('[]'));
+    await expect(canvasRemoteConnector(settings).renewSecret?.('abc')).resolves.toBeUndefined();
+    expect(settings.fetchFn).toHaveBeenCalledOnce();
+  });
+});
+
+const NOW = new Date('2026-11-05T12:00:00Z');
+const TOKEN = '11748~segredoDoToken';
+const DAY = 24 * 3600 * 1000;
+
+function tokenInfo(expiresAt: string | null, visible = '11748~segr...') {
+  return { id: 42, visible_token: visible, expires_at: expiresAt };
+}
+
+describe('matchesVisibleToken', () => {
+  it('compara o começo visível do token, sem as reticências', () => {
+    expect(matchesVisibleToken('11748~segr...', TOKEN)).toBe(true);
+    expect(matchesVisibleToken('11748~outr...', TOKEN)).toBe(false);
+    expect(matchesVisibleToken('...', TOKEN)).toBe(false);
+  });
+});
+
+describe('planTokenRenewal', () => {
+  const target = new Date(NOW.getTime() + TOKEN_RENEWAL_SECONDS * 1000).toISOString();
+
+  it('estende para o limite do Canvas o token que vence antes dele', () => {
+    const soon = new Date(NOW.getTime() + 10 * DAY).toISOString();
+    expect(
+      planTokenRenewal([tokenInfo(soon, '99999~xxxx...'), tokenInfo(soon)], TOKEN, NOW),
+    ).toEqual({ id: 42, expiresAt: target });
+  });
+
+  it('não mexe em token sem validade, renovado há menos de um dia ou que não está na lista', () => {
+    const fresh = new Date(NOW.getTime() + TOKEN_RENEWAL_SECONDS * 1000 - DAY / 2).toISOString();
+    expect(planTokenRenewal([tokenInfo(null)], TOKEN, NOW)).toBeNull();
+    expect(planTokenRenewal([tokenInfo(fresh)], TOKEN, NOW)).toBeNull();
+    expect(planTokenRenewal([tokenInfo('2027-06-01T00:00:00Z')], TOKEN, NOW)).toBeNull();
+    expect(planTokenRenewal([], TOKEN, NOW)).toBeNull();
+  });
+});
+
+describe('canvasTokenApi', () => {
+  it('chama o Canvas com o token e devolve o JSON', async () => {
+    const settings = settingsWith(new Response('{"id":1}'));
+    await expect(
+      canvasTokenApi(settings, 'abc', { path: '/api/v1/x', method: 'PUT', body: { a: 1 } }),
+    ).resolves.toEqual({ id: 1 });
+    expect(settings.fetchFn).toHaveBeenCalledWith(`${BASE}/api/v1/x`, {
+      method: 'PUT',
+      headers: {
+        Authorization: 'Bearer abc',
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: '{"a":1}',
+    });
+  });
+
+  it('rejeita quando o Canvas não responde 2xx', async () => {
+    const settings = settingsWith(new Response('{}', { status: 400 }));
+    await expect(canvasTokenApi(settings, 'abc', { path: '/api/v1/x' })).rejects.toThrow('400');
+  });
+});
+
+describe('renewCanvasToken', () => {
+  it('lista os tokens e estende o próprio quando está perto de vencer', async () => {
+    const soon = new Date(NOW.getTime() + DAY).toISOString();
+    const settings = settingsWith(
+      new Response(JSON.stringify([tokenInfo(soon)])),
+      new Response('{}'),
+    );
+    await renewCanvasToken(settings, TOKEN, NOW);
+    expect(settings.fetchFn).toHaveBeenNthCalledWith(
+      1,
+      `${BASE}/api/v1/users/self/user_generated_tokens?per_page=100`,
+      expect.objectContaining({ method: 'GET' }),
+    );
+    expect(settings.fetchFn).toHaveBeenNthCalledWith(
+      2,
+      `${BASE}/api/v1/users/self/tokens/42`,
+      expect.objectContaining({ method: 'PUT' }),
+    );
+  });
+
+  it('não chama o PUT quando não há o que renovar', async () => {
+    const settings = settingsWith(new Response(JSON.stringify([tokenInfo(null)])));
+    await renewCanvasToken(settings, TOKEN, NOW);
+    expect(settings.fetchFn).toHaveBeenCalledOnce();
   });
 });

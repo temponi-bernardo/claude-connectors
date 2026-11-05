@@ -63,7 +63,8 @@ describe('redeemTokenRequest com authorization_code', () => {
     const result = redeemTokenRequest(codeForm(code), settings, NOW + 1);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(readAccessSecret(`Bearer ${result.value.access_token}`, settings, NOW + 1)).toBe(
+    expect(result.value).toMatchObject({ secret: 'segredo', refreshed: false });
+    expect(readAccessSecret(`Bearer ${result.value.tokens.access_token}`, settings, NOW + 1)).toBe(
       'segredo',
     );
   });
@@ -92,7 +93,8 @@ describe('redeemTokenRequest com refresh_token', () => {
     const { refresh_token } = issueTokenSet('segredo', settings, NOW);
     const form = new URLSearchParams({ grant_type: 'refresh_token', refresh_token });
     const result = redeemTokenRequest(form, settings, NOW + ACCESS_TTL_SECONDS * 2);
-    expect(result.ok && result.value.token_type).toBe('Bearer');
+    expect(result.ok && result.value.tokens.token_type).toBe('Bearer');
+    expect(result).toMatchObject({ value: { secret: 'segredo', refreshed: true } });
   });
 
   it('não aceita access token no lugar do refresh nem grant desconhecido', () => {

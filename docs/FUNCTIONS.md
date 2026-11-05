@@ -20,7 +20,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/canvas-puc/src/main.ts`: [`startCanvasServer`](#startcanvasserver)
 - `connectors/canvas-puc/src/playwright-runtime.ts`: [`runtimeDir`](#runtimedir), [`npmInstallArgs`](#npminstallargs), [`resolveFrom`](#resolvefrom), [`installPlaywright`](#installplaywright), [`loadPlaywright`](#loadplaywright)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
-- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`remoteUnauthorizedMessage`](#remoteunauthorizedmessage), [`createTokenAuthProvider`](#createtokenauthprovider), [`verifyCanvasToken`](#verifycanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
+- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`remoteUnauthorizedMessage`](#remoteunauthorizedmessage), [`createTokenAuthProvider`](#createtokenauthprovider), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
 - `connectors/canvas-puc/src/session.ts`: [`sessionFilePath`](#sessionfilepath), [`cookieHeader`](#cookieheader), [`csrfToken`](#csrftoken), [`isCanvasSession`](#iscanvassession), [`loadSession`](#loadsession), [`saveSession`](#savesession), [`clearSession`](#clearsession)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasServiceTools`](#canvasservicetools), [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
@@ -29,7 +29,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
 - `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs)
-- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`handleAuthorizePage`](#handleauthorizepage), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
+- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`handleAuthorizePage`](#handleauthorizepage), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
 - `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage)
 - `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
@@ -2836,7 +2836,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Faz:** Monta o `RemoteConnector` do Canvas para o servidor HTTP.
 - **Entrada:** `settings`: configuração do modo remoto.
-- **Saída:** Textos da página, verificação do token e fábrica de `McpServer` por token.
+- **Saída:** Textos da página, verificação do token, fábrica de `McpServer` por token e renovação da validade (`renewCanvasToken()`).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -2856,6 +2856,74 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Cópia das opções com os headers originais (nomes em minúsculas) mais `user-agent`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
+
+### `matchesVisibleToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `matchesVisibleToken(visible: string, token: string): boolean`
+- **Usada por:** `planTokenRenewal()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se o começo visível de um token do Canvas (`visible_token`, ex.: `11748~abcd...`) é o do token dado.
+- **Entrada:** `visible` (campo da lista de tokens) e o token completo.
+- **Saída:** `true` se o token começa pelo prefixo visível sem as reticências; `false` com prefixo vazio.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `planTokenRenewal`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `planTokenRenewal(list: readonly CanvasTokenInfo[], token: string, now: Date): { readonly id: number; readonly expiresAt: string } | null`
+- **Usada por:** `renewCanvasToken()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide se o token do Canvas precisa ter a validade estendida e para quando (agora + `TOKEN_RENEWAL_SECONDS`).
+- **Entrada:** Lista de `user_generated_tokens`, o token e o instante atual.
+- **Saída:** `{ id, expiresAt }`, ou nulo se o token não está na lista, não tem validade ou já vence a menos de um dia do limite.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `canvasTokenApi`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `async canvasTokenApi(settings: CanvasRemoteSettings, token: string, request: CanvasTokenRequest): Promise<unknown>`
+- **Usada por:** `renewCanvasToken()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Chama a API do Canvas com o token do usuário (`Bearer`), enviando corpo JSON se houver.
+- **Entrada:** Configuração remota, token e `CanvasTokenRequest` (`path`, `method` opcional, `body` opcional).
+- **Saída:** O JSON da resposta.
+- **Efeitos:** Requisição HTTP ao Canvas.
+- **Erros:** Rejeita com o status se a resposta não for 2xx; repassa falha de rede.
+
+### `renewCanvasToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `async renewCanvasToken(settings: CanvasRemoteSettings, token: string, now: Date): Promise<void>`
+- **Usada por:** `canvasRemoteConnector()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Estende a validade do próprio token no Canvas (Access Tokens API) quando ele está perto de vencer; o Canvas da PUC aceita no máximo 30 dias à frente.
+- **Entrada:** Configuração remota, token e instante atual.
+- **Saída:** Nada.
+- **Efeitos:** `GET /api/v1/users/self/user_generated_tokens` e, se `planTokenRenewal()` mandar, `PUT /api/v1/users/self/tokens/:id` com `expires_at`.
+- **Erros:** Rejeita como `canvasTokenApi()` (quem chama, `renewSecretQuietly()`, só registra o aviso).
 
 ## `src/remote/handler.ts`
 
@@ -3023,10 +3091,10 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Atende `POST /token`.
+- **Faz:** Atende `POST /token`; no refresh, chama `renewSecretQuietly()` antes de responder.
 - **Entrada:** `app`; `request`: formulário OAuth.
 - **Saída:** 200 com tokens, ou 400 com erro OAuth.
-- **Efeitos:** Consome o corpo.
+- **Efeitos:** Consome o corpo; no refresh, a renovação da credencial do conector.
 - **Erros:** Nenhum.
 
 ### `handleMcp`
@@ -3113,6 +3181,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Texto do header `content-security-policy`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
+
+### `renewSecretQuietly`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `async renewSecretQuietly(connector: RemoteConnector, secret: string): Promise<void>`
+- **Usada por:** `handleToken()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Pede ao conector para renovar a credencial (`renewSecret`), sem deixar a falha derrubar o refresh.
+- **Entrada:** Conector remoto e o segredo do usuário.
+- **Saída:** Nada.
+- **Efeitos:** O que o `renewSecret` do conector fizer; `console.warn` se ele falhar.
+- **Erros:** Nenhum (a falha vira aviso no log).
 
 ## `src/remote/login-page.ts`
 
@@ -3675,7 +3760,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `src/remote/tokens.ts`
-- **Assinatura:** `redeemTokenRequest(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<TokenSet>`
+- **Assinatura:** `redeemTokenRequest(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<RedeemedGrant>`
 - **Usada por:** `handleToken()`
 - **Processos:** P08
 
@@ -3683,7 +3768,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Faz:** Atende o `/token` conforme o `grant_type`.
 - **Entrada:** `form`: corpo do `/token`; `settings`; `now`.
-- **Saída:** Novo `TokenSet`, ou erro `invalid_grant`/`unsupported_grant_type`.
+- **Saída:** `RedeemedGrant` (novo `TokenSet`, o segredo e se veio de refresh), ou erro `invalid_grant`/`unsupported_grant_type`.
 - **Efeitos:** Gera bytes aleatórios (selos).
 - **Erros:** Nenhum.
 
@@ -3762,6 +3847,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | Nome                     | Arquivo                                           | O que é                                                                                                                     |
 | ------------------------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | `CANVAS_USER_AGENT`      | `connectors/canvas-puc/src/remote.ts`             | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                                     |
+| `TOKEN_RENEWAL_SECONDS`  | `connectors/canvas-puc/src/remote.ts`             | Quanto cada renovação estende o token do Canvas: 30 dias menos 1 hora (o Canvas recusa mais de 30 dias à frente).           |
 | `TEST_EXCEPTIONS`        | `src/test-exceptions.ts`                          | Lista única de funções sem teste automatizado, com motivo e teste manual.                                                   |
 | `DEFAULT_DOCS_CONFIG`    | `tools/docs/config.ts`                            | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                                        |
 | `MODULE_SCOPE_SUFFIX`    | `tools/docs/ast.ts`                               | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                                   |

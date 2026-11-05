@@ -8,6 +8,8 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Adicionado
 
+- Conector remoto do Canvas renova sozinho a validade do token da PUC a cada refresh do OAuth: não é
+  mais preciso reconectar todo mês (ADR 0011).
 - Repositório de conectores criado a partir do `template-new-project`: docs como fonte da verdade, checagens
   por AST, TDD, hooks e skills do Claude Code.
 - Conector **Canvas PUC Minas** (`connectors/canvas-puc`, v1.2.0): 19 ferramentas (agenda de entregas,
