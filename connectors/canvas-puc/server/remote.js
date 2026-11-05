@@ -14493,13 +14493,17 @@ function jsonResponse(data, status = 200) {
     headers: { "content-type": "application/json", "cache-control": "no-store" }
   });
 }
-function htmlResponse(html, status = 200) {
+function pageSecurityPolicy(formTarget) {
+  const formAction = formTarget ? `'self' ${formTarget}` : "'self'";
+  return `default-src 'none'; style-src 'unsafe-inline'; form-action ${formAction}; frame-ancestors 'none'`;
+}
+function htmlResponse(html, status = 200, formTarget = null) {
   return new Response(html, {
     status,
     headers: {
       "content-type": "text/html; charset=utf-8",
       "cache-control": "no-store",
-      "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'"
+      "content-security-policy": pageSecurityPolicy(formTarget)
     }
   });
 }
@@ -14521,7 +14525,9 @@ function loginPageFor(app, request, error2) {
       pending: sealAuthorizeRequest(request, app.settings, app.now()),
       clientHost: new URL(request.redirectUri).host,
       error: error2
-    })
+    }),
+    200,
+    new URL(request.redirectUri).origin
   );
 }
 function redirectWithCode(request, code) {
