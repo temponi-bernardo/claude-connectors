@@ -2,27 +2,21 @@
 
 Todas as mudanças relevantes ficam aqui. Formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/);
 versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão são geradas pelo release-please
-a partir dos commits; a seção "Não lançado" é mantida à mão.
+(CLI local, ADR 0006) a partir dos commits; a seção "Não lançado" é mantida à mão.
 
 ## [Não lançado]
 
 ### Adicionado
 
-- Estrutura inicial do template: documentação como fonte da verdade, `docs:check`/`docs:generate` por AST,
-  hooks, CI, release-please, skills do Claude Code e esqueleto executável.
-- Ciclo de contexto pequeno do Claude Code: `docs/STATE.md` como handoff, skill `/handoff`, hooks `Stop`
-  (cobra handoff após commit), `SessionStart` (injeta o estado) e `PreCompact` (handoff automático).
+- Repositório de conectores criado a partir do `template-new-project`: docs como fonte da verdade, checagens
+  por AST, TDD, hooks e skills do Claude Code.
+- Conector **Canvas PUC Minas** (`connectors/canvas-puc`, v1.2.0): 19 ferramentas (agenda de entregas,
+  tarefas, notas, avisos, módulos, páginas, arquivos, fóruns, calendário, busca, entregar tarefa e responder
+  fórum).
+- Login no Canvas por janela do Chrome/Edge com renovação silenciosa da sessão; token só como reserva.
+- `npm run pack` / `pack:all`: empacota cada conector numa extensão `.mcpb` enxuta (bundle esbuild, ~3 MB).
+- `npm run pr:check`: portão local de PR no lugar do CI.
 
-### Corrigido
+### Removido
 
-- `npm run init` agora renomeia o pacote no `package.json`/`package-lock.json` e esvazia o histórico do
-  template no CHANGELOG.
-- `docs/STATE.md` passou a ser local de cada clone (fora do git): o handoff pós-merge não suja mais a `main`
-  nem o PR seguinte. O hook `Stop` deixou de cobrar handoff por commits trazidos via `git pull`.
-- Título do PR validado pelo próprio commitlint (tipos e escopos num lugar só).
-- `scripts/setup-github.sh` avisa e segue quando o GitHub recusa branch protection (privado no plano
-  gratuito); `secrets:check` local falha sem gitleaks, salvo `SECRETS_CHECK=skip`.
-- `npm run docs:generate` remove seções órfãs do FUNCTIONS.md; actions do CI fixadas por SHA.
-
-- CodeQL e `dependency-review` pulados em repositório privado, onde exigem GitHub Advanced Security /
-  Code Security; CodeQL ganha a permissão `actions: read`.
+- GitHub Actions (CI, CodeQL, release-please em workflow): checagens e release rodam localmente, sem custo.

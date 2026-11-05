@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Rápido: lint/format só nos arquivos staged + tipos. O check completo roda no pre-push e no CI.
+# Rápido: lint/format só nos arquivos staged + tipos. O check completo roda no pre-push e no pr:check.
 set -e
 npx --no-install lint-staged
 npm run -s typecheck

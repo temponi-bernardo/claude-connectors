@@ -11,8 +11,19 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- indice:inicio -->
 
-- `src/core/slug.ts`: [`removeDiacritics`](#removediacritics), [`slugify`](#slugify)
-- `src/main.ts`: [`main`](#main)
+- `connectors/canvas-puc/src/auth.ts`: [`pickAuth`](#pickauth), [`authHeaders`](#authheaders), [`loginAndStore`](#loginandstore), [`renewAuth`](#renewauth), [`renewOnce`](#renewonce), [`createAuthProvider`](#createauthprovider)
+- `connectors/canvas-puc/src/browser-login.ts`: [`isLoginChooserUrl`](#isloginchooserurl), [`launchLoginBrowser`](#launchloginbrowser), [`pageHasCanvasSession`](#pagehascanvassession), [`clickInstitutionButton`](#clickinstitutionbutton), [`waitForCanvasLogin`](#waitforcanvaslogin), [`browserLogin`](#browserlogin)
+- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`requestWithRenewal`](#requestwithrenewal), [`collectPages`](#collectpages), [`fetchPlainText`](#fetchplaintext), [`createCanvasClient`](#createcanvasclient)
+- `connectors/canvas-puc/src/config.ts`: [`envValue`](#envvalue), [`parseFlag`](#parseflag), [`readCanvasConfig`](#readcanvasconfig)
+- `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
+- `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
+- `connectors/canvas-puc/src/main.ts`: [`startCanvasServer`](#startcanvasserver)
+- `connectors/canvas-puc/src/session.ts`: [`sessionFilePath`](#sessionfilepath), [`cookieHeader`](#cookieheader), [`csrfToken`](#csrftoken), [`isCanvasSession`](#iscanvassession), [`loadSession`](#loadsession), [`saveSession`](#savesession), [`clearSession`](#clearsession)
+- `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
+- `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools)
+- `src/core/html.ts`: [`htmlToText`](#htmltotext)
+- `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
+- `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs)
 - `tools/docs/ast.ts`: [`toPosixRelative`](#toposixrelative), [`globToRegExp`](#globtoregexp), [`isAnalyzedSource`](#isanalyzedsource), [`openProject`](#openproject), [`signatureOf`](#signatureof), [`collectFileFunctions`](#collectfilefunctions), [`collectFunctions`](#collectfunctions), [`isDataDeclaration`](#isdatadeclaration), [`collectFileConstants`](#collectfileconstants), [`collectConstants`](#collectconstants), [`isIgnoredReference`](#isignoredreference), [`ownerLabelOf`](#ownerlabelof), [`findDeclaration`](#finddeclaration), [`buildReferenceIndex`](#buildreferenceindex), [`buildCallGraph`](#buildcallgraph)
 - `tools/docs/checks.ts`: [`checkFunctionsDocumented`](#checkfunctionsdocumented), [`checkSectionModules`](#checksectionmodules), [`checkUniqueNames`](#checkuniquenames), [`checkGeneratedBlocks`](#checkgeneratedblocks), [`checkManualFields`](#checkmanualfields), [`checkProcessCitations`](#checkprocesscitations), [`checkStructure`](#checkstructure), [`checkUiComponents`](#checkuicomponents), [`checkTests`](#checktests), [`checkConstants`](#checkconstants), [`runAllChecks`](#runallchecks)
 - `tools/docs/cli.ts`: [`runDocsCli`](#rundocscli)
@@ -21,65 +32,10 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `tools/docs/markdown.ts`: [`firstGroup`](#firstgroup), [`stripCodeBlocks`](#stripcodeblocks), [`extractCalledNames`](#extractcallednames), [`sliceBetween`](#slicebetween), [`replaceBetween`](#replacebetween), [`extractFunctionSections`](#extractfunctionsections), [`buildSection`](#buildsection), [`extractProcessCitations`](#extractprocesscitations), [`extractDocumentedDirs`](#extractdocumenteddirs), [`extractBacktickedNames`](#extractbacktickednames)
 - `tools/docs/render.ts`: [`formatList`](#formatlist), [`renderGeneratedBlock`](#rendergeneratedblock), [`renderNewSection`](#rendernewsection), [`renderModuleIndex`](#rendermoduleindex), [`computeGeneratedData`](#computegenerateddata), [`closureOf`](#closureof), [`processesByFunction`](#processesbyfunction), [`replaceSectionBlock`](#replacesectionblock), [`appendSection`](#appendsection), [`insertBeforeDataTable`](#insertbeforedatatable), [`removeSection`](#removesection), [`removeEmptyModules`](#removeemptymodules), [`pruneOrphanSections`](#pruneorphansections), [`applyGenerated`](#applygenerated)
 - `tools/docs/run.ts`: [`readOptional`](#readoptional), [`readDocsTexts`](#readdocstexts), [`formatIssues`](#formatissues), [`runCheck`](#runcheck), [`generateFunctionsDoc`](#generatefunctionsdoc), [`runGenerate`](#rungenerate)
-- `tools/init/cli.ts`: [`runInitCli`](#runinitcli)
-- `tools/init/init.ts`: [`parseKeyValueArgs`](#parsekeyvalueargs), [`requireArg`](#requirearg), [`parseInitArgs`](#parseinitargs), [`replacePlaceholders`](#replaceplaceholders), [`applyPackageValues`](#applypackagevalues), [`resetChangelog`](#resetchangelog), [`rewriteFile`](#rewritefile), [`initFile`](#initfile), [`initProject`](#initproject)
+- `tools/pack/cli.ts`: [`installedExternalVersions`](#installedexternalversions), [`runNodeBin`](#runnodebin), [`packConnector`](#packconnector), [`runPackCli`](#runpackcli)
+- `tools/pack/pack.ts`: [`listConnectors`](#listconnectors), [`readManifestIdentity`](#readmanifestidentity), [`runtimePackageJson`](#runtimepackagejson), [`bundleOptions`](#bundleoptions)
 
 <!-- indice:fim -->
-
-## `src/core/slug.ts`
-
-### `removeDiacritics`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `src/core/slug.ts`
-- **Assinatura:** `removeDiacritics(text: string): string`
-- **Usada por:** `slugify()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Remove acentos e marcas diacríticas de um texto (normalização NFD + remoção dos combinantes).
-- **Entrada:** `text`: texto livre.
-- **Saída:** Texto sem diacríticos, mesmo comprimento de letras.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `slugify`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `src/core/slug.ts`
-- **Assinatura:** `slugify(title: string): string`
-- **Usada por:** `main()`, `parseInitArgs()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Converte um título em slug de URL: minúsculo, sem acentos, blocos não alfanuméricos virando um hífen, sem hífens nas pontas e limitado a `MAX_SLUG_LENGTH`.
-- **Entrada:** `title`: título livre.
-- **Saída:** Slug (`[a-z0-9-]*`); vazio se não houver caracteres válidos.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-## `src/main.ts`
-
-### `main`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `src/main.ts`
-- **Assinatura:** `main(args: readonly string[]): void`
-- **Usada por:** `src/main.ts (módulo)`
-- **Processos:** P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Ponto de entrada do esqueleto: monta um título a partir dos argumentos (ou usa "Olá, Mundo!") e imprime o slug.
-- **Entrada:** `args`: argumentos da linha de comando, sem `node` e script.
-- **Saída:** Nada (`void`).
-- **Efeitos:** Escreve uma linha no stdout.
-- **Erros:** Nenhum.
 
 ## `tools/docs/ast.ts`
 
@@ -90,7 +46,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `toPosixRelative(rootDir: string, absolutePath: string): string`
 - **Usada por:** `collectFileConstants()`, `collectFileFunctions()`, `openProject()`, `ownerLabelOf()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -107,7 +63,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `globToRegExp(glob: string): RegExp`
 - **Usada por:** `isAnalyzedSource()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -124,7 +80,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `isAnalyzedSource(relativePath: string, config: DocsConfig): boolean`
 - **Usada por:** `openProject()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -141,7 +97,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `openProject(rootDir: string, config: DocsConfig): Project`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -158,7 +114,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `signatureOf(fn: FunctionDeclaration): string`
 - **Usada por:** `collectFileFunctions()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -175,7 +131,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `collectFileFunctions(rootDir: string, file: SourceFile): FunctionInfo[]`
 - **Usada por:** `collectFunctions()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -192,7 +148,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `collectFunctions(rootDir: string, project: Project): FunctionInfo[]`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -209,7 +165,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `isDataDeclaration(declaration: VariableDeclaration): boolean`
 - **Usada por:** `collectFileConstants()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -226,7 +182,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `collectFileConstants(rootDir: string, file: SourceFile): ConstantInfo[]`
 - **Usada por:** `collectConstants()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -243,7 +199,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `collectConstants(rootDir: string, project: Project): ConstantInfo[]`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -260,7 +216,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `isIgnoredReference(node: Node): boolean`
 - **Usada por:** `buildReferenceIndex()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -277,7 +233,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `ownerLabelOf(rootDir: string, node: Node): string`
 - **Usada por:** `buildReferenceIndex()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -294,7 +250,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `findDeclaration(rootDir: string, project: Project, info: FunctionInfo): FunctionDeclaration | undefined`
 - **Usada por:** `buildReferenceIndex()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -311,7 +267,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `buildReferenceIndex(rootDir: string, project: Project, functions: readonly FunctionInfo[]): ReferenceIndex`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -328,7 +284,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/ast.ts`
 - **Assinatura:** `buildCallGraph(functions: readonly FunctionInfo[], references: ReferenceIndex): CallGraph`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -347,7 +303,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkFunctionsDocumented(functions: readonly FunctionInfo[], sections: readonly FunctionSection[]): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -364,7 +320,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkSectionModules(functions: readonly FunctionInfo[], sections: readonly FunctionSection[]): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -381,7 +337,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkUniqueNames(functions: readonly FunctionInfo[]): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -398,7 +354,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkGeneratedBlocks(inventory: Inventory, sections: readonly FunctionSection[], citations: ProcessCitations): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -415,7 +371,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkManualFields(sections: readonly FunctionSection[]): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -432,7 +388,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkProcessCitations(functions: readonly FunctionInfo[], citations: ProcessCitations): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -449,7 +405,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkStructure(versionedDirs: readonly string[], structureMarkdown: string): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -466,7 +422,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkUiComponents(components: readonly string[], uiMarkdown: string | null): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -483,7 +439,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkTests(inventory: Inventory): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -500,7 +456,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `checkConstants(inventory: Inventory, functionsMarkdown: string): Issue[]`
 - **Usada por:** `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -517,7 +473,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/checks.ts`
 - **Assinatura:** `runAllChecks(inventory: Inventory, docs: DocsTexts, citations: ProcessCitations): Issue[]`
 - **Usada por:** `runCheck()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -536,7 +492,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/cli.ts`
 - **Assinatura:** `async runDocsCli(args: readonly string[]): Promise<number>`
 - **Usada por:** `tools/docs/cli.ts (módulo)`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -555,7 +511,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/config.ts`
 - **Assinatura:** `mergeDocsConfig(partial: unknown): DocsConfig`
 - **Usada por:** `loadDocsConfig()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -572,7 +528,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/config.ts`
 - **Assinatura:** `loadDocsConfig(rootDir: string): DocsConfig`
 - **Usada por:** `runCheck()`, `runGenerate()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -591,7 +547,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/inventory.ts`
 - **Assinatura:** `listGitFiles(rootDir: string): string[] | null`
 - **Usada por:** `listVersionedDirs()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -608,7 +564,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/inventory.ts`
 - **Assinatura:** `walkFiles(rootDir: string, relativeDir = ''): string[]`
 - **Usada por:** `listUiComponents()`, `listVersionedDirs()`, `readTestFilesText()`, `walkFiles()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -625,7 +581,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/inventory.ts`
 - **Assinatura:** `dirsFromFiles(files: readonly string[]): string[]`
 - **Usada por:** `listVersionedDirs()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -642,7 +598,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/inventory.ts`
 - **Assinatura:** `listVersionedDirs(rootDir: string): string[]`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -659,7 +615,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/inventory.ts`
 - **Assinatura:** `readTestFilesText(rootDir: string, config: DocsConfig): string`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -676,7 +632,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/inventory.ts`
 - **Assinatura:** `listUiComponents(rootDir: string, config: DocsConfig): string[]`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -693,7 +649,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/inventory.ts`
 - **Assinatura:** `async loadTestExceptions(rootDir: string, config: DocsConfig): Promise<TestExceptionEntry[]>`
 - **Usada por:** `buildInventory()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -710,7 +666,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/inventory.ts`
 - **Assinatura:** `async buildInventory(rootDir: string, config: DocsConfig): Promise<Inventory>`
 - **Usada por:** `runCheck()`, `runGenerate()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -729,7 +685,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `firstGroup(match: RegExpMatchArray): string`
 - **Usada por:** `checkManualFields()`, `extractBacktickedNames()`, `extractCalledNames()`, `extractDocumentedDirs()`, `extractFunctionSections()`, `extractProcessCitations()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -746,7 +702,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `stripCodeBlocks(markdown: string): string`
 - **Usada por:** `extractBacktickedNames()`, `extractCalledNames()`, `extractDocumentedDirs()`, `extractFunctionSections()`, `extractProcessCitations()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -763,7 +719,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `extractCalledNames(text: string): Set<string>`
 - **Usada por:** `extractProcessCitations()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -780,7 +736,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `sliceBetween(text: string, start: string, end: string): string | null`
 - **Usada por:** `buildSection()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -797,7 +753,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `replaceBetween(text: string, markers: readonly [string, string], content: string): string`
 - **Usada por:** `applyGenerated()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -814,7 +770,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `extractFunctionSections(markdown: string): FunctionSection[]`
 - **Usada por:** `applyGenerated()`, `pruneOrphanSections()`, `runAllChecks()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -831,7 +787,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `buildSection(name: string, moduleHeading: string | null, raw: string): FunctionSection`
 - **Usada por:** `extractFunctionSections()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -848,7 +804,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `extractProcessCitations(markdown: string): ProcessCitations`
 - **Usada por:** `generateFunctionsDoc()`, `runCheck()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -865,7 +821,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `extractDocumentedDirs(markdown: string): Set<string>`
 - **Usada por:** `checkStructure()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -882,7 +838,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/markdown.ts`
 - **Assinatura:** `extractBacktickedNames(markdown: string): Set<string>`
 - **Usada por:** `checkConstants()`, `checkUiComponents()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -901,7 +857,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `formatList(items: readonly string[]): string`
 - **Usada por:** `renderGeneratedBlock()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -918,7 +874,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `renderGeneratedBlock(info: FunctionInfo, data: GeneratedData): string`
 - **Usada por:** `applyGenerated()`, `checkGeneratedBlocks()`, `renderNewSection()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -935,7 +891,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `renderNewSection(info: FunctionInfo, data: GeneratedData): string`
 - **Usada por:** `applyGenerated()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -952,7 +908,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `renderModuleIndex(functions: readonly FunctionInfo[]): string`
 - **Usada por:** `applyGenerated()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -969,7 +925,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `computeGeneratedData(name: string, references: ReferenceIndex, processesByFunction: ReadonlyMap<string, ReadonlySet<string>>): GeneratedData`
 - **Usada por:** `checkGeneratedBlocks()`, `generateFunctionsDoc()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -986,7 +942,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `closureOf(graph: CallGraph, roots: ReadonlySet<string>): Set<string>`
 - **Usada por:** `processesByFunction()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1003,7 +959,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `processesByFunction(citations: ProcessCitations, graph: CallGraph): Map<string, Set<string>>`
 - **Usada por:** `checkGeneratedBlocks()`, `generateFunctionsDoc()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1020,7 +976,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `replaceSectionBlock(markdown: string, name: string, block: string): string`
 - **Usada por:** `applyGenerated()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1037,7 +993,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `appendSection(markdown: string, info: FunctionInfo, section: string): string`
 - **Usada por:** `applyGenerated()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1054,7 +1010,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `insertBeforeDataTable(markdown: string, text: string): string`
 - **Usada por:** `appendSection()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1071,7 +1027,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `applyGenerated(markdown: string, functions: readonly FunctionInfo[], dataOf: (name: string) => GeneratedData): string`
 - **Usada por:** `generateFunctionsDoc()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1088,7 +1044,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `removeSection(markdown: string, name: string): string`
 - **Usada por:** `pruneOrphanSections()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1105,7 +1061,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `removeEmptyModules(markdown: string): string`
 - **Usada por:** `pruneOrphanSections()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1122,7 +1078,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/render.ts`
 - **Assinatura:** `pruneOrphanSections(markdown: string, functions: readonly FunctionInfo[]): string`
 - **Usada por:** `applyGenerated()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1141,7 +1097,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/run.ts`
 - **Assinatura:** `readOptional(rootDir: string, relativePath: string): string | null`
 - **Usada por:** `readDocsTexts()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1158,7 +1114,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/run.ts`
 - **Assinatura:** `readDocsTexts(rootDir: string, config: DocsConfig): DocsTexts`
 - **Usada por:** `runCheck()`, `runGenerate()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1175,7 +1131,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/run.ts`
 - **Assinatura:** `formatIssues(issues: readonly Issue[]): string`
 - **Usada por:** `runDocsCli()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1192,7 +1148,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/run.ts`
 - **Assinatura:** `async runCheck(rootDir: string): Promise<Issue[]>`
 - **Usada por:** `runDocsCli()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1209,7 +1165,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/run.ts`
 - **Assinatura:** `generateFunctionsDoc(inventory: Inventory, docs: DocsTexts): string`
 - **Usada por:** `runGenerate()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1226,7 +1182,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `tools/docs/run.ts`
 - **Assinatura:** `async runGenerate(rootDir: string): Promise<boolean>`
 - **Usada por:** `runDocsCli()`
-- **Processos:** P01, P02
+- **Processos:** P01, P02, P06
 
 <!-- gerado:fim -->
 
@@ -1236,195 +1192,1339 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Lê e grava `docs/FUNCTIONS.md`.
 - **Erros:** Propaga erros de configuração e de escrita.
 
-## `tools/init/cli.ts`
+## `connectors/canvas-puc/src/auth.ts`
 
-### `runInitCli`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/init/cli.ts`
-- **Assinatura:** `runInitCli(args: readonly string[]): number`
-- **Usada por:** `tools/init/cli.ts (módulo)`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Interpreta os argumentos, inicializa o projeto e imprime os arquivos alterados.
-- **Entrada:** `args`: argumentos da linha de comando.
-- **Saída:** Código de saída: 0 ok, 1 erro.
-- **Efeitos:** Grava arquivos; escreve no stdout/stderr.
-- **Erros:** Nenhum (erros viram mensagem e código 1).
-
-## `tools/init/init.ts`
-
-### `parseKeyValueArgs`
+### `pickAuth`
 
 <!-- gerado:inicio -->
 
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `parseKeyValueArgs(args: readonly string[]): Map<string, string>`
-- **Usada por:** `parseInitArgs()`
-- **Processos:** P03
+- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
+- **Assinatura:** `pickAuth(session: CanvasSession | null, token: string | null): CanvasAuth | null`
+- **Usada por:** `createAuthProvider()`, `renewAuth()`
+- **Processos:** P03, P04
 
 <!-- gerado:fim -->
 
-- **Faz:** Converte `--chave valor ...` em um mapa.
-- **Entrada:** `args`: argumentos.
-- **Saída:** `Map` chave → valor (valor vazio se faltar).
-- **Efeitos:** Nenhum (pura).
-- **Erros:** `Error` se um argumento não começar com `--`.
-
-### `requireArg`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `requireArg(values: ReadonlyMap<string, string>, key: string): string`
-- **Usada por:** `parseInitArgs()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Devolve o valor obrigatório de uma chave.
-- **Entrada:** `values`: mapa; `key`: chave.
-- **Saída:** Valor não vazio.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** `Error` "Falta o argumento --chave" se ausente ou vazio.
-
-### `parseInitArgs`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `parseInitArgs(args: readonly string[]): InitValues`
-- **Usada por:** `runInitCli()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê `--name`, `--description` e `--owner` e normaliza o nome com `slugify()`.
-- **Entrada:** `args`: argumentos.
-- **Saída:** `InitValues`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Propaga os erros de `parseKeyValueArgs()` e `requireArg()`.
-
-### `replacePlaceholders`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `replacePlaceholders(text: string, values: InitValues): string`
-- **Usada por:** `initFile()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Substitui `{{PROJECT_NAME}}`, `{{PROJECT_DESCRIPTION}}`, `{{GITHUB_OWNER}}` e `{{YEAR}}`; marcadores desconhecidos ficam como estão.
-- **Entrada:** `text`; `values`: valores do projeto.
-- **Saída:** Texto substituído.
+- **Faz:** Escolhe a credencial atual: sessão se houver, senão token, senão nenhuma.
+- **Entrada:** `session`: sessão salva ou `null`; `token`: token de acesso ou `null`.
+- **Saída:** `CanvasAuth` do tipo `session` ou `token`; `null` se não houver nenhuma credencial.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
-### `initFile`
+### `authHeaders`
 
 <!-- gerado:inicio -->
 
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `initFile(rootDir: string, relativePath: string, values: InitValues): boolean`
-- **Usada por:** `initProject()`
-- **Processos:** P03
+- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
+- **Assinatura:** `authHeaders(auth: CanvasAuth, method: string): Record<string, string>`
+- **Usada por:** `sendCanvasRequest()`
+- **Processos:** P03, P04
 
 <!-- gerado:fim -->
 
-- **Faz:** Aplica `replacePlaceholders()` a um arquivo via `rewriteFile()`.
-- **Entrada:** `rootDir`; `relativePath`; `values`.
-- **Saída:** `true` se o arquivo mudou (`false` se não existe ou não tinha marcadores).
-- **Efeitos:** Lê e grava um arquivo.
-- **Erros:** Erros de escrita propagam.
-
-### `initProject`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `initProject(rootDir: string, values: InitValues): string[]`
-- **Usada por:** `runInitCli()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Inicializa o projeto: marcadores em `TEMPLATE_FILES`, nome do pacote em `PACKAGE_FILES` e "Não lançado" vazio no CHANGELOG.
-- **Entrada:** `rootDir`; `values`.
-- **Saída:** Lista dos arquivos alterados.
-- **Efeitos:** Grava arquivos.
-- **Erros:** Erros de escrita propagam.
-
-### `applyPackageValues`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `applyPackageValues(text: string, values: InitValues): string`
-- **Usada por:** `initProject()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Troca o nome do pacote (raiz e, no lock, o pacote `""`) e a descrição, só se o campo existir.
-- **Entrada:** `text`: JSON de `package.json` ou `package-lock.json`; `values`.
-- **Saída:** JSON reformatado com 2 espaços e quebra de linha final.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** JSON inválido lança `SyntaxError`.
-
-### `resetChangelog`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `resetChangelog(text: string): string`
-- **Usada por:** `initProject()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Esvazia a seção `## [Não lançado]` do CHANGELOG, mantendo o heading e as versões seguintes.
-- **Entrada:** `text`: conteúdo do CHANGELOG.
-- **Saída:** Texto com "Não lançado" vazio; intacto se a seção não existir.
+- **Faz:** Monta os headers de autenticação de uma requisição ao Canvas.
+- **Entrada:** `auth`: credencial (sessão ou token); `method`: método HTTP (`GET`, `POST`...).
+- **Saída:** `Authorization: Bearer` para token; `Cookie` (mais `X-CSRF-Token` fora de GET, se houver) para sessão.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
-### `rewriteFile`
+### `loginAndStore`
 
 <!-- gerado:inicio -->
 
-- **Arquivo:** `tools/init/init.ts`
-- **Assinatura:** `rewriteFile(rootDir: string, relativePath: string, transform: (text: string) => string): boolean`
-- **Usada por:** `initFile()`, `initProject()`
+- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
+- **Assinatura:** `async loginAndStore(deps: AuthDeps, state: AuthState, mode: LoginMode): Promise<CanvasSession>`
+- **Usada por:** `createAuthProvider()`, `renewAuth()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Faz login no navegador no modo pedido, guardando a sessão em disco e no estado.
+- **Entrada:** `deps`: dependências (arquivo da sessão, função de login); `state`: estado mutável; `mode`: `silent` ou `window`.
+- **Saída:** Promise com a `CanvasSession` obtida.
+- **Efeitos:** Abre navegador (via `deps.login`), grava o arquivo da sessão, altera `state.session`.
+- **Erros:** Propaga a rejeição de `deps.login` e erros de escrita do arquivo.
+
+### `renewAuth`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
+- **Assinatura:** `async renewAuth(deps: AuthDeps, state: AuthState): Promise<CanvasAuth | null>`
+- **Usada por:** `renewOnce()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Renova a credencial: login silencioso, depois token, depois janela de login.
+- **Entrada:** `deps`: dependências do provedor; `state`: estado mutável.
+- **Saída:** Promise com a nova `CanvasAuth`; `null` se nenhum caminho funcionar.
+- **Efeitos:** Abre navegador (oculto e, se preciso, com janela), grava a sessão em disco, altera `state.session`.
+- **Erros:** Nenhum (falhas de login viram `null`).
+
+### `renewOnce`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
+- **Assinatura:** `renewOnce(deps: AuthDeps, state: AuthState): Promise<CanvasAuth | null>`
+- **Usada por:** `createAuthProvider()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Garante uma só renovação por vez, compartilhando a promessa entre chamadas simultâneas.
+- **Entrada:** `deps`: dependências do provedor; `state`: estado mutável (usa `state.pending`).
+- **Saída:** A promessa de `renewAuth()` em andamento (nova ou já existente).
+- **Efeitos:** Altera `state.pending` (definido no início, limpo ao terminar); efeitos de `renewAuth()`.
+- **Erros:** Nenhum.
+
+### `createAuthProvider`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
+- **Assinatura:** `createAuthProvider(deps: AuthDeps): AuthProvider`
+- **Usada por:** `startCanvasServer()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o provedor de autenticação a partir da sessão salva em disco.
+- **Entrada:** `deps`: token opcional, caminho do arquivo da sessão e função de login no navegador.
+- **Saída:** `AuthProvider` com `current`, `renew`, `connect` e `disconnect`.
+- **Efeitos:** Lê o arquivo da sessão; os métodos devolvidos abrem navegador, gravam ou apagam a sessão.
+- **Erros:** Nenhum.
+
+## `connectors/canvas-puc/src/browser-login.ts`
+
+### `isLoginChooserUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
+- **Assinatura:** `isLoginChooserUrl(url: string): boolean`
+- **Usada por:** `clickInstitutionButton()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide se a URL é a tela de escolha de login do Canvas.
+- **Entrada:** `url`: endereço atual de uma aba.
+- **Saída:** `true` para `login.instructure.com/discovery` ou caminhos `/login`; senão `false`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `launchLoginBrowser`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
+- **Assinatura:** `async launchLoginBrowser(dataDir: string, headless: boolean): Promise<BrowserContext>`
+- **Usada por:** `browserLogin()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Abre o perfil do conector no primeiro navegador disponível (Chrome, depois Edge).
+- **Entrada:** `dataDir`: pasta de dados (perfil em `browser-profile`); `headless`: `true` para navegador oculto.
+- **Saída:** Promise com o `BrowserContext` persistente aberto.
+- **Efeitos:** Abre um processo de navegador; cria/usa a pasta do perfil em disco.
+- **Erros:** Rejeita com "Não consegui abrir o Chrome nem o Edge" se nenhum canal abrir.
+
+### `pageHasCanvasSession`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
+- **Assinatura:** `async pageHasCanvasSession(page: Page, baseUrl: string): Promise<boolean>`
+- **Usada por:** `waitForCanvasLogin()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere se uma aba no domínio do Canvas já tem sessão válida na API.
+- **Entrada:** `page`: aba do navegador; `baseUrl`: URL base do Canvas.
+- **Saída:** Promise com `true` se `/api/v1/users/self` responde ok; `false` fora do domínio ou em erro.
+- **Efeitos:** Rede: faz `fetch` de dentro da aba.
+- **Erros:** Nenhum (erros viram `false`).
+
+### `clickInstitutionButton`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
+- **Assinatura:** `async clickInstitutionButton(pages: readonly Page[], text: string): Promise<void>`
+- **Usada por:** `waitForCanvasLogin()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Clica no botão da instituição nas abas que estão na tela de escolha de login.
+- **Entrada:** `pages`: abas abertas; `text`: trecho do texto do botão.
+- **Saída:** Promise vazia.
+- **Efeitos:** Navegador: clica no botão visível de cada aba elegível.
+- **Erros:** Nenhum (falhas de clique são ignoradas).
+
+### `waitForCanvasLogin`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
+- **Assinatura:** `async waitForCanvasLogin(context: BrowserContext, opts: BrowserLoginOptions, mode: LoginMode): Promise<void>`
+- **Usada por:** `browserLogin()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Espera até alguma aba ter sessão no Canvas, clicando no botão da instituição pelo caminho.
+- **Entrada:** `context`: navegador aberto; `opts`: URL base e texto do botão; `mode`: define o tempo máximo (`LOGIN_TIMEOUT_MS`).
+- **Saída:** Promise vazia, resolvida quando há sessão.
+- **Efeitos:** Navegador: consulta e clica nas abas; espera 1,5 s entre tentativas.
+- **Erros:** Rejeita se todas as abas forem fechadas ou se o prazo acabar sem login.
+
+### `browserLogin`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
+- **Assinatura:** `async browserLogin(opts: BrowserLoginOptions, mode: LoginMode): Promise<CanvasSession>`
+- **Usada por:** `startCanvasServer()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Faz o login no navegador e devolve a sessão com os cookies do domínio do Canvas.
+- **Entrada:** `opts`: URL base, pasta de dados e texto do botão; `mode`: `silent` (oculto) ou `window`.
+- **Saída:** Promise com `CanvasSession` (URL base, data e cookies `name`/`value`).
+- **Efeitos:** Abre e fecha o navegador; rede (navegação ao Canvas e login).
+- **Erros:** Propaga as rejeições de `launchLoginBrowser()` e `waitForCanvasLogin()`.
+
+## `connectors/canvas-puc/src/client.ts`
+
+### `unauthorizedMessage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `unauthorizedMessage(auth: CanvasAuth | null, baseUrl: string): string`
+- **Usada por:** `requestWithRenewal()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Escolhe a mensagem de erro para 401 ou ausência de credencial.
+- **Entrada:** `auth`: credencial usada ou `null`; `baseUrl`: URL base do Canvas (para o link de gerar token).
+- **Saída:** Texto pedindo `conectar_canvas`, adaptado a sem credencial, sessão expirada ou token inválido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `sendCanvasRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `sendCanvasRequest(deps: ClientDeps, req: CanvasRequest, auth: CanvasAuth): Promise<Response>`
+- **Usada por:** `requestWithRenewal()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Envia uma requisição à API do Canvas com a credencial dada, sem tratar o status.
+- **Entrada:** `deps`: URL base e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional; `auth`: credencial.
+- **Saída:** Promise com a `Response` crua.
+- **Efeitos:** Rede (via `deps.fetchFn`).
+- **Erros:** Propaga a rejeição de `fetchFn`.
+
+### `requestWithRenewal`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `async requestWithRenewal(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
+- **Usada por:** `collectPages()`, `createCanvasClient()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Envia a requisição e, em 401 ou sem credencial, renova uma vez e repete.
+- **Entrada:** `deps`: dependências do cliente; `req`: requisição.
+- **Saída:** Promise com a `Response` de status ok.
+- **Efeitos:** Rede; pode renovar a autenticação (navegador, disco).
+- **Erros:** Rejeita com `unauthorizedMessage()` se continuar 401/sem credencial; com `Canvas <status> em ...` para outro status não ok.
+
+### `collectPages`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `async collectPages(deps: ClientDeps, first: CanvasRequest, max: number): Promise<T[]>`
+- **Usada por:** `createCanvasClient()`
 - **Processos:** P03
 
 <!-- gerado:fim -->
 
-- **Faz:** Lê um arquivo, aplica `transform` e grava só se o conteúdo mudou.
-- **Entrada:** `rootDir`; `relativePath`; `transform`: função texto → texto.
-- **Saída:** `true` se gravou; `false` se nada mudou ou o arquivo não existe.
-- **Efeitos:** Grava o arquivo.
-- **Erros:** Erros de escrita e os lançados por `transform` propagam.
+- **Faz:** Busca todas as páginas de uma listagem seguindo o header `Link`, até `max` itens.
+- **Entrada:** `deps`: dependências do cliente; `first`: primeira requisição; `max`: limite de itens.
+- **Saída:** Promise com até `max` itens (resposta não-lista vira um item); lista vazia se não houver.
+- **Efeitos:** Rede (uma requisição por página).
+- **Erros:** Propaga erros de `requestWithRenewal()` e de JSON inválido.
+
+### `fetchPlainText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `async fetchPlainText(fetchFn: typeof fetch, url: string): Promise<string>`
+- **Usada por:** `createCanvasClient()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Baixa um arquivo de texto por URL direta.
+- **Entrada:** `fetchFn`: função `fetch`; `url`: link de download (já autorizado pelo Canvas).
+- **Saída:** Promise com o conteúdo do arquivo.
+- **Efeitos:** Rede.
+- **Erros:** Rejeita com "Falha ao baixar o arquivo (<status>)" se a resposta não for ok.
+
+### `createCanvasClient`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `createCanvasClient(deps: ClientDeps): CanvasClient`
+- **Usada por:** `startCanvasServer()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o cliente do Canvas usado pelas ferramentas.
+- **Entrada:** `deps`: URL base, provedor de autenticação e `fetchFn`.
+- **Saída:** `CanvasClient` com `get`, `getAll` (página de `CANVAS_PAGE_SIZE`, limite `DEFAULT_MAX_ITEMS`), `post` e `fetchText`.
+- **Efeitos:** Nenhum na criação; os métodos fazem rede.
+- **Erros:** Nenhum na criação; os métodos propagam erros das requisições.
+
+## `connectors/canvas-puc/src/config.ts`
+
+### `envValue`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/config.ts`
+- **Assinatura:** `envValue(env: EnvVars, key: string): string | null`
+- **Usada por:** `readCanvasConfig()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma variável de ambiente, tratando vazio ou placeholder `${...}` como ausente.
+- **Entrada:** `env`: variáveis de ambiente; `key`: nome da variável.
+- **Saída:** Valor sem espaços nas pontas; `null` se ausente, vazio ou começando com `${`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseFlag`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/config.ts`
+- **Assinatura:** `parseFlag(value: string | null): boolean`
+- **Usada por:** `readCanvasConfig()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Interpreta uma opção liga/desliga.
+- **Entrada:** `value`: texto da opção ou `null`.
+- **Saída:** `true` para `1`, `true`, `sim` ou `yes` (sem diferenciar maiúsculas); senão `false`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readCanvasConfig`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/config.ts`
+- **Assinatura:** `readCanvasConfig(env: EnvVars, homeDir: string): CanvasConfig`
+- **Usada por:** `startCanvasServer()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a configuração do conector a partir do ambiente.
+- **Entrada:** `env`: variáveis de ambiente (`CANVAS_*`); `homeDir`: pasta do usuário (base da pasta de dados padrão).
+- **Saída:** `CanvasConfig` com URL base sem `/` final, token, `allowWrite`, texto do botão e pasta de dados (padrões quando ausentes).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/canvas-puc/src/format.ts`
+
+### `shortText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `shortText(html: string | null | undefined): string`
+- **Usada por:** `toAnnouncement()`, `toCalendarEvent()`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte HTML em texto cortado em `MAX_TEXT_LENGTH` caracteres.
+- **Entrada:** `html`: HTML, `null` ou `undefined`.
+- **Saída:** Texto de até `MAX_TEXT_LENGTH` caracteres; `''` para entrada vazia.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toProfile`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toProfile(p: CanvasProfile): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o perfil do Canvas em visualização enxuta.
+- **Entrada:** `p`: perfil do usuário da API.
+- **Saída:** `View` com `id`, `nome`, `email`, `login` e `fuso`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toCourse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toCourse(c: CanvasCourse): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um curso em visualização com a nota atual da matrícula do aluno.
+- **Entrada:** `c`: curso da API (com `enrollments` e `term` opcionais).
+- **Saída:** `View` com id, nome, código, período, `nota_atual` e `conceito_atual` (`null` sem matrícula).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toSubmissionFlags`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toSubmissionFlags(flags: CanvasSubmissionFlags | false | undefined): View | null`
+- **Usada por:** `toPlannerItem()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o status de entrega de um item da agenda.
+- **Entrada:** `flags`: status da API, `false` ou `undefined`.
+- **Saída:** `View` com `entregue`, `atrasado`, `faltando` e `corrigido`; `null` se o item não tem entrega.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toPlannerItem`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toPlannerItem(i: CanvasPlannerItem, baseUrl: string): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um item da agenda do aluno em visualização com link absoluto.
+- **Entrada:** `i`: item do planner; `baseUrl`: URL base do Canvas.
+- **Saída:** `View` com tipo, título, curso, data, pontos, entrega e `url` (`undefined` sem `html_url`).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toAssignmentSummary`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toAssignmentSummary(a: CanvasAssignment): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte uma tarefa de listagem em visualização com status e nota da entrega.
+- **Entrada:** `a`: tarefa da API (com `submission` opcional).
+- **Saída:** `View` com id, nome, prazo, pontos, tipos de entrega, status, nota, atraso e falta (`null` sem entrega).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toRubricCriterion`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toRubricCriterion(r: CanvasRubricCriterion): View`
+- **Usada por:** `toAssignmentDetail()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um critério de rubrica com seus níveis como `pontos: descrição`.
+- **Entrada:** `r`: critério da API.
+- **Saída:** `View` com `criterio`, `pontos` e `niveis` (lista vazia sem níveis).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toFileInfo`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toFileInfo(f: CanvasAttachment): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `toSubmissionDetail()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um anexo em visualização com tamanho em KB.
+- **Entrada:** `f`: anexo/arquivo da API.
+- **Saída:** `View` com id, nome, tipo, `tamanho_kb` (0 sem tamanho), data e link de download.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toSubmissionDetail`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toSubmissionDetail(s: CanvasSubmission): View`
+- **Usada por:** `toAssignmentDetail()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte uma entrega do aluno com nota, comentários, rubrica e anexos.
+- **Entrada:** `s`: entrega da API.
+- **Saída:** `View` com status, data, nota, conceito, atraso, `comentarios`, `avaliacao_rubrica` (`null` se ausente) e `anexos`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toAssignmentDetail`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toAssignmentDetail(a: CanvasAssignment, submission: CanvasSubmission | null): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte uma tarefa completa com enunciado em texto, datas, rubrica e entrega.
+- **Entrada:** `a`: tarefa da API; `submission`: entrega do aluno ou `null`.
+- **Saída:** `View` com datas, pontos, enunciado, rubrica e `entrega` (`null` sem entrega).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toGradeRow`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toGradeRow(s: CanvasSubmission): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte uma entrega (com `assignment` incluído) em linha de nota.
+- **Entrada:** `s`: entrega de `students/submissions` com `include[]=assignment`.
+- **Saída:** `View` com tarefa, id, nota, `de` (pontos possíveis), conceito, status e prazo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toEnrollmentGrade`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toEnrollmentGrade(e: CanvasEnrollment, courseNames: ReadonlyMap<string, string>): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o resumo de notas de uma matrícula, com o nome do curso.
+- **Entrada:** `e`: matrícula da API; `courseNames`: mapa id → nome do curso.
+- **Saída:** `View` com `course_id`, `curso` (`undefined` se fora do mapa), nota e conceito atuais e nota final.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toAnnouncement`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toAnnouncement(a: CanvasAnnouncement): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um aviso do curso com o texto convertido e cortado.
+- **Entrada:** `a`: aviso da API.
+- **Saída:** `View` com id, título, curso, autor, data, `texto` (via `shortText()`) e url.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toModuleItem`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toModuleItem(i: CanvasModuleItem): View`
+- **Usada por:** `toModule()`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um item de módulo em visualização.
+- **Entrada:** `i`: item de módulo da API.
+- **Saída:** `View` com id, tipo, título, `content_id`, `page_url`, url externa e `concluido` (`null` sem requisito).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toModule`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toModule(m: CanvasModule): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um módulo com seus itens.
+- **Entrada:** `m`: módulo da API.
+- **Saída:** `View` com id, nome e `itens` (lista vazia sem itens).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toDiscussionSummary`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toDiscussionSummary(d: CanvasDiscussionTopic): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um fórum de discussão de listagem em visualização.
+- **Entrada:** `d`: tópico de discussão da API.
+- **Saída:** `View` com id, título, prazo (`null` sem tarefa), respostas, não lidas, última resposta e url.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `flattenDiscussion`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `flattenDiscussion(entries: readonly CanvasDiscussionEntry[] | undefined, names: ReadonlyMap<string, string>, depth = 0): { nivel: number; autor: string | undefined; data: string | undefined; texto: string }[]`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `flattenDiscussion()`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Achata a árvore de postagens de um fórum, marcando o nível de cada resposta.
+- **Entrada:** `entries`: postagens (ou `undefined`); `names`: mapa id → nome do autor; `depth`: nível inicial (padrão 0).
+- **Saída:** Lista em pré-ordem de `{ nivel, autor, data, texto }`; vazia sem postagens.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toCalendarEvent`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/format.ts`
+- **Assinatura:** `toCalendarEvent(e: CanvasCalendarEvent): View`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um evento do calendário com descrição em texto curto.
+- **Entrada:** `e`: evento da API.
+- **Saída:** `View` com título, início, fim, local, curso e `descricao` de até 1000 caracteres.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/canvas-puc/src/helpers.ts`
+
+### `isoDaysFrom`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `isoDaysFrom(now: Date, days: number): string`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula a data/hora ISO `days` dias depois de `now`.
+- **Entrada:** `now`: data de referência; `days`: número de dias (negativo vai para trás).
+- **Saída:** Texto ISO 8601 em UTC.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `dateOnly`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `dateOnly(iso: string): string`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai a parte `AAAA-MM-DD` de uma data ISO.
+- **Entrada:** `iso`: data ISO.
+- **Saída:** Os 10 primeiros caracteres.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `courseContextCodes`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `courseContextCodes(ids: readonly Id[]): string[]`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta os códigos de contexto `course_<id>` usados por avisos e calendário.
+- **Entrada:** `ids`: ids de curso.
+- **Saída:** Lista de códigos na mesma ordem; vazia para lista vazia.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `courseNameMap`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `courseNameMap(courses: readonly CanvasCourse[]): Map<string, string>`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o mapa id → nome dos cursos.
+- **Entrada:** `courses`: cursos da API.
+- **Saída:** `Map` com id em texto e nome (`''` sem nome).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `participantNames`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `participantNames(view: CanvasDiscussionView): Map<string, string>`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o mapa id → nome dos participantes de um fórum.
+- **Entrada:** `view`: visão completa da discussão.
+- **Saída:** `Map` com id em texto e nome (`''` sem nome); vazio sem participantes.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isTextFile`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `isTextFile(contentType: string, name: string): boolean`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide se um arquivo pode ser lido como texto, pelo tipo MIME ou pela extensão.
+- **Entrada:** `contentType`: tipo MIME; `name`: nome do arquivo.
+- **Saída:** `true` para MIME `text/`, json, xml, javascript, csv ou extensões de texto/código; senão `false`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `matchModuleItems`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `matchModuleItems(modules: readonly CanvasModule[], term: string): ModuleMatch[]`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Encontra os itens de módulo cujo título contém o termo, sem diferenciar maiúsculas.
+- **Entrada:** `modules`: módulos com itens; `term`: termo buscado.
+- **Saída:** Lista de `ModuleMatch` (`modulo`, `titulo`, `tipo`); vazia sem resultados.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `activeCourses`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `activeCourses(client: CanvasClient): Promise<CanvasCourse[]>`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Busca os cursos ativos do aluno.
+- **Entrada:** `client`: cliente do Canvas.
+- **Saída:** Promise com a lista de cursos (`enrollment_state=active`).
+- **Efeitos:** Rede.
+- **Erros:** Propaga erros do cliente.
+
+### `fetchOwnSubmission`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `async fetchOwnSubmission(client: CanvasClient, courseId: Id, assignmentId: Id): Promise<CanvasSubmission | null>`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Busca a entrega do próprio aluno numa tarefa, com comentários e rubrica.
+- **Entrada:** `client`: cliente do Canvas; `courseId`: id do curso; `assignmentId`: id da tarefa.
+- **Saída:** Promise com a `CanvasSubmission`; `null` se a busca falhar (sem acesso).
+- **Efeitos:** Rede.
+- **Erros:** Nenhum (falhas viram `null`).
+
+### `getAllOrEmpty`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
+- **Assinatura:** `getAllOrEmpty(client: CanvasClient, path: string, params: Record<string, string | readonly string[]>): Promise<T[]>`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Busca uma listagem paginada, trocando falha por lista vazia.
+- **Entrada:** `client`: cliente do Canvas; `path`: caminho da API; `params`: parâmetros de query.
+- **Saída:** Promise com os itens; lista vazia se a busca falhar.
+- **Efeitos:** Rede.
+- **Erros:** Nenhum (falhas viram `[]`).
+
+## `connectors/canvas-puc/src/main.ts`
+
+### `startCanvasServer`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/main.ts`
+- **Assinatura:** `async startCanvasServer(): Promise<void>`
+- **Usada por:** `connectors/canvas-puc/src/main.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Sobe o servidor MCP do Canvas em stdio.
+- **Entrada:** Nenhuma (lê `process.env` e a pasta do usuário).
+- **Saída:** Promise vazia, resolvida quando o transporte conecta.
+- **Efeitos:** Lê ambiente e sessão em disco; registra ferramentas; abre o transporte stdio.
+- **Erros:** Propaga erros de conexão do servidor MCP.
+
+## `connectors/canvas-puc/src/session.ts`
+
+### `sessionFilePath`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/session.ts`
+- **Assinatura:** `sessionFilePath(dataDir: string): string`
+- **Usada por:** `startCanvasServer()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula o caminho do arquivo da sessão dentro da pasta de dados.
+- **Entrada:** `dataDir`: pasta de dados do conector.
+- **Saída:** `<dataDir>/session.json`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `cookieHeader`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/session.ts`
+- **Assinatura:** `cookieHeader(session: CanvasSession): string`
+- **Usada por:** `authHeaders()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o valor do header `Cookie` com todos os cookies da sessão.
+- **Entrada:** `session`: sessão salva.
+- **Saída:** Texto `nome=valor; ...`; `''` sem cookies.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `csrfToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/session.ts`
+- **Assinatura:** `csrfToken(session: CanvasSession): string | null`
+- **Usada por:** `authHeaders()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o token CSRF (cookie `_csrf_token`, decodificado) da sessão.
+- **Entrada:** `session`: sessão salva.
+- **Saída:** Token decodificado; `null` se o cookie não existe.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isCanvasSession`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/session.ts`
+- **Assinatura:** `isCanvasSession(value: unknown): value is CanvasSession`
+- **Usada por:** `loadSession()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere se um valor lido do disco tem a forma de uma sessão válida.
+- **Entrada:** `value`: qualquer valor (JSON já interpretado).
+- **Saída:** `true` se tem `baseUrl` texto e `cookies` lista de `{ name, value }` texto; senão `false`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `loadSession`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/session.ts`
+- **Assinatura:** `loadSession(file: string): CanvasSession | null`
+- **Usada por:** `createAuthProvider()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a sessão salva em disco.
+- **Entrada:** `file`: caminho do arquivo da sessão.
+- **Saída:** `CanvasSession`; `null` se o arquivo não existe, está corrompido ou tem forma inválida.
+- **Efeitos:** Lê um arquivo.
+- **Erros:** Nenhum (falhas viram `null`).
+
+### `saveSession`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/session.ts`
+- **Assinatura:** `saveSession(file: string, session: CanvasSession): void`
+- **Usada por:** `loginAndStore()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava a sessão em disco, criando a pasta se preciso.
+- **Entrada:** `file`: caminho do arquivo; `session`: sessão a salvar.
+- **Saída:** Nada.
+- **Efeitos:** Cria pasta e grava o arquivo JSON.
+- **Erros:** Propaga erros de escrita.
+
+### `clearSession`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/session.ts`
+- **Assinatura:** `clearSession(file: string): void`
+- **Usada por:** `createAuthProvider()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Apaga o arquivo da sessão salva, se existir.
+- **Entrada:** `file`: caminho do arquivo da sessão.
+- **Saída:** Nada.
+- **Efeitos:** Apaga o arquivo em disco.
+- **Erros:** Propaga erros de remoção.
+
+## `connectors/canvas-puc/src/tools-write.ts`
+
+### `submissionPayload`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/tools-write.ts`
+- **Assinatura:** `submissionPayload(kind: 'texto' | 'url', content: string): { submission: Readonly<Record<string, string>> }`
+- **Usada por:** `connectors/canvas-puc/src/tools-write.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o corpo de entrega para o tipo escolhido.
+- **Entrada:** `kind`: `texto` (HTML aceito) ou `url`; `content`: texto ou link.
+- **Saída:** `{ submission }` com `online_text_entry` e `body`, ou `online_url` e `url`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/canvas-puc/src/tools.ts`
+
+### `canvasTools`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/tools.ts`
+- **Assinatura:** `canvasTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[]`
+- **Usada por:** `startCanvasServer()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Seleciona as ferramentas do Canvas a registrar.
+- **Entrada:** `allowWrite`: se as ferramentas de escrita entram.
+- **Saída:** Lista com conexão e leitura, mais `CANVAS_WRITE_TOOLS` quando `allowWrite` é `true`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/core/html.ts`
+
+### `htmlToText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/html.ts`
+- **Assinatura:** `htmlToText(html: string | null | undefined): string`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `flattenDiscussion()`, `shortText()`, `toAssignmentDetail()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte HTML em texto simples, preservando parágrafos e listas como quebras de linha.
+- **Entrada:** `html`: HTML, `null` ou `undefined`.
+- **Saída:** Texto sem tags, com entidades decodificadas e sem espaços nas pontas; `''` para entrada vazia.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/core/http.ts`
+
+### `buildUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/http.ts`
+- **Assinatura:** `buildUrl(base: string, path: string, params: QueryParams = {}): URL`
+- **Usada por:** `sendCanvasRequest()`
+- **Processos:** P03, P04
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a URL de uma requisição a partir de base, caminho e parâmetros.
+- **Entrada:** `base`: URL base; `path`: caminho relativo ou URL absoluta (`http...`); `params`: query (padrão `{}`).
+- **Saída:** `URL` com parâmetros; listas viram `chave[]=...`; `null`/`undefined` são omitidos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `TypeError` se a URL resultante for inválida.
+
+### `parseNextLink`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/http.ts`
+- **Assinatura:** `parseNextLink(linkHeader: string | null): string | null`
+- **Usada por:** `collectPages()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai a URL `rel="next"` de um header `Link` de paginação.
+- **Entrada:** `linkHeader`: valor do header ou `null`.
+- **Saída:** URL da próxima página; `null` se não houver header ou `next`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/mcp/tools.ts`
+
+### `defineTool`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/mcp/tools.ts`
+- **Assinatura:** `defineTool(def: ToolDefinition<C, S>): ToolSpec<C>`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/canvas-puc/src/tools.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria uma `ToolSpec` que valida os argumentos com o `shape` antes de chamar `run`.
+- **Entrada:** `def`: nome, descrição, `shape` zod e `run` tipado.
+- **Saída:** `ToolSpec` com `run` que aceita argumentos crus (`undefined` vira `{}`).
+- **Efeitos:** Nenhum na criação.
+- **Erros:** O `run` devolvido rejeita com `ZodError` para argumentos inválidos e propaga erros de `def.run`.
+
+### `textResult`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/mcp/tools.ts`
+- **Assinatura:** `textResult(data: unknown, notes: readonly string[] = []): CallToolResult`
+- **Usada por:** `runToolSafely()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o retorno de uma ferramenta em resultado MCP de texto.
+- **Entrada:** `data`: texto ou valor serializável; `notes`: textos extras (padrão vazio).
+- **Saída:** `CallToolResult` com um bloco de texto (JSON indentado se não for string) mais um por nota.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança se `data` não for serializável em JSON (ex.: referência circular).
+
+### `errorResult`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/mcp/tools.ts`
+- **Assinatura:** `errorResult(error: unknown): CallToolResult`
+- **Usada por:** `runToolSafely()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um erro em resultado MCP com `isError`.
+- **Entrada:** `error`: qualquer valor lançado.
+- **Saída:** `CallToolResult` com `isError: true` e a mensagem do erro (ou `String(error)`).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `runToolSafely`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/mcp/tools.ts`
+- **Assinatura:** `async runToolSafely(spec: ToolSpec<C>, ctx: C, rawArgs: unknown): Promise<CallToolResult>`
+- **Usada por:** `registerToolSpecs()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Executa uma ferramenta convertendo sucesso ou falha em resultado MCP.
+- **Entrada:** `spec`: ferramenta; `ctx`: contexto do conector; `rawArgs`: argumentos crus.
+- **Saída:** Promise com `textResult()` no sucesso ou `errorResult()` na falha.
+- **Efeitos:** Os efeitos da própria ferramenta.
+- **Erros:** Nenhum (erros viram `errorResult`).
+
+### `registerToolSpecs`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/mcp/tools.ts`
+- **Assinatura:** `registerToolSpecs(server: McpServer, specs: readonly ToolSpec<C>[], ctx: C): void`
+- **Usada por:** `startCanvasServer()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Registra cada `ToolSpec` no servidor MCP com o contexto do conector.
+- **Entrada:** `server`: servidor MCP; `specs`: ferramentas; `ctx`: contexto passado a cada execução.
+- **Saída:** Nada.
+- **Efeitos:** Altera o servidor (registra as ferramentas).
+- **Erros:** Propaga erros do SDK (ex.: nome repetido).
+
+## `tools/pack/cli.ts`
+
+### `installedExternalVersions`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/cli.ts`
+- **Assinatura:** `installedExternalVersions(root: string): Record<string, string>`
+- **Usada por:** `packConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê as versões instaladas das dependências externas em `node_modules`.
+- **Entrada:** `root`: raiz do repositório.
+- **Saída:** Mapa dependência → versão para cada item de `RUNTIME_EXTERNALS`.
+- **Efeitos:** Lê `package.json` em `node_modules`.
+- **Erros:** Propaga erro se a dependência não estiver instalada ou o JSON for inválido.
+
+### `runNodeBin`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/cli.ts`
+- **Assinatura:** `runNodeBin(bin: 'npm' | 'npx', args: readonly string[], cwd: string): void`
+- **Usada por:** `packConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Roda `npm` ou `npx` de forma portátil entre Windows e Unix.
+- **Entrada:** `bin`: `npm` ou `npx`; `args`: argumentos; `cwd`: pasta de trabalho.
+- **Saída:** Nada.
+- **Efeitos:** Executa processo filho com saída herdada (stdout/stderr).
+- **Erros:** Lança se o comando sair com código diferente de zero.
+
+### `packConnector`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/cli.ts`
+- **Assinatura:** `async packConnector(root: string, name: string): Promise<string>`
+- **Usada por:** `runPackCli()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera o `.mcpb` de um conector a partir de uma pasta de staging.
+- **Entrada:** `root`: raiz do repositório; `name`: nome da pasta do conector.
+- **Saída:** Promise com o caminho do `.mcpb` gerado em `dist/connectors`.
+- **Efeitos:** Apaga e grava `dist/stage/<nome>`, roda esbuild, `npm install` e `mcpb pack`, grava o pacote.
+- **Erros:** Propaga erros de manifesto, build, instalação e empacotamento.
+
+### `runPackCli`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/cli.ts`
+- **Assinatura:** `async runPackCli(argv: readonly string[]): Promise<void>`
+- **Usada por:** `tools/pack/cli.ts (módulo)`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Empacota o conector pedido, ou todos com `--all`.
+- **Entrada:** `argv`: argumentos da linha de comando (nomes de conector ou `--all`).
+- **Saída:** Promise vazia.
+- **Efeitos:** Gera pacotes em disco; imprime o caminho de cada um no stdout.
+- **Erros:** Rejeita com a mensagem de uso se nenhum conector for informado; propaga erros de `packConnector()`.
+
+## `tools/pack/pack.ts`
+
+### `listConnectors`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/pack.ts`
+- **Assinatura:** `listConnectors(rootDir: string): string[]`
+- **Usada por:** `runPackCli()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os conectores com `manifest.json` em `connectors/`.
+- **Entrada:** `rootDir`: raiz do repositório.
+- **Saída:** Nomes das subpastas em ordem alfabética; vazia se `connectors/` não existe.
+- **Efeitos:** Lê o disco.
+- **Erros:** Propaga erros de leitura da pasta.
+
+### `readManifestIdentity`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/pack.ts`
+- **Assinatura:** `readManifestIdentity(manifestPath: string): { name: string; version: string }`
+- **Usada por:** `packConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê `name` e `version` do manifesto de um conector.
+- **Entrada:** `manifestPath`: caminho do `manifest.json`.
+- **Saída:** `{ name, version }`.
+- **Efeitos:** Lê um arquivo.
+- **Erros:** Lança se faltar `name` ou `version` (texto); propaga erros de leitura e JSON inválido.
+
+### `runtimePackageJson`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/pack.ts`
+- **Assinatura:** `runtimePackageJson(identity: { name: string; version: string }, installedVersions: Readonly<Record<string, string>>): RuntimePackageJson`
+- **Usada por:** `packConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o `package.json` do pacote com as versões exatas das dependências externas.
+- **Entrada:** `identity`: nome e versão do conector; `installedVersions`: mapa dependência → versão instalada.
+- **Saída:** `RuntimePackageJson` privado, ESM, com `dependencies` de `RUNTIME_EXTERNALS`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança se alguma dependência externa não estiver em `installedVersions`.
+
+### `bundleOptions`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/pack.ts`
+- **Assinatura:** `bundleOptions(entry: string, outfile: string): BuildOptions`
+- **Usada por:** `packConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta as opções do esbuild para unir o conector num ESM para Node 18+.
+- **Entrada:** `entry`: arquivo de entrada; `outfile`: arquivo de saída.
+- **Saída:** `BuildOptions` com bundle, `node18`, externos de `RUNTIME_EXTERNALS` e banner que define `require`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
 
 ## Dados e constantes
 
-| Nome                  | Arquivo                   | O que é                                                                   |
-| --------------------- | ------------------------- | ------------------------------------------------------------------------- |
-| `MAX_SLUG_LENGTH`     | `src/core/slug.ts`        | Tamanho máximo de um slug gerado por `slugify`.                           |
-| `TEST_EXCEPTIONS`     | `src/test-exceptions.ts`  | Lista única de funções sem teste automatizado, com motivo e teste manual. |
-| `DEFAULT_DOCS_CONFIG` | `tools/docs/config.ts`    | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.      |
-| `MODULE_SCOPE_SUFFIX` | `tools/docs/ast.ts`       | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`). |
-| `WALK_IGNORED_DIRS`   | `tools/docs/inventory.ts` | Pastas puladas ao percorrer o disco sem git.                              |
-| `GENERATED_START`     | `tools/docs/markdown.ts`  | Marcador de início do bloco gerado em FUNCTIONS.md.                       |
-| `GENERATED_END`       | `tools/docs/markdown.ts`  | Marcador de fim do bloco gerado.                                          |
-| `INDEX_START`         | `tools/docs/markdown.ts`  | Marcador de início do índice por módulo.                                  |
-| `INDEX_END`           | `tools/docs/markdown.ts`  | Marcador de fim do índice por módulo.                                     |
-| `PLACEHOLDER`         | `tools/docs/markdown.ts`  | Texto `_preencher_` deixado nos campos manuais novos.                     |
-| `MANUAL_FIELDS`       | `tools/docs/render.ts`    | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).      |
-| `TEMPLATE_FILES`      | `tools/init/init.ts`      | Arquivos do template que contêm marcadores `{{...}}`.                     |
-| `PACKAGE_FILES`       | `tools/init/init.ts`      | Manifestos npm cujo nome e descrição o init troca editando o JSON.        |
-| `CHANGELOG_FILE`      | `tools/init/init.ts`      | CHANGELOG cuja seção "Não lançado" o init esvazia.                        |
+| Nome                     | Arquivo                                      | O que é                                                                                         |
+| ------------------------ | -------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `TEST_EXCEPTIONS`        | `src/test-exceptions.ts`                     | Lista única de funções sem teste automatizado, com motivo e teste manual.                       |
+| `DEFAULT_DOCS_CONFIG`    | `tools/docs/config.ts`                       | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                            |
+| `MODULE_SCOPE_SUFFIX`    | `tools/docs/ast.ts`                          | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                       |
+| `WALK_IGNORED_DIRS`      | `tools/docs/inventory.ts`                    | Pastas puladas ao percorrer o disco sem git.                                                    |
+| `GENERATED_START`        | `tools/docs/markdown.ts`                     | Marcador de início do bloco gerado em FUNCTIONS.md.                                             |
+| `GENERATED_END`          | `tools/docs/markdown.ts`                     | Marcador de fim do bloco gerado.                                                                |
+| `INDEX_START`            | `tools/docs/markdown.ts`                     | Marcador de início do índice por módulo.                                                        |
+| `INDEX_END`              | `tools/docs/markdown.ts`                     | Marcador de fim do índice por módulo.                                                           |
+| `PLACEHOLDER`            | `tools/docs/markdown.ts`                     | Texto `_preencher_` deixado nos campos manuais novos.                                           |
+| `MANUAL_FIELDS`          | `tools/docs/render.ts`                       | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                            |
+| `HTML_TEXT_REPLACEMENTS` | `src/core/html.ts`                           | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                              |
+| `CONNECTORS_DIR`         | `tools/pack/pack.ts`                         | Pasta dos conectores relativa à raiz (`connectors`).                                            |
+| `PACK_OUT_DIR`           | `tools/pack/pack.ts`                         | Pasta de saída dos pacotes `.mcpb` (`dist/connectors`).                                         |
+| `RUNTIME_EXTERNALS`      | `tools/pack/pack.ts`                         | Dependências que o esbuild não une e vão para `node_modules` do pacote.                         |
+| `CONNECTOR_ENTRY`        | `tools/pack/pack.ts`                         | Arquivo de entrada de cada conector (`src/main.ts`).                                            |
+| `BUNDLE_PATH`            | `tools/pack/pack.ts`                         | Caminho do bundle dentro do pacote (`server/index.js`).                                         |
+| `LOGIN_TIMEOUT_MS`       | `connectors/canvas-puc/src/browser-login.ts` | Tempo máximo de espera do login por modo (`silent` 25 s, `window` 5 min).                       |
+| `BROWSER_CHANNELS`       | `connectors/canvas-puc/src/browser-login.ts` | Navegadores tentados em ordem no login (`chrome`, `msedge`).                                    |
+| `CANVAS_PAGE_SIZE`       | `connectors/canvas-puc/src/client.ts`        | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                 |
+| `DEFAULT_MAX_ITEMS`      | `connectors/canvas-puc/src/client.ts`        | Limite padrão de itens somados entre páginas em `getAll`.                                       |
+| `DEFAULT_CANVAS_URL`     | `connectors/canvas-puc/src/config.ts`        | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                        |
+| `DEFAULT_LOGIN_BUTTON`   | `connectors/canvas-puc/src/config.ts`        | Trecho do texto do botão da instituição na tela de login, usado sem `CANVAS_LOGIN_BUTTON`.      |
+| `MAX_TEXT_LENGTH`        | `connectors/canvas-puc/src/format.ts`        | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                           |
+| `ASSIGNMENT_BUCKETS`     | `connectors/canvas-puc/src/helpers.ts`       | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                   |
+| `CANVAS_READ_TOOLS`      | `connectors/canvas-puc/src/tools-read.ts`    | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                     |
+| `CANVAS_WRITE_TOOLS`     | `connectors/canvas-puc/src/tools-write.ts`   | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`. |
+| `CANVAS_ACCOUNT_TOOLS`   | `connectors/canvas-puc/src/tools.ts`         | Ferramentas MCP de conexão: `conectar_canvas` e `desconectar_canvas`.                           |

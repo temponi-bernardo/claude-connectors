@@ -1,0 +1,135 @@
+{
+  "manifest_version": "0.3",
+  "name": "canvas-puc",
+  "display_name": "Canvas PUC Minas",
+  "version": "1.2.0",
+  "description": "Tarefas, prazos, notas, avisos, módulos e arquivos do Canvas da PUC Minas, com login pelo navegador.",
+  "long_description": "Conecta o Claude ao Canvas LMS da PUC Minas. O login é feito uma vez numa janela do Chrome (botão Aluno / Professor) e a sessão é renovada sozinha em segundo plano, sem token de 30 dias. Inclui próximas entregas, tarefas com enunciado e rubrica, notas, avisos, módulos, páginas, arquivos, fóruns e calendário. Entregar tarefa e responder fórum só ficam ativos se a opção estiver ligada.",
+  "author": {
+    "name": "Bernardo Temponi"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/index.js"],
+      "env": {
+        "CANVAS_BASE_URL": "${user_config.base_url}",
+        "CANVAS_ALLOW_WRITE": "${user_config.allow_write}",
+        "CANVAS_API_TOKEN": "${user_config.api_token}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "conectar_canvas",
+      "description": "Faz login no Canvas por uma janela do navegador"
+    },
+    {
+      "name": "desconectar_canvas",
+      "description": "Apaga a sessão salva"
+    },
+    {
+      "name": "quem_sou_eu",
+      "description": "Perfil do usuário (teste de conexão)"
+    },
+    {
+      "name": "listar_cursos",
+      "description": "Cursos/disciplinas e nota atual"
+    },
+    {
+      "name": "proximas_entregas",
+      "description": "O que vence nos próximos dias"
+    },
+    {
+      "name": "listar_tarefas",
+      "description": "Tarefas de um curso com status"
+    },
+    {
+      "name": "ver_tarefa",
+      "description": "Enunciado, rubrica e feedback"
+    },
+    {
+      "name": "notas",
+      "description": "Notas por curso e por tarefa"
+    },
+    {
+      "name": "avisos",
+      "description": "Avisos recentes"
+    },
+    {
+      "name": "modulos",
+      "description": "Módulos e itens de um curso"
+    },
+    {
+      "name": "ver_pagina",
+      "description": "Conteúdo de uma página do curso"
+    },
+    {
+      "name": "arquivos",
+      "description": "Arquivos do curso com link"
+    },
+    {
+      "name": "ler_arquivo_texto",
+      "description": "Lê arquivos de texto do curso"
+    },
+    {
+      "name": "discussoes",
+      "description": "Fóruns de um curso"
+    },
+    {
+      "name": "ver_discussao",
+      "description": "Postagens de um fórum"
+    },
+    {
+      "name": "calendario",
+      "description": "Eventos do calendário"
+    },
+    {
+      "name": "buscar",
+      "description": "Busca em tarefas, páginas, arquivos e módulos"
+    },
+    {
+      "name": "entregar_tarefa_texto",
+      "description": "Entrega texto/link (só com envios permitidos)"
+    },
+    {
+      "name": "responder_discussao",
+      "description": "Responde fórum (só com envios permitidos)"
+    }
+  ],
+  "user_config": {
+    "base_url": {
+      "type": "string",
+      "title": "Endereço do Canvas",
+      "description": "URL do Canvas da instituição",
+      "default": "https://pucminas.instructure.com",
+      "required": true
+    },
+    "allow_write": {
+      "type": "boolean",
+      "title": "Permitir envios",
+      "description": "Libera entregar tarefa e responder fórum (o Claude sempre confirma antes)",
+      "default": true,
+      "required": false
+    },
+    "api_token": {
+      "type": "string",
+      "title": "Token de acesso (opcional)",
+      "description": "Reserva caso o login pelo navegador falhe. Pode deixar em branco.",
+      "sensitive": true,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "platforms": ["win32", "darwin"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/temponi-bernardo/claude-connectors"
+  }
+}

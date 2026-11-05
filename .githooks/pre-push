@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
-# Tudo o que o CI roda. Se demorar, é sinal para otimizar, não para pular.
+# Check completo (não há CI, ADR 0006). Se demorar, é sinal para otimizar, não para pular.
 set -e
 npm run -s check

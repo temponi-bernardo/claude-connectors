@@ -1,6 +1,9 @@
-# {{PROJECT_NAME}}
+# claude-connectors
 
-{{PROJECT_DESCRIPTION}}
+Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo Canvas da PUC Minas.
+
+Cada conector vive em `connectors/<nome>/` e vira uma extensão `.mcpb` (ADR 0007); código compartilhado
+fica em `src/`. Não há GitHub Actions: o portão de PR é `npm run pr:check` (ADR 0006).
 
 A documentação em `docs/` é a fonte da verdade. **Antes de mexer em código, leia `docs/README.md`** e siga
 o "quero... → leia...". Não varra o código para descobrir o que existe: `docs/FUNCTIONS.md`,
@@ -18,8 +21,8 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 5. **Documentação na mesma mudança.** Rode `npm run docs:generate`, preencha os campos manuais, siga a
    tabela de `docs/DOCUMENTATION.md`.
 6. **Interface só com o design system** (`docs/UI.md`), quando houver.
-7. **Nada direto na `main`** — branch por tarefa, PR, CI verde, squash merge (`docs/WORKFLOW.md`).
-8. **Conventional Commits** com descrição em português: `feat(core): adicionar validação de slug`.
+7. **Nada direto na `main`** — branch por tarefa, PR, `pr:check` verde, squash merge (`docs/WORKFLOW.md`).
+8. **Conventional Commits** com descrição em português: `feat(canvas): adicionar ferramenta de notas`.
 9. **Skills sempre atualizadas** — passo repetido, comando ou regra nova → skill no mesmo PR.
 10. Docs e mensagens ao usuário em **português**; identificadores em **inglês**.
 11. **Contexto pequeno.** Uma tarefa por sessão. Exploração, pesquisa e verificações independentes vão para
@@ -31,7 +34,8 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 
 | Comando                              | Faz                                                                   |
 | ------------------------------------ | --------------------------------------------------------------------- |
-| `npm run check`                      | Tudo o que o CI roda. Rode antes de abrir PR.                         |
+| `npm run check`                      | Formato, lint, tipos, testes, docs, duplicação e segredos             |
+| `npm run pr:check -- "<título>"`     | Portão de PR (não há CI): check, build, pacotes e commitlint          |
 | `npm run docs:generate`              | Atualiza os blocos gerados de `docs/FUNCTIONS.md` e cria seções novas |
 | `npm run docs:check`                 | Falha se docs e código divergirem                                     |
 | `npm test` / `npm run test:coverage` | Testes / com cobertura mínima de 90%                                  |
@@ -39,13 +43,12 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 | `npm run format:fix`                 | Prettier                                                              |
 | `npm run typecheck`                  | `tsc --noEmit`                                                        |
 | `npm run dup:check`                  | jscpd                                                                 |
-| `npm start -- <título>`              | Roda o esqueleto                                                      |
+| `npm run pack -- <conector>`         | Gera `dist/connectors/<conector>-<versão>.mcpb` (`pack:all`: todos)   |
 
 ## Skills
 
 | Skill               | Quando                                                                   |
 | ------------------- | ------------------------------------------------------------------------ |
-| `/novo-projeto`     | Primeira sessão em um repositório criado a partir do template            |
 | `/tarefa`           | Pegar a próxima tarefa do roadmap e levá-la até o merge                  |
 | `/testes-primeiro`  | Qualquer código novo ou bug: o ciclo TDD                                 |
 | `/atualizar-docs`   | Depois de alterar código, antes de abrir o PR                            |

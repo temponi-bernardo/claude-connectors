@@ -2,9 +2,10 @@
 
 ## Branches
 
-- `main` é protegida: só recebe código por PR com CI verde; sem push direto, sem force push.
+- `main` só recebe código por PR com `npm run pr:check` verde; sem push direto, sem force push. Não há CI
+  no GitHub Actions ([ADR 0006](adr/0006-sem-github-actions-checagens-locais.md)): o portão é local.
 - Uma branch por tarefa: `<tipo>/<id-roadmap>-<descricao-curta>`, ex.: `feat/f2-1-processo-principal`,
-  `fix/slug-acentos`, `docs/arquitetura-camadas`.
+  `fix/canvas-paginacao`, `docs/arquitetura-camadas`.
 - Branch nasce da `main` atualizada e morre no merge (squash).
 
 ## Commits (Conventional Commits, descrição em português)
@@ -30,11 +31,11 @@
 | `chore`    | Manutenção que não se encaixa acima       | —                       |
 | `revert`   | Reverte um commit                         | —                       |
 
-Escopos permitidos (`commitlint.config.js`): `core`, `docs`, `tools`, `ci`, `deps`, `skills`, `release`,
-`config`. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
+Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `pack`, `docs`, `tools`, `ci`, `deps`,
+`skills`, `release`, `config`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
 
-`BREAKING CHANGE:` no rodapé (ou `!` após o tipo) gera major. O hook `commit-msg` valida localmente; o CI
-valida o **título do PR**, porque com squash merge é ele que vira o commit da `main`.
+`BREAKING CHANGE:` no rodapé (ou `!` após o tipo) gera major. O hook `commit-msg` valida localmente; o
+`pr:check` valida o **título do PR**, porque com squash merge é ele que vira o commit da `main`.
 
 ## Pull request
 
@@ -42,8 +43,11 @@ valida o **título do PR**, porque com squash merge é ele que vira o commit da 
 2. Título no formato Conventional Commits (vira o commit da `main`).
 3. Preencha o template: o que mudou, como testar, checklist de documentação (cada doc marcado ou "não se
    aplica: motivo").
-4. CI verde é obrigatório. Corrija em vez de pular (`--no-verify` é proibido e barrado pelo Claude Code).
-5. Merge por **squash**, apagando a branch.
+4. `npm run pr:check -- "<título do PR>"` verde é obrigatório antes de abrir e de mergear: check completo,
+   build, pacotes `.mcpb`, commitlint dos commits e do título. Corrija em vez de pular (`--no-verify` é
+   proibido e barrado pelo Claude Code).
+5. **Quem mergeia:** o Claude, com `pr:check` verde (decisão do dono, 2026-11-05).
+6. Merge por **squash**, apagando a branch.
 
 ## Definição de pronto
 
@@ -82,21 +86,22 @@ Versão oficial em um lugar só: `package.json` (`.release-please-manifest.json`
 release-please). O fluxo é da skill `/lancar-versao`:
 
 1. Commits convencionais chegam na `main` via PR.
-2. O workflow `release-please` abre/atualiza um **PR de release** com o bump de versão e o CHANGELOG gerado.
+2. A CLI local abre/atualiza um **PR de release** com o bump de versão e o CHANGELOG gerado:
+   `npx release-please release-pr --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`.
 3. Revisar o PR de release (e a seção "Não lançado" do CHANGELOG, que vira a versão).
-4. Mergear o PR de release — essa é a confirmação humana. O workflow cria a tag `vX.Y.Z` e um **rascunho**
-   de release no GitHub.
-5. Publicar o rascunho quando quiser. Segredos necessários a releases futuras estão comentados em
-   `.github/workflows/release-please.yml`.
+4. Mergear o PR de release — essa é a confirmação humana. Depois, a mesma CLI cria a tag `vX.Y.Z` e um
+   **rascunho** de release: `npx release-please github-release --draft --token "$(gh auth token)" --repo-url
+temponi-bernardo/claude-connectors`.
+5. Publicar o rascunho quando quiser, anexando os `.mcpb` de `dist/connectors/`.
 
 ## Segurança no fluxo
 
-- `gitleaks` roda no CI em todo PR e no `secrets:check` local (pre-push). Sem gitleaks instalado, o
-  `secrets:check` local falha; pule conscientemente com `SECRETS_CHECK=skip` (o CI ainda barra).
-- Dependabot semanal, agrupado; `dependency-review` bloqueia dependências com vulnerabilidade conhecida.
-- CodeQL em PRs, em push na `main` e semanalmente.
-- `dependency-review` e CodeQL só rodam em repositório público: em privado exigem GitHub Advanced
-  Security / Code Security, e os jobs são pulados (job pulado conta como aprovado na branch protection).
-- Branch protection configurada por `scripts/setup-github.sh`. Em repositório privado no plano gratuito o
-  GitHub não oferece branch protection: o script avisa, termina o resto e sai com código 1.
-- Actions fixadas por SHA do commit (com a versão em comentário); o Dependabot as atualiza.
+- `gitleaks` roda no `secrets:check` (dentro do `check`, do `pre-push` e do `pr:check`). Sem CI, ele é a única
+  barreira: sem gitleaks instalado o `secrets:check` falha (`winget install Gitleaks.Gitleaks`).
+- Dependabot semanal para npm, agrupado (gratuito, não usa minutos de Actions). PR do Dependabot passa pelo
+  mesmo `pr:check` antes do merge.
+- Sem CodeQL e sem `dependency-review` (exigiam Actions). Antes de adicionar dependência nova, confira
+  `npm audit` e a licença.
+- `scripts/setup-github.sh` desliga o Actions, deixa só squash merge e tenta a branch protection, que em
+  repositório privado no plano gratuito não é aplicada (exige GitHub Pro). Sem ela, os hooks locais
+  (`guard-bash`, `pre-push`) impedem push direto na `main`.
