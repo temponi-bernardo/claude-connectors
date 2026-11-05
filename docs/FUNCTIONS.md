@@ -29,7 +29,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
 - `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs)
-- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`handleAuthorizePage`](#handleauthorizepage), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
+- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`handleAuthorizePage`](#handleauthorizepage), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
 - `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage)
 - `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
@@ -2881,14 +2881,14 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `src/remote/handler.ts`
-- **Assinatura:** `htmlResponse(html: string, status = 200): Response`
+- **Assinatura:** `htmlResponse(html: string, status = 200, formTarget: string | null = null): Response`
 - **Usada por:** `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `loginPageFor()`
 - **Processos:** P08
 
 <!-- gerado:fim -->
 
 - **Faz:** Monta uma resposta HTML sem cache, com CSP restrita.
-- **Entrada:** `html`: página; `status`: padrão 200.
+- **Entrada:** `html`: página; `status`: padrão 200; `formTarget`: origem do retorno liberada no `form-action` (padrão `null`).
 - **Saída:** `Response`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
@@ -3094,6 +3094,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Faz:** Cria o handler HTTP do conector remoto.
 - **Entrada:** `app`: configuração OAuth, conector e relógio.
 - **Saída:** Função `(Request) => Promise<Response>`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pageSecurityPolicy`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `pageSecurityPolicy(formTarget: string | null): string`
+- **Usada por:** `htmlResponse()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a CSP das páginas HTML; o `form-action` inclui a origem do retorno do OAuth, porque o navegador aplica o `form-action` também ao 302 que segue o envio do formulário.
+- **Entrada:** `formTarget`: origem liberada para o envio (ex. `https://claude.ai`) ou `null`.
+- **Saída:** Texto do header `content-security-policy`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 

@@ -57,15 +57,24 @@ export function jsonResponse(data: unknown, status = 200): Response {
   });
 }
 
+/** CSP das páginas; o `form-action` inclui a origem do retorno, senão o navegador barra o 302 do envio. */
+export function pageSecurityPolicy(formTarget: string | null): string {
+  const formAction = formTarget ? `'self' ${formTarget}` : "'self'";
+  return `default-src 'none'; style-src 'unsafe-inline'; form-action ${formAction}; frame-ancestors 'none'`;
+}
+
 /** Resposta HTML com status, sem cache e sem ser exibida em frames de outros sites. */
-export function htmlResponse(html: string, status = 200): Response {
+export function htmlResponse(
+  html: string,
+  status = 200,
+  formTarget: string | null = null,
+): Response {
   return new Response(html, {
     status,
     headers: {
       'content-type': 'text/html; charset=utf-8',
       'cache-control': 'no-store',
-      'content-security-policy':
-        "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'",
+      'content-security-policy': pageSecurityPolicy(formTarget),
     },
   });
 }
@@ -98,6 +107,8 @@ export function loginPageFor(
       clientHost: new URL(request.redirectUri).host,
       error,
     }),
+    200,
+    new URL(request.redirectUri).origin,
   );
 }
 

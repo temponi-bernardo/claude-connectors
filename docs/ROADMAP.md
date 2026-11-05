@@ -41,7 +41,7 @@ O MVP é o conector do Canvas instalado como extensão e usado no dia a dia: **F
 | F2.4 | Avaliar a migração para zod 4 (Dependabot ignora majors do zod até lá) | ⬜     | Conector testado com zod 4 e regra de ignore removida, ou ADR dizendo por que não      |
 | F2.5 | Avaliar TypeScript 7 (Dependabot ignora majors do TS até lá)           | ⬜     | `npm run check` verde com TS 7 e regra de ignore removida, ou ADR dizendo por que não  |
 | F2.6 | Conector remoto do Canvas: HTTP + OAuth com token (ADR 0009)           | ✅     | `server/remote.js` faz o OAuth completo e responde as ferramentas; Dockerfile e Render |
-| F2.7 | Conector remoto no Cloudflare Workers e conectado no claude.ai         | 🟨     | Worker no ar e `proximas_entregas` respondendo numa sessão do Cowork (ADR 0010)        |
+| F2.7 | Conector remoto no Cloudflare Workers e conectado no claude.ai         | ✅     | Worker no ar e `proximas_entregas` respondendo numa sessão do Cowork (ADR 0010)        |
 
 ## Fases seguintes
 
