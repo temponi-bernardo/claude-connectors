@@ -1,5 +1,5 @@
 {
-  "sourceDirs": ["src", "tools"],
+  "sourceDirs": ["src", "tools", "connectors"],
   "ignore": ["**/fixtures/**"],
   "testSuffix": ".test.ts",
   "testExceptionsFile": "src/test-exceptions.ts",

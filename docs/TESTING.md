@@ -17,7 +17,7 @@ conduz o ciclo.
   bordas e erros.
 - Cobertura mínima **90%** (linhas, funções, ramos, statements) em `src/**` e `tools/**`, medida por
   `npm run test:coverage`. Pontos de entrada (`main.ts`, `cli.ts`) e fixtures ficam fora da medição.
-- Teste fica ao lado do código: `slug.ts` → `slug.test.ts`.
+- Teste fica ao lado do código: `client.ts` → `client.test.ts`.
 - Funções puras: testes de tabela (entrada → saída), sem mocks.
 - Funções com efeito: use um diretório temporário real (`mkdtempSync`) em vez de mockar `fs`; limpe no
   `afterAll`. Mocks só para rede e relógio.
@@ -38,9 +38,9 @@ por lint, jscpd e `docs:check`). Prefira fixtures pequenas inline.
 
 ## Comandos
 
-| Comando                                  | Faz                                            |
-| ---------------------------------------- | ---------------------------------------------- |
-| `npm test`                               | Roda tudo uma vez                              |
-| `npm run test:watch`                     | Modo interativo                                |
-| `npm run test:coverage`                  | Com cobertura e thresholds (é o que o CI roda) |
-| `npx vitest run caminho/arquivo.test.ts` | Um arquivo                                     |
+| Comando                                  | Faz                                                 |
+| ---------------------------------------- | --------------------------------------------------- |
+| `npm test`                               | Roda tudo uma vez                                   |
+| `npm run test:watch`                     | Modo interativo                                     |
+| `npm run test:coverage`                  | Com cobertura e thresholds (é o que o `check` roda) |
+| `npx vitest run caminho/arquivo.test.ts` | Um arquivo                                          |

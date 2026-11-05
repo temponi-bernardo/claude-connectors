@@ -23,10 +23,10 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
 6. **`npm run check`** até ficar verde. Não use `--no-verify`; corrija a causa.
 7. **Commits** pequenos no formato Conventional Commits com descrição em português.
 8. **PR:** `gh pr create` com título convencional, corpo pelo template (`.github/PULL_REQUEST_TEMPLATE.md`),
-   checklist de documentação preenchido item a item. Acompanhe o CI (`gh pr checks --watch`); corrija até
-   ficar verde; responda comentários.
-9. **Merge:** se `docs/WORKFLOW.md` autoriza o Claude a mergear com CI verde, `gh pr merge --squash
---delete-branch`; senão, avise que o PR está pronto e pare.
+   checklist de documentação preenchido item a item. Antes, rode `npm run pr:check -- "<título do PR>"`
+   (não há CI, ADR 0006); corrija até ficar verde; responda comentários.
+9. **Merge:** o Claude mergeia com `pr:check` verde (`docs/WORKFLOW.md`). Rode o `pr:check` de novo na
+   branch final e então `gh pr merge --squash --delete-branch`.
 10. **Feche a tarefa:** ✅ no ROADMAP, "Próxima tarefa" atualizada, entrada no CHANGELOG se visível ao
     usuário. Isso pode ir no mesmo PR (preferido) ou em um PR `docs(docs): ...` imediato.
 11. **`/melhorar-skills`**: algo se repetiu ou mudou? Atualize a skill no mesmo PR.

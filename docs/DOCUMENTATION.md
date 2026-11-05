@@ -140,4 +140,4 @@ marca o antigo como "Substituído por NNNN".
 | Hook `Stop` (handoff)      | Bloqueia o encerramento se há commit seu novo sem `docs/STATE.md` atualizado                          |
 | Hook `SessionStart`        | Injeta `docs/STATE.md` e a próxima tarefa do roadmap no início de toda sessão                         |
 | Hook `PreCompact`          | Gera handoff automático em `docs/STATE.md` via `claude -p` antes de compactar a conversa              |
-| Hook `pre-push` e CI       | Rodam `npm run check`, que inclui `docs:check`                                                        |
+| Hook `pre-push`/`pr:check` | Rodam `npm run check`, que inclui `docs:check`                                                        |

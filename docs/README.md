@@ -25,24 +25,24 @@ deve encontrar tudo aqui, sem varrer o código. Quando docs e código divergem, 
 
 ## Quem confere o quê
 
-| Regra                                                                     | Máquina (comando)                             | Checklist do PR                                 |
-| ------------------------------------------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
-| Toda função documentada em FUNCTIONS.md, no módulo certo                  | `docs:check`                                  | —                                               |
-| Blocos gerados (Arquivo, Assinatura, Usada por, Processos) em dia         | `docs:check` (`docs:generate` corrige)        | —                                               |
-| Campos manuais preenchidos (Faz, Entrada, Saída, Efeitos, Erros)          | `docs:check` (detecta só o marcador)          | Conteúdo correto e útil                         |
-| Nomes de função únicos no repositório                                     | `docs:check`                                  | —                                               |
-| Função citada em PROCESSES.md existe                                      | `docs:check`                                  | Passos do processo refletem o código            |
-| Toda pasta versionada em STRUCTURE.md                                     | `docs:check`                                  | Descrição da pasta faz sentido                  |
-| Todo componente de UI em UI.md                                            | `docs:check` (se `uiDir` configurado)         | Estados e variantes documentados                |
-| Toda função tem teste (ou exceção justificada)                            | `docs:check`                                  | Teste cobre o comportamento, não só o nome      |
-| Constante exportada na tabela "Dados e constantes"                        | `docs:check`                                  | —                                               |
-| Cobertura mínima de 90%                                                   | `test:coverage`                               | —                                               |
-| Nenhuma duplicação                                                        | `dup:check` (jscpd)                           | Lógica parecida sem ser idêntica foi unificada? |
-| Funções ≤ 25 linhas, ≤ 3 parâmetros, complexidade ≤ 8, `function` no topo | `lint` (ESLint)                               | Função faz um único trabalho?                   |
-| Tipos estritos                                                            | `typecheck`                                   | —                                               |
-| Formatação                                                                | `format` (Prettier)                           | —                                               |
-| Segredos                                                                  | `secrets:check` (gitleaks, obrigatório no CI) | —                                               |
-| Conventional Commits                                                      | hook `commit-msg` e título do PR no CI        | Escopo certo?                                   |
-| Nada direto na `main`                                                     | Branch protection no GitHub                   | —                                               |
-| ROADMAP, CHANGELOG, PRODUCT, ARCHITECTURE, ADRs atualizados               | —                                             | Checklist do template de PR                     |
-| Skills atualizadas                                                        | —                                             | Checklist do template de PR                     |
+| Regra                                                                     | Máquina (comando)                        | Checklist do PR                                 |
+| ------------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------- |
+| Toda função documentada em FUNCTIONS.md, no módulo certo                  | `docs:check`                             | —                                               |
+| Blocos gerados (Arquivo, Assinatura, Usada por, Processos) em dia         | `docs:check` (`docs:generate` corrige)   | —                                               |
+| Campos manuais preenchidos (Faz, Entrada, Saída, Efeitos, Erros)          | `docs:check` (detecta só o marcador)     | Conteúdo correto e útil                         |
+| Nomes de função únicos no repositório                                     | `docs:check`                             | —                                               |
+| Função citada em PROCESSES.md existe                                      | `docs:check`                             | Passos do processo refletem o código            |
+| Toda pasta versionada em STRUCTURE.md                                     | `docs:check`                             | Descrição da pasta faz sentido                  |
+| Todo componente de UI em UI.md                                            | `docs:check` (se `uiDir` configurado)    | Estados e variantes documentados                |
+| Toda função tem teste (ou exceção justificada)                            | `docs:check`                             | Teste cobre o comportamento, não só o nome      |
+| Constante exportada na tabela "Dados e constantes"                        | `docs:check`                             | —                                               |
+| Cobertura mínima de 90%                                                   | `test:coverage`                          | —                                               |
+| Nenhuma duplicação                                                        | `dup:check` (jscpd)                      | Lógica parecida sem ser idêntica foi unificada? |
+| Funções ≤ 25 linhas, ≤ 3 parâmetros, complexidade ≤ 8, `function` no topo | `lint` (ESLint)                          | Função faz um único trabalho?                   |
+| Tipos estritos                                                            | `typecheck`                              | —                                               |
+| Formatação                                                                | `format` (Prettier)                      | —                                               |
+| Segredos                                                                  | `secrets:check` (gitleaks, obrigatório)  | —                                               |
+| Conventional Commits                                                      | hook `commit-msg` e título no `pr:check` | Escopo certo?                                   |
+| Nada direto na `main`                                                     | Branch protection no GitHub              | —                                               |
+| ROADMAP, CHANGELOG, PRODUCT, ARCHITECTURE, ADRs atualizados               | —                                        | Checklist do template de PR                     |
+| Skills atualizadas                                                        | —                                        | Checklist do template de PR                     |

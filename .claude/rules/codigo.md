@@ -2,6 +2,7 @@
 paths:
   - 'src/**/*.ts'
   - 'tools/**/*.ts'
+  - 'connectors/**/*.ts'
 ---
 
 # Ao editar código

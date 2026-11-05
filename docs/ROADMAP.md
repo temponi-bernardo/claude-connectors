@@ -2,7 +2,7 @@
 
 ## Próxima tarefa
 
-**F1.1 — Definir o produto em PRODUCT.md** (responder às perguntas abertas e registrar as decisões com data).
+**F2.1 — Primeira release `v0.1.0`** com o `canvas-puc-1.2.0.mcpb` anexado (skill `/lancar-versao`).
 
 ## Como ler
 
@@ -12,33 +12,33 @@ a "Próxima tarefa". Formato das linhas: [DOCUMENTATION.md](DOCUMENTATION.md#est
 
 ## MVP
 
-O MVP é o menor conjunto de fases que entrega valor real a um usuário: **Fases 1 e 2**. Fases seguintes são
-evolução.
+O MVP é o conector do Canvas instalado como extensão e usado no dia a dia: **Fases 1 e 2**.
 
 ## Fase 0 — Fundação (template) ✅
 
-| Id   | Tarefa                                                                             | Estado | Pronto quando                                                     |
-| ---- | ---------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------- |
-| F0.1 | Estrutura, docs, checagens, hooks, CI e skills                                     | ✅     | `npm run check` passa do zero em um clone limpo                   |
-| F0.2 | Esqueleto que roda com lógica pura testada                                         | ✅     | `npm start -- Olá Mundo` imprime `ola-mundo`                      |
-| F0.3 | Travas provadas (função sem doc, pasta sem doc, duplicação, commit fora do padrão) | ✅     | Cada violação barrada e desfeita, registrada no PR/commit inicial |
+| Id   | Tarefa                                                                 | Estado | Pronto quando                                                     |
+| ---- | ---------------------------------------------------------------------- | ------ | ----------------------------------------------------------------- |
+| F0.1 | Estrutura, docs, checagens, hooks e skills (do `template-new-project`) | ✅     | `npm run check` passa do zero em um clone limpo                   |
+| F0.2 | CI local no lugar do GitHub Actions (`pr:check`, ADR 0006)             | ✅     | Actions desligado; `npm run pr:check` cobre o que o CI cobria     |
+| F0.3 | Adaptar o template ao projeto (`/novo-projeto`)                        | ✅     | Sem marcadores; PRODUCT, ROADMAP, ARCHITECTURE refletem o projeto |
 
-## Fase 1 — Definição do produto
+## Fase 1 — Estrutura de conectores e Canvas
 
-| Id   | Tarefa                                               | Estado | Pronto quando                                                |
-| ---- | ---------------------------------------------------- | ------ | ------------------------------------------------------------ |
-| F1.1 | Definir o produto em PRODUCT.md                      | ⬜     | Nenhuma pergunta aberta sem decisão datada                   |
-| F1.2 | Escolher a stack definitiva e registrar ADR          | ⬜     | ADR aceito em `docs/adr/` e ARCHITECTURE.md atualizado       |
-| F1.3 | Definir se há interface e configurar `uiDir` + UI.md | ⬜     | `docs:check` cobra componentes, ou UI.md diz "sem interface" |
-| F1.4 | Modelar as camadas em ARCHITECTURE.md                | ⬜     | Tabela de dependências permitidas completa                   |
+| Id   | Tarefa                                                                    | Estado | Pronto quando                                                       |
+| ---- | ------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------- |
+| F1.1 | Código compartilhado (`src/core`, `src/mcp`) e empacotador (`tools/pack`) | ✅     | `npm run pack:all` gera `.mcpb` válidos                             |
+| F1.2 | Portar o conector do Canvas para TypeScript, com testes e docs            | ✅     | 19 ferramentas; pacote extraído responde com a sessão real          |
+| F1.3 | Login pelo navegador com renovação silenciosa (ADR 0007)                  | ✅     | Sessão renovada sem janela; janela só quando a Microsoft pede senha |
 
-## Fase 2 — Primeiro fluxo de valor
+## Fase 2 — Uso real
 
-| Id   | Tarefa                                               | Estado | Pronto quando                                       |
-| ---- | ---------------------------------------------------- | ------ | --------------------------------------------------- |
-| F2.1 | Implementar o processo principal (P05) ponta a ponta | ⬜     | PROCESSES.md descreve o fluxo e ele roda com testes |
-| F2.2 | Primeira release `v0.1.0`                            | ⬜     | Rascunho de release publicado pelo release-please   |
+| Id   | Tarefa                                                                   | Estado | Pronto quando                                                       |
+| ---- | ------------------------------------------------------------------------ | ------ | ------------------------------------------------------------------- |
+| F2.1 | Primeira release `v0.1.0` com o `.mcpb` anexado                          | ⬜     | Rascunho de release com `canvas-puc-1.2.0.mcpb`                     |
+| F2.2 | Instalar a extensão no Claude Desktop e aposentar `Documents/canvas-mcp` | ⬜     | Extensão ativa; registro antigo no Claude Code trocado pelo do repo |
+| F2.3 | Escolher e esboçar o próximo conector (PRODUCT Q4)                       | ⬜     | Pergunta Q4 decidida e tarefas da Fase 3 escritas                   |
 
 ## Fases seguintes
 
-Adicione fases conforme o PRODUCT.md evoluir. Não planeje mais de duas fases à frente em detalhe.
+Um conector novo por fase, seguindo o molde de `connectors/canvas-puc/`. Não planeje mais de duas fases à
+frente em detalhe.

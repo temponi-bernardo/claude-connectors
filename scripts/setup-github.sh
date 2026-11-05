@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # Configura o repositório no GitHub depois do primeiro push:
 #   bash scripts/setup-github.sh <owner>/<repo> [--template]
-# - branch protection da main (PR + CI verdes obrigatórios, sem force push/delete, conversas resolvidas)
+# - branch protection da main (sem force push/delete, histórico linear). Sem status checks obrigatórios:
+#   não há CI (ADR 0006); o portão é o `npm run pr:check` local.
+# - GitHub Actions desligado (nenhum custo de minutos)
 # - squash merge como único modo, apagar branch após merge
 # - alertas de vulnerabilidade, Dependabot security updates, relatório privado de vulnerabilidades
 # - --template marca o repositório como template
@@ -10,10 +12,13 @@ set -euo pipefail
 repo="${1:?uso: setup-github.sh <owner>/<repo> [--template]}"
 template_flag="${2:-}"
 
+echo "→ GitHub Actions: desligado (ADR 0006)"
+gh api -X PUT "repos/$repo/actions/permissions" -F enabled=false >/dev/null
+
 echo "→ merges: só squash, apagar branch, atualizar branch sugerido"
 gh repo edit "$repo" \
   --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false \
-  --delete-branch-on-merge --enable-auto-merge \
+  --delete-branch-on-merge \
   --allow-update-branch >/dev/null
 
 echo "→ segurança: alertas, Dependabot security updates, relatório privado"
@@ -28,16 +33,7 @@ if ! gh api -X PUT "repos/$repo/branches/main/protection" \
   -H "Accept: application/vnd.github+json" \
   --input - <<'JSON' >/dev/null
 {
-  "required_status_checks": {
-    "strict": true,
-    "contexts": [
-      "check (lint, tipos, testes, docs, duplicação)",
-      "mensagens de commit (Conventional Commits)",
-      "título do PR (vira o commit da main no squash)",
-      "segredos (gitleaks)",
-      "dependências novas (vulnerabilidades e licenças)"
-    ]
-  },
+  "required_status_checks": null,
   "enforce_admins": false,
   "required_pull_request_reviews": null,
   "restrictions": null,

@@ -20,7 +20,7 @@
   ],
   "packages": {
     ".": {
-      "package-name": "{{PROJECT_NAME}}"
+      "package-name": "claude-connectors"
     }
   }
 }

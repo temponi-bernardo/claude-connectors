@@ -8,8 +8,11 @@ por `npm run docs:generate` a partir do código.
 
 **Campos manuais** — Faz, Entrada, Saída, Efeitos e Erros de cada função em FUNCTIONS.md; escritos à mão.
 
-**Check** — `npm run check`: tudo o que o CI roda (formato, lint, tipos, testes com cobertura, docs,
-duplicação, segredos).
+**Check** — `npm run check`: formato, lint, tipos, testes com cobertura, docs, duplicação e segredos. O
+portão completo de PR é o `pr:check` (não há CI, ADR 0006).
+
+**Conector** — Servidor MCP de um serviço externo (ex.: Canvas), numa pasta de `connectors/`, com
+manifesto `.mcpb` e ferramentas para o Claude.
 
 **Core** — Camada de lógica pura (`src/core/`): decide, não faz.
 
@@ -19,7 +22,8 @@ duplicação, segredos).
 
 **docs:check** — Verificador que falha quando documentação e código divergem.
 
-**Esqueleto** — Código mínimo que roda (`npm start`) e prova que a estrutura funciona.
+**Extensão `.mcpb`** — Pacote instalável no Claude Desktop (Configurações → Extensões) com o servidor MCP
+de um conector, gerado por `npm run pack`.
 
 **Exceção de teste** — Entrada em `src/test-exceptions.ts` que isenta uma função de teste automatizado,
 com motivo e teste manual.
@@ -37,11 +41,17 @@ com motivo e teste manual.
 
 **Registro de funções** — Lista de funções de topo (`function nome`) encontradas no código.
 
-**Release-please** — Ação do GitHub que gera PR de release, versão e changelog a partir dos commits.
+**pr:check** — `npm run pr:check -- "<título>"`: o portão local de PR que substitui o CI (check, build,
+pacotes `.mcpb`, commitlint dos commits e do título).
+
+**Release-please** — Ferramenta que gera PR de release, versão e changelog a partir dos commits; aqui roda pela CLI local.
 
 **Skill** — Procedimento reutilizável do Claude Code em `.claude/skills/<nome>/SKILL.md`, invocado como
 `/nome`.
 
 **Squash merge** — Merge que condensa a branch em um commit na `main`; o título do PR vira a mensagem.
 
-**Template** — Este repositório, base para projetos novos via `/novo-projeto`.
+**Sessão do Canvas** — Cookies do login feito pelo navegador, salvos em `~/.canvas-puc/session.json` e
+renovados sozinhos quando expiram.
+
+**Template** — `template-new-project`, repositório de origem desta estrutura (docs, checagens, skills).

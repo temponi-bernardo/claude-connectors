@@ -8,7 +8,7 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 
 ## P01 — Checar a documentação (`npm run docs:check`)
 
-- **Gatilho:** `npm run docs:check`, o `npm run check`, o hook `pre-push`, o CI e o hook `Stop` do Claude Code.
+- **Gatilho:** `npm run docs:check`, o `npm run check`, o hook `pre-push`, o `pr:check` e o hook `Stop` do Claude Code.
 - **Passos:**
   1. `runDocsCli()` lê o comando (`check` por padrão) e chama `runCheck()`.
   2. `runCheck()` carrega a configuração com `loadDocsConfig()`, monta o inventário com `buildInventory()`
@@ -35,30 +35,57 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
   (ou o Claude) preencher — o P01 cobra isso.
 - **Falhas:** as mesmas do P01.
 
-## P03 — Inicializar um projeto a partir do template (`npm run init`)
+## P03 — Responder a uma ferramenta do Canvas (chamada do Claude)
 
-- **Gatilho:** `npm run init -- --name <nome> --description <descrição> --owner <conta-github>`, primeiro
-  passo da skill `/novo-projeto`.
+- **Gatilho:** o Claude chama uma ferramenta do conector `canvas-puc` (ex.: `proximas_entregas`).
 - **Passos:**
-  1. `runInitCli()` chama `parseInitArgs()`, que valida os argumentos e normaliza o nome com `slugify()`.
-  2. `initProject()` percorre `TEMPLATE_FILES` e, em cada um, `initFile()` substitui os marcadores
-     `{{PROJECT_NAME}}`, `{{PROJECT_DESCRIPTION}}`, `{{GITHUB_OWNER}}` e `{{YEAR}}` via
-     `replacePlaceholders()`.
-  3. Em cada arquivo de `PACKAGE_FILES`, `rewriteFile()` aplica `applyPackageValues()` (nome do pacote e
-     descrição no `package.json` e no `package-lock.json`).
-  4. `rewriteFile()` aplica `resetChangelog()` ao `CHANGELOG.md`, esvaziando o histórico do template em
-     "Não lançado".
-- **Resultado:** lista dos arquivos alterados; o repositório deixa de ter marcadores e nome do template.
-  Depois de usado, o init pode ser apagado (passo final da skill `/novo-projeto`).
-- **Falhas:** argumento ausente ou fora do formato `--chave valor` encerra com código 1 e mensagem clara.
+  1. Na subida, `startCanvasServer()` lê a configuração com `readCanvasConfig()`, cria a autenticação com
+     `createAuthProvider()` e o cliente com `createCanvasClient()`, escolhe as ferramentas com `canvasTools()`
+     e as registra com `registerToolSpecs()`.
+  2. A chamada passa por `runToolSafely()`; a `ToolSpec` criada por `defineTool()` valida os argumentos.
+  3. A ferramenta usa o cliente: `requestWithRenewal()` monta a requisição com `sendCanvasRequest()`
+     (`buildUrl()` + `authHeaders()`); listagens seguem as páginas com `collectPages()` e `parseNextLink()`.
+     Apoios como `activeCourses()`, `fetchOwnSubmission()` e `getAllOrEmpty()` compõem buscas.
+  4. As respostas viram objetos enxutos em português (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
+     etc.), com HTML convertido por `htmlToText()`.
+  5. `textResult()` devolve o JSON ao Claude; qualquer erro vira `errorResult()` com a mensagem.
+- **Resultado:** o Claude recebe só os campos úteis, com links absolutos e textos limpos.
+- **Falhas:** status ≠ 2xx vira erro com status e corpo; argumentos inválidos são recusados pelo zod.
 
-## P04 — Esqueleto executável (`npm start`)
+## P04 — Conectar e renovar a sessão do Canvas (login pelo navegador)
 
-- **Gatilho:** `npm start -- <título>`.
+- **Gatilho:** ferramenta `conectar_canvas`, ou um 401 (ou ausência de credencial) em qualquer requisição.
 - **Passos:**
-  1. `main()` junta os argumentos em um título (ou usa um exemplo) e chama `slugify()`.
-  2. `slugify()` normaliza o texto com `removeDiacritics()`, troca o que não é letra/dígito por hífen e
-     limita o tamanho a `MAX_SLUG_LENGTH`.
-- **Resultado:** slug impresso no terminal. Serve de prova de que o esqueleto roda e de exemplo de lógica pura
-  separada de efeito (decidir em `slugify()`, fazer em `main()`).
-- **Falhas:** nenhuma prevista; entrada sem caracteres válidos produz slug vazio.
+  1. Ao subir, `createAuthProvider()` carrega a sessão salva com `loadSession()` (`isCanvasSession()` valida
+     a forma) e `pickAuth()` escolhe sessão, token ou nenhuma.
+  2. Em 401, `requestWithRenewal()` chama `renewOnce()`, que roda uma única `renewAuth()` por vez.
+  3. `renewAuth()` tenta `loginAndStore()` em modo silencioso: `browserLogin()` abre o perfil com
+     `launchLoginBrowser()` oculto e `waitForCanvasLogin()` espera `pageHasCanvasSession()`, clicando o botão
+     da instituição com `clickInstitutionButton()` quando `isLoginChooserUrl()` reconhece a tela de escolha.
+  4. Se o silencioso falhar, usa o token reserva (se houver) ou repete o login com janela visível.
+  5. `saveSession()` grava os cookies; `cookieHeader()` e `csrfToken()` montam os headers das próximas chamadas.
+  6. `desconectar_canvas` apaga a sessão com `clearSession()`.
+- **Resultado:** a requisição original é repetida com a sessão nova, sem o usuário ver janela na maioria dos casos.
+- **Falhas:** janela fechada ou tempo esgotado → `unauthorizedMessage()` orienta a usar `conectar_canvas`.
+
+## P05 — Empacotar conectores (`npm run pack` / `npm run pack:all`)
+
+- **Gatilho:** `npm run pack -- <conector>`, `npm run pack:all` ou o `pr:check`.
+- **Passos:**
+  1. `runPackCli()` escolhe os conectores; com `--all`, `listConnectors()` acha as pastas com `manifest.json`.
+  2. `packConnector()` lê nome e versão com `readManifestIdentity()` e une o código com o esbuild usando
+     `bundleOptions()`.
+  3. `runtimePackageJson()` grava só as dependências externas, com as versões de `installedExternalVersions()`.
+  4. `runNodeBin()` roda `npm install --omit=dev` na pasta de staging e `mcpb pack`.
+- **Resultado:** `dist/connectors/<nome>-<versão>.mcpb`, pronto para instalar no Claude Desktop.
+- **Falhas:** manifesto sem nome/versão ou dependência externa não instalada interrompem com erro.
+
+## P06 — Portão de PR local (`npm run pr:check`)
+
+- **Gatilho:** antes de abrir e antes de mergear um PR (não há CI, ADR 0006).
+- **Passos:**
+  1. `scripts/pr-check.sh` exige o título do PR e roda `npm run check` (inclui o P01 via `runDocsCli()`).
+  2. Roda o P05 (`npm run pack:all`) para garantir que todos os conectores empacotam.
+  3. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
+- **Resultado:** `✔ pr:check verde`, condição para o Claude mergear com squash.
+- **Falhas:** qualquer etapa com erro para o script com código ≠ 0.
