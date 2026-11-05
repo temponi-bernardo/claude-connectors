@@ -45,8 +45,8 @@ personalizado. Ele não usa o navegador: você autoriza colando um **token de ac
 
 **1. Publicar no Cloudflare Workers (plano grátis, [ADR 0010](../../docs/adr/0010-conector-remoto-no-cloudflare-workers.md)):**
 
-1. Na Cloudflare, crie um token de API com o modelo **"Edit Cloudflare Workers"** e deixe-o na variável
-   `CLOUDFLARE_API_TOKEN` (no PC, ou nas configurações do ambiente da nuvem do Claude Code).
+1. Autentique o `wrangler`: no PC, `npx wrangler login`; na nuvem do Claude Code, um token de API com o modelo
+   **"Edit Cloudflare Workers"** na variável `CLOUDFLARE_API_TOKEN` das configurações do ambiente.
 2. Uma vez só, grave a chave dos selos como secret do Worker:
 
    ```bash
@@ -66,10 +66,11 @@ Para testar local antes: `npm run worker:dev` (precisa de `SEAL_KEY`, ex.: `--va
 
 **2. Conectar no Claude:**
 
-1. No claude.ai: **Configurações → Conectores → Adicionar conector personalizado**, com a URL
-   `https://<seu-endereço>/mcp`.
-2. Clique em **Conectar**. Abre a página "Conectar o Canvas ao Claude".
-3. No Canvas, **Conta → Configurações → Novo token de acesso**, copie o token e cole na página.
+1. No claude.ai: **Personalizar → Conectores → Adicionar → Adicionar conector personalizado**, com a URL
+   `https://<seu-endereço>/mcp` (deixe a autenticação OAuth e o registro automático detectados).
+2. Clique em **Vincular**. Abre a página "Conectar o Canvas ao Claude".
+3. No Canvas, **Conta → Configurações → Novo token de acesso**, copie o token, cole na página e clique em
+   **Conectar**. A aba volta para o claude.ai com o conector vinculado.
 4. O conector fica disponível na web, no Cowork e no app do celular.
 
 O token da PUC vale 30 dias. Quando vencer, as ferramentas avisam: gere outro e reconecte o conector.
@@ -96,6 +97,14 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://seu-dominio -e SEAL_KEY=<32 bytes 
 Segurança: o token do Canvas nunca é gravado no servidor; ele só viaja cifrado dentro dos tokens OAuth.
 Qualquer pessoa com um token válido do Canvas pode usar o seu servidor, mas só acessa a própria conta.
 No modo remoto não existem `conectar_canvas` nem `desconectar_canvas`.
+
+**Problemas comuns:**
+
+| Sintoma                                     | Causa e solução                                                                                       |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| "O Canvas respondeu 403" na página          | Chamada sem `User-Agent`; o Worker manda `CANVAS_USER_AGENT` desde o PR #13. Publique a versão atual. |
+| **Conectar** não faz nada com token válido  | CSP barrando o 302 para o claude.ai; corrigido no PR #14 (`pageSecurityPolicy()`). Publique de novo.  |
+| "Configuração do Worker inválida: SEAL_KEY" | Secret ausente ou ainda propagando logo após o `secret put`; espere alguns segundos.                  |
 
 ## Ferramentas
 
