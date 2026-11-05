@@ -4,7 +4,7 @@
  * Claude Code) e gera `dist/connectors/<nome>-<versão>.mcpb` (Claude Desktop → Extensões).
  */
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { build } from 'esbuild';
 import {
@@ -12,6 +12,8 @@ import {
   CONNECTORS_DIR,
   CONNECTOR_ENTRY,
   PACK_OUT_DIR,
+  REMOTE_BUNDLE_PATH,
+  REMOTE_ENTRY,
   RUNTIME_EXTERNALS,
   RUNTIME_FILES,
   bundleOptions,
@@ -54,6 +56,9 @@ async function buildConnectorRuntime(root: string, name: string): Promise<void> 
   const dir = join(root, CONNECTORS_DIR, name);
   const identity = readManifestIdentity(join(dir, 'manifest.json'));
   await build(bundleOptions(join(dir, CONNECTOR_ENTRY), join(dir, BUNDLE_PATH)));
+  if (existsSync(join(dir, REMOTE_ENTRY))) {
+    await build(bundleOptions(join(dir, REMOTE_ENTRY), join(dir, REMOTE_BUNDLE_PATH)));
+  }
   writeJson(
     join(dir, 'package.json'),
     runtimePackageJson(identity, installedExternalVersions(root)),

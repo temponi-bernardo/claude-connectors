@@ -13,8 +13,9 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 │   └── canvas-puc/   # Canvas LMS da PUC Minas (plugin + manifest .mcpb + src/ + server/ gerado)
 ├── docs/             # Documentação — fonte da verdade
 ├── scripts/          # Scripts de shell auxiliares (GitHub, segredos, pr:check)
-├── src/              # Código compartilhado entre conectores (core puro + mcp)
-└── tools/            # Ferramentas internas do repositório (docs, hooks, pack)
+├── src/              # Código compartilhado entre conectores (core puro, mcp, remote)
+├── tools/            # Ferramentas internas do repositório (docs, hooks, pack)
+└── render.yaml       # Blueprint do Render para o conector Canvas remoto (ADR 0009)
 ```
 
 ## Pastas
@@ -37,17 +38,18 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 | `.github/`                              | Configuração do GitHub (sem workflows: CI é local, ADR 0006)                 | `dependabot.yml`, `PULL_REQUEST_TEMPLATE.md`, `CODEOWNERS`   |
 | `.github/ISSUE_TEMPLATE/`               | Formulários de issue                                                         | `bug.yml`, `ideia.yml`, `config.yml`                         |
 | `connectors/`                           | Conectores MCP, um por pasta; `npm run pack:all` empacota todos              | `*/manifest.json`                                            |
-| `connectors/canvas-puc/`                | Conector do Canvas: plugin do Claude Code, manifesto `.mcpb`, runtime e guia | `.mcp.json`, `manifest.json`, `package.json`, `README.md`    |
+| `connectors/canvas-puc/`                | Conector do Canvas: plugin do Claude Code, manifesto `.mcpb`, runtime e guia | `.mcp.json`, `manifest.json`, `Dockerfile`, `README.md`      |
 | `connectors/canvas-puc/.claude-plugin/` | Manifesto do plugin, com os campos de configuração (`userConfig`)            | `plugin.json`                                                |
-| `connectors/canvas-puc/server/`         | Bundle gerado por `npm run pack` (versionado; não editar à mão)              | `index.js`                                                   |
-| `connectors/canvas-puc/src/`            | Código do conector: config, sessão, auth, cliente, formatação, tools         | `main.ts`, `tools-read.ts`, `client.ts`, `auth.ts`           |
+| `connectors/canvas-puc/server/`         | Bundles gerados por `npm run pack` (versionados; não editar à mão)           | `index.js` (stdio), `remote.js` (HTTP)                       |
+| `connectors/canvas-puc/src/`            | Código do conector: config, sessão, auth, cliente, formatação, tools, remoto | `main.ts`, `remote-main.ts`, `remote.ts`, `client.ts`        |
 | `connectors/canvas-puc/src/fixtures/`   | Contexto falso (cliente e auth simulados) para os testes das ferramentas     | `fake-context.ts`                                            |
 | `docs/`                                 | Documentação do projeto (índice em `README.md`)                              | `FUNCTIONS.md`, `PROCESSES.md`, `ROADMAP.md`                 |
 | `docs/adr/`                             | Registros de decisão de arquitetura                                          | `README.md`, `0000-modelo.md`                                |
 | `scripts/`                              | Scripts de shell                                                             | `setup-github.sh`, `secrets-check.sh`, `pr-check.sh`         |
 | `src/`                                  | Código compartilhado entre conectores e lista de exceções de teste           | `test-exceptions.ts`                                         |
-| `src/core/`                             | Lógica pura compartilhada, sem efeitos (HTML → texto, URL, paginação)        | `html.ts`, `http.ts`                                         |
+| `src/core/`                             | Lógica pura compartilhada, sem efeitos (HTML → texto, URL, paginação, env)   | `html.ts`, `http.ts`, `env.ts`                               |
 | `src/mcp/`                              | Definição e registro de ferramentas MCP, usados por todos os conectores      | `tools.ts`                                                   |
+| `src/remote/`                           | Servidor remoto genérico: OAuth sem estado, página de login, `/mcp` por HTTP | `handler.ts`, `oauth.ts`, `tokens.ts`, `node-server.ts`      |
 | `tools/`                                | Ferramentas internas do repositório                                          | —                                                            |
 | `tools/docs/`                           | Verificador e gerador de documentação (`docs:check`, `docs:generate`)        | `cli.ts`, `run.ts`, `checks.ts`, `ast.ts`                    |
 | `tools/hooks/`                          | Testes dos hooks do Claude Code que vivem em `.claude/hooks/`                | `guard-bash.test.ts`, `stop-handoff.test.ts`                 |
@@ -59,6 +61,7 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 | Quero adicionar...                        | Vai em...                                              | E documento em...                                 |
 | ----------------------------------------- | ------------------------------------------------------ | ------------------------------------------------- |
 | Conector novo                             | `connectors/<nome>/` (`manifest.json` + `src/main.ts`) | STRUCTURE.md, FUNCTIONS.md, PROCESSES.md, ROADMAP |
+| Modo remoto de um conector (HTTP + OAuth) | `connectors/<nome>/src/remote-main.ts` + `src/remote/` | ARCHITECTURE.md, PROCESSES.md (P08–P09), README   |
 | Lógica pura usada por mais de um conector | `src/core/`                                            | FUNCTIONS.md, PROCESSES.md se for um fluxo novo   |
 | Efeito (IO, rede, banco, terminal)        | `src/<camada>/` conforme ARCHITECTURE.md               | FUNCTIONS.md (campo Efeitos)                      |
 | Componente de UI                          | pasta `uiDir` de `docs.config.json`                    | UI.md                                             |

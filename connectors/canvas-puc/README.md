@@ -37,6 +37,54 @@ janela sozinha). Uma janela do Chrome abre, num perfil só do conector:
 | `CANVAS_LOGIN_BUTTON` | `pucminas.edu.br`                  | Texto do botão da instituição na tela de login                  |
 | `CANVAS_DATA_DIR`     | `~/.canvas-puc`                    | Onde ficam a sessão e o perfil do navegador                     |
 
+## Conector remoto (claude.ai, Cowork e celular)
+
+O plugin e a `.mcpb` rodam no seu computador. Para usar o Canvas nas sessões na nuvem, hospede o servidor
+remoto (`server/remote.js`, [ADR 0009](../../docs/adr/0009-conector-remoto-http-oauth.md)) e adicione-o como
+conector personalizado. Ele não usa o navegador: você autoriza colando um **token de acesso** do Canvas.
+
+**1. Hospedar no Render (plano grátis):**
+
+1. Em [render.com](https://render.com), **New → Blueprint** e escolha este repositório (o `render.yaml` da
+   raiz já configura tudo: Docker, `SEAL_KEY` gerada e envios liberados).
+2. Ao terminar o deploy, anote o endereço, ex.: `https://canvas-puc-remote.onrender.com`.
+
+No plano grátis o serviço dorme depois de 15 minutos sem uso. A primeira chamada depois disso pode levar
+cerca de 1 minuto; se o Claude desistir, tente de novo.
+
+**2. Conectar no Claude:**
+
+1. No claude.ai: **Configurações → Conectores → Adicionar conector personalizado**, com a URL
+   `https://<seu-endereço>/mcp`.
+2. Clique em **Conectar**. Abre a página "Conectar o Canvas ao Claude".
+3. No Canvas, **Conta → Configurações → Novo token de acesso**, copie o token e cole na página.
+4. O conector fica disponível na web, no Cowork e no app do celular.
+
+O token da PUC vale 30 dias. Quando vencer, as ferramentas avisam: gere outro e reconecte o conector.
+
+**Outros hosts (Docker):**
+
+```bash
+docker build -t canvas-puc-remote connectors/canvas-puc
+```
+
+```bash
+docker run -p 8080:8080 -e PUBLIC_URL=https://seu-dominio -e SEAL_KEY=<32 bytes em base64> -e CANVAS_ALLOW_WRITE=true canvas-puc-remote
+```
+
+| Variável               | Padrão                             | Para quê                                                        |
+| ---------------------- | ---------------------------------- | --------------------------------------------------------------- |
+| `PUBLIC_URL`           | `RENDER_EXTERNAL_URL`              | Endereço público em https (obrigatório fora do Render)          |
+| `SEAL_KEY`             | —                                  | Chave dos selos OAuth; trocar desconecta todo mundo             |
+| `PORT`                 | `8080`                             | Porta HTTP                                                      |
+| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Para onde o OAuth pode devolver o acesso                        |
+| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | Canvas fixo do servidor                                         |
+| `CANVAS_ALLOW_WRITE`   | desligado                          | `true` registra `entregar_tarefa_texto` e `responder_discussao` |
+
+Segurança: o token do Canvas nunca é gravado no servidor; ele só viaja cifrado dentro dos tokens OAuth.
+Qualquer pessoa com um token válido do Canvas pode usar o seu servidor, mas só acessa a própria conta.
+No modo remoto não existem `conectar_canvas` nem `desconectar_canvas`.
+
 ## Ferramentas
 
 | Ferramenta              | Faz                                                                    |

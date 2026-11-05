@@ -13,6 +13,7 @@ export default defineConfig({
         'tools/**/fixtures/**',
         // Pontos de entrada e automação de navegador: exceções em src/test-exceptions.ts
         'connectors/*/src/main.ts',
+        'connectors/*/src/remote-main.ts',
         'connectors/*/src/browser-login.ts',
       ],
       thresholds: { lines: 90, functions: 90, branches: 90, statements: 90 },

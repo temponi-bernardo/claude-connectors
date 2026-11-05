@@ -1,10 +1,16 @@
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { describe, expect, it } from 'vitest';
 import type { ToolSpec } from '../../../src/mcp/tools.js';
 import type { CanvasContext } from './context.js';
 import { fakeContext, type Routes } from './fixtures/fake-context.js';
 import { CANVAS_READ_TOOLS } from './tools-read.js';
 import { CANVAS_WRITE_TOOLS, submissionPayload } from './tools-write.js';
-import { CANVAS_ACCOUNT_TOOLS, canvasTools } from './tools.js';
+import {
+  CANVAS_ACCOUNT_TOOLS,
+  canvasServiceTools,
+  canvasTools,
+  createCanvasMcpServer,
+} from './tools.js';
 
 const ALL = [...CANVAS_ACCOUNT_TOOLS, ...CANVAS_READ_TOOLS, ...CANVAS_WRITE_TOOLS];
 
@@ -29,6 +35,24 @@ describe('canvasTools', () => {
     expect(toolNames(false)).not.toContain('entregar_tarefa_texto');
     expect(toolNames(true)).toContain('responder_discussao');
     expect(new Set(toolNames(true)).size).toBe(toolNames(true).length);
+  });
+});
+
+describe('canvasServiceTools', () => {
+  it('traz leitura e escrita, sem as ferramentas de conexão', () => {
+    const names = canvasServiceTools(true).map((t) => t.name);
+    expect(names).toContain('proximas_entregas');
+    expect(names).toContain('entregar_tarefa_texto');
+    expect(names).not.toContain('conectar_canvas');
+    expect(canvasServiceTools(false).map((t) => t.name)).not.toContain('entregar_tarefa_texto');
+  });
+});
+
+describe('createCanvasMcpServer', () => {
+  it('cria o servidor MCP com as ferramentas registradas', () => {
+    const server = createCanvasMcpServer(canvasServiceTools(false), fakeContext({}).ctx);
+    expect(server).toBeInstanceOf(McpServer);
+    expect(server.isConnected()).toBe(false);
   });
 });
 

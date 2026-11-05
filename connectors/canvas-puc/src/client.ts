@@ -23,6 +23,8 @@ export interface ClientDeps {
   readonly baseUrl: string;
   readonly auth: AuthProvider;
   readonly fetchFn: typeof fetch;
+  /** Mensagem de 401 (padrão: `unauthorizedMessage`); o modo remoto troca para orientar a reconexão. */
+  readonly describeUnauthorized?: (auth: CanvasAuth | null, baseUrl: string) => string;
 }
 
 /** Operações usadas pelas ferramentas. */
@@ -62,6 +64,11 @@ export function sendCanvasRequest(
   });
 }
 
+/** Erro de 401 com a mensagem injetada nas dependências, ou a padrão (`unauthorizedMessage`). */
+export function unauthorizedError(deps: ClientDeps, auth: CanvasAuth | null): Error {
+  return new Error((deps.describeUnauthorized ?? unauthorizedMessage)(auth, deps.baseUrl));
+}
+
 /** Envia a requisição; em 401 (ou sem credencial) renova uma vez e repete. Lança erro se não der certo. */
 export async function requestWithRenewal(deps: ClientDeps, req: CanvasRequest): Promise<Response> {
   let auth = deps.auth.current();
@@ -70,7 +77,7 @@ export async function requestWithRenewal(deps: ClientDeps, req: CanvasRequest): 
     auth = await deps.auth.renew();
     res = auth ? await sendCanvasRequest(deps, req, auth) : null;
   }
-  if (!res || res.status === 401) throw new Error(unauthorizedMessage(auth, deps.baseUrl));
+  if (!res || res.status === 401) throw unauthorizedError(deps, auth);
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`Canvas ${res.status} em ${req.method} ${req.path}: ${text.slice(0, 300)}`);

@@ -22,6 +22,7 @@ export default {
         'skills',
         'release',
         'config',
+        'remote',
       ],
     ],
     'scope-empty': [2, 'never'],

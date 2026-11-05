@@ -3,15 +3,13 @@
  * registra as ferramentas e conversa com o Claude por stdio.
  */
 import { homedir } from 'node:os';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { registerToolSpecs } from '../../../src/mcp/tools.js';
 import { createAuthProvider } from './auth.js';
 import { browserLogin } from './browser-login.js';
 import { createCanvasClient } from './client.js';
 import { readCanvasConfig } from './config.js';
 import { sessionFilePath } from './session.js';
-import { canvasTools } from './tools.js';
+import { canvasTools, createCanvasMcpServer } from './tools.js';
 
 /** Sobe o servidor MCP do Canvas em stdio. */
 export async function startCanvasServer(): Promise<void> {
@@ -22,8 +20,7 @@ export async function startCanvasServer(): Promise<void> {
     login: (mode) => browserLogin(config, mode),
   });
   const client = createCanvasClient({ baseUrl: config.baseUrl, auth, fetchFn: fetch });
-  const server = new McpServer({ name: 'canvas-puc', version: '1.2.0' });
-  registerToolSpecs(server, canvasTools(config.allowWrite), {
+  const server = createCanvasMcpServer(canvasTools(config.allowWrite), {
     client,
     auth,
     now: () => new Date(),

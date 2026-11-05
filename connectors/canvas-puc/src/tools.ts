@@ -1,7 +1,8 @@
 /**
  * Conjunto de ferramentas do conector Canvas: conexão + leitura, e escrita quando permitida.
  */
-import { defineTool, type ToolSpec } from '../../../src/mcp/tools.js';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { defineTool, registerToolSpecs, type ToolSpec } from '../../../src/mcp/tools.js';
 import type { CanvasProfile } from './canvas-types.js';
 import type { CanvasContext } from './context.js';
 import { CANVAS_READ_TOOLS } from './tools-read.js';
@@ -33,7 +34,25 @@ export const CANVAS_ACCOUNT_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   }),
 ];
 
-/** Seleciona as ferramentas a registrar: escrita só com `allowWrite`. */
+/** Nome e versão anunciados pelo servidor MCP do Canvas (stdio e remoto). */
+export const CANVAS_SERVER_INFO = { name: 'canvas-puc', version: '1.2.0' } as const;
+
+/** Ferramentas do serviço (leitura, e escrita com `allowWrite`), sem as de conexão. */
+export function canvasServiceTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[] {
+  return [...CANVAS_READ_TOOLS, ...(allowWrite ? CANVAS_WRITE_TOOLS : [])];
+}
+
+/** Seleciona as ferramentas do modo local: conexão + serviço. */
 export function canvasTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[] {
-  return [...CANVAS_ACCOUNT_TOOLS, ...CANVAS_READ_TOOLS, ...(allowWrite ? CANVAS_WRITE_TOOLS : [])];
+  return [...CANVAS_ACCOUNT_TOOLS, ...canvasServiceTools(allowWrite)];
+}
+
+/** Cria o servidor MCP do Canvas com as ferramentas dadas ligadas ao contexto. */
+export function createCanvasMcpServer(
+  specs: readonly ToolSpec<CanvasContext>[],
+  ctx: CanvasContext,
+): McpServer {
+  const server = new McpServer({ ...CANVAS_SERVER_INFO });
+  registerToolSpecs(server, specs, ctx);
+  return server;
 }
