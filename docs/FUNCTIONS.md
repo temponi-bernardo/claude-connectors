@@ -13,18 +13,28 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - `connectors/canvas-puc/src/auth.ts`: [`pickAuth`](#pickauth), [`authHeaders`](#authheaders), [`loginAndStore`](#loginandstore), [`renewAuth`](#renewauth), [`renewOnce`](#renewonce), [`createAuthProvider`](#createauthprovider)
 - `connectors/canvas-puc/src/browser-login.ts`: [`isLoginChooserUrl`](#isloginchooserurl), [`launchLoginBrowser`](#launchloginbrowser), [`pageHasCanvasSession`](#pagehascanvassession), [`clickInstitutionButton`](#clickinstitutionbutton), [`waitForCanvasLogin`](#waitforcanvaslogin), [`browserLogin`](#browserlogin)
-- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`requestWithRenewal`](#requestwithrenewal), [`collectPages`](#collectpages), [`fetchPlainText`](#fetchplaintext), [`createCanvasClient`](#createcanvasclient)
-- `connectors/canvas-puc/src/config.ts`: [`envValue`](#envvalue), [`parseFlag`](#parseflag), [`readCanvasConfig`](#readcanvasconfig)
+- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`unauthorizedError`](#unauthorizederror), [`requestWithRenewal`](#requestwithrenewal), [`collectPages`](#collectpages), [`fetchPlainText`](#fetchplaintext), [`createCanvasClient`](#createcanvasclient)
+- `connectors/canvas-puc/src/config.ts`: [`readCanvasConfig`](#readcanvasconfig)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
 - `connectors/canvas-puc/src/main.ts`: [`startCanvasServer`](#startcanvasserver)
 - `connectors/canvas-puc/src/playwright-runtime.ts`: [`runtimeDir`](#runtimedir), [`npmInstallArgs`](#npminstallargs), [`resolveFrom`](#resolvefrom), [`installPlaywright`](#installplaywright), [`loadPlaywright`](#loadplaywright)
+- `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
+- `connectors/canvas-puc/src/remote.ts`: [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`remoteUnauthorizedMessage`](#remoteunauthorizedmessage), [`createTokenAuthProvider`](#createtokenauthprovider), [`verifyCanvasToken`](#verifycanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
 - `connectors/canvas-puc/src/session.ts`: [`sessionFilePath`](#sessionfilepath), [`cookieHeader`](#cookieheader), [`csrfToken`](#csrftoken), [`isCanvasSession`](#iscanvassession), [`loadSession`](#loadsession), [`saveSession`](#savesession), [`clearSession`](#clearsession)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
-- `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools)
+- `connectors/canvas-puc/src/tools.ts`: [`canvasServiceTools`](#canvasservicetools), [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
+- `src/core/env.ts`: [`envValue`](#envvalue), [`parseFlag`](#parseflag)
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
 - `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs)
+- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`handleAuthorizePage`](#handleauthorizepage), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
+- `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage)
+- `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
+- `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
+- `src/remote/oauth.ts`: [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
+- `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed)
+- `src/remote/tokens.ts`: [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessSecret`](#readaccesssecret)
 - `tools/docs/ast.ts`: [`toPosixRelative`](#toposixrelative), [`globToRegExp`](#globtoregexp), [`isAnalyzedSource`](#isanalyzedsource), [`openProject`](#openproject), [`signatureOf`](#signatureof), [`collectFileFunctions`](#collectfilefunctions), [`collectFunctions`](#collectfunctions), [`isDataDeclaration`](#isdatadeclaration), [`collectFileConstants`](#collectfileconstants), [`collectConstants`](#collectconstants), [`isIgnoredReference`](#isignoredreference), [`ownerLabelOf`](#ownerlabelof), [`findDeclaration`](#finddeclaration), [`buildReferenceIndex`](#buildreferenceindex), [`buildCallGraph`](#buildcallgraph)
 - `tools/docs/checks.ts`: [`checkFunctionsDocumented`](#checkfunctionsdocumented), [`checkSectionModules`](#checksectionmodules), [`checkUniqueNames`](#checkuniquenames), [`checkGeneratedBlocks`](#checkgeneratedblocks), [`checkManualFields`](#checkmanualfields), [`checkProcessCitations`](#checkprocesscitations), [`checkStructure`](#checkstructure), [`checkUiComponents`](#checkuicomponents), [`checkTests`](#checktests), [`checkConstants`](#checkconstants), [`runAllChecks`](#runallchecks)
 - `tools/docs/cli.ts`: [`runDocsCli`](#rundocscli)
@@ -1219,7 +1229,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/auth.ts`
 - **Assinatura:** `authHeaders(auth: CanvasAuth, method: string): Record<string, string>`
 - **Usada por:** `sendCanvasRequest()`
-- **Processos:** P03, P04
+- **Processos:** P03, P04, P08, P09
 
 <!-- gerado:fim -->
 
@@ -1409,8 +1419,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
 - **Assinatura:** `unauthorizedMessage(auth: CanvasAuth | null, baseUrl: string): string`
-- **Usada por:** `requestWithRenewal()`
-- **Processos:** P03, P04
+- **Usada por:** `unauthorizedError()`
+- **Processos:** P03, P04, P08, P09
 
 <!-- gerado:fim -->
 
@@ -1427,7 +1437,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
 - **Assinatura:** `sendCanvasRequest(deps: ClientDeps, req: CanvasRequest, auth: CanvasAuth): Promise<Response>`
 - **Usada por:** `requestWithRenewal()`
-- **Processos:** P03, P04
+- **Processos:** P03, P04, P08, P09
 
 <!-- gerado:fim -->
 
@@ -1444,7 +1454,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
 - **Assinatura:** `async requestWithRenewal(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
 - **Usada por:** `collectPages()`, `createCanvasClient()`
-- **Processos:** P03, P04
+- **Processos:** P03, P04, P08, P09
 
 <!-- gerado:fim -->
 
@@ -1461,7 +1471,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
 - **Assinatura:** `async collectPages(deps: ClientDeps, first: CanvasRequest, max: number): Promise<T[]>`
 - **Usada por:** `createCanvasClient()`
-- **Processos:** P03
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -1478,7 +1488,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
 - **Assinatura:** `async fetchPlainText(fetchFn: typeof fetch, url: string): Promise<string>`
 - **Usada por:** `createCanvasClient()`
-- **Processos:** P03
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -1494,8 +1504,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
 - **Assinatura:** `createCanvasClient(deps: ClientDeps): CanvasClient`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03
+- **Usada por:** `canvasRemoteConnector()`, `startCanvasServer()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -1505,41 +1515,24 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum na criação; os métodos fazem rede.
 - **Erros:** Nenhum na criação; os métodos propagam erros das requisições.
 
+### `unauthorizedError`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `unauthorizedError(deps: ClientDeps, auth: CanvasAuth | null): Error`
+- **Usada por:** `requestWithRenewal()`
+- **Processos:** P03, P04, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o erro de 401 com a mensagem injetada (`describeUnauthorized`) ou a padrão.
+- **Entrada:** `deps`: dependências do cliente; `auth`: credencial usada (ou nula).
+- **Saída:** `Error` com a orientação ao usuário.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
 ## `connectors/canvas-puc/src/config.ts`
-
-### `envValue`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/config.ts`
-- **Assinatura:** `envValue(env: EnvVars, key: string): string | null`
-- **Usada por:** `readCanvasConfig()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê uma variável de ambiente, tratando vazio ou placeholder `${...}` como ausente.
-- **Entrada:** `env`: variáveis de ambiente; `key`: nome da variável.
-- **Saída:** Valor sem espaços nas pontas; `null` se ausente, vazio ou começando com `${`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `parseFlag`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/config.ts`
-- **Assinatura:** `parseFlag(value: string | null): boolean`
-- **Usada por:** `readCanvasConfig()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Interpreta uma opção liga/desliga.
-- **Entrada:** `value`: texto da opção ou `null`.
-- **Saída:** `true` para `1`, `true`, `sim` ou `yes` (sem diferenciar maiúsculas); senão `false`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
 
 ### `readCanvasConfig`
 
@@ -2083,7 +2076,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/session.ts`
 - **Assinatura:** `cookieHeader(session: CanvasSession): string`
 - **Usada por:** `authHeaders()`
-- **Processos:** P03, P04
+- **Processos:** P03, P04, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2100,7 +2093,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/session.ts`
 - **Assinatura:** `csrfToken(session: CanvasSession): string | null`
 - **Usada por:** `authHeaders()`
-- **Processos:** P03, P04
+- **Processos:** P03, P04, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2216,6 +2209,76 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+### `canvasServiceTools`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/tools.ts`
+- **Assinatura:** `canvasServiceTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[]`
+- **Usada por:** `canvasRemoteConnector()`, `canvasTools()`
+- **Processos:** P03, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista as ferramentas do serviço (leitura, e escrita se permitida), sem as de conexão.
+- **Entrada:** `allowWrite`: libera `entregar_tarefa_texto` e `responder_discussao`.
+- **Saída:** Lista de `ToolSpec`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `createCanvasMcpServer`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/tools.ts`
+- **Assinatura:** `createCanvasMcpServer(specs: readonly ToolSpec<CanvasContext>[], ctx: CanvasContext): McpServer`
+- **Usada por:** `canvasRemoteConnector()`, `startCanvasServer()`
+- **Processos:** P03, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o `McpServer` do Canvas com as ferramentas ligadas ao contexto.
+- **Entrada:** `specs`: ferramentas; `ctx`: cliente, autenticação e relógio.
+- **Saída:** Servidor MCP ainda não conectado.
+- **Efeitos:** Nenhum além de criar o objeto.
+- **Erros:** Nenhum.
+
+## `src/core/env.ts`
+
+### `envValue`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/env.ts`
+- **Assinatura:** `envValue(env: EnvVars, key: string): string | null`
+- **Usada por:** `readCanvasConfig()`, `readCanvasRemoteSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`
+- **Processos:** P03, P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma variável de ambiente, tratando vazio ou placeholder `${...}` como ausente.
+- **Entrada:** `env`: variáveis de ambiente; `key`: nome da variável.
+- **Saída:** Valor sem espaços nas pontas; `null` se ausente, vazio ou começando com `${`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseFlag`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/env.ts`
+- **Assinatura:** `parseFlag(value: string | null): boolean`
+- **Usada por:** `readCanvasConfig()`, `readCanvasRemoteSettings()`
+- **Processos:** P03, P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Interpreta uma opção liga/desliga.
+- **Entrada:** `value`: texto da opção ou `null`.
+- **Saída:** `true` para `1`, `true`, `sim` ou `yes` (sem diferenciar maiúsculas); senão `false`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
 ## `src/core/html.ts`
 
 ### `htmlToText`
@@ -2244,7 +2307,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/http.ts`
 - **Assinatura:** `buildUrl(base: string, path: string, params: QueryParams = {}): URL`
 - **Usada por:** `sendCanvasRequest()`
-- **Processos:** P03, P04
+- **Processos:** P03, P04, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2261,7 +2324,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/http.ts`
 - **Assinatura:** `parseNextLink(linkHeader: string | null): string | null`
 - **Usada por:** `collectPages()`
-- **Processos:** P03
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2297,7 +2360,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `textResult(data: unknown, notes: readonly string[] = []): CallToolResult`
 - **Usada por:** `runToolSafely()`
-- **Processos:** P03
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2314,7 +2377,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `errorResult(error: unknown): CallToolResult`
 - **Usada por:** `runToolSafely()`
-- **Processos:** P03
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2331,7 +2394,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `async runToolSafely(spec: ToolSpec<C>, ctx: C, rawArgs: unknown): Promise<CallToolResult>`
 - **Usada por:** `registerToolSpecs()`
-- **Processos:** P03
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2347,8 +2410,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `registerToolSpecs(server: McpServer, specs: readonly ToolSpec<C>[], ctx: C): void`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03
+- **Usada por:** `createCanvasMcpServer()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2653,6 +2716,942 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Importa módulos dinamicamente; na primeira vez sem o pacote, instala com `installPlaywright()` (rede).
 - **Erros:** Rejeita com "Não consegui instalar o playwright-core" se a instalação não deixar o pacote resolvível.
 
+## `connectors/canvas-puc/src/remote-main.ts`
+
+### `startCanvasRemoteServer`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote-main.ts`
+- **Assinatura:** `startCanvasRemoteServer(): void`
+- **Usada por:** `connectors/canvas-puc/src/remote-main.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Sobe o servidor HTTP do conector Canvas remoto.
+- **Entrada:** Nenhuma (lê o ambiente do processo).
+- **Saída:** Nada.
+- **Efeitos:** Abre a porta HTTP e escreve no stdout.
+- **Erros:** Lança se `PUBLIC_URL`/`RENDER_EXTERNAL_URL` ou `SEAL_KEY` faltarem ou forem inválidas.
+
+## `connectors/canvas-puc/src/remote.ts`
+
+### `readCanvasRemoteSettings`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `readCanvasRemoteSettings(env: EnvVars): CanvasRemoteSettings`
+- **Usada por:** `startCanvasRemoteServer()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a configuração do modo remoto (`CANVAS_BASE_URL`, `CANVAS_ALLOW_WRITE`).
+- **Entrada:** `env`: variáveis de ambiente.
+- **Saída:** `CanvasRemoteSettings` com URL sem barra final, escrita desligada por padrão e o `fetch` global.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `canvasLoginText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `canvasLoginText(baseUrl: string): LoginPageText`
+- **Usada por:** `canvasRemoteConnector()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta os textos da página de autorização do Canvas.
+- **Entrada:** `baseUrl`: endereço do Canvas.
+- **Saída:** `LoginPageText` com a ajuda apontando para `/profile/settings`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `remoteUnauthorizedMessage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `remoteUnauthorizedMessage(_auth: CanvasAuth | null, baseUrl: string): string`
+- **Usada por:** `canvasRemoteConnector()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Escreve a mensagem de 401 do modo remoto (gerar outro token e reconectar no Claude).
+- **Entrada:** `_auth`: ignorada; `baseUrl`: endereço do Canvas.
+- **Saída:** Texto da mensagem.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `createTokenAuthProvider`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `createTokenAuthProvider(token: string): AuthProvider`
+- **Usada por:** `canvasRemoteConnector()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria um `AuthProvider` que usa só o token, sem renovação nem login.
+- **Entrada:** `token`: token de acesso do Canvas.
+- **Saída:** Provedor: `current` dá o token, `renew` dá nulo, `disconnect` não faz nada.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** `connect` rejeita orientando a reconectar pelas configurações do Claude.
+
+### `verifyCanvasToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `async verifyCanvasToken(settings: CanvasRemoteSettings, token: string): Promise<void>`
+- **Usada por:** `canvasRemoteConnector()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere o token chamando `/api/v1/users/self` no Canvas.
+- **Entrada:** `settings`: Canvas e `fetch`; `token`: token colado pelo usuário.
+- **Saída:** Promessa vazia se o token serve.
+- **Efeitos:** Rede (uma requisição ao Canvas).
+- **Erros:** Rejeita com mensagem ao usuário: token vazio, 401, outro status ou falha de rede.
+
+### `canvasRemoteConnector`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector`
+- **Usada por:** `startCanvasRemoteServer()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o `RemoteConnector` do Canvas para o servidor HTTP.
+- **Entrada:** `settings`: configuração do modo remoto.
+- **Saída:** Textos da página, verificação do token e fábrica de `McpServer` por token.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/remote/handler.ts`
+
+### `jsonResponse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `jsonResponse(data: unknown, status = 200): Response`
+- **Usada por:** `handleRegister()`, `handleToken()`, `src/remote/handler.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta uma resposta JSON sem cache.
+- **Entrada:** `data`: valor; `status`: padrão 200.
+- **Saída:** `Response`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `htmlResponse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `htmlResponse(html: string, status = 200): Response`
+- **Usada por:** `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `loginPageFor()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta uma resposta HTML sem cache, com CSP restrita.
+- **Entrada:** `html`: página; `status`: padrão 200.
+- **Saída:** `Response`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readForm`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `async readForm(request: Request): Promise<URLSearchParams>`
+- **Usada por:** `handleAuthorizeSubmit()`, `handleToken()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o corpo de um formulário urlencoded.
+- **Entrada:** `request`.
+- **Saída:** `URLSearchParams`.
+- **Efeitos:** Consome o corpo da requisição.
+- **Erros:** Nenhum.
+
+### `readJsonBody`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `async readJsonBody(request: Request): Promise<unknown>`
+- **Usada por:** `handleRegister()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o corpo JSON da requisição.
+- **Entrada:** `request`.
+- **Saída:** Valor lido; `null` se não for JSON válido.
+- **Efeitos:** Consome o corpo da requisição.
+- **Erros:** Nenhum (JSON inválido vira `null`).
+
+### `loginPageFor`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `loginPageFor(app: RemoteApp, request: AuthorizeRequest, error: string | null): Response`
+- **Usada por:** `handleAuthorizePage()`, `handleAuthorizeSubmit()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a página de login de um pedido validado.
+- **Entrada:** `app`; `request`: pedido; `error`: mensagem ou nulo.
+- **Saída:** `Response` HTML com o pedido selado.
+- **Efeitos:** Gera bytes aleatórios (selo).
+- **Erros:** Nenhum.
+
+### `redirectWithCode`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `redirectWithCode(request: AuthorizeRequest, code: string): Response`
+- **Usada por:** `handleAuthorizeSubmit()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Redireciona ao cliente com o código e o `state`.
+- **Entrada:** `request`: pedido; `code`: código selado.
+- **Saída:** `Response` 302.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `handleRegister`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `async handleRegister(app: RemoteApp, request: Request): Promise<Response>`
+- **Usada por:** `src/remote/handler.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende `POST /register` (registro dinâmico).
+- **Entrada:** `app`; `request`.
+- **Saída:** 201 com o cliente, ou 400 com erro OAuth.
+- **Efeitos:** Consome o corpo.
+- **Erros:** Nenhum.
+
+### `handleAuthorizePage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `handleAuthorizePage(app: RemoteApp, request: Request): Promise<Response>`
+- **Usada por:** `src/remote/handler.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende `GET /authorize`: valida e mostra a página de login.
+- **Entrada:** `app`; `request`.
+- **Saída:** Página HTML, ou 400 sem redirecionar quando o pedido é inválido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `handleAuthorizeSubmit`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `async handleAuthorizeSubmit(app: RemoteApp, request: Request): Promise<Response>`
+- **Usada por:** `src/remote/handler.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende `POST /authorize`: confere a credencial e devolve o código.
+- **Entrada:** `app`; `request`: formulário com `pending` e `secret`.
+- **Saída:** 302 para o cliente; página com erro se a credencial falhar; 400 se o pedido venceu.
+- **Efeitos:** Rede (via `verifySecret` do conector).
+- **Erros:** Nenhum.
+
+### `handleToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `async handleToken(app: RemoteApp, request: Request): Promise<Response>`
+- **Usada por:** `src/remote/handler.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende `POST /token`.
+- **Entrada:** `app`; `request`: formulário OAuth.
+- **Saída:** 200 com tokens, ou 400 com erro OAuth.
+- **Efeitos:** Consome o corpo.
+- **Erros:** Nenhum.
+
+### `handleMcp`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `handleMcp(app: RemoteApp, request: Request): Promise<Response>`
+- **Usada por:** `src/remote/handler.ts (módulo)`
+- **Processos:** P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende `/mcp` exigindo o access token.
+- **Entrada:** `app`; `request`.
+- **Saída:** Resposta MCP, ou 401 que inicia o OAuth.
+- **Efeitos:** Executa ferramentas do conector (rede).
+- **Erros:** Repassa erros do transporte MCP.
+
+### `withCors`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `withCors(response: Response): Response`
+- **Usada por:** `routeRemoteRequest()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Acrescenta os headers CORS a uma resposta.
+- **Entrada:** `response`.
+- **Saída:** A mesma resposta, com `CORS_HEADERS`.
+- **Efeitos:** Altera os headers da resposta recebida.
+- **Erros:** Nenhum.
+
+### `routeRemoteRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `async routeRemoteRequest(app: RemoteApp, request: Request): Promise<Response>`
+- **Usada por:** `createRemoteHandler()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Escolhe a rota pelo método e caminho.
+- **Entrada:** `app`; `request`.
+- **Saída:** Resposta da rota com CORS; 204 no preflight; 404 em caminho desconhecido.
+- **Efeitos:** Os da rota escolhida.
+- **Erros:** Repassa erros da rota.
+
+### `createRemoteHandler`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `createRemoteHandler(app: RemoteApp): (request: Request) => Promise<Response>`
+- **Usada por:** `startCanvasRemoteServer()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o handler HTTP do conector remoto.
+- **Entrada:** `app`: configuração OAuth, conector e relógio.
+- **Saída:** Função `(Request) => Promise<Response>`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/remote/login-page.ts`
+
+### `escapeHtml`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/login-page.ts`
+- **Assinatura:** `escapeHtml(value: string): string`
+- **Usada por:** `renderLoginPage()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Escapa texto para HTML (conteúdo e atributos).
+- **Entrada:** `value`: texto.
+- **Saída:** Texto com `& < > " '` trocados por entidades.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `renderLoginPage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/login-page.ts`
+- **Assinatura:** `renderLoginPage(view: LoginPageView): string`
+- **Usada por:** `loginPageFor()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera a página HTML de autorização.
+- **Entrada:** `view`: textos, pedido selado, host do cliente e erro opcional.
+- **Saída:** HTML completo, sem script.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/remote/mcp-endpoint.ts`
+
+### `serveMcpRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/mcp-endpoint.ts`
+- **Assinatura:** `async serveMcpRequest(server: McpServer, request: Request): Promise<Response>`
+- **Usada por:** `handleMcp()`
+- **Processos:** P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende uma requisição MCP sem sessão, com resposta JSON.
+- **Entrada:** `server`: `McpServer` do usuário; `request`: requisição HTTP.
+- **Saída:** `Response` do transporte.
+- **Efeitos:** Conecta e fecha o servidor MCP (executa a ferramenta chamada).
+- **Erros:** Repassa erros do transporte.
+
+### `mcpUnauthorizedResponse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/mcp-endpoint.ts`
+- **Assinatura:** `mcpUnauthorizedResponse(issuer: string): Response`
+- **Usada por:** `handleMcp()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o 401 que inicia o OAuth no cliente MCP.
+- **Entrada:** `issuer`: URL pública.
+- **Saída:** `Response` 401 com `WWW-Authenticate` apontando os metadados do recurso.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/remote/node-server.ts`
+
+### `readPublicUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/node-server.ts`
+- **Assinatura:** `readPublicUrl(env: EnvVars): string`
+- **Usada por:** `readRemoteServerConfig()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a URL pública do servidor (`PUBLIC_URL` ou `RENDER_EXTERNAL_URL`).
+- **Entrada:** `env`: variáveis de ambiente.
+- **Saída:** URL sem barra final.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança se ausente, inválida ou sem https fora de localhost.
+
+### `readRemoteServerConfig`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/node-server.ts`
+- **Assinatura:** `readRemoteServerConfig(env: EnvVars): RemoteServerConfig`
+- **Usada por:** `startCanvasRemoteServer()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a configuração do servidor remoto a partir do ambiente.
+- **Entrada:** `env`: variáveis de ambiente.
+- **Saída:** `RemoteServerConfig` com porta (padrão 8080) e `OAuthSettings`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Os de `readPublicUrl` e `parseSealKey`.
+
+### `readNodeBody`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/node-server.ts`
+- **Assinatura:** `async readNodeBody(req: IncomingMessage): Promise<Buffer | null>`
+- **Usada por:** `serveNodeRequest()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o corpo de uma requisição do Node.
+- **Entrada:** `req`: requisição.
+- **Saída:** `Buffer`; `null` se passar de `MAX_BODY_BYTES`.
+- **Efeitos:** Consome o stream da requisição.
+- **Erros:** Nenhum.
+
+### `toWebRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/node-server.ts`
+- **Assinatura:** `toWebRequest(req: IncomingMessage, body: Buffer, origin: string): Request`
+- **Usada por:** `serveNodeRequest()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte a requisição do Node em `Request` com a origem pública.
+- **Entrada:** `req`; `body`: corpo lido; `origin`: URL pública.
+- **Saída:** `Request` (sem corpo em GET/HEAD).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `writeWebResponse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/node-server.ts`
+- **Assinatura:** `async writeWebResponse(res: ServerResponse, response: Response): Promise<void>`
+- **Usada por:** `serveNodeRequest()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Escreve um `Response` na resposta do Node.
+- **Entrada:** `res`: resposta do Node; `response`.
+- **Saída:** Promessa vazia.
+- **Efeitos:** Escreve status, headers e corpo no socket.
+- **Erros:** Nenhum.
+
+### `serveNodeRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/node-server.ts`
+- **Assinatura:** `async serveNodeRequest(options: NodeServerOptions, req: IncomingMessage, res: ServerResponse): Promise<void>`
+- **Usada por:** `startRemoteHttpServer()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende uma requisição do Node com o handler.
+- **Entrada:** `options`: handler e origem; `req`; `res`.
+- **Saída:** Promessa vazia.
+- **Efeitos:** Lê o corpo, escreve a resposta; registra erros no stderr.
+- **Erros:** Nenhum: corpo grande vira 413 e erro do handler vira 500.
+
+### `startRemoteHttpServer`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/node-server.ts`
+- **Assinatura:** `startRemoteHttpServer(options: NodeServerOptions): Server`
+- **Usada por:** `startCanvasRemoteServer()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Sobe o servidor `node:http` com o handler.
+- **Entrada:** `options`: handler, origem pública e porta (0 = livre).
+- **Saída:** O `Server` escutando.
+- **Efeitos:** Abre uma porta TCP.
+- **Erros:** Nenhum.
+
+## `src/remote/oauth.ts`
+
+### `oauthError`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `oauthError(error: string, description: string): OAuthResult<T>`
+- **Usada por:** `parseAuthorizeQuery()`, `readCodeChallenge()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `redeemTokenRequest()`, `registerClient()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta um resultado de erro OAuth.
+- **Entrada:** `error`: código OAuth; `description`: explicação.
+- **Saída:** `OAuthResult` com `ok: false`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `authorizationServerMetadata`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `authorizationServerMetadata(issuer: string): Record<string, unknown>`
+- **Usada por:** `src/remote/handler.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta os metadados do servidor de autorização (RFC 8414).
+- **Entrada:** `issuer`: URL pública.
+- **Saída:** Objeto com endpoints, PKCE S256 e cliente público.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `protectedResourceMetadata`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `protectedResourceMetadata(issuer: string): Record<string, unknown>`
+- **Usada por:** `src/remote/handler.ts (módulo)`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta os metadados do recurso protegido `/mcp` (RFC 9728).
+- **Entrada:** `issuer`: URL pública.
+- **Saída:** Objeto com `resource` e `authorization_servers`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isAllowedRedirect`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `isAllowedRedirect(uri: string, hosts: readonly string[]): boolean`
+- **Usada por:** `registerClient()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se um endereço de retorno do OAuth é aceito.
+- **Entrada:** `uri`: endereço; `hosts`: hosts permitidos.
+- **Saída:** `true` para https num host listado (ou subdomínio) ou http em localhost/127.0.0.1 quando `localhost` está na lista.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pkceChallenge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `pkceChallenge(verifier: string): string`
+- **Usada por:** `redeemAuthorizationCode()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula o desafio PKCE S256 de um verificador.
+- **Entrada:** `verifier`: `code_verifier`.
+- **Saída:** SHA-256 em base64url.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readRedirectUris`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `readRedirectUris(body: unknown): string[] | null`
+- **Usada por:** `clientRedirectUris()`, `registerClient()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai `redirect_uris` de um objeto.
+- **Entrada:** `body`: corpo do registro ou conteúdo selado.
+- **Saída:** Lista de textos; `null` se ausente, vazia ou com itens que não são texto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `registerClient`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `registerClient(body: unknown, settings: OAuthSettings, now: number): OAuthResult<ClientRegistration>`
+- **Usada por:** `handleRegister()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Registra um cliente OAuth selando os endereços de retorno no `client_id`.
+- **Entrada:** `body`: corpo JSON do registro; `settings`; `now`: segundos Unix.
+- **Saída:** `ClientRegistration`, ou erro `invalid_redirect_uri`.
+- **Efeitos:** Gera bytes aleatórios (selo).
+- **Erros:** Nenhum.
+
+### `clientRedirectUris`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `clientRedirectUris(clientId: string, settings: OAuthSettings, now: number): string[] | null`
+- **Usada por:** `parseAuthorizeQuery()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê os endereços de retorno de um `client_id` deste servidor.
+- **Entrada:** `clientId`; `settings`; `now`.
+- **Saída:** Lista de endereços; `null` se o cliente não é deste servidor ou venceu.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseAuthorizeQuery`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `parseAuthorizeQuery(query: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<AuthorizeRequest>`
+- **Usada por:** `handleAuthorizePage()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida a query do `/authorize`.
+- **Entrada:** `query`: parâmetros; `settings`; `now`.
+- **Saída:** `AuthorizeRequest`, ou erro `invalid_client`, `invalid_request` ou `unsupported_response_type`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readCodeChallenge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `readCodeChallenge(query: URLSearchParams): OAuthResult<string>`
+- **Usada por:** `parseAuthorizeQuery()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere `response_type=code` e PKCE S256 da query.
+- **Entrada:** `query`: parâmetros do `/authorize`.
+- **Saída:** O `code_challenge`, ou erro OAuth.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/remote/seal.ts`
+
+### `parseSealKey`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/seal.ts`
+- **Assinatura:** `parseSealKey(raw: string | null): Buffer`
+- **Usada por:** `readRemoteServerConfig()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica a `SEAL_KEY` (base64 ou base64url) e exige 32 bytes.
+- **Entrada:** `raw`: valor da variável (ou nulo).
+- **Saída:** `Buffer` de 32 bytes.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança se ausente (com o comando para gerar) ou de tamanho errado.
+
+### `sealPayload`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/seal.ts`
+- **Assinatura:** `sealPayload(payload: unknown, key: Buffer): string`
+- **Usada por:** `issueAuthorizationCode()`, `issueTokenSet()`, `registerClient()`, `sealAuthorizeRequest()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Sela um valor JSON com AES-256-GCM.
+- **Entrada:** `payload`: valor serializável; `key`: chave de 32 bytes.
+- **Saída:** Texto base64url com `iv + tag + cifra`.
+- **Efeitos:** Gera bytes aleatórios (IV).
+- **Erros:** Nenhum.
+
+### `unsealPayload`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/seal.ts`
+- **Assinatura:** `unsealPayload(sealed: string, key: Buffer): Record<string, unknown> | null`
+- **Usada por:** `openSealed()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Abre um selo e devolve o objeto dentro.
+- **Entrada:** `sealed`: texto selado; `key`: chave.
+- **Saída:** Objeto; `null` se a chave não confere, o texto foi alterado ou não é objeto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum (erros de decifragem viram `null`).
+
+### `openSealed`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/seal.ts`
+- **Assinatura:** `openSealed(sealed: string, key: Buffer, expected: SealExpectation): SealedClaims | null`
+- **Usada por:** `clientRedirectUris()`, `openAuthorizeRequest()`, `readAccessSecret()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`
+- **Processos:** P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Abre um selo do tipo esperado que ainda não venceu.
+- **Entrada:** `sealed`; `key`; `expected`: `typ` e instante `now` (segundos Unix).
+- **Saída:** `SealedClaims`; `null` se inválido, de outro tipo, sem `exp` numérico ou vencido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/remote/tokens.ts`
+
+### `sealAuthorizeRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/tokens.ts`
+- **Assinatura:** `sealAuthorizeRequest(request: AuthorizeRequest, settings: OAuthSettings, now: number): string`
+- **Usada por:** `loginPageFor()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Sela o pedido de autorização para o formulário de login (15 minutos).
+- **Entrada:** `request`: pedido validado; `settings`; `now`.
+- **Saída:** Texto selado do tipo `pending`.
+- **Efeitos:** Gera bytes aleatórios (selo).
+- **Erros:** Nenhum.
+
+### `openAuthorizeRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/tokens.ts`
+- **Assinatura:** `openAuthorizeRequest(sealed: string, settings: OAuthSettings, now: number): AuthorizeRequest | null`
+- **Usada por:** `handleAuthorizeSubmit()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Abre o pedido selado vindo do formulário.
+- **Entrada:** `sealed`; `settings`; `now`.
+- **Saída:** `AuthorizeRequest`; `null` se inválido ou vencido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `issueAuthorizationCode`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/tokens.ts`
+- **Assinatura:** `issueAuthorizationCode(grant: ApprovedGrant, settings: OAuthSettings, now: number): string`
+- **Usada por:** `handleAuthorizeSubmit()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Emite o código de autorização (5 minutos) amarrado a cliente, retorno e PKCE.
+- **Entrada:** `grant`: pedido + segredo; `settings`; `now`.
+- **Saída:** Código selado do tipo `code`.
+- **Efeitos:** Gera bytes aleatórios (selo).
+- **Erros:** Nenhum.
+
+### `issueTokenSet`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/tokens.ts`
+- **Assinatura:** `issueTokenSet(secret: string, settings: OAuthSettings, now: number): TokenSet`
+- **Usada por:** `redeemTokenRequest()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Emite access token (1 hora) e refresh token (30 dias) para um segredo.
+- **Entrada:** `secret`: credencial do usuário; `settings`; `now`.
+- **Saída:** `TokenSet` do tipo Bearer.
+- **Efeitos:** Gera bytes aleatórios (selos).
+- **Erros:** Nenhum.
+
+### `redeemAuthorizationCode`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/tokens.ts`
+- **Assinatura:** `redeemAuthorizationCode(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<string>`
+- **Usada por:** `redeemTokenRequest()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere o código contra cliente, retorno e verificador PKCE.
+- **Entrada:** `form`: corpo do `/token`; `settings`; `now`.
+- **Saída:** O segredo selado, ou erro `invalid_grant`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `redeemRefreshToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/tokens.ts`
+- **Assinatura:** `redeemRefreshToken(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<string>`
+- **Usada por:** `redeemTokenRequest()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere o refresh token.
+- **Entrada:** `form`: corpo do `/token`; `settings`; `now`.
+- **Saída:** O segredo selado, ou erro `invalid_grant`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `redeemTokenRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/tokens.ts`
+- **Assinatura:** `redeemTokenRequest(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<TokenSet>`
+- **Usada por:** `handleToken()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende o `/token` conforme o `grant_type`.
+- **Entrada:** `form`: corpo do `/token`; `settings`; `now`.
+- **Saída:** Novo `TokenSet`, ou erro `invalid_grant`/`unsupported_grant_type`.
+- **Efeitos:** Gera bytes aleatórios (selos).
+- **Erros:** Nenhum.
+
+### `readAccessSecret`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/tokens.ts`
+- **Assinatura:** `readAccessSecret(authorization: string | null, settings: OAuthSettings, now: number): string | null`
+- **Usada por:** `handleMcp()`
+- **Processos:** P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o segredo de um header `Authorization: Bearer`.
+- **Entrada:** `authorization`: header (ou nulo); `settings`; `now`.
+- **Saída:** O segredo; `null` sem Bearer, com token de outro tipo ou vencido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
 ## Dados e constantes
 
 | Nome                     | Arquivo                                           | O que é                                                                                                                     |
@@ -2686,3 +3685,17 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `CANVAS_READ_TOOLS`      | `connectors/canvas-puc/src/tools-read.ts`         | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                                 |
 | `CANVAS_WRITE_TOOLS`     | `connectors/canvas-puc/src/tools-write.ts`        | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`.                             |
 | `CANVAS_ACCOUNT_TOOLS`   | `connectors/canvas-puc/src/tools.ts`              | Ferramentas MCP de conexão: `conectar_canvas` e `desconectar_canvas`.                                                       |
+| `CANVAS_SERVER_INFO`     | `connectors/canvas-puc/src/tools.ts`              | Nome e versão anunciados pelo servidor MCP do Canvas (stdio e remoto).                                                      |
+| `REMOTE_ENTRY`           | `tools/pack/pack.ts`                              | Entrada opcional do servidor remoto de um conector (`src/remote-main.ts`).                                                  |
+| `REMOTE_BUNDLE_PATH`     | `tools/pack/pack.ts`                              | Bundle do servidor remoto (`server/remote.js`), usado pelo Dockerfile.                                                      |
+| `SEAL_KEY_BYTES`         | `src/remote/seal.ts`                              | Tamanho da `SEAL_KEY` (32 bytes, AES-256).                                                                                  |
+| `CLIENT_TTL_SECONDS`     | `src/remote/oauth.ts`                             | Validade do `client_id` registrado (10 anos).                                                                               |
+| `PENDING_TTL_SECONDS`    | `src/remote/tokens.ts`                            | Validade do pedido selado no formulário de login (15 minutos).                                                              |
+| `CODE_TTL_SECONDS`       | `src/remote/tokens.ts`                            | Validade do código de autorização (5 minutos).                                                                              |
+| `ACCESS_TTL_SECONDS`     | `src/remote/tokens.ts`                            | Validade do access token (1 hora).                                                                                          |
+| `REFRESH_TTL_SECONDS`    | `src/remote/tokens.ts`                            | Validade do refresh token (30 dias, como o token da PUC).                                                                   |
+| `LOGIN_PAGE_CSS`         | `src/remote/login-page.ts`                        | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                             |
+| `CORS_HEADERS`           | `src/remote/handler.ts`                           | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                                       |
+| `REMOTE_ROUTES`          | `src/remote/handler.ts`                           | Tabela `MÉTODO caminho` → função do servidor remoto.                                                                        |
+| `DEFAULT_REDIRECT_HOSTS` | `src/remote/node-server.ts`                       | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                                         |
+| `MAX_BODY_BYTES`         | `src/remote/node-server.ts`                       | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                               |

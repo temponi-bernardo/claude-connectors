@@ -36,4 +36,6 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
 ## Não faça
 
 Não comece a codar sem ler os docs; não crie função sem teste; não deixe `_preencher_` no FUNCTIONS.md; não
-abra PR com `check` vermelho; não toque na `main`; não encerre a tarefa sem `/handoff`.
+abra PR com `check` vermelho; não toque na `main`; não encerre a tarefa sem `/handoff`. Não grave arquivo por
+heredoc ou script no Bash se o texto tiver `.env` entre aspas (ex.: `process.env`): o guard bloqueia; use
+Write/Edit.

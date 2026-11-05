@@ -18,6 +18,8 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 - `npm run pr:check`: portão local de PR no lugar do CI.
 - Repositório como **marketplace de plugins** do Claude: cada conector instala por "Adicionar marketplace",
   com formulário de configuração e atualização pelos commits.
+- **Conector Canvas remoto** (`server/remote.js`, ADR 0009): servidor HTTP com OAuth para usar o Canvas no
+  claude.ai, no Cowork e no celular, autorizando com o token de acesso do Canvas; pronto para Docker e Render.
 
 ### Removido
 

@@ -54,6 +54,12 @@ pacotes `.mcpb`, commitlint dos commits e do título).
 
 **Squash merge** — Merge que condensa a branch em um commit na `main`; o título do PR vira a mensagem.
 
+**Conector remoto** — Modo de um conector servido por HTTP (`server/remote.js`) e adicionado no claude.ai como
+conector personalizado; autoriza por OAuth e funciona na web, no Cowork e no celular (ADR 0009).
+
+**Selo** — Texto cifrado e autenticado (AES-256-GCM, chave `SEAL_KEY`) que carrega `client_id`, código e tokens
+do OAuth sem estado; só o servidor abre e ninguém altera.
+
 **Sessão do Canvas** — Cookies do login feito pelo navegador, salvos em `~/.canvas-puc/session.json` e
 renovados sozinhos quando expiram.
 

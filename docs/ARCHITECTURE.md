@@ -2,7 +2,8 @@
 
 Repositório de **conectores MCP** para o Claude. Cada conector é um servidor MCP (stdio) independente,
 empacotado como extensão `.mcpb` e instalado no Claude Desktop (Configurações → Extensões). Decisão em
-[ADR 0007](adr/0007-conectores-como-extensoes-mcpb.md).
+[ADR 0007](adr/0007-conectores-como-extensoes-mcpb.md). Um conector pode ter também um **modo remoto**: servidor
+HTTP com OAuth para o claude.ai, o Cowork e o celular ([ADR 0009](adr/0009-conector-remoto-http-oauth.md)).
 
 ## Camadas
 
@@ -10,6 +11,9 @@ empacotado como extensão `.mcpb` e instalado no Claude Desktop (Configurações
 ┌───────────────────────────────────────────────┐
 │  conector  (connectors/<nome>/src/)            │  entrada (main.ts), tools, cliente da API,
 │                                                │  autenticação, formatação das respostas
+├───────────────────────────────────────────────┤
+│  remote  (src/remote/)                         │  servidor HTTP: OAuth sem estado, página de login,
+│                                                │  /mcp sem sessão (só o modo remoto usa)
 ├───────────────────────────────────────────────┤
 │  mcp  (src/mcp/)                               │  definição/registro de ferramentas, resultados
 ├───────────────────────────────────────────────┤
@@ -20,18 +24,21 @@ empacotado como extensão `.mcpb` e instalado no Claude Desktop (Configurações
 
 Dentro de um conector, a mesma regra vale em escala menor: funções puras (`config`, `format`, `helpers`,
 partes de `session`/`auth`) separadas das que fazem efeito (`client` → rede, `session` → disco,
-`browser-login` → navegador, `main` → stdio).
+`browser-login` → navegador, `main` → stdio, `remote-main` → HTTP).
 
 ## Regras de dependência (quem pode importar quem)
 
-| De ↓ / Para → | core | mcp | conector (o próprio) | outro conector | tools |
-| ------------- | ---- | --- | -------------------- | -------------- | ----- |
-| **core**      | ✅   | ❌  | ❌                   | ❌             | ❌    |
-| **mcp**       | ✅   | ✅  | ❌                   | ❌             | ❌    |
-| **conector**  | ✅   | ✅  | ✅                   | ❌             | ❌    |
-| **tools**     | ✅   | ❌  | ❌                   | ❌             | ✅    |
+| De ↓ / Para → | core | mcp | remote | conector (o próprio) | outro conector | tools |
+| ------------- | ---- | --- | ------ | -------------------- | -------------- | ----- |
+| **core**      | ✅   | ❌  | ❌     | ❌                   | ❌             | ❌    |
+| **mcp**       | ✅   | ✅  | ❌     | ❌                   | ❌             | ❌    |
+| **remote**    | ✅   | ❌  | ✅     | ❌                   | ❌             | ❌    |
+| **conector**  | ✅   | ✅  | ✅     | ✅                   | ❌             | ❌    |
+| **tools**     | ✅   | ❌  | ❌     | ❌                   | ❌             | ✅    |
 
 - Conectores **não** importam uns dos outros: lógica usada por dois conectores sobe para `src/core/` ou `src/mcp/`.
+- `remote` não conhece conector nenhum: recebe um `RemoteConnector` (textos da página, verificação da credencial e
+  fábrica de `McpServer`). Usa `node:crypto` e `node:http`, por isso não está em `core`.
 - `core` nunca importa Node (`node:fs`, `node:http`) nem bibliotecas com efeito; testes de `core` não usam mocks.
 
 ## Fluxo de dados
@@ -50,16 +57,19 @@ esbuild e grava ao lado um `package.json`/`package-lock.json` só com o que não
 | ------------------------ | ------------------------------------------------------------------- | -------- |
 | Plugin do marketplace    | Claude → Adicionar marketplace `temponi-bernardo/claude-connectors` | ADR 0008 |
 | Extensão `.mcpb` (~3 MB) | Claude Desktop → Configurações → Extensões → Instalar extensão      | ADR 0007 |
+| Conector remoto (HTTP)   | Hospedar `server/remote.js` (Dockerfile/Render) e adicionar a URL   | ADR 0009 |
 
 O `playwright-core` só é carregado quando o login pelo navegador é necessário (`loadPlaywright()`).
 
 ## Serviços externos
 
-| Serviço                   | Usado para                        | Onde está o adaptador                        | Segredo                                                |
-| ------------------------- | --------------------------------- | -------------------------------------------- | ------------------------------------------------------ |
-| API REST do Canvas LMS    | Cursos, tarefas, notas, avisos... | `connectors/canvas-puc/src/client.ts`        | Sessão em `~/.canvas-puc/session.json` (fora do repo)  |
-| Login SSO da instituição  | Obter a sessão do Canvas          | `connectors/canvas-puc/src/browser-login.ts` | Perfil do navegador em `~/.canvas-puc/browser-profile` |
-| Token de acesso do Canvas | Reserva se o login falhar         | `connectors/canvas-puc/src/auth.ts`          | `CANVAS_API_TOKEN` (campo sensível da extensão)        |
+| Serviço                   | Usado para                        | Onde está o adaptador                             | Segredo                                                |
+| ------------------------- | --------------------------------- | ------------------------------------------------- | ------------------------------------------------------ |
+| API REST do Canvas LMS    | Cursos, tarefas, notas, avisos... | `connectors/canvas-puc/src/client.ts`             | Sessão em `~/.canvas-puc/session.json` (fora do repo)  |
+| Login SSO da instituição  | Obter a sessão do Canvas          | `connectors/canvas-puc/src/browser-login.ts`      | Perfil do navegador em `~/.canvas-puc/browser-profile` |
+| Token de acesso do Canvas | Reserva se o login falhar         | `connectors/canvas-puc/src/auth.ts`               | `CANVAS_API_TOKEN` (campo sensível da extensão)        |
+| Token de acesso (remoto)  | Única credencial do modo remoto   | `connectors/canvas-puc/src/remote.ts`             | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)    |
+| Host HTTPS (ex.: Render)  | Rodar o conector remoto           | `render.yaml`, `connectors/canvas-puc/Dockerfile` | `SEAL_KEY` (variável do host, nunca no repositório)    |
 
 Nada de credencial no repositório: a configuração vem do formulário da extensão (variáveis de ambiente) e a
 sessão fica na pasta do usuário.
@@ -68,7 +78,7 @@ sessão fica na pasta do usuário.
 
 | Pacote                      | Para quê                                                          |
 | --------------------------- | ----------------------------------------------------------------- |
-| `@modelcontextprotocol/sdk` | Servidor MCP em stdio                                             |
+| `@modelcontextprotocol/sdk` | Servidor MCP em stdio e em Streamable HTTP (modo remoto)          |
 | `zod` (v3)                  | Esquemas de entrada das ferramentas                               |
 | `playwright-core`           | Controlar o Chrome/Edge instalado no login (sem baixar navegador) |
 

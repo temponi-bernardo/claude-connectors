@@ -58,6 +58,13 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
       'Rodar o pacote `.mcpb` extraído com `node server/index.js` e chamar `tools/list` e `quem_sou_eu` via JSON-RPC.',
   },
   {
+    name: 'startCanvasRemoteServer',
+    reason:
+      'Ponto de entrada: lê o ambiente e liga peças testadas (handler, servidor HTTP, conector).',
+    manualTest:
+      'Rodar `node server/remote.js` com PUBLIC_URL=http://localhost:8080 e SEAL_KEY, abrir `/.well-known/oauth-authorization-server` e conectar pelo MCP Inspector.',
+  },
+  {
     name: 'installedExternalVersions',
     reason: 'Lê node_modules reais da raiz; parte do CLI de empacotamento.',
     manualTest:

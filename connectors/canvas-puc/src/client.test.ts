@@ -6,9 +6,20 @@ import {
   fetchPlainText,
   requestWithRenewal,
   sendCanvasRequest,
+  unauthorizedError,
   unauthorizedMessage,
   type ClientDeps,
 } from './client.js';
+
+describe('unauthorizedError', () => {
+  it('usa a mensagem padrão ou a injetada', () => {
+    const base: ClientDeps = { baseUrl: 'b', auth: {} as AuthProvider, fetchFn: fetch };
+    expect(unauthorizedError(base, null).message).toContain('não está conectado');
+    expect(unauthorizedError({ ...base, describeUnauthorized: () => 'outra' }, null).message).toBe(
+      'outra',
+    );
+  });
+});
 
 const token: CanvasAuth = { kind: 'token', token: 't' };
 const fresh: CanvasAuth = { kind: 'token', token: 'novo' };
@@ -111,6 +122,17 @@ describe('requestWithRenewal', () => {
     await expect(
       requestWithRenewal(deps(f, provider(token, fresh)), { method: 'GET', path: '/a' }),
     ).rejects.toThrow('token');
+  });
+
+  it('usa a mensagem de 401 injetada quando houver', async () => {
+    const f = fakeFetch(json({}, { status: 401 }));
+    const custom: ClientDeps = {
+      ...deps(f, provider(token)),
+      describeUnauthorized: () => 'reconecte',
+    };
+    await expect(requestWithRenewal(custom, { method: 'GET', path: '/a' })).rejects.toThrow(
+      'reconecte',
+    );
   });
 
   it('inclui status e corpo em outros erros', async () => {

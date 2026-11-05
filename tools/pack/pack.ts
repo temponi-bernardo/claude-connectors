@@ -19,6 +19,10 @@ export const RUNTIME_EXTERNALS: readonly string[] = ['playwright-core'];
 export const CONNECTOR_ENTRY = join('src', 'main.ts');
 export const BUNDLE_PATH = join('server', 'index.js');
 
+/** Entrada opcional do servidor remoto (HTTP + OAuth, ADR 0009) e caminho do bundle dele. */
+export const REMOTE_ENTRY = join('src', 'remote-main.ts');
+export const REMOTE_BUNDLE_PATH = join('server', 'remote.js');
+
 /** Arquivos de runtime de um conector, versionados na pasta dele e copiados para o `.mcpb`. */
 export const RUNTIME_FILES: readonly string[] = [
   'manifest.json',

@@ -32,7 +32,7 @@
 | `revert`   | Reverte um commit                         | —                       |
 
 Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `pack`, `docs`, `tools`, `ci`, `deps`,
-`skills`, `release`, `config`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
+`skills`, `release`, `config`, `remote`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
 
 `BREAKING CHANGE:` no rodapé (ou `!` após o tipo) gera major. O hook `commit-msg` valida localmente; o
 `pr:check` valida o **título do PR**, porque com squash merge é ele que vira o commit da `main`.
@@ -93,6 +93,9 @@ release-please). O fluxo é da skill `/lancar-versao`:
    **rascunho** de release: `npx release-please github-release --draft --token "$(gh auth token)" --repo-url
 temponi-bernardo/claude-connectors`.
 5. Publicar o rascunho quando quiser, anexando os `.mcpb` de `dist/connectors/`.
+
+O **conector remoto** (ADR 0009) não depende de release: o Render (`render.yaml`, `autoDeploy`) publica o
+`server/remote.js` da `main` a cada merge. Por isso o bundle remoto entra no mesmo `pr:check` que os outros.
 
 ## Segurança no fluxo
 

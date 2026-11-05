@@ -33,13 +33,15 @@ O MVP é o conector do Canvas instalado como extensão e usado no dia a dia: **F
 
 ## Fase 2 — Uso real
 
-| Id   | Tarefa                                                                 | Estado | Pronto quando                                                                         |
-| ---- | ---------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------- |
-| F2.1 | Primeira release `v0.1.0` com o `.mcpb` anexado                        | ⬜     | Rascunho de release com `canvas-puc-1.2.0.mcpb`                                       |
-| F2.2 | Instalar pelo marketplace e aposentar `Documents/canvas-mcp`           | ⬜     | Extensão ativa; registro antigo no Claude Code trocado pelo do repo                   |
-| F2.3 | Escolher e esboçar o próximo conector (PRODUCT Q4)                     | ⬜     | Pergunta Q4 decidida e tarefas da Fase 3 escritas                                     |
-| F2.4 | Avaliar a migração para zod 4 (Dependabot ignora majors do zod até lá) | ⬜     | Conector testado com zod 4 e regra de ignore removida, ou ADR dizendo por que não     |
-| F2.5 | Avaliar TypeScript 7 (Dependabot ignora majors do TS até lá)           | ⬜     | `npm run check` verde com TS 7 e regra de ignore removida, ou ADR dizendo por que não |
+| Id   | Tarefa                                                                 | Estado | Pronto quando                                                                          |
+| ---- | ---------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------- |
+| F2.1 | Primeira release `v0.1.0` com o `.mcpb` anexado                        | ⬜     | Rascunho de release com `canvas-puc-1.2.0.mcpb`                                        |
+| F2.2 | Instalar pelo marketplace e aposentar `Documents/canvas-mcp`           | ⬜     | Extensão ativa; registro antigo no Claude Code trocado pelo do repo                    |
+| F2.3 | Escolher e esboçar o próximo conector (PRODUCT Q4)                     | ⬜     | Pergunta Q4 decidida e tarefas da Fase 3 escritas                                      |
+| F2.4 | Avaliar a migração para zod 4 (Dependabot ignora majors do zod até lá) | ⬜     | Conector testado com zod 4 e regra de ignore removida, ou ADR dizendo por que não      |
+| F2.5 | Avaliar TypeScript 7 (Dependabot ignora majors do TS até lá)           | ⬜     | `npm run check` verde com TS 7 e regra de ignore removida, ou ADR dizendo por que não  |
+| F2.6 | Conector remoto do Canvas: HTTP + OAuth com token (ADR 0009)           | ✅     | `server/remote.js` faz o OAuth completo e responde as ferramentas; Dockerfile e Render |
+| F2.7 | Hospedar o conector remoto e conectá-lo no claude.ai                   | ⬜     | Serviço no ar em https e `proximas_entregas` respondendo numa sessão do Cowork         |
 
 ## Fases seguintes
 

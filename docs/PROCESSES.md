@@ -41,7 +41,7 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 - **Passos:**
   1. Na subida, `startCanvasServer()` lê a configuração com `readCanvasConfig()`, cria a autenticação com
      `createAuthProvider()` e o cliente com `createCanvasClient()`, escolhe as ferramentas com `canvasTools()`
-     e as registra com `registerToolSpecs()`.
+     e as registra com `registerToolSpecs()` dentro de `createCanvasMcpServer()`.
   2. A chamada passa por `runToolSafely()`; a `ToolSpec` criada por `defineTool()` valida os argumentos.
   3. A ferramenta usa o cliente: `requestWithRenewal()` monta a requisição com `sendCanvasRequest()`
      (`buildUrl()` + `authHeaders()`); listagens seguem as páginas com `collectPages()` e `parseNextLink()`.
@@ -74,7 +74,8 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 - **Passos:**
   1. `runPackCli()` escolhe os conectores; com `--all`, `listConnectors()` acha as pastas com `manifest.json`.
   2. `buildConnectorRuntime()` lê nome e versão com `readManifestIdentity()`, une o código com o esbuild usando
-     `bundleOptions()` em `connectors/<nome>/server/index.js` e grava o `package.json` de runtime com
+     `bundleOptions()` em `connectors/<nome>/server/index.js` (e, se houver `src/remote-main.ts`, também em
+     `server/remote.js`, P08) e grava o `package.json` de runtime com
      `runtimePackageJson()` (versões de `installedExternalVersions()`) e o lockfile, via `runNodeBin()`; gera
      também o `plugin.json` (`pluginManifest()`) e o `.mcp.json` (`pluginMcpConfig()`) a partir do `manifest.json`,
      gravados por `writeJson()`.
@@ -108,3 +109,40 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 - **Resultado:** as ferramentas do conector aparecem como `mcp__plugin_<nome>_<servidor>__<ferramenta>`.
 - **Falhas:** sem acesso ao repo privado, o "Adicionar marketplace" falha; sem npm no PATH, o login pelo
   navegador falha (a leitura com sessão salva continua funcionando).
+
+## P08 — Conectar o Canvas remoto (OAuth no claude.ai)
+
+- **Gatilho:** no claude.ai, Configurações → Conectores → Adicionar conector personalizado com
+  `https://<servidor>/mcp` (ADR 0009); ou um token vencido que obriga a reconectar.
+- **Passos:**
+  1. Na subida, `startCanvasRemoteServer()` lê `readRemoteServerConfig()` (`readPublicUrl()`, `parseSealKey()`) e
+     `readCanvasRemoteSettings()`, monta `canvasRemoteConnector()` e sobe `startRemoteHttpServer()` com
+     `createRemoteHandler()`; cada requisição passa por `serveNodeRequest()` (`readNodeBody()`, `toWebRequest()`,
+     `writeWebResponse()`) e `routeRemoteRequest()`.
+  2. O Claude chama `/mcp` sem token e recebe `mcpUnauthorizedResponse()`; lê os metadados de
+     `protectedResourceMetadata()` e `authorizationServerMetadata()`.
+  3. `handleRegister()` registra o cliente com `registerClient()`: `isAllowedRedirect()` confere o retorno e o
+     `client_id` é um selo de `sealPayload()`.
+  4. `handleAuthorizePage()` valida a query com `parseAuthorizeQuery()` (`clientRedirectUris()`,
+     `readCodeChallenge()`) e mostra `renderLoginPage()` via `loginPageFor()`, com o pedido selado por
+     `sealAuthorizeRequest()`.
+  5. O usuário cola o token; `handleAuthorizeSubmit()` abre o pedido com `openAuthorizeRequest()`, confere o token
+     com `verifyCanvasToken()` e devolve o código de `issueAuthorizationCode()` por `redirectWithCode()`.
+  6. `handleToken()` troca o código em `redeemTokenRequest()` (`redeemAuthorizationCode()` confere PKCE com
+     `pkceChallenge()`) e responde com `issueTokenSet()`; depois, o refresh passa por `redeemRefreshToken()`.
+- **Resultado:** o conector aparece conectado no Claude (web, Cowork e celular); o servidor não guardou nada.
+- **Falhas:** token recusado → a página volta com o erro; pedido com mais de 15 minutos → 400; retorno fora de
+  `OAUTH_REDIRECT_HOSTS` → registro recusado; troca da `SEAL_KEY` → todos reconectam.
+
+## P09 — Responder a uma ferramenta pelo conector remoto
+
+- **Gatilho:** o Claude chama uma ferramenta em `POST /mcp` com o access token.
+- **Passos:**
+  1. `handleMcp()` lê o token do Canvas com `readAccessSecret()` (`openSealed()` confere tipo e validade).
+  2. O `createServer` de `canvasRemoteConnector()` monta `createTokenAuthProvider()` e o cliente com
+     `remoteUnauthorizedMessage()`, e `createCanvasMcpServer()` registra `canvasServiceTools()` (sem as de conexão).
+  3. `serveMcpRequest()` atende a requisição sem sessão, em JSON, e fecha o servidor; a ferramenta segue o P03
+     a partir do passo 2.
+- **Resultado:** a mesma resposta do conector local, sem navegador nem arquivo no servidor.
+- **Falhas:** access token vencido → 401 e o Claude usa o refresh token; token do Canvas vencido (30 dias na PUC)
+  → `unauthorizedError()` devolve a orientação de gerar outro token e reconectar (P08).
