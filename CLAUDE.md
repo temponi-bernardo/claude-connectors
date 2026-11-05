@@ -44,6 +44,7 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 | `npm run typecheck`                  | `tsc --noEmit`                                                        |
 | `npm run dup:check`                  | jscpd                                                                 |
 | `npm run pack -- <conector>`         | Gera `dist/connectors/<conector>-<versão>.mcpb` (`pack:all`: todos)   |
+| `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)   |
 
 ## Skills
 

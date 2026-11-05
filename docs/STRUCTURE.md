@@ -14,8 +14,7 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 ├── docs/             # Documentação — fonte da verdade
 ├── scripts/          # Scripts de shell auxiliares (GitHub, segredos, pr:check)
 ├── src/              # Código compartilhado entre conectores (core puro, mcp, remote)
-├── tools/            # Ferramentas internas do repositório (docs, hooks, pack)
-└── render.yaml       # Blueprint do Render para o conector Canvas remoto (ADR 0009)
+└── tools/            # Ferramentas internas do repositório (docs, hooks, pack)
 ```
 
 ## Pastas
@@ -38,10 +37,10 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 | `.github/`                              | Configuração do GitHub (sem workflows: CI é local, ADR 0006)                 | `dependabot.yml`, `PULL_REQUEST_TEMPLATE.md`, `CODEOWNERS`   |
 | `.github/ISSUE_TEMPLATE/`               | Formulários de issue                                                         | `bug.yml`, `ideia.yml`, `config.yml`                         |
 | `connectors/`                           | Conectores MCP, um por pasta; `npm run pack:all` empacota todos              | `*/manifest.json`                                            |
-| `connectors/canvas-puc/`                | Conector do Canvas: plugin do Claude Code, manifesto `.mcpb`, runtime e guia | `.mcp.json`, `manifest.json`, `Dockerfile`, `README.md`      |
+| `connectors/canvas-puc/`                | Conector do Canvas: plugin do Claude Code, manifesto `.mcpb`, runtime e guia | `manifest.json`, `wrangler.toml`, `Dockerfile`, `README.md`  |
 | `connectors/canvas-puc/.claude-plugin/` | Manifesto do plugin, com os campos de configuração (`userConfig`)            | `plugin.json`                                                |
 | `connectors/canvas-puc/server/`         | Bundles gerados por `npm run pack` (versionados; não editar à mão)           | `index.js` (stdio), `remote.js` (HTTP)                       |
-| `connectors/canvas-puc/src/`            | Código do conector: config, sessão, auth, cliente, formatação, tools, remoto | `main.ts`, `remote-main.ts`, `remote.ts`, `client.ts`        |
+| `connectors/canvas-puc/src/`            | Código do conector: config, sessão, auth, cliente, formatação, tools, remoto | `main.ts`, `worker.ts`, `remote.ts`, `client.ts`             |
 | `connectors/canvas-puc/src/fixtures/`   | Contexto falso (cliente e auth simulados) para os testes das ferramentas     | `fake-context.ts`                                            |
 | `docs/`                                 | Documentação do projeto (índice em `README.md`)                              | `FUNCTIONS.md`, `PROCESSES.md`, `ROADMAP.md`                 |
 | `docs/adr/`                             | Registros de decisão de arquitetura                                          | `README.md`, `0000-modelo.md`                                |

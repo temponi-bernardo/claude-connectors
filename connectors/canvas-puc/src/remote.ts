@@ -23,7 +23,8 @@ export function readCanvasRemoteSettings(env: EnvVars): CanvasRemoteSettings {
   return {
     baseUrl: baseUrl.replace(/\/+$/, ''),
     allowWrite: parseFlag(envValue(env, 'CANVAS_ALLOW_WRITE')),
-    fetchFn: fetch,
+    // Arrow: no Workers, o fetch global chamado como método de outro objeto dá "Illegal invocation".
+    fetchFn: (input, init) => fetch(input, init),
   };
 }
 

@@ -13,4 +13,5 @@ marca o antigo como "Substituído por NNNN". Modelo em [0000-modelo.md](0000-mod
 | [0006](0006-sem-github-actions-checagens-locais.md)       | Sem GitHub Actions: checagens e release locais            | Aceito                        | 2026-11-05 |
 | [0007](0007-conectores-como-extensoes-mcpb.md)            | Conectores como extensões `.mcpb` com sessão do navegador | Aceito                        | 2026-11-05 |
 | [0008](0008-conectores-como-plugins-do-marketplace.md)    | Conectores também como plugins de um marketplace          | Aceito                        | 2026-11-05 |
-| [0009](0009-conector-remoto-http-oauth.md)                | Conector remoto por HTTP com OAuth e token do Canvas      | Aceito                        | 2026-11-05 |
+| [0009](0009-conector-remoto-http-oauth.md)                | Conector remoto por HTTP com OAuth e token do Canvas      | Substituído em parte por 0010 | 2026-11-05 |
+| [0010](0010-conector-remoto-no-cloudflare-workers.md)     | Conector remoto hospedado no Cloudflare Workers           | Aceito                        | 2026-11-05 |

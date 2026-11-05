@@ -94,8 +94,8 @@ release-please). O fluxo é da skill `/lancar-versao`:
 temponi-bernardo/claude-connectors`.
 5. Publicar o rascunho quando quiser, anexando os `.mcpb` de `dist/connectors/`.
 
-O **conector remoto** (ADR 0009) não depende de release: o Render (`render.yaml`, `autoDeploy`) publica o
-`server/remote.js` da `main` a cada merge. Por isso o bundle remoto entra no mesmo `pr:check` que os outros.
+O **conector remoto** (ADR 0010) não depende de release: depois de um merge que mexe no conector, rode
+`npm run worker:deploy` na `main` (precisa de `CLOUDFLARE_API_TOKEN`). Para testar antes, `npm run worker:dev`.
 
 ## Segurança no fluxo
 

@@ -13,6 +13,8 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "pack": "tsx tools/pack/cli.ts",
     "pack:all": "tsx tools/pack/cli.ts --all",
+    "worker:dev": "wrangler dev --config connectors/canvas-puc/wrangler.toml",
+    "worker:deploy": "wrangler deploy --config connectors/canvas-puc/wrangler.toml",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
@@ -54,7 +56,8 @@
     "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.0",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.0",
+    "wrangler": "^4.158.0"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",

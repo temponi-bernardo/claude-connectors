@@ -3,10 +3,14 @@
  * e validação do pedido de autorização. Os clientes ficam selados no próprio `client_id`.
  */
 import { createHash } from 'node:crypto';
-import { openSealed, sealPayload } from './seal.js';
+import { envValue, type EnvVars } from '../core/env.js';
+import { openSealed, parseSealKey, sealPayload } from './seal.js';
 
 /** Validade do `client_id` registrado (10 anos, em segundos). */
 export const CLIENT_TTL_SECONDS = 10 * 365 * 24 * 3600;
+
+/** Hosts de retorno OAuth aceitos por padrão: Claude na web e Claude Code (localhost). */
+export const DEFAULT_REDIRECT_HOSTS: readonly string[] = ['claude.ai', 'claude.com', 'localhost'];
 
 /** Configuração do servidor de autorização. */
 export interface OAuthSettings {
@@ -16,6 +20,19 @@ export interface OAuthSettings {
   readonly key: Buffer;
   /** Hosts aceitos como retorno do OAuth (`localhost` libera também `127.0.0.1` em http). */
   readonly redirectHosts: readonly string[];
+}
+
+/** Monta a configuração OAuth do ambiente (`SEAL_KEY`, `OAUTH_REDIRECT_HOSTS`) com o emissor dado. */
+export function readOAuthSettings(env: EnvVars, issuer: string): OAuthSettings {
+  const hosts = envValue(env, 'OAUTH_REDIRECT_HOSTS')
+    ?.split(',')
+    .map((host) => host.trim())
+    .filter(Boolean);
+  return {
+    issuer,
+    key: parseSealKey(envValue(env, 'SEAL_KEY')),
+    redirectHosts: hosts ?? DEFAULT_REDIRECT_HOSTS,
+  };
 }
 
 /** Resultado de uma validação: valor, ou erro OAuth (`error` + `error_description`). */

@@ -71,3 +71,7 @@ logs/
 
 # ===== Handoff do Claude Code: docs/STATE.md é estado local de cada clone (ADR 0005) =====
 docs/STATE.md
+
+# ===== Cloudflare Workers (wrangler dev/deploy, ADR 0010) =====
+.wrangler/
+.dev.vars*

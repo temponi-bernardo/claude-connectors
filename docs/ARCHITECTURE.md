@@ -57,19 +57,19 @@ esbuild e grava ao lado um `package.json`/`package-lock.json` só com o que não
 | ------------------------ | ------------------------------------------------------------------- | -------- |
 | Plugin do marketplace    | Claude → Adicionar marketplace `temponi-bernardo/claude-connectors` | ADR 0008 |
 | Extensão `.mcpb` (~3 MB) | Claude Desktop → Configurações → Extensões → Instalar extensão      | ADR 0007 |
-| Conector remoto (HTTP)   | Hospedar `server/remote.js` (Dockerfile/Render) e adicionar a URL   | ADR 0009 |
+| Conector remoto (HTTP)   | `npm run worker:deploy` (Cloudflare Workers) e adicionar a URL      | ADR 0010 |
 
 O `playwright-core` só é carregado quando o login pelo navegador é necessário (`loadPlaywright()`).
 
 ## Serviços externos
 
-| Serviço                   | Usado para                        | Onde está o adaptador                             | Segredo                                                |
-| ------------------------- | --------------------------------- | ------------------------------------------------- | ------------------------------------------------------ |
-| API REST do Canvas LMS    | Cursos, tarefas, notas, avisos... | `connectors/canvas-puc/src/client.ts`             | Sessão em `~/.canvas-puc/session.json` (fora do repo)  |
-| Login SSO da instituição  | Obter a sessão do Canvas          | `connectors/canvas-puc/src/browser-login.ts`      | Perfil do navegador em `~/.canvas-puc/browser-profile` |
-| Token de acesso do Canvas | Reserva se o login falhar         | `connectors/canvas-puc/src/auth.ts`               | `CANVAS_API_TOKEN` (campo sensível da extensão)        |
-| Token de acesso (remoto)  | Única credencial do modo remoto   | `connectors/canvas-puc/src/remote.ts`             | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)    |
-| Host HTTPS (ex.: Render)  | Rodar o conector remoto           | `render.yaml`, `connectors/canvas-puc/Dockerfile` | `SEAL_KEY` (variável do host, nunca no repositório)    |
+| Serviço                   | Usado para                        | Onde está o adaptador                                  | Segredo                                                          |
+| ------------------------- | --------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------- |
+| API REST do Canvas LMS    | Cursos, tarefas, notas, avisos... | `connectors/canvas-puc/src/client.ts`                  | Sessão em `~/.canvas-puc/session.json` (fora do repo)            |
+| Login SSO da instituição  | Obter a sessão do Canvas          | `connectors/canvas-puc/src/browser-login.ts`           | Perfil do navegador em `~/.canvas-puc/browser-profile`           |
+| Token de acesso do Canvas | Reserva se o login falhar         | `connectors/canvas-puc/src/auth.ts`                    | `CANVAS_API_TOKEN` (campo sensível da extensão)                  |
+| Token de acesso (remoto)  | Única credencial do modo remoto   | `connectors/canvas-puc/src/remote.ts`                  | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)              |
+| Cloudflare Workers        | Rodar o conector remoto           | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (secret do Worker); deploy com `CLOUDFLARE_API_TOKEN` |
 
 Nada de credencial no repositório: a configuração vem do formulário da extensão (variáveis de ambiente) e a
 sessão fica na pasta do usuário.
@@ -82,7 +82,8 @@ sessão fica na pasta do usuário.
 | `zod` (v3)                  | Esquemas de entrada das ferramentas                               |
 | `playwright-core`           | Controlar o Chrome/Edge instalado no login (sem baixar navegador) |
 
-Dev: `esbuild` (bundle) e `@anthropic-ai/mcpb` (gera o `.mcpb`), além das ferramentas do template.
+Dev: `esbuild` (bundle), `@anthropic-ai/mcpb` (gera o `.mcpb`) e `wrangler` (Worker remoto, ADR 0010), além
+das ferramentas do template.
 
 ## Ferramentas internas (`tools/`)
 

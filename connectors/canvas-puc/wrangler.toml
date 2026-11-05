@@ -1,0 +1,16 @@
+# Conector Canvas remoto no Cloudflare Workers (ADR 0010).
+# Deploy: `npm run worker:deploy` (precisa de CLOUDFLARE_API_TOKEN). A chave dos selos é um secret:
+#   npx wrangler secret put SEAL_KEY --config connectors/canvas-puc/wrangler.toml
+# Sem PUBLIC_URL, o emissor OAuth é o próprio endereço do Worker (https://canvas-puc-remote.<conta>.workers.dev).
+name = "canvas-puc-remote"
+main = "src/worker.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[vars]
+CANVAS_BASE_URL = "https://pucminas.instructure.com"
+CANVAS_ALLOW_WRITE = "true"
+
+[observability]
+enabled = true

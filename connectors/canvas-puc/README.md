@@ -39,18 +39,30 @@ janela sozinha). Uma janela do Chrome abre, num perfil só do conector:
 
 ## Conector remoto (claude.ai, Cowork e celular)
 
-O plugin e a `.mcpb` rodam no seu computador. Para usar o Canvas nas sessões na nuvem, hospede o servidor
-remoto (`server/remote.js`, [ADR 0009](../../docs/adr/0009-conector-remoto-http-oauth.md)) e adicione-o como
-conector personalizado. Ele não usa o navegador: você autoriza colando um **token de acesso** do Canvas.
+O plugin e a `.mcpb` rodam no seu computador. Para usar o Canvas nas sessões na nuvem, publique o servidor
+remoto ([ADR 0009](../../docs/adr/0009-conector-remoto-http-oauth.md)) e adicione-o como conector
+personalizado. Ele não usa o navegador: você autoriza colando um **token de acesso** do Canvas.
 
-**1. Hospedar no Render (plano grátis):**
+**1. Publicar no Cloudflare Workers (plano grátis, [ADR 0010](../../docs/adr/0010-conector-remoto-no-cloudflare-workers.md)):**
 
-1. Em [render.com](https://render.com), **New → Blueprint** e escolha este repositório (o `render.yaml` da
-   raiz já configura tudo: Docker, `SEAL_KEY` gerada e envios liberados).
-2. Ao terminar o deploy, anote o endereço, ex.: `https://canvas-puc-remote.onrender.com`.
+1. Na Cloudflare, crie um token de API com o modelo **"Edit Cloudflare Workers"** e deixe-o na variável
+   `CLOUDFLARE_API_TOKEN` (no PC, ou nas configurações do ambiente da nuvem do Claude Code).
+2. Uma vez só, grave a chave dos selos como secret do Worker:
 
-No plano grátis o serviço dorme depois de 15 minutos sem uso. A primeira chamada depois disso pode levar
-cerca de 1 minuto; se o Claude desistir, tente de novo.
+   ```bash
+   node -e "console.log(crypto.randomBytes(32).toString('base64'))" | npx wrangler secret put SEAL_KEY --config connectors/canvas-puc/wrangler.toml
+   ```
+
+3. Publique (e repita depois de cada merge que mexer no conector):
+
+   ```bash
+   npm run worker:deploy
+   ```
+
+4. O endereço sai no fim do deploy: `https://canvas-puc-remote.<sua-conta>.workers.dev`.
+
+`wrangler.toml` já liga os envios (`CANVAS_ALLOW_WRITE=true`). O Worker não dorme: responde na hora.
+Para testar local antes: `npm run worker:dev` (precisa de `SEAL_KEY`, ex.: `--var SEAL_KEY:<chave>`).
 
 **2. Conectar no Claude:**
 
@@ -74,7 +86,7 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://seu-dominio -e SEAL_KEY=<32 bytes 
 
 | Variável               | Padrão                             | Para quê                                                        |
 | ---------------------- | ---------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC_URL`           | `RENDER_EXTERNAL_URL`              | Endereço público em https (obrigatório fora do Render)          |
+| `PUBLIC_URL`           | — (no Worker: o próprio endereço)  | Endereço público em https (obrigatório no Docker)               |
 | `SEAL_KEY`             | —                                  | Chave dos selos OAuth; trocar desconecta todo mundo             |
 | `PORT`                 | `8080`                             | Porta HTTP                                                      |
 | `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Para onde o OAuth pode devolver o acesso                        |
