@@ -20,7 +20,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/canvas-puc/src/main.ts`: [`startCanvasServer`](#startcanvasserver)
 - `connectors/canvas-puc/src/playwright-runtime.ts`: [`runtimeDir`](#runtimedir), [`npmInstallArgs`](#npminstallargs), [`resolveFrom`](#resolvefrom), [`installPlaywright`](#installplaywright), [`loadPlaywright`](#loadplaywright)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
-- `connectors/canvas-puc/src/remote.ts`: [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`remoteUnauthorizedMessage`](#remoteunauthorizedmessage), [`createTokenAuthProvider`](#createtokenauthprovider), [`verifyCanvasToken`](#verifycanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
+- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`remoteUnauthorizedMessage`](#remoteunauthorizedmessage), [`createTokenAuthProvider`](#createtokenauthprovider), [`verifyCanvasToken`](#verifycanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
 - `connectors/canvas-puc/src/session.ts`: [`sessionFilePath`](#sessionfilepath), [`cookieHeader`](#cookieheader), [`csrfToken`](#csrftoken), [`isCanvasSession`](#iscanvassession), [`loadSession`](#loadsession), [`saveSession`](#savesession), [`clearSession`](#clearsession)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasServiceTools`](#canvasservicetools), [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
@@ -2751,7 +2751,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Faz:** Lê a configuração do modo remoto (`CANVAS_BASE_URL`, `CANVAS_ALLOW_WRITE`).
 - **Entrada:** `env`: variáveis de ambiente.
-- **Saída:** `CanvasRemoteSettings` com URL sem barra final, escrita desligada por padrão e o `fetch` global.
+- **Saída:** `CanvasRemoteSettings` com URL sem barra final, escrita desligada por padrão e o `fetch` global com o `User-Agent` do conector (`withCanvasUserAgent`).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -2837,6 +2837,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Faz:** Monta o `RemoteConnector` do Canvas para o servidor HTTP.
 - **Entrada:** `settings`: configuração do modo remoto.
 - **Saída:** Textos da página, verificação do token e fábrica de `McpServer` por token.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `withCanvasUserAgent`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `withCanvasUserAgent(init: RequestInit | undefined): RequestInit`
+- **Usada por:** `readCanvasRemoteSettings()`
+- **Processos:** P08
+
+<!-- gerado:fim -->
+
+- **Faz:** Soma o `User-Agent` do conector (`CANVAS_USER_AGENT`) às opções do `fetch`; sem ele o Canvas responde 403, e o `fetch` do Workers não manda um.
+- **Entrada:** `init`: opções do `fetch` (ou `undefined`).
+- **Saída:** Cópia das opções com os headers originais (nomes em minúsculas) mais `user-agent`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -3727,6 +3744,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 | Nome                     | Arquivo                                           | O que é                                                                                                                     |
 | ------------------------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `CANVAS_USER_AGENT`      | `connectors/canvas-puc/src/remote.ts`             | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                                     |
 | `TEST_EXCEPTIONS`        | `src/test-exceptions.ts`                          | Lista única de funções sem teste automatizado, com motivo e teste manual.                                                   |
 | `DEFAULT_DOCS_CONFIG`    | `tools/docs/config.ts`                            | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                                        |
 | `MODULE_SCOPE_SUFFIX`    | `tools/docs/ast.ts`                               | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                                   |
