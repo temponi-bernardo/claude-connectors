@@ -22,6 +22,11 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
   claude.ai, no Cowork e no celular, autorizando com o token de acesso do Canvas; publicado no Cloudflare Workers
   (`npm run worker:deploy`) ou em qualquer host Docker.
 
+### Corrigido
+
+- Conector Canvas remoto no Cloudflare Workers: as chamadas ao Canvas mandam `User-Agent` (sem ele o Canvas
+  respondia 403) e a página de login libera o retorno ao claude.ai na CSP (antes o botão Conectar não fazia nada).
+
 ### Removido
 
 - GitHub Actions (CI, CodeQL, release-please em workflow): checagens e release rodam localmente, sem custo.
