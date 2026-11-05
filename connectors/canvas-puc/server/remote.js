@@ -23537,13 +23537,18 @@ function createCanvasMcpServer(specs, ctx) {
 }
 
 // connectors/canvas-puc/src/remote.ts
+var CANVAS_USER_AGENT = "claude-connectors-canvas-puc (+https://github.com/temponi-bernardo/claude-connectors)";
+function withCanvasUserAgent(init) {
+  const headers = Object.fromEntries(new Headers(init?.headers).entries());
+  return { ...init, headers: { ...headers, "user-agent": CANVAS_USER_AGENT } };
+}
 function readCanvasRemoteSettings(env) {
   const baseUrl = envValue(env, "CANVAS_BASE_URL") ?? DEFAULT_CANVAS_URL;
   return {
     baseUrl: baseUrl.replace(/\/+$/, ""),
     allowWrite: parseFlag(envValue(env, "CANVAS_ALLOW_WRITE")),
     // Arrow: no Workers, o fetch global chamado como método de outro objeto dá "Illegal invocation".
-    fetchFn: (input, init) => fetch(input, init)
+    fetchFn: (input, init) => fetch(input, withCanvasUserAgent(init))
   };
 }
 function canvasLoginText(baseUrl) {

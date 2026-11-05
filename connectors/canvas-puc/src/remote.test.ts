@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  CANVAS_USER_AGENT,
+  withCanvasUserAgent,
   canvasLoginText,
   canvasRemoteConnector,
   createTokenAuthProvider,
@@ -42,8 +44,31 @@ describe('readCanvasRemoteSettings', () => {
     vi.stubGlobal('fetch', global);
     const settings = readCanvasRemoteSettings({});
     await expect(settings.fetchFn('https://x.dev')).resolves.toBeInstanceOf(Response);
-    expect(global).toHaveBeenCalledWith('https://x.dev', undefined);
+    expect(global).toHaveBeenCalledWith('https://x.dev', {
+      headers: { 'user-agent': CANVAS_USER_AGENT },
+    });
     vi.unstubAllGlobals();
+  });
+});
+
+describe('withCanvasUserAgent', () => {
+  it('põe o User-Agent (o Canvas devolve 403 sem ele, e o fetch do Workers não manda)', () => {
+    expect(withCanvasUserAgent(undefined)).toEqual({
+      headers: { 'user-agent': CANVAS_USER_AGENT },
+    });
+  });
+
+  it('mantém método, corpo e headers da chamada', () => {
+    const init = withCanvasUserAgent({
+      method: 'POST',
+      body: '{}',
+      headers: { Authorization: 'Bearer t' },
+    });
+    expect(init).toEqual({
+      method: 'POST',
+      body: '{}',
+      headers: { authorization: 'Bearer t', 'user-agent': CANVAS_USER_AGENT },
+    });
   });
 });
 

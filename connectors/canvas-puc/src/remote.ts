@@ -17,6 +17,16 @@ export interface CanvasRemoteSettings {
   readonly fetchFn: typeof fetch;
 }
 
+/** User-Agent das chamadas ao Canvas: sem ele o Canvas responde 403 (o fetch do Workers não manda um). */
+export const CANVAS_USER_AGENT =
+  'claude-connectors-canvas-puc (+https://github.com/temponi-bernardo/claude-connectors)';
+
+/** Devolve as opções do `fetch` com o `User-Agent` do conector somado aos headers existentes. */
+export function withCanvasUserAgent(init: RequestInit | undefined): RequestInit {
+  const headers = Object.fromEntries(new Headers(init?.headers).entries());
+  return { ...init, headers: { ...headers, 'user-agent': CANVAS_USER_AGENT } };
+}
+
 /** Lê `CANVAS_BASE_URL` e `CANVAS_ALLOW_WRITE` (escrita desligada por padrão). */
 export function readCanvasRemoteSettings(env: EnvVars): CanvasRemoteSettings {
   const baseUrl = envValue(env, 'CANVAS_BASE_URL') ?? DEFAULT_CANVAS_URL;
@@ -24,7 +34,7 @@ export function readCanvasRemoteSettings(env: EnvVars): CanvasRemoteSettings {
     baseUrl: baseUrl.replace(/\/+$/, ''),
     allowWrite: parseFlag(envValue(env, 'CANVAS_ALLOW_WRITE')),
     // Arrow: no Workers, o fetch global chamado como método de outro objeto dá "Illegal invocation".
-    fetchFn: (input, init) => fetch(input, init),
+    fetchFn: (input, init) => fetch(input, withCanvasUserAgent(init)),
   };
 }
 
