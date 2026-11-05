@@ -21,8 +21,8 @@ Fluxo completo em `docs/WORKFLOW.md` (seção "Versão e release") e decisões e
    commits (feat → minor, fix → patch, BREAKING → major), CHANGELOG gerado legível.
 4. **Mova "Não lançado"** para a versão no PR de release se o texto humano for melhor que o gerado (edite a
    branch do release-please; ele preserva edições manuais no CHANGELOG).
-5. **Pare e peça confirmação explícita** para mergear o PR de release. Só mergeie (`gh pr merge --squash`)
-   com um "sim" da pessoa. Nunca crie tag à mão.
+5. **Mergeie** o PR de release sem pedir confirmação (`gh pr merge --squash`), como qualquer PR com
+   `pr:check` verde (`docs/WORKFLOW.md`). Nunca crie tag à mão.
 6. **Tag e rascunho:** depois do merge, `npx release-please github-release --draft --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`
    cria a tag `vX.Y.Z` e o rascunho. Gere os pacotes (`npm run pack:all`) e anexe:
    `gh release upload vX.Y.Z dist/connectors/*.mcpb`. Publicar é decisão da pessoa

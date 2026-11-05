@@ -46,7 +46,8 @@ Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `pack`, `d
 4. `npm run pr:check -- "<título do PR>"` verde é obrigatório antes de abrir e de mergear: check completo,
    pacotes `.mcpb`, runtime dos conectores commitado e atual, commitlint dos commits e do título. Corrija em vez de pular (`--no-verify` é
    proibido e barrado pelo Claude Code).
-5. **Quem mergeia:** o Claude, com `pr:check` verde (decisão do dono, 2026-11-05).
+5. **Quem mergeia:** o Claude, com `pr:check` verde, sem pedir confirmação, inclusive o PR de release
+   (decisão do dono, 2026-11-05).
 6. Merge por **squash**, apagando a branch.
 
 ## Definição de pronto
@@ -89,7 +90,7 @@ release-please). O fluxo é da skill `/lancar-versao`:
 2. A CLI local abre/atualiza um **PR de release** com o bump de versão e o CHANGELOG gerado:
    `npx release-please release-pr --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`.
 3. Revisar o PR de release (e a seção "Não lançado" do CHANGELOG, que vira a versão).
-4. Mergear o PR de release — essa é a confirmação humana. Depois, a mesma CLI cria a tag `vX.Y.Z` e um
+4. O Claude mergeia o PR de release, como qualquer PR. A confirmação humana fica em publicar o rascunho. Depois, a mesma CLI cria a tag `vX.Y.Z` e um
    **rascunho** de release: `npx release-please github-release --draft --token "$(gh auth token)" --repo-url
 temponi-bernardo/claude-connectors`.
 5. Publicar o rascunho quando quiser, anexando os `.mcpb` de `dist/connectors/`.
