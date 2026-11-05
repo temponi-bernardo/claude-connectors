@@ -100,4 +100,11 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
     manualTest:
       'Rodar `npm run pack -- canvas-puc` e `npm run pack:all` e conferir os arquivos em dist/connectors/.',
   },
+  {
+    name: 'writeJson',
+    reason:
+      'Só escreve no disco o JSON que pluginManifest/pluginMcpConfig/runtimePackageJson (testadas) montam.',
+    manualTest:
+      'Rodar `npm run pack:all` e conferir .mcp.json e .claude-plugin/plugin.json do conector.',
+  },
 ];

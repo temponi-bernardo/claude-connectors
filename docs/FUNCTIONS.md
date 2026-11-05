@@ -33,8 +33,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `tools/docs/markdown.ts`: [`firstGroup`](#firstgroup), [`stripCodeBlocks`](#stripcodeblocks), [`extractCalledNames`](#extractcallednames), [`sliceBetween`](#slicebetween), [`replaceBetween`](#replacebetween), [`extractFunctionSections`](#extractfunctionsections), [`buildSection`](#buildsection), [`extractProcessCitations`](#extractprocesscitations), [`extractDocumentedDirs`](#extractdocumenteddirs), [`extractBacktickedNames`](#extractbacktickednames)
 - `tools/docs/render.ts`: [`formatList`](#formatlist), [`renderGeneratedBlock`](#rendergeneratedblock), [`renderNewSection`](#rendernewsection), [`renderModuleIndex`](#rendermoduleindex), [`computeGeneratedData`](#computegenerateddata), [`closureOf`](#closureof), [`processesByFunction`](#processesbyfunction), [`replaceSectionBlock`](#replacesectionblock), [`appendSection`](#appendsection), [`insertBeforeDataTable`](#insertbeforedatatable), [`removeSection`](#removesection), [`removeEmptyModules`](#removeemptymodules), [`pruneOrphanSections`](#pruneorphansections), [`applyGenerated`](#applygenerated)
 - `tools/docs/run.ts`: [`readOptional`](#readoptional), [`readDocsTexts`](#readdocstexts), [`formatIssues`](#formatissues), [`runCheck`](#runcheck), [`generateFunctionsDoc`](#generatefunctionsdoc), [`runGenerate`](#rungenerate)
-- `tools/pack/cli.ts`: [`installedExternalVersions`](#installedexternalversions), [`runNodeBin`](#runnodebin), [`buildConnectorRuntime`](#buildconnectorruntime), [`packMcpb`](#packmcpb), [`runPackCli`](#runpackcli)
-- `tools/pack/pack.ts`: [`listConnectors`](#listconnectors), [`readManifestIdentity`](#readmanifestidentity), [`runtimePackageJson`](#runtimepackagejson), [`bundleOptions`](#bundleoptions)
+- `tools/pack/cli.ts`: [`installedExternalVersions`](#installedexternalversions), [`runNodeBin`](#runnodebin), [`writeJson`](#writejson), [`buildConnectorRuntime`](#buildconnectorruntime), [`packMcpb`](#packmcpb), [`runPackCli`](#runpackcli)
+- `tools/pack/pack.ts`: [`listConnectors`](#listconnectors), [`pluginManifest`](#pluginmanifest), [`pluginMcpConfig`](#pluginmcpconfig), [`readManifestIdentity`](#readmanifestidentity), [`runtimePackageJson`](#runtimepackagejson), [`bundleOptions`](#bundleoptions)
 
 <!-- indice:fim -->
 
@@ -2445,6 +2445,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Apaga e recria `dist/stage/<nome>`; roda `npm ci` (rede) e `mcpb pack`; escreve em `dist/connectors/`.
 - **Erros:** Lança se faltar um arquivo de runtime (rode `buildConnectorRuntime` antes) ou se npm/mcpb falharem.
 
+### `writeJson`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/cli.ts`
+- **Assinatura:** `writeJson(file: string, data: unknown): void`
+- **Usada por:** `buildConnectorRuntime()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava um valor como JSON indentado com quebra de linha final.
+- **Entrada:** `file`: caminho do arquivo; `data`: valor serializável.
+- **Saída:** Nada.
+- **Efeitos:** Escreve o arquivo no disco (sobrescreve).
+- **Erros:** Lança se o disco recusar a escrita.
+
 ## `tools/pack/pack.ts`
 
 ### `listConnectors`
@@ -2512,6 +2529,40 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Faz:** Monta as opções do esbuild para unir o conector num ESM para Node 18+.
 - **Entrada:** `entry`: arquivo de entrada; `outfile`: arquivo de saída.
 - **Saída:** `BuildOptions` com bundle, `node18`, externos de `RUNTIME_EXTERNALS` e banner que define `require`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pluginManifest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/pack.ts`
+- **Assinatura:** `pluginManifest(manifest: McpbManifest): Record<string, unknown>`
+- **Usada por:** `buildConnectorRuntime()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera o `plugin.json` do plugin a partir do manifesto `.mcpb`, fonte única de nome, descrição e configuração.
+- **Entrada:** `manifest`: manifesto `.mcpb` do conector.
+- **Saída:** Objeto com `name`, `description`, `author`, `repository` (URL) e `userConfig` (= `user_config` do manifesto).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pluginMcpConfig`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/pack/pack.ts`
+- **Assinatura:** `pluginMcpConfig(manifest: McpbManifest): Record<string, unknown>`
+- **Usada por:** `buildConnectorRuntime()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera o `.mcp.json` do plugin com o comando do `.mcpb`, trocando `${__dirname}` por `${CLAUDE_PLUGIN_ROOT}`.
+- **Entrada:** `manifest`: manifesto `.mcpb` do conector.
+- **Saída:** `{ mcpServers: { <nome>: { command, args, env } } }`; `env` vazio se o manifesto não tiver.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 

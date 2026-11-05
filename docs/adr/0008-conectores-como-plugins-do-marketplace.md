@@ -15,7 +15,8 @@ do `playwright-core`, que lê arquivos próprios em tempo de execução e não p
 
 1. O repositório é um marketplace (`.claude-plugin/marketplace.json`) e cada `connectors/<nome>/` é um plugin
    (`.claude-plugin/plugin.json` com `userConfig` + `.mcp.json`), sem `version` fixa: atualizações seguem os
-   commits da pasta.
+   commits da pasta. Os dois arquivos são **gerados** do `manifest.json` do `.mcpb`, que é a fonte única de nome,
+   descrição, comando e campos de configuração.
 2. `npm run pack` passa a gerar dentro da pasta do conector o runtime versionado: `server/index.js` (bundle),
    `package.json` e `package-lock.json` só com as dependências externas. O `pr:check` falha se ele estiver
    desatualizado. O mesmo runtime vai para o `.mcpb` (ADR 0007 continua valendo).

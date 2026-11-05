@@ -9,3 +9,5 @@ tools/**/fixtures/**
 connectors/*/server/
 connectors/*/package.json
 connectors/*/package-lock.json
+connectors/*/.claude-plugin/
+connectors/*/.mcp.json

@@ -1,10 +1,10 @@
 {
   "name": "canvas-puc",
-  "description": "Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, módulos, arquivos e fóruns, com login pelo navegador e sessão renovada sozinha.",
-  "author": { "name": "Bernardo Temponi" },
+  "description": "Tarefas, prazos, notas, avisos, módulos e arquivos do Canvas da PUC Minas, com login pelo navegador.",
+  "author": {
+    "name": "Bernardo Temponi"
+  },
   "repository": "https://github.com/temponi-bernardo/claude-connectors",
-  "license": "MIT",
-  "keywords": ["canvas", "lms", "puc-minas", "mcp"],
   "userConfig": {
     "base_url": {
       "type": "string",

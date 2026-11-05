@@ -17,7 +17,10 @@ import {
   bundleOptions,
   listConnectors,
   readManifestIdentity,
+  pluginManifest,
+  pluginMcpConfig,
   runtimePackageJson,
+  type McpbManifest,
 } from './pack.js';
 
 /** Versões instaladas (em node_modules da raiz) das dependências externas. */
@@ -41,17 +44,24 @@ function runNodeBin(bin: 'npm' | 'npx', args: readonly string[], cwd: string): v
   });
 }
 
-/** Gera, dentro da pasta do conector, o que o plugin do Claude Code usa: bundle, package.json e lockfile. */
+/** Grava um JSON indentado com quebra de linha final. */
+function writeJson(file: string, data: unknown): void {
+  writeFileSync(file, `${JSON.stringify(data, null, 2)}\n`);
+}
+
+/** Gera na pasta do conector o que o plugin usa: bundle, package.json, lockfile, plugin.json e .mcp.json. */
 async function buildConnectorRuntime(root: string, name: string): Promise<void> {
   const dir = join(root, CONNECTORS_DIR, name);
   const identity = readManifestIdentity(join(dir, 'manifest.json'));
   await build(bundleOptions(join(dir, CONNECTOR_ENTRY), join(dir, BUNDLE_PATH)));
-  const pkg = runtimePackageJson(identity, installedExternalVersions(root));
-  writeFileSync(
+  writeJson(
     join(dir, 'package.json'),
-    `${JSON.stringify(pkg, null, 2)}
-`,
+    runtimePackageJson(identity, installedExternalVersions(root)),
   );
+  const manifest = JSON.parse(readFileSync(join(dir, 'manifest.json'), 'utf8')) as McpbManifest;
+  mkdirSync(join(dir, '.claude-plugin'), { recursive: true });
+  writeJson(join(dir, '.claude-plugin', 'plugin.json'), pluginManifest(manifest));
+  writeJson(join(dir, '.mcp.json'), pluginMcpConfig(manifest));
   runNodeBin('npm', ['install', '--package-lock-only', '--no-audit', '--no-fund', '--silent'], dir);
 }
 

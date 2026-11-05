@@ -75,7 +75,9 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
   1. `runPackCli()` escolhe os conectores; com `--all`, `listConnectors()` acha as pastas com `manifest.json`.
   2. `buildConnectorRuntime()` lê nome e versão com `readManifestIdentity()`, une o código com o esbuild usando
      `bundleOptions()` em `connectors/<nome>/server/index.js` e grava o `package.json` de runtime com
-     `runtimePackageJson()` (versões de `installedExternalVersions()`) e o lockfile, via `runNodeBin()`.
+     `runtimePackageJson()` (versões de `installedExternalVersions()`) e o lockfile, via `runNodeBin()`; gera
+     também o `plugin.json` (`pluginManifest()`) e o `.mcp.json` (`pluginMcpConfig()`) a partir do `manifest.json`,
+     gravados por `writeJson()`.
   3. `packMcpb()` copia `RUNTIME_FILES` para o staging, roda `npm ci` e `mcpb pack`.
 - **Resultado:** runtime versionado na pasta do conector (usado pelo plugin do Claude Code, P07) e
   `dist/connectors/<nome>-<versão>.mcpb` (Claude Desktop → Extensões).
