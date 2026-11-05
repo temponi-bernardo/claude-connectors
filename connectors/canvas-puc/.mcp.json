@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "canvas": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/index.js"],
+      "env": {
+        "CANVAS_BASE_URL": "${user_config.base_url}",
+        "CANVAS_ALLOW_WRITE": "${user_config.allow_write}",
+        "CANVAS_API_TOKEN": "${user_config.api_token}"
+      }
+    }
+  }
+}

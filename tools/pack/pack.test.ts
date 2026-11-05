@@ -3,7 +3,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  BUNDLE_PATH,
   RUNTIME_EXTERNALS,
+  RUNTIME_FILES,
   bundleOptions,
   listConnectors,
   readManifestIdentity,
@@ -71,5 +73,16 @@ describe('bundleOptions', () => {
     });
     expect(opts.external).toEqual([...RUNTIME_EXTERNALS]);
     expect(opts.banner?.js).toContain('createRequire');
+  });
+});
+
+describe('RUNTIME_FILES', () => {
+  it('inclui manifesto, package.json, lockfile e o bundle', () => {
+    expect(RUNTIME_FILES).toEqual([
+      'manifest.json',
+      'package.json',
+      'package-lock.json',
+      BUNDLE_PATH,
+    ]);
   });
 });

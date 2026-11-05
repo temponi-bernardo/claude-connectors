@@ -19,6 +19,14 @@ export const RUNTIME_EXTERNALS: readonly string[] = ['playwright-core'];
 export const CONNECTOR_ENTRY = join('src', 'main.ts');
 export const BUNDLE_PATH = join('server', 'index.js');
 
+/** Arquivos de runtime de um conector, versionados na pasta dele e copiados para o `.mcpb`. */
+export const RUNTIME_FILES: readonly string[] = [
+  'manifest.json',
+  'package.json',
+  'package-lock.json',
+  BUNDLE_PATH,
+];
+
 /** `package.json` mínimo gravado no pacote para instalar as dependências externas. */
 export interface RuntimePackageJson {
   readonly name: string;
@@ -82,7 +90,7 @@ export function bundleOptions(entry: string, outfile: string): BuildOptions {
     target: 'node18',
     external: [...RUNTIME_EXTERNALS],
     banner: {
-      js: "import { createRequire } from 'node:module'; const require = createRequire(import.meta.url);",
+      js: "import { createRequire as __bundleCreateRequire } from 'node:module'; const require = __bundleCreateRequire(import.meta.url);",
     },
     logLevel: 'warning',
   };

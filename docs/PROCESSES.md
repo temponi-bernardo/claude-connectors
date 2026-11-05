@@ -60,7 +60,7 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
      a forma) e `pickAuth()` escolhe sessão, token ou nenhuma.
   2. Em 401, `requestWithRenewal()` chama `renewOnce()`, que roda uma única `renewAuth()` por vez.
   3. `renewAuth()` tenta `loginAndStore()` em modo silencioso: `browserLogin()` abre o perfil com
-     `launchLoginBrowser()` oculto e `waitForCanvasLogin()` espera `pageHasCanvasSession()`, clicando o botão
+     `launchLoginBrowser()` oculto (carregando o navegador por `loadPlaywright()`) e `waitForCanvasLogin()` espera `pageHasCanvasSession()`, clicando o botão
      da instituição com `clickInstitutionButton()` quando `isLoginChooserUrl()` reconhece a tela de escolha.
   4. Se o silencioso falhar, usa o token reserva (se houver) ou repete o login com janela visível.
   5. `saveSession()` grava os cookies; `cookieHeader()` e `csrfToken()` montam os headers das próximas chamadas.
@@ -73,11 +73,12 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 - **Gatilho:** `npm run pack -- <conector>`, `npm run pack:all` ou o `pr:check`.
 - **Passos:**
   1. `runPackCli()` escolhe os conectores; com `--all`, `listConnectors()` acha as pastas com `manifest.json`.
-  2. `packConnector()` lê nome e versão com `readManifestIdentity()` e une o código com o esbuild usando
-     `bundleOptions()`.
-  3. `runtimePackageJson()` grava só as dependências externas, com as versões de `installedExternalVersions()`.
-  4. `runNodeBin()` roda `npm install --omit=dev` na pasta de staging e `mcpb pack`.
-- **Resultado:** `dist/connectors/<nome>-<versão>.mcpb`, pronto para instalar no Claude Desktop.
+  2. `buildConnectorRuntime()` lê nome e versão com `readManifestIdentity()`, une o código com o esbuild usando
+     `bundleOptions()` em `connectors/<nome>/server/index.js` e grava o `package.json` de runtime com
+     `runtimePackageJson()` (versões de `installedExternalVersions()`) e o lockfile, via `runNodeBin()`.
+  3. `packMcpb()` copia `RUNTIME_FILES` para o staging, roda `npm ci` e `mcpb pack`.
+- **Resultado:** runtime versionado na pasta do conector (usado pelo plugin do Claude Code, P07) e
+  `dist/connectors/<nome>-<versão>.mcpb` (Claude Desktop → Extensões).
 - **Falhas:** manifesto sem nome/versão ou dependência externa não instalada interrompem com erro.
 
 ## P06 — Portão de PR local (`npm run pr:check`)
@@ -85,7 +86,23 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 - **Gatilho:** antes de abrir e antes de mergear um PR (não há CI, ADR 0006).
 - **Passos:**
   1. `scripts/pr-check.sh` exige o título do PR e roda `npm run check` (inclui o P01 via `runDocsCli()`).
-  2. Roda o P05 (`npm run pack:all`) para garantir que todos os conectores empacotam.
+  2. Roda o P05 (`npm run pack:all`) e falha se o runtime versionado dos conectores mudar sem commit.
   3. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
 - **Resultado:** `✔ pr:check verde`, condição para o Claude mergear com squash.
 - **Falhas:** qualquer etapa com erro para o script com código ≠ 0.
+
+## P07 — Instalar um conector como plugin (marketplace do Claude Code)
+
+- **Gatilho:** no Claude, "Adicionar marketplace" com `temponi-bernardo/claude-connectors` e instalar o plugin.
+- **Passos:**
+  1. O Claude clona o repositório (credenciais git do PC; repo privado) e lê `.claude-plugin/marketplace.json`.
+  2. Ao instalar, copia `connectors/<nome>/`, pede os campos de `userConfig` do `plugin.json` e roda
+     `npm install` porque a pasta tem `package.json` e `package-lock.json` (só o playwright-core).
+  3. O `.mcp.json` sobe `node ${CLAUDE_PLUGIN_ROOT}/server/index.js` com os campos como variáveis de ambiente
+     (P03 a partir daí).
+  4. Se o `npm install` automático não tiver rodado, `loadPlaywright()` instala o playwright-core em
+     `runtimeDir()` na primeira vez que o login pelo navegador for necessário (`resolveFrom()`,
+     `installPlaywright()`).
+- **Resultado:** as ferramentas do conector aparecem como `mcp__plugin_<nome>_<servidor>__<ferramenta>`.
+- **Falhas:** sem acesso ao repo privado, o "Adicionar marketplace" falha; sem npm no PATH, o login pelo
+  navegador falha (a leitura com sessão salva continua funcionando).

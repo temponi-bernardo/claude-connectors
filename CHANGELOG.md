@@ -16,6 +16,8 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 - Login no Canvas por janela do Chrome/Edge com renovação silenciosa da sessão; token só como reserva.
 - `npm run pack` / `pack:all`: empacota cada conector numa extensão `.mcpb` enxuta (bundle esbuild, ~3 MB).
 - `npm run pr:check`: portão local de PR no lugar do CI.
+- Repositório como **marketplace de plugins** do Claude: cada conector instala por "Adicionar marketplace",
+  com formulário de configuração e atualização pelos commits.
 
 ### Removido
 

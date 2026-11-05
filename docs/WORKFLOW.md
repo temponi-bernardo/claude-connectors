@@ -44,7 +44,7 @@ Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `pack`, `d
 3. Preencha o template: o que mudou, como testar, checklist de documentação (cada doc marcado ou "não se
    aplica: motivo").
 4. `npm run pr:check -- "<título do PR>"` verde é obrigatório antes de abrir e de mergear: check completo,
-   build, pacotes `.mcpb`, commitlint dos commits e do título. Corrija em vez de pular (`--no-verify` é
+   pacotes `.mcpb`, runtime dos conectores commitado e atual, commitlint dos commits e do título. Corrija em vez de pular (`--no-verify` é
    proibido e barrado pelo Claude Code).
 5. **Quem mergeia:** o Claude, com `pr:check` verde (decisão do dono, 2026-11-05).
 6. Merge por **squash**, apagando a branch.

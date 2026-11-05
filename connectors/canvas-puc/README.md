@@ -5,11 +5,17 @@ rubrica, notas, avisos, módulos, páginas, arquivos, fóruns e calendário.
 
 ## Instalar
 
-1. `npm run pack -- canvas-puc` gera `dist/connectors/canvas-puc-<versão>.mcpb`.
-2. No Claude Desktop: **Configurações → Extensões → Instalar extensão** e escolha o arquivo (ou dê dois
-   cliques nele).
-3. No formulário: o endereço já vem preenchido, "Permitir envios" liga/desliga entregar tarefa e responder
-   fórum, e o token pode ficar em branco.
+**Como plugin (recomendado):**
+
+1. No Claude, **Adicionar marketplace** → `temponi-bernardo/claude-connectors`.
+2. Instale o plugin **canvas-puc** e preencha o formulário: endereço (já vem preenchido), "Permitir envios" e
+   token (pode ficar em branco).
+3. O Claude instala o `playwright-core` sozinho; as atualizações chegam quando o marketplace é atualizado.
+
+**Como extensão `.mcpb`:** `npm run pack -- canvas-puc` e instale `dist/connectors/canvas-puc-<versão>.mcpb`
+em **Configurações → Extensões → Instalar extensão**.
+
+Use só um dos dois para não ter as ferramentas duplicadas.
 
 ## Login
 

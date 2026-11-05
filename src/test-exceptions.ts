@@ -69,14 +69,34 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
     manualTest: 'Rodar `npm run pack:all` no Windows e conferir que npm install e mcpb pack rodam.',
   },
   {
-    name: 'packConnector',
+    name: 'buildConnectorRuntime',
     reason:
-      'Gera o pacote real (esbuild, npm install, mcpb pack); as decisões estão em pack.ts (testadas).',
+      'Roda esbuild e npm de verdade na pasta do conector; as decisões estão em pack.ts (testadas).',
+    manualTest:
+      'Rodar `npm run pack:all` e conferir server/index.js, package.json e package-lock.json do conector.',
+  },
+  {
+    name: 'packMcpb',
+    reason:
+      'Gera o pacote real (npm ci, mcpb pack); os arquivos copiados vêm de RUNTIME_FILES (testada).',
     manualTest: 'Rodar `npm run pack:all`, extrair o `.mcpb` e rodar `node server/index.js`.',
   },
   {
+    name: 'installPlaywright',
+    reason: 'Roda npm install de verdade (rede); os argumentos vêm de npmInstallArgs (testada).',
+    manualTest:
+      'Apagar o runtime do plugin, chamar `conectar_canvas` e conferir `~/.canvas-puc/runtime/node_modules/playwright-core`.',
+  },
+  {
+    name: 'loadPlaywright',
+    reason:
+      'Importa módulos dinamicamente e pode instalar pela rede; a resolução está em resolveFrom (testada).',
+    manualTest: 'No plugin instalado, chamar `conectar_canvas`: a janela do Chrome deve abrir.',
+  },
+  {
     name: 'runPackCli',
-    reason: 'Ponto de entrada do CLI de empacotamento: só lê argv e chama packConnector.',
+    reason:
+      'Ponto de entrada do CLI de empacotamento: só lê argv e chama buildConnectorRuntime/packMcpb.',
     manualTest:
       'Rodar `npm run pack -- canvas-puc` e `npm run pack:all` e conferir os arquivos em dist/connectors/.',
   },

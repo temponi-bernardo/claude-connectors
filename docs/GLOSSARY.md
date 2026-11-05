@@ -41,6 +41,9 @@ com motivo e teste manual.
 
 **Registro de funções** — Lista de funções de topo (`function nome`) encontradas no código.
 
+**Marketplace de plugins** — Repositório com `.claude-plugin/marketplace.json` de onde o Claude instala
+plugins; aqui, cada conector é um plugin.
+
 **pr:check** — `npm run pr:check -- "<título>"`: o portão local de PR que substitui o CI (check, build,
 pacotes `.mcpb`, commitlint dos commits e do título).
 

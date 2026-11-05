@@ -1,6 +1,6 @@
 {
   "sourceDirs": ["src", "tools", "connectors"],
-  "ignore": ["**/fixtures/**"],
+  "ignore": ["**/fixtures/**", "**/server/**"],
   "testSuffix": ".test.ts",
   "testExceptionsFile": "src/test-exceptions.ts",
   "uiDir": null,
