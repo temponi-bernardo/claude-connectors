@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -11,7 +11,8 @@ import {
 
 const dirs: string[] = [];
 function tempDir(): string {
-  const dir = mkdtempSync(join(tmpdir(), 'pw-runtime-'));
+  // realpath: no macOS o tmpdir é um link (/var → /private/var) e o require.resolve devolve o caminho real.
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), 'pw-runtime-')));
   dirs.push(dir);
   return dir;
 }

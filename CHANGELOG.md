@@ -8,11 +8,15 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Adicionado
 
+- Canvas: ferramenta `baixar_arquivo`, que traz o conteúdo de um arquivo do curso (PDF, slides, imagem; até
+  10 MB) para a conversa, no conector local e no remoto.
+- Canvas: `ler_arquivo_texto` agora lê também documentos do Word (`.docx` e `.doc` 97-2003), sem dependências
+  novas (`src/core/zip.ts`, `src/core/cfb.ts`, `src/core/word.ts`).
 - Conector remoto do Canvas renova sozinho a validade do token da PUC a cada refresh do OAuth: não é
   mais preciso reconectar todo mês (ADR 0011).
 - Repositório de conectores criado a partir do `template-new-project`: docs como fonte da verdade, checagens
   por AST, TDD, hooks e skills do Claude Code.
-- Conector **Canvas PUC Minas** (`connectors/canvas-puc`, v1.2.0): 19 ferramentas (agenda de entregas,
+- Conector **Canvas PUC Minas** (`connectors/canvas-puc`, v1.3.0): 20 ferramentas (agenda de entregas,
   tarefas, notas, avisos, módulos, páginas, arquivos, fóruns, calendário, busca, entregar tarefa e responder
   fórum).
 - Login no Canvas por janela do Chrome/Edge com renovação silenciosa da sessão; token só como reserva.

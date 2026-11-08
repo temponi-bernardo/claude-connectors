@@ -27,6 +27,7 @@ export interface FakeContext {
   readonly getAll: Mock<GetFn>;
   readonly post: Mock<PostFn>;
   readonly fetchText: Mock<TextFn>;
+  readonly fetchBytes: Mock<TextFn>;
   readonly auth: { [K in keyof AuthProvider]: Mock<AuthProvider[K]> };
 }
 
@@ -52,14 +53,16 @@ export function fakeContext(routes: Routes = {}): FakeContext {
   const getAll = vi.fn<GetFn>((path) => answer(routes, path));
   const post = vi.fn<PostFn>((path) => answer(routes, path));
   const fetchText = vi.fn<TextFn>((url) => answer(routes, url));
+  const fetchBytes = vi.fn<TextFn>((url) => answer(routes, url));
   const client = {
     baseUrl: 'https://x.test',
     get,
     getAll,
     post,
     fetchText,
+    fetchBytes,
   } as unknown as CanvasClient;
   const auth = fakeAuth();
   const ctx: CanvasContext = { client, auth, now: () => new Date('2026-11-05T12:00:00Z') };
-  return { ctx, get, getAll, post, fetchText, auth };
+  return { ctx, get, getAll, post, fetchText, fetchBytes, auth };
 }

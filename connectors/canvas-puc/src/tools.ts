@@ -35,7 +35,7 @@ export const CANVAS_ACCOUNT_TOOLS: readonly ToolSpec<CanvasContext>[] = [
 ];
 
 /** Nome e versão anunciados pelo servidor MCP do Canvas (stdio e remoto). */
-export const CANVAS_SERVER_INFO = { name: 'canvas-puc', version: '1.2.0' } as const;
+export const CANVAS_SERVER_INFO = { name: 'canvas-puc', version: '1.3.0' } as const;
 
 /** Ferramentas do serviço (leitura, e escrita com `allowWrite`), sem as de conexão. */
 export function canvasServiceTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[] {

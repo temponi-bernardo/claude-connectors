@@ -48,7 +48,13 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
      Apoios como `activeCourses()`, `fetchOwnSubmission()` e `getAllOrEmpty()` compõem buscas.
   4. As respostas viram objetos enxutos em português (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
      etc.), com HTML convertido por `htmlToText()`.
-  5. `textResult()` devolve o JSON ao Claude; qualquer erro vira `errorResult()` com a mensagem.
+  5. Arquivos: `ler_arquivo_texto` usa `readCanvasFileText()`, que baixa texto com `fetchPlainText()` ou, para
+     Word (`wordKind()`), os bytes com `fetchFileBytes()` e extrai o texto com `wordToText()` (`docxToText()`
+     sobre `readZipEntry()`; `docToText()` sobre `openCfb()`/`readCfbStream()` e `parsePieceTable()`).
+     `baixar_arquivo` usa `downloadCanvasFile()`: `downloadRefusal()` recusa arquivo sem link ou acima de 10 MB;
+     senão `downloadedFileResult()` embute o conteúdo com `fileContentBlock()` e o marca com `rawToolResult()`.
+  6. `toToolResult()` devolve o JSON (via `textResult()`) ou o resultado pronto ao Claude; qualquer erro vira
+     `errorResult()` com a mensagem.
 - **Resultado:** o Claude recebe só os campos úteis, com links absolutos e textos limpos.
 - **Falhas:** status ≠ 2xx vira erro com status e corpo; argumentos inválidos são recusados pelo zod.
 

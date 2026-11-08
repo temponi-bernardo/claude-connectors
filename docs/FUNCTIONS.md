@@ -13,8 +13,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - `connectors/canvas-puc/src/auth.ts`: [`pickAuth`](#pickauth), [`authHeaders`](#authheaders), [`loginAndStore`](#loginandstore), [`renewAuth`](#renewauth), [`renewOnce`](#renewonce), [`createAuthProvider`](#createauthprovider)
 - `connectors/canvas-puc/src/browser-login.ts`: [`isLoginChooserUrl`](#isloginchooserurl), [`launchLoginBrowser`](#launchloginbrowser), [`pageHasCanvasSession`](#pagehascanvassession), [`clickInstitutionButton`](#clickinstitutionbutton), [`waitForCanvasLogin`](#waitforcanvaslogin), [`browserLogin`](#browserlogin)
-- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`unauthorizedError`](#unauthorizederror), [`requestWithRenewal`](#requestwithrenewal), [`collectPages`](#collectpages), [`fetchPlainText`](#fetchplaintext), [`createCanvasClient`](#createcanvasclient)
+- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`unauthorizedError`](#unauthorizederror), [`requestWithRenewal`](#requestwithrenewal), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`createCanvasClient`](#createcanvasclient)
 - `connectors/canvas-puc/src/config.ts`: [`readCanvasConfig`](#readcanvasconfig)
+- `connectors/canvas-puc/src/files.ts`: [`bytesToBase64`](#bytestobase64), [`fileContentBlock`](#filecontentblock), [`downloadedFileResult`](#downloadedfileresult), [`downloadRefusal`](#downloadrefusal), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
 - `connectors/canvas-puc/src/main.ts`: [`startCanvasServer`](#startcanvasserver)
@@ -25,10 +26,14 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasServiceTools`](#canvasservicetools), [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
 - `connectors/canvas-puc/src/worker.ts`: [`toEnvVars`](#toenvvars), [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
+- `src/core/bytes.ts`: [`byteView`](#byteview), [`concatBytes`](#concatbytes), [`utf16leToString`](#utf16letostring)
+- `src/core/cfb.ts`: [`isCfb`](#iscfb), [`readCfbHeader`](#readcfbheader), [`cfbSector`](#cfbsector), [`sectorWords`](#sectorwords), [`fatSectorIds`](#fatsectorids), [`followChain`](#followchain), [`readRegularChain`](#readregularchain), [`parseDirectory`](#parsedirectory), [`openCfb`](#opencfb), [`readMiniStream`](#readministream), [`readCfbStream`](#readcfbstream)
 - `src/core/env.ts`: [`envValue`](#envvalue), [`parseFlag`](#parseflag)
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
-- `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs)
+- `src/core/word.ts`: [`docxXmlToText`](#docxxmltotext), [`docxToText`](#docxtotext), [`cp1252ToString`](#cp1252tostring), [`parsePieceTable`](#parsepiecetable), [`pieceText`](#piecetext), [`cleanWordText`](#cleanwordtext), [`docToText`](#doctotext), [`wordKind`](#wordkind), [`wordToText`](#wordtotext)
+- `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
+- `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`rawToolResult`](#rawtoolresult), [`toToolResult`](#totoolresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs)
 - `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`handleAuthorizePage`](#handleauthorizepage), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
 - `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage)
 - `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
@@ -1533,6 +1538,40 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+### `fetchDownload`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `async fetchDownload(fetchFn: typeof fetch, url: string): Promise<Response>`
+- **Usada por:** `fetchFileBytes()`, `fetchPlainText()`
+- **Processos:** P03, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Baixa um link direto do Canvas e confere o status.
+- **Entrada:** `fetchFn`: função `fetch`; `url`: link de download (já autorizado pelo Canvas).
+- **Saída:** Promise com a `Response` ok.
+- **Efeitos:** Rede.
+- **Erros:** Rejeita com "Falha ao baixar o arquivo (<status>)" se a resposta não for ok.
+
+### `fetchFileBytes`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `async fetchFileBytes(fetchFn: typeof fetch, url: string): Promise<Uint8Array>`
+- **Usada por:** `createCanvasClient()`
+- **Processos:** P03, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Baixa um arquivo binário por URL direta.
+- **Entrada:** `fetchFn`; `url`.
+- **Saída:** Promise com os bytes.
+- **Efeitos:** Rede.
+- **Erros:** Repassa o erro de `fetchDownload`.
+
 ## `connectors/canvas-puc/src/config.ts`
 
 ### `readCanvasConfig`
@@ -1953,8 +1992,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/helpers.ts`
 - **Assinatura:** `isTextFile(contentType: string, name: string): boolean`
-- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
-- **Processos:** —
+- **Usada por:** `readCanvasFileText()`
+- **Processos:** P03
 
 <!-- gerado:fim -->
 
@@ -2288,7 +2327,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/html.ts`
 - **Assinatura:** `htmlToText(html: string | null | undefined): string`
-- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `flattenDiscussion()`, `shortText()`, `toAssignmentDetail()`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `docxXmlToText()`, `flattenDiscussion()`, `readCanvasFileText()`, `shortText()`, `toAssignmentDetail()`
 - **Processos:** P03
 
 <!-- gerado:fim -->
@@ -2360,7 +2399,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `textResult(data: unknown, notes: readonly string[] = []): CallToolResult`
-- **Usada por:** `runToolSafely()`
+- **Usada por:** `toToolResult()`
 - **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
@@ -2421,6 +2460,40 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Nada.
 - **Efeitos:** Altera o servidor (registra as ferramentas).
 - **Erros:** Propaga erros do SDK (ex.: nome repetido).
+
+### `rawToolResult`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/mcp/tools.ts`
+- **Assinatura:** `rawToolResult(result: CallToolResult): RawToolResult`
+- **Usada por:** `downloadedFileResult()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Embrulha um resultado MCP pronto (imagem, recurso embutido) para a ferramenta devolver sem conversão para texto.
+- **Entrada:** `result`: `CallToolResult`.
+- **Saída:** `RawToolResult`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toToolResult`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/mcp/tools.ts`
+- **Assinatura:** `toToolResult(data: unknown): CallToolResult`
+- **Usada por:** `runToolSafely()`
+- **Processos:** P03, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o retorno de uma ferramenta em resultado MCP: o embrulhado por `rawToolResult` passa direto, o resto vira `textResult`.
+- **Entrada:** `data`: retorno da ferramenta.
+- **Saída:** `CallToolResult`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
 
 ## `tools/pack/cli.ts`
 
@@ -3842,6 +3915,594 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Os do handler remoto (rede para o Canvas).
 - **Erros:** Nenhum: configuração inválida vira 500.
 
+## `connectors/canvas-puc/src/files.ts`
+
+### `bytesToBase64`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/files.ts`
+- **Assinatura:** `bytesToBase64(bytes: Uint8Array): string`
+- **Usada por:** `fileContentBlock()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Codifica bytes em base64 em blocos de 32 KB, sem `Buffer` (Node e Workers).
+- **Entrada:** `bytes`.
+- **Saída:** Texto base64.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `fileContentBlock`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/files.ts`
+- **Assinatura:** `fileContentBlock(file: CanvasAttachment, bytes: Uint8Array): CallToolResult['content'][number]`
+- **Usada por:** `downloadedFileResult()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o bloco MCP com o conteúdo do arquivo: `image` para `image/*`, `resource` embutido (blob) para o resto.
+- **Entrada:** `file`: arquivo do Canvas; `bytes`: conteúdo.
+- **Saída:** Bloco de conteúdo MCP.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `downloadedFileResult`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/files.ts`
+- **Assinatura:** `downloadedFileResult(file: CanvasAttachment, bytes: Uint8Array): RawToolResult`
+- **Usada por:** `downloadCanvasFile()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o resultado de `baixar_arquivo`: uma linha com nome, tipo, tamanho e link, e o bloco com o conteúdo.
+- **Entrada:** `file`; `bytes`.
+- **Saída:** `RawToolResult`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `downloadRefusal`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/files.ts`
+- **Assinatura:** `downloadRefusal(file: CanvasAttachment): string | null`
+- **Usada por:** `downloadCanvasFile()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide se o arquivo não pode ser trazido à conversa: sem link ou acima de `MAX_DOWNLOAD_BYTES`.
+- **Entrada:** `file`: arquivo do Canvas.
+- **Saída:** Mensagem em português com o motivo (e o link, se houver), ou `null` se pode baixar.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `downloadCanvasFile`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/files.ts`
+- **Assinatura:** `async downloadCanvasFile(client: CanvasClient, file: CanvasAttachment): Promise<RawToolResult | string>`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Baixa o arquivo e devolve seu conteúdo para a conversa, ou o motivo de não baixar.
+- **Entrada:** `client`: cliente do Canvas; `file`: metadados de `/files/:id`.
+- **Saída:** Promise com `RawToolResult` ou mensagem.
+- **Efeitos:** Rede (download do arquivo).
+- **Erros:** Repassa os erros do download.
+
+### `readCanvasFileText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/files.ts`
+- **Assinatura:** `async readCanvasFileText(client: CanvasClient, file: CanvasAttachment): Promise<string>`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê um arquivo do Canvas como texto: texto puro, HTML (convertido) ou Word (.doc/.docx); outros tipos devolvem o link e sugerem `baixar_arquivo`.
+- **Entrada:** `client`; `file`: metadados de `/files/:id`.
+- **Saída:** Promise com `# nome` e o texto (até `MAX_TEXT_CHARS`), ou a mensagem com o link.
+- **Efeitos:** Rede (download do arquivo).
+- **Erros:** Repassa os erros do download e da extração do Word.
+
+## `src/core/cfb.ts`
+
+### `isCfb`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `isCfb(bytes: Uint8Array): boolean`
+- **Usada por:** `readCfbHeader()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se os bytes começam com a assinatura OLE/CFB (`CFB_SIGNATURE`).
+- **Entrada:** `bytes`: arquivo.
+- **Saída:** `true` se for CFB.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readCfbHeader`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `readCfbHeader(bytes: Uint8Array): CfbHeader`
+- **Usada por:** `openCfb()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê do cabeçalho de 512 bytes os tamanhos de setor, o início do diretório, da mini FAT e da DIFAT.
+- **Entrada:** `bytes`: arquivo CFB.
+- **Saída:** `CfbHeader`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança "Arquivo não é um documento do Office (OLE)." sem a assinatura.
+
+### `cfbSector`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `cfbSector(bytes: Uint8Array, header: CfbHeader, id: number): Uint8Array`
+- **Usada por:** `fatSectorIds()`, `openCfb()`, `readRegularChain()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Recorta um setor regular pelo id (o setor 0 vem logo após o cabeçalho).
+- **Entrada:** `bytes`; `header`; `id`: número do setor.
+- **Saída:** `Uint8Array` do setor.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `sectorWords`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `sectorWords(sector: Uint8Array): number[]`
+- **Usada por:** `fatSectorIds()`, `openCfb()`, `readMiniStream()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê um setor como lista de inteiros de 32 bits little-endian (FAT, DIFAT, mini FAT).
+- **Entrada:** `sector`: bytes.
+- **Saída:** Lista de números.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `fatSectorIds`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `fatSectorIds(bytes: Uint8Array, header: CfbHeader): number[]`
+- **Usada por:** `openCfb()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os setores que guardam a FAT: os 109 do cabeçalho e os da cadeia DIFAT.
+- **Entrada:** `bytes`; `header`.
+- **Saída:** Ids válidos (sem marcas de livre/fim).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `followChain`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `followChain(table: readonly number[], start: number): number[]`
+- **Usada por:** `readMiniStream()`, `readRegularChain()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Segue uma cadeia de setores na tabela até o fim de cadeia, sem entrar em laço.
+- **Entrada:** `table`: FAT ou mini FAT; `start`: primeiro setor.
+- **Saída:** Ids na ordem da cadeia (vazia se `start` for fim de cadeia).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readRegularChain`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `readRegularChain(file: Omit<CfbFile, 'entries'>, start: number): Uint8Array`
+- **Usada por:** `openCfb()`, `readCfbStream()`, `readMiniStream()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê os bytes de uma cadeia de setores regulares.
+- **Entrada:** `file`: bytes, cabeçalho e FAT; `start`: primeiro setor.
+- **Saída:** Bytes concatenados (múltiplo do tamanho do setor).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseDirectory`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `parseDirectory(dir: Uint8Array): CfbEntry[]`
+- **Usada por:** `openCfb()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê as entradas de 128 bytes do diretório CFB.
+- **Entrada:** `dir`: bytes do diretório.
+- **Saída:** Lista de `CfbEntry` (nome, primeiro setor, tamanho).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `openCfb`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `openCfb(bytes: Uint8Array): CfbFile`
+- **Usada por:** `docToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Abre um arquivo CFB: cabeçalho, FAT completa e diretório.
+- **Entrada:** `bytes`: arquivo .doc (ou outro CFB).
+- **Saída:** `CfbFile`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Repassa o erro de `readCfbHeader`.
+
+### `readMiniStream`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `readMiniStream(file: CfbFile, entry: CfbEntry): Uint8Array`
+- **Usada por:** `readCfbStream()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê um stream pequeno pelo mini stream (setores de 64 bytes guardados na entrada raiz), seguindo a mini FAT.
+- **Entrada:** `file`: CFB aberto; `entry`: o stream.
+- **Saída:** Bytes (com sobra do último mini setor).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readCfbStream`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/cfb.ts`
+- **Assinatura:** `readCfbStream(file: CfbFile, name: string): Uint8Array | null`
+- **Usada por:** `docToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê um stream pelo nome, pelo mini stream ou pela FAT conforme o tamanho.
+- **Entrada:** `file`: CFB aberto; `name`: nome do stream (ex.: `WordDocument`).
+- **Saída:** Bytes do stream no tamanho exato, ou `null` se não existir.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `src/core/word.ts`
+
+### `docxXmlToText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `docxXmlToText(xml: string): string`
+- **Usada por:** `docxToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o XML do corpo do .docx em texto: junta os `w:t`, troca `w:tab` por tabulação, `w:br`/`w:cr` e fim de parágrafo por quebra de linha e decodifica as entidades.
+- **Entrada:** `xml`: conteúdo de `word/document.xml`.
+- **Saída:** Texto sem espaços nas pontas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `docxToText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `async docxToText(bytes: Uint8Array): Promise<string>`
+- **Usada por:** `wordToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o texto de um .docx (abre o ZIP e lê `word/document.xml`).
+- **Entrada:** `bytes`: arquivo .docx.
+- **Saída:** Promise com o texto.
+- **Efeitos:** Nenhum (só CPU).
+- **Erros:** Rejeita com "Arquivo .docx sem word/document.xml." ou com os erros do ZIP.
+
+### `cp1252ToString`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `cp1252ToString(bytes: Uint8Array): string`
+- **Usada por:** `pieceText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica bytes em Windows-1252 (texto de 8 bits do .doc).
+- **Entrada:** `bytes`.
+- **Saída:** Texto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parsePieceTable`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `parsePieceTable(table: Uint8Array, fcClx: number): DocPiece[]`
+- **Usada por:** `docToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a tabela de peças (PlcPcd) do Clx do .doc, pulando os blocos de formatação (Prc).
+- **Entrada:** `table`: stream 0Table/1Table; `fcClx`: posição do Clx (do FIB).
+- **Saída:** Lista de `DocPiece`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança "Documento .doc com tabela de texto inválida." se o Clx não tiver a tabela.
+
+### `pieceText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `pieceText(wordDoc: Uint8Array, piece: DocPiece): string`
+- **Usada por:** `docToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica uma peça do texto: Windows-1252 se o bit "compressed" estiver ligado, senão UTF-16LE.
+- **Entrada:** `wordDoc`: stream WordDocument; `piece`.
+- **Saída:** Texto da peça.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `cleanWordText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `cleanWordText(raw: string): string`
+- **Usada por:** `docToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Troca as marcas do Word por texto com `WORD_TEXT_REPLACEMENTS`: tira o código dos campos (fica o resultado), parágrafos viram quebras, células viram tabulação.
+- **Entrada:** `raw`: texto bruto das peças.
+- **Saída:** Texto limpo, sem espaços nas pontas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `docToText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `docToText(bytes: Uint8Array): string`
+- **Usada por:** `wordToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o texto principal de um .doc (Word 97-2003): abre o CFB, lê o FIB, a tabela de peças e decodifica cada peça, cortando em `ccpText` (sem rodapés e cabeçalhos).
+- **Entrada:** `bytes`: arquivo .doc.
+- **Saída:** Texto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança "O .doc está protegido por senha.", "Arquivo .doc sem o stream WordDocument.", "Arquivo .doc sem o stream de tabela." ou os erros de `openCfb`/`parsePieceTable`.
+
+### `wordKind`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `wordKind(contentType: string, name: string): 'docx' | 'doc' | null`
+- **Usada por:** `readCanvasFileText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide se o arquivo é documento do Word pelo nome ou pelo MIME.
+- **Entrada:** `contentType`: MIME; `name`: nome do arquivo.
+- **Saída:** `docx`, `doc` ou `null`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `wordToText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/word.ts`
+- **Assinatura:** `wordToText(kind: 'docx' | 'doc', bytes: Uint8Array): Promise<string>`
+- **Usada por:** `readCanvasFileText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o texto de um documento do Word conforme o tipo.
+- **Entrada:** `kind`: `docx` ou `doc`; `bytes`.
+- **Saída:** Promise com o texto.
+- **Efeitos:** Nenhum (só CPU).
+- **Erros:** Repassa os erros de `docxToText`/`docToText`.
+
+## `src/core/zip.ts`
+
+### `findEndOfCentralDirectory`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/zip.ts`
+- **Assinatura:** `findEndOfCentralDirectory(bytes: Uint8Array): number`
+- **Usada por:** `listZipEntries()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Acha o registro de fim do diretório central (EOCD) do ZIP, procurando de trás para frente.
+- **Entrada:** `bytes`: arquivo ZIP.
+- **Saída:** Posição do EOCD.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança "Arquivo ZIP inválido: diretório central não encontrado.".
+
+### `listZipEntries`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/zip.ts`
+- **Assinatura:** `listZipEntries(bytes: Uint8Array): ZipEntry[]`
+- **Usada por:** `readZipEntry()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê as entradas do diretório central do ZIP.
+- **Entrada:** `bytes`: arquivo ZIP.
+- **Saída:** Lista de `ZipEntry`; para na primeira entrada corrompida.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Repassa o erro de `findEndOfCentralDirectory`.
+
+### `zipEntryBytes`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/zip.ts`
+- **Assinatura:** `zipEntryBytes(bytes: Uint8Array, entry: ZipEntry): Uint8Array`
+- **Usada por:** `readZipEntry()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Recorta os bytes comprimidos de uma entrada, pulando o cabeçalho local.
+- **Entrada:** `bytes`: ZIP; `entry`: entrada.
+- **Saída:** `Uint8Array` comprimido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `inflateRaw`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/zip.ts`
+- **Assinatura:** `async inflateRaw(data: Uint8Array): Promise<Uint8Array>`
+- **Usada por:** `readZipEntry()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Descomprime DEFLATE puro com `DecompressionStream` (Node 22 e Workers).
+- **Entrada:** `data`: bytes comprimidos.
+- **Saída:** Promise com os bytes descomprimidos.
+- **Efeitos:** Nenhum (só CPU).
+- **Erros:** Rejeita se os dados não forem DEFLATE válido.
+
+### `readZipEntry`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/zip.ts`
+- **Assinatura:** `async readZipEntry(bytes: Uint8Array, name: string): Promise<Uint8Array | null>`
+- **Usada por:** `docxToText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê e descompacta uma entrada do ZIP pelo nome (métodos 0 e 8).
+- **Entrada:** `bytes`: ZIP; `name`: caminho da entrada.
+- **Saída:** Promise com os bytes, ou `null` se a entrada não existir.
+- **Efeitos:** Nenhum (só CPU).
+- **Erros:** Rejeita com "Compressão ZIP não suportada (método N)." para outros métodos.
+
+## `src/core/bytes.ts`
+
+### `byteView`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/bytes.ts`
+- **Assinatura:** `byteView(bytes: Uint8Array): DataView`
+- **Usada por:** `docToText()`, `findEndOfCentralDirectory()`, `listZipEntries()`, `parseDirectory()`, `parsePieceTable()`, `readCfbHeader()`, `sectorWords()`, `utf16leToString()`, `zipEntryBytes()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria uma `DataView` sobre exatamente a fatia de bytes dada (respeita `byteOffset`).
+- **Entrada:** `bytes`: buffer ou fatia.
+- **Saída:** `DataView` para leituras little-endian.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `concatBytes`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/bytes.ts`
+- **Assinatura:** `concatBytes(parts: readonly Uint8Array[]): Uint8Array`
+- **Usada por:** `readMiniStream()`, `readRegularChain()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Junta vários pedaços de bytes num buffer novo, em ordem.
+- **Entrada:** `parts`: lista de `Uint8Array`.
+- **Saída:** `Uint8Array` com todos os bytes.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `utf16leToString`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/bytes.ts`
+- **Assinatura:** `utf16leToString(bytes: Uint8Array): string`
+- **Usada por:** `parseDirectory()`, `pieceText()`
+- **Processos:** P03
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica UTF-16LE sem `TextDecoder` (portável para o Workers).
+- **Entrada:** `bytes`: texto em UTF-16LE.
+- **Saída:** Texto; um byte solto no fim é ignorado.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
 ## Dados e constantes
 
 | Nome                     | Arquivo                                           | O que é                                                                                                                     |
@@ -3859,6 +4520,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `PLACEHOLDER`            | `tools/docs/markdown.ts`                          | Texto `_preencher_` deixado nos campos manuais novos.                                                                       |
 | `MANUAL_FIELDS`          | `tools/docs/render.ts`                            | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                                        |
 | `HTML_TEXT_REPLACEMENTS` | `src/core/html.ts`                                | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                          |
+| `CFB_SIGNATURE`          | `src/core/cfb.ts`                                 | Os 8 bytes iniciais de todo arquivo OLE/CFB (o contêiner do .doc).                                                          |
+| `CP1252_HIGH`            | `src/core/word.ts`                                | Caracteres de 0x80 a 0x9F do Windows-1252, usados ao decodificar o texto de 8 bits do .doc.                                 |
+| `WORD_TEXT_REPLACEMENTS` | `src/core/word.ts`                                | Substituições (regex → texto) aplicadas em ordem por `cleanWordText` às marcas do Word.                                     |
+| `MAX_DOWNLOAD_BYTES`     | `connectors/canvas-puc/src/files.ts`              | Maior arquivo que `baixar_arquivo` traz para a conversa (10 MB).                                                            |
+| `MAX_TEXT_CHARS`         | `connectors/canvas-puc/src/files.ts`              | Maior texto devolvido por `ler_arquivo_texto` (100 000 caracteres).                                                         |
 | `CONNECTORS_DIR`         | `tools/pack/pack.ts`                              | Pasta dos conectores relativa à raiz (`connectors`).                                                                        |
 | `PACK_OUT_DIR`           | `tools/pack/pack.ts`                              | Pasta de saída dos pacotes `.mcpb` (`dist/connectors`).                                                                     |
 | `RUNTIME_EXTERNALS`      | `tools/pack/pack.ts`                              | Dependências que o esbuild não une e vão para `node_modules` do pacote.                                                     |

@@ -1,7 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { defineTool, errorResult, registerToolSpecs, runToolSafely, textResult } from './tools.js';
+import {
+  defineTool,
+  errorResult,
+  rawToolResult,
+  registerToolSpecs,
+  runToolSafely,
+  textResult,
+  toToolResult,
+} from './tools.js';
 
 const echo = defineTool({
   name: 'eco',
@@ -52,6 +60,22 @@ describe('runToolSafely', () => {
   it('converte sucesso e erro em resultado MCP', async () => {
     expect((await runToolSafely(echo, { prefix: '' }, { texto: 'a' })).isError).toBeUndefined();
     expect((await runToolSafely(echo, { prefix: '' }, {})).isError).toBe(true);
+  });
+});
+
+describe('rawToolResult', () => {
+  it('embrulha o resultado sem alterá-lo', () => {
+    const result = { content: [{ type: 'image' as const, data: 'AA==', mimeType: 'image/png' }] };
+    expect(toToolResult(rawToolResult(result))).toBe(result);
+  });
+});
+
+describe('toToolResult', () => {
+  it('repassa o resultado pronto e converte o resto em texto', () => {
+    const ready = { content: [{ type: 'text' as const, text: 'pronto' }] };
+    expect(toToolResult(rawToolResult(ready))).toBe(ready);
+    expect(toToolResult({ a: 1 })).toEqual(textResult({ a: 1 }));
+    expect(toToolResult(null)).toEqual(textResult(null));
   });
 });
 
