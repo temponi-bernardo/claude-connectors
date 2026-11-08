@@ -3,6 +3,8 @@ import type { AuthProvider, CanvasAuth } from './auth.js';
 import {
   collectPages,
   createCanvasClient,
+  fetchDownload,
+  fetchFileBytes,
   fetchPlainText,
   requestWithRenewal,
   sendCanvasRequest,
@@ -174,15 +176,41 @@ describe('fetchPlainText', () => {
   });
 });
 
+describe('fetchDownload', () => {
+  it('devolve a resposta ou falha com o status', async () => {
+    const f = fakeFetch(new Response('ok'), new Response('', { status: 403 }));
+    const res = await fetchDownload(f as unknown as typeof fetch, 'https://f.test/a');
+    expect(await res.text()).toBe('ok');
+    await expect(fetchDownload(f as unknown as typeof fetch, 'https://f.test/a')).rejects.toThrow(
+      '403',
+    );
+  });
+});
+
+describe('fetchFileBytes', () => {
+  it('devolve os bytes do arquivo', async () => {
+    const f = fakeFetch(new Response(new Uint8Array([1, 2, 3])));
+    const bytes = await fetchFileBytes(f as unknown as typeof fetch, 'https://f.test/a');
+    expect(Array.from(bytes)).toEqual([1, 2, 3]);
+  });
+});
+
 describe('createCanvasClient', () => {
-  it('expõe get, getAll com per_page, post e fetchText', async () => {
-    const f = fakeFetch(json({ g: 1 }), json([1]), json({ p: 1 }), new Response('txt'));
+  it('expõe get, getAll com per_page, post, fetchText e fetchBytes', async () => {
+    const f = fakeFetch(
+      json({ g: 1 }),
+      json([1]),
+      json({ p: 1 }),
+      new Response('txt'),
+      new Response(new Uint8Array([7])),
+    );
     const client = createCanvasClient(deps(f));
     await expect(client.get('/g')).resolves.toEqual({ g: 1 });
     await expect(client.getAll('/l')).resolves.toEqual([1]);
     expect(String(f.mock.calls[1]![0])).toContain('per_page=100');
     await expect(client.post('/p', { a: 1 })).resolves.toEqual({ p: 1 });
     await expect(client.fetchText('https://f.test/x')).resolves.toBe('txt');
+    expect(Array.from(await client.fetchBytes('https://f.test/y'))).toEqual([7]);
     expect(client.baseUrl).toBe('https://x.test');
   });
 });

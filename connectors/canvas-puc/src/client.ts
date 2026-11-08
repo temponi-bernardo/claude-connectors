@@ -34,6 +34,7 @@ export interface CanvasClient {
   readonly getAll: <T>(path: string, params?: QueryParams, max?: number) => Promise<T[]>;
   readonly post: <T>(path: string, body: unknown) => Promise<T>;
   readonly fetchText: (url: string) => Promise<string>;
+  readonly fetchBytes: (url: string) => Promise<Uint8Array>;
 }
 
 /** Mensagem para 401 (ou sem credencial), conforme a credencial usada. */
@@ -103,11 +104,21 @@ export async function collectPages<T>(
   return items.slice(0, max);
 }
 
-/** Baixa um arquivo de texto por URL direta (links de download do Canvas já trazem a autorização). */
-export async function fetchPlainText(fetchFn: typeof fetch, url: string): Promise<string> {
+/** Baixa um arquivo por URL direta (links de download do Canvas já trazem a autorização). */
+export async function fetchDownload(fetchFn: typeof fetch, url: string): Promise<Response> {
   const res = await fetchFn(url);
   if (!res.ok) throw new Error(`Falha ao baixar o arquivo (${res.status}).`);
-  return res.text();
+  return res;
+}
+
+/** Baixa um arquivo de texto por URL direta. */
+export async function fetchPlainText(fetchFn: typeof fetch, url: string): Promise<string> {
+  return (await fetchDownload(fetchFn, url)).text();
+}
+
+/** Baixa um arquivo binário por URL direta. */
+export async function fetchFileBytes(fetchFn: typeof fetch, url: string): Promise<Uint8Array> {
+  return new Uint8Array(await (await fetchDownload(fetchFn, url)).arrayBuffer());
 }
 
 /** Cria o cliente do Canvas. */
@@ -125,5 +136,6 @@ export function createCanvasClient(deps: ClientDeps): CanvasClient {
     post: async <T>(path: string, body: unknown) =>
       (await (await requestWithRenewal(deps, { method: 'POST', path, body })).json()) as T,
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
+    fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
   };
 }

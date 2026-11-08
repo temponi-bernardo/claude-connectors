@@ -15,7 +15,7 @@ Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo
 
 | Conector     | O que dá ao Claude                                                     | Estado    |
 | ------------ | ---------------------------------------------------------------------- | --------- |
-| `canvas-puc` | Agenda de entregas, tarefas, notas, avisos, módulos, arquivos e fóruns | ✅ v1.2.0 |
+| `canvas-puc` | Agenda de entregas, tarefas, notas, avisos, módulos, arquivos e fóruns | ✅ v1.3.0 |
 
 Guia de uso de cada um em `connectors/<nome>/README.md`.
 

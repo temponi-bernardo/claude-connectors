@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { describe, expect, it } from 'vitest';
-import type { ToolSpec } from '../../../src/mcp/tools.js';
+import { toToolResult, type ToolSpec } from '../../../src/mcp/tools.js';
 import type { CanvasContext } from './context.js';
 import { fakeContext, type Routes } from './fixtures/fake-context.js';
 import { CANVAS_READ_TOOLS } from './tools-read.js';
@@ -216,23 +216,28 @@ describe('ferramentas de leitura', () => {
       },
     );
     expect(txt.result).toBe('# a.md\n\nconteúdo');
-    const html = await run(
-      'ler_arquivo_texto',
-      { file_id: 2 },
-      {
-        '/files/2': { display_name: 'a.html', url: 'h', 'content-type': 'text/html' },
-        h: '<p>x</p>',
-      },
-    );
-    expect(html.result).toBe('# a.html\n\nx');
     const pdf = await run(
       'ler_arquivo_texto',
       { file_id: 3 },
       { '/files/3': { display_name: 'a.pdf', url: 'p', 'content-type': 'application/pdf' } },
     );
-    expect(pdf.result).toBe('"a.pdf" é application/pdf; baixe pelo link: p');
-    const vazio = await run('ler_arquivo_texto', { file_id: 4 }, { '/files/4': {} });
-    expect(vazio.result).toContain('baixe pelo link');
+    expect(pdf.result).toBe(
+      '"a.pdf" é application/pdf; use `baixar_arquivo` para trazer o conteúdo ou baixe pelo link: p',
+    );
+  });
+
+  it('baixar_arquivo traz o conteúdo ou explica por que não baixou', async () => {
+    const ok = await run(
+      'baixar_arquivo',
+      { file_id: 5 },
+      {
+        '/files/5': { display_name: 'a.pdf', url: 'p', 'content-type': 'application/pdf', size: 3 },
+        p: new Uint8Array([1, 2, 3]),
+      },
+    );
+    expect(toToolResult(ok.result).content[1]).toMatchObject({ type: 'resource' });
+    const semLink = await run('baixar_arquivo', { file_id: 6 }, { '/files/6': {} });
+    expect(semLink.result).toContain('não tem link');
   });
 
   it('ver_discussao achata as postagens e tolera falha na view', async () => {

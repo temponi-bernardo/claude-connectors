@@ -20,6 +20,7 @@ import type {
   CanvasSubmission,
 } from './canvas-types.js';
 import type { CanvasContext } from './context.js';
+import { downloadCanvasFile, readCanvasFileText } from './files.js';
 import * as f from './format.js';
 import * as h from './helpers.js';
 
@@ -185,17 +186,24 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   defineTool({
     name: 'ler_arquivo_texto',
     description:
-      'Lê um arquivo de texto do curso (txt, md, csv, código, html). Para PDF/slides, devolve o link.',
+      'Lê um arquivo do curso como texto (txt, md, csv, código, html, doc e docx). Para PDF/slides, use baixar_arquivo.',
     shape: { file_id: id },
-    run: async ({ client }, args) => {
-      const file = await client.get<CanvasAttachment>(`/files/${String(args.file_id)}`);
-      const type = file['content-type'] ?? '';
-      const name = file.display_name ?? '';
-      if (!h.isTextFile(type, name) || !file.url)
-        return `"${name}" é ${type}; baixe pelo link: ${String(file.url)}`;
-      const text = await client.fetchText(file.url);
-      return `# ${name}\n\n${type.includes('html') ? htmlToText(text) : text}`.slice(0, 100_000);
-    },
+    run: async ({ client }, args) =>
+      readCanvasFileText(
+        client,
+        await client.get<CanvasAttachment>(`/files/${String(args.file_id)}`),
+      ),
+  }),
+  defineTool({
+    name: 'baixar_arquivo',
+    description:
+      'Baixa um arquivo do curso (PDF, slides, imagem etc., até 10 MB) e traz o conteúdo para a conversa.',
+    shape: { file_id: id },
+    run: async ({ client }, args) =>
+      downloadCanvasFile(
+        client,
+        await client.get<CanvasAttachment>(`/files/${String(args.file_id)}`),
+      ),
   }),
   defineTool({
     name: 'discussoes',

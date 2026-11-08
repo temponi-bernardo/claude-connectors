@@ -124,7 +124,8 @@ No modo remoto não existem `conectar_canvas` nem `desconectar_canvas`.
 | `modulos`               | Módulos e itens                                                        |
 | `ver_pagina`            | Conteúdo de uma página                                                 |
 | `arquivos`              | Arquivos com link de download                                          |
-| `ler_arquivo_texto`     | Conteúdo de arquivos de texto/código                                   |
+| `ler_arquivo_texto`     | Conteúdo de arquivos de texto/código, inclusive `.doc` e `.docx`       |
+| `baixar_arquivo`        | Traz PDF, slides ou imagem (até 10 MB) para a conversa                 |
 | `discussoes`            | Fóruns do curso                                                        |
 | `ver_discussao`         | Postagens de um fórum                                                  |
 | `calendario`            | Eventos do calendário                                                  |

@@ -39,20 +39,41 @@ export function textResult(data: unknown, notes: readonly string[] = []): CallTo
   return { content: [text, ...notes].map((t) => ({ type: 'text' as const, text: t })) };
 }
 
+/** Marca de um resultado MCP pronto, devolvido por uma ferramenta que monta seu próprio conteúdo. */
+const RAW_RESULT: unique symbol = Symbol('rawToolResult');
+
+/** Resultado MCP pronto (imagem, arquivo embutido...), que `runToolSafely` repassa sem converter. */
+export interface RawToolResult {
+  readonly [RAW_RESULT]: CallToolResult;
+}
+
+/** Embrulha um resultado MCP pronto para a ferramenta devolver sem passar por `textResult`. */
+export function rawToolResult(result: CallToolResult): RawToolResult {
+  return { [RAW_RESULT]: result };
+}
+
+/** Converte o retorno de uma ferramenta em resultado MCP: o pronto passa direto, o resto vira texto. */
+export function toToolResult(data: unknown): CallToolResult {
+  if (typeof data === 'object' && data !== null && RAW_RESULT in data) {
+    return (data as RawToolResult)[RAW_RESULT];
+  }
+  return textResult(data);
+}
+
 /** Converte um erro em resultado MCP com `isError`, usando a mensagem do erro. */
 export function errorResult(error: unknown): CallToolResult {
   const message = error instanceof Error ? error.message : String(error);
   return { isError: true, content: [{ type: 'text', text: message }] };
 }
 
-/** Executa uma ferramenta capturando erros: sucesso vira `textResult`, falha vira `errorResult`. */
+/** Executa uma ferramenta capturando erros: sucesso vira `toToolResult`, falha vira `errorResult`. */
 export async function runToolSafely<C>(
   spec: ToolSpec<C>,
   ctx: C,
   rawArgs: unknown,
 ): Promise<CallToolResult> {
   try {
-    return textResult(await spec.run(ctx, rawArgs));
+    return toToolResult(await spec.run(ctx, rawArgs));
   } catch (error) {
     return errorResult(error);
   }

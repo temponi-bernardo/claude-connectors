@@ -14773,10 +14773,16 @@ async function collectPages(deps, first, max) {
   }
   return items.slice(0, max);
 }
-async function fetchPlainText(fetchFn, url) {
+async function fetchDownload(fetchFn, url) {
   const res = await fetchFn(url);
   if (!res.ok) throw new Error(`Falha ao baixar o arquivo (${res.status}).`);
-  return res.text();
+  return res;
+}
+async function fetchPlainText(fetchFn, url) {
+  return (await fetchDownload(fetchFn, url)).text();
+}
+async function fetchFileBytes(fetchFn, url) {
+  return new Uint8Array(await (await fetchDownload(fetchFn, url)).arrayBuffer());
 }
 function createCanvasClient(deps) {
   return {
@@ -14788,7 +14794,8 @@ function createCanvasClient(deps) {
       max
     ),
     post: async (path, body) => await (await requestWithRenewal(deps, { method: "POST", path, body })).json(),
-    fetchText: (url) => fetchPlainText(deps.fetchFn, url)
+    fetchText: (url) => fetchPlainText(deps.fetchFn, url),
+    fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url)
   };
 }
 
@@ -22979,13 +22986,23 @@ function textResult(data, notes = []) {
   const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
   return { content: [text, ...notes].map((t) => ({ type: "text", text: t })) };
 }
+var RAW_RESULT = /* @__PURE__ */ Symbol("rawToolResult");
+function rawToolResult(result) {
+  return { [RAW_RESULT]: result };
+}
+function toToolResult(data) {
+  if (typeof data === "object" && data !== null && RAW_RESULT in data) {
+    return data[RAW_RESULT];
+  }
+  return textResult(data);
+}
 function errorResult(error2) {
   const message = error2 instanceof Error ? error2.message : String(error2);
   return { isError: true, content: [{ type: "text", text: message }] };
 }
 async function runToolSafely(spec, ctx, rawArgs) {
   try {
-    return textResult(await spec.run(ctx, rawArgs));
+    return toToolResult(await spec.run(ctx, rawArgs));
   } catch (error2) {
     return errorResult(error2);
   }
@@ -23023,6 +23040,342 @@ function htmlToText(html) {
     html
   );
   return text.trim();
+}
+
+// src/core/bytes.ts
+function byteView(bytes) {
+  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+function concatBytes(parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let pos = 0;
+  for (const part of parts) {
+    out.set(part, pos);
+    pos += part.length;
+  }
+  return out;
+}
+function utf16leToString(bytes) {
+  const v = byteView(bytes);
+  let out = "";
+  for (let pos = 0; pos + 1 < bytes.length; pos += 2)
+    out += String.fromCharCode(v.getUint16(pos, true));
+  return out;
+}
+
+// src/core/cfb.ts
+var CFB_SIGNATURE = [208, 207, 17, 224, 161, 177, 26, 225];
+var END_OF_CHAIN = 4294967294;
+function isCfb(bytes) {
+  return CFB_SIGNATURE.every((b, i) => bytes[i] === b);
+}
+function readCfbHeader(bytes) {
+  if (!isCfb(bytes)) throw new Error("Arquivo n\xE3o \xE9 um documento do Office (OLE).");
+  const v = byteView(bytes);
+  return {
+    sectorSize: 1 << v.getUint16(30, true),
+    miniSectorSize: 1 << v.getUint16(32, true),
+    firstDirSector: v.getUint32(48, true),
+    miniCutoff: v.getUint32(56, true),
+    firstMiniFatSector: v.getUint32(60, true),
+    firstDifatSector: v.getUint32(68, true),
+    difatCount: v.getUint32(72, true)
+  };
+}
+function cfbSector(bytes, header, id3) {
+  const start = (id3 + 1) * header.sectorSize;
+  return bytes.subarray(start, start + header.sectorSize);
+}
+function sectorWords(sector) {
+  const v = byteView(sector);
+  return Array.from({ length: sector.length >> 2 }, (_, i) => v.getUint32(i * 4, true));
+}
+function fatSectorIds(bytes, header) {
+  const ids = sectorWords(bytes.subarray(76, 512));
+  let next = header.firstDifatSector;
+  for (let i = 0; i < header.difatCount && next < END_OF_CHAIN; i++) {
+    const words = sectorWords(cfbSector(bytes, header, next));
+    next = words.pop() ?? END_OF_CHAIN;
+    ids.push(...words);
+  }
+  return ids.filter((id3) => id3 < END_OF_CHAIN);
+}
+function followChain(table, start) {
+  const chain = [];
+  let id3 = start;
+  while (id3 !== void 0 && id3 < table.length && chain.length < table.length) {
+    chain.push(id3);
+    id3 = table[id3];
+  }
+  return chain;
+}
+function readRegularChain(file, start) {
+  return concatBytes(
+    followChain(file.fat, start).map((id3) => cfbSector(file.bytes, file.header, id3))
+  );
+}
+function parseDirectory(dir) {
+  const v = byteView(dir);
+  const entries = [];
+  for (let pos = 0; pos + 128 <= dir.length; pos += 128) {
+    const nameBytes = Math.max(0, v.getUint16(pos + 64, true) - 2);
+    entries.push({
+      name: utf16leToString(dir.subarray(pos, pos + nameBytes)),
+      start: v.getUint32(pos + 116, true),
+      size: v.getUint32(pos + 120, true)
+    });
+  }
+  return entries;
+}
+function openCfb(bytes) {
+  const header = readCfbHeader(bytes);
+  const fat = fatSectorIds(bytes, header).flatMap(
+    (id3) => sectorWords(cfbSector(bytes, header, id3))
+  );
+  const entries = parseDirectory(readRegularChain({ bytes, header, fat }, header.firstDirSector));
+  return { bytes, header, fat, entries };
+}
+function readMiniStream(file, entry) {
+  const root = file.entries[0];
+  const container = root ? readRegularChain(file, root.start) : new Uint8Array();
+  const miniFat = sectorWords(readRegularChain(file, file.header.firstMiniFatSector));
+  const size = file.header.miniSectorSize;
+  const parts = followChain(miniFat, entry.start).map(
+    (id3) => container.subarray(id3 * size, (id3 + 1) * size)
+  );
+  return concatBytes(parts);
+}
+function readCfbStream(file, name) {
+  const entry = file.entries.find((e, i) => i > 0 && e.name === name);
+  if (!entry) return null;
+  const data = entry.size < file.header.miniCutoff ? readMiniStream(file, entry) : readRegularChain(file, entry.start);
+  return data.subarray(0, entry.size);
+}
+
+// src/core/zip.ts
+var EOCD_SIGNATURE = 101010256;
+var CENTRAL_SIGNATURE = 33639248;
+function findEndOfCentralDirectory(bytes) {
+  const view = byteView(bytes);
+  for (let pos = bytes.length - 22; pos >= 0; pos--) {
+    if (view.getUint32(pos, true) === EOCD_SIGNATURE) return pos;
+  }
+  throw new Error("Arquivo ZIP inv\xE1lido: diret\xF3rio central n\xE3o encontrado.");
+}
+function listZipEntries(bytes) {
+  const view = byteView(bytes);
+  const eocd = findEndOfCentralDirectory(bytes);
+  const entries = [];
+  let pos = view.getUint32(eocd + 16, true);
+  for (let i = 0; i < view.getUint16(eocd + 10, true); i++) {
+    if (view.getUint32(pos, true) !== CENTRAL_SIGNATURE) break;
+    const nameLength = view.getUint16(pos + 28, true);
+    entries.push({
+      name: new TextDecoder().decode(bytes.subarray(pos + 46, pos + 46 + nameLength)),
+      method: view.getUint16(pos + 10, true),
+      compressedSize: view.getUint32(pos + 20, true),
+      localOffset: view.getUint32(pos + 42, true)
+    });
+    pos += 46 + nameLength + view.getUint16(pos + 30, true) + view.getUint16(pos + 32, true);
+  }
+  return entries;
+}
+function zipEntryBytes(bytes, entry) {
+  const view = byteView(bytes);
+  const start = entry.localOffset + 30 + view.getUint16(entry.localOffset + 26, true) + view.getUint16(entry.localOffset + 28, true);
+  return bytes.subarray(start, start + entry.compressedSize);
+}
+async function inflateRaw(data) {
+  const stream = new Blob([new Uint8Array(data)]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function readZipEntry(bytes, name) {
+  const entry = listZipEntries(bytes).find((e) => e.name === name);
+  if (!entry) return null;
+  const data = zipEntryBytes(bytes, entry);
+  if (entry.method === 0) return data;
+  if (entry.method === 8) return inflateRaw(data);
+  throw new Error(`Compress\xE3o ZIP n\xE3o suportada (m\xE9todo ${entry.method}).`);
+}
+
+// src/core/word.ts
+var CP1252_HIGH = "\u20AC\x81\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\x8D\u017D\x8F\x90\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\x9D\u017E\u0178";
+var DOCX_TOKENS = /<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>|<w:tab\/>|<w:(?:br|cr)(?:\s[^>]*)?\/>|<\/w:p>/g;
+function docxXmlToText(xml) {
+  let out = "";
+  for (const match of xml.matchAll(DOCX_TOKENS)) {
+    const [token, text] = match;
+    if (text !== void 0) out += text;
+    else if (token === "<w:tab/>") out += "	";
+    else out += "\n";
+  }
+  return htmlToText(out);
+}
+async function docxToText(bytes) {
+  const xml = await readZipEntry(bytes, "word/document.xml");
+  if (!xml) throw new Error("Arquivo .docx sem word/document.xml.");
+  return docxXmlToText(new TextDecoder().decode(xml));
+}
+function cp1252ToString(bytes) {
+  let out = "";
+  for (const b of bytes) {
+    out += b >= 128 && b < 160 ? CP1252_HIGH.charAt(b - 128) : String.fromCharCode(b);
+  }
+  return out;
+}
+function parsePieceTable(table, fcClx) {
+  const v = byteView(table);
+  let pos = fcClx;
+  while (table[pos] === 1) pos += 3 + v.getUint16(pos + 1, true);
+  if (table[pos] !== 2) throw new Error("Documento .doc com tabela de texto inv\xE1lida.");
+  const lcb = v.getUint32(pos + 1, true);
+  const plc = pos + 5;
+  const count = (lcb - 4) / 12;
+  return Array.from({ length: count }, (_, i) => ({
+    cpStart: v.getUint32(plc + i * 4, true),
+    cpEnd: v.getUint32(plc + (i + 1) * 4, true),
+    fc: v.getUint32(plc + (count + 1) * 4 + i * 8 + 2, true)
+  }));
+}
+function pieceText(wordDoc, piece) {
+  const length = piece.cpEnd - piece.cpStart;
+  if (piece.fc & 1073741824) {
+    const start = (piece.fc & 1073741823) / 2;
+    return cp1252ToString(wordDoc.subarray(start, start + length));
+  }
+  return utf16leToString(wordDoc.subarray(piece.fc, piece.fc + length * 2));
+}
+var WORD_TEXT_REPLACEMENTS = [
+  [/\u0013[^\u0013\u0014\u0015]*\u0014/g, ""],
+  [/\u0013[^\u0013\u0014\u0015]*\u0015/g, ""],
+  [/[\r\u000b\u000c]/g, "\n"],
+  [/\u0007/g, "	"],
+  [/[\u0000-\u0008\u000e-\u001f]/g, ""],
+  [/[ \t]+\n/g, "\n"],
+  [/\n{3,}/g, "\n\n"]
+];
+function cleanWordText(raw) {
+  return WORD_TEXT_REPLACEMENTS.reduce((acc, [re, to]) => acc.replace(re, to), raw).trim();
+}
+function docToText(bytes) {
+  const cfb = openCfb(bytes);
+  const wordDoc = readCfbStream(cfb, "WordDocument");
+  if (!wordDoc) throw new Error("Arquivo .doc sem o stream WordDocument.");
+  const v = byteView(wordDoc);
+  const flags = v.getUint16(10, true);
+  if (flags & 256) throw new Error("O .doc est\xE1 protegido por senha.");
+  const table = readCfbStream(cfb, flags & 512 ? "1Table" : "0Table");
+  if (!table) throw new Error("Arquivo .doc sem o stream de tabela.");
+  const pieces = parsePieceTable(table, v.getUint32(418, true));
+  const raw = pieces.map((p) => pieceText(wordDoc, p)).join("");
+  return cleanWordText(raw.slice(0, v.getUint32(76, true)));
+}
+function wordKind(contentType2, name) {
+  if (/\.docx$/i.test(name) || contentType2.includes("wordprocessingml")) return "docx";
+  if (/\.doc$/i.test(name) || contentType2 === "application/msword") return "doc";
+  return null;
+}
+function wordToText(kind, bytes) {
+  return kind === "docx" ? docxToText(bytes) : Promise.resolve(docToText(bytes));
+}
+
+// connectors/canvas-puc/src/helpers.ts
+var ASSIGNMENT_BUCKETS = {
+  todas: void 0,
+  futuras: "upcoming",
+  passadas: "past",
+  sem_entrega: "unsubmitted",
+  atrasadas: "overdue"
+};
+function isoDaysFrom(now, days) {
+  return new Date(now.getTime() + days * 864e5).toISOString();
+}
+function dateOnly(iso) {
+  return iso.slice(0, 10);
+}
+function courseContextCodes(ids) {
+  return ids.map((id3) => `course_${String(id3)}`);
+}
+function courseNameMap(courses) {
+  return new Map(courses.map((c) => [String(c.id), c.name ?? ""]));
+}
+function participantNames(view) {
+  return new Map((view.participants ?? []).map((p) => [String(p.id), p.display_name ?? ""]));
+}
+function isTextFile(contentType2, name) {
+  return /^text\/|json|xml|javascript|csv/.test(contentType2) || /\.(txt|md|csv|py|js|ts|java|c|cpp|h|html?)$/i.test(name);
+}
+function matchModuleItems(modules, term) {
+  const q = term.toLowerCase();
+  return modules.flatMap(
+    (m) => (m.items ?? []).filter((i) => i.title?.toLowerCase().includes(q)).map((i) => ({ modulo: m.name, titulo: i.title, tipo: i.type }))
+  );
+}
+function activeCourses(client) {
+  return client.getAll("/courses", { enrollment_state: "active" });
+}
+async function fetchOwnSubmission(client, courseId2, assignmentId) {
+  const path = `/courses/${String(courseId2)}/assignments/${String(assignmentId)}/submissions/self`;
+  try {
+    return await client.get(path, {
+      include: ["submission_comments", "rubric_assessment"]
+    });
+  } catch {
+    return null;
+  }
+}
+function getAllOrEmpty(client, path, params) {
+  return client.getAll(path, params).catch(() => []);
+}
+
+// connectors/canvas-puc/src/files.ts
+var MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
+var MAX_TEXT_CHARS = 1e5;
+function bytesToBase64(bytes) {
+  let binary = "";
+  for (let pos = 0; pos < bytes.length; pos += 32768) {
+    binary += String.fromCharCode(...bytes.subarray(pos, pos + 32768));
+  }
+  return btoa(binary);
+}
+function fileContentBlock(file, bytes) {
+  const mimeType = file["content-type"] ?? "application/octet-stream";
+  const data = bytesToBase64(bytes);
+  if (mimeType.startsWith("image/")) return { type: "image", data, mimeType };
+  const uri = file.url ?? `canvas-file:${String(file.id)}`;
+  return { type: "resource", resource: { uri, mimeType, blob: data } };
+}
+function downloadedFileResult(file, bytes) {
+  const kb = Math.round(bytes.length / 1024);
+  const text = `"${String(file.display_name)}" (${String(file["content-type"])}, ${kb} KB). Link: ${String(file.url)}`;
+  return rawToolResult({ content: [{ type: "text", text }, fileContentBlock(file, bytes)] });
+}
+function downloadRefusal(file) {
+  const name = String(file.display_name);
+  if (!file.url) return `"${name}" n\xE3o tem link de download dispon\xEDvel para esta conta.`;
+  if ((file.size ?? 0) > MAX_DOWNLOAD_BYTES) {
+    const mb = ((file.size ?? 0) / 1024 / 1024).toFixed(1);
+    return `"${name}" tem ${mb} MB, acima do limite de 10 MB para trazer \xE0 conversa; baixe pelo link: ${file.url}`;
+  }
+  return null;
+}
+async function downloadCanvasFile(client, file) {
+  const refusal = downloadRefusal(file);
+  if (refusal !== null) return refusal;
+  return downloadedFileResult(file, await client.fetchBytes(String(file.url)));
+}
+async function readCanvasFileText(client, file) {
+  const type = file["content-type"] ?? "";
+  const name = file.display_name ?? "";
+  const word = wordKind(type, name);
+  if (!file.url || !word && !isTextFile(type, name)) {
+    return `"${name}" \xE9 ${type}; use \`baixar_arquivo\` para trazer o conte\xFAdo ou baixe pelo link: ${String(file.url)}`;
+  }
+  const text = word ? await wordToText(word, await client.fetchBytes(file.url)) : await client.fetchText(file.url);
+  const body = type.includes("html") ? htmlToText(text) : text;
+  return `# ${name}
+
+${body}`.slice(0, MAX_TEXT_CHARS);
 }
 
 // connectors/canvas-puc/src/format.ts
@@ -23205,55 +23558,6 @@ function toCalendarEvent(e) {
   };
 }
 
-// connectors/canvas-puc/src/helpers.ts
-var ASSIGNMENT_BUCKETS = {
-  todas: void 0,
-  futuras: "upcoming",
-  passadas: "past",
-  sem_entrega: "unsubmitted",
-  atrasadas: "overdue"
-};
-function isoDaysFrom(now, days) {
-  return new Date(now.getTime() + days * 864e5).toISOString();
-}
-function dateOnly(iso) {
-  return iso.slice(0, 10);
-}
-function courseContextCodes(ids) {
-  return ids.map((id3) => `course_${String(id3)}`);
-}
-function courseNameMap(courses) {
-  return new Map(courses.map((c) => [String(c.id), c.name ?? ""]));
-}
-function participantNames(view) {
-  return new Map((view.participants ?? []).map((p) => [String(p.id), p.display_name ?? ""]));
-}
-function isTextFile(contentType2, name) {
-  return /^text\/|json|xml|javascript|csv/.test(contentType2) || /\.(txt|md|csv|py|js|ts|java|c|cpp|h|html?)$/i.test(name);
-}
-function matchModuleItems(modules, term) {
-  const q = term.toLowerCase();
-  return modules.flatMap(
-    (m) => (m.items ?? []).filter((i) => i.title?.toLowerCase().includes(q)).map((i) => ({ modulo: m.name, titulo: i.title, tipo: i.type }))
-  );
-}
-function activeCourses(client) {
-  return client.getAll("/courses", { enrollment_state: "active" });
-}
-async function fetchOwnSubmission(client, courseId2, assignmentId) {
-  const path = `/courses/${String(courseId2)}/assignments/${String(assignmentId)}/submissions/self`;
-  try {
-    return await client.get(path, {
-      include: ["submission_comments", "rubric_assessment"]
-    });
-  } catch {
-    return null;
-  }
-}
-function getAllOrEmpty(client, path, params) {
-  return client.getAll(path, params).catch(() => []);
-}
-
 // connectors/canvas-puc/src/tools-read.ts
 var id = external_exports.union([external_exports.string(), external_exports.number()]);
 var courseId = id.describe("ID do curso (veja listar_cursos)");
@@ -23406,19 +23710,21 @@ var CANVAS_READ_TOOLS = [
   }),
   defineTool({
     name: "ler_arquivo_texto",
-    description: "L\xEA um arquivo de texto do curso (txt, md, csv, c\xF3digo, html). Para PDF/slides, devolve o link.",
+    description: "L\xEA um arquivo do curso como texto (txt, md, csv, c\xF3digo, html, doc e docx). Para PDF/slides, use baixar_arquivo.",
     shape: { file_id: id },
-    run: async ({ client }, args) => {
-      const file = await client.get(`/files/${String(args.file_id)}`);
-      const type = file["content-type"] ?? "";
-      const name = file.display_name ?? "";
-      if (!isTextFile(type, name) || !file.url)
-        return `"${name}" \xE9 ${type}; baixe pelo link: ${String(file.url)}`;
-      const text = await client.fetchText(file.url);
-      return `# ${name}
-
-${type.includes("html") ? htmlToText(text) : text}`.slice(0, 1e5);
-    }
+    run: async ({ client }, args) => readCanvasFileText(
+      client,
+      await client.get(`/files/${String(args.file_id)}`)
+    )
+  }),
+  defineTool({
+    name: "baixar_arquivo",
+    description: "Baixa um arquivo do curso (PDF, slides, imagem etc., at\xE9 10 MB) e traz o conte\xFAdo para a conversa.",
+    shape: { file_id: id },
+    run: async ({ client }, args) => downloadCanvasFile(
+      client,
+      await client.get(`/files/${String(args.file_id)}`)
+    )
   }),
   defineTool({
     name: "discussoes",
@@ -23548,7 +23854,7 @@ var CANVAS_ACCOUNT_TOOLS = [
     }
   })
 ];
-var CANVAS_SERVER_INFO = { name: "canvas-puc", version: "1.2.0" };
+var CANVAS_SERVER_INFO = { name: "canvas-puc", version: "1.3.0" };
 function canvasServiceTools(allowWrite) {
   return [...CANVAS_READ_TOOLS, ...allowWrite ? CANVAS_WRITE_TOOLS : []];
 }
