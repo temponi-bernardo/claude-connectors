@@ -8,6 +8,10 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Adicionado
 
+- Canvas: o plugin agora funciona nas sessões do Claude Code na nuvem. O `.mcp.json` liga
+  `NODE_USE_ENV_PROXY=1`, e o Node passa a usar o proxy do ambiente, que injeta o token do Canvas. Basta
+  preencher o campo "Token de acesso" do plugin com qualquer texto (ex.: `proxy`).
+
 - Canvas: ferramenta `baixar_arquivo`, que traz o conteúdo de um arquivo do curso (PDF, slides, imagem; até
   10 MB) para a conversa, no conector local e no remoto.
 - Canvas: `ler_arquivo_texto` agora lê também documentos do Word (`.docx` e `.doc` 97-2003), sem dependências

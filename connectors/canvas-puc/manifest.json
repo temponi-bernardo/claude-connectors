@@ -17,7 +17,8 @@
       "env": {
         "CANVAS_BASE_URL": "${user_config.base_url}",
         "CANVAS_ALLOW_WRITE": "${user_config.allow_write}",
-        "CANVAS_API_TOKEN": "${user_config.api_token}"
+        "CANVAS_API_TOKEN": "${user_config.api_token}",
+        "NODE_USE_ENV_PROXY": "1"
       }
     }
   },

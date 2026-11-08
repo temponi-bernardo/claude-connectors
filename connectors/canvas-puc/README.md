@@ -37,6 +37,16 @@ janela sozinha). Uma janela do Chrome abre, num perfil só do conector:
 | `CANVAS_LOGIN_BUTTON` | `pucminas.edu.br`                  | Texto do botão da instituição na tela de login                  |
 | `CANVAS_DATA_DIR`     | `~/.canvas-puc`                    | Onde ficam a sessão e o perfil do navegador                     |
 
+O manifesto também define `NODE_USE_ENV_PROXY=1`: com ele, o Node usa o `HTTPS_PROXY` do ambiente. Sem proxy
+configurado, nada muda.
+
+### Plugin numa sessão do Claude Code na nuvem
+
+A nuvem não tem navegador, então o login pela janela não funciona. Se o ambiente da nuvem tiver um segredo
+de rede para `pucminas.instructure.com` (header `Authorization`), preencha o campo **"Token de acesso"** do
+plugin com qualquer texto, por exemplo `proxy`. O proxy troca esse texto pelo token real a cada chamada. Não
+cole o token verdadeiro no plugin.
+
 ## Conector remoto (claude.ai, Cowork e celular)
 
 O plugin e a `.mcpb` rodam no seu computador. Para usar o Canvas nas sessões na nuvem, publique o servidor
