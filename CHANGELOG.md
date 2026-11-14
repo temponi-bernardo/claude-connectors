@@ -8,6 +8,15 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Adicionado
 
+- **Conector Gmail remoto** (`connectors/gmail`, ADR 0012): lê duas ou mais contas Gmail no claude.ai, no
+  Cowork e no celular, só leitura. Ferramentas `list_accounts`, `search_threads`, `get_thread`, `get_message`,
+  `list_labels` e `get_attachment_text` (PDF, Word, HTML e texto), com `account` (`all` onde faz sentido).
+  OAuth 2.1 com `@cloudflare/workers-oauth-provider`, login no Google restrito a `ALLOWED_EMAILS`, vínculo
+  de contas em `/accounts/link` com refresh token cifrado (AES-256-GCM) no Workers KV, limite de 120
+  requisições por minuto por sessão. Roda só sob demanda (`npm run gmail:deploy`).
+- `src/core/pdf.ts`: extração de texto de PDF sem dependências (fluxos comprimidos, fluxos de objetos e
+  mapas ToUnicode).
+
 - Canvas: o plugin agora funciona nas sessões do Claude Code na nuvem. O `.mcp.json` liga
   `NODE_USE_ENV_PROXY=1`, e o Node passa a usar o proxy do ambiente, que injeta o token do Canvas. Basta
   preencher o campo "Token de acesso" do plugin com qualquer texto (ex.: `proxy`).

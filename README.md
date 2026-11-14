@@ -4,9 +4,10 @@ Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo
 
 ## Conectores
 
-| Conector                                        | O que faz                                                           |
-| ----------------------------------------------- | ------------------------------------------------------------------- |
-| [`canvas-puc`](connectors/canvas-puc/README.md) | Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, arquivos |
+| Conector                                        | O que faz                                                                |
+| ----------------------------------------------- | ------------------------------------------------------------------------ |
+| [`canvas-puc`](connectors/canvas-puc/README.md) | Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, arquivos      |
+| [`gmail`](connectors/gmail/README.md)           | Gmail multi-conta só leitura, remoto no Cloudflare Workers (sem `.mcpb`) |
 
 ## Começando
 

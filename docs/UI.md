@@ -3,7 +3,8 @@
 **Este projeto não tem interface de aplicativo.** `docs.config.json` tem `"uiDir": null`, então o `docs:check`
 não cobra componentes. A única tela é a **página de autorização do conector remoto** (ADR 0009): HTML estático,
 sem script, gerado por `renderLoginPage()` em `src/remote/login-page.ts`, com o estilo em `LOGIN_PAGE_CSS` e os
-tokens abaixo (claro e escuro por `prefers-color-scheme`).
+tokens abaixo (claro e escuro por `prefers-color-scheme`). As páginas do conector Gmail (consentimento e resultado
+do vínculo, `connectors/gmail/src/pages.ts`) usam o mesmo `LOGIN_PAGE_CSS`, sem estilo próprio.
 
 ## Quando houver interface
 

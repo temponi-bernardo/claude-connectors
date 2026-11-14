@@ -43,6 +43,7 @@ O MVP é o conector do Canvas instalado como extensão e usado no dia a dia: **F
 | F2.6 | Conector remoto do Canvas: HTTP + OAuth com token (ADR 0009)           | ✅     | `server/remote.js` faz o OAuth completo e responde as ferramentas; Dockerfile e Render |
 | F2.7 | Conector remoto no Cloudflare Workers e conectado no claude.ai         | ✅     | Worker no ar e `proximas_entregas` respondendo numa sessão do Cowork (ADR 0010)        |
 | F2.8 | Renovação automática do token do Canvas no refresh do OAuth            | ✅     | Refresh do OAuth estende a validade do token na PUC (ADR 0011)                         |
+| F2.9 | Gmail remoto multi-conta só leitura no Workers (ADR 0012)              | 🟨     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai |
 
 ## Fases seguintes
 
