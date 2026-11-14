@@ -27,13 +27,13 @@ const ORIGINAL = gmailRoute({
   'messages/m1/attachments/att-1': { size: 3, data: b64('PDF') },
 });
 
-/** Dependências com rota de escrita (que responde o id do envio) e a leitura do original. */
+/** Dependencies with a write route (answering the send id) and the original read. */
 async function writableDeps(writes: GmailWrite[]) {
   const route = gmailWriteRoute(writes, () => ({ id: 's1', threadId: 't1' }));
   return linkedTestDeps([route, ORIGINAL]);
 }
 
-/** MIME do envio registrado. */
+/** MIME of the recorded send. */
 function sentMime(writes: GmailWrite[]): string {
   return Buffer.from((writes[0]?.body as { raw: string }).raw, 'base64url').toString();
 }
@@ -42,68 +42,68 @@ beforeEach(() => {
   clearAccessTokenCache();
 });
 
-describe('ferramentas de envio', () => {
-  it('todas pedem confirmação (destructiveHint) e não são idempotentes', () => {
+describe('sending tools', () => {
+  it('all ask for confirmation (destructiveHint) and are not idempotent', () => {
     for (const tool of [sendEmailTool, replyEmailTool, replyAllEmailTool, forwardEmailTool]) {
       expect(tool.annotations).toMatchObject(SEND_HINTS);
       expect(tool.description).toMatch(/confirmation/);
     }
   });
 
-  it('send_email envia pela conta pedida', async () => {
+  it('send_email sends from the requested account', async () => {
     const writes: GmailWrite[] = [];
     const deps = await writableDeps(writes);
     const result = await sendEmailTool.run(deps, {
-      account: 'musica',
+      account: 'music',
       to: ['ana@example.com'],
-      subject: 'Oi',
-      body: 'Tudo bem?',
+      subject: 'Hi',
+      body: 'How are you?',
     });
-    expect(result).toEqual({ account: 'musica', sent: true, message_id: 's1', thread_id: 't1' });
+    expect(result).toEqual({ account: 'music', sent: true, message_id: 's1', thread_id: 't1' });
     expect(sentMime(writes)).toContain('To: ana@example.com');
   });
 
-  it('send_email recusa "all" e listas vazias', async () => {
+  it('send_email refuses "all" and empty lists', async () => {
     const deps = await writableDeps([]);
     const args = { account: 'all', to: ['a@x.com'], subject: '', body: '' };
     await expect(sendEmailTool.run(deps, args)).rejects.toThrow(/one specific account/);
-    await expect(sendEmailTool.run(deps, { ...args, account: 'dono', to: [] })).rejects.toThrow();
+    await expect(sendEmailTool.run(deps, { ...args, account: 'owner', to: [] })).rejects.toThrow();
   });
 
-  it('reply_email e reply_all_email mantêm a conversa', async () => {
+  it('reply_email and reply_all_email keep the thread', async () => {
     const writes: GmailWrite[] = [];
     const deps = await writableDeps(writes);
-    await replyEmailTool.run(deps, { account: 'dono', message_id: 'm1', body: 'Obrigado' });
-    await replyAllEmailTool.run(deps, { account: 'dono', message_id: 'm1', body: 'Obrigado' });
+    await replyEmailTool.run(deps, { account: 'owner', message_id: 'm1', body: 'Thanks' });
+    await replyAllEmailTool.run(deps, { account: 'owner', message_id: 'm1', body: 'Thanks' });
     expect(writes.map((w) => (w.body as { threadId?: string }).threadId)).toEqual(['t1', 't1']);
-    expect(sentMime(writes)).toContain('Subject: Re: Seu recibo FL Cloud');
+    expect(sentMime(writes)).toContain('Subject: Re: Your FL Cloud receipt');
   });
 
-  it('replyTool monta a ferramenta com o nome dado', () => {
+  it('replyTool builds the tool with the given name', () => {
     expect(replyTool({ name: 'x', title: 'X', replyAll: true, description: 'd' }).name).toBe('x');
   });
 
-  it('forward_email leva os anexos originais', async () => {
+  it('forward_email carries the original attachments', async () => {
     const writes: GmailWrite[] = [];
     const deps = await writableDeps(writes);
     await forwardEmailTool.run(deps, {
-      account: 'dono',
+      account: 'owner',
       message_id: 'm1',
       to: ['z@example.com'],
-      note: 'Segue',
+      note: 'See below',
     });
     const mime = sentMime(writes);
     expect(mime).toContain('multipart/mixed');
-    expect(mime).toContain('filename="recibo.pdf"');
+    expect(mime).toContain('filename="receipt.pdf"');
   });
 
-  it('conta só leitura recebe o pedido de novo vínculo antes de ler o original', async () => {
+  it('a read-only account gets the relinking request before reading the original', async () => {
     const writes: GmailWrite[] = [];
     const deps = await writableDeps(writes);
     const accounts = TEST_EMAILS.map((email) => testAccount(email, { scope: READONLY_SCOPE }));
     await saveOwnerAccounts(deps.kv, TEST_TOKEN_KEY, { owner: TEST_OWNER, accounts });
     await expect(
-      replyEmailTool.run(deps, { account: 'dono', message_id: 'm1', body: 'x' }),
+      replyEmailTool.run(deps, { account: 'owner', message_id: 'm1', body: 'x' }),
     ).rejects.toThrow(/read-only.*link_account/s);
     expect(writes).toHaveLength(0);
   });

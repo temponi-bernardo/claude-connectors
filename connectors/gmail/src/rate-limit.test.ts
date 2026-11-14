@@ -3,11 +3,11 @@ import { countingLimiter } from './fixtures/fake-google.js';
 import { isRateLimited, rateLimitedResponse } from './rate-limit.js';
 
 describe('isRateLimited', () => {
-  it('sem binding nunca limita', async () => {
+  it('never limits without a binding', async () => {
     expect(await isRateLimited(undefined, 's1')).toBe(false);
   });
 
-  it('limita por chave depois do permitido', async () => {
+  it('limits per key past the allowance', async () => {
     const limiter = countingLimiter(1);
     expect(await isRateLimited(limiter, 's1')).toBe(false);
     expect(await isRateLimited(limiter, 's1')).toBe(true);
@@ -16,7 +16,7 @@ describe('isRateLimited', () => {
 });
 
 describe('rateLimitedResponse', () => {
-  it('devolve 429 com Retry-After', async () => {
+  it('returns 429 with Retry-After', async () => {
     const response = rateLimitedResponse();
     expect(response.status).toBe(429);
     expect(response.headers.get('retry-after')).toBe('60');

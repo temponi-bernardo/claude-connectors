@@ -1,41 +1,41 @@
 /**
- * Selo autenticado (AES-256-GCM) para os blobs do OAuth sem estado: `client_id`, código e tokens.
- * Quem tem a chave do servidor abre e confere; ninguém mais lê nem altera o conteúdo.
+ * Authenticated seal (AES-256-GCM) for the stateless OAuth blobs: `client_id`, code and tokens.
+ * Whoever holds the server key opens and verifies them; nobody else can read or change the content.
  */
 import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto';
 
-/** Tamanho da chave em bytes (AES-256). */
+/** Key size in bytes (AES-256). */
 export const SEAL_KEY_BYTES = 32;
 
-/** Bytes do vetor de inicialização e da tag de autenticação do GCM. */
+/** Bytes of the GCM initialization vector and authentication tag. */
 const IV_BYTES = 12;
 const TAG_BYTES = 16;
 
-/** Conteúdo selado: um objeto com tipo (`typ`) e validade em segundos Unix (`exp`). */
+/** Sealed content: an object with a type (`typ`) and an expiry in Unix seconds (`exp`). */
 export type SealedClaims = Readonly<Record<string, unknown>> & {
   readonly typ: string;
   readonly exp: number;
 };
 
-/** O que `openSealed` exige: o tipo esperado e o instante atual (segundos Unix). */
+/** What `openSealed` requires: the expected type and the current time (Unix seconds). */
 export interface SealExpectation {
   readonly typ: string;
   readonly now: number;
 }
 
-/** Decodifica uma chave de selo (base64 ou base64url) e exige 32 bytes; `name` é a variável, para o erro. */
+/** Decodes a seal key (base64 or base64url) and requires 32 bytes; `name` is the variable, for the error. */
 export function parseSealKey(raw: string | null, name = 'SEAL_KEY'): Buffer {
   if (!raw) {
     throw new Error(
-      `Defina ${name} com 32 bytes aleatórios em base64: \`node -e "console.log(crypto.randomBytes(32).toString('base64'))"\`.`,
+      `Set ${name} to 32 random bytes in base64: \`node -e "console.log(crypto.randomBytes(32).toString('base64'))"\`.`,
     );
   }
   const key = Buffer.from(raw, 'base64');
-  if (key.length !== SEAL_KEY_BYTES) throw new Error(`${name} precisa ter 32 bytes em base64.`);
+  if (key.length !== SEAL_KEY_BYTES) throw new Error(`${name} must be 32 bytes in base64.`);
   return key;
 }
 
-/** Sela um valor JSON: `iv + tag + cifra` em base64url. */
+/** Seals a JSON value: `iv + tag + ciphertext` in base64url. */
 export function sealPayload(payload: unknown, key: Buffer): string {
   const iv = randomBytes(IV_BYTES);
   const cipher = createCipheriv('aes-256-gcm', key, iv);
@@ -43,7 +43,7 @@ export function sealPayload(payload: unknown, key: Buffer): string {
   return Buffer.concat([iv, cipher.getAuthTag(), body]).toString('base64url');
 }
 
-/** Abre um selo; devolve nulo se a chave não confere, o texto foi alterado ou não é um objeto. */
+/** Opens a seal; returns null if the key does not match, the text was tampered with or it is not an object. */
 export function unsealPayload(sealed: string, key: Buffer): Record<string, unknown> | null {
   try {
     const raw = Buffer.from(sealed, 'base64url');
@@ -60,7 +60,7 @@ export function unsealPayload(sealed: string, key: Buffer): Record<string, unkno
   }
 }
 
-/** Abre um selo do tipo esperado que ainda não venceu; senão, nulo. */
+/** Opens a seal of the expected type that has not expired yet; otherwise null. */
 export function openSealed(
   sealed: string,
   key: Buffer,

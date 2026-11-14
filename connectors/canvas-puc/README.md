@@ -12,8 +12,8 @@ O conector roda só na nuvem. Nada é instalado no computador ([ADR 0013](../../
 
 1. No Claude (claude.ai, Cowork ou Claude Code), **Adicionar marketplace** → `temponi-bernardo/claude-connectors`.
 2. Instale o plugin **canvas-puc**. Ele aponta para `https://canvas-puc-remote.bftemponi.workers.dev/mcp`.
-3. Na primeira vez, o Claude abre a página **"Conectar o Canvas ao Claude"**. No Canvas, vá em **Conta →
-   Configurações → Novo token de acesso**, copie o token, cole na página e clique em **Conectar**.
+3. Na primeira vez, o Claude abre a página **"Connect Canvas to Claude"**. No Canvas, vá em **Conta →
+   Configurações → Novo token de acesso**, copie o token, cole na página e clique em **Connect**.
 4. Pronto: o conector funciona na web, no Cowork, no app do celular e no Claude Code.
 
 No Claude Code, os passos 1 e 2 cabem num comando só:
@@ -89,11 +89,11 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://seu-dominio -e SEAL_KEY=<32 bytes 
 
 **Problemas comuns:**
 
-| Sintoma                                     | Causa e solução                                                                                       |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| "O Canvas respondeu 403" na página          | Chamada sem `User-Agent`; o Worker manda `CANVAS_USER_AGENT` desde o PR #13. Publique a versão atual. |
-| **Conectar** não faz nada com token válido  | CSP barrando o 302 para o claude.ai; corrigido no PR #14 (`pageSecurityPolicy()`). Publique de novo.  |
-| "Configuração do Worker inválida: SEAL_KEY" | Secret ausente ou ainda propagando logo após o `secret put`; espere alguns segundos.                  |
+| Sintoma                                   | Causa e solução                                                                                       |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| "O Canvas respondeu 403" na página        | Chamada sem `User-Agent`; o Worker manda `CANVAS_USER_AGENT` desde o PR #13. Publique a versão atual. |
+| **Connect** não faz nada com token válido | CSP barrando o 302 para o claude.ai; corrigido no PR #14 (`pageSecurityPolicy()`). Publique de novo.  |
+| "Invalid Worker configuration: SEAL_KEY"  | Secret ausente ou ainda propagando logo após o `secret put`; espere alguns segundos.                  |
 
 ## Ferramentas
 

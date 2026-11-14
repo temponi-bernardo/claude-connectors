@@ -15,7 +15,7 @@ function json(data: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(data), { status: 200, ...init });
 }
 
-/** fetch falso que devolve as respostas em ordem e guarda as chamadas. */
+/** Fake fetch that returns the responses in order and records the calls. */
 function fakeFetch(...responses: Response[]) {
   return vi.fn<(url: URL | string, init?: RequestInit) => Promise<Response>>(() =>
     Promise.resolve(responses.shift() ?? json(null)),
@@ -27,7 +27,7 @@ function deps(fetchFn: ReturnType<typeof fakeFetch>): ClientDeps {
 }
 
 describe('unauthorizedMessage', () => {
-  it('manda gerar outro token e reconectar no Claude', () => {
+  it('tells the user to generate another token and reconnect in Claude', () => {
     const message = unauthorizedMessage('https://x.test');
     expect(message).toContain('https://x.test/profile/settings');
     expect(message).toContain('reconnect');
@@ -35,7 +35,7 @@ describe('unauthorizedMessage', () => {
 });
 
 describe('sendCanvasRequest', () => {
-  it('monta URL da API, headers com o token e corpo JSON', async () => {
+  it('builds the API URL, headers with the token and a JSON body', async () => {
     const f = fakeFetch(json({}));
     await sendCanvasRequest(deps(f), {
       method: 'POST',
@@ -52,7 +52,7 @@ describe('sendCanvasRequest', () => {
     });
   });
 
-  it('não manda corpo em GET', async () => {
+  it('sends no body on GET', async () => {
     const f = fakeFetch(json({}));
     await sendCanvasRequest(deps(f), { method: 'GET', path: '/a' });
     expect(f.mock.calls[0]![1]).not.toHaveProperty('body');
@@ -60,7 +60,7 @@ describe('sendCanvasRequest', () => {
 });
 
 describe('requestCanvas', () => {
-  it('devolve a resposta quando dá certo', async () => {
+  it('returns the response on success', async () => {
     const res = await requestCanvas(deps(fakeFetch(json({ ok: 1 }))), {
       method: 'GET',
       path: '/a',
@@ -68,7 +68,7 @@ describe('requestCanvas', () => {
     expect(await res.json()).toEqual({ ok: 1 });
   });
 
-  it('em 401 falha uma vez só, orientando a reconectar', async () => {
+  it('on 401 fails only once, telling the user to reconnect', async () => {
     const f = fakeFetch(json({}, { status: 401 }));
     await expect(requestCanvas(deps(f), { method: 'GET', path: '/a' })).rejects.toThrow(
       'reconnect',
@@ -76,16 +76,16 @@ describe('requestCanvas', () => {
     expect(f).toHaveBeenCalledOnce();
   });
 
-  it('inclui status e corpo em outros erros', async () => {
-    const f = fakeFetch(new Response('proibido', { status: 403 }));
+  it('includes the status and body in other errors', async () => {
+    const f = fakeFetch(new Response('forbidden', { status: 403 }));
     await expect(requestCanvas(deps(f), { method: 'GET', path: '/a' })).rejects.toThrow(
-      'Canvas 403 on GET /a: proibido',
+      'Canvas 403 on GET /a: forbidden',
     );
   });
 });
 
 describe('collectPages', () => {
-  it('segue o header Link e respeita o máximo', async () => {
+  it('follows the Link header and respects the maximum', async () => {
     const f = fakeFetch(
       json([1, 2], { headers: { link: '<https://x.test/api/v1/a?page=2>; rel="next"' } }),
       json([3, 4], { headers: { link: '<https://x.test/api/v1/a?page=3>; rel="next"' } }),
@@ -96,7 +96,7 @@ describe('collectPages', () => {
     expect(String(f.mock.calls[1]![0])).toBe('https://x.test/api/v1/a?page=2');
   });
 
-  it('aceita resposta que não é lista', async () => {
+  it('accepts a response that is not a list', async () => {
     await expect(
       collectPages(deps(fakeFetch(json({ a: 1 }))), { method: 'GET', path: '/a' }, 10),
     ).resolves.toEqual([{ a: 1 }]);
@@ -104,10 +104,10 @@ describe('collectPages', () => {
 });
 
 describe('fetchPlainText', () => {
-  it('devolve o texto ou falha com o status', async () => {
-    const f = fakeFetch(new Response('conteúdo'), new Response('', { status: 404 }));
+  it('returns the text or fails with the status', async () => {
+    const f = fakeFetch(new Response('content'), new Response('', { status: 404 }));
     await expect(fetchPlainText(f as unknown as typeof fetch, 'https://f.test/a')).resolves.toBe(
-      'conteúdo',
+      'content',
     );
     await expect(fetchPlainText(f as unknown as typeof fetch, 'https://f.test/a')).rejects.toThrow(
       '404',
@@ -116,7 +116,7 @@ describe('fetchPlainText', () => {
 });
 
 describe('fetchDownload', () => {
-  it('devolve a resposta ou falha com o status', async () => {
+  it('returns the response or fails with the status', async () => {
     const f = fakeFetch(new Response('ok'), new Response('', { status: 403 }));
     const res = await fetchDownload(f as unknown as typeof fetch, 'https://f.test/a');
     expect(await res.text()).toBe('ok');
@@ -127,7 +127,7 @@ describe('fetchDownload', () => {
 });
 
 describe('fetchFileBytes', () => {
-  it('devolve os bytes do arquivo', async () => {
+  it('returns the file bytes', async () => {
     const f = fakeFetch(new Response(new Uint8Array([1, 2, 3])));
     const bytes = await fetchFileBytes(f as unknown as typeof fetch, 'https://f.test/a');
     expect(Array.from(bytes)).toEqual([1, 2, 3]);
@@ -135,7 +135,7 @@ describe('fetchFileBytes', () => {
 });
 
 describe('createCanvasClient', () => {
-  it('expõe get, getAll com per_page, post, fetchText e fetchBytes', async () => {
+  it('exposes get, getAll with per_page, post, fetchText and fetchBytes', async () => {
     const f = fakeFetch(
       json({ g: 1 }),
       json([1]),

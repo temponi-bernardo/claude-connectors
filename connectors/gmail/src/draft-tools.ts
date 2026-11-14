@@ -1,6 +1,6 @@
 /**
- * Ferramentas MCP de rascunhos: listar, criar (novo ou como resposta), substituir, enviar e apagar.
- * Enviar é marcado como envio (destrutivo); substituir e apagar, como destrutivos; criar, como criação.
+ * Draft MCP tools: list, create (new or as a reply), replace, send and delete. Sending is annotated as a send
+ * (destructive); replacing and deleting as destructive; creating as a creation.
  */
 import { z } from 'zod';
 import {
@@ -30,10 +30,10 @@ import {
   resolveWritableAccount,
 } from './tools.js';
 
-/** Id de rascunho (de list_drafts ou create_draft). */
+/** Draft id (from list_drafts or create_draft). */
 const DRAFT_ID = GMAIL_ID.describe('draft_id from list_drafts or create_draft.');
 
-/** Parâmetros do conteúdo de um rascunho (criar e substituir). */
+/** Draft content parameters (create and replace). */
 export const DRAFT_SHAPE = {
   account: ONE_ACCOUNT,
   to: RECIPIENTS.default([]).describe('Recipients; ignored when reply_to_message_id is set.'),
@@ -47,7 +47,7 @@ export const DRAFT_SHAPE = {
   reply_all: z.boolean().default(false).describe('With reply_to_message_id: reply to all.'),
 };
 
-/** Parâmetros de conteúdo das ferramentas de rascunho, já validados. */
+/** Content parameters of the draft tools, already validated. */
 export interface DraftToolArgs {
   readonly to: string[];
   readonly cc: string[];
@@ -58,7 +58,7 @@ export interface DraftToolArgs {
   readonly reply_all: boolean;
 }
 
-/** Argumentos de rascunho no formato interno, a partir dos parâmetros da ferramenta. */
+/** Draft arguments in the internal format, from the tool parameters. */
 export function draftArgs(args: DraftToolArgs): DraftArgs {
   return {
     to: args.to,
@@ -71,7 +71,7 @@ export function draftArgs(args: DraftToolArgs): DraftArgs {
   };
 }
 
-/** `list_drafts`: rascunhos de uma conta. */
+/** `list_drafts`: drafts of one account. */
 export const listDraftsTool = defineTool({
   name: 'list_drafts',
   description: 'List drafts of one account (draft_id, recipients, subject, snippet). Read-only.',
@@ -84,7 +84,7 @@ export const listDraftsTool = defineTool({
     listDrafts(deps, await resolveSingleAccount(deps, args.account), args.max_results),
 });
 
-/** `create_draft`: rascunho novo, ou resposta a uma mensagem na mesma conversa. */
+/** `create_draft`: a new draft, or a reply to a message in the same thread. */
 export const createDraftTool = defineTool({
   name: 'create_draft',
   description:
@@ -97,7 +97,7 @@ export const createDraftTool = defineTool({
   },
 });
 
-/** `update_draft`: substitui todo o conteúdo de um rascunho. */
+/** `update_draft`: replaces the whole content of a draft. */
 export const updateDraftTool = defineTool({
   name: 'update_draft',
   description: `Replace the whole content of a draft (send every field again). ${CONFIRM_HINT}`,
@@ -110,7 +110,7 @@ export const updateDraftTool = defineTool({
   },
 });
 
-/** `send_draft`: envia um rascunho existente. */
+/** `send_draft`: sends an existing draft. */
 export const sendDraftTool = defineTool({
   name: 'send_draft',
   description: `Send an existing draft as it is. ${CONFIRM_HINT}`,
@@ -120,7 +120,7 @@ export const sendDraftTool = defineTool({
     sendDraft(deps, await resolveWritableAccount(deps, args.account), args.draft_id),
 });
 
-/** `delete_draft`: apaga um rascunho (só o rascunho). */
+/** `delete_draft`: deletes a draft (only the draft). */
 export const deleteDraftTool = defineTool({
   name: 'delete_draft',
   description: `Delete a draft (only the draft; sent mail is not touched). ${CONFIRM_HINT}`,

@@ -1,15 +1,15 @@
 /**
- * Cliente HTTP da API REST do Canvas: autenticação por token (Bearer) e paginação.
+ * HTTP client for the Canvas REST API: token (Bearer) authentication and pagination.
  */
 import { buildUrl, parseNextLink, type QueryParams } from '../../../src/core/http.js';
 
-/** Itens por página pedidos ao Canvas (máximo aceito pela API). */
+/** Items per page requested from Canvas (the maximum the API accepts). */
 export const CANVAS_PAGE_SIZE = 100;
 
-/** Limite padrão de itens somados entre páginas, para não varrer listas enormes. */
+/** Default cap on items gathered across pages, so huge lists are not swept. */
 export const DEFAULT_MAX_ITEMS = 200;
 
-/** Uma requisição à API (caminho relativo a `/api/v1` ou URL absoluta de paginação). */
+/** An API request (path relative to `/api/v1` or an absolute pagination URL). */
 export interface CanvasRequest {
   readonly method: 'GET' | 'POST';
   readonly path: string;
@@ -17,15 +17,15 @@ export interface CanvasRequest {
   readonly body?: unknown;
 }
 
-/** Dependências do cliente. */
+/** Client dependencies. */
 export interface ClientDeps {
   readonly baseUrl: string;
-  /** Token de acesso do Canvas que o usuário colou na página do OAuth. */
+  /** Canvas access token the user pasted on the OAuth page. */
   readonly token: string;
   readonly fetchFn: typeof fetch;
 }
 
-/** Operações usadas pelas ferramentas. */
+/** Operations used by the tools. */
 export interface CanvasClient {
   readonly baseUrl: string;
   readonly get: <T>(path: string, params?: QueryParams) => Promise<T>;
@@ -35,12 +35,12 @@ export interface CanvasClient {
   readonly fetchBytes: (url: string) => Promise<Uint8Array>;
 }
 
-/** Mensagem de 401: o token venceu ou foi revogado; orienta a gerar outro e reconectar. */
+/** 401 message: the token expired or was revoked; tells the user to generate another and reconnect. */
 export function unauthorizedMessage(baseUrl: string): string {
   return `Canvas rejected the token (expired or revoked). Generate a new one at ${baseUrl}/profile/settings and reconnect the connector in Claude's settings.`;
 }
 
-/** Envia uma requisição com o token (sem tratar o status). */
+/** Sends a request with the token (without handling the status). */
 export function sendCanvasRequest(deps: ClientDeps, req: CanvasRequest): Promise<Response> {
   const hasBody = req.body !== undefined;
   return deps.fetchFn(buildUrl(`${deps.baseUrl}/api/v1`, req.path, req.params), {
@@ -54,7 +54,7 @@ export function sendCanvasRequest(deps: ClientDeps, req: CanvasRequest): Promise
   });
 }
 
-/** Envia a requisição e lança erro em 401 (token recusado) ou em qualquer status fora de 2xx. */
+/** Sends the request and throws on 401 (token refused) or on any status outside 2xx. */
 export async function requestCanvas(deps: ClientDeps, req: CanvasRequest): Promise<Response> {
   const res = await sendCanvasRequest(deps, req);
   if (res.status === 401) throw new Error(unauthorizedMessage(deps.baseUrl));
@@ -65,7 +65,7 @@ export async function requestCanvas(deps: ClientDeps, req: CanvasRequest): Promi
   return res;
 }
 
-/** Busca todas as páginas de uma listagem seguindo o header `Link`, até `max` itens. */
+/** Fetches every page of a listing by following the `Link` header, up to `max` items. */
 export async function collectPages<T>(
   deps: ClientDeps,
   first: CanvasRequest,
@@ -83,24 +83,24 @@ export async function collectPages<T>(
   return items.slice(0, max);
 }
 
-/** Baixa um arquivo por URL direta (links de download do Canvas já trazem a autorização). */
+/** Downloads a file by direct URL (Canvas download links already carry the authorization). */
 export async function fetchDownload(fetchFn: typeof fetch, url: string): Promise<Response> {
   const res = await fetchFn(url);
   if (!res.ok) throw new Error(`Failed to download the file (${res.status}).`);
   return res;
 }
 
-/** Baixa um arquivo de texto por URL direta. */
+/** Downloads a text file by direct URL. */
 export async function fetchPlainText(fetchFn: typeof fetch, url: string): Promise<string> {
   return (await fetchDownload(fetchFn, url)).text();
 }
 
-/** Baixa um arquivo binário por URL direta. */
+/** Downloads a binary file by direct URL. */
 export async function fetchFileBytes(fetchFn: typeof fetch, url: string): Promise<Uint8Array> {
   return new Uint8Array(await (await fetchDownload(fetchFn, url)).arrayBuffer());
 }
 
-/** Cria o cliente do Canvas. */
+/** Creates the Canvas client. */
 export function createCanvasClient(deps: ClientDeps): CanvasClient {
   return {
     baseUrl: deps.baseUrl,

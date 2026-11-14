@@ -1,22 +1,21 @@
 /**
- * Apelidos das contas vinculadas, resolução do parâmetro `account` das ferramentas e conferência do
- * escopo de escrita. Pura.
+ * Aliases of the linked accounts, resolution of the tools' `account` parameter and write scope check. Pure.
  */
 import { hasModifyScope } from './config.js';
 import type { LinkedAccount } from './token-store.js';
 
-/** Conta vinculada com o apelido usado nas ferramentas. */
+/** Linked account with the alias used by the tools. */
 export interface AccountRef {
   readonly alias: string;
   readonly account: LinkedAccount;
 }
 
-/** Parte antes do `@`, em minúsculas (`musica.nova@example.com` → `musica.nova`). */
+/** Part before the `@`, lowercased (`music.new@example.com` → `music.new`). */
 export function accountAlias(email: string): string {
   return email.slice(0, email.indexOf('@')).toLowerCase();
 }
 
-/** Apelido de cada conta: a parte antes do `@`, ou o e-mail inteiro quando duas contas a repetem. */
+/** Alias of each account: the part before the `@`, or the full email when two accounts share it. */
 export function aliasAccounts(accounts: readonly LinkedAccount[]): AccountRef[] {
   const counts = new Map<string, number>();
   for (const { email } of accounts) {
@@ -28,12 +27,12 @@ export function aliasAccounts(accounts: readonly LinkedAccount[]): AccountRef[] 
   });
 }
 
-/** Erro de quem ainda não vinculou nenhuma conta. */
+/** Error for a user who has not linked any account yet. */
 export function noAccountsError(): Error {
   return new Error('No Gmail account linked. Use the link_account tool to link one.');
 }
 
-/** Contas pedidas: `all` são todas; apelido ou e-mail escolhem uma; o resto vira erro com os válidos. */
+/** Requested accounts: `all` is every one; an alias or email picks one; anything else errors listing the valid ones. */
 export function resolveAccounts(refs: readonly AccountRef[], requested: string): AccountRef[] {
   if (refs.length === 0) throw noAccountsError();
   const wanted = requested.trim().toLowerCase();
@@ -46,14 +45,14 @@ export function resolveAccounts(refs: readonly AccountRef[], requested: string):
   );
 }
 
-/** Erro de conta vinculada antes do gerenciamento (token só com `gmail.readonly`). */
+/** Error for an account linked before Gmail management (token with `gmail.readonly` only). */
 export function writeAccessError(alias: string): Error {
   return new Error(
     `Account "${alias}" was linked read-only. To send, organize or delete email, use link_account and sign in with it again, allowing Gmail management.`,
   );
 }
 
-/** Lança `writeAccessError` se o token da conta não tiver o escopo `gmail.modify`. */
+/** Throws `writeAccessError` if the account token lacks the `gmail.modify` scope. */
 export function requireWriteAccess(ref: AccountRef): void {
   if (!hasModifyScope(ref.account.scope)) throw writeAccessError(ref.alias);
 }

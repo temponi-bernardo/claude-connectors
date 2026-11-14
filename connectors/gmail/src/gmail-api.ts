@@ -1,29 +1,29 @@
 /**
- * Cliente da Gmail API: monta a URL, envia o access token da conta e o User-Agent, tenta de novo uma vez
- * depois de 401 e converte falhas HTTP em mensagens acionáveis. Escritas (`gmailWrite`) exigem antes o
- * escopo `gmail.modify` na conta, para contas antigas (só leitura) pedirem novo vínculo sem chamar o Google.
+ * Gmail API client: builds the URL, sends the account access token and the User-Agent, retries once after
+ * a 401 and turns HTTP failures into actionable messages. Writes (`gmailWrite`) first require the
+ * `gmail.modify` scope on the account, so old (read-only) accounts ask for relinking without calling Google.
  */
 import { requireWriteAccess, type AccountRef } from './accounts.js';
 import { UPSTREAM_USER_AGENT, type GmailDeps, type OwnerDeps } from './context.js';
 import { forgetAccessToken, getAccessToken } from './access-token.js';
 
-/** Base da Gmail API para a conta do token. */
+/** Gmail API base for the token's account. */
 export const GMAIL_API_BASE = 'https://gmail.googleapis.com/gmail/v1/users/me';
 
-/** Valor de um parâmetro da Gmail API; listas viram o parâmetro repetido (`metadataHeaders=a&...=b`). */
+/** Value of a Gmail API parameter; lists become the repeated parameter (`metadataHeaders=a&...=b`). */
 export type GmailQueryValue = string | number | readonly string[] | null | undefined;
 
-/** Pedido à Gmail API: URL, método (padrão GET) e corpo JSON opcional. */
+/** Gmail API request: URL, method (GET by default) and optional JSON body. */
 export interface GmailRequest {
   readonly url: string;
   readonly method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
   readonly body?: unknown;
 }
 
-/** Maior detalhe de erro do Gmail repassado ao modelo, em caracteres. */
+/** Longest Gmail error detail passed on to the model, in characters. */
 export const MAX_GMAIL_ERROR_DETAIL = 200;
 
-/** Mensagens por status HTTP da Gmail API. */
+/** Messages per Gmail API HTTP status. */
 export const GMAIL_STATUS_MESSAGES: Readonly<Record<number, string>> = {
   400: 'Gmail rejected the request (check ids, query and recipients)',
   403: 'Gmail denied access (missing permission: use link_account and link the account again)',
@@ -31,7 +31,7 @@ export const GMAIL_STATUS_MESSAGES: Readonly<Record<number, string>> = {
   429: 'Gmail usage limit reached; try again shortly',
 };
 
-/** Monta a URL de um caminho da Gmail API com os parâmetros dados (nulos e vazios são omitidos). */
+/** Builds the URL of a Gmail API path with the given parameters (nulls and empties are omitted). */
 export function gmailUrl(
   path: string,
   params: Readonly<Record<string, GmailQueryValue>> = {},
@@ -47,13 +47,13 @@ export function gmailUrl(
   return url.toString();
 }
 
-/** Erro acionável para uma resposta de falha da Gmail API, com o detalhe do Gmail quando houver. */
+/** Actionable error for a Gmail API failure response, with Gmail's detail when present. */
 export function gmailHttpError(status: number, alias: string, detail: string | null = null): Error {
   const reason = GMAIL_STATUS_MESSAGES[status] ?? `Gmail failed (HTTP ${status}); try again`;
   return new Error(`Account "${alias}": ${reason}${detail ? `: ${detail}` : ''}.`);
 }
 
-/** Detalhe (`error.message`) de uma resposta de erro da Gmail API, limitado; nulo se não houver. */
+/** Detail (`error.message`) of a Gmail API error response, capped; null if absent. */
 export async function gmailErrorDetail(response: Response): Promise<string | null> {
   try {
     const body = (await response.json()) as { error?: { message?: unknown } };
@@ -64,7 +64,7 @@ export async function gmailErrorDetail(response: Response): Promise<string | nul
   }
 }
 
-/** Envia um pedido autenticado à Gmail API com o access token dado. */
+/** Sends an authenticated request to the Gmail API with the given access token. */
 export function sendGmailRequest(
   deps: GmailDeps,
   request: GmailRequest,
@@ -83,13 +83,13 @@ export function sendGmailRequest(
   });
 }
 
-/** Lê o JSON de uma resposta de sucesso; corpo vazio (ex.: 204 de DELETE) vira objeto vazio. */
+/** Reads the JSON of a success response; an empty body (e.g. a DELETE 204) becomes an empty object. */
 export async function readGmailJson<T>(response: Response): Promise<T> {
   const text = await response.text();
   return (text ? JSON.parse(text) : {}) as T;
 }
 
-/** Faz um pedido à Gmail API e lê o JSON; depois de 401 renova o token e tenta mais uma vez. */
+/** Calls the Gmail API and reads the JSON; after a 401 it refreshes the token and retries once. */
 export async function gmailCall<T>(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -106,12 +106,12 @@ export async function gmailCall<T>(
   return readGmailJson<T>(response);
 }
 
-/** Lê um recurso da Gmail API como JSON. */
+/** Reads a Gmail API resource as JSON. */
 export function gmailGet<T>(deps: OwnerDeps, ref: AccountRef, url: string): Promise<T> {
   return gmailCall<T>(deps, ref, { url });
 }
 
-/** Escreve na Gmail API (enviar, rascunhos, marcadores, lixeira) exigindo antes o escopo `gmail.modify`. */
+/** Writes to the Gmail API (send, drafts, labels, trash), first requiring the `gmail.modify` scope. */
 export async function gmailWrite<T>(
   deps: OwnerDeps,
   ref: AccountRef,

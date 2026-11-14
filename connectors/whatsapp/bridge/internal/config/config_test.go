@@ -22,7 +22,7 @@ func TestLoadDefaults(t *testing.T) {
 	}
 	if c.DataDir != "/data" || c.Port != 8080 || c.HistoryDays != 90 || c.MaxMediaBytes != 5242880 ||
 		c.EnableSend || c.SendMaxPerHour != 10 || c.Location.String() != "America/Sao_Paulo" || len(c.SnapshotKey) != 32 {
-		t.Fatalf("padrões errados: %+v", c)
+		t.Fatalf("wrong defaults: %+v", c)
 	}
 }
 
@@ -37,7 +37,7 @@ func TestLoadOverrides(t *testing.T) {
 		t.Fatal(err)
 	}
 	if c.Port != 9090 || !c.EnableSend || c.Location.String() != "UTC" || c.DataDir != "/tmp/x" || c.SnapshotPushURL != "https://e.x/p" {
-		t.Fatalf("sobrescritas ignoradas: %+v", c)
+		t.Fatalf("overrides ignored: %+v", c)
 	}
 	if len(c.SendAllowlist) != 2 || c.SendAllowlist[0] != "5531999999999@s.whatsapp.net" || c.SendAllowlist[1] != "1203630@g.us" {
 		t.Fatalf("allowlist: %v", c.SendAllowlist)
@@ -45,21 +45,21 @@ func TestLoadOverrides(t *testing.T) {
 }
 
 func TestLoadErrorsDoNotLeakSecrets(t *testing.T) {
-	env := map[string]string{"BRIDGE_TOKEN": "segredo-curto", "SNAPSHOT_KEY": "chave-invalida", "PORT": "0",
-		"TIMEZONE": "Marte/Base", "ENABLE_SEND": "talvez", "SEND_ALLOWLIST": "abc", "HISTORY_DAYS": "x",
+	env := map[string]string{"BRIDGE_TOKEN": "short-secret", "SNAPSHOT_KEY": "invalid-key", "PORT": "0",
+		"TIMEZONE": "Mars/Base", "ENABLE_SEND": "maybe", "SEND_ALLOWLIST": "abc", "HISTORY_DAYS": "x",
 		"MAX_MEDIA_BYTES": "-1", "SEND_MAX_PER_HOUR": "99999"}
 	_, err := Load(envMap(env))
 	if err == nil {
-		t.Fatal("esperava erro")
+		t.Fatal("expected an error")
 	}
 	msg := err.Error()
 	for _, want := range []string{"BRIDGE_TOKEN", "SNAPSHOT_KEY", "PORT", "TIMEZONE", "ENABLE_SEND", "SEND_ALLOWLIST", "HISTORY_DAYS", "MAX_MEDIA_BYTES", "SEND_MAX_PER_HOUR"} {
 		if !strings.Contains(msg, want) {
-			t.Errorf("erro sem %s: %s", want, msg)
+			t.Errorf("error without %s: %s", want, msg)
 		}
 	}
-	if strings.Contains(msg, "segredo-curto") || strings.Contains(msg, "chave-invalida") {
-		t.Fatal("erro vazou segredo")
+	if strings.Contains(msg, "short-secret") || strings.Contains(msg, "invalid-key") {
+		t.Fatal("error leaked a secret")
 	}
 }
 
@@ -79,7 +79,7 @@ func TestNormalizeRecipient(t *testing.T) {
 	for in, want := range cases {
 		got, ok := NormalizeRecipient(in)
 		if got != want || ok != (want != "") {
-			t.Errorf("%q → %q,%v; esperava %q", in, got, ok, want)
+			t.Errorf("%q → %q,%v; expected %q", in, got, ok, want)
 		}
 	}
 }

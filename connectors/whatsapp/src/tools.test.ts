@@ -23,7 +23,7 @@ import {
 } from './tools.js';
 
 const SETTINGS: WhatsAppSettings = readWhatsAppSettings({
-  ALLOWED_EMAILS: 'dono@exemplo.dev',
+  ALLOWED_EMAILS: 'owner@example.dev',
   GITHUB_CLIENT_ID: 'c',
   GITHUB_CLIENT_SECRET: 's',
   SEND_ALLOWLIST: '5531999999999',
@@ -46,7 +46,7 @@ function context(routes: Routes, settings: Partial<WhatsAppSettings> = {}): What
   return {
     bridge: fakeBridge({ '/sync/wait': () => Response.json(READY_STATUS), ...routes }),
     settings: { ...SETTINGS, ...settings },
-    pairUrl: 'https://wa.exemplo.dev/pair',
+    pairUrl: 'https://wa.example.dev/pair',
     now: () => Date.now(),
   };
 }
@@ -61,8 +61,8 @@ async function run(name: string, ctx: WhatsAppToolContext, args: unknown = {}): 
   return tool(name).run(ctx, args);
 }
 
-describe('prazos', () => {
-  it('toolDeadline soma o teto e syncWaitBudget preserva a folga da consulta', () => {
+describe('deadlines', () => {
+  it('toolDeadline adds the cap and syncWaitBudget keeps the query margin', () => {
     const ctx = { ...context({}), now: () => 1000 };
     expect(toolDeadline(ctx)).toBe(1000 + SETTINGS.toolTimeoutMs);
     expect(syncWaitBudget(ctx, 1000 + 30_000)).toBe(SETTINGS.syncWaitMs);
@@ -71,8 +71,8 @@ describe('prazos', () => {
   });
 });
 
-describe('prepareRead e runRead', () => {
-  it('pede o sync com o orçamento e não avisa quando completo', async () => {
+describe('prepareRead and runRead', () => {
+  it('requests the sync with the budget and does not warn when complete', async () => {
     const ctx = context({});
     expect(await prepareRead(ctx, Date.now() + 25_000)).toBeNull();
     expect((ctx.bridge as ReturnType<typeof fakeBridge>).paths[0]).toBe(
@@ -80,28 +80,28 @@ describe('prepareRead e runRead', () => {
     );
   });
 
-  it('manda parear quando não há sessão', async () => {
+  it('asks to pair when there is no session', async () => {
     const ctx = context({
       '/sync/wait': () => Response.json({ ...READY_STATUS, needs_pairing: true }),
     });
     await expect(prepareRead(ctx, Date.now() + 25_000)).rejects.toThrow(
-      'https://wa.exemplo.dev/pair',
+      'https://wa.example.dev/pair',
     );
   });
 
-  it('junta o aviso de resultado parcial', async () => {
+  it('adds the partial-result warning', async () => {
     const ctx = context({ '/sync/wait': () => Response.json({ ...READY_STATUS, partial: true }) });
     expect(await runRead(ctx, () => Promise.resolve(1))).toMatchObject({ result: 1 });
   });
 
-  it('esgota o tempo total da ferramenta', async () => {
+  it('times out after the overall tool deadline', async () => {
     const ctx = context({}, { toolTimeoutMs: 30 });
     await expect(runRead(ctx, () => new Promise(() => undefined))).rejects.toThrow('timed out');
   });
 });
 
-describe('ferramentas de leitura', () => {
-  it('whatsapp_status devolve o status compacto sem esperar sync', async () => {
+describe('read tools', () => {
+  it('whatsapp_status returns the compact status without waiting for the sync', async () => {
     const ctx = context({ '/status': () => Response.json(READY_STATUS) });
     expect(await run('whatsapp_status', ctx)).toMatchObject({
       connected: true,
@@ -109,7 +109,7 @@ describe('ferramentas de leitura', () => {
     });
   });
 
-  it('list_chats repassa filtros e marca o conteúdo como não confiável', async () => {
+  it('list_chats forwards filters and marks the content as untrusted', async () => {
     const ctx = context({
       '/chats': () =>
         Response.json({
@@ -127,7 +127,7 @@ describe('ferramentas de leitura', () => {
     );
   });
 
-  it('get_messages devolve a conversa e as mensagens compactas', async () => {
+  it('get_messages returns the chat and the compact messages', async () => {
     const ctx = context({
       '/messages': () =>
         Response.json({
@@ -143,7 +143,7 @@ describe('ferramentas de leitura', () => {
     expect(result.data.messages[0]?.text).toBe(MESSAGE.text);
   });
 
-  it('search_messages e search_contacts validam e compactam', async () => {
+  it('search_messages and search_contacts validate and compact', async () => {
     const ctx = context({
       '/search': () => Response.json({ messages: [{ ...MESSAGE, chat_name: 'Ana' }] }),
       '/contacts': () =>
@@ -159,7 +159,7 @@ describe('ferramentas de leitura', () => {
     await expect(run('search_messages', ctx, { query: '' })).rejects.toThrow();
   });
 
-  it('get_media devolve o arquivo como bloco MCP', async () => {
+  it('get_media returns the file as an MCP block', async () => {
     const ctx = context({
       '/media': () =>
         new Response(new Uint8Array([1, 2]), {
@@ -173,7 +173,7 @@ describe('ferramentas de leitura', () => {
     expect(JSON.stringify(result.content[0])).toContain('fóto.jpg');
   });
 
-  it('erros da ponte viram mensagens claras', async () => {
+  it('bridge errors become clear messages', async () => {
     const ctx = context({ '/media': () => Response.json({ error: 'too_large' }, { status: 413 }) });
     await expect(
       run('get_media', ctx, { chat_jid: 'a@s.whatsapp.net', message_id: 'm' }),
@@ -182,22 +182,22 @@ describe('ferramentas de leitura', () => {
 });
 
 describe('decodeHeaderText', () => {
-  it('decodifica UTF-8 percent-encoded e mantém valor inválido', () => {
+  it('decodes percent-encoded UTF-8 and keeps an invalid value', () => {
     expect(decodeHeaderText('relat%C3%B3rio.pdf')).toBe('relatório.pdf');
     expect(decodeHeaderText('%E0%A4%A')).toBe('%E0%A4%A');
     expect(decodeHeaderText(null)).toBe('');
   });
 });
 
-describe('compactContact e mediaResult', () => {
-  it('usa o push name sem nome salvo e omite telefone ausente', () => {
+describe('compactContact and mediaResult', () => {
+  it('uses the push name without a saved name and omits a missing phone', () => {
     expect(compactContact({ jid: 'a', name: null, push_name: null, phone: null })).toEqual({
       jid: 'a',
       name: '',
     });
   });
 
-  it('descreve mídia sem nome de arquivo e sem tipo', () => {
+  it('describes media without a file name and without a type', () => {
     const result = toToolResult(mediaResult(new Response(null), new Uint8Array(10), 'm9'));
     expect(JSON.stringify(result.content[0])).toContain('application/octet-stream, 1 KB.');
   });
@@ -214,15 +214,15 @@ describe('annotations', () => {
   });
 });
 
-describe('send_message e whatsappTools', () => {
-  it('só existe com ENABLE_SEND', () => {
+describe('send_message and whatsappTools', () => {
+  it('exists only with ENABLE_SEND', () => {
     expect(whatsappTools(SETTINGS).map((t) => t.name)).toEqual(READ_TOOLS.map((t) => t.name));
     expect(whatsappTools({ ...SETTINGS, enableSend: true }).map((t) => t.name)).toContain(
       'send_message',
     );
   });
 
-  it('recusa destinatário fora da allowlist e exige confirmação explícita', async () => {
+  it('rejects a recipient outside the allowlist and requires explicit confirmation', async () => {
     expect(allowedRecipient(SETTINGS, '+55 31 99999-9999')).toBe('5531999999999@s.whatsapp.net');
     expect(() => allowedRecipient(SETTINGS, '5511888888888')).toThrow('SEND_ALLOWLIST');
     const ctx = context({ '/send': () => Response.json({ id: 'x' }) });
@@ -231,14 +231,14 @@ describe('send_message e whatsappTools', () => {
     ).rejects.toThrow();
   });
 
-  it('com a allowlist vazia aceita qualquer contato ou grupo, mas não destinatário inválido', () => {
+  it('with an empty allowlist accepts any contact or group, but not an invalid recipient', () => {
     const open = { ...SETTINGS, sendAllowlist: [] };
     expect(allowedRecipient(open, '5511888888888')).toBe('5511888888888@s.whatsapp.net');
     expect(allowedRecipient(open, '120363000000000001@g.us')).toBe('120363000000000001@g.us');
     expect(() => allowedRecipient(open, 'status@broadcast')).toThrow('Invalid recipient');
   });
 
-  it('envia com o destinatário normalizado', async () => {
+  it('sends with the normalized recipient', async () => {
     const send = vi.fn((init: RequestInit | undefined) => {
       expect(JSON.parse(init?.body as string)).toEqual({
         recipient: '5531999999999@s.whatsapp.net',
@@ -252,7 +252,7 @@ describe('send_message e whatsappTools', () => {
     expect(send).toHaveBeenCalledOnce();
   });
 
-  it('responde citando uma mensagem num grupo', async () => {
+  it('replies quoting a message in a group', async () => {
     const send = vi.fn((init: RequestInit | undefined) => {
       expect(JSON.parse(init?.body as string)).toEqual({
         recipient: '120363000000000001@g.us',
@@ -271,7 +271,7 @@ describe('send_message e whatsappTools', () => {
     expect(await run('send_message', ctx, args)).toEqual({ id: 'y' });
   });
 
-  it('traduz citação inexistente', async () => {
+  it('translates a missing quoted message', async () => {
     function missing(): Response {
       return Response.json({ error: 'quoted_not_found' }, { status: 404 });
     }
@@ -287,7 +287,7 @@ describe('send_message e whatsappTools', () => {
 });
 
 describe('createWhatsAppMcpServer', () => {
-  it('cria o servidor com as instruções de conteúdo não confiável', () => {
+  it('creates the server with the untrusted-content instructions', () => {
     const server = createWhatsAppMcpServer(context({}));
     expect(server.server).toBeDefined();
     expect(WHATSAPP_INSTRUCTIONS).toContain('untrusted');

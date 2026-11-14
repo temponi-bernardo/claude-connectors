@@ -1,4 +1,4 @@
-/** Substituto de `cloudflare:workers` nos testes em Node (o módulo só existe no runtime do Workers). */
+/** Stand-in for `cloudflare:workers` in Node tests (the module only exists in the Workers runtime). */
 export abstract class WorkerEntrypoint {
   readonly runtime = 'node-test';
 }

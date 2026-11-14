@@ -19,9 +19,9 @@ import {
 } from './mailbox-tools.js';
 import { DESTRUCTIVE_HINTS, ORGANIZE_HINTS } from '../../../src/mcp/annotations.js';
 
-const LABELS = gmailRoute({ labels: { labels: [{ id: 'Label_1', name: 'Recibos' }] } });
+const LABELS = gmailRoute({ labels: { labels: [{ id: 'Label_1', name: 'Receipts' }] } });
 
-/** Dependências que registram as escritas. */
+/** Dependencies that record the writes. */
 async function recordingDeps(writes: GmailWrite[]) {
   return linkedTestDeps([gmailWriteRoute(writes, () => null), LABELS]);
 }
@@ -31,42 +31,46 @@ beforeEach(() => {
 });
 
 describe('toggleAction', () => {
-  it('escolhe a ação ligada ou desligada', () => {
+  it('picks the on or off action', () => {
     expect(toggleAction(true, 'star', 'unstar')).toBe('star');
     expect(toggleAction(false, 'star', 'unstar')).toBe('unstar');
   });
 });
 
-describe('writableTargets e runMailboxAction', () => {
-  it('resolve a conta com escrita e os alvos, e aplica a ação pronta', async () => {
+describe('writableTargets and runMailboxAction', () => {
+  it('resolves the writable account and the targets, and applies the ready-made action', async () => {
     const writes: GmailWrite[] = [];
     const deps = await recordingDeps(writes);
-    const { ref, targets } = await writableTargets(deps, { account: 'musica', thread_ids: ['t1'] });
-    expect(ref.alias).toBe('musica');
+    const { ref, targets } = await writableTargets(deps, { account: 'music', thread_ids: ['t1'] });
+    expect(ref.alias).toBe('music');
     expect(targets).toEqual({ messageIds: [], threadIds: ['t1'] });
-    await expect(writableTargets(deps, { account: 'musica' })).rejects.toThrow(/message_ids/);
-    const result = await runMailboxAction(deps, { account: 'dono', message_ids: ['m1'] }, 'unstar');
+    await expect(writableTargets(deps, { account: 'music' })).rejects.toThrow(/message_ids/);
+    const result = await runMailboxAction(
+      deps,
+      { account: 'owner', message_ids: ['m1'] },
+      'unstar',
+    );
     expect(result).toMatchObject({ messages: 1, removed_labels: ['STARRED'] });
   });
 });
 
-describe('ferramentas de organização', () => {
-  it('anotações: organizar é reversível; lixeira é destrutiva', () => {
+describe('organization tools', () => {
+  it('annotations: organizing is reversible; trash is destructive', () => {
     for (const tool of [markReadTool, archiveTool, starTool, updateLabelsTool, untrashTool]) {
       expect(tool.annotations).toMatchObject(ORGANIZE_HINTS);
     }
     expect(trashTool.annotations).toMatchObject(DESTRUCTIVE_HINTS);
   });
 
-  it('mark_read, archive e star mexem nos marcadores de sistema', async () => {
+  it('mark_read, archive and star change the system labels', async () => {
     const writes: GmailWrite[] = [];
     const deps = await recordingDeps(writes);
-    await markReadTool.run(deps, { account: 'dono', message_ids: ['m1'] });
-    await markReadTool.run(deps, { account: 'dono', message_ids: ['m1'], read: false });
-    await archiveTool.run(deps, { account: 'dono', thread_ids: ['t1'] });
-    await archiveTool.run(deps, { account: 'dono', thread_ids: ['t1'], archived: false });
-    await starTool.run(deps, { account: 'dono', message_ids: ['m1'], starred: true });
-    await starTool.run(deps, { account: 'dono', message_ids: ['m1'], starred: false });
+    await markReadTool.run(deps, { account: 'owner', message_ids: ['m1'] });
+    await markReadTool.run(deps, { account: 'owner', message_ids: ['m1'], read: false });
+    await archiveTool.run(deps, { account: 'owner', thread_ids: ['t1'] });
+    await archiveTool.run(deps, { account: 'owner', thread_ids: ['t1'], archived: false });
+    await starTool.run(deps, { account: 'owner', message_ids: ['m1'], starred: true });
+    await starTool.run(deps, { account: 'owner', message_ids: ['m1'], starred: false });
     const bodies = writes.map((w) => w.body as { addLabelIds: string[]; removeLabelIds: string[] });
     expect(bodies.map((b) => [b.addLabelIds, b.removeLabelIds])).toEqual([
       [[], ['UNREAD']],
@@ -78,36 +82,40 @@ describe('ferramentas de organização', () => {
     ]);
   });
 
-  it('update_labels aceita nomes e ids e exige ao menos um', async () => {
+  it('update_labels accepts names and ids and requires at least one', async () => {
     const writes: GmailWrite[] = [];
     const deps = await recordingDeps(writes);
     const result = await updateLabelsTool.run(deps, {
-      account: 'dono',
+      account: 'owner',
       message_ids: ['m1'],
-      add_labels: ['recibos'],
+      add_labels: ['receipts'],
     });
     expect(result).toMatchObject({ added_labels: ['Label_1'] });
     await expect(
-      updateLabelsTool.run(deps, { account: 'dono', message_ids: ['m1'] }),
+      updateLabelsTool.run(deps, { account: 'owner', message_ids: ['m1'] }),
     ).rejects.toThrow(/at least one/);
     await expect(
-      updateLabelsTool.run(deps, { account: 'dono', message_ids: ['m1'], add_labels: ['Nada'] }),
+      updateLabelsTool.run(deps, {
+        account: 'owner',
+        message_ids: ['m1'],
+        add_labels: ['Nothing'],
+      }),
     ).rejects.toThrow(/list_labels/);
   });
 
-  it('trash e untrash; sem ids é recusado', async () => {
+  it('trash and untrash; no ids is refused', async () => {
     const writes: GmailWrite[] = [];
     const deps = await recordingDeps(writes);
-    await trashTool.run(deps, { account: 'dono', thread_ids: ['t1'] });
-    await untrashTool.run(deps, { account: 'dono', thread_ids: ['t1'] });
+    await trashTool.run(deps, { account: 'owner', thread_ids: ['t1'] });
+    await untrashTool.run(deps, { account: 'owner', thread_ids: ['t1'] });
     expect(writes.map((w) => w.path)).toEqual(['threads/t1/trash', 'threads/t1/untrash']);
-    await expect(trashTool.run(deps, { account: 'dono' })).rejects.toThrow(/message_ids/);
+    await expect(trashTool.run(deps, { account: 'owner' })).rejects.toThrow(/message_ids/);
   });
 
-  it('ids inválidos são recusados pelo schema', async () => {
+  it('invalid ids are rejected by the schema', async () => {
     const deps = await recordingDeps([]);
     await expect(
-      trashTool.run(deps, { account: 'dono', message_ids: ['../drafts'] }),
+      trashTool.run(deps, { account: 'owner', message_ids: ['../drafts'] }),
     ).rejects.toThrow();
   });
 });

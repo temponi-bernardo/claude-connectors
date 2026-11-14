@@ -1,6 +1,6 @@
 /**
- * Modo remoto do conector Canvas (ADR 0009): o usuário autoriza colando o token de acesso do Canvas na
- * página do OAuth; cada requisição MCP usa esse token, sem sessão do navegador nem arquivo em disco.
+ * Remote mode of the Canvas connector (ADR 0009): the user authorizes by pasting a Canvas access token on
+ * the OAuth page; every MCP request uses that token, with no browser session and no file on disk.
  */
 import { envValue, parseFlag, type EnvVars } from '../../../src/core/env.js';
 import type { RemoteConnector, SecretRenewal } from '../../../src/remote/handler.js';
@@ -8,47 +8,47 @@ import type { LoginPageText } from '../../../src/remote/login-page.js';
 import { createCanvasClient } from './client.js';
 import { canvasTools, createCanvasMcpServer } from './tools.js';
 
-/** Canvas da PUC Minas, usado quando `CANVAS_BASE_URL` não vem preenchida. */
+/** PUC Minas Canvas, used when `CANVAS_BASE_URL` is not set. */
 export const DEFAULT_CANVAS_URL = 'https://pucminas.instructure.com';
 
-/** Configuração do modo remoto: Canvas fixo do servidor, escrita liberada ou não, e `fetch`. */
+/** Remote mode configuration: the server's fixed Canvas, whether writing is allowed, and `fetch`. */
 export interface CanvasRemoteSettings {
   readonly baseUrl: string;
   readonly allowWrite: boolean;
   readonly fetchFn: typeof fetch;
 }
 
-/** User-Agent das chamadas ao Canvas: sem ele o Canvas responde 403 (o fetch do Workers não manda um). */
+/** User-Agent of the Canvas calls: without one Canvas answers 403 (the Workers fetch does not send one). */
 export const CANVAS_USER_AGENT =
   'claude-connectors-canvas-puc (+https://github.com/temponi-bernardo/claude-connectors)';
 
-/** Devolve as opções do `fetch` com o `User-Agent` do conector somado aos headers existentes. */
+/** Returns the `fetch` options with the connector's `User-Agent` added to the existing headers. */
 export function withCanvasUserAgent(init: RequestInit | undefined): RequestInit {
   const headers = Object.fromEntries(new Headers(init?.headers).entries());
   return { ...init, headers: { ...headers, 'user-agent': CANVAS_USER_AGENT } };
 }
 
-/** Lê `CANVAS_BASE_URL` e `CANVAS_ALLOW_WRITE` (escrita desligada por padrão). */
+/** Reads `CANVAS_BASE_URL` and `CANVAS_ALLOW_WRITE` (writing off by default). */
 export function readCanvasRemoteSettings(env: EnvVars): CanvasRemoteSettings {
   const baseUrl = envValue(env, 'CANVAS_BASE_URL') ?? DEFAULT_CANVAS_URL;
   return {
     baseUrl: baseUrl.replace(/\/+$/, ''),
     allowWrite: parseFlag(envValue(env, 'CANVAS_ALLOW_WRITE')),
-    // Arrow: no Workers, o fetch global chamado como método de outro objeto dá "Illegal invocation".
+    // Arrow: on Workers, the global fetch called as a method of another object throws "Illegal invocation".
     fetchFn: (input, init) => fetch(input, withCanvasUserAgent(init)),
   };
 }
 
-/** Textos da página de autorização do Canvas. */
+/** Texts of the Canvas authorization page. */
 export function canvasLoginText(baseUrl: string): LoginPageText {
   return {
-    title: 'Conectar o Canvas ao Claude',
+    title: 'Connect Canvas to Claude',
     intro:
-      'Cole um token de acesso do Canvas (Conta → Configurações → Novo token de acesso). O token não fica guardado neste servidor e, enquanto você usar o conector, a validade dele é renovada sozinha.',
-    secretLabel: 'Token de acesso do Canvas',
+      'Paste a Canvas access token (Account → Settings → New Access Token). The token is not stored on this server and, while you use the connector, its expiry is renewed automatically.',
+    secretLabel: 'Canvas access token',
     helpUrl: `${baseUrl}/profile/settings`,
-    helpLabel: 'Abrir a página de tokens do Canvas',
-    submit: 'Conectar',
+    helpLabel: 'Open the Canvas tokens page',
+    submit: 'Connect',
   };
 }
 
@@ -59,51 +59,53 @@ export function fetchCanvasSelf(settings: CanvasRemoteSettings, token: string): 
   });
 }
 
-/** Confere o token em `/api/v1/users/self`; rejeita com a orientação ao usuário se não servir. */
+/** Checks the token at `/api/v1/users/self`; rejects with guidance for the user if it does not work. */
 export async function verifyCanvasToken(
   settings: CanvasRemoteSettings,
   token: string,
 ): Promise<void> {
-  if (!token.trim()) throw new Error('Cole o token de acesso do Canvas.');
+  if (!token.trim()) throw new Error('Paste the Canvas access token.');
   let res: Response;
   try {
     res = await fetchCanvasSelf(settings, token);
   } catch {
-    throw new Error('Não consegui falar com o Canvas. Tente de novo em instantes.');
+    throw new Error('Could not reach Canvas. Try again in a moment.');
   }
   if (res.status === 401) {
-    throw new Error('O Canvas recusou o token: confira se copiou inteiro e se ele não expirou.');
+    throw new Error(
+      'Canvas refused the token: check that you copied all of it and that it has not expired.',
+    );
   }
-  if (!res.ok) throw new Error(`O Canvas respondeu ${res.status}. Tente de novo em instantes.`);
+  if (!res.ok) throw new Error(`Canvas answered ${res.status}. Try again in a moment.`);
 }
 
-/** Quanto cada renovação estende o token: o Canvas recusa mais de 30 dias à frente (1 hora de folga). */
+/** How far each renewal extends the token: Canvas refuses more than 30 days ahead (1 hour of slack). */
 export const TOKEN_RENEWAL_SECONDS = 30 * 24 * 3600 - 3600;
 
-/** Só renova se o token vence mais de um dia antes do limite (no máximo uma renovação por dia). */
+/** Renews only if the token expires more than a day before the limit (at most one renewal a day). */
 const RENEWAL_SLACK_MS = 24 * 3600 * 1000;
 
-/** Campos usados de um item de `/users/self/user_generated_tokens`. */
+/** Fields used from an item of `/users/self/user_generated_tokens`. */
 export interface CanvasTokenInfo {
   readonly id: number;
   readonly visible_token: string;
   readonly expires_at: string | null;
 }
 
-/** Pedido à API do Canvas com o token do usuário. */
+/** Canvas API request made with the user's token. */
 export interface CanvasTokenRequest {
   readonly path: string;
   readonly method?: string;
   readonly body?: unknown;
 }
 
-/** Diz se o começo visível de um token (`11748~abcd...`) é o deste token. */
+/** Says whether the visible start of a token (`11748~abcd...`) belongs to this token. */
 export function matchesVisibleToken(visible: string, token: string): boolean {
   const prefix = visible.replace(/\.+$/, '');
   return prefix.length > 0 && token.startsWith(prefix);
 }
 
-/** Decide a renovação: id e nova validade, ou nulo se o token não está na lista, não vence ou vence depois. */
+/** Plans the renewal: id and new expiry, or null if the token is not listed, never expires or expires later. */
 export function planTokenRenewal(
   list: readonly CanvasTokenInfo[],
   token: string,
@@ -116,7 +118,7 @@ export function planTokenRenewal(
   return { id: mine.id, expiresAt: new Date(target).toISOString() };
 }
 
-/** Chama a API do Canvas com o token e devolve o JSON; rejeita se a resposta não for 2xx. */
+/** Calls the Canvas API with the token and returns the JSON; rejects if the response is not 2xx. */
 export async function canvasTokenApi(
   settings: CanvasRemoteSettings,
   token: string,
@@ -136,7 +138,7 @@ export async function canvasTokenApi(
   return res.json();
 }
 
-/** Estende a validade do próprio token no Canvas (Access Tokens API) quando ele está perto de vencer. */
+/** Extends the token's own expiry on Canvas (Access Tokens API) when it is close to expiring. */
 export async function renewCanvasToken(
   settings: CanvasRemoteSettings,
   token: string,
@@ -176,7 +178,7 @@ export async function renewCanvasSecret(
   return 'kept';
 }
 
-/** Monta o conector remoto do Canvas para o servidor HTTP. */
+/** Builds the remote Canvas connector for the HTTP server. */
 export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector {
   return {
     login: {

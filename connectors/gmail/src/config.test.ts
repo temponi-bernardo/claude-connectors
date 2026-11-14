@@ -20,42 +20,42 @@ const ENV = {
 };
 
 describe('isEmailAddress', () => {
-  it('reconhece e-mails simples', () => {
+  it('recognizes simple emails', () => {
     expect(isEmailAddress('a@b.co')).toBe(true);
     expect(isEmailAddress('a b@c.d')).toBe(false);
-    expect(isEmailAddress('semarroba')).toBe(false);
+    expect(isEmailAddress('noatsign')).toBe(false);
   });
 });
 
 describe('parseAllowedEmails', () => {
-  it('sem valor é modo público (nulo)', () => {
+  it('no value means public mode (null)', () => {
     expect(parseAllowedEmails(null)).toBeNull();
     expect(parseAllowedEmails(' , ')).toBeNull();
   });
 
-  it('normaliza a lista do modo privado e recusa item inválido', () => {
-    expect(parseAllowedEmails(' Dono@Example.com , musica@example.com ')).toEqual([
-      'dono@example.com',
-      'musica@example.com',
+  it('normalizes the private-mode list and rejects an invalid item', () => {
+    expect(parseAllowedEmails(' Owner@Example.com , music@example.com ')).toEqual([
+      'owner@example.com',
+      'music@example.com',
     ]);
-    expect(() => parseAllowedEmails('nao-e-email')).toThrow(/não é e-mail/);
+    expect(() => parseAllowedEmails('not-an-email')).toThrow(/not an email/);
   });
 });
 
 describe('secrets', () => {
-  it('requiredSecret lê ou explica como definir', () => {
+  it('requiredSecret reads or explains how to set it', () => {
     expect(requiredSecret(ENV, 'GOOGLE_CLIENT_ID')).toBe('id');
     expect(() => requiredSecret({}, 'GOOGLE_CLIENT_ID')).toThrow(
       /wrangler secret put GOOGLE_CLIENT_ID/,
     );
   });
 
-  it('readConsentSecret exige 32 caracteres', () => {
+  it('readConsentSecret requires 32 characters', () => {
     expect(readConsentSecret(ENV)).toHaveLength(32);
-    expect(() => readConsentSecret({ CONSENT_SECRET: 'curto' })).toThrow(/32/);
+    expect(() => readConsentSecret({ CONSENT_SECRET: 'short' })).toThrow(/32/);
   });
 
-  it('readGmailSettings funciona sem ALLOWED_EMAILS e valida a chave de cifra', () => {
+  it('readGmailSettings works without ALLOWED_EMAILS and validates the encryption key', () => {
     const settings = readGmailSettings(ENV);
     expect(settings.allowedEmails).toBeNull();
     expect(settings.tokenKey.length).toBe(32);
@@ -66,16 +66,16 @@ describe('secrets', () => {
 });
 
 describe('isEmailAllowed', () => {
-  it('libera qualquer conta no modo público e só as listadas no privado', () => {
-    expect(isEmailAllowed(TEST_SETTINGS, 'qualquer@example.com')).toBe(true);
-    const restricted = { ...TEST_SETTINGS, allowedEmails: ['dono@example.com'] };
-    expect(isEmailAllowed(restricted, 'DONO@example.com')).toBe(true);
-    expect(isEmailAllowed(restricted, 'outro@example.com')).toBe(false);
+  it('allows any account in public mode and only the listed ones in private mode', () => {
+    expect(isEmailAllowed(TEST_SETTINGS, 'anyone@example.com')).toBe(true);
+    const restricted = { ...TEST_SETTINGS, allowedEmails: ['owner@example.com'] };
+    expect(isEmailAllowed(restricted, 'OWNER@example.com')).toBe(true);
+    expect(isEmailAllowed(restricted, 'other@example.com')).toBe(false);
   });
 });
 
-describe('escopos', () => {
-  it('pede só identidade e gmail.modify (sem readonly nem exclusão definitiva)', () => {
+describe('scopes', () => {
+  it('asks only for identity and gmail.modify (no readonly, no permanent deletion)', () => {
     expect(GMAIL_SCOPES).toEqual([
       'openid',
       'email',
@@ -83,7 +83,7 @@ describe('escopos', () => {
     ]);
   });
 
-  it('hasModifyScope reconhece gmail.modify e recusa os outros', () => {
+  it('hasModifyScope recognizes gmail.modify and rejects the others', () => {
     expect(hasModifyScope('openid email https://www.googleapis.com/auth/gmail.modify')).toBe(true);
     expect(hasModifyScope('openid https://www.googleapis.com/auth/gmail.readonly')).toBe(false);
     expect(hasModifyScope('https://www.googleapis.com/auth/gmail.modify.extra')).toBe(false);

@@ -1,7 +1,7 @@
 /**
- * Composição de respostas e encaminhamentos a partir da mensagem original: assunto com `Re:`/`Fwd:`,
- * destinatários (responder ou responder a todos, sem a própria conta), cabeçalhos de conversa
- * (`In-Reply-To`, `References`) e o texto citado. Pura.
+ * Composes replies and forwards from the original message: subject with `Re:`/`Fwd:`, recipients (reply
+ * or reply all, without the account itself), threading headers (`In-Reply-To`, `References`) and the
+ * quoted text. Pure.
  */
 import {
   headerValues,
@@ -17,20 +17,20 @@ import {
   type OutgoingEmail,
 } from './mime.js';
 
-/** E-mail pronto para enviar ou guardar como rascunho, com a conversa (`threadId`) a manter. */
+/** Email ready to send or save as a draft, with the thread (`threadId`) to keep. */
 export interface PreparedEmail {
   readonly email: OutgoingEmail;
   readonly threadId: string | null;
 }
 
-/** Como responder: texto novo, se é para todos e o endereço da própria conta (excluído). */
+/** How to reply: new text, whether to reply all and the account's own address (excluded). */
 export interface ReplyOptions {
   readonly body: string;
   readonly replyAll: boolean;
   readonly selfEmail: string;
 }
 
-/** Destinatários, nota e anexos de um encaminhamento. */
+/** Recipients, note and attachments of a forward. */
 export interface ForwardOptions {
   readonly to: readonly MailAddress[];
   readonly cc: readonly MailAddress[];
@@ -39,25 +39,25 @@ export interface ForwardOptions {
   readonly attachments: readonly MailAttachment[];
 }
 
-/** Maior trecho do original citado numa resposta, em caracteres. */
+/** Longest part of the original quoted in a reply, in characters. */
 export const MAX_QUOTED_CHARS = 20_000;
 
-/** Linha que abre o bloco do e-mail encaminhado. */
-export const FORWARD_SEPARATOR = '---------- Mensagem encaminhada ----------';
+/** Line that opens the forwarded email block. */
+export const FORWARD_SEPARATOR = '---------- Forwarded message ----------';
 
-/** Assunto com `Re:` ou `Fwd:` na frente, sem repetir se já houver (`RE:`, `Fw:`...). */
+/** Subject prefixed with `Re:` or `Fwd:`, not repeated if already there (`RE:`, `Fw:`...). */
 export function prefixSubject(subject: string, prefix: 'Re' | 'Fwd'): string {
   const pattern = prefix === 'Re' ? /^re:/i : /^fwd?:/i;
   return pattern.test(subject.trim()) ? subject : `${prefix}: ${subject}`.trim();
 }
 
-/** Cabeçalhos que mantêm a conversa numa resposta. */
+/** Headers that keep the thread in a reply. */
 export interface ThreadingHeaders {
   readonly inReplyTo: string | null;
   readonly references: string | null;
 }
 
-/** `In-Reply-To` e `References` da resposta a partir dos cabeçalhos do original. */
+/** The reply's `In-Reply-To` and `References` from the original's headers. */
 export function threadingHeaders(headers: ReadonlyMap<string, string>): ThreadingHeaders {
   const messageId = headers.get('message-id');
   return {
@@ -66,7 +66,7 @@ export function threadingHeaders(headers: ReadonlyMap<string, string>): Threadin
   };
 }
 
-/** Endereços sem repetidos e sem os excluídos (comparação sem maiúsculas). */
+/** Addresses without duplicates or excluded ones (case-insensitive). */
 export function uniqueAddresses(
   addresses: readonly MailAddress[],
   exclude: ReadonlySet<string>,
@@ -80,7 +80,7 @@ export function uniqueAddresses(
   });
 }
 
-/** Candidatos a `To` da resposta: remetente (ou `Reply-To`), ou os destinatários se a original é sua. */
+/** Reply `To` candidates: the sender (or `Reply-To`), or the recipients if you sent the original. */
 export function replyToList(
   headers: ReadonlyMap<string, string>,
   self: string,
@@ -92,7 +92,7 @@ export function replyToList(
   return replyAll ? [...sender, ...originalTo] : sender;
 }
 
-/** Para quem vai a resposta: remetente (ou `Reply-To`); com `replyAll`, também `To` e `Cc` do original. */
+/** Who gets the reply: the sender (or `Reply-To`); with `replyAll`, also the original's `To` and `Cc`. */
 export function replyRecipients(
   headers: ReadonlyMap<string, string>,
   selfEmail: string,
@@ -110,7 +110,7 @@ export function replyRecipients(
   return { to, cc };
 }
 
-/** Texto do original citado com `> `, depois da linha "Em <data>, <remetente> escreveu:". */
+/** Original text quoted with `> `, after the line "On <date>, <sender> wrote:". */
 export function quotedText(message: GmailMessage): string {
   const headers = headerValues(message.payload?.headers ?? []);
   const body = truncateText(messageBodyText(message.payload), MAX_QUOTED_CHARS);
@@ -118,26 +118,26 @@ export function quotedText(message: GmailMessage): string {
     .split(/\r?\n/)
     .map((line) => `> ${line}`)
     .join('\n');
-  return `Em ${headers.get('date') ?? ''}, ${headers.get('from') ?? ''} escreveu:\n${quoted}`;
+  return `On ${headers.get('date') ?? ''}, ${headers.get('from') ?? ''} wrote:\n${quoted}`;
 }
 
-/** Bloco do e-mail encaminhado: separador, cabeçalhos do original e o corpo em texto. */
+/** Forwarded email block: separator, the original's headers and its text body. */
 export function forwardedText(message: GmailMessage): string {
   const headers = headerValues(message.payload?.headers ?? []);
   const cc = headers.get('cc');
   return [
     FORWARD_SEPARATOR,
-    `De: ${headers.get('from') ?? ''}`,
-    `Data: ${headers.get('date') ?? ''}`,
-    `Assunto: ${headers.get('subject') ?? ''}`,
-    `Para: ${headers.get('to') ?? ''}`,
+    `From: ${headers.get('from') ?? ''}`,
+    `Date: ${headers.get('date') ?? ''}`,
+    `Subject: ${headers.get('subject') ?? ''}`,
+    `To: ${headers.get('to') ?? ''}`,
     ...(cc ? [`Cc: ${cc}`] : []),
     '',
     messageBodyText(message.payload),
   ].join('\n');
 }
 
-/** Resposta pronta: destinatários, `Re:`, conversa mantida e o original citado abaixo do texto novo. */
+/** Ready reply: recipients, `Re:`, thread kept and the original quoted below the new text. */
 export function replyEmail(message: GmailMessage, options: ReplyOptions): PreparedEmail {
   const headers = headerValues(message.payload?.headers ?? []);
   const recipients = replyRecipients(headers, options.selfEmail, options.replyAll);
@@ -154,7 +154,7 @@ export function replyEmail(message: GmailMessage, options: ReplyOptions): Prepar
   };
 }
 
-/** Encaminhamento pronto: `Fwd:`, nota, bloco do original e os anexos dados, numa conversa nova. */
+/** Ready forward: `Fwd:`, note, the original's block and the given attachments, in a new thread. */
 export function forwardEmail(message: GmailMessage, options: ForwardOptions): PreparedEmail {
   const headers = headerValues(message.payload?.headers ?? []);
   const note = options.note.trim();

@@ -63,9 +63,9 @@ avisar quando terminar e chame `whatsapp_status` de novo.
 Se `whatsapp_status` disser que precisa parear, guie:
 
 1. Abrir `<servidor>/pair` e entrar com o GitHub. A primeira abertura acorda o servidor (alguns segundos).
-2. Digitar o número com DDI (ex.: `5531999999999`) e clicar em **Gerar código de pareamento**.
+2. Digitar o número com DDI (ex.: `5531999999999`) e clicar em **Generate pairing code**.
 3. No celular: WhatsApp → **Aparelhos conectados** → **Conectar aparelho** → **Conectar com número de
-   telefone** e digitar o código. Alternativa: **Mostrar QR** e ler o QR.
+   telefone** e digitar o código. Alternativa: **Show QR** e ler o QR.
 4. Esperar a página mostrar **"Conectado"**; o histórico recente começa a chegar.
 
 Quando ela avisar, chame `whatsapp_status` de novo. Se já estiver conectado, diga isso e siga.

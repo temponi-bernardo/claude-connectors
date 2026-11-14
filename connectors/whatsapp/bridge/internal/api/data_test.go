@@ -20,12 +20,12 @@ func TestStatusAndSyncWait(t *testing.T) {
 	}
 	m = decode(t, e.do("POST", "/sync/wait?timeout_ms=0", nil, nil))
 	if m["partial"] != true {
-		t.Fatalf("deveria ser parcial: %v", m)
+		t.Fatalf("should be partial: %v", m)
 	}
 	e.fake.state.OfflineSyncComplete = true
 	m = decode(t, e.do("POST", "/sync/wait?timeout_ms=99999", nil, nil))
 	if _, has := m["partial"]; has || m["offline_sync_complete"] != true {
-		t.Fatalf("deveria terminar: %v", m)
+		t.Fatalf("should finish: %v", m)
 	}
 	expect(t, e.do("POST", "/sync/wait?timeout_ms=x", nil, nil), 400, "bad_request")
 }
@@ -52,12 +52,12 @@ func TestChats(t *testing.T) {
 		t.Fatalf("%v", m)
 	}
 	last := first["last_message"].(map[string]any)
-	if last["from_me"] != true || last["sender_name"] != "Você" || last["type"] != "image" {
+	if last["from_me"] != true || last["sender_name"] != "You" || last["type"] != "image" {
 		t.Fatalf("last: %v", last)
 	}
 	m = decode(t, e.get("/chats?limit=1&cursor="+m["next_cursor"].(string)))
 	if g := m["chats"].([]any)[0].(map[string]any); g["name"] != "Família" || g["is_group"] != true || m["next_cursor"] != nil {
-		t.Fatalf("página 2: %v", m)
+		t.Fatalf("page 2: %v", m)
 	}
 	if m := decode(t, e.get("/chats?query="+url.QueryEscape("famí"))); len(m["chats"].([]any)) != 1 {
 		t.Fatalf("query: %v", m)
@@ -78,21 +78,21 @@ func TestMessages(t *testing.T) {
 	img := msgs[0].(map[string]any)
 	media := img["media"].(map[string]any)
 	if img["id"] != "A2" || img["timestamp"] != "2025-11-14T09:31:40-03:00" || media["filename"] != "férias.jpg" || media["size"] != float64(50) {
-		t.Fatalf("imagem: %v", img)
+		t.Fatalf("image: %v", img)
 	}
 	if _, has := img["chat_name"]; has {
-		t.Fatal("chat_name só na busca")
+		t.Fatal("chat_name only in search")
 	}
 	m = decode(t, e.get("/messages?chat_jid=5531999990001@s.whatsapp.net&limit=2&before="+m["next_before"].(string)))
 	rest := m["messages"].([]any)
 	if len(rest) != 1 || rest[0].(map[string]any)["id"] != "BIG" || m["next_before"] != nil {
-		t.Fatalf("página 2: %v", m)
+		t.Fatalf("page 2: %v", m)
 	}
 	if msgs[1].(map[string]any)["text"] != "Oi" {
-		t.Fatal("override bidi não removido")
+		t.Fatal("bidi override not removed")
 	}
 	expect(t, e.get("/messages?chat_jid=x@s.whatsapp.net"), 404, "chat_not_found")
-	for _, q := range []string{"", "chat_jid=semarroba", "chat_jid=a@b&limit=500", "chat_jid=a@b&before=zz"} {
+	for _, q := range []string{"", "chat_jid=noat", "chat_jid=a@b&limit=500", "chat_jid=a@b&before=zz"} {
 		expect(t, e.get("/messages?"+q), 400, "bad_request")
 	}
 }
@@ -106,7 +106,7 @@ func TestSearchAndContacts(t *testing.T) {
 		t.Fatalf("%v", m)
 	}
 	if m := decode(t, e.get("/search?query=oi&chat_jid=120363000000000001@g.us")); len(m["messages"].([]any)) != 0 {
-		t.Fatalf("filtro por conversa: %v", m)
+		t.Fatalf("chat filter: %v", m)
 	}
 	for _, q := range []string{"", "query=", "query=a&chat_jid=x", "query=a&limit=0"} {
 		expect(t, e.get("/search?"+q), 400, "bad_request")
@@ -125,7 +125,7 @@ func TestMedia(t *testing.T) {
 	e := newEnv(t, nil).ready()
 	e.seed()
 	base := "/media?chat_jid=5531999990001@s.whatsapp.net&message_id="
-	expect(t, e.get(base+"nada"), 404, "not_found")
+	expect(t, e.get(base+"missing"), 404, "not_found")
 	expect(t, e.get(base+"A1"), 404, "not_found")
 	expect(t, e.get(base+"BIG"), 413, "too_large")
 	expect(t, e.get("/media?chat_jid=x"), 400, "bad_request")
@@ -133,7 +133,7 @@ func TestMedia(t *testing.T) {
 	expect(t, e.get(base+"A2"), 410, "media_expired")
 	e.fake.mediaErr = wa.ErrNotConnected
 	expect(t, e.get(base+"A2"), 503, "not_connected")
-	e.fake.mediaErr = errors.New("rede")
+	e.fake.mediaErr = errors.New("network")
 	expect(t, e.get(base+"A2"), 502, "download_failed")
 	e.fake.mediaErr, e.fake.media = nil, make([]byte, 101)
 	expect(t, e.get(base+"A2"), 413, "too_large")

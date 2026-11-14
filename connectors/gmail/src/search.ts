@@ -1,36 +1,36 @@
 /**
- * Busca de conversas com a sintaxe do Gmail, numa conta ou em todas: resumo de cada conversa, ordenação
- * por data e paginação (com `all`, o `page_token` junta o de cada conta).
+ * Thread search with Gmail syntax, in one account or all of them: a summary of each thread, sorting by date
+ * and pagination (with `all`, the `page_token` combines each account's token).
  */
 import type { AccountRef } from './accounts.js';
 import type { OwnerDeps } from './context.js';
 import { gmailGet, gmailUrl } from './gmail-api.js';
 import { MESSAGE_HEADERS, summarizeThread, type GmailThread } from './message-format.js';
 
-/** Pedido de busca já validado. */
+/** Search request, already validated. */
 export interface SearchRequest {
   readonly query: string;
   readonly maxResults: number;
   readonly pageToken: string | null;
 }
 
-/** Resultado da busca numa conta. */
+/** Search result in one account. */
 export interface AccountSearchResult {
   readonly threads: Record<string, unknown>[];
   readonly nextPageToken: string | null;
 }
 
-/** Página da busca em várias contas: `page_token` por apelido. */
+/** Multi-account search page: `page_token` per alias. */
 export type MultiPageToken = Readonly<Record<string, string>>;
 
-/** Codifica os `page_token` de várias contas num só texto (base64url de JSON). */
+/** Encodes several accounts' `page_token`s into one string (base64url JSON). */
 export function encodeMultiPageToken(tokens: MultiPageToken): string | null {
   return Object.keys(tokens).length === 0
     ? null
     : Buffer.from(JSON.stringify(tokens)).toString('base64url');
 }
 
-/** Decodifica o `page_token` de várias contas; lança erro acionável se não for um token desta busca. */
+/** Decodes the multi-account `page_token`; throws an actionable error if it is not from this search. */
 export function decodeMultiPageToken(token: string): MultiPageToken {
   try {
     const value: unknown = JSON.parse(Buffer.from(token, 'base64url').toString('utf8'));
@@ -47,7 +47,7 @@ export function decodeMultiPageToken(token: string): MultiPageToken {
   }
 }
 
-/** Lê uma conversa só com os cabeçalhos úteis (sem corpo), para o resumo da busca. */
+/** Reads a thread with only the useful headers (no body), for the search summary. */
 export function fetchThreadMetadata(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -60,7 +60,7 @@ export function fetchThreadMetadata(
   return gmailGet<GmailThread>(deps, ref, url);
 }
 
-/** Busca numa conta: lista as conversas e lê os cabeçalhos de cada uma em paralelo. */
+/** Searches one account: lists the threads and reads each one's headers in parallel. */
 export async function searchAccount(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -85,17 +85,17 @@ export async function searchAccount(
   };
 }
 
-/** Data ISO de um resumo de conversa, ou texto vazio. */
+/** ISO date of a thread summary, or an empty string. */
 export function threadDate(thread: Readonly<Record<string, unknown>>): string {
   return typeof thread.date === 'string' ? thread.date : '';
 }
 
-/** Ordena resumos de conversas da mais recente para a mais antiga. */
+/** Sorts thread summaries from newest to oldest. */
 export function sortByDateDesc(threads: Record<string, unknown>[]): Record<string, unknown>[] {
   return [...threads].sort((a, b) => threadDate(b).localeCompare(threadDate(a)));
 }
 
-/** Contas a consultar e o token de cada uma, a partir do `page_token` de várias contas. */
+/** Accounts to query and each one's token, from the multi-account `page_token`. */
 export function pagesToFetch(
   accounts: readonly AccountRef[],
   pageToken: string | null,
@@ -107,7 +107,7 @@ export function pagesToFetch(
     .map((a) => [a, tokens[a.alias] ?? null]);
 }
 
-/** Busca em uma ou várias contas e devolve as conversas e o próximo `page_token`. */
+/** Searches one or more accounts and returns the threads and the next `page_token`. */
 export async function searchThreads(
   deps: OwnerDeps,
   accounts: readonly AccountRef[],

@@ -1,17 +1,17 @@
 /**
- * Limite simples de requisições por sessão OAuth no `/mcp`, com o binding de rate limiting do Workers
- * (contador na borda, sem gravar no KV e sem nada rodando entre requisições).
+ * Simple per-OAuth-session request limit on `/mcp`, using the Workers rate limiting binding (an edge
+ * counter, no KV writes and nothing running between requests).
  */
 
-/** O binding `ratelimits` do Workers. */
+/** The Workers `ratelimits` binding. */
 export interface RateLimiter {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 }
 
-/** Segundos sugeridos ao cliente para tentar de novo (o período do binding é 60 s). */
+/** Seconds suggested to the client before retrying (the binding period is 60 s). */
 export const RATE_LIMIT_RETRY_SECONDS = 60;
 
-/** Diz se a sessão passou do limite; sem binding (ex.: testes locais) nunca limita. */
+/** Tells whether the session is over the limit; without a binding (e.g. local tests) it never limits. */
 export async function isRateLimited(
   limiter: RateLimiter | undefined,
   key: string,
@@ -21,12 +21,12 @@ export async function isRateLimited(
   return !success;
 }
 
-/** Resposta 429 com `Retry-After`. */
+/** 429 response with `Retry-After`. */
 export function rateLimitedResponse(): Response {
   return new Response(
     JSON.stringify({
       error: 'rate_limited',
-      error_description: 'Muitas requisições; tente de novo em 1 minuto.',
+      error_description: 'Too many requests; try again in 1 minute.',
     }),
     {
       status: 429,

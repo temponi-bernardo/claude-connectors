@@ -16,20 +16,20 @@ import { READ_ONLY_HINTS, SEND_HINTS, toolAnnotations } from './annotations.js';
 const echoAnnotations = toolAnnotations('Echo', READ_ONLY_HINTS);
 
 const echo = defineTool({
-  name: 'eco',
-  description: 'devolve o texto',
-  shape: { texto: z.string() },
+  name: 'echo',
+  description: 'returns the text',
+  shape: { value: z.string() },
   annotations: echoAnnotations,
-  run: (ctx: { prefix: string }, args) => Promise.resolve(`${ctx.prefix}${args.texto}`),
+  run: (ctx: { prefix: string }, args) => Promise.resolve(`${ctx.prefix}${args.value}`),
 });
 
 describe('defineTool', () => {
-  it('valida os argumentos antes de chamar run', async () => {
-    await expect(echo.run({ prefix: '> ' }, { texto: 'oi' })).resolves.toBe('> oi');
-    await expect(echo.run({ prefix: '' }, { texto: 1 })).rejects.toThrow();
+  it('validates the arguments before calling run', async () => {
+    await expect(echo.run({ prefix: '> ' }, { value: 'hi' })).resolves.toBe('> hi');
+    await expect(echo.run({ prefix: '' }, { value: 1 })).rejects.toThrow();
   });
 
-  it('aceita argumentos ausentes quando o shape é vazio', async () => {
+  it('accepts missing arguments when the shape is empty', async () => {
     const none = defineTool({
       name: 'n',
       description: 'd',
@@ -42,43 +42,43 @@ describe('defineTool', () => {
 });
 
 describe('textResult', () => {
-  it('mantém string e serializa objetos', () => {
-    expect(textResult('oi').content).toEqual([{ type: 'text', text: 'oi' }]);
+  it('keeps strings and serializes objects', () => {
+    expect(textResult('hi').content).toEqual([{ type: 'text', text: 'hi' }]);
     expect(textResult({ a: 1 }).content[0]).toEqual({ type: 'text', text: '{\n  "a": 1\n}' });
   });
 
-  it('acrescenta notas como blocos extras', () => {
-    expect(textResult('a', ['aviso']).content).toHaveLength(2);
+  it('appends notes as extra blocks', () => {
+    expect(textResult('a', ['note']).content).toHaveLength(2);
   });
 });
 
 describe('errorResult', () => {
-  it('usa a mensagem do Error ou o texto', () => {
-    expect(errorResult(new Error('falhou'))).toEqual({
+  it('uses the Error message or the text', () => {
+    expect(errorResult(new Error('failed'))).toEqual({
       isError: true,
-      content: [{ type: 'text', text: 'falhou' }],
+      content: [{ type: 'text', text: 'failed' }],
     });
     expect(errorResult('x').content[0]).toEqual({ type: 'text', text: 'x' });
   });
 });
 
 describe('runToolSafely', () => {
-  it('converte sucesso e erro em resultado MCP', async () => {
-    expect((await runToolSafely(echo, { prefix: '' }, { texto: 'a' })).isError).toBeUndefined();
+  it('turns success and error into an MCP result', async () => {
+    expect((await runToolSafely(echo, { prefix: '' }, { value: 'a' })).isError).toBeUndefined();
     expect((await runToolSafely(echo, { prefix: '' }, {})).isError).toBe(true);
   });
 });
 
 describe('rawToolResult', () => {
-  it('embrulha o resultado sem alterá-lo', () => {
+  it('wraps the result without changing it', () => {
     const result = { content: [{ type: 'image' as const, data: 'AA==', mimeType: 'image/png' }] };
     expect(toToolResult(rawToolResult(result))).toBe(result);
   });
 });
 
 describe('toToolResult', () => {
-  it('repassa o resultado pronto e converte o resto em texto', () => {
-    const ready = { content: [{ type: 'text' as const, text: 'pronto' }] };
+  it('passes a ready result through and turns the rest into text', () => {
+    const ready = { content: [{ type: 'text' as const, text: 'ready' }] };
     expect(toToolResult(rawToolResult(ready))).toBe(ready);
     expect(toToolResult({ a: 1 })).toEqual(textResult({ a: 1 }));
     expect(toToolResult(null)).toEqual(textResult(null));
@@ -90,10 +90,10 @@ describe('registerToolSpecs', () => {
     const registerTool = vi.fn();
     registerToolSpecs({ registerTool } as unknown as McpServer, [echo], { prefix: '' });
     expect(registerTool).toHaveBeenCalledWith(
-      'eco',
+      'echo',
       {
         title: 'Echo',
-        description: 'devolve o texto',
+        description: 'returns the text',
         inputSchema: echo.shape,
         annotations: echoAnnotations,
       },
@@ -102,7 +102,7 @@ describe('registerToolSpecs', () => {
     const handler = registerTool.mock.calls[0]![2] as (
       a: unknown,
     ) => Promise<{ content: unknown[] }>;
-    expect((await handler({ texto: 'z' })).content).toEqual([{ type: 'text', text: 'z' }]);
+    expect((await handler({ value: 'z' })).content).toEqual([{ type: 'text', text: 'z' }]);
   });
 
   it('passes the destructive hints of a write tool through', () => {
@@ -112,30 +112,30 @@ describe('registerToolSpecs', () => {
     expect(send.annotations).toEqual(annotations);
     registerToolSpecs({ registerTool } as unknown as McpServer, [send], { prefix: '' });
     expect(registerTool).toHaveBeenCalledWith(
-      'eco',
+      'echo',
       expect.objectContaining({ title: 'Send echo', annotations }),
       expect.any(Function),
     );
   });
 });
 
-/** Definição da ferramenta de eco, para variar só as anotações. */
+/** Echo tool definition, to vary only the annotations. */
 function echoDefinition(): {
   name: string;
   description: string;
-  shape: { texto: z.ZodString };
-  run: (ctx: { prefix: string }, args: { texto: string }) => Promise<string>;
+  shape: { value: z.ZodString };
+  run: (ctx: { prefix: string }, args: { value: string }) => Promise<string>;
 } {
   return {
-    name: 'eco',
-    description: 'devolve o texto',
-    shape: { texto: z.string() },
-    run: (ctx, args) => Promise.resolve(`${ctx.prefix}${args.texto}`),
+    name: 'echo',
+    description: 'returns the text',
+    shape: { value: z.string() },
+    run: (ctx, args) => Promise.resolve(`${ctx.prefix}${args.value}`),
   };
 }
 
 describe('binaryContentBlock', () => {
-  it('usa imagem para image/*, áudio para audio/* e recurso embutido para o resto', () => {
+  it('uses image for image/*, audio for audio/* and an embedded resource for the rest', () => {
     const bytes = new Uint8Array([1]);
     expect(binaryContentBlock('image/png', bytes, 'u')).toEqual({
       type: 'image',

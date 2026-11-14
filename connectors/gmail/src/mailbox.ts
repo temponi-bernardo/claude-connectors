@@ -1,41 +1,41 @@
 /**
- * Organização da caixa: marcar como lido/não lido, arquivar, estrela e marcadores (por mensagem ou por
- * conversa) e lixeira com restauração. Não há exclusão definitiva: o escopo `gmail.modify` nem permite.
+ * Mailbox organization: mark read/unread, archive, star and labels (per message or per thread) and trash
+ * with restore. There is no permanent deletion: the `gmail.modify` scope does not even allow it.
  */
 import type { AccountRef } from './accounts.js';
 import type { OwnerDeps } from './context.js';
 import { gmailGet, gmailUrl, gmailWrite } from './gmail-api.js';
 
-/** Ações prontas sobre marcadores de sistema. */
+/** Ready-made actions on system labels. */
 export type MailboxAction =
   'mark_read' | 'mark_unread' | 'archive' | 'unarchive' | 'star' | 'unstar';
 
-/** Marcadores a pôr e a tirar (ids). */
+/** Labels to add and remove (ids). */
 export interface LabelChange {
   readonly add: readonly string[];
   readonly remove: readonly string[];
 }
 
-/** Mensagens e conversas a alterar. */
+/** Messages and threads to change. */
 export interface MailTargets {
   readonly messageIds: readonly string[];
   readonly threadIds: readonly string[];
 }
 
-/** Marcador da Gmail API. */
+/** Gmail API label. */
 export interface GmailLabel {
   readonly id: string;
   readonly name: string;
   readonly type?: string;
 }
 
-/** Mais mensagens por chamada das ferramentas de organização. */
+/** Maximum messages per call of the organization tools. */
 export const MAX_TARGET_MESSAGES = 50;
 
-/** Mais conversas por chamada das ferramentas de organização. */
+/** Maximum threads per call of the organization tools. */
 export const MAX_TARGET_THREADS = 20;
 
-/** O que cada ação faz nos marcadores de sistema do Gmail. */
+/** What each action does to the Gmail system labels. */
 export const MAILBOX_ACTIONS: Readonly<Record<MailboxAction, LabelChange>> = {
   mark_read: { add: [], remove: ['UNREAD'] },
   mark_unread: { add: ['UNREAD'], remove: [] },
@@ -45,7 +45,7 @@ export const MAILBOX_ACTIONS: Readonly<Record<MailboxAction, LabelChange>> = {
   unstar: { add: [], remove: ['STARRED'] },
 };
 
-/** Alvos de uma alteração; lança erro se não houver nenhum id. */
+/** Targets of a change; throws if there is no id. */
 export function mailTargets(
   messageIds: readonly string[] | undefined,
   threadIds: readonly string[] | undefined,
@@ -57,7 +57,7 @@ export function mailTargets(
   return targets;
 }
 
-/** Lança erro se a mudança não tiver marcador ou puser e tirar o mesmo. */
+/** Throws if the change has no label or adds and removes the same one. */
 export function checkLabelChange(change: LabelChange): void {
   if (change.add.length + change.remove.length === 0) {
     throw new Error('Give at least one label in add_labels or remove_labels.');
@@ -67,7 +67,7 @@ export function checkLabelChange(change: LabelChange): void {
     throw new Error(`Label "${both}" is in both add_labels and remove_labels.`);
 }
 
-/** Ids dos marcadores pedidos por id ou nome (sem maiúsculas); lança erro para os desconhecidos. */
+/** Ids of the labels requested by id or name (case-insensitive); throws for unknown ones. */
 export function resolveLabelIds(
   labels: readonly GmailLabel[],
   wanted: readonly string[],
@@ -80,13 +80,13 @@ export function resolveLabelIds(
   });
 }
 
-/** Marcadores da conta, como a Gmail API devolve. */
+/** Account labels, as the Gmail API returns them. */
 export async function fetchLabels(deps: OwnerDeps, ref: AccountRef): Promise<GmailLabel[]> {
   const body = await gmailGet<{ labels?: GmailLabel[] }>(deps, ref, gmailUrl('labels'));
   return body.labels ?? [];
 }
 
-/** Põe e tira marcadores: `batchModify` nas mensagens e `modify` em cada conversa. */
+/** Adds and removes labels: `batchModify` on messages and `modify` on each thread. */
 export async function applyLabelChange(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -112,7 +112,7 @@ export async function applyLabelChange(
   };
 }
 
-/** Conta e quantas mensagens e conversas foram alteradas (para o resultado das ferramentas). */
+/** Account and how many messages and threads changed (for the tools' result). */
 export function targetCounts(alias: string, targets: MailTargets): Record<string, unknown> {
   return {
     account: alias,
@@ -121,7 +121,7 @@ export function targetCounts(alias: string, targets: MailTargets): Record<string
   };
 }
 
-/** Manda mensagens e conversas para a lixeira (ou as restaura com `restore`). */
+/** Moves messages and threads to the trash (or restores them with `restore`). */
 export async function moveToTrash(
   deps: OwnerDeps,
   ref: AccountRef,

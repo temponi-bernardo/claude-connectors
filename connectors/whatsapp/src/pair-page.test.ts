@@ -11,29 +11,27 @@ import {
   type PairPageView,
 } from './pair-page.js';
 
-const VIEW: PairPageView = { email: 'dono@exemplo.dev', csrf: 'tok"en', status: READY_STATUS };
+const VIEW: PairPageView = { email: 'owner@example.dev', csrf: 'tok"en', status: READY_STATUS };
 
 describe('describePairStatus', () => {
-  it('descreve cada situação', () => {
-    expect(describePairStatus(null)).toContain('Não consegui');
+  it('describes each situation', () => {
+    expect(describePairStatus(null)).toContain('Could not');
     expect(describePairStatus({ ...READY_STATUS, needs_pairing: true })).toContain(
-      'Precisa parear',
+      'Pairing needed',
     );
-    expect(describePairStatus({ ...READY_STATUS, connected: false })).toContain('conectando');
-    expect(describePairStatus(READY_STATUS)).toBe(
-      `Conectado como ${READY_STATUS.account} (sincronizado).`,
-    );
+    expect(describePairStatus({ ...READY_STATUS, connected: false })).toContain('connecting');
+    expect(describePairStatus(READY_STATUS)).toBe(`Connected as ${READY_STATUS.account} (synced).`);
     const syncing = { ...READY_STATUS, offline_sync_complete: false, account: null };
-    expect(describePairStatus(syncing)).toBe('Conectado (sincronizando pendências).');
+    expect(describePairStatus(syncing)).toBe('Connected (syncing pending messages).');
   });
 });
 
-describe('pairForm, pairingSection e maintenanceSection', () => {
-  it('escapa o token anti-CSRF no formulário', () => {
+describe('pairForm, pairingSection and maintenanceSection', () => {
+  it('escapes the anti-CSRF token in the form', () => {
     expect(pairForm('/pair/qr', 'a"b', '')).toContain('value="a&quot;b"');
   });
 
-  it('mostra código e QR quando existem, sempre com os formulários', () => {
+  it('shows code and QR when present, always with the forms', () => {
     const html = pairingSection({ ...VIEW, code: 'ABCD-EFGH', qrPng: 'iVBOR' });
     expect(html).toContain('<p class="code">ABCD-EFGH</p>');
     expect(html).toContain('src="data:image/png;base64,iVBOR"');
@@ -41,7 +39,7 @@ describe('pairForm, pairingSection e maintenanceSection', () => {
     expect(pairingSection(VIEW)).not.toContain('class="code"');
   });
 
-  it('oferece desvincular, recomeçar do zero e sair', () => {
+  it('offers unlink, start over and sign out', () => {
     const html = maintenanceSection(VIEW);
     for (const action of ['/pair/logout', '/pair/reset', '/pair/signout']) {
       expect(html).toContain(`action="${action}"`);
@@ -49,14 +47,14 @@ describe('pairForm, pairingSection e maintenanceSection', () => {
   });
 });
 
-describe('alertHtml e renderPairPage', () => {
-  it('prioriza o erro e escapa os textos', () => {
+describe('alertHtml and renderPairPage', () => {
+  it('prioritizes the error and escapes the texts', () => {
     expect(alertHtml({ ...VIEW, error: '<x>', message: 'ok' })).toContain('&lt;x&gt;');
-    expect(alertHtml({ ...VIEW, message: 'feito' })).toContain('role="status"');
+    expect(alertHtml({ ...VIEW, message: 'done' })).toContain('role="status"');
     expect(alertHtml(VIEW)).toBe('');
   });
 
-  it('só mostra o pareamento quando precisa e atualiza sozinha enquanto pareia', () => {
+  it('shows pairing only when needed and auto-refreshes while pairing', () => {
     expect(renderPairPage(VIEW)).not.toContain('/pair/code');
     const pairing = renderPairPage({
       ...VIEW,

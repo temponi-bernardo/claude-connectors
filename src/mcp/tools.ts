@@ -1,6 +1,6 @@
 /**
- * Definição e registro de ferramentas MCP, compartilhados por todos os conectores.
- * Cada conector descreve suas ferramentas como dados (`ToolSpec`) e as registra com `registerToolSpecs`.
+ * MCP tool definition and registration, shared by every connector.
+ * Each connector describes its tools as data (`ToolSpec`) and registers them with `registerToolSpecs`.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { bytesToBase64 } from '../core/bytes.js';
 import type { RequiredToolAnnotations } from './annotations.js';
 
-/** Ferramenta já com tipos apagados, pronta para registrar. `C` é o contexto do conector (cliente etc.). */
+/** Tool with erased types, ready to register. `C` is the connector context (client etc.). */
 export interface ToolSpec<C> {
   readonly name: string;
   readonly description: string;
@@ -18,7 +18,7 @@ export interface ToolSpec<C> {
   readonly run: (ctx: C, rawArgs: unknown) => Promise<unknown>;
 }
 
-/** Definição tipada de uma ferramenta: `run` recebe os argumentos já validados pelo `shape`. */
+/** Typed tool definition: `run` receives the arguments already validated by the `shape`. */
 export interface ToolDefinition<C, S extends z.ZodRawShape> {
   readonly name: string;
   readonly description: string;
@@ -27,7 +27,7 @@ export interface ToolDefinition<C, S extends z.ZodRawShape> {
   readonly run: (ctx: C, args: z.infer<z.ZodObject<S>>) => Promise<unknown>;
 }
 
-/** Cria uma `ToolSpec` validando os argumentos com o `shape` antes de chamar `run`. */
+/** Creates a `ToolSpec` that validates the arguments with the `shape` before calling `run`. */
 export function defineTool<C, S extends z.ZodRawShape>(def: ToolDefinition<C, S>): ToolSpec<C> {
   const schema = z.object(def.shape);
   return {
@@ -39,26 +39,26 @@ export function defineTool<C, S extends z.ZodRawShape>(def: ToolDefinition<C, S>
   };
 }
 
-/** Converte o retorno de uma ferramenta em resultado MCP de texto (JSON indentado se não for string). */
+/** Converts a tool return value into a text MCP result (indented JSON if it is not a string). */
 export function textResult(data: unknown, notes: readonly string[] = []): CallToolResult {
   const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
   return { content: [text, ...notes].map((t) => ({ type: 'text' as const, text: t })) };
 }
 
-/** Marca de um resultado MCP pronto, devolvido por uma ferramenta que monta seu próprio conteúdo. */
+/** Marker of a ready MCP result, returned by a tool that builds its own content. */
 const RAW_RESULT: unique symbol = Symbol('rawToolResult');
 
-/** Resultado MCP pronto (imagem, arquivo embutido...), que `runToolSafely` repassa sem converter. */
+/** Ready MCP result (image, embedded file...), which `runToolSafely` passes through unconverted. */
 export interface RawToolResult {
   readonly [RAW_RESULT]: CallToolResult;
 }
 
-/** Embrulha um resultado MCP pronto para a ferramenta devolver sem passar por `textResult`. */
+/** Wraps a ready MCP result so the tool can return it without going through `textResult`. */
 export function rawToolResult(result: CallToolResult): RawToolResult {
   return { [RAW_RESULT]: result };
 }
 
-/** Converte o retorno de uma ferramenta em resultado MCP: o pronto passa direto, o resto vira texto. */
+/** Converts a tool return value into an MCP result: a ready one passes through, the rest becomes text. */
 export function toToolResult(data: unknown): CallToolResult {
   if (typeof data === 'object' && data !== null && RAW_RESULT in data) {
     return (data as RawToolResult)[RAW_RESULT];
@@ -66,13 +66,13 @@ export function toToolResult(data: unknown): CallToolResult {
   return textResult(data);
 }
 
-/** Converte um erro em resultado MCP com `isError`, usando a mensagem do erro. */
+/** Converts an error into an MCP result with `isError`, using the error message. */
 export function errorResult(error: unknown): CallToolResult {
   const message = error instanceof Error ? error.message : String(error);
   return { isError: true, content: [{ type: 'text', text: message }] };
 }
 
-/** Executa uma ferramenta capturando erros: sucesso vira `toToolResult`, falha vira `errorResult`. */
+/** Runs a tool catching errors: success becomes `toToolResult`, failure becomes `errorResult`. */
 export async function runToolSafely<C>(
   spec: ToolSpec<C>,
   ctx: C,
@@ -105,7 +105,7 @@ export function registerToolSpecs<C>(
   }
 }
 
-/** Bloco MCP com um conteúdo binário: imagem, áudio ou, para o resto, recurso embutido com o `uri` dado. */
+/** MCP block with binary content: image, audio or, for the rest, an embedded resource with the given `uri`. */
 export function binaryContentBlock(
   mimeType: string,
   bytes: Uint8Array,

@@ -1,48 +1,48 @@
 /**
- * Lista ÚNICA de funções sem teste automatizado (docs/TESTING.md, seção "Exceções").
- * Cada entrada precisa de motivo e de um teste manual descrito. O `docs:check` falha
- * se uma função não tiver teste e não estiver aqui, e se uma entrada aqui não existir no código.
+ * The SINGLE list of functions without an automated test (docs/TESTING.md, "Exceptions" section).
+ * Each entry needs a reason and a described manual test. `docs:check` fails if a function has no
+ * test and is not listed here, and if an entry here does not exist in the code.
  */
 
 export interface TestException {
-  /** Nome exato da função. */
+  /** Exact function name. */
   readonly name: string;
-  /** Por que não há teste automatizado. */
+  /** Why there is no automated test. */
   readonly reason: string;
-  /** Como testar manualmente. */
+  /** How to test it manually. */
   readonly manualTest: string;
 }
 
 export const TEST_EXCEPTIONS: readonly TestException[] = [
   {
     name: 'runDocsCli',
-    reason: 'Ponto de entrada do CLI de docs: só despacha para runCheck/runGenerate (testadas).',
-    manualTest: 'Rodar `npm run docs:check` e `npm run docs:generate` e conferir a saída.',
+    reason: 'Docs CLI entry point: it only dispatches to runCheck/runGenerate (tested).',
+    manualTest: 'Run `npm run docs:check` and `npm run docs:generate` and check the output.',
   },
   {
     name: 'startCanvasRemoteServer',
     reason:
-      'Ponto de entrada: lê o ambiente e liga peças testadas (handler, servidor HTTP, conector).',
+      'Entry point: reads the environment and wires tested pieces (handler, HTTP server, connector).',
     manualTest:
-      'Rodar `node server/remote.js` com PUBLIC_URL=http://localhost:8080 e SEAL_KEY, abrir `/.well-known/oauth-authorization-server` e conectar pelo MCP Inspector.',
+      'Run `node server/remote.js` with PUBLIC_URL=http://localhost:8080 and SEAL_KEY, open `/.well-known/oauth-authorization-server` and connect with the MCP Inspector.',
   },
   {
     name: 'buildConnector',
     reason:
-      'Lê o .mcp.json real e roda o esbuild na pasta do conector; as decisões estão em build.ts (testadas).',
+      'Reads the real .mcp.json and runs esbuild in the connector folder; the decisions live in build.ts (tested).',
     manualTest:
-      'Rodar `npm run build` e conferir que `server/remote.js` foi regerado e que um .mcp.json com "command" faz o build falhar.',
+      'Run `npm run build` and check that `server/remote.js` was regenerated and that a .mcp.json with "command" makes the build fail.',
   },
   {
     name: 'runBuildCli',
-    reason: 'Ponto de entrada do CLI de build: só lista os conectores e chama buildConnector.',
-    manualTest: 'Rodar `npm run build` e conferir uma linha "✔ <conector>" por conector.',
+    reason: 'Build CLI entry point: it only lists the connectors and calls buildConnector.',
+    manualTest: 'Run `npm run build` and check for one "✔ <connector>" line per connector.',
   },
   {
     name: 'workersFixedLength',
     reason:
-      'Usa o FixedLengthStream, que só existe no runtime do Cloudflare Workers; os testes injetam um conversor falso (snapshots.test.ts).',
+      'Uses FixedLengthStream, which only exists in the Cloudflare Workers runtime; the tests inject a fake converter (snapshots.test.ts).',
     manualTest:
-      'Com o Worker publicado, usar uma ferramenta e conferir no R2 o objeto `whatsapp/snapshot.was1` com o tamanho do snapshot.',
+      'With the Worker deployed, use a tool and check in R2 that the `whatsapp/snapshot.was1` object has the snapshot size.',
   },
 ];

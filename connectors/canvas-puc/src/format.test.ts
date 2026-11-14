@@ -22,14 +22,14 @@ import {
 } from './format.js';
 
 describe('shortText', () => {
-  it('converte HTML e corta no limite', () => {
-    expect(shortText('<p>oi</p>')).toBe('oi');
+  it('converts HTML and cuts at the limit', () => {
+    expect(shortText('<p>hi</p>')).toBe('hi');
     expect(shortText('x'.repeat(MAX_TEXT_LENGTH + 10))).toHaveLength(MAX_TEXT_LENGTH);
   });
 });
 
 describe('toProfile', () => {
-  it('traduz os campos do perfil', () => {
+  it('maps the profile fields', () => {
     expect(
       toProfile({ id: 1, name: 'A', primary_email: 'a@x', login_id: 'l', time_zone: 'tz' }),
     ).toEqual({
@@ -43,7 +43,7 @@ describe('toProfile', () => {
 });
 
 describe('toCourse', () => {
-  it('usa a primeira matrícula para a nota', () => {
+  it('uses the first enrollment for the grade', () => {
     const c = toCourse({
       id: 1,
       name: 'N',
@@ -61,7 +61,7 @@ describe('toCourse', () => {
     });
   });
 
-  it('usa null sem matrícula', () => {
+  it('uses null without an enrollment', () => {
     expect(toCourse({ id: 1 })).toMatchObject({
       current_score: null,
       current_grade: null,
@@ -71,7 +71,7 @@ describe('toCourse', () => {
 });
 
 describe('toSubmissionFlags', () => {
-  it('devolve null sem entrega e traduz as flags', () => {
+  it('returns null without a submission and maps the flags', () => {
     expect(toSubmissionFlags(false)).toBeNull();
     expect(toSubmissionFlags(undefined)).toBeNull();
     expect(
@@ -86,7 +86,7 @@ describe('toSubmissionFlags', () => {
 });
 
 describe('toPlannerItem', () => {
-  it('monta link absoluto e usa title ou name', () => {
+  it('builds an absolute link and uses title or name', () => {
     const item = toPlannerItem(
       {
         plannable_type: 'assignment',
@@ -111,7 +111,7 @@ describe('toPlannerItem', () => {
 });
 
 describe('toAssignmentSummary', () => {
-  it('inclui status e nota da entrega', () => {
+  it('includes the submission status and score', () => {
     const a = toAssignmentSummary({
       id: 1,
       name: 'T',
@@ -127,7 +127,7 @@ describe('toAssignmentSummary', () => {
     });
   });
 
-  it('usa null sem entrega', () => {
+  it('uses null without a submission', () => {
     expect(toAssignmentSummary({ id: 1 })).toMatchObject({
       score: null,
       late: null,
@@ -137,24 +137,24 @@ describe('toAssignmentSummary', () => {
 });
 
 describe('toRubricCriterion', () => {
-  it('formata os níveis', () => {
+  it('formats the ratings', () => {
     expect(
       toRubricCriterion({
         description: 'C',
         points: 5,
-        ratings: [{ points: 5, description: 'ótimo' }],
+        ratings: [{ points: 5, description: 'great' }],
       }),
     ).toEqual({
       criterion: 'C',
       points: 5,
-      ratings: ['5: ótimo'],
+      ratings: ['5: great'],
     });
     expect(toRubricCriterion({})).toMatchObject({ ratings: [] });
   });
 });
 
 describe('toFileInfo', () => {
-  it('converte o tamanho para KB', () => {
+  it('converts the size to KB', () => {
     expect(
       toFileInfo({
         id: 1,
@@ -174,14 +174,14 @@ describe('toFileInfo', () => {
 });
 
 describe('toSubmissionDetail', () => {
-  it('traz comentários e anexos', () => {
+  it('brings comments and attachments', () => {
     const s = toSubmissionDetail({
       workflow_state: 'graded',
-      submission_comments: [{ author_name: 'Prof', comment: 'bom', created_at: 'd' }],
+      submission_comments: [{ author_name: 'Prof', comment: 'good', created_at: 'd' }],
       attachments: [{ display_name: 'a.txt' }],
     });
     expect(s).toMatchObject({
-      comments: [{ author: 'Prof', text: 'bom', date: 'd' }],
+      comments: [{ author: 'Prof', text: 'good', date: 'd' }],
       rubric_assessment: null,
     });
     expect(s.attachments as unknown[]).toHaveLength(1);
@@ -190,9 +190,9 @@ describe('toSubmissionDetail', () => {
 });
 
 describe('toAssignmentDetail', () => {
-  it('converte o enunciado e inclui a entrega quando houver', () => {
-    const a = { id: 1, description: '<p>Faça</p>', rubric: [{ description: 'C' }] };
-    expect(toAssignmentDetail(a, null)).toMatchObject({ description: 'Faça', submission: null });
+  it('converts the description and includes the submission when there is one', () => {
+    const a = { id: 1, description: '<p>Do it</p>', rubric: [{ description: 'C' }] };
+    expect(toAssignmentDetail(a, null)).toMatchObject({ description: 'Do it', submission: null });
     expect(toAssignmentDetail({ id: 2 }, { score: 7 })).toMatchObject({
       rubric: [],
       submission: { score: 7 },
@@ -201,7 +201,7 @@ describe('toAssignmentDetail', () => {
 });
 
 describe('toGradeRow', () => {
-  it('usa os dados da tarefa incluída', () => {
+  it('uses the data of the included assignment', () => {
     expect(
       toGradeRow({
         assignment_id: 1,
@@ -218,12 +218,12 @@ describe('toGradeRow', () => {
 });
 
 describe('toEnrollmentGrade', () => {
-  it('busca o nome do curso pelo id', () => {
-    const names = new Map([['5', 'Curso']]);
+  it('looks up the course name by id', () => {
+    const names = new Map([['5', 'Course']]);
     expect(
       toEnrollmentGrade({ course_id: 5, grades: { current_score: 80, final_score: 70 } }, names),
     ).toMatchObject({
-      course: 'Curso',
+      course: 'Course',
       current_score: 80,
       final_score: 70,
     });
@@ -235,35 +235,35 @@ describe('toEnrollmentGrade', () => {
 });
 
 describe('toAnnouncement', () => {
-  it('prefere o nome do autor e converte o texto', () => {
+  it("prefers the author's name and converts the text", () => {
     expect(
       toAnnouncement({
         id: 1,
-        message: '<b>oi</b>',
+        message: '<b>hi</b>',
         author: { display_name: 'A' },
         user_name: 'B',
       }),
-    ).toMatchObject({ author: 'A', text: 'oi' });
+    ).toMatchObject({ author: 'A', text: 'hi' });
     expect(toAnnouncement({ id: 1, user_name: 'B' })).toMatchObject({ author: 'B', text: '' });
   });
 });
 
-describe('toModule e toModuleItem', () => {
-  it('traduz itens e conclusão', () => {
+describe('toModule and toModuleItem', () => {
+  it('maps items and completion', () => {
     expect(toModuleItem({ id: 1, completion_requirement: { completed: true } })).toMatchObject({
       completed: true,
     });
     expect(toModuleItem({ id: 1 })).toMatchObject({ completed: null });
-    expect(toModule({ id: 1, name: 'M', items: [{ id: 2, title: 'Aula' }] })).toMatchObject({
+    expect(toModule({ id: 1, name: 'M', items: [{ id: 2, title: 'Lesson' }] })).toMatchObject({
       name: 'M',
-      items: [{ title: 'Aula' }],
+      items: [{ title: 'Lesson' }],
     });
     expect(toModule({ id: 1 })).toMatchObject({ items: [] });
   });
 });
 
 describe('toDiscussionSummary', () => {
-  it('traz o prazo da tarefa vinculada ou null', () => {
+  it('brings the due date of the linked assignment, or null', () => {
     expect(toDiscussionSummary({ id: 1, assignment: { due_at: 'd' } })).toMatchObject({
       due_at: 'd',
     });
@@ -272,7 +272,7 @@ describe('toDiscussionSummary', () => {
 });
 
 describe('flattenDiscussion', () => {
-  it('achata respostas aninhadas com o nível e o autor', () => {
+  it('flattens nested replies with the depth and the author', () => {
     const names = new Map([['1', 'Ana']]);
     const flat = flattenDiscussion(
       [{ user_id: 1, message: '<p>a</p>', replies: [{ user_id: 2, message: 'b' }] }],
@@ -287,7 +287,7 @@ describe('flattenDiscussion', () => {
 });
 
 describe('toCalendarEvent', () => {
-  it('limita a descrição a 1000 caracteres', () => {
+  it('limits the description to 1000 characters', () => {
     expect(
       (toCalendarEvent({ title: 'E', description: 'x'.repeat(2000) }).description as string).length,
     ).toBe(1000);

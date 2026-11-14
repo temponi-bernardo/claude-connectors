@@ -9,14 +9,14 @@ import {
 } from './accounts.js';
 import { testAccount } from './fixtures/fake-google.js';
 
-const REFS = aliasAccounts([testAccount('dono@example.com'), testAccount('musica@example.com')]);
+const REFS = aliasAccounts([testAccount('owner@example.com'), testAccount('music@example.com')]);
 
-describe('apelidos', () => {
-  it('accountAlias usa a parte antes do @ em minúsculas', () => {
-    expect(accountAlias('Musica.Nova@example.com')).toBe('musica.nova');
+describe('aliases', () => {
+  it('accountAlias uses the lowercased part before the @', () => {
+    expect(accountAlias('Music.New@example.com')).toBe('music.new');
   });
 
-  it('aliasAccounts usa o e-mail inteiro quando a parte antes do @ se repete', () => {
+  it('aliasAccounts uses the full email when the part before the @ repeats', () => {
     const refs = aliasAccounts([
       testAccount('ana@a.com'),
       testAccount('ana@b.com'),
@@ -27,32 +27,32 @@ describe('apelidos', () => {
 });
 
 describe('resolveAccounts', () => {
-  it('resolve all, apelido ou e-mail', () => {
+  it('resolves all, an alias or an email', () => {
     expect(resolveAccounts(REFS, 'all')).toHaveLength(2);
-    expect(resolveAccounts(REFS, ' Musica ')[0]?.alias).toBe('musica');
-    expect(resolveAccounts(REFS, 'dono@example.com')[0]?.alias).toBe('dono');
+    expect(resolveAccounts(REFS, ' Music ')[0]?.alias).toBe('music');
+    expect(resolveAccounts(REFS, 'owner@example.com')[0]?.alias).toBe('owner');
   });
 
-  it('explica os válidos ou pede link_account sem contas', () => {
-    expect(() => resolveAccounts(REFS, 'x')).toThrow(/"dono", "musica", "all"/);
+  it('lists the valid ones or asks for link_account without accounts', () => {
+    expect(() => resolveAccounts(REFS, 'x')).toThrow(/"owner", "music", "all"/);
     expect(() => resolveAccounts([], 'all')).toThrow(/link_account/);
     expect(noAccountsError().message).toMatch(/No Gmail account/);
   });
 });
 
-describe('acesso de escrita', () => {
-  it('requireWriteAccess passa com gmail.modify', () => {
+describe('write access', () => {
+  it('requireWriteAccess passes with gmail.modify', () => {
     expect(() => {
       requireWriteAccess(REFS[0]!);
     }).not.toThrow();
   });
 
-  it('conta vinculada só para leitura pede novo vínculo pelo link_account', () => {
+  it('a read-only linked account asks for relinking via link_account', () => {
     const scope = 'openid email https://www.googleapis.com/auth/gmail.readonly';
-    const [old] = aliasAccounts([testAccount('antiga@example.com', { scope })]);
+    const [old] = aliasAccounts([testAccount('legacy@example.com', { scope })]);
     expect(() => {
       requireWriteAccess(old!);
-    }).toThrow(writeAccessError('antiga'));
-    expect(writeAccessError('antiga').message).toMatch(/"antiga".*read-only.*link_account/s);
+    }).toThrow(writeAccessError('legacy'));
+    expect(writeAccessError('legacy').message).toMatch(/"legacy".*read-only.*link_account/s);
   });
 });

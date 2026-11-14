@@ -35,12 +35,12 @@ const REDIRECT = 'https://claude.ai/api/mcp/auth_callback';
 const VERIFIER = 'v'.repeat(64);
 const SECRETS = {
   GOOGLE_CLIENT_ID: 'client-123.apps.googleusercontent.com',
-  GOOGLE_CLIENT_SECRET: 'segredo',
+  GOOGLE_CLIENT_SECRET: 'secret',
   TOKEN_ENC_KEY: TEST_TOKEN_KEY.toString('base64'),
   CONSENT_SECRET: 's'.repeat(40),
 };
 
-/** Navegador mínimo: guarda cookies e chama o Worker. */
+/** Minimal browser: keeps cookies and calls the Worker. */
 class Browser {
   readonly cookies = new Map<string, string>();
   constructor(readonly env: GmailWorkerEnv) {}
@@ -65,12 +65,12 @@ class Browser {
   }
 }
 
-/** Ambiente do Worker com KV em memória e todos os secrets. */
+/** Worker environment with in-memory KV and every secret. */
 function workerEnv(extra: Partial<GmailWorkerEnv> = {}): GmailWorkerEnv {
   return { ...SECRETS, OAUTH_KV: new FakeKv(), GMAIL_KV: new FakeKv(), ...extra };
 }
 
-/** Google cuja troca de código devolve um id_token do e-mail dado com o nonce do último pedido. */
+/** Google whose code exchange returns an id_token for the given email with the last request's nonce. */
 function stubGoogle(email: string, routes: Parameters<typeof fakeFetch>[0] = []) {
   const state = { nonce: '' };
   const exp = Math.floor(Date.now() / 1000) + 600;
@@ -91,7 +91,7 @@ function stubGoogle(email: string, routes: Parameters<typeof fakeFetch>[0] = [])
   return state;
 }
 
-/** Registra um cliente com o retorno do claude.ai e devolve o `client_id`. */
+/** Registers a client with the claude.ai callback and returns the `client_id`. */
 async function register(browser: Browser): Promise<string> {
   const response = await browser.fetch('/register', {
     method: 'POST',
@@ -102,7 +102,7 @@ async function register(browser: Browser): Promise<string> {
   return ((await response.json()) as { client_id: string }).client_id;
 }
 
-/** URL do `/authorize` para o cliente, com PKCE S256. */
+/** `/authorize` URL for the client, with PKCE S256. */
 function authorizePath(clientId: string): string {
   const query = new URLSearchParams({
     response_type: 'code',
@@ -116,7 +116,7 @@ function authorizePath(clientId: string): string {
   return `/authorize?${query.toString()}`;
 }
 
-/** Aprova o consentimento e devolve a URL do Google para onde o navegador foi mandado. */
+/** Approves the consent and returns the Google URL the browser was sent to. */
 async function approve(browser: Browser, clientId: string, nonceHolder: { nonce: string }) {
   const page = await browser.fetch(authorizePath(clientId));
   expect(page.status).toBe(200);
@@ -132,14 +132,14 @@ async function approve(browser: Browser, clientId: string, nonceHolder: { nonce:
   return google;
 }
 
-/** Volta do Google com um código para o `state` dado. */
+/** Google callback with a code for the given `state`. */
 function googleCallback(browser: Browser, google: URL): Promise<Response> {
   const state = google.searchParams.get('state') ?? '';
-  return browser.fetch(`/google/callback?state=${encodeURIComponent(state)}&code=codigo-google`);
+  return browser.fetch(`/google/callback?state=${encodeURIComponent(state)}&code=google-code`);
 }
 
-/** Faz o fluxo inteiro e devolve o access token emitido para o Claude. */
-async function signIn(browser: Browser, email = 'dono@example.com'): Promise<string> {
+/** Runs the whole flow and returns the access token issued to Claude. */
+async function signIn(browser: Browser, email = 'owner@example.com'): Promise<string> {
   const holder = stubGoogle(email, [gmailRoute({ labels: { labels: [] } })]);
   const clientId = await register(browser);
   const callback = await googleCallback(browser, await approve(browser, clientId, holder));
@@ -162,7 +162,7 @@ async function signIn(browser: Browser, email = 'dono@example.com'): Promise<str
   return ((await token.json()) as { access_token: string }).access_token;
 }
 
-/** Chamada JSON-RPC ao `/mcp` com o token dado. */
+/** JSON-RPC call to `/mcp` with the given token. */
 function mcpCall(browser: Browser, token: string, body: unknown): Promise<Response> {
   return browser.fetch('/mcp', {
     method: 'POST',
@@ -176,7 +176,7 @@ function mcpCall(browser: Browser, token: string, body: unknown): Promise<Respon
   });
 }
 
-/** Chama uma ferramenta pelo `/mcp` e devolve o texto do primeiro bloco do resultado. */
+/** Calls a tool through `/mcp` and returns the text of the first result block. */
 async function toolText(
   browser: Browser,
   token: string,
@@ -200,14 +200,14 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe('rotas básicas e descoberta', () => {
-  it('responde ok em / e 404 em caminho desconhecido', async () => {
+describe('basic routes and discovery', () => {
+  it('answers ok on / and 404 on an unknown path', async () => {
     const browser = new Browser(workerEnv());
     expect(await (await browser.fetch('/')).text()).toBe('ok');
-    expect((await browser.fetch('/nada')).status).toBe(404);
+    expect((await browser.fetch('/nothing')).status).toBe(404);
   });
 
-  it('publica os metadados e exige token no /mcp', async () => {
+  it('publishes the metadata and requires a token on /mcp', async () => {
     const browser = new Browser(workerEnv());
     const resource = await browser.fetch('/.well-known/oauth-protected-resource/mcp');
     expect(await resource.json()).toMatchObject({
@@ -224,7 +224,7 @@ describe('rotas básicas e descoberta', () => {
     expect(unauthorized.headers.get('www-authenticate')).toContain('resource_metadata');
   });
 
-  it('recusa registro de cliente com retorno fora do Claude', async () => {
+  it('refuses registering a client with a callback outside Claude', async () => {
     const browser = new Browser(workerEnv());
     const response = await browser.fetch('/register', {
       method: 'POST',
@@ -235,8 +235,8 @@ describe('rotas básicas e descoberta', () => {
   });
 });
 
-describe('login de quem instalou e /mcp', () => {
-  it('faz o fluxo completo e lista as ferramentas', async () => {
+describe('installer sign-in and /mcp', () => {
+  it('runs the full flow and lists the tools', async () => {
     const browser = new Browser(workerEnv());
     const token = await signIn(browser);
     const list = await mcpCall(browser, token, { jsonrpc: '2.0', id: 1, method: 'tools/list' });
@@ -251,14 +251,14 @@ describe('login de quem instalou e /mcp', () => {
     expect(read?.annotations).toMatchObject({ readOnlyHint: true });
   });
 
-  it('a conta do login já fica vinculada e responde às ferramentas', async () => {
+  it('the sign-in account is linked right away and answers the tools', async () => {
     const browser = new Browser(workerEnv());
     const token = await signIn(browser);
-    const text = await toolText(browser, token, ['list_labels', { account: 'dono' }]);
-    expect(JSON.parse(text)).toEqual({ results: [{ account: 'dono', labels: [] }] });
+    const text = await toolText(browser, token, ['list_labels', { account: 'owner' }]);
+    expect(JSON.parse(text)).toEqual({ results: [{ account: 'owner', labels: [] }] });
   });
 
-  it('cada usuário só vê as próprias contas', async () => {
+  it('each user only sees their own accounts', async () => {
     const env = workerEnv();
     const ana = await signIn(new Browser(env), 'ana@example.com');
     const bia = await signIn(new Browser(env), 'bia@example.com');
@@ -272,7 +272,7 @@ describe('login de quem instalou e /mcp', () => {
     expect(biaCall).toMatch(/is not linked/);
   });
 
-  it('link_account gera link que leva ao Google com acesso offline', async () => {
+  it('link_account issues a link that leads to Google with offline access', async () => {
     const env = workerEnv();
     const browser = new Browser(env);
     const token = await signIn(browser);
@@ -285,20 +285,20 @@ describe('login de quem instalou e /mcp', () => {
     const back = await browser.fetch(
       `/google/callback?state=${google.searchParams.get('state') ?? ''}&error=access_denied`,
     );
-    expect(await back.text()).toContain('Vínculo cancelado');
+    expect(await back.text()).toContain('Linking canceled');
   });
 
-  it('no modo privado, e-mail fora de ALLOWED_EMAILS recebe 403 e nenhum código', async () => {
-    const browser = new Browser(workerEnv({ ALLOWED_EMAILS: 'dono@example.com' }));
-    const holder = stubGoogle('intruso@example.com');
+  it('in private mode, an email outside ALLOWED_EMAILS gets 403 and no code', async () => {
+    const browser = new Browser(workerEnv({ ALLOWED_EMAILS: 'owner@example.com' }));
+    const holder = stubGoogle('intruder@example.com');
     const clientId = await register(browser);
     const callback = await googleCallback(browser, await approve(browser, clientId, holder));
     expect(callback.status).toBe(403);
   });
 
-  it('consentimento lembrado vai direto ao Google na próxima vez', async () => {
+  it('remembered consent goes straight to Google next time', async () => {
     const browser = new Browser(workerEnv());
-    const holder = stubGoogle('dono@example.com');
+    const holder = stubGoogle('owner@example.com');
     const clientId = await register(browser);
     await approve(browser, clientId, holder);
     const again = await browser.fetch(authorizePath(clientId));
@@ -306,7 +306,7 @@ describe('login de quem instalou e /mcp', () => {
     expect(again.headers.get('location')).toMatch(/^https:\/\/accounts\.google\.com/);
   });
 
-  it('negar volta ao Claude com access_denied', async () => {
+  it('denying returns to Claude with access_denied', async () => {
     const browser = new Browser(workerEnv());
     const clientId = await register(browser);
     const page = await browser.fetch(authorizePath(clientId));
@@ -321,16 +321,16 @@ describe('login de quem instalou e /mcp', () => {
     );
   });
 
-  it('recusa no Google volta ao Claude com access_denied', async () => {
+  it('a refusal at Google returns to Claude with access_denied', async () => {
     const browser = new Browser(workerEnv());
-    const holder = stubGoogle('dono@example.com');
+    const holder = stubGoogle('owner@example.com');
     const google = await approve(browser, await register(browser), holder);
     const state = google.searchParams.get('state') ?? '';
     const back = await browser.fetch(`/google/callback?state=${state}&error=access_denied`);
     expect(back.headers.get('location')).toContain('error=access_denied');
   });
 
-  it('pedidos inválidos viram página de erro', async () => {
+  it('invalid requests become an error page', async () => {
     const browser = new Browser(workerEnv());
     expect((await browser.fetch('/authorize?client_id=x')).status).toBe(400);
     const post = await browser.fetch('/authorize', {
@@ -339,18 +339,18 @@ describe('login de quem instalou e /mcp', () => {
       headers: { 'content-type': 'application/x-www-form-urlencoded' },
     });
     expect(post.status).toBe(400);
-    expect((await browser.fetch('/google/callback?state=sem-cookie&code=c')).status).toBe(400);
+    expect((await browser.fetch('/google/callback?state=no-cookie&code=c')).status).toBe(400);
   });
 
-  it('id_token ausente na volta do login vira página de erro', async () => {
+  it('a missing id_token on the sign-in callback becomes an error page', async () => {
     const browser = new Browser(workerEnv());
-    const holder = stubGoogle('dono@example.com');
+    const holder = stubGoogle('owner@example.com');
     const google = await approve(browser, await register(browser), holder);
     vi.stubGlobal('fetch', fakeFetch([tokenRoute(() => Response.json({ access_token: 'a' }))]));
     expect((await googleCallback(browser, google)).status).toBe(400);
   });
 
-  it('limita requisições por sessão no /mcp', async () => {
+  it('limits requests per session on /mcp', async () => {
     const browser = new Browser(workerEnv({ RATE_LIMITER: countingLimiter(1) }));
     const token = await signIn(browser);
     const ping = { jsonrpc: '2.0', id: 1, method: 'ping' };
@@ -469,20 +469,20 @@ describe('Connectors Directory requirements (Gmail, via workers-oauth-provider)'
   });
 });
 
-describe('rotas públicas', () => {
-  it('/accounts/link sem ticket mostra link inválido', async () => {
+describe('public routes', () => {
+  it('/accounts/link without a ticket shows an invalid link', async () => {
     const response = await new Browser(workerEnv()).fetch('/accounts/link');
     expect(response.status).toBe(400);
   });
 
-  it('limita por IP as rotas sem token, mas não o /mcp', async () => {
+  it('limits the tokenless routes per IP, but not /mcp', async () => {
     const browser = new Browser(workerEnv({ RATE_LIMITER_PUBLIC: countingLimiter(1) }));
     expect((await browser.fetch('/')).status).toBe(200);
     expect((await browser.fetch('/')).status).toBe(429);
     expect((await browser.fetch('/mcp', { method: 'POST' })).status).toBe(401);
   });
 
-  it('clientIpKey e isMcpPath', () => {
+  it('clientIpKey and isMcpPath', () => {
     const request = new Request(`${ORIGIN}/mcp/x`, { headers: { 'cf-connecting-ip': '1.2.3.4' } });
     expect(clientIpKey(request)).toBe('ip:1.2.3.4');
     expect(clientIpKey(new Request(ORIGIN))).toBe('ip:unknown');
@@ -498,8 +498,8 @@ describe('GMAIL_SERVER_INFO', () => {
   });
 });
 
-describe('configuração e peças do Worker', () => {
-  it('secret ausente vira 500 explicando qual falta', async () => {
+describe('Worker configuration and pieces', () => {
+  it('a missing secret becomes a 500 naming it', async () => {
     const env = workerEnv({ GOOGLE_CLIENT_ID: undefined });
     const response = await new Browser(env).fetch('/authorize');
     expect(response.status).toBe(500);
@@ -511,17 +511,17 @@ describe('configuração e peças do Worker', () => {
     };
     const mcp = await handleMcpApi(new Request(`${ORIGIN}/mcp`), env, ctx);
     expect(mcp.status).toBe(500);
-    expect(configErrorResponse('texto').status).toBe(500);
+    expect(configErrorResponse('text').status).toBe(500);
   });
 
-  it('publicOrigin prefere PUBLIC_URL', () => {
+  it('publicOrigin prefers PUBLIC_URL', () => {
     const request = new Request('https://x.workers.dev/mcp');
     expect(publicOrigin(workerEnv(), request)).toBe('https://x.workers.dev');
-    const custom = workerEnv({ PUBLIC_URL: 'https://gmail.exemplo.dev/' });
-    expect(publicOrigin(custom, request)).toBe('https://gmail.exemplo.dev');
+    const custom = workerEnv({ PUBLIC_URL: 'https://gmail.example.dev/' });
+    expect(publicOrigin(custom, request)).toBe('https://gmail.example.dev');
   });
 
-  it('createGmailDeps e createGmailServer montam o conector', () => {
+  it('createGmailDeps and createGmailServer build the connector', () => {
     const deps = createGmailDeps(workerEnv(), ORIGIN);
     expect(deps.settings.allowedEmails).toBeNull();
     expect(deps.now()).toBeGreaterThan(0);
@@ -529,12 +529,12 @@ describe('configuração e peças do Worker', () => {
     expect(createGmailProvider(ORIGIN)).toBeDefined();
   });
 
-  it('handleDefaultRequest sem o provedor injetado dá 404', async () => {
+  it('handleDefaultRequest without the injected provider gives 404', async () => {
     const response = await handleDefaultRequest(new Request(`${ORIGIN}/authorize`), workerEnv());
     expect(response.status).toBe(404);
   });
 
-  it('checkClientRegistration aceita só retornos do Claude', () => {
+  it('checkClientRegistration accepts only Claude callbacks', () => {
     const request = new Request(ORIGIN);
     expect(
       checkClientRegistration({ clientMetadata: { redirect_uris: [REDIRECT] }, request }),
@@ -542,7 +542,7 @@ describe('configuração e peças do Worker', () => {
     expect(checkClientRegistration({ clientMetadata: {}, request })).toMatchObject({ status: 400 });
   });
 
-  it('authorizationErrorResponse redireciona quando a biblioteca indica, senão mostra página', () => {
+  it('authorizationErrorResponse redirects when the library says so, otherwise shows a page', () => {
     const withRedirect = Object.assign(
       new AuthorizationError('access_denied', { description: 'x' }),
       {

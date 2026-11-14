@@ -1,32 +1,32 @@
 /**
- * Extração de texto de PDF sem dependências (recibos, faturas): objetos, fluxos FlateDecode, fluxos de
- * objetos, mapas ToUnicode e os operadores de texto das páginas. Não faz OCR nem abre PDF cifrado.
+ * Dependency-free PDF text extraction (receipts, invoices): objects, FlateDecode streams, object
+ * streams, ToUnicode maps and the page text operators. No OCR and no encrypted PDFs.
  */
 import { decompressBytes } from './zip.js';
 
-/** Objeto do PDF: dicionário (texto) e o fluxo já descomprimido, se houver. */
+/** PDF object: dictionary (text) and the decompressed stream, if any. */
 export interface PdfObject {
   readonly dict: string;
   readonly data: Uint8Array | null;
 }
 
-/** Objetos do PDF por número. */
+/** PDF objects by number. */
 export type PdfObjects = ReadonlyMap<number, PdfObject>;
 
-/** Mapa ToUnicode de uma fonte: código → texto, e quantos bytes tem cada código. */
+/** ToUnicode map of a font: code → text, and how many bytes each code has. */
 export interface PdfCMap {
   readonly map: ReadonlyMap<number, string>;
   readonly bytes: 1 | 2;
 }
 
-/** Pedaço cru de um objeto: dicionário e bytes do fluxo ainda comprimido. */
+/** Raw piece of an object: dictionary and the still-compressed stream bytes. */
 interface RawPdfObject {
   readonly num: number;
   readonly dict: string;
   readonly stream: Uint8Array | null;
 }
 
-/** Converte bytes em texto de um caractere por byte (latin1), para achar palavras-chave sem perder offsets. */
+/** Converts bytes into one-character-per-byte text (latin1), to find keywords without losing offsets. */
 export function bytesToLatin1(bytes: Uint8Array): string {
   let out = '';
   for (let pos = 0; pos < bytes.length; pos += 0x8000) {
@@ -35,19 +35,19 @@ export function bytesToLatin1(bytes: Uint8Array): string {
   return out;
 }
 
-/** Diz se os bytes começam como um PDF (`%PDF-`). */
+/** Says whether the bytes start like a PDF (`%PDF-`). */
 export function isPdf(bytes: Uint8Array): boolean {
   return bytesToLatin1(bytes.subarray(0, 5)) === '%PDF-';
 }
 
-/** Início dos dados de um fluxo: depois de `stream` e da quebra de linha (CRLF ou LF). */
+/** Start of a stream's data: after `stream` and the line break (CRLF or LF). */
 export function streamDataStart(text: string, keywordAt: number): number {
   const after = keywordAt + 'stream'.length;
   if (text.startsWith('\r\n', after)) return after + 2;
   return text[after] === '\n' || text[after] === '\r' ? after + 1 : after;
 }
 
-/** Fim dos dados de um fluxo sem a quebra de linha que precede `endstream` (ela não faz parte dos dados). */
+/** End of a stream's data without the line break before `endstream` (it is not part of the data). */
 export function trimStreamEol(text: string, dataStart: number, streamEnd: number): number {
   let end = streamEnd;
   if (end > dataStart && text[end - 1] === '\n') end--;
@@ -55,7 +55,7 @@ export function trimStreamEol(text: string, dataStart: number, streamEnd: number
   return end;
 }
 
-/** Lê o objeto que começa em `start` (logo após `N G obj`); `end` é onde a busca pelo próximo continua. */
+/** Reads the object starting at `start` (right after `N G obj`); `end` is where the search for the next one resumes. */
 export function readRawObject(
   text: string,
   bytes: Uint8Array,
@@ -77,7 +77,7 @@ export function readRawObject(
   };
 }
 
-/** Lista os objetos `N G obj ... endobj` do arquivo, na ordem em que aparecem. */
+/** Lists the file's `N G obj ... endobj` objects, in the order they appear. */
 export function listRawObjects(bytes: Uint8Array): RawPdfObject[] {
   const text = bytesToLatin1(bytes);
   const pattern = /(\d+)\s+\d+\s+obj\b/g;
@@ -90,7 +90,7 @@ export function listRawObjects(bytes: Uint8Array): RawPdfObject[] {
   return objects;
 }
 
-/** Descomprime o fluxo conforme o `/Filter`: sem filtro passa direto, FlateDecode infla, outros dão nulo. */
+/** Decompresses the stream per its `/Filter`: no filter passes through, FlateDecode inflates, others give null. */
 export async function decodePdfStream(
   dict: string,
   stream: Uint8Array,
@@ -104,7 +104,7 @@ export async function decodePdfStream(
   }
 }
 
-/** Separa os objetos guardados num fluxo de objetos (`/Type /ObjStm`): números e dicionários. */
+/** Splits the objects stored in an object stream (`/Type /ObjStm`): numbers and dictionaries. */
 export function splitObjectStream(dict: string, data: Uint8Array): [number, PdfObject][] {
   const first = Number(/\/First\s+(\d+)/.exec(dict)?.[1] ?? NaN);
   if (Number.isNaN(first)) return [];
@@ -119,7 +119,7 @@ export function splitObjectStream(dict: string, data: Uint8Array): [number, PdfO
     ]);
 }
 
-/** Guarda um objeto lido e, se ele for um fluxo de objetos, os objetos de dentro (sem sobrescrever). */
+/** Stores a read object and, if it is an object stream, the objects inside it (without overwriting). */
 export function storePdfObject(objects: Map<number, PdfObject>, num: number, obj: PdfObject): void {
   objects.set(num, obj);
   if (!obj.data || !/\/Type\s*\/ObjStm/.test(obj.dict)) return;
@@ -128,7 +128,7 @@ export function storePdfObject(objects: Map<number, PdfObject>, num: number, obj
   }
 }
 
-/** Lê todos os objetos do PDF, descomprimindo fluxos e abrindo os fluxos de objetos. */
+/** Reads every PDF object, decompressing streams and opening object streams. */
 export async function readPdfObjects(bytes: Uint8Array): Promise<PdfObjects> {
   const objects = new Map<number, PdfObject>();
   for (const raw of listRawObjects(bytes)) {
@@ -138,18 +138,18 @@ export async function readPdfObjects(bytes: Uint8Array): Promise<PdfObjects> {
   return objects;
 }
 
-/** Números de objeto citados como referência (`N 0 R`) num trecho. */
+/** Object numbers referenced (`N 0 R`) in a fragment. */
 export function pdfRefs(text: string): number[] {
   return [...text.matchAll(/(\d+)\s+\d+\s+R\b/g)].map((m) => Number(m[1]));
 }
 
-/** Valor de uma chave que pode ser referência única ou lista de referências (`/Kids [...]`, `/Contents`). */
+/** Value of a key that may be a single reference or a list of references (`/Kids [...]`, `/Contents`). */
 export function dictRefs(dict: string, key: string): number[] {
   const match = new RegExp(`/${key}\\s*(\\[[^\\]]*\\]|\\d+\\s+\\d+\\s+R)`).exec(dict);
   return match?.[1] ? pdfRefs(match[1]) : [];
 }
 
-/** Acrescenta a `pages` as páginas sob o nó `num` da árvore de páginas, em ordem (profundidade limitada). */
+/** Appends to `pages` the pages under node `num` of the page tree, in order (bounded depth). */
 export function collectPdfPages(objects: PdfObjects, num: number, pages: number[]): void {
   const dict = objects.get(num)?.dict ?? '';
   if (/\/Type\s*\/Page\b/.test(dict)) pages.push(num);
@@ -157,7 +157,7 @@ export function collectPdfPages(objects: PdfObjects, num: number, pages: number[
     for (const kid of dictRefs(dict, 'Kids')) collectPdfPages(objects, kid, pages);
 }
 
-/** Páginas na ordem de leitura, percorrendo a árvore `/Pages` → `/Kids` a partir da raiz. */
+/** Pages in reading order, walking the `/Pages` → `/Kids` tree from the root. */
 export function orderedPages(objects: PdfObjects): number[] {
   const pages: number[] = [];
   for (const [num, obj] of objects) {
@@ -167,7 +167,7 @@ export function orderedPages(objects: PdfObjects): number[] {
   return pages;
 }
 
-/** Decodifica hexadecimal UTF-16BE (destino de um mapa ToUnicode) em texto. */
+/** Decodes UTF-16BE hex (a ToUnicode map target) into text. */
 export function utf16beHexToString(hex: string): string {
   if (hex.length === 2) return String.fromCharCode(parseInt(hex, 16));
   const units: number[] = [];
@@ -176,7 +176,7 @@ export function utf16beHexToString(hex: string): string {
   return String.fromCharCode(...units);
 }
 
-/** Lê as linhas `<orig> <destino>` dos blocos `beginbfchar` de um mapa ToUnicode. */
+/** Reads the `<src> <target>` lines of the `beginbfchar` blocks of a ToUnicode map. */
 export function readBfChars(text: string, map: Map<number, string>): void {
   for (const block of text.matchAll(/beginbfchar([\s\S]*?)endbfchar/g)) {
     for (const pair of (block[1] ?? '').matchAll(/<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]*)>/g)) {
@@ -185,7 +185,7 @@ export function readBfChars(text: string, map: Map<number, string>): void {
   }
 }
 
-/** Lê os blocos `beginbfrange` de um mapa ToUnicode (destino inicial incrementado ou lista). */
+/** Reads the `beginbfrange` blocks of a ToUnicode map (incremented start target or list). */
 export function readBfRanges(text: string, map: Map<number, string>): void {
   const line = /<([0-9a-fA-F]+)>\s*<([0-9a-fA-F]+)>\s*(<[0-9a-fA-F]*>|\[[^\]]*\])/g;
   for (const block of text.matchAll(/beginbfrange([\s\S]*?)endbfrange/g)) {
@@ -198,7 +198,7 @@ export function readBfRanges(text: string, map: Map<number, string>): void {
   }
 }
 
-/** Destino de um código num `bfrange`: o item da lista, ou o destino inicial somado ao deslocamento. */
+/** Target of a code in a `bfrange`: the list item, or the start target plus the offset. */
 export function rangeTarget(targets: readonly string[], offset: number): string {
   if (targets.length > 1) return utf16beHexToString(targets[offset] ?? '');
   const base = utf16beHexToString(targets[0] ?? '');
@@ -206,7 +206,7 @@ export function rangeTarget(targets: readonly string[], offset: number): string 
   return base.slice(0, -1) + String.fromCharCode(base.charCodeAt(base.length - 1) + offset);
 }
 
-/** Interpreta um mapa ToUnicode: códigos de 1 ou 2 bytes (pelo `codespacerange`) e seus textos. */
+/** Parses a ToUnicode map: 1- or 2-byte codes (by `codespacerange`) and their texts. */
 export function parseToUnicodeCMap(text: string): PdfCMap {
   const map = new Map<number, string>();
   readBfChars(text, map);
@@ -215,7 +215,7 @@ export function parseToUnicodeCMap(text: string): PdfCMap {
   return { map, bytes: space.length >= 4 ? 2 : 1 };
 }
 
-/** Acrescenta a `fonts` os pares nome → objeto (`/F1 5 0 R`) de um dicionário de fontes. */
+/** Adds to `fonts` the name → object pairs (`/F1 5 0 R`) of a font dictionary. */
 export function addFontRefs(fonts: Map<string, number>, text: string): void {
   for (const m of text.matchAll(/\/([^\s/<>[\]()]+)\s+(\d+)\s+\d+\s+R/g)) {
     const name = m[1] ?? '';
@@ -223,7 +223,7 @@ export function addFontRefs(fonts: Map<string, number>, text: string): void {
   }
 }
 
-/** Nomes de fonte (`/F1`) → objeto da fonte, juntando os dicionários `/Font` de todos os recursos. */
+/** Font names (`/F1`) → font object, merging the `/Font` dictionaries of every resource. */
 export function fontResourceRefs(objects: PdfObjects): Map<string, number> {
   const fonts = new Map<string, number>();
   for (const obj of objects.values()) {
@@ -234,7 +234,7 @@ export function fontResourceRefs(objects: PdfObjects): Map<string, number> {
   return fonts;
 }
 
-/** Mapas ToUnicode por nome de fonte, para as fontes que têm `/ToUnicode`. */
+/** ToUnicode maps by font name, for fonts that have `/ToUnicode`. */
 export function fontCMaps(objects: PdfObjects): Map<string, PdfCMap> {
   const cmaps = new Map<string, PdfCMap>();
   for (const [name, num] of fontResourceRefs(objects)) {
@@ -245,7 +245,7 @@ export function fontCMaps(objects: PdfObjects): Map<string, PdfCMap> {
   return cmaps;
 }
 
-/** Decodifica os bytes de uma string de texto pela fonte atual (ToUnicode), ou como latin1 sem mapa. */
+/** Decodes the bytes of a text string with the current font (ToUnicode), or as latin1 without a map. */
 export function decodePdfText(raw: string, cmap: PdfCMap | undefined): string {
   if (!cmap) return raw;
   let out = '';
@@ -257,7 +257,7 @@ export function decodePdfText(raw: string, cmap: PdfCMap | undefined): string {
   return out;
 }
 
-/** Sequências de escape de uma string literal do PDF (`\n`, `\(`...). */
+/** Escape sequences of a PDF literal string (`\n`, `\(`...). */
 export const PDF_ESCAPES: Readonly<Record<string, string>> = {
   n: '\n',
   r: '\r',
@@ -266,10 +266,10 @@ export const PDF_ESCAPES: Readonly<Record<string, string>> = {
   f: '\f',
 };
 
-/** Quanto cada parêntese muda a profundidade de uma string literal. */
+/** How much each parenthesis changes the depth of a literal string. */
 const PAREN_DEPTH: Readonly<Record<string, number>> = { '(': 1, ')': -1 };
 
-/** Lê uma string literal `( ... )` a partir do `(`; devolve o texto cru e a posição seguinte. */
+/** Reads a literal string `( ... )` from the `(`; returns the raw text and the next position. */
 export function readLiteralString(src: string, start: number): [string, number] {
   let depth = 1;
   let out = '';
@@ -289,7 +289,7 @@ export function readLiteralString(src: string, start: number): [string, number] 
   return [out, pos];
 }
 
-/** Lê o escape depois de `\`: octal de até 3 dígitos, letra conhecida, quebra de linha ou o próprio caractere. */
+/** Reads the escape after `\`: octal of up to 3 digits, known letter, line break or the character itself. */
 export function readEscape(src: string, pos: number): [string, number] {
   const octal = /^[0-7]{1,3}/.exec(src.slice(pos, pos + 3))?.[0];
   if (octal) return [String.fromCharCode(parseInt(octal, 8) & 0xff), pos + octal.length];
@@ -298,7 +298,7 @@ export function readEscape(src: string, pos: number): [string, number] {
   return [PDF_ESCAPES[ch] ?? ch, pos + 1];
 }
 
-/** Lê uma string hexadecimal `<...>` a partir do `<`; dígito ímpar no fim vale como seguido de 0. */
+/** Reads a hex string `<...>` from the `<`; an odd trailing digit counts as followed by 0. */
 export function readHexString(src: string, start: number): [string, number] {
   const end = src.indexOf('>', start);
   const stop = end < 0 ? src.length : end;
@@ -310,26 +310,26 @@ export function readHexString(src: string, start: number): [string, number] {
   return [out, stop + 1];
 }
 
-/** Item lido de um fluxo de conteúdo: string de texto, número, nome, marca de lista ou operador. */
+/** Item read from a content stream: text string, number, name, list mark or operator. */
 export type PdfToken =
   | { readonly kind: 'string'; readonly value: string }
   | { readonly kind: 'number'; readonly value: number }
   | { readonly kind: 'name' | 'op' | 'open' | 'close'; readonly value: string };
 
-/** Espaços em branco (busca fixa na posição, sem copiar o resto do texto). */
+/** Whitespace (sticky search at the position, without copying the rest of the text). */
 const PDF_SPACE = /\s*/y;
 
-/** Uma palavra do fluxo: nome, `<<`/`>>`, número/operador, comentário ou um caractere solto. */
+/** A stream word: name, `<<`/`>>`, number/operator, comment or a lone character. */
 const PDF_WORD = /\/[^\s/<>[\]()]*|<<|>>|[^\s/<>[\]()%]+|%[^\r\n]*|[\s\S]/y;
 
-/** Posição do próximo caractere que não é espaço, a partir de `pos`. */
+/** Position of the next non-space character, from `pos`. */
 export function skipPdfSpace(src: string, pos: number): number {
   PDF_SPACE.lastIndex = pos;
   PDF_SPACE.exec(src);
   return PDF_SPACE.lastIndex;
 }
 
-/** Lê o próximo item do fluxo de conteúdo a partir de `pos`; nulo no fim. */
+/** Reads the next content stream item from `pos`; null at the end. */
 export function nextPdfToken(src: string, pos: number): [PdfToken, number] | null {
   const at = skipPdfSpace(src, pos);
   if (at >= src.length) return null;
@@ -341,26 +341,26 @@ export function nextPdfToken(src: string, pos: number): [PdfToken, number] | nul
   return readPdfWord(src, at);
 }
 
-/** Lê uma palavra (nome, número, operador, `<<`/`>>` ou comentário) a partir de `at`. */
+/** Reads a word (name, number, operator, `<<`/`>>` or comment) from `at`. */
 export function readPdfWord(src: string, at: number): [PdfToken, number] {
   PDF_WORD.lastIndex = at;
   const word = PDF_WORD.exec(src)?.[0] ?? ' ';
   return [classifyWord(word), at + word.length];
 }
 
-/** Embrulha o resultado de uma leitura de string num item `string`. */
+/** Wraps the result of a string read in a `string` item. */
 export function wrapString([value, next]: [string, number]): [PdfToken, number] {
   return [{ kind: 'string', value }, next];
 }
 
-/** Classifica uma palavra do fluxo: nome (`/F1`), número ou operador. */
+/** Classifies a stream word: name (`/F1`), number or operator. */
 export function classifyWord(word: string): PdfToken {
   if (word.startsWith('/')) return { kind: 'name', value: word.slice(1) };
   if (/^[+-]?(\d+\.?\d*|\.\d+)$/.test(word)) return { kind: 'number', value: Number(word) };
   return { kind: 'op', value: word };
 }
 
-/** Estado do intérprete de texto: fonte atual, operandos, lista aberta e texto já produzido. */
+/** Text interpreter state: current font, operands, open list and text produced so far. */
 export interface PdfTextState {
   font: PdfCMap | undefined;
   operands: PdfToken[];
@@ -368,10 +368,10 @@ export interface PdfTextState {
   out: string[];
 }
 
-/** Espaço entre letras de um `TJ` a partir do qual o ajuste conta como espaço entre palavras. */
+/** `TJ` letter spacing beyond which the adjustment counts as a word space. */
 export const TJ_SPACE_THRESHOLD = -200;
 
-/** Texto de um operando de `TJ`: strings decodificadas e espaços onde o ajuste é grande. */
+/** Text of a `TJ` operand: decoded strings and spaces where the adjustment is large. */
 export function showArrayText(items: readonly PdfToken[], font: PdfCMap | undefined): string {
   return items
     .map((item) => {
@@ -381,19 +381,19 @@ export function showArrayText(items: readonly PdfToken[], font: PdfCMap | undefi
     .join('');
 }
 
-/** Texto da última string dos operandos, decodificado pela fonte atual. */
+/** Text of the last operand string, decoded with the current font. */
 export function lastOperandText(state: PdfTextState): string {
   const last = state.operands[state.operands.length - 1];
   return last?.kind === 'string' ? decodePdfText(last.value, state.font) : '';
 }
 
-/** O que um `Td`/`TD` produz: quebra de linha se mudou a linha (ty ≠ 0), senão um espaço. */
+/** What a `Td`/`TD` produces: a line break if the line changed (ty ≠ 0), otherwise a space. */
 export function moveText(state: PdfTextState): string {
   const ty = state.operands[state.operands.length - 1];
   return ty?.kind === 'number' && ty.value !== 0 ? '\n' : ' ';
 }
 
-/** Texto que cada operador de texto produz (sem `Tf`, que só troca a fonte). */
+/** Text produced by each text operator (except `Tf`, which only switches the font). */
 export const PDF_TEXT_OPERATORS: Readonly<Record<string, (state: PdfTextState) => string>> = {
   Tj: lastOperandText,
   "'": (state) => `\n${lastOperandText(state)}`,
@@ -405,7 +405,7 @@ export const PDF_TEXT_OPERATORS: Readonly<Record<string, (state: PdfTextState) =
   ET: () => '\n',
 };
 
-/** Aplica um operador de texto ao estado: troca de fonte ou acrescenta o texto que ele produz. */
+/** Applies a text operator to the state: switches the font or appends the text it produces. */
 export function applyTextOperator(
   state: PdfTextState,
   op: string,
@@ -419,7 +419,7 @@ export function applyTextOperator(
   if (produce) state.out.push(produce(state));
 }
 
-/** Consome um item no intérprete: listas, operandos e operadores. */
+/** Feeds an item to the interpreter: lists, operands and operators. */
 export function feedPdfToken(
   state: PdfTextState,
   token: PdfToken,
@@ -435,7 +435,7 @@ export function feedPdfToken(
   } else state.operands.push(token);
 }
 
-/** Texto de um fluxo de conteúdo de página. */
+/** Text of a page content stream. */
 export function contentStreamText(content: string, cmaps: ReadonlyMap<string, PdfCMap>): string {
   const state: PdfTextState = { font: undefined, operands: [], array: null, out: [] };
   for (let next = nextPdfToken(content, 0); next; next = nextPdfToken(content, next[1])) {
@@ -444,7 +444,7 @@ export function contentStreamText(content: string, cmaps: ReadonlyMap<string, Pd
   return state.out.join('');
 }
 
-/** Limpa o texto extraído: espaços repetidos, linhas em branco em excesso e pontas. */
+/** Tidies the extracted text: repeated spaces, extra blank lines and ends. */
 export function tidyPdfText(text: string): string {
   return text
     .replace(/[ \t]+/g, ' ')
@@ -453,7 +453,7 @@ export function tidyPdfText(text: string): string {
     .trim();
 }
 
-/** Extrai o texto de um PDF, página por página; lança erro se ele for cifrado. */
+/** Extracts the text of a PDF, page by page; throws if it is encrypted. */
 export async function pdfToText(bytes: Uint8Array): Promise<string> {
   if (/\/Encrypt\b/.test(bytesToLatin1(bytes.subarray(Math.max(0, bytes.length - 4096))))) {
     throw new Error('The PDF is password-protected (encrypted); its text cannot be read.');

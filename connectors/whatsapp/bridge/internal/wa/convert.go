@@ -1,4 +1,4 @@
-// Package wa conecta a ponte ao WhatsApp via whatsmeow e grava os eventos em messages.db.
+// Package wa connects the bridge to WhatsApp via whatsmeow and stores the events in messages.db.
 package wa
 
 import (
@@ -12,7 +12,7 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/store"
 )
 
-// actionKind diz o que fazer com um evento de mensagem.
+// actionKind says what to do with a message event.
 type actionKind int
 
 const (
@@ -22,7 +22,7 @@ const (
 	actionRevoke
 )
 
-// action é a decisão (pura) tomada sobre uma mensagem recebida.
+// action is the (pure) decision taken about a received message.
 type action struct {
 	kind     actionKind
 	msg      store.Message
@@ -30,10 +30,10 @@ type action struct {
 	text     string
 }
 
-// Resolver troca um JID (ex.: LID) pelo JID canônico de telefone, quando conhecido.
+// Resolver replaces a JID (e.g. a LID) with the canonical phone JID, when known.
 type Resolver func(types.JID) types.JID
 
-// keepChat decide se a conversa interessa (ignora status, canais e broadcasts).
+// keepChat decides whether the chat is relevant (ignores status, channels and broadcasts).
 func keepChat(jid types.JID) bool {
 	switch jid.Server {
 	case types.DefaultUserServer, types.HiddenUserServer, types.GroupServer:
@@ -42,7 +42,7 @@ func keepChat(jid types.JID) bool {
 	return false
 }
 
-// decideMessage converte um evento em ação: gravar, editar, apagar ou ignorar.
+// decideMessage turns an event into an action: save, edit, delete or skip.
 func decideMessage(evt *events.Message, resolve Resolver) action {
 	chat := resolve(evt.Info.Chat)
 	if !keepChat(chat) || evt.Message == nil {
@@ -64,7 +64,7 @@ func decideMessage(evt *events.Message, resolve Resolver) action {
 	}}
 }
 
-// decideProtocol trata edição e apagamento; outros tipos de protocolo são ignorados.
+// decideProtocol handles edits and deletions; other protocol types are ignored.
 func decideProtocol(pm *waE2E.ProtocolMessage) action {
 	id := pm.GetKey().GetID()
 	if id == "" {
@@ -80,7 +80,7 @@ func decideProtocol(pm *waE2E.ProtocolMessage) action {
 	return action{}
 }
 
-// extractContent devolve tipo, texto (ou legenda) e mídia; tipo "" quando não há conteúdo útil.
+// extractContent returns type, text (or caption) and media; type "" when there is no useful content.
 func extractContent(m *waE2E.Message) (string, string, *store.Media) {
 	if m == nil {
 		return "", "", nil
@@ -94,7 +94,7 @@ func extractContent(m *waE2E.Message) (string, string, *store.Media) {
 	return extractOther(m)
 }
 
-// extractText lê mensagens de texto simples ou estendido.
+// extractText reads plain or extended text messages.
 func extractText(m *waE2E.Message) (string, bool) {
 	if m.Conversation != nil {
 		return m.GetConversation(), true
@@ -105,7 +105,7 @@ func extractText(m *waE2E.Message) (string, bool) {
 	return "", false
 }
 
-// mediaFields é o que as mensagens de mídia do whatsmeow têm em comum.
+// mediaFields is what whatsmeow media messages have in common.
 type mediaFields interface {
 	GetDirectPath() string
 	GetMediaKey() []byte
@@ -115,7 +115,7 @@ type mediaFields interface {
 	GetFileLength() uint64
 }
 
-// extractMedia lê imagem, vídeo, áudio, documento ou figurinha.
+// extractMedia reads an image, video, audio, document or sticker.
 func extractMedia(m *waE2E.Message) (string, string, *store.Media) {
 	switch {
 	case m.ImageMessage != nil:
@@ -133,13 +133,13 @@ func extractMedia(m *waE2E.Message) (string, string, *store.Media) {
 	return "", "", nil
 }
 
-// newMedia copia os metadados de download de uma mídia.
+// newMedia copies a media file's download metadata.
 func newMedia(kind string, f mediaFields, filename string) *store.Media {
 	return &store.Media{Kind: kind, Mime: f.GetMimetype(), Size: int64(f.GetFileLength()), Filename: filename,
 		DirectPath: f.GetDirectPath(), MediaKey: f.GetMediaKey(), FileSHA256: f.GetFileSHA256(), FileEncSHA256: f.GetFileEncSHA256()}
 }
 
-// extractOther lê localização, contato e enquete como texto descritivo.
+// extractOther reads location, contact and poll as descriptive text.
 func extractOther(m *waE2E.Message) (string, string, *store.Media) {
 	switch {
 	case m.LocationMessage != nil:
@@ -154,12 +154,12 @@ func extractOther(m *waE2E.Message) (string, string, *store.Media) {
 		return "contact", m.GetContactsArrayMessage().GetDisplayName(), nil
 	}
 	if p := firstPoll(m); p != nil {
-		return "other", "Enquete: " + p.GetName(), nil
+		return "other", "Poll: " + p.GetName(), nil
 	}
 	return "", "", nil
 }
 
-// firstPoll devolve a enquete em qualquer das versões conhecidas.
+// firstPoll returns the poll in any of the known versions.
 func firstPoll(m *waE2E.Message) *waE2E.PollCreationMessage {
 	for _, p := range []*waE2E.PollCreationMessage{m.GetPollCreationMessage(), m.GetPollCreationMessageV2(), m.GetPollCreationMessageV3()} {
 		if p != nil {
@@ -169,7 +169,7 @@ func firstPoll(m *waE2E.Message) *waE2E.PollCreationMessage {
 	return nil
 }
 
-// describeLocation monta "nome, endereço (lat, long)".
+// describeLocation builds "name, address (lat, long)".
 func describeLocation(name, address string, lat, lng float64) string {
 	parts := []string{}
 	for _, p := range []string{name, address} {
@@ -184,7 +184,7 @@ func describeLocation(name, address string, lat, lng float64) string {
 	return strings.Join(parts, ", ") + " " + coords
 }
 
-// firstNonEmpty devolve o primeiro texto não vazio.
+// firstNonEmpty returns the first non-empty string.
 func firstNonEmpty(vals ...string) string {
 	for _, v := range vals {
 		if v != "" {

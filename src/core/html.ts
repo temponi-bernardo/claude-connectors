@@ -1,9 +1,9 @@
 /**
- * Conversão de HTML (enunciados, avisos, páginas de LMS) em texto legível para o modelo.
- * Pura: só transforma strings.
+ * Converts HTML (assignment prompts, announcements, LMS pages) into text the model can read.
+ * Pure: only transforms strings.
  */
 
-/** Substituições aplicadas em ordem: blocos removidos, quebras de linha, marcadores, tags e entidades. */
+/** Replacements applied in order: removed blocks, line breaks, bullets, tags and entities. */
 export const HTML_TEXT_REPLACEMENTS: readonly (readonly [RegExp, string])[] = [
   [/<(script|style)[\s\S]*?<\/\1>/gi, ''],
   [/<br\s*\/?>/gi, '\n'],
@@ -20,7 +20,7 @@ export const HTML_TEXT_REPLACEMENTS: readonly (readonly [RegExp, string])[] = [
   [/\n{3,}/g, '\n\n'],
 ];
 
-/** Converte HTML em texto simples, preservando parágrafos e listas como quebras de linha. */
+/** Converts HTML into plain text, keeping paragraphs and lists as line breaks. */
 export function htmlToText(html: string | null | undefined): string {
   if (!html) return '';
   const text = HTML_TEXT_REPLACEMENTS.reduce(

@@ -20,24 +20,24 @@ describe('hook stop-handoff (Stop)', () => {
     writeFileSync(join(dir, 'docs/STATE.md'), '# Estado atual\n');
   });
 
-  it('primeira execução adota o estado atual como referência e não bloqueia', () => {
+  it('the first run adopts the current state as the reference and does not block', () => {
     const r = runHook(HOOK, dir, STOP);
     expect(r.status).toBe(0);
     expect(isBlock(r.stdout)).toBe(false);
     expect(existsSync(join(dir, '.claude/.last-handoff'))).toBe(true);
   });
 
-  it('sem commit novo não bloqueia (trabalho em andamento)', () => {
+  it('no new commit does not block (work in progress)', () => {
     runHook(HOOK, dir, STOP);
-    writeFileSync(join(dir, 'wip.txt'), 'rascunho');
+    writeFileSync(join(dir, 'wip.txt'), 'draft');
     const r = runHook(HOOK, dir, STOP);
     expect(r.status).toBe(0);
     expect(isBlock(r.stdout)).toBe(false);
   });
 
-  it('commit novo sem handoff bloqueia com instrução de /handoff e /clear', () => {
+  it('a new commit without a handoff blocks with /handoff and /clear instructions', () => {
     runHook(HOOK, dir, STOP);
-    commitFile(dir, 'feature.txt', 'feat(core): algo');
+    commitFile(dir, 'feature.txt', 'feat(core): something');
     const r = runHook(HOOK, dir, STOP);
     expect(r.status).toBe(0);
     expect(isBlock(r.stdout)).toBe(true);
@@ -46,19 +46,19 @@ describe('hook stop-handoff (Stop)', () => {
     expect(parsed.reason).toContain('/clear');
   });
 
-  it('commit novo com STATE.md atualizado não bloqueia e registra o marcador', () => {
+  it('a new commit with an updated STATE.md does not block and records the marker', () => {
     runHook(HOOK, dir, STOP);
-    commitFile(dir, 'feature.txt', 'feat(core): algo');
-    writeFileSync(join(dir, 'docs/STATE.md'), '# Estado atual\n\n## Feito\n\n- algo\n');
+    commitFile(dir, 'feature.txt', 'feat(core): something');
+    writeFileSync(join(dir, 'docs/STATE.md'), '# Estado atual\n\n## Feito\n\n- something\n');
     const r = runHook(HOOK, dir, STOP);
     expect(isBlock(r.stdout)).toBe(false);
     const marker = readFileSync(join(dir, '.claude/.last-handoff'), 'utf8');
     expect(marker.split(' ')[0]).toHaveLength(40);
-    // Turno seguinte, nada mudou: continua liberado.
+    // Next turn, nothing changed: still allowed.
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(false);
   });
 
-  it('commit de outra pessoa (ex.: squash do GitHub trazido por git pull) não bloqueia', () => {
+  it('a commit by someone else (e.g. a GitHub squash brought by git pull) does not block', () => {
     runHook(HOOK, dir, STOP);
     writeFileSync(join(dir, 'merged.txt'), 'squash');
     const env = {
@@ -69,39 +69,39 @@ describe('hook stop-handoff (Stop)', () => {
     spawnSync('git', ['add', 'merged.txt'], { cwd: dir });
     spawnSync('git', ['commit', '-q', '-m', 'feat(core): x (#1)'], { cwd: dir, env });
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(false);
-    // O marcador avança: um commit próprio depois disso volta a cobrar o handoff.
-    commitFile(dir, 'feature.txt', 'feat(core): algo');
+    // The marker moves forward: an own commit after that asks for the handoff again.
+    commitFile(dir, 'feature.txt', 'feat(core): something');
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(true);
   });
 
-  it('marcador apontando para commit inexistente não quebra nem bloqueia', () => {
+  it('a marker pointing at a missing commit neither breaks nor blocks', () => {
     writeFileSync(join(dir, '.claude/.last-handoff'), `${'0'.repeat(40)} none\n`);
     const r = runHook(HOOK, dir, STOP);
     expect(r.status).toBe(0);
     expect(isBlock(r.stdout)).toBe(false);
   });
 
-  it('guarda contra loop: stop_hook_active=true nunca bloqueia', () => {
+  it('loop guard: stop_hook_active=true never blocks', () => {
     runHook(HOOK, dir, STOP);
-    commitFile(dir, 'feature.txt', 'feat(core): algo');
+    commitFile(dir, 'feature.txt', 'feat(core): something');
     const r = runHook(HOOK, dir, { input: JSON.stringify({ stop_hook_active: true }) });
     expect(r.status).toBe(0);
     expect(isBlock(r.stdout)).toBe(false);
   });
 
-  it('STATE.md inexistente é tratado como "none" e segue o mesmo critério', () => {
+  it('a missing STATE.md is treated as "none" and follows the same rule', () => {
     rmSync(join(dir, 'docs/STATE.md'));
     runHook(HOOK, dir, STOP);
-    commitFile(dir, 'feature.txt', 'feat(core): algo');
+    commitFile(dir, 'feature.txt', 'feat(core): something');
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(true);
   });
 
-  it('stdin vazio ou JSON inválido não quebra o hook', () => {
+  it('empty stdin or invalid JSON does not break the hook', () => {
     expect(runHook(HOOK, dir).status).toBe(0);
-    expect(runHook(HOOK, dir, { input: 'não é json' }).status).toBe(0);
+    expect(runHook(HOOK, dir, { input: 'not json' }).status).toBe(0);
   });
 
-  it('fora de um repositório git sai 0 sem bloquear', () => {
+  it('outside a git repository exits 0 without blocking', () => {
     const plain = mkdtempSync(join(tmpdir(), 'hook-nogit-'));
     const r = runHook(HOOK, plain, STOP);
     expect(r.status).toBe(0);

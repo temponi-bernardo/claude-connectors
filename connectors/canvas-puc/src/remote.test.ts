@@ -28,23 +28,23 @@ function settingsWith(...responses: Response[]) {
 }
 
 describe('readCanvasRemoteSettings', () => {
-  it('usa o Canvas da PUC e a escrita desligada por padrão', () => {
+  it('uses the PUC Canvas and writing off by default', () => {
     const settings = readCanvasRemoteSettings({});
     expect(settings.baseUrl).toBe(BASE);
     expect(DEFAULT_CANVAS_URL).toBe(BASE);
     expect(settings.allowWrite).toBe(false);
   });
 
-  it('lê endereço sem barra final e a escrita ligada', () => {
+  it('reads the address without a trailing slash and writing on', () => {
     const settings = readCanvasRemoteSettings({
-      CANVAS_BASE_URL: 'https://outro.instructure.com/',
+      CANVAS_BASE_URL: 'https://other.instructure.com/',
       CANVAS_ALLOW_WRITE: 'true',
     });
-    expect(settings.baseUrl).toBe('https://outro.instructure.com');
+    expect(settings.baseUrl).toBe('https://other.instructure.com');
     expect(settings.allowWrite).toBe(true);
   });
 
-  it('chama o fetch global sem depender do objeto (o Workers recusa fetch com outro this)', async () => {
+  it('calls the global fetch without depending on the object (Workers refuses fetch with another this)', async () => {
     const global = vi.fn<typeof fetch>(function (this: unknown) {
       if (this !== undefined && this !== globalThis) throw new TypeError('Illegal invocation');
       return Promise.resolve(new Response('ok'));
@@ -60,13 +60,13 @@ describe('readCanvasRemoteSettings', () => {
 });
 
 describe('withCanvasUserAgent', () => {
-  it('põe o User-Agent (o Canvas devolve 403 sem ele, e o fetch do Workers não manda)', () => {
+  it('sets the User-Agent (Canvas answers 403 without it, and the Workers fetch does not send one)', () => {
     expect(withCanvasUserAgent(undefined)).toEqual({
       headers: { 'user-agent': CANVAS_USER_AGENT },
     });
   });
 
-  it('mantém método, corpo e headers da chamada', () => {
+  it('keeps the method, body and headers of the call', () => {
     const init = withCanvasUserAgent({
       method: 'POST',
       body: '{}',
@@ -81,13 +81,13 @@ describe('withCanvasUserAgent', () => {
 });
 
 describe('canvasLoginText', () => {
-  it('aponta a ajuda para a página de tokens do Canvas', () => {
+  it('points the help link to the Canvas tokens page', () => {
     expect(canvasLoginText(BASE).helpUrl).toBe(`${BASE}/profile/settings`);
   });
 });
 
 describe('verifyCanvasToken', () => {
-  it('aceita o token quando o Canvas devolve o usuário', async () => {
+  it('accepts the token when Canvas returns the user', async () => {
     const settings = settingsWith(new Response(JSON.stringify({ id: 1 })));
     await expect(verifyCanvasToken(settings, 'abc')).resolves.toBeUndefined();
     expect(settings.fetchFn).toHaveBeenCalledWith(`${BASE}/api/v1/users/self`, {
@@ -95,23 +95,21 @@ describe('verifyCanvasToken', () => {
     });
   });
 
-  it('explica token vazio, recusado, erro do Canvas e falha de rede', async () => {
-    await expect(verifyCanvasToken(settingsWith(), ' ')).rejects.toThrow('Cole o token');
+  it('explains an empty token, a refused token, a Canvas error and a network failure', async () => {
+    await expect(verifyCanvasToken(settingsWith(), ' ')).rejects.toThrow('Paste the Canvas');
     await expect(
       verifyCanvasToken(settingsWith(new Response('', { status: 401 })), 'x'),
-    ).rejects.toThrow('recusou o token');
+    ).rejects.toThrow('refused the token');
     await expect(
       verifyCanvasToken(settingsWith(new Response('', { status: 503 })), 'x'),
     ).rejects.toThrow('503');
-    const offline = { ...settingsWith(), fetchFn: () => Promise.reject(new Error('rede')) };
-    await expect(verifyCanvasToken(offline, 'x')).rejects.toThrow(
-      'Não consegui falar com o Canvas',
-    );
+    const offline = { ...settingsWith(), fetchFn: () => Promise.reject(new Error('network')) };
+    await expect(verifyCanvasToken(offline, 'x')).rejects.toThrow('Could not reach Canvas');
   });
 });
 
 describe('canvasRemoteConnector', () => {
-  it('cria um servidor MCP por token e confere o token no Canvas', async () => {
+  it('creates one MCP server per token and checks the token on Canvas', async () => {
     const settings = settingsWith(new Response('{}'));
     const connector = canvasRemoteConnector(settings);
     expect(connector.login.kind === 'secret' && connector.login.text.title).toContain('Canvas');
@@ -121,7 +119,7 @@ describe('canvasRemoteConnector', () => {
     expect(connector.createServer('abc').isConnected()).toBe(false);
   });
 
-  it('renova a validade do token pelo Canvas', async () => {
+  it("renews the token's expiry through Canvas", async () => {
     const settings = settingsWith(new Response('{}'), new Response('[]'));
     await expect(canvasRemoteConnector(settings).renewSecret?.('abc')).resolves.toBe('kept');
     expect(settings.fetchFn).toHaveBeenCalledTimes(2);
@@ -129,17 +127,17 @@ describe('canvasRemoteConnector', () => {
 });
 
 const NOW = new Date('2026-11-05T12:00:00Z');
-const TOKEN = '11748~segredoDoToken';
+const TOKEN = '11748~secretTokenValue';
 const DAY = 24 * 3600 * 1000;
 
-function tokenInfo(expiresAt: string | null, visible = '11748~segr...') {
+function tokenInfo(expiresAt: string | null, visible = '11748~secr...') {
   return { id: 42, visible_token: visible, expires_at: expiresAt };
 }
 
 describe('matchesVisibleToken', () => {
-  it('compara o começo visível do token, sem as reticências', () => {
-    expect(matchesVisibleToken('11748~segr...', TOKEN)).toBe(true);
-    expect(matchesVisibleToken('11748~outr...', TOKEN)).toBe(false);
+  it('compares the visible start of the token, without the ellipsis', () => {
+    expect(matchesVisibleToken('11748~secr...', TOKEN)).toBe(true);
+    expect(matchesVisibleToken('11748~othe...', TOKEN)).toBe(false);
     expect(matchesVisibleToken('...', TOKEN)).toBe(false);
   });
 });
@@ -147,14 +145,14 @@ describe('matchesVisibleToken', () => {
 describe('planTokenRenewal', () => {
   const target = new Date(NOW.getTime() + TOKEN_RENEWAL_SECONDS * 1000).toISOString();
 
-  it('estende para o limite do Canvas o token que vence antes dele', () => {
+  it('extends a token that expires before the Canvas limit up to that limit', () => {
     const soon = new Date(NOW.getTime() + 10 * DAY).toISOString();
     expect(
       planTokenRenewal([tokenInfo(soon, '99999~xxxx...'), tokenInfo(soon)], TOKEN, NOW),
     ).toEqual({ id: 42, expiresAt: target });
   });
 
-  it('não mexe em token sem validade, renovado há menos de um dia ou que não está na lista', () => {
+  it('leaves alone a token without expiry, renewed less than a day ago or not in the list', () => {
     const fresh = new Date(NOW.getTime() + TOKEN_RENEWAL_SECONDS * 1000 - DAY / 2).toISOString();
     expect(planTokenRenewal([tokenInfo(null)], TOKEN, NOW)).toBeNull();
     expect(planTokenRenewal([tokenInfo(fresh)], TOKEN, NOW)).toBeNull();
@@ -164,7 +162,7 @@ describe('planTokenRenewal', () => {
 });
 
 describe('canvasTokenApi', () => {
-  it('chama o Canvas com o token e devolve o JSON', async () => {
+  it('calls Canvas with the token and returns the JSON', async () => {
     const settings = settingsWith(new Response('{"id":1}'));
     await expect(
       canvasTokenApi(settings, 'abc', { path: '/api/v1/x', method: 'PUT', body: { a: 1 } }),
@@ -180,14 +178,14 @@ describe('canvasTokenApi', () => {
     });
   });
 
-  it('rejeita quando o Canvas não responde 2xx', async () => {
+  it('rejects when Canvas does not answer 2xx', async () => {
     const settings = settingsWith(new Response('{}', { status: 400 }));
     await expect(canvasTokenApi(settings, 'abc', { path: '/api/v1/x' })).rejects.toThrow('400');
   });
 });
 
 describe('renewCanvasToken', () => {
-  it('lista os tokens e estende o próprio quando está perto de vencer', async () => {
+  it('lists the tokens and extends its own when it is close to expiring', async () => {
     const soon = new Date(NOW.getTime() + DAY).toISOString();
     const settings = settingsWith(
       new Response(JSON.stringify([tokenInfo(soon)])),
@@ -206,7 +204,7 @@ describe('renewCanvasToken', () => {
     );
   });
 
-  it('não chama o PUT quando não há o que renovar', async () => {
+  it('does not call the PUT when there is nothing to renew', async () => {
     const settings = settingsWith(new Response(JSON.stringify([tokenInfo(null)])));
     await renewCanvasToken(settings, TOKEN, NOW);
     expect(settings.fetchFn).toHaveBeenCalledOnce();

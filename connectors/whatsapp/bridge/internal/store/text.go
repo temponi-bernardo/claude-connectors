@@ -5,8 +5,8 @@ import (
 	"unicode"
 )
 
-// Clean remove caracteres de controle (menos \n e \t) e de override bidi (U+202A–U+202E, U+2066–U+2069)
-// de textos que saem da ponte.
+// Clean removes control characters (except \n and \t) and bidi overrides (U+202A–U+202E, U+2066–U+2069)
+// from text leaving the bridge.
 func Clean(s string) string {
 	return strings.Map(func(r rune) rune {
 		if isUnsafeRune(r) {
@@ -16,7 +16,7 @@ func Clean(s string) string {
 	}, strings.ToValidUTF8(s, ""))
 }
 
-// isUnsafeRune decide se um caractere deve ser removido da saída.
+// isUnsafeRune decides whether a character must be removed from the output.
 func isUnsafeRune(r rune) bool {
 	switch {
 	case r == '\n' || r == '\t':
@@ -27,14 +27,14 @@ func isUnsafeRune(r rune) bool {
 	return unicode.IsControl(r)
 }
 
-// foldMap troca letras acentuadas comuns pela base sem acento.
+// foldMap maps common accented letters to their unaccented base.
 var foldMap = map[rune]rune{
 	'á': 'a', 'à': 'a', 'â': 'a', 'ã': 'a', 'ä': 'a', 'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e',
 	'í': 'i', 'ì': 'i', 'î': 'i', 'ï': 'i', 'ó': 'o', 'ò': 'o', 'ô': 'o', 'õ': 'o', 'ö': 'o',
 	'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ç': 'c', 'ñ': 'n',
 }
 
-// Fold deixa o texto em minúsculas e sem acentos, para buscas que ignoram caixa e acentuação.
+// Fold lowercases the text and strips accents, for case- and accent-insensitive searches.
 func Fold(s string) string {
 	return strings.Map(func(r rune) rune {
 		r = unicode.ToLower(r)
@@ -45,15 +45,15 @@ func Fold(s string) string {
 	}, s)
 }
 
-// likeEscaper escapa os curingas do LIKE (o caractere de escape é a barra invertida).
+// likeEscaper escapes the LIKE wildcards (the escape character is the backslash).
 var likeEscaper = strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`)
 
-// ContainsPattern monta o padrão LIKE "%termo%" já normalizado com Fold e com curingas escapados.
+// ContainsPattern builds the LIKE pattern "%term%", normalized with Fold and with escaped wildcards.
 func ContainsPattern(query string) string {
 	return "%" + likeEscaper.Replace(Fold(query)) + "%"
 }
 
-// Digits devolve só os dígitos ASCII de s.
+// Digits returns only the ASCII digits of s.
 func Digits(s string) string {
 	var b strings.Builder
 	for _, r := range s {
@@ -64,7 +64,7 @@ func Digits(s string) string {
 	return b.String()
 }
 
-// PhoneFromJID devolve "+<número>" para JIDs de usuário por telefone e "" para os demais.
+// PhoneFromJID returns "+<number>" for phone-based user JIDs and "" for the rest.
 func PhoneFromJID(jid string) string {
 	user, server, ok := strings.Cut(jid, "@")
 	if !ok || server != "s.whatsapp.net" {
@@ -77,5 +77,5 @@ func PhoneFromJID(jid string) string {
 	return "+" + user
 }
 
-// IsGroupJID diz se o JID é de grupo.
+// IsGroupJID reports whether the JID is a group.
 func IsGroupJID(jid string) bool { return strings.HasSuffix(jid, "@g.us") }

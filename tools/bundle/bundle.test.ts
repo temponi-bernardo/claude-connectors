@@ -27,27 +27,27 @@ afterEach(() => {
 const REPO_ROOT = resolve(import.meta.dirname, '..', '..');
 
 describe('listConnectors', () => {
-  it('lista só pastas com manifesto de plugin, em ordem', () => {
+  it('lists only folders with a plugin manifest, in order', () => {
     const root = tempRoot();
-    for (const name of ['zeta', 'alfa', 'sem-plugin'])
+    for (const name of ['zeta', 'alpha', 'no-plugin'])
       mkdirSync(join(root, 'connectors', name, dirname(PLUGIN_MANIFEST_PATH)), { recursive: true });
     writeFileSync(join(root, 'connectors', 'zeta', PLUGIN_MANIFEST_PATH), '{}');
-    writeFileSync(join(root, 'connectors', 'alfa', PLUGIN_MANIFEST_PATH), '{}');
-    writeFileSync(join(root, 'connectors', 'arquivo.txt'), '');
-    expect(listConnectors(root)).toEqual(['alfa', 'zeta']);
+    writeFileSync(join(root, 'connectors', 'alpha', PLUGIN_MANIFEST_PATH), '{}');
+    writeFileSync(join(root, 'connectors', 'file.txt'), '');
+    expect(listConnectors(root)).toEqual(['alpha', 'zeta']);
   });
 
-  it('devolve vazio sem a pasta connectors', () => {
+  it('returns empty without the connectors folder', () => {
     expect(listConnectors(tempRoot())).toEqual([]);
   });
 });
 
 describe('isRemoteMcpUrl', () => {
-  it('aceita só https fixo', () => {
+  it('accepts only fixed https', () => {
     expect(isRemoteMcpUrl('https://x.dev/mcp')).toBe(true);
   });
 
-  it('recusa http, campo de configuração do plugin (quebra o Vincular no claude.ai) e valores que não são texto', () => {
+  it('rejects http, a plugin config field (breaks Connect on claude.ai) and non-text values', () => {
     expect(isRemoteMcpUrl('http://x.dev/mcp')).toBe(false);
     expect(isRemoteMcpUrl('${user_config.server_url}')).toBe(false);
     expect(isRemoteMcpUrl('http://${user_config.server_url}')).toBe(false);
@@ -56,15 +56,15 @@ describe('isRemoteMcpUrl', () => {
 });
 
 describe('mcpServerProblems', () => {
-  it('aceita um servidor http com URL https', () => {
+  it('accepts an http server with an https URL', () => {
     expect(mcpServerProblems('c', { type: 'http', url: 'https://x.dev/mcp' })).toEqual([]);
   });
 
-  it('recusa servidor local, sem tipo http ou com URL insegura', () => {
+  it('rejects a local server, a missing http type or an insecure URL', () => {
     expect(mcpServerProblems('c', { command: 'node', args: [] })).toEqual([
-      'c: "type" deve ser "http".',
-      'c: "url" deve ser um endereço https:// fixo (sem ${user_config.*}).',
-      'c: não pode ter "command" (nada roda localmente).',
+      'c: "type" must be "http".',
+      'c: "url" must be a fixed https:// address (no ${user_config.*}).',
+      'c: must not have "command" (nothing runs locally).',
     ]);
     expect(mcpServerProblems('c', { type: 'http', url: 'http://x.dev/mcp' })).toHaveLength(1);
     expect(mcpServerProblems('c', null)).toHaveLength(2);
@@ -72,13 +72,13 @@ describe('mcpServerProblems', () => {
 });
 
 describe('pluginMcpProblems', () => {
-  it('exige ao menos um servidor e junta os problemas de cada um', () => {
-    expect(pluginMcpProblems({})).toEqual(['"mcpServers" está vazio.']);
-    expect(pluginMcpProblems(null)).toEqual(['"mcpServers" está vazio.']);
+  it('requires at least one server and joins the problems of each', () => {
+    expect(pluginMcpProblems({})).toEqual(['"mcpServers" is empty.']);
+    expect(pluginMcpProblems(null)).toEqual(['"mcpServers" is empty.']);
     expect(pluginMcpProblems({ mcpServers: { a: { type: 'stdio' } } })).toHaveLength(2);
   });
 
-  it('o plugin de cada conector com servidor fixo aponta só para servidores remotos', () => {
+  it('the plugin of each connector with a fixed server points only to remote servers', () => {
     const names = listConnectors(REPO_ROOT);
     expect(names.length).toBeGreaterThan(0);
     for (const name of names) {
@@ -88,7 +88,7 @@ describe('pluginMcpProblems', () => {
     }
   });
 
-  it('o WhatsApp self-host não embute servidor no plugin (cada pessoa conecta o próprio)', () => {
+  it('the self-hosted WhatsApp plugin ships no server (each person connects their own)', () => {
     expect(existsSync(join(REPO_ROOT, CONNECTORS_DIR, 'whatsapp', PLUGIN_MCP_CONFIG_PATH))).toBe(
       false,
     );
@@ -151,7 +151,7 @@ describe('plugin version (ADR 0022)', () => {
 });
 
 describe('bundleOptions', () => {
-  it('gera um único ESM para Node, sem dependências externas', () => {
+  it('generates a single ESM for Node, with no external dependencies', () => {
     const options = bundleOptions('in.ts', 'out.js');
     expect(options).toMatchObject({
       entryPoints: ['in.ts'],

@@ -21,12 +21,12 @@ import {
 const [OWNER, MUSIC] = [TEST_REFS[0]!, TEST_REFS[1]!];
 const REQUEST = { query: 'from:image-line', maxResults: 2, pageToken: null };
 
-/** Gmail falso por conta: `threads` lista ids (com próxima página `p2`) e `threads/<id>` dá metadados. */
+/** Fake Gmail per account: `threads` lists ids (with next page `p2`) and `threads/<id>` gives metadata. */
 function mailbox(dates: Readonly<Record<string, string>>): FakeRoute {
   return (url, init) => {
     if (url.hostname !== 'gmail.googleapis.com') return undefined;
     const auth = (init?.headers as Record<string, string>).authorization ?? '';
-    const prefix = auth.endsWith('dono') ? 'd' : 'm';
+    const prefix = auth.endsWith('owner') ? 'd' : 'm';
     const path = url.pathname.split('/users/me/')[1] ?? '';
     if (path === 'threads') {
       const ids = Object.keys(dates).filter((id) => id.startsWith(prefix));
@@ -45,40 +45,40 @@ beforeEach(() => {
   clearAccessTokenCache();
 });
 
-describe('page_token de várias contas', () => {
-  it('codifica e decodifica, ignorando valores que não são texto', () => {
-    const token = encodeMultiPageToken({ dono: 'a', musica: 'b' });
-    expect(decodeMultiPageToken(token!)).toEqual({ dono: 'a', musica: 'b' });
+describe('multi-account page_token', () => {
+  it('encodes and decodes, ignoring non-string values', () => {
+    const token = encodeMultiPageToken({ owner: 'a', music: 'b' });
+    expect(decodeMultiPageToken(token!)).toEqual({ owner: 'a', music: 'b' });
     expect(encodeMultiPageToken({})).toBeNull();
-    const mixed = Buffer.from(JSON.stringify({ dono: 'a', x: 1 })).toString('base64url');
-    expect(decodeMultiPageToken(mixed)).toEqual({ dono: 'a' });
+    const mixed = Buffer.from(JSON.stringify({ owner: 'a', x: 1 })).toString('base64url');
+    expect(decodeMultiPageToken(mixed)).toEqual({ owner: 'a' });
   });
 
-  it('recusa token que não é desta busca', () => {
-    expect(() => decodeMultiPageToken('lixo')).toThrow(/Invalid page_token/);
+  it('rejects a token not from this search', () => {
+    expect(() => decodeMultiPageToken('junk')).toThrow(/Invalid page_token/);
     const list = Buffer.from('[1]').toString('base64url');
     expect(() => decodeMultiPageToken(list)).toThrow(/Invalid page_token/);
   });
 
-  it('pagesToFetch consulta todas na primeira página e só as pendentes depois', () => {
+  it('pagesToFetch queries all on the first page and only the pending ones afterwards', () => {
     expect(pagesToFetch(TEST_REFS, null)).toEqual([
       [OWNER, null],
       [MUSIC, null],
     ]);
-    expect(pagesToFetch(TEST_REFS, encodeMultiPageToken({ musica: 't' }))).toEqual([[MUSIC, 't']]);
+    expect(pagesToFetch(TEST_REFS, encodeMultiPageToken({ music: 't' }))).toEqual([[MUSIC, 't']]);
   });
 });
 
-describe('ordenação', () => {
-  it('threadDate e sortByDateDesc', () => {
+describe('sorting', () => {
+  it('threadDate and sortByDateDesc', () => {
     expect(threadDate({ date: 5 })).toBe('');
     const sorted = sortByDateDesc([{ date: '2026-01-01' }, { date: null }, { date: '2026-02-01' }]);
     expect(sorted.map(threadDate)).toEqual(['2026-02-01', '2026-01-01', '']);
   });
 });
 
-describe('busca', () => {
-  it('fetchThreadMetadata pede só cabeçalhos úteis', async () => {
+describe('search', () => {
+  it('fetchThreadMetadata asks only for useful headers', async () => {
     const calls: RecordedCall[] = [];
     const deps = await linkedTestDeps([mailbox(DATES)], calls);
     await fetchThreadMetadata(deps, OWNER, 'd1');
@@ -93,7 +93,7 @@ describe('busca', () => {
     ]);
   });
 
-  it('searchAccount resume as conversas e repassa a busca', async () => {
+  it('searchAccount summarizes the threads and forwards the query', async () => {
     const calls: RecordedCall[] = [];
     const deps = await linkedTestDeps([mailbox(DATES)], calls);
     const result = await searchAccount(deps, OWNER, REQUEST);
@@ -104,23 +104,23 @@ describe('busca', () => {
     expect(list.searchParams.get('maxResults')).toBe('2');
   });
 
-  it('searchThreads numa conta devolve o page_token do Gmail', async () => {
+  it('searchThreads in one account returns the Gmail page_token', async () => {
     const deps = await linkedTestDeps([mailbox(DATES)]);
     const result = await searchThreads(deps, [MUSIC], REQUEST);
     expect(result).toMatchObject({ next_page_token: 'm-p2' });
   });
 
-  it('searchThreads em todas junta, ordena por data e combina os page_token', async () => {
+  it('searchThreads across all merges, sorts by date and combines the page_tokens', async () => {
     const deps = await linkedTestDeps([mailbox(DATES)]);
     const first = await searchThreads(deps, TEST_REFS, REQUEST);
     const threads = first.threads as Record<string, unknown>[];
     expect(threads.map((t) => `${String(t.account)}:${String(t.thread_id)}`)).toEqual([
-      'dono:d2',
-      'musica:m1',
-      'dono:d1',
+      'owner:d2',
+      'music:m1',
+      'owner:d1',
     ]);
     const token = first.next_page_token as string;
-    expect(decodeMultiPageToken(token)).toEqual({ dono: 'd-p2', musica: 'm-p2' });
+    expect(decodeMultiPageToken(token)).toEqual({ owner: 'd-p2', music: 'm-p2' });
     const second = await searchThreads(deps, TEST_REFS, { ...REQUEST, pageToken: token });
     expect(second.next_page_token).toBeNull();
   });

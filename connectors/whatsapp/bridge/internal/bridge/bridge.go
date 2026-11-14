@@ -1,4 +1,4 @@
-// Package bridge controla o ciclo de vida da ponte: fases, restauração, snapshots e o cliente do WhatsApp.
+// Package bridge controls the bridge lifecycle: phases, restore, snapshots and the WhatsApp client.
 package bridge
 
 import (
@@ -16,14 +16,14 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/wa"
 )
 
-// Fases da ponte (ver API.md).
+// Bridge phases (see API.md).
 const (
 	PhaseAwaitingRestore = "awaiting_restore"
 	PhaseStarting        = "starting"
 	PhaseReady           = "ready"
 )
 
-// WhatsApp é o que a API e o ciclo de vida usam do cliente (implementado por *wa.Manager).
+// WhatsApp is what the API and the lifecycle use from the client (implemented by *wa.Manager).
 type WhatsApp interface {
 	State() wa.State
 	QR() (wa.QRCode, error)
@@ -34,23 +34,23 @@ type WhatsApp interface {
 	Disconnect()
 }
 
-// StartFunc cria e inicia o cliente do WhatsApp sobre os bancos abertos.
+// StartFunc creates and starts the WhatsApp client on top of the open databases.
 type StartFunc func(ctx context.Context, sessionDB *sql.DB, st *store.Store) (WhatsApp, error)
 
-// Options configura a ponte.
+// Options configures the bridge.
 type Options struct {
 	DataDir     string
 	SnapshotKey []byte
-	MaxRestore  int64 // teto do snapshot e de cada arquivo extraído
+	MaxRestore  int64 // cap for the snapshot and each extracted file
 	Log         *slog.Logger
 	Start       StartFunc
 }
 
-// Bridge guarda fase, bancos abertos, cliente e o estado do último snapshot.
+// Bridge holds the phase, open databases, client and the last snapshot state.
 type Bridge struct {
 	opts      Options
 	phase     atomic.Value
-	mu        sync.Mutex // serializa restauração, snapshot e encerramento
+	mu        sync.Mutex // serializes restore, snapshot and shutdown
 	sessionDB *sql.DB
 	store     *store.Store
 	wa        WhatsApp
@@ -58,7 +58,7 @@ type Bridge struct {
 	ready     chan struct{}
 }
 
-// snapState é a geração e o hash do último snapshot entregue ou restaurado.
+// snapState is the generation and hash of the last delivered or restored snapshot.
 type snapState struct {
 	generation uint64
 	hash       [32]byte
@@ -66,45 +66,45 @@ type snapState struct {
 }
 
 var (
-	// ErrAlreadyRestored indica /restore fora da fase awaiting_restore.
-	ErrAlreadyRestored = errors.New("a ponte já foi restaurada")
-	// ErrBadSnapshot indica snapshot inválido (MAC, versão, truncado ou tar inesperado).
-	ErrBadSnapshot = errors.New("snapshot inválido")
-	// ErrNotReady indica operação que exige a fase ready.
-	ErrNotReady = errors.New("a ponte ainda não está pronta")
+	// ErrAlreadyRestored signals /restore outside the awaiting_restore phase.
+	ErrAlreadyRestored = errors.New("the bridge has already been restored")
+	// ErrBadSnapshot signals an invalid snapshot (MAC, version, truncated or unexpected tar).
+	ErrBadSnapshot = errors.New("invalid snapshot")
+	// ErrNotReady signals an operation that requires the ready phase.
+	ErrNotReady = errors.New("the bridge is not ready yet")
 )
 
-// New cria a ponte na fase awaiting_restore.
+// New creates the bridge in the awaiting_restore phase.
 func New(opts Options) *Bridge {
 	b := &Bridge{opts: opts, ready: make(chan struct{})}
 	b.phase.Store(PhaseAwaitingRestore)
 	return b
 }
 
-// Phase devolve a fase atual.
+// Phase returns the current phase.
 func (b *Bridge) Phase() string { return b.phase.Load().(string) }
 
-// Store devolve o banco de mensagens (nil antes de ready).
+// Store returns the message database (nil before ready).
 func (b *Bridge) Store() *store.Store {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return b.store
 }
 
-// WhatsApp devolve o cliente (nil antes de ready).
+// WhatsApp returns the client (nil before ready).
 func (b *Bridge) WhatsApp() WhatsApp {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	return b.wa
 }
 
-// Ready é fechado quando a ponte chega à fase ready.
+// Ready is closed when the bridge reaches the ready phase.
 func (b *Bridge) Ready() <-chan struct{} { return b.ready }
 
-// path devolve o caminho de um arquivo dentro de DATA_DIR.
+// path returns the path of a file inside DATA_DIR.
 func (b *Bridge) path(name string) string { return filepath.Join(b.opts.DataDir, name) }
 
-// removeDatabases apaga os bancos e seus arquivos -wal/-shm de DATA_DIR.
+// removeDatabases deletes the databases and their -wal/-shm files from DATA_DIR.
 func (b *Bridge) removeDatabases() error {
 	for _, name := range snapshot.FileNames {
 		for _, suffix := range []string{"", "-wal", "-shm", "-journal"} {

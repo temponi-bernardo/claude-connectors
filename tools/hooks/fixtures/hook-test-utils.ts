@@ -11,25 +11,25 @@ export interface HookResult {
   stderr: string;
 }
 
-/** Cria um repositório git temporário com um commit inicial e as pastas que os hooks esperam. */
+/** Creates a temporary git repository with an initial commit and the folders the hooks expect. */
 export function createTempRepo(): string {
   const dir = mkdtempSync(join(tmpdir(), 'hook-test-'));
   mkdirSync(join(dir, 'docs'));
   mkdirSync(join(dir, '.claude'));
   git(dir, ['init', '-q', '-b', 'main']);
   git(dir, ['config', 'user.email', 'test@example.com']);
-  git(dir, ['config', 'user.name', 'Teste']);
-  commitFile(dir, 'README.md', 'inicial');
+  git(dir, ['config', 'user.name', 'Test']);
+  commitFile(dir, 'README.md', 'initial');
   return dir;
 }
 
 export function git(dir: string, args: string[]): string {
   const r = spawnSync('git', args, { cwd: dir, encoding: 'utf8' });
-  if (r.status !== 0) throw new Error(`git ${args.join(' ')} falhou: ${r.stderr}`);
+  if (r.status !== 0) throw new Error(`git ${args.join(' ')} failed: ${r.stderr}`);
   return r.stdout.trim();
 }
 
-/** Escreve um arquivo (conteúdo = mensagem) e o commita. */
+/** Writes a file (content = message) and commits it. */
 export function commitFile(dir: string, file: string, message: string): void {
   writeFileSync(join(dir, file), message);
   git(dir, ['add', file]);
@@ -41,7 +41,7 @@ export interface HookOptions {
   env?: Record<string, string>;
 }
 
-/** Roda um hook de `.claude/hooks/` com stdin e ambiente controlados, dentro de `dir`. */
+/** Runs a hook from `.claude/hooks/` with controlled stdin and environment, inside `dir`. */
 export function runHook(name: string, dir: string, options: HookOptions = {}): HookResult {
   const r = spawnSync('bash', [join(HOOKS_DIR, name)], {
     cwd: dir,
@@ -52,7 +52,7 @@ export function runHook(name: string, dir: string, options: HookOptions = {}): H
   return { status: r.status, stdout: r.stdout, stderr: r.stderr };
 }
 
-/** Cria um `claude` falso no PATH que devolve `output` (ou falha se `output` for null). */
+/** Creates a fake `claude` on the PATH that prints `output` (or fails if `output` is null). */
 export function fakeClaude(dir: string, output: string | null): string {
   const bin = join(dir, 'fakebin');
   mkdirSync(bin);

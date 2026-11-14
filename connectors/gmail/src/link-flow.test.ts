@@ -36,14 +36,14 @@ const SCOPE = 'openid email https://www.googleapis.com/auth/gmail.modify';
 const TOKENS: GoogleTokens = {
   accessToken: 'a',
   expiresIn: 3600,
-  refreshToken: 'novo-refresh',
+  refreshToken: 'new-refresh',
   idToken: null,
   scope: SCOPE,
 };
 const EXP = { exp: 1_700_000_000 + 600 };
 const LINK = { owner: TEST_OWNER, verifier: 'v', nonce: 'n' };
 
-/** `fetch` cujo Google devolve, na troca de código, um id_token do e-mail dado com o nonce de `holder`. */
+/** `fetch` whose Google returns, on code exchange, an id_token for the given email with `holder`'s nonce. */
 function googleFor(
   email: string,
   extra: Record<string, unknown> = {},
@@ -53,7 +53,7 @@ function googleFor(
     tokenRoute(() =>
       Response.json({
         access_token: 'a',
-        refresh_token: 'novo-refresh',
+        refresh_token: 'new-refresh',
         scope: SCOPE,
         id_token: validIdToken(email, holder.nonce, EXP),
         ...extra,
@@ -62,7 +62,7 @@ function googleFor(
   ]);
 }
 
-/** Abre o link de vínculo e devolve o `state`, o `nonce` e o cookie que o Google/navegador mandariam. */
+/** Opens the linking link and returns the `state`, `nonce` and cookie Google/the browser would send. */
 async function begin(deps: ReturnType<typeof testDeps>) {
   const response = await startAccountLink(deps, new Request(issueLinkUrl(deps)));
   const google = new URL(response.headers.get('location') ?? '');
@@ -76,7 +76,7 @@ async function begin(deps: ReturnType<typeof testDeps>) {
   };
 }
 
-/** Requisição da volta do Google com os parâmetros e o cookie dados. */
+/** Google callback request with the given parameters and cookie. */
 function callback(params: Record<string, string>, cookie: string | null): Request {
   const url = new URL('https://gmail.test/google/callback');
   for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
@@ -87,67 +87,67 @@ beforeEach(() => {
   clearAccessTokenCache();
 });
 
-describe('auxiliares', () => {
-  it('nowSeconds, linkRequestKey e readCookie', () => {
+describe('helpers', () => {
+  it('nowSeconds, linkRequestKey and readCookie', () => {
     expect(nowSeconds(testDeps(fakeFetch([])))).toBe(TEST_NOW_MS / 1000);
     expect(linkRequestKey('abc')).toBe(`link:${sha256Hex('abc')}`);
     expect(readCookie('a=1; __Host-gmail-link=x=y; b=2', LINK_COOKIE)).toBe('x=y');
     expect(readCookie(null, LINK_COOKIE)).toBeNull();
   });
 
-  it('linkCookie é __Host-, seguro, HttpOnly, SameSite e apagável', () => {
+  it('linkCookie is __Host-, Secure, HttpOnly, SameSite and deletable', () => {
     expect(linkCookie('v')).toBe(
       '__Host-gmail-link=v; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=600',
     );
     expect(linkCookie(null)).toContain('Max-Age=0');
   });
 
-  it('invalidTicketPage orienta a pedir outro link', async () => {
+  it('invalidTicketPage tells the user to ask for another link', async () => {
     const page = invalidTicketPage();
     expect(page.status).toBe(400);
     expect(await page.text()).toContain('link_account');
   });
 
-  it('linkRefusalReason exige o escopo do Gmail e o refresh token', () => {
+  it('linkRefusalReason requires the Gmail scope and the refresh token', () => {
     expect(linkRefusalReason(TOKENS)).toBeNull();
-    expect(linkRefusalReason({ ...TOKENS, scope: 'openid email' })).toMatch(/permissão/);
+    expect(linkRefusalReason({ ...TOKENS, scope: 'openid email' })).toMatch(/permission/);
     const readOnly = 'openid email https://www.googleapis.com/auth/gmail.readonly';
-    expect(linkRefusalReason({ ...TOKENS, scope: readOnly })).toMatch(/gerenciar o Gmail/);
+    expect(linkRefusalReason({ ...TOKENS, scope: readOnly })).toMatch(/manage Gmail/);
     expect(linkRefusalReason({ ...TOKENS, refreshToken: null })).toMatch(/refresh token/);
   });
 
-  it('storeGoogleAccount acrescenta ou troca a conta do usuário', async () => {
+  it('storeGoogleAccount adds or replaces the user account', async () => {
     const deps = testDeps(fakeFetch([]));
     await saveOwnerAccounts(deps.kv, TEST_TOKEN_KEY, {
       owner: TEST_OWNER,
-      accounts: [testAccount('dono@example.com')],
+      accounts: [testAccount('owner@example.com')],
     });
-    await storeGoogleAccount(deps, 'musica@example.com', TOKENS);
-    await storeGoogleAccount(deps, 'dono@example.com', TOKENS);
+    await storeGoogleAccount(deps, 'music@example.com', TOKENS);
+    await storeGoogleAccount(deps, 'owner@example.com', TOKENS);
     const accounts = await loadOwnerAccounts(deps.kv, TEST_TOKEN_KEY, TEST_OWNER);
     expect(accounts.map((a) => [a.email, a.refreshToken])).toEqual([
-      ['musica@example.com', 'novo-refresh'],
-      ['dono@example.com', 'novo-refresh'],
+      ['music@example.com', 'new-refresh'],
+      ['owner@example.com', 'new-refresh'],
     ]);
   });
 });
 
-describe('ticket de vínculo', () => {
-  it('issueLinkUrl gera link do Worker com ticket que não expõe o usuário', () => {
+describe('link ticket', () => {
+  it('issueLinkUrl builds a Worker link with a ticket that does not expose the user', () => {
     const url = new URL(issueLinkUrl(testDeps(fakeFetch([]))));
     expect(url.origin + url.pathname).toBe('https://gmail.test/accounts/link');
     expect(url.searchParams.get('ticket')).not.toContain(TEST_OWNER);
   });
 
-  it('redeemLinkTicket devolve o usuário uma vez só', async () => {
+  it('redeemLinkTicket returns the user only once', async () => {
     const deps = testDeps(fakeFetch([]));
     const ticket = new URL(issueLinkUrl(deps)).searchParams.get('ticket') ?? '';
     expect(await redeemLinkTicket(deps, ticket)).toBe(TEST_OWNER);
     expect(await redeemLinkTicket(deps, ticket)).toBeNull();
-    expect(await redeemLinkTicket(deps, 'lixo')).toBeNull();
+    expect(await redeemLinkTicket(deps, 'junk')).toBeNull();
   });
 
-  it('redeemLinkTicket recusa ticket vencido ou sem jti', async () => {
+  it('redeemLinkTicket rejects an expired ticket or one without jti', async () => {
     const deps = testDeps(fakeFetch([]));
     const old = sealPayload(
       { typ: 'gmail_link_ticket', exp: 1, owner: 'x', jti: 'j' },
@@ -160,7 +160,7 @@ describe('ticket de vínculo', () => {
 });
 
 describe('startAccountLink', () => {
-  it('pede acesso offline para gerenciar o Gmail e guarda o pedido selado com validade', async () => {
+  it('asks for offline access to manage Gmail and keeps the sealed request with an expiry', async () => {
     const deps = testDeps(fakeFetch([]));
     const { response, google, state, cookie } = await begin(deps);
     expect(response.status).toBe(302);
@@ -174,7 +174,7 @@ describe('startAccountLink', () => {
     expect(entry?.value).not.toContain(TEST_OWNER);
   });
 
-  it('sem ticket válido mostra a página de link inválido', async () => {
+  it('without a valid ticket shows the invalid link page', async () => {
     const deps = testDeps(fakeFetch([]));
     const response = await startAccountLink(deps, new Request('https://gmail.test/accounts/link'));
     expect(response.status).toBe(400);
@@ -182,67 +182,67 @@ describe('startAccountLink', () => {
 });
 
 describe('takeLinkRequest', () => {
-  it('é de uso único, exige o cookie do mesmo navegador e devolve o usuário', async () => {
+  it('is single-use, requires the same browser cookie and returns the user', async () => {
     const deps = testDeps(fakeFetch([]));
     const first = await begin(deps);
-    expect(await takeLinkRequest(deps, callback({ state: first.state }, 'outro=1'))).toBeNull();
+    expect(await takeLinkRequest(deps, callback({ state: first.state }, 'other=1'))).toBeNull();
     const again = await begin(deps);
     const taken = await takeLinkRequest(deps, callback({ state: again.state }, again.cookie));
     expect(taken?.owner).toBe(TEST_OWNER);
     expect(await takeLinkRequest(deps, callback({ state: again.state }, again.cookie))).toBeNull();
   });
 
-  it('recusa pedido vencido', async () => {
+  it('rejects an expired request', async () => {
     const deps = testDeps(fakeFetch([]));
     const expired = sealPayload({ typ: 'gmail_link', exp: 1, owner: 'x' }, TEST_TOKEN_KEY);
-    await deps.kv.put(linkRequestKey('link.velho'), expired);
-    const request = callback({ state: 'link.velho' }, `${LINK_COOKIE}=x`);
+    await deps.kv.put(linkRequestKey('link.old'), expired);
+    const request = callback({ state: 'link.old' }, `${LINK_COOKIE}=x`);
     expect(await takeLinkRequest(deps, request)).toBeNull();
   });
 });
 
-describe('linkFromCode, linkSafely e finishAccountLink', () => {
-  it('vincula a conta ao usuário do ticket e apaga o cookie', async () => {
+describe('linkFromCode, linkSafely and finishAccountLink', () => {
+  it('links the account to the ticket user and deletes the cookie', async () => {
     const holder = { nonce: '' };
-    const deps = testDeps((url, init) => googleFor('musica@example.com', {}, holder)(url, init));
+    const deps = testDeps((url, init) => googleFor('music@example.com', {}, holder)(url, init));
     const started = await begin(deps);
     holder.nonce = started.nonce;
     const request = callback({ state: started.state, code: 'c' }, started.cookie);
     const response = await finishAccountLink(deps, request);
     expect(response.status).toBe(200);
-    expect(await response.text()).toContain('musica@example.com foi vinculada');
+    expect(await response.text()).toContain('music@example.com was linked');
     expect(response.headers.getSetCookie().at(-1)).toContain('Max-Age=0');
     const accounts = await loadOwnerAccounts(deps.kv, TEST_TOKEN_KEY, TEST_OWNER);
-    expect(accounts.map((a) => a.email)).toEqual(['musica@example.com']);
+    expect(accounts.map((a) => a.email)).toEqual(['music@example.com']);
   });
 
-  it('recusa sem id_token, sem escopo ou sem refresh token', async () => {
-    const noId = testDeps(googleFor('dono@example.com', { id_token: undefined }));
-    expect(await (await linkFromCode(noId, 'c', LINK)).text()).toContain('Sem id_token');
-    const noScope = testDeps(googleFor('dono@example.com', { scope: 'openid email' }));
-    expect(await (await linkFromCode(noScope, 'c', LINK)).text()).toContain('Permissão faltando');
-    const noRefresh = testDeps(googleFor('dono@example.com', { refresh_token: undefined }));
+  it('refuses without id_token, scope or refresh token', async () => {
+    const noId = testDeps(googleFor('owner@example.com', { id_token: undefined }));
+    expect(await (await linkFromCode(noId, 'c', LINK)).text()).toContain('No id_token');
+    const noScope = testDeps(googleFor('owner@example.com', { scope: 'openid email' }));
+    expect(await (await linkFromCode(noScope, 'c', LINK)).text()).toContain('Missing permission');
+    const noRefresh = testDeps(googleFor('owner@example.com', { refresh_token: undefined }));
     expect(await (await linkFromCode(noRefresh, 'c', LINK)).text()).toContain('refresh token');
     expect(noRefresh.kv.entries.size).toBe(0);
   });
 
-  it('linkSafely converte falha do Google em página 400 sem gravar', async () => {
+  it('linkSafely turns a Google failure into a 400 page without storing', async () => {
     const deps = testDeps(() => Promise.resolve(new Response('', { status: 503 })));
     const response = await linkSafely(deps, 'c', LINK);
     expect(response.status).toBe(400);
-    expect(await response.text()).toContain('Nada foi gravado');
+    expect(await response.text()).toContain('Nothing was stored');
     expect(deps.kv.entries.size).toBe(0);
   });
 
-  it('pedido expirado ou recusa no Google não gravam nada', async () => {
+  it('an expired request or a Google refusal stores nothing', async () => {
     const deps = testDeps(fakeFetch([]));
     const expired = await finishAccountLink(deps, callback({ state: 'link.x', code: 'c' }, null));
-    expect(await expired.text()).toContain('Link inválido');
+    expect(await expired.text()).toContain('Invalid or expired link');
     const started = await begin(deps);
     const denied = await finishAccountLink(
       deps,
       callback({ state: started.state, error: 'access_denied' }, started.cookie),
     );
-    expect(await denied.text()).toContain('Vínculo cancelado');
+    expect(await denied.text()).toContain('Linking canceled');
   });
 });

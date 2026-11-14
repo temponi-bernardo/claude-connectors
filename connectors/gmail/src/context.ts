@@ -1,35 +1,35 @@
 /**
- * Dependências injetadas no conector Gmail (configuração, KV, rede e relógio), para os testes trocarem
- * a rede e o relógio sem mocks globais.
+ * Dependencies injected into the Gmail connector (settings, KV, network and clock), so tests can swap the
+ * network and the clock without global mocks.
  */
 import type { GmailSettings } from './config.js';
 
-/** O subconjunto do Workers KV que o conector usa. */
+/** The subset of Workers KV the connector uses. */
 export interface KvStore {
   get(key: string): Promise<string | null>;
   put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
   delete(key: string): Promise<void>;
 }
 
-/** `fetch` injetável. */
+/** Injectable `fetch`. */
 export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
 
-/** Tudo de que as ferramentas e os fluxos de vínculo precisam. */
+/** Everything the tools and the linking flows need. */
 export interface GmailDeps {
   readonly settings: GmailSettings;
   readonly kv: KvStore;
   readonly fetch: Fetcher;
-  /** Relógio em milissegundos Unix. */
+  /** Clock in Unix milliseconds. */
   readonly now: () => number;
-  /** Origem pública do Worker (`https://gmail-remote.<conta>.workers.dev`), para os links de vínculo. */
+  /** Public origin of the Worker (`https://gmail-remote.<account>.workers.dev`), for linking links. */
   readonly origin: string;
 }
 
-/** Dependências de uma requisição autenticada: as de sempre mais o usuário do conector. */
+/** Dependencies of an authenticated request: the usual ones plus the connector user. */
 export interface OwnerDeps extends GmailDeps {
-  /** Id estável do usuário no Google (`sub` do login), dono das contas vinculadas. */
+  /** Stable Google user id (`sub` from sign-in), owner of the linked accounts. */
   readonly owner: string;
 }
 
-/** User-Agent enviado ao Google (lição do Canvas: chamadas sem User-Agent podem ser barradas). */
+/** User-Agent sent to Google (lesson from Canvas: calls without a User-Agent may be blocked). */
 export const UPSTREAM_USER_AGENT = 'claude-connectors-gmail/0.1';

@@ -1,7 +1,7 @@
 /**
- * Envio de e-mails pela Gmail API: monta e-mails novos a partir dos argumentos das ferramentas, prepara
- * respostas e encaminhamentos (com os anexos originais) lendo a mensagem original e envia o MIME em
- * `messages/send`. Toda escrita passa por `gmailWrite`, que exige o escopo `gmail.modify` da conta.
+ * Sends email through the Gmail API: builds new emails from the tool arguments, prepares replies and
+ * forwards (with the original attachments) by reading the original message and sends the MIME to
+ * `messages/send`. Every write goes through `gmailWrite`, which requires the account `gmail.modify` scope.
  */
 import type { AccountRef } from './accounts.js';
 import { downloadAttachment } from './attachments.js';
@@ -18,7 +18,7 @@ import {
   type OutgoingEmail,
 } from './mime.js';
 
-/** Argumentos de um e-mail novo, como as ferramentas recebem. */
+/** Arguments of a new email, as the tools receive them. */
 export interface ComposeArgs {
   readonly to: readonly string[];
   readonly cc: readonly string[];
@@ -27,14 +27,14 @@ export interface ComposeArgs {
   readonly body: string;
 }
 
-/** Pedido de resposta: a mensagem original, o texto novo e se é para todos. */
+/** Reply request: the original message, the new text and whether to reply all. */
 export interface ReplyRequest {
   readonly messageId: string;
   readonly body: string;
   readonly replyAll: boolean;
 }
 
-/** Pedido de encaminhamento: a mensagem original, destinatários e a nota opcional. */
+/** Forward request: the original message, recipients and the optional note. */
 export interface ForwardRequest {
   readonly messageId: string;
   readonly to: readonly string[];
@@ -43,13 +43,13 @@ export interface ForwardRequest {
   readonly note: string;
 }
 
-/** Mais destinatários (To + Cc + Bcc) num e-mail. */
+/** Maximum recipients (To + Cc + Bcc) in an email. */
 export const MAX_RECIPIENTS = 100;
 
-/** Maior soma de anexos num encaminhamento (o Gmail aceita 25 MB por e-mail, já com o base64). */
+/** Largest attachment total in a forward (Gmail accepts 25 MB per email, base64 included). */
 export const MAX_FORWARD_BYTES = 18 * 1024 * 1024;
 
-/** Lança erro se o e-mail não tiver destinatário ou passar do limite. */
+/** Throws if the email has no recipient or exceeds the limit. */
 export function checkRecipientLimit(email: OutgoingEmail): void {
   const total = email.to.length + email.cc.length + email.bcc.length;
   if (email.to.length === 0) throw new Error('Give at least one recipient in "to".');
@@ -58,7 +58,7 @@ export function checkRecipientLimit(email: OutgoingEmail): void {
   }
 }
 
-/** E-mail novo (sem conversa) a partir dos argumentos; lança erro para endereços inválidos. */
+/** New email (no thread) from the arguments; throws for invalid addresses. */
 export function composeEmail(args: ComposeArgs): PreparedEmail {
   const email: OutgoingEmail = {
     to: parseRecipients(args.to, 'to'),
@@ -74,18 +74,18 @@ export function composeEmail(args: ComposeArgs): PreparedEmail {
   return { email, threadId: null };
 }
 
-/** Fronteira MIME aleatória (`=_` não aparece em base64, então não colide com o conteúdo). */
+/** Random MIME boundary (`=_` never appears in base64, so it cannot collide with the content). */
 export function mimeBoundary(): string {
   return `=_part_${randomToken(18)}`;
 }
 
-/** Mensagem no formato da Gmail API: `raw` em base64url e o `threadId` quando mantém a conversa. */
+/** Message in the Gmail API format: base64url `raw` and the `threadId` when keeping the thread. */
 export function gmailMessageResource(prepared: PreparedEmail): { raw: string; threadId?: string } {
   const raw = toRawMessage(buildMimeMessage(prepared.email, mimeBoundary()));
   return prepared.threadId ? { raw, threadId: prepared.threadId } : { raw };
 }
 
-/** Lê uma mensagem inteira (formato `full`), para responder ou encaminhar. */
+/** Reads a whole message (`full` format), to reply or forward. */
 export function fetchFullMessage(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -94,7 +94,7 @@ export function fetchFullMessage(
   return gmailGet<GmailMessage>(deps, ref, gmailUrl(`messages/${messageId}`, { format: 'full' }));
 }
 
-/** Resposta pronta à mensagem: lê o original e calcula destinatários, assunto e conversa. */
+/** Ready reply to the message: reads the original and works out recipients, subject and thread. */
 export async function prepareReply(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -107,7 +107,7 @@ export async function prepareReply(
   return prepared;
 }
 
-/** Baixa os anexos da mensagem para encaminhar; recusa se a soma passar de `MAX_FORWARD_BYTES`. */
+/** Downloads the message attachments to forward; refuses if the total exceeds `MAX_FORWARD_BYTES`. */
 export async function forwardAttachments(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -128,7 +128,7 @@ export async function forwardAttachments(
   );
 }
 
-/** Encaminhamento pronto: valida os destinatários, lê o original e baixa os anexos dele. */
+/** Ready forward: validates the recipients, reads the original and downloads its attachments. */
 export async function prepareForward(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -140,7 +140,7 @@ export async function prepareForward(
   return forwardEmail(message, { ...email, note: request.note, attachments });
 }
 
-/** Envia o e-mail pronto pela conta e devolve os ids da mensagem enviada. */
+/** Sends the ready email from the account and returns the sent message ids. */
 export async function sendPrepared(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -154,7 +154,7 @@ export async function sendPrepared(
   return sentResult(ref.alias, sent);
 }
 
-/** Resultado de um envio: conta, `sent` e os ids da mensagem enviada (nulos se o Gmail não devolver). */
+/** Send result: account, `sent` and the sent message ids (null if Gmail does not return them). */
 export function sentResult(
   alias: string,
   sent: { readonly id?: string; readonly threadId?: string },

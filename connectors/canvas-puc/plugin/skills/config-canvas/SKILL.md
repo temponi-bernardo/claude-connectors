@@ -37,7 +37,7 @@ Se a pessoa colar o token no chat, não use o valor: peça para revogar esse tok
 - **Sem o plugin:** Configurações → Conectores → **Adicionar conector personalizado** com
   `https://canvas-puc-remote.bftemponi.workers.dev/mcp`.
 
-O Claude abre a página **"Conectar o Canvas ao Claude"**: colar o token e clicar em **Conectar**. A página
+O Claude abre a página **"Connect Canvas to Claude"**: colar o token e clicar em **Connect**. A página
 devolve o acesso ao Claude sozinha. Peça para avisar quando terminar e chame `whoami` de novo.
 
 ## 4. Teste rápido

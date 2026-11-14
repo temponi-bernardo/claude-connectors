@@ -19,11 +19,11 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/wa"
 )
 
-const testToken = "token-de-teste-com-mais-de-32-caracteres"
+const testToken = "test-token-with-more-than-32-characters"
 
 var testKey = bytes.Repeat([]byte{9}, 32)
 
-// fakeWA substitui o whatsmeow nos testes (sem rede).
+// fakeWA replaces whatsmeow in tests (no network).
 type fakeWA struct {
 	mu           sync.Mutex
 	state        wa.State
@@ -63,7 +63,7 @@ func (f *fakeWA) SendText(_ context.Context, out wa.Outgoing) (wa.Sent, error) {
 func (f *fakeWA) Download(context.Context, store.Media) ([]byte, error) { return f.media, f.mediaErr }
 func (f *fakeWA) Disconnect()                                           { f.disconnected = true }
 
-// env é um servidor de teste completo: ponte real (bancos em t.TempDir) + whatsmeow falso.
+// env is a complete test server: real bridge (databases in t.TempDir) + fake whatsmeow.
 type env struct {
 	t    *testing.T
 	b    *bridge.Bridge
@@ -90,7 +90,7 @@ func newEnv(t *testing.T, mutate func(*Options)) *env {
 	return e
 }
 
-// ready restaura do zero e espera a fase ready.
+// ready restores from scratch and waits for the ready phase.
 func (e *env) ready() *env {
 	e.t.Helper()
 	rec := e.do("POST", "/restore", nil, map[string]string{"X-Snapshot": "none"})
@@ -106,11 +106,11 @@ func (e *env) waitReady() {
 	select {
 	case <-e.b.Ready():
 	case <-time.After(5 * time.Second):
-		e.t.Fatal("ponte não ficou pronta")
+		e.t.Fatal("bridge did not become ready")
 	}
 }
 
-// do faz uma requisição autenticada.
+// do sends an authenticated request.
 func (e *env) do(method, path string, body []byte, headers map[string]string) *httptest.ResponseRecorder {
 	e.t.Helper()
 	req := httptest.NewRequest(method, path, bytes.NewReader(body))
@@ -129,36 +129,36 @@ func (e *env) postJSON(path, body string) *httptest.ResponseRecorder {
 	return e.do("POST", path, []byte(body), map[string]string{"Content-Type": "application/json"})
 }
 
-// decode lê a resposta JSON num mapa.
+// decode reads the JSON response into a map.
 func decode(t *testing.T, rec *httptest.ResponseRecorder) map[string]any {
 	t.Helper()
 	var m map[string]any
 	if err := json.Unmarshal(rec.Body.Bytes(), &m); err != nil {
-		t.Fatalf("JSON inválido (%d): %s", rec.Code, rec.Body)
+		t.Fatalf("invalid JSON (%d): %s", rec.Code, rec.Body)
 	}
 	return m
 }
 
-// expect confere status e, se dado, o código de erro.
+// expect checks the status and, when given, the error code.
 func expect(t *testing.T, rec *httptest.ResponseRecorder, status int, code string) map[string]any {
 	t.Helper()
 	if rec.Code != status {
-		t.Fatalf("status %d (esperava %d): %s", rec.Code, status, rec.Body)
+		t.Fatalf("status %d (expected %d): %s", rec.Code, status, rec.Body)
 	}
 	if code == "" {
 		return nil
 	}
 	m := decode(t, rec)
 	if m["error"] != code {
-		t.Fatalf("erro %v (esperava %s)", m["error"], code)
+		t.Fatalf("error %v (expected %s)", m["error"], code)
 	}
 	if !strings.Contains(rec.Header().Get("Content-Type"), "application/json") {
-		t.Fatal("content-type de erro deveria ser JSON")
+		t.Fatal("error content-type should be JSON")
 	}
 	return m
 }
 
-// seed grava dados de exemplo no banco da ponte.
+// seed stores sample data in the bridge database.
 func (e *env) seed() {
 	e.t.Helper()
 	err := e.b.Store().SaveHistory(context.Background(), store.HistoryBatch{

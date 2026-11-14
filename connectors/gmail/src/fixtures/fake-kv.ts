@@ -1,12 +1,12 @@
-/** Workers KV em memória para os testes (get com `type: 'json'`, put com validade, delete e list). */
+/** In-memory Workers KV for tests (get with `type: 'json'`, put with expiry, delete and list). */
 import type { KvStore } from '../context.js';
 
-/** Opções de leitura aceitas pelo KV falso. */
+/** Read options accepted by the fake KV. */
 interface GetOptions {
   readonly type?: 'text' | 'json';
 }
 
-/** KV em memória; `now` controla a validade (`expirationTtl`). */
+/** In-memory KV; `now` drives expiry (`expirationTtl`). */
 export class FakeKv implements KvStore {
   readonly entries = new Map<string, { value: string; expiresAt: number | null }>();
   now: () => number = () => Date.now();

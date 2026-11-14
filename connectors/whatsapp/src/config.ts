@@ -1,30 +1,30 @@
 /**
- * Configuração do conector WhatsApp lida do ambiente do Worker (variáveis de `wrangler.toml` e secrets). Pura:
- * valida tudo na borda e devolve tipos do domínio, com mensagens que dizem como corrigir.
+ * WhatsApp connector settings read from the Worker environment (`wrangler.toml` variables and secrets). Pure:
+ * validates everything at the edge and returns domain types, with messages that say how to fix them.
  */
 import { envValue, parseFlag, type EnvVars } from '../../../src/core/env.js';
 import { parseEmailList } from '../../../src/remote/github-login.js';
 
-/** Configuração completa do conector. */
+/** Full connector settings. */
 export interface WhatsAppSettings {
   readonly allowedEmails: readonly string[];
   readonly githubClientId: string;
   readonly githubClientSecret: string;
-  /** Tempo sem uso até o container dormir, no formato do `Container` (`"5m"`, `"90s"`). */
+  /** Idle time until the container sleeps, in the `Container` format (`"5m"`, `"90s"`). */
   readonly sleepAfter: string;
-  /** Teto de cada chamada de ferramenta, de ponta a ponta (ms). */
+  /** End-to-end cap of each tool call (ms). */
   readonly toolTimeoutMs: number;
-  /** Quanto esperar a sincronização de pendências antes de responder com o que houver (ms). */
+  /** How long to wait for the pending-message sync before answering with what is available (ms). */
   readonly syncWaitMs: number;
   readonly enableSend: boolean;
-  /** Destinatários permitidos para envio, como JID; vazia = qualquer contato ou grupo. */
+  /** Recipients allowed for sending, as JIDs; empty = any contact or group. */
   readonly sendAllowlist: readonly string[];
   readonly sendMaxPerHour: number;
-  /** Expressão cron do sync periódico opcional; vazia = desligado. */
+  /** Cron expression of the optional periodic sync; empty = off. */
   readonly syncCron: string | null;
 }
 
-/** Padrões: dormir em 5 minutos, 25 s por ferramenta, 8 s esperando o sync, até 10 envios por hora. */
+/** Defaults: sleep after 5 minutes, 25 s per tool, 8 s waiting for the sync, up to 10 sends per hour. */
 export const WHATSAPP_DEFAULTS = {
   sleepAfter: '5m',
   toolTimeoutMs: 25_000,
@@ -32,14 +32,14 @@ export const WHATSAPP_DEFAULTS = {
   sendMaxPerHour: 10,
 } as const;
 
-/** Lê uma variável obrigatória ou lança dizendo como defini-la. */
+/** Reads a required variable or throws saying how to set it. */
 export function requireEnv(env: EnvVars, key: string, how: string): string {
   const value = envValue(env, key);
-  if (!value) throw new Error(`Defina ${key}: ${how}`);
+  if (!value) throw new Error(`Set ${key}: ${how}`);
   return value;
 }
 
-/** Lê um inteiro dentro de um intervalo; ausente vale o padrão, fora do intervalo lança. */
+/** Reads an integer within a range; missing uses the default, out of range throws. */
 export function readIntInRange(
   env: EnvVars,
   key: string,
@@ -49,12 +49,12 @@ export function readIntInRange(
   if (raw === null) return range.fallback;
   const value = Number(raw);
   if (!Number.isInteger(value) || value < range.min || value > range.max) {
-    throw new Error(`${key} precisa ser um inteiro entre ${range.min} e ${range.max}.`);
+    throw new Error(`${key} must be an integer between ${range.min} and ${range.max}.`);
   }
   return value;
 }
 
-/** Valida `SLEEP_AFTER` (`30s` a `60m`, ou `1h`); ausente vale `5m`. */
+/** Validates `SLEEP_AFTER` (`30s` to `60m`, or `1h`); missing means `5m`. */
 export function readSleepAfter(env: EnvVars): string {
   const raw = envValue(env, 'SLEEP_AFTER') ?? WHATSAPP_DEFAULTS.sleepAfter;
   const match = /^(\d+)(s|m|h)$/.exec(raw);
@@ -62,12 +62,12 @@ export function readSleepAfter(env: EnvVars): string {
     ? Number(match[1]) * { s: 1, m: 60, h: 3600 }[match[2] as 's' | 'm' | 'h']
     : 0;
   if (seconds < 30 || seconds > 3600) {
-    throw new Error('SLEEP_AFTER precisa ser uma duração entre 30s e 1h (ex.: "5m").');
+    throw new Error('SLEEP_AFTER must be a duration between 30s and 1h (e.g. "5m").');
   }
   return raw;
 }
 
-/** Normaliza um número de telefone ou JID de contato para só dígitos; nulo se não parecer um número. */
+/** Normalizes a phone number or contact JID to digits only; null if it does not look like a number. */
 export function normalizePhone(raw: string): string | null {
   const digits = raw
     .trim()
@@ -76,10 +76,10 @@ export function normalizePhone(raw: string): string | null {
   return /^\d{8,15}$/.test(digits) ? digits : null;
 }
 
-/** JIDs aceitos como destinatário: contato, LID e grupo (inclusive o formato antigo `criador-timestamp`). */
+/** JIDs accepted as recipient: contact, LID and group (including the old `creator-timestamp` format). */
 const RECIPIENT_JID = /^(?:\d{5,30}@(?:s\.whatsapp\.net|lid|g\.us)|\d{5,30}-\d{5,30}@g\.us)$/;
 
-/** Normaliza um destinatário de envio para JID (número vira contato); nulo se não for contato nem grupo. */
+/** Normalizes a send recipient to a JID (a number becomes a contact); null if neither contact nor group. */
 export function normalizeRecipient(raw: string): string | null {
   const trimmed = raw.trim();
   if (!trimmed.includes('@')) {
@@ -89,26 +89,26 @@ export function normalizeRecipient(raw: string): string | null {
   return RECIPIENT_JID.test(trimmed) ? trimmed : null;
 }
 
-/** Lê `SEND_ALLOWLIST` (números ou JIDs separados por vírgula; vazia = qualquer um); item inválido lança. */
+/** Reads `SEND_ALLOWLIST` (comma-separated numbers or JIDs; empty = anyone); an invalid item throws. */
 export function readSendAllowlist(env: EnvVars): string[] {
   const items = (envValue(env, 'SEND_ALLOWLIST') ?? '').split(',').filter((item) => item.trim());
   return items.map((item) => {
     const jid = normalizeRecipient(item);
-    if (!jid) throw new Error(`SEND_ALLOWLIST tem um destinatário inválido: "${item.trim()}".`);
+    if (!jid) throw new Error(`SEND_ALLOWLIST has an invalid recipient: "${item.trim()}".`);
     return jid;
   });
 }
 
-/** Lê a lista de donos (`ALLOWED_EMAILS`); vazia lança, porque ninguém conseguiria entrar. */
+/** Reads the owner list (`ALLOWED_EMAILS`); empty throws, because nobody could sign in. */
 export function readAllowedEmails(env: EnvVars): string[] {
   const emails = parseEmailList(envValue(env, 'ALLOWED_EMAILS'));
   if (emails.length === 0) {
-    throw new Error('Defina ALLOWED_EMAILS com o e-mail verificado da sua conta do GitHub.');
+    throw new Error('Set ALLOWED_EMAILS to the verified email of your GitHub account.');
   }
   return emails;
 }
 
-/** Lê os prazos: sono do container, teto por ferramenta e espera do sync. */
+/** Reads the timings: container sleep, per-tool cap and sync wait. */
 export function readTimingSettings(
   env: EnvVars,
 ): Pick<WhatsAppSettings, 'sleepAfter' | 'toolTimeoutMs' | 'syncWaitMs'> {
@@ -128,7 +128,7 @@ export function readTimingSettings(
   };
 }
 
-/** Lê a configuração de envio: ligado ou não, allowlist opcional e limite por hora. */
+/** Reads the send settings: on or off, optional allowlist and hourly limit. */
 export function readSendSettings(
   env: EnvVars,
 ): Pick<WhatsAppSettings, 'enableSend' | 'sendAllowlist' | 'sendMaxPerHour'> {
@@ -143,11 +143,11 @@ export function readSendSettings(
   };
 }
 
-/** Lê e valida a configuração do conector a partir do ambiente do Worker. */
+/** Reads and validates the connector settings from the Worker environment. */
 export function readWhatsAppSettings(env: EnvVars): WhatsAppSettings {
   return {
     allowedEmails: readAllowedEmails(env),
-    githubClientId: requireEnv(env, 'GITHUB_CLIENT_ID', 'crie um OAuth App no GitHub (README).'),
+    githubClientId: requireEnv(env, 'GITHUB_CLIENT_ID', 'create an OAuth App on GitHub (README).'),
     githubClientSecret: requireEnv(
       env,
       'GITHUB_CLIENT_SECRET',
@@ -159,7 +159,7 @@ export function readWhatsAppSettings(env: EnvVars): WhatsAppSettings {
   };
 }
 
-/** Variáveis repassadas da configuração do Worker para o container da ponte (`bridge/API.md`). */
+/** Variables forwarded from the Worker configuration to the bridge container (`bridge/API.md`). */
 export const BRIDGE_ENV_KEYS: readonly string[] = [
   'BRIDGE_TOKEN',
   'SNAPSHOT_KEY',
@@ -171,19 +171,18 @@ export const BRIDGE_ENV_KEYS: readonly string[] = [
   'SEND_MAX_PER_HOUR',
 ];
 
-/** Endereço interno (interceptado pelo Worker) para onde a ponte envia o snapshot no `SIGTERM`. */
+/** Internal address (intercepted by the Worker) where the bridge sends the snapshot on `SIGTERM`. */
 export const SNAPSHOT_PUSH_URL = 'http://snapshot.internal/push';
 
-/** Monta o ambiente do container: só as chaves da ponte, mais o endereço do snapshot de saída. */
+/** Builds the container environment: only the bridge keys, plus the outgoing snapshot address. */
 export function containerEnvVars(env: EnvVars): Record<string, string> {
   const token = requireEnv(
     env,
     'BRIDGE_TOKEN',
-    'wrangler secret put BRIDGE_TOKEN (32+ caracteres aleatórios).',
+    'wrangler secret put BRIDGE_TOKEN (32+ random characters).',
   );
-  if (token.length < 32)
-    throw new Error('BRIDGE_TOKEN precisa ter pelo menos 32 caracteres aleatórios.');
-  requireEnv(env, 'SNAPSHOT_KEY', 'wrangler secret put SNAPSHOT_KEY (32 bytes em base64).');
+  if (token.length < 32) throw new Error('BRIDGE_TOKEN must have at least 32 random characters.');
+  requireEnv(env, 'SNAPSHOT_KEY', 'wrangler secret put SNAPSHOT_KEY (32 bytes in base64).');
   const pairs = BRIDGE_ENV_KEYS.map((key) => [key, envValue(env, key)] as const);
   const present = pairs.filter((pair): pair is readonly [string, string] => pair[1] !== null);
   return { ...Object.fromEntries(present), SNAPSHOT_PUSH_URL };

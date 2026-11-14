@@ -1,23 +1,23 @@
 /**
- * Validação do `id_token` do Google (OpenID Connect): assinatura RS256 pelas chaves públicas do Google,
- * emissor, audiência, validade, `nonce` e e-mail verificado. Só depois disso o e-mail é confiável.
+ * Validation of the Google `id_token` (OpenID Connect): RS256 signature with Google's public keys, issuer,
+ * audience, expiry, `nonce` and verified email. Only after that is the email trustworthy.
  */
 import type { webcrypto } from 'node:crypto';
 import { UPSTREAM_USER_AGENT, type GmailDeps } from './context.js';
 
-/** Chaves públicas (JWKS) que assinam os `id_token` do Google. */
+/** Public keys (JWKS) that sign Google `id_token`s. */
 export const GOOGLE_JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
 
-/** Emissores aceitos nos `id_token` do Google. */
+/** Issuers accepted in Google `id_token`s. */
 export const GOOGLE_ISSUERS: readonly string[] = [
   'https://accounts.google.com',
   'accounts.google.com',
 ];
 
-/** Folga de relógio aceita na validade do token, em segundos. */
+/** Clock skew accepted on the token expiry, in seconds. */
 export const CLOCK_SKEW_SECONDS = 60;
 
-/** Partes de um JWT já decodificadas. */
+/** Decoded parts of a JWT. */
 export interface DecodedJwt {
   readonly header: Record<string, unknown>;
   readonly payload: Record<string, unknown>;
@@ -25,31 +25,31 @@ export interface DecodedJwt {
   readonly signature: Uint8Array<ArrayBuffer>;
 }
 
-/** Identidade confirmada pelo `id_token`: id estável (`sub`) e e-mail verificado. */
+/** Identity confirmed by the `id_token`: stable id (`sub`) and verified email. */
 export interface GoogleIdentity {
   readonly sub: string;
   readonly email: string;
 }
 
-/** O que o `id_token` precisa conferir. */
+/** What the `id_token` must match. */
 export interface IdTokenExpectation {
   readonly clientId: string;
   readonly nonce: string;
-  /** Instante atual em segundos Unix. */
+  /** Current time in Unix seconds. */
   readonly now: number;
 }
 
-/** Decodifica um pedaço base64url de JSON em objeto; lança erro se não for objeto. */
+/** Decodes a base64url JSON part into an object; throws if it is not an object. */
 export function decodeJwtJson(part: string): Record<string, unknown> {
   const value: unknown = JSON.parse(Buffer.from(part, 'base64url').toString('utf8'));
-  if (typeof value !== 'object' || value === null) throw new Error('JWT malformado.');
+  if (typeof value !== 'object' || value === null) throw new Error('Malformed JWT.');
   return value as Record<string, unknown>;
 }
 
-/** Separa e decodifica um JWT (`header.payload.assinatura`); lança erro se estiver malformado. */
+/** Splits and decodes a JWT (`header.payload.signature`); throws if malformed. */
 export function decodeJwt(token: string): DecodedJwt {
   const parts = token.split('.');
-  if (parts.length !== 3) throw new Error('id_token do Google malformado.');
+  if (parts.length !== 3) throw new Error('Malformed Google id_token.');
   const [header = '', payload = '', signature = ''] = parts;
   return {
     header: decodeJwtJson(header),
@@ -59,49 +59,48 @@ export function decodeJwt(token: string): DecodedJwt {
   };
 }
 
-/** Nomes das verificações do `id_token` que falharam (vazio quando todas passam). */
+/** Names of the `id_token` checks that failed (empty when all pass). */
 export function idTokenProblems(
   payload: Readonly<Record<string, unknown>>,
   expected: IdTokenExpectation,
 ): string[] {
   const exp = typeof payload.exp === 'number' ? payload.exp : 0;
   const checks: [string, boolean][] = [
-    ['emissor', GOOGLE_ISSUERS.includes(String(payload.iss))],
-    ['audiência', payload.aud === expected.clientId],
-    ['validade', exp + CLOCK_SKEW_SECONDS > expected.now],
+    ['issuer', GOOGLE_ISSUERS.includes(String(payload.iss))],
+    ['audience', payload.aud === expected.clientId],
+    ['expiry', exp + CLOCK_SKEW_SECONDS > expected.now],
     ['nonce', payload.nonce === expected.nonce],
-    ['e-mail verificado', payload.email_verified === true && typeof payload.email === 'string'],
+    ['verified email', payload.email_verified === true && typeof payload.email === 'string'],
     ['sub', typeof payload.sub === 'string' && payload.sub.length > 0],
   ];
   return checks.filter(([, ok]) => !ok).map(([name]) => name);
 }
 
-/** Confere emissor, audiência, validade, `nonce`, `sub` e e-mail verificado; devolve a identidade. */
+/** Checks issuer, audience, expiry, `nonce`, `sub` and verified email; returns the identity. */
 export function checkIdTokenClaims(
   payload: Readonly<Record<string, unknown>>,
   expected: IdTokenExpectation,
 ): GoogleIdentity {
   const problems = idTokenProblems(payload, expected);
-  if (problems.length > 0) throw new Error(`id_token do Google inválido (${problems.join(', ')}).`);
+  if (problems.length > 0) throw new Error(`Invalid Google id_token (${problems.join(', ')}).`);
   return { sub: String(payload.sub), email: String(payload.email).toLowerCase() };
 }
 
-/** Busca a chave pública do Google com o `kid` dado; lança erro se não existir. */
+/** Fetches the Google public key with the given `kid`; throws if it does not exist. */
 export async function fetchGoogleKey(deps: GmailDeps, kid: string): Promise<webcrypto.JsonWebKey> {
   const response = await deps.fetch(GOOGLE_JWKS_URL, {
     headers: { 'user-agent': UPSTREAM_USER_AGENT },
   });
-  if (!response.ok)
-    throw new Error(`Não consegui buscar as chaves do Google (HTTP ${response.status}).`);
+  if (!response.ok) throw new Error(`Could not fetch the Google keys (HTTP ${response.status}).`);
   const { keys } = (await response.json()) as {
     keys?: (webcrypto.JsonWebKey & { kid?: string })[];
   };
   const key = keys?.find((candidate) => candidate.kid === kid);
-  if (!key) throw new Error('Chave do id_token não encontrada no Google.');
+  if (!key) throw new Error('id_token key not found at Google.');
   return key;
 }
 
-/** Confere a assinatura RS256 do JWT com a chave pública dada. */
+/** Checks the JWT RS256 signature with the given public key. */
 export async function verifyRs256(jwt: DecodedJwt, jwk: webcrypto.JsonWebKey): Promise<boolean> {
   const key = await crypto.subtle.importKey(
     'jwk',
@@ -118,16 +117,16 @@ export async function verifyRs256(jwt: DecodedJwt, jwk: webcrypto.JsonWebKey): P
   );
 }
 
-/** Valida o `id_token` do Google (assinatura e claims) e devolve a identidade verificada. */
+/** Validates the Google `id_token` (signature and claims) and returns the verified identity. */
 export async function verifyGoogleIdToken(
   deps: GmailDeps,
   idToken: string,
   nonce: string,
 ): Promise<GoogleIdentity> {
   const jwt = decodeJwt(idToken);
-  if (jwt.header.alg !== 'RS256') throw new Error('id_token do Google com algoritmo inesperado.');
+  if (jwt.header.alg !== 'RS256') throw new Error('Google id_token with an unexpected algorithm.');
   const jwk = await fetchGoogleKey(deps, String(jwt.header.kid));
-  if (!(await verifyRs256(jwt, jwk))) throw new Error('Assinatura do id_token do Google inválida.');
+  if (!(await verifyRs256(jwt, jwk))) throw new Error('Invalid Google id_token signature.');
   const now = Math.floor(deps.now() / 1000);
   return checkIdTokenClaims(jwt.payload, { clientId: deps.settings.googleClientId, nonce, now });
 }

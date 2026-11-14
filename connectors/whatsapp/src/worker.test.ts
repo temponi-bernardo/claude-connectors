@@ -14,9 +14,9 @@ import {
   whatsappRemoteConnector,
 } from './worker.js';
 
-const ORIGIN = 'https://whatsapp.conta.workers.dev';
+const ORIGIN = 'https://whatsapp.account.workers.dev';
 const VARS = {
-  ALLOWED_EMAILS: 'dono@exemplo.dev',
+  ALLOWED_EMAILS: 'owner@example.dev',
   GITHUB_CLIENT_ID: 'cid',
   GITHUB_CLIENT_SECRET: 'cs',
   SEAL_KEY: randomBytes(32).toString('base64'),
@@ -46,14 +46,14 @@ function envWith(
   return { env, paths };
 }
 
-describe('auxiliares', () => {
-  it('unixNow está em segundos e githubSettingsFrom repassa a lista do dono', () => {
+describe('helpers', () => {
+  it('unixNow is in seconds and githubSettingsFrom forwards the owner list', () => {
     expect(unixNow()).toBeLessThan(Date.now());
     const github = githubSettingsFrom(readWhatsAppSettings(VARS));
-    expect(github).toMatchObject({ clientId: 'cid', allowedEmails: ['dono@exemplo.dev'] });
+    expect(github).toMatchObject({ clientId: 'cid', allowedEmails: ['owner@example.dev'] });
   });
 
-  it('o fetch do GitHub chama o fetch global sem this', async () => {
+  it('the GitHub fetch calls the global fetch without this', async () => {
     const spy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('ok'));
     const github = githubSettingsFrom(readWhatsAppSettings(VARS));
     await github.fetchFn('https://api.github.com/x');
@@ -63,27 +63,27 @@ describe('auxiliares', () => {
 });
 
 describe('whatsappRemoteConnector', () => {
-  it('usa login pelo GitHub e só aceita o dono', () => {
+  it('uses GitHub login and accepts only the owner', () => {
     const connector = whatsappRemoteConnector(
       readWhatsAppSettings(VARS),
       () => Promise.resolve(new Response()),
       ORIGIN,
     );
     expect(connector.login.kind).toBe('upstream');
-    expect(connector.acceptsSecret?.('dono@exemplo.dev')).toBe(true);
+    expect(connector.acceptsSecret?.('owner@example.dev')).toBe(true);
     expect(connector.acceptsSecret?.('x@y.z')).toBe(false);
-    expect(connector.createServer('dono@exemplo.dev').server).toBeDefined();
+    expect(connector.createServer('owner@example.dev').server).toBeDefined();
   });
 });
 
-describe('createWhatsAppApps e handleWhatsAppFetch', () => {
-  it('usa a origem como emissor e liga o /pair à mesma chave', () => {
+describe('createWhatsAppApps and handleWhatsAppFetch', () => {
+  it('uses the origin as issuer and binds /pair to the same key', () => {
     const apps = createWhatsAppApps(VARS, () => Promise.resolve(new Response()), ORIGIN);
     expect(apps.remote.settings.issuer).toBe(ORIGIN);
     expect(apps.pair.settings).toBe(apps.remote.settings);
   });
 
-  it('configuração inválida vira 500 explicado', async () => {
+  it('invalid configuration becomes an explained 500', async () => {
     const { env } = envWith(() => new Response());
     const res = await handleWhatsAppFetch(new Request(`${ORIGIN}/`), {
       ...env,
@@ -93,7 +93,7 @@ describe('createWhatsAppApps e handleWhatsAppFetch', () => {
     expect(await res.text()).toContain('ALLOWED_EMAILS');
   });
 
-  it('o /pair sem sessão vai ao GitHub e o OAuth publica os metadados', async () => {
+  it('/pair without a session goes to GitHub and OAuth publishes the metadata', async () => {
     const { env } = envWith(() => new Response());
     const pair = await handleWhatsAppFetch(new Request(`${ORIGIN}/pair`), env);
     expect(pair.headers.get('location')).toContain('github.com/login/oauth/authorize');
@@ -105,8 +105,8 @@ describe('createWhatsAppApps e handleWhatsAppFetch', () => {
   });
 });
 
-describe('sync periódico opcional', () => {
-  it('só roda com SYNC_CRON igual ao cron que disparou', async () => {
+describe('optional periodic sync', () => {
+  it('runs only with SYNC_CRON equal to the cron that fired', async () => {
     expect(isSyncCronEnabled(VARS, '0 * * * *')).toBe(false);
     expect(isSyncCronEnabled({ ...VARS, SYNC_CRON: '0 */6 * * *' }, '0 */6 * * *')).toBe(true);
     const { env, paths } = envWith(() => Response.json({}));
@@ -114,7 +114,7 @@ describe('sync periódico opcional', () => {
     expect(paths).toEqual([]);
   });
 
-  it('espera o sync, guarda o snapshot e devolve o resultado', async () => {
+  it('waits for the sync, saves the snapshot and returns the outcome', async () => {
     const { env, paths } = envWith(
       (request) =>
         new URL(request.url).pathname === '/__snapshot'
