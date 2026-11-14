@@ -22,6 +22,9 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
   tools that send, submit, overwrite or delete are `destructiveHint` (Canvas submit and reply, Gmail send, reply,
   forward, send/update/delete draft, trash and unlink, WhatsApp `send_message`). Tool descriptions and error
   messages are in English, and each MCP server announces the version of its `plugin.json`.
+- Site: the public GitHub Pages site is in English (ADR 0021). The privacy policy moves to `privacy.html` and the
+  terms to `terms.html`; the old `privacidade.html` and `termos.html` addresses redirect to them. The three plugins'
+  `privacyPolicyUrl` point to the new page.
 
 - Canvas: when the Canvas token behind a refresh token was deleted or expired in Canvas, the OAuth refresh now
   answers `invalid_grant` instead of new tokens that fail on every tool call, so Claude asks to connect again.
