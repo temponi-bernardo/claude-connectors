@@ -1,36 +1,36 @@
-# 0002 — Documentação verificada e gerada por análise de AST
+# 0002 — Documentation checked and generated from AST analysis
 
-- **Estado:** Aceito
-- **Data:** 2026-10-01
-- **Relacionado:** F0.1, ADR 0001
+- **Status:** Accepted
+- **Date:** 2026-10-01
+- **Related:** F0.1, ADR 0001
 
-## Contexto
+## Context
 
-Queremos que `docs/FUNCTIONS.md` liste toda função com "Usada por" e "Processos" corretos, sem que ninguém
-mantenha isso à mão. Uma versão anterior baseada em regex precisava de uma lista crescente de cuidados
-(ignorar comentários, strings, `${}`, chaves de objeto, descobrir a função dona pelo recuo do `}`), e ainda
-assim errava.
+We want `docs/FUNCTIONS.md` to list every function with correct "Usada por" and "Processos", without anyone
+maintaining that by hand. An earlier regex-based version needed a growing list of special cases (skip
+comments, strings, `${}`, object keys, find the owning function by the indentation of `}`), and still got it
+wrong.
 
-## Decisão
+## Decision
 
-Usar a AST (ts-morph) para registrar funções de topo, resolver referências por símbolo e descobrir a função
-que contém cada referência. Os campos deriváveis do código (Arquivo, Assinatura, Usada por, Processos) são
-**gerados** por `docs:generate` em blocos marcados; `docs:check` só falha se o bloco gerado estiver
-desatualizado. Os campos de intenção (Faz, Entrada, Saída, Efeitos, Erros) continuam manuais e obrigatórios.
+Use the AST (ts-morph) to register top-level functions, resolve references by symbol and find the function
+that contains each reference. Fields derivable from the code (Arquivo, Assinatura, Usada por, Processos) are
+**generated** by `docs:generate` in marked blocks; `docs:check` only fails if a generated block is out of
+date. Intent fields (Faz, Entrada, Saída, Efeitos, Erros) stay manual and required.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                     | Por que não                                                           |
-| ----------------------------------------------- | --------------------------------------------------------------------- |
-| Regex sobre o código                            | Lista infinita de exceções; falsos positivos em strings e comentários |
-| Só conferir (sem gerar)                         | Obriga a escrever à mão dados que a máquina já sabe; churn em todo PR |
-| TypeDoc                                         | Gera referência de API, mas não "Usada por" nem ligação com processos |
-| Exigir arrow vs. `function` por causa do parser | Com AST a restrição é desnecessária; mantida só como estilo (lint)    |
+| Alternative                                        | Why not                                                                  |
+| -------------------------------------------------- | ------------------------------------------------------------------------ |
+| Regex over the code                                | Endless list of exceptions; false positives in strings and comments      |
+| Check only (no generation)                         | Forces writing by hand data the machine already knows; churn in every PR |
+| TypeDoc                                            | Generates an API reference, but no "Usada por" nor links to processes    |
+| Require arrow vs. `function` because of the parser | With an AST the restriction is unnecessary; kept only as style (lint)    |
 
-## Consequências
+## Consequences
 
-- Positivas: zero regex sobre código; mensagens de erro exatas (esperado × encontrado); menos tokens gastos
-  pelo Claude escrevendo o que a máquina gera.
-- Negativas: `docs:check` leva alguns segundos (ts-morph carrega o programa); depende de TypeScript como
-  linguagem analisada (ver ADR 0001).
-- Docs afetados: DOCUMENTATION.md (modelo de função), FUNCTIONS.md (marcadores).
+- Positive: zero regex over code; exact error messages (expected × found); fewer tokens spent by Claude
+  writing what the machine generates.
+- Negative: `docs:check` takes a few seconds (ts-morph loads the program); depends on TypeScript as the
+  analyzed language (see ADR 0001).
+- Docs that change: DOCUMENTATION.md (function template), FUNCTIONS.md (markers).

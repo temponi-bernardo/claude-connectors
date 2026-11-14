@@ -1,8 +1,8 @@
 # 0020 — Plugin content lives in a `plugin/` subfolder
 
-- **Estado:** Aceito
-- **Data:** 2026-11-14
-- **Relacionado:** ADR 0013 (replaced in part), ADR 0018, roadmap F4.2
+- **Status:** Accepted
+- **Date:** 2026-11-14
+- **Related:** ADR 0013 (replaced in part), ADR 0018, roadmap F4.2
 
 ## Context
 

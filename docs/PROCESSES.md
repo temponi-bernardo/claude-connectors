@@ -4,7 +4,7 @@ Fluxos do sistema, do gatilho ao resultado. Cada passo cita as funções envolvi
 o `docs:check` usa essas citações (mais tudo o que elas chamam) para preencher o campo **Processos**
 de cada função em [FUNCTIONS.md](FUNCTIONS.md). Função citada que não existe no código é erro.
 
-Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
+Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#process).
 
 ## P01 — Checar a documentação (`npm run docs:check`)
 

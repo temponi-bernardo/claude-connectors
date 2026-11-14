@@ -1,8 +1,8 @@
 # 0022 — One version per plugin
 
-- **Estado:** Aceito
-- **Data:** 2026-11-14
-- **Relacionado:** ADR 0003, ADR 0006, roadmap F4.3
+- **Status:** Accepted
+- **Date:** 2026-11-14
+- **Related:** ADR 0003, ADR 0006, roadmap F4.3
 
 ## Context
 

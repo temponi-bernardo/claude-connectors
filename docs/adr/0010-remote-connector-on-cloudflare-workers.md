@@ -1,38 +1,39 @@
-# 0010 — Conector remoto hospedado no Cloudflare Workers
+# 0010 — Remote connector hosted on Cloudflare Workers
 
-- **Estado:** Aceito
-- **Data:** 2026-11-05
-- **Relacionado:** F2.7, substitui em parte a ADR 0009 (item 7, hospedagem)
+- **Status:** Accepted
+- **Date:** 2026-11-05
+- **Related:** F2.7, partly supersedes ADR 0009 (item 7, hosting)
 
-## Contexto
+## Context
 
-A ADR 0009 publicava o servidor remoto por Docker, com um blueprint do Render. O plano grátis do Render dorme
-depois de 15 minutos sem uso e a primeira chamada leva cerca de 1 minuto, tempo em que o Claude pode desistir.
-O dono já tem conta e conector da Cloudflare e prefere o Workers. O handler remoto já usa `Request`/`Response`
-(Web padrão), que é a interface nativa do Workers.
+ADR 0009 published the remote server with Docker, using a Render blueprint. Render's free plan sleeps after
+15 minutes idle and the first call takes about 1 minute, long enough for Claude to give up. The owner already
+has a Cloudflare account and connector and prefers Workers. The remote handler already uses
+`Request`/`Response` (Web standard), which is Workers' native interface.
 
-## Decisão
+## Decision
 
-1. O conector remoto do Canvas é publicado no **Cloudflare Workers** com `npm run worker:deploy`
-   (`connectors/canvas-puc/wrangler.toml`, entrada `src/worker.ts`, flag `nodejs_compat` para `node:crypto`).
-2. `SEAL_KEY` é um _secret_ do Worker (`wrangler secret put`); `CANVAS_BASE_URL` e `CANVAS_ALLOW_WRITE` ficam em
-   `[vars]`. Sem `PUBLIC_URL`, o emissor OAuth é a origem da requisição (`*.workers.dev`).
-3. O deploy é manual (depois do merge), com `CLOUDFLARE_API_TOKEN` no ambiente: o conector da Cloudflare do
-   Claude não publica Workers e o projeto não usa CI (ADR 0006).
-4. O `render.yaml` sai. O `Dockerfile` e o `server/remote.js` continuam para quem quiser outro host.
+1. The remote Canvas connector is published on **Cloudflare Workers** with `npm run worker:deploy`
+   (`connectors/canvas-puc/wrangler.toml`, entry `src/worker.ts`, `nodejs_compat` flag for `node:crypto`).
+2. `SEAL_KEY` is a Worker _secret_ (`wrangler secret put`); `CANVAS_BASE_URL` and `CANVAS_ALLOW_WRITE` go in
+   `[vars]`. Without `PUBLIC_URL`, the OAuth issuer is the request origin (`*.workers.dev`).
+3. Deployment is manual (after the merge), with `CLOUDFLARE_API_TOKEN` in the environment: Claude's Cloudflare
+   connector does not publish Workers and the project does not use CI (ADR 0006).
+4. `render.yaml` is removed. The `Dockerfile` and `server/remote.js` stay for anyone who wants another host.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa              | Por que não                                                                |
-| ------------------------ | -------------------------------------------------------------------------- |
-| Manter o Render          | Dorme no plano grátis; a primeira chamada pode estourar o tempo do Claude. |
-| Google Cloud Run         | Pede cartão e configuração do `gcloud`; sem vantagem sobre o Workers aqui. |
-| Deploy automático por CI | Não há GitHub Actions (ADR 0006).                                          |
+| Alternative            | Why not                                                              |
+| ---------------------- | -------------------------------------------------------------------- |
+| Keep Render            | Sleeps on the free plan; the first call may exceed Claude's timeout. |
+| Google Cloud Run       | Requires a card and `gcloud` setup; no advantage over Workers here.  |
+| Automatic deploy by CI | There are no GitHub Actions (ADR 0006).                              |
 
-## Consequências
+## Consequences
 
-- Positivas: sem servidor dormindo, HTTPS e domínio prontos, bundle de ~164 KiB comprimido, plano grátis.
-- Negativas / custos aceitos: deploy manual depois de cada merge que mexe no conector; o `fetch` global precisa
-  ser chamado sem `this` de outro objeto (ver `readCanvasRemoteSettings()`); dependência de dev nova (`wrangler`).
-- O que muda nos docs: ARCHITECTURE (formato de instalação e serviços), STRUCTURE (`wrangler.toml`), PROCESSES
-  (P08), WORKFLOW e CLAUDE.md (`worker:dev`, `worker:deploy`), README do conector, `.env.example`.
+- Positive: no sleeping server, HTTPS and domain ready, ~164 KiB compressed bundle, free plan.
+- Negative / accepted costs: manual deploy after each merge that touches the connector; the global `fetch`
+  must be called without another object's `this` (see `readCanvasRemoteSettings()`); a new dev dependency
+  (`wrangler`).
+- Docs that change: ARCHITECTURE (installation format and services), STRUCTURE (`wrangler.toml`), PROCESSES
+  (P08), WORKFLOW and CLAUDE.md (`worker:dev`, `worker:deploy`), connector README, `.env.example`.

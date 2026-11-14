@@ -1,36 +1,38 @@
-# 0017 — Handoff automático no SessionEnd
+# 0017 — Automatic handoff on SessionEnd
 
-- **Estado:** Aceito
-- **Data:** 2026-11-14
-- **Relacionado:** complementa os ADRs 0004 e 0005 (handoff em `docs/STATE.md`)
+- **Status:** Accepted
+- **Date:** 2026-11-14
+- **Related:** complements ADRs 0004 and 0005 (handoff in `docs/STATE.md`)
 
-## Contexto
+## Context
 
-O ciclo de contexto pequeno depende de `/handoff` antes do `/clear`. O `Stop` só cobra o handoff quando há commit
-novo, e o `PreCompact` só roda quando a conversa é compactada. Um `/clear` (ou o fim da sessão) depois de editar
-arquivos sem commitar perdia o estado: a sessão seguinte começava sem saber o que estava em andamento.
+The small-context cycle depends on `/handoff` before `/clear`. `Stop` only asks for the handoff when there is a
+new commit, and `PreCompact` only runs when the conversation is compacted. A `/clear` (or the end of the
+session) after editing files without committing lost the state: the next session started without knowing what
+was in progress.
 
-## Decisão
+## Decision
 
-Um hook `SessionEnd` (`session-end-handoff.sh`) reaproveita a geração do `PreCompact` (`generate_handoff` em
-`hook-lib.sh`, via `claude -p`). Ele só gera se `handoff_is_stale` disser que o transcript tem trabalho (Edit,
-Write, MultiEdit, NotebookEdit fora do `STATE.md`, ou Bash com `git commit`/`merge`/`push`) depois da última
-modificação do `STATE.md`. O `timeout` de 60 s no `settings.json` eleva o orçamento padrão de 1,5 s do SessionEnd.
+A `SessionEnd` hook (`session-end-handoff.sh`) reuses the `PreCompact` generation (`generate_handoff` in
+`hook-lib.sh`, via `claude -p`). It only generates when `handoff_is_stale` says the transcript has work (Edit,
+Write, MultiEdit, NotebookEdit outside `STATE.md`, or Bash with `git commit`/`merge`/`push`) after the last
+change to `STATE.md`. The 60 s `timeout` in `settings.json` raises SessionEnd's default 1.5 s budget.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                    | Motivo para descartar                                                        |
-| ---------------------------------------------- | ---------------------------------------------------------------------------- |
-| Gerar em todo SessionEnd                       | Gasta tokens e trava o `/clear` até 45 s mesmo em sessão só de conversa      |
-| Rodar `claude -p` em segundo plano (detached)  | O SessionStart do `/clear` leria o STATE.md antigo; resultado chegaria tarde |
-| Bloquear o `/clear` até haver handoff          | Impossível: SessionEnd não tem controle de decisão                           |
-| Comparar só o marcador `.claude/.last-handoff` | O marcador só anda com commit; não detecta edição sem commit                 |
+| Alternative                                   | Why not                                                                        |
+| --------------------------------------------- | ------------------------------------------------------------------------------ |
+| Generate on every SessionEnd                  | Spends tokens and blocks `/clear` for up to 45 s even in chat-only sessions    |
+| Run `claude -p` in the background (detached)  | The `/clear` SessionStart would read the old STATE.md; the result arrives late |
+| Block `/clear` until there is a handoff       | Impossible: SessionEnd has no decision control                                 |
+| Compare only the `.claude/.last-handoff` mark | The mark only moves with a commit; it does not detect uncommitted edits        |
 
-## Consequências
+## Consequences
 
-- Positivas: `/clear` ou saída sem handoff não perde mais o estado; sessão sem trabalho não custa nada.
-- Negativas / custos aceitos: quando dispara, o `/clear` espera o `claude -p` (até `CLAUDE_HANDOFF_TIMEOUT`, 45 s);
-  edições feitas por Bash fora de `git commit`/`merge`/`push` (ex.: `sed -i`) não contam como trabalho; a doc do
-  Claude Code não garante que o SessionEnd termine antes do SessionStart do `/clear` — se não terminar, o handoff
-  vale para a sessão seguinte. Desligue com `CLAUDE_HANDOFF_AUTOGEN=0`.
-- O que muda nos docs: WORKFLOW.md, DOCUMENTATION.md, CLAUDE.md e o índice de ADRs.
+- Positive: `/clear` or exiting without a handoff no longer loses the state; a session with no work costs
+  nothing.
+- Negative / accepted costs: when it fires, `/clear` waits for `claude -p` (up to `CLAUDE_HANDOFF_TIMEOUT`,
+  45 s); edits made through Bash other than `git commit`/`merge`/`push` (e.g. `sed -i`) do not count as work; the
+  Claude Code docs do not guarantee that SessionEnd finishes before the `/clear` SessionStart — if it does not,
+  the handoff applies to the following session. Turn it off with `CLAUDE_HANDOFF_AUTOGEN=0`.
+- Docs that change: WORKFLOW.md, DOCUMENTATION.md, CLAUDE.md and the ADR index.

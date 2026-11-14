@@ -1,95 +1,102 @@
-# Fluxo de trabalho
+# Workflow
 
 ## Branches
 
-- `main` só recebe código por PR com `npm run pr:check` verde; sem push direto, sem force push. Não há CI
-  no GitHub Actions ([ADR 0006](adr/0006-no-github-actions-local-checks.md)): o portão é local.
-- Uma branch por tarefa: `<tipo>/<id-roadmap>-<descricao-curta>`, ex.: `feat/f2-1-processo-principal`,
-  `fix/canvas-paginacao`, `docs/arquitetura-camadas`.
-- Branch nasce da `main` atualizada e morre no merge (squash).
+- `main` only receives code through a PR with a green `npm run pr:check`; no direct push, no force push. There is
+  no CI on GitHub Actions ([ADR 0006](adr/0006-no-github-actions-local-checks.md)): the gate is local.
+- One branch per task: `<type>/<roadmap-id>-<short-description>`, e.g. `feat/f2-1-main-process`,
+  `fix/canvas-pagination`, `docs/architecture-layers`.
+- A branch starts from an up-to-date `main` and dies at the merge (squash).
 
-## Commits (Conventional Commits, descrição em português)
+## Commits (Conventional Commits, description in English)
+
+Commit descriptions are in English ([ADR 0021](adr/0021-english-across-the-repository.md)), e.g.
+`feat(canvas): add grades tool`.
 
 ```text
-<tipo>(<escopo>): <descrição no imperativo, minúscula, sem ponto final>
+<type>(<scope>): <description in the imperative, lowercase, no trailing period>
 
-[corpo opcional: o porquê]
+[optional body: the why]
 
-[rodapé opcional: BREAKING CHANGE: ..., Closes #12]
+[optional footer: BREAKING CHANGE: ..., Closes #12]
 ```
 
-| Tipo       | Quando                                    | Entra no changelog como |
-| ---------- | ----------------------------------------- | ----------------------- |
-| `feat`     | Funcionalidade nova visível               | Adicionado (minor)      |
-| `fix`      | Correção de comportamento                 | Corrigido (patch)       |
-| `perf`     | Melhora de desempenho                     | Alterado                |
-| `refactor` | Mudança interna sem alterar comportamento | —                       |
-| `docs`     | Só documentação                           | —                       |
-| `test`     | Só testes                                 | —                       |
-| `build`    | Build, dependências de produção           | —                       |
-| `ci`       | GitHub Actions, hooks                     | —                       |
-| `chore`    | Manutenção que não se encaixa acima       | —                       |
-| `revert`   | Reverte um commit                         | —                       |
+| Type       | When                                    | Changelog section  |
+| ---------- | --------------------------------------- | ------------------ |
+| `feat`     | New visible feature                     | Adicionado (minor) |
+| `fix`      | Behavior fix                            | Corrigido (patch)  |
+| `perf`     | Performance improvement                 | Alterado           |
+| `refactor` | Internal change, behavior unchanged     | —                  |
+| `docs`     | Documentation only                      | —                  |
+| `test`     | Tests only                              | —                  |
+| `build`    | Build, production dependencies          | —                  |
+| `ci`       | GitHub Actions, hooks                   | —                  |
+| `chore`    | Maintenance that fits none of the above | —                  |
+| `revert`   | Reverts a commit                        | —                  |
 
-Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `bundle`, `docs`, `tools`, `ci`, `deps`,
-`skills`, `release`, `config`, `remote`, `site`, `gmail`, `whatsapp`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
+The changelog section names (Adicionado = Added, Corrigido = Fixed, Alterado = Changed) are still Portuguese in
+`release-please-config.json` and `CHANGELOG.md`.
 
-`BREAKING CHANGE:` no rodapé (ou `!` após o tipo) gera major. O hook `commit-msg` valida localmente; o
-`pr:check` valida o **título do PR**, porque com squash merge é ele que vira o commit da `main`.
+Allowed scopes (`commitlint.config.js`): `core`, `mcp`, `canvas`, `bundle`, `docs`, `tools`, `ci`, `deps`,
+`skills`, `release`, `config`, `remote`, `site`, `gmail`, `whatsapp`. A new connector gets a scope with its name.
+When you create a new layer or module, add the scope there **and** here in the same PR.
+
+`BREAKING CHANGE:` in the footer (or `!` after the type) produces a major. The `commit-msg` hook validates locally;
+`pr:check` validates the **PR title**, because with squash merge it becomes the commit on `main`.
 
 ## Pull request
 
-1. Abra o PR cedo, como rascunho se ainda não terminou.
-2. Título no formato Conventional Commits (vira o commit da `main`).
-3. Preencha o template: o que mudou, como testar, checklist de documentação (cada doc marcado ou "não se
-   aplica: motivo").
-4. `npm run pr:check -- "<título do PR>"` verde é obrigatório antes de abrir e de mergear: check completo,
-   build dos conectores (plugin só remoto, `server/remote.js` commitado e atual), commitlint dos commits e do título. Corrija em vez de pular (`--no-verify` é
-   proibido e barrado pelo Claude Code).
-5. **Quem mergeia:** o Claude, com `pr:check` verde, sem pedir confirmação, inclusive o PR de release
-   (decisão do dono, 2026-11-05).
-6. Merge por **squash**, apagando a branch.
+1. Open the PR early, as a draft if it is not finished.
+2. Title in Conventional Commits format (it becomes the commit on `main`).
+3. Fill in the template: what changed, how to test, documentation checklist (each doc ticked or "n/a:
+   reason").
+4. A green `npm run pr:check -- "<PR title>"` is required before opening and before merging: full check,
+   connector build (remote-only plugin, `server/remote.js` committed and current), commitlint of the commits and
+   of the title. Fix things instead of skipping them (`--no-verify` is forbidden and blocked by Claude Code).
+5. **Who merges:** Claude, with a green `pr:check`, without asking for confirmation, including the release PR
+   (owner's decision, 2026-11-05).
+6. Merge by **squash**, deleting the branch.
 
-## Definição de pronto
+## Definition of done
 
-Uma tarefa está pronta quando: o critério "Pronto quando" do ROADMAP é verificável e verdadeiro; `npm run
-check` passa; a documentação do mesmo PR está atualizada conforme [DOCUMENTATION.md](DOCUMENTATION.md);
-CHANGELOG "Não lançado" tem a entrada (se visível ao usuário); o estado no ROADMAP e a "Próxima tarefa"
-foram atualizados; skills afetadas foram revisadas.
+A task is done when: the roadmap's "Pronto quando" (done when) criterion is verifiable and true; `npm run check`
+passes; the documentation in the same PR is updated as in [DOCUMENTATION.md](DOCUMENTATION.md); the CHANGELOG
+"Não lançado" (unreleased) section has the entry (if user-visible); the state in the ROADMAP and its "Next task"
+were updated; affected skills were reviewed.
 
-## Hooks locais
+## Local hooks
 
-Versionados em `.githooks/` e ativados pelo `npm install` (script `prepare` → `git config core.hooksPath`).
+Versioned in `.githooks/` and enabled by `npm install` (the `prepare` script → `git config core.hooksPath`).
 
-| Hook         | Roda                                                              | Tempo alvo  |
-| ------------ | ----------------------------------------------------------------- | ----------- |
-| `pre-commit` | lint-staged (ESLint + Prettier nos arquivos staged) e `typecheck` | segundos    |
-| `commit-msg` | commitlint                                                        | instantâneo |
-| `pre-push`   | `npm run check` completo                                          | 1–2 min     |
+| Hook         | Runs                                                            | Target time |
+| ------------ | --------------------------------------------------------------- | ----------- |
+| `pre-commit` | lint-staged (ESLint + Prettier on staged files) and `typecheck` | seconds     |
+| `commit-msg` | commitlint                                                      | instant     |
+| `pre-push`   | full `npm run check`                                            | 1–2 min     |
 
-## Ciclo de contexto do Claude Code
+## Claude Code context cycle
 
-O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, sustentado pelos hooks de
-`.claude/settings.json` (decisões em [ADR 0004](adr/0004-context-handoff-in-state-md-with-hooks.md) e
+Claude works in small contexts: one task per session. The cycle, supported by the hooks in
+`.claude/settings.json` (decisions in [ADR 0004](adr/0004-context-handoff-in-state-md-with-hooks.md) and
 [ADR 0005](adr/0005-state-md-local-per-clone.md)):
 
-1. `SessionStart` injeta `docs/STATE.md` (handoff) e a próxima tarefa do roadmap. Na nuvem, `session-tools.sh`
-   também instala o gitleaks e as dependências do npm.
-2. Durante a tarefa, trabalho que pode ser isolado vai para subagents; só o resumo volta ao contexto.
-3. Ao concluir, `/handoff` sobrescreve `docs/STATE.md`, que é local de cada clone (está no `.gitignore` e
-   nunca vai para commit). Se houver commit seu novo sem handoff, o hook `Stop` bloqueia o encerramento e
-   pede o handoff; commits trazidos por `git pull` não contam.
-4. Se a branch alterou plugin (`connectors/` ou `.claude-plugin/`) sem tocar documentação (`docs/`,
-   `CHANGELOG.md`, `README.md` ou o README do conector), o hook `Stop` `stop-plugin-docs.sh` bloqueia o
-   encerramento e pede a skill `/atualizar-docs`: toda mudança em plugin documenta tudo o que foi feito.
-5. O Claude avisa; o usuário roda `/clear`. Se o contexto estourar antes, `PreCompact` gera um handoff
-   automático via `claude -p` (desligue com `CLAUDE_HANDOFF_AUTOGEN=0`).
-6. Se o `/clear` (ou o fim da sessão) vier sem handoff, `SessionEnd` (`session-end-handoff.sh`) gera um do
-   mesmo jeito, mas só se o transcript tiver edição de arquivo ou `git commit`/`merge`/`push` depois da última
-   modificação do `STATE.md`; conversa e leitura não disparam. O `timeout` de 60 s no `settings.json` eleva o
-   orçamento padrão de 1,5 s do SessionEnd ([ADR 0017](adr/0017-automatic-handoff-on-session-end.md)).
+1. `SessionStart` injects `docs/STATE.md` (handoff) and the roadmap's next task. In the cloud, `session-tools.sh`
+   also installs gitleaks and the npm dependencies.
+2. During the task, work that can be isolated goes to subagents; only the summary comes back into the context.
+3. When done, `/handoff` overwrites `docs/STATE.md`, which is local to each clone (it is in `.gitignore` and is
+   never committed). If there is a new commit of yours without a handoff, the `Stop` hook blocks ending the turn
+   and asks for the handoff; commits brought in by `git pull` do not count.
+4. If the branch changed a plugin (`connectors/` or `.claude-plugin/`) without touching documentation (`docs/`,
+   `CHANGELOG.md`, `README.md` or the connector's README), the `Stop` hook `stop-plugin-docs.sh` blocks ending the
+   turn and asks for the `/atualizar-docs` skill: every plugin change documents everything that was done.
+5. Claude says so; the user runs `/clear`. If the context overflows first, `PreCompact` generates an automatic
+   handoff via `claude -p` (turn it off with `CLAUDE_HANDOFF_AUTOGEN=0`).
+6. If `/clear` (or the end of the session) comes without a handoff, `SessionEnd` (`session-end-handoff.sh`)
+   generates one the same way, but only if the transcript has a file edit or a `git commit`/`merge`/`push` after
+   the last modification of `STATE.md`; conversation and reading do not trigger it. The 60 s `timeout` in
+   `settings.json` raises SessionEnd's default 1.5 s budget ([ADR 0017](adr/0017-automatic-handoff-on-session-end.md)).
 
-## Versão e release
+## Version and release
 
 Each version lives in one place ([ADR 0022](adr/0022-version-per-plugin.md)). The repository version is in
 `package.json` (package `.`, tag `vX.Y.Z`). Each plugin has its own `version` in
@@ -98,35 +105,36 @@ Each version lives in one place ([ADR 0022](adr/0022-version-per-plugin.md)). Th
 the `plugin.json` field through `extra-files` (`jsonpath: $.version`). The marketplace entry never carries a
 version. `.release-please-manifest.json` mirrors every package's current version. A plugin only shows an update
 to users after its version is bumped, so release any change to a connector (server or plugin) that users should
-get. O fluxo é da skill `/lancar-versao`:
+get. The flow belongs to the `/lancar-versao` skill:
 
-1. Commits convencionais chegam na `main` via PR.
-2. A CLI local abre/atualiza um **PR de release** com o bump de versão e o CHANGELOG gerado:
+1. Conventional commits reach `main` through PRs.
+2. The local CLI opens/updates a **release PR** with the version bump and the generated CHANGELOG:
    `npx release-please release-pr --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`.
-3. Revisar o PR de release (e a seção "Não lançado" do CHANGELOG, que vira a versão).
-4. O Claude mergeia o PR de release, como qualquer PR. A confirmação humana fica em publicar o rascunho. Depois, a mesma CLI cria a tag `vX.Y.Z` e um
-   **rascunho** de release: `npx release-please github-release --draft --token "$(gh auth token)" --repo-url
-temponi-bernardo/claude-connectors`. It also creates `<name>-vX.Y.Z` tags and drafts for the plugins in the release PR.
-5. Publicar o rascunho quando quiser. Não há anexo: o plugin aponta para o servidor remoto (ADR 0013).
+3. Review the release PR (and the CHANGELOG "Não lançado" section, which becomes the version).
+4. Claude merges the release PR, like any PR. Human confirmation is in publishing the draft. Afterwards the same
+   CLI creates the `vX.Y.Z` tag and a release **draft**: `npx release-please github-release --draft --token
+"$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`. It also creates `<name>-vX.Y.Z` tags and
+   drafts for the plugins in the release PR.
+5. Publish the draft whenever you want. There is no attachment: the plugin points to the remote server (ADR 0013).
 
-O **conector remoto** (ADR 0010) não depende de release: depois de um merge que mexe no conector, rode
-`npm run worker:deploy` na `main` (precisa de `CLOUDFLARE_API_TOKEN`). Para testar antes, `npm run worker:dev`.
-O **Gmail remoto** (ADR 0014) segue o mesmo caminho com `npm run gmail:deploy` / `npm run gmail:dev`; o
-primeiro deploy (KV, secrets, Google Cloud) está em [connectors/gmail/README.md](../connectors/gmail/README.md).
-O **WhatsApp** (ADR 0015) é publicado por quem hospeda: `npm run whatsapp:deploy` (precisa de Docker para a imagem
-da ponte). O `pr:check` roda `npm run bridge:test` (Go 1.26+; com `GOTOOLCHAIN=auto` o Go baixa o toolchain) e
-`npm run whatsapp:build` (bundle e imagem, sem publicar).
+The **remote connector** (ADR 0010) does not depend on a release: after a merge that touches the connector, run
+`npm run worker:deploy` on `main` (needs `CLOUDFLARE_API_TOKEN`). To test first, `npm run worker:dev`. The
+**remote Gmail** (ADR 0014) follows the same path with `npm run gmail:deploy` / `npm run gmail:dev`; the first
+deploy (KV, secrets, Google Cloud) is in [connectors/gmail/README.md](../connectors/gmail/README.md).
+**WhatsApp** (ADR 0015) is published by whoever hosts it: `npm run whatsapp:deploy` (needs Docker for the bridge
+image). `pr:check` runs `npm run bridge:test` (Go 1.26+; with `GOTOOLCHAIN=auto` Go downloads the toolchain) and
+`npm run whatsapp:build` (bundle and image, without publishing).
 
-## Segurança no fluxo
+## Security in the flow
 
-- `gitleaks` roda no `secrets:check` (dentro do `check`, do `pre-push` e do `pr:check`). Sem CI, ele é a única
-  barreira: sem gitleaks instalado o `secrets:check` falha (`winget install Gitleaks.Gitleaks`). Na nuvem do
-  Claude Code, ele instala sozinho a versão 8.28.0 pelo Go (`scripts/install-gitleaks.sh`): o download direto do
-  GitHub é bloqueado pelo proxy e o apt traz uma versão antiga, sem `gitleaks git`/`dir`.
-- Dependabot semanal para npm, agrupado (gratuito, não usa minutos de Actions). PR do Dependabot passa pelo
-  mesmo `pr:check` antes do merge.
-- Sem CodeQL e sem `dependency-review` (exigiam Actions). Antes de adicionar dependência nova, confira
-  `npm audit` e a licença.
-- `scripts/setup-github.sh` desliga o Actions, deixa só squash merge e tenta a branch protection, que em
-  repositório privado no plano gratuito não é aplicada (exige GitHub Pro). Sem ela, os hooks locais
-  (`guard-bash`, `pre-push`) impedem push direto na `main`.
+- `gitleaks` runs in `secrets:check` (inside `check`, `pre-push` and `pr:check`). Without CI it is the only
+  barrier: without gitleaks installed, `secrets:check` fails (`winget install Gitleaks.Gitleaks`). In the Claude
+  Code cloud it installs version 8.28.0 by itself through Go (`scripts/install-gitleaks.sh`): the direct GitHub
+  download is blocked by the proxy and apt ships an old version, without `gitleaks git`/`dir`.
+- Weekly Dependabot for npm, grouped (free, uses no Actions minutes). A Dependabot PR goes through the same
+  `pr:check` before merging.
+- No CodeQL and no `dependency-review` (they required Actions). Before adding a new dependency, check
+  `npm audit` and the license.
+- `scripts/setup-github.sh` turns off Actions, leaves only squash merge and tries branch protection, which is not
+  enforced on a private repository on the free plan (it requires GitHub Pro). Without it, the local hooks
+  (`guard-bash`, `pre-push`) prevent direct pushes to `main`.

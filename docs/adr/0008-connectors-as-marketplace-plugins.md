@@ -1,42 +1,41 @@
-# 0008 — Conectores também como plugins de um marketplace do Claude Code
+# 0008 — Connectors also as plugins of a Claude Code marketplace
 
-- **Estado:** Aceito
-- **Data:** 2026-11-05
-- **Relacionado:** ADR 0007, F1.4
+- **Status:** Accepted
+- **Date:** 2026-11-05
+- **Related:** ADR 0007, F1.4
 
-## Contexto
+## Context
 
-O dono quer instalar os conectores pela tela de marketplace de plugins do Claude ("Adicionar marketplace" com
-`temponi-bernardo/claude-connectors`). Um plugin é copiado só a partir da própria pasta, o Claude não roda
-build e só roda `npm install` se a pasta tiver `package.json` + `package-lock.json`. O login do Canvas depende
-do `playwright-core`, que lê arquivos próprios em tempo de execução e não pode ser unido pelo esbuild.
+The owner wants to install the connectors through Claude's plugin marketplace screen ("Add marketplace" with
+`temponi-bernardo/claude-connectors`). A plugin is copied only from its own folder; Claude does not run a build
+and only runs `npm install` if the folder has `package.json` + `package-lock.json`. The Canvas login depends on
+`playwright-core`, which reads its own files at runtime and cannot be bundled by esbuild.
 
-## Decisão
+## Decision
 
-1. O repositório é um marketplace (`.claude-plugin/marketplace.json`) e cada `connectors/<nome>/` é um plugin
-   (`.claude-plugin/plugin.json` com `userConfig` + `.mcp.json`), sem `version` fixa: atualizações seguem os
-   commits da pasta. Os dois arquivos são **gerados** do `manifest.json` do `.mcpb`, que é a fonte única de nome,
-   descrição, comando e campos de configuração.
-2. `npm run pack` passa a gerar dentro da pasta do conector o runtime versionado: `server/index.js` (bundle),
-   `package.json` e `package-lock.json` só com as dependências externas. O `pr:check` falha se ele estiver
-   desatualizado. O mesmo runtime vai para o `.mcpb` (ADR 0007 continua valendo).
-3. O `playwright-core` é carregado só quando o login pelo navegador é necessário (`loadPlaywright()`): primeiro
-   do `node_modules` (instalado pelo Claude ou pelo `.mcpb`), senão de `~/.canvas-puc/runtime`, instalando lá
-   na primeira vez.
+1. The repository is a marketplace (`.claude-plugin/marketplace.json`) and each `connectors/<nome>/` is a
+   plugin (`.claude-plugin/plugin.json` with `userConfig` + `.mcp.json`), with no fixed `version`: updates
+   follow the folder's commits. Both files are **generated** from the `.mcpb` `manifest.json`, the single
+   source of name, description, command and configuration fields.
+2. `npm run pack` now generates the versioned runtime inside the connector folder: `server/index.js` (bundle),
+   `package.json` and `package-lock.json` with only the external dependencies. `pr:check` fails if it is out
+   of date. The same runtime goes into the `.mcpb` (ADR 0007 still holds).
+3. `playwright-core` is loaded only when browser login is needed (`loadPlaywright()`): first from
+   `node_modules` (installed by Claude or by the `.mcpb`), otherwise from `~/.canvas-puc/runtime`, installing
+   it there the first time.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                    | Por que não                                                                  |
-| ---------------------------------------------- | ---------------------------------------------------------------------------- |
-| Unir o playwright-core no bundle               | Testado: depende de `__dirname`, `package.json` próprio e módulos opcionais. |
-| Versionar `node_modules` no repositório        | ~10 MB por versão no histórico do git.                                       |
-| Plugin só com token (sem login pelo navegador) | Volta o problema do token de 30 dias da PUC.                                 |
-| `version` fixa no `plugin.json`                | Exigiria lembrar de subir a versão a cada mudança, senão ninguém atualiza.   |
+| Alternative                             | Why not                                                                      |
+| --------------------------------------- | ---------------------------------------------------------------------------- |
+| Bundle playwright-core                  | Tested: depends on `__dirname`, its own `package.json` and optional modules. |
+| Commit `node_modules` to the repository | ~10 MB per version in the git history.                                       |
+| Token-only plugin (no browser login)    | Brings back PUC's 30-day token problem.                                      |
+| Fixed `version` in `plugin.json`        | Would require remembering to bump it on every change, or nobody updates.     |
 
-## Consequências
+## Consequences
 
-- Positivas: instalação e atualização pela interface do Claude; o mesmo bundle serve plugin e `.mcpb`.
-- Negativas / custos aceitos: bundle gerado versionado (~780 KB) e PRs maiores quando o código muda; o repo
-  privado exige credenciais git funcionando no PC (SSH sem senha ou `gh auth setup-git`).
-- O que muda nos docs: ARCHITECTURE (empacotamento), STRUCTURE, PROCESSES (P05, P07), WORKFLOW (`pr:check`),
-  READMEs.
+- Positive: install and update through Claude's UI; the same bundle serves the plugin and the `.mcpb`.
+- Negative / accepted costs: a committed generated bundle (~780 KB) and bigger PRs when code changes; the
+  private repo requires working git credentials on the PC (passwordless SSH or `gh auth setup-git`).
+- Docs that change: ARCHITECTURE (packaging), STRUCTURE, PROCESSES (P05, P07), WORKFLOW (`pr:check`), READMEs.

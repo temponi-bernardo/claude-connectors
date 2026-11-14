@@ -1,52 +1,53 @@
-# 0009 — Conector remoto por HTTP com OAuth e token do Canvas
+# 0009 — Remote HTTP connector with OAuth and the Canvas token
 
-- **Estado:** Aceito
-- **Data:** 2026-11-05
-- **Relacionado:** F2.6, ADR 0007, ADR 0008
+- **Status:** Accepted
+- **Date:** 2026-11-05
+- **Related:** F2.6, ADR 0007, ADR 0008
 
-## Contexto
+## Context
 
-O plugin e a extensão `.mcpb` rodam o servidor MCP por stdio no computador do usuário e fazem login pelo
-Chrome. Sessões na nuvem (Cowork, celular, claude.ai) não iniciam o servidor do plugin ou não têm navegador
-para o login. Para usar o Canvas nelas, o Claude precisa de um **conector personalizado**: uma URL HTTPS que
-fala MCP por Streamable HTTP e autentica com OAuth 2.1 (com registro dinâmico de cliente). A PUC não fornece
-chave de desenvolvedor OAuth do Canvas, então a única credencial possível sem navegador é o **token de acesso**
-pessoal (Conta → Configurações), que na PUC vale 30 dias.
+The plugin and the `.mcpb` extension run the MCP server over stdio on the user's computer and log in through
+Chrome. Cloud sessions (Cowork, mobile, claude.ai) do not start the plugin's server or have no browser for the
+login. To use Canvas there, Claude needs a **custom connector**: an HTTPS URL that speaks MCP over Streamable
+HTTP and authenticates with OAuth 2.1 (with dynamic client registration). PUC does not provide a Canvas OAuth
+developer key, so the only credential possible without a browser is the personal **access token** (Account →
+Settings), valid for 30 days at PUC.
 
-## Decisão
+## Decision
 
-1. Um servidor HTTP (`connectors/canvas-puc/src/remote-main.ts`) expõe as mesmas ferramentas de leitura e
-   escrita em `/mcp` (Streamable HTTP sem sessão, uma instância de `McpServer` por requisição). As ferramentas
-   `conectar_canvas`/`desconectar_canvas` não existem no modo remoto.
-2. O próprio servidor é o servidor de autorização OAuth (camada nova `src/remote/`, genérica para outros
-   conectores): metadados (RFC 8414 e RFC 9728), registro dinâmico (RFC 7591), `/authorize` com PKCE S256
-   obrigatório e `/token` (código e refresh).
-3. A tela de `/authorize` pede o token do Canvas, valida em `/api/v1/users/self` e só então emite o código.
-4. **Sem banco de dados:** `client_id`, código, access token e refresh token são blobs selados com AES-256-GCM
-   (chave `SEAL_KEY` do servidor), com tipo e validade dentro. O token do Canvas viaja só selado e nunca é gravado.
-5. Endereços de retorno do OAuth limitados por lista (`claude.ai`, `claude.com` e `localhost`, configurável),
-   para que um cliente registrado por terceiros não receba o token de alguém.
-6. O endereço do Canvas é fixo no servidor (`CANVAS_BASE_URL`), então o servidor não acessa URLs escolhidas
-   pelo usuário.
-7. O handler é escrito sobre `Request`/`Response` (Web padrão) e um adaptador fino o serve com `node:http`;
-   empacotado em `server/remote.js` e publicado por Docker (qualquer host Node com HTTPS).
+1. An HTTP server (`connectors/canvas-puc/src/remote-main.ts`) exposes the same read and write tools at `/mcp`
+   (stateless Streamable HTTP, one `McpServer` instance per request). The `conectar_canvas`/`desconectar_canvas`
+   tools do not exist in remote mode.
+2. The server itself is the OAuth authorization server (new `src/remote/` layer, generic for other
+   connectors): metadata (RFC 8414 and RFC 9728), dynamic registration (RFC 7591), `/authorize` with mandatory
+   PKCE S256 and `/token` (code and refresh).
+3. The `/authorize` page asks for the Canvas token, validates it at `/api/v1/users/self` and only then issues
+   the code.
+4. **No database:** `client_id`, code, access token and refresh token are blobs sealed with AES-256-GCM (server
+   key `SEAL_KEY`), with type and expiry inside. The Canvas token only travels sealed and is never stored.
+5. OAuth redirect addresses are limited by an allowlist (`claude.ai`, `claude.com` and `localhost`,
+   configurable), so a client registered by a third party cannot receive someone's token.
+6. The Canvas address is fixed on the server (`CANVAS_BASE_URL`), so the server does not access user-chosen
+   URLs.
+7. The handler is written on top of `Request`/`Response` (Web standard) and a thin adapter serves it with
+   `node:http`; bundled into `server/remote.js` and published with Docker (any Node host with HTTPS).
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                   | Por que não                                                                            |
-| --------------------------------------------- | -------------------------------------------------------------------------------------- |
-| OAuth do próprio Canvas (developer key)       | Exige que a PUC crie uma chave de desenvolvedor; fora do nosso controle.               |
-| Login pelo navegador no servidor (Playwright) | Precisaria guardar senha/MFA da Microsoft do usuário; inseguro e frágil.               |
-| Conector sem autenticação, token em variável  | Só serve a uma pessoa e expõe a conta de quem souber a URL.                            |
-| Guardar tokens em banco (KV, SQLite)          | Mais infraestrutura e um alvo para vazamento; o selo dispensa armazenamento.           |
-| Express + `mcpAuthRouter` do SDK              | Exige dependência nova e um provedor com estado; o handler Web padrão é testável puro. |
-| Sessões MCP com estado (`Mcp-Session-Id`)     | Não sobrevivem a reinício nem a várias instâncias; nenhuma ferramenta precisa delas.   |
+| Alternative                                 | Why not                                                                                   |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Canvas's own OAuth (developer key)          | Requires PUC to create a developer key; out of our control.                               |
+| Browser login on the server (Playwright)    | Would have to store the user's Microsoft password/MFA; insecure and fragile.              |
+| Connector without auth, token in a variable | Serves only one person and exposes the account to anyone who knows the URL.               |
+| Store tokens in a database (KV, SQLite)     | More infrastructure and a leak target; sealing removes the need for storage.              |
+| Express + the SDK's `mcpAuthRouter`         | Needs a new dependency and a stateful provider; the Web-standard handler is pure to test. |
+| Stateful MCP sessions (`Mcp-Session-Id`)    | Do not survive restarts or multiple instances; no tool needs them.                        |
 
-## Consequências
+## Consequences
 
-- Positivas: o Canvas funciona no claude.ai, no Cowork e no celular; o servidor não guarda segredo de usuário.
-- Negativas / custos aceitos: o token da PUC expira em 30 dias e o usuário reconecta o conector depois disso;
-  um código de autorização pode ser reusado durante os 5 minutos de validade (sem estado), o que o PKCE mitiga;
-  trocar a `SEAL_KEY` desconecta todo mundo; alguém precisa hospedar o servidor com HTTPS.
-- O que muda nos docs: ARCHITECTURE (camada `remote`, serviço externo), STRUCTURE, PROCESSES (fluxos OAuth e
-  MCP remoto), README do conector (como hospedar e conectar), ROADMAP (F2.6).
+- Positive: Canvas works on claude.ai, in Cowork and on mobile; the server stores no user secret.
+- Negative / accepted costs: the PUC token expires in 30 days and the user reconnects the connector after
+  that; an authorization code can be reused during its 5-minute validity (stateless), which PKCE mitigates;
+  changing `SEAL_KEY` disconnects everyone; someone has to host the server with HTTPS.
+- Docs that change: ARCHITECTURE (`remote` layer, external service), STRUCTURE, PROCESSES (OAuth and remote MCP
+  flows), connector README (how to host and connect), ROADMAP (F2.6).

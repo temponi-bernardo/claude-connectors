@@ -1,25 +1,25 @@
-# NNNN — Título curto no imperativo ou substantivo
+# NNNN — Short title, imperative or noun phrase
 
-- **Estado:** Proposto | Aceito | Substituído por NNNN | Rejeitado
-- **Data:** AAAA-MM-DD
-- **Relacionado:** tarefa Fx.y, ADR NNNN
+- **Status:** Proposed | Accepted | Superseded by NNNN | Rejected
+- **Date:** YYYY-MM-DD
+- **Related:** task Fx.y, ADR NNNN
 
-## Contexto
+## Context
 
-Qual problema ou força nos levou a decidir. Fatos, restrições, requisitos. Sem opinião ainda.
+What problem or force led us to decide. Facts, constraints, requirements. No opinion yet.
 
-## Decisão
+## Decision
 
-O que decidimos, em uma ou duas frases afirmativas.
+What we decided, in one or two affirmative sentences.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa | Por que não |
-| ----------- | ----------- |
-| ...         | ...         |
+| Alternative | Why not |
+| ----------- | ------- |
+| ...         | ...     |
 
-## Consequências
+## Consequences
 
-- Positivas: ...
-- Negativas / custos aceitos: ...
-- O que muda nos docs (ARCHITECTURE, STRUCTURE, WORKFLOW...): ...
+- Positive: ...
+- Negative / accepted costs: ...
+- Docs that change (ARCHITECTURE, STRUCTURE, WORKFLOW...): ...

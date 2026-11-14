@@ -1,58 +1,61 @@
-# 0016 — Gmail remoto público e multiusuário
+# 0016 — Public, multi-user remote Gmail
 
-- **Estado:** Substituído em parte por 0019 (o login pede `gmail.modify` em vez de `gmail.readonly`)
-- **Data:** 2026-11-14
-- **Relacionado:** substitui em parte o ADR 0014 (itens 3 e 4: allowlist obrigatória e vínculo pela allowlist)
+- **Status:** Superseded in part by 0019 (login asks for `gmail.modify` instead of `gmail.readonly`)
+- **Date:** 2026-11-14
+- **Related:** supersedes in part ADR 0014 (items 3 and 4: mandatory allowlist and linking through the
+  allowlist)
 
-## Contexto
+## Context
 
-O repositório é público e o plugin `gmail` aparece no marketplace para qualquer pessoa. O ADR 0014 desenhou o
-conector para um dono só: `ALLOWED_EMAILS` obrigatório e contas vinculadas num espaço único do KV. Quem instalasse
-o plugin não conseguiria entrar, e se a allowlist fosse aberta todo mundo veria as mesmas contas. A restrição de
-custo continua: o Worker só roda quando chega uma requisição e pode ficar ocioso sem custo.
+The repository is public and the `gmail` plugin shows up in the marketplace for anyone. ADR 0014 designed the
+connector for a single owner: `ALLOWED_EMAILS` mandatory and linked accounts in a single KV space. Anyone who
+installed the plugin could not sign in, and if the allowlist were opened everyone would see the same accounts.
+The cost constraint still holds: the Worker only runs when a request arrives and can sit idle at no cost.
 
-## Decisão
+## Decision
 
-1. **Cada pessoa que instala é um usuário.** O login no Google acontece no OAuth do próprio Claude, depois de
-   instalar o conector. O usuário é o `sub` do `id_token` (estável, diferente do e-mail) e vai nos `props` do
-   grant junto do e-mail e de um id de sessão.
-2. **O login já vincula a conta.** O login pede `openid email gmail.readonly` com acesso offline; se o Google
-   concede o Gmail e o refresh token, a conta entra nas contas do usuário. Falha ao gravar não impede o login.
-3. **Contas por usuário, num registro só.** `owner:<sha256(sub)>` guarda as contas do usuário seladas com
-   AES-256-GCM (`TOKEN_ENC_KEY`), com o `sub` dentro do selo conferido na leitura. Uma leitura de KV por
-   chamada de ferramenta; escrita só ao vincular, desvincular ou revogar. Até 10 contas por usuário.
-4. **Mais contas por link de uso único.** A ferramenta `link_account` gera `/accounts/link?ticket=...`: um selo
-   com o usuário, validade de 10 minutos e um `jti` marcado no KV no primeiro uso. Sem ticket válido,
-   `/accounts/link` não faz nada. O resto do vínculo (cookie `__Host-`, PKCE, `nonce`, `id_token`) é o do ADR 0014.
-5. **`unlink_account`** apaga a conta do registro e revoga o refresh token no Google (melhor esforço).
-6. **`ALLOWED_EMAILS` vira opcional:** sem ele o conector é público; com ele, só os e-mails listados entram
-   (modo privado, 403 para os demais).
-7. **Limite por IP nas rotas públicas** (registro, `/authorize`, `/token`, vínculo e retorno): binding
-   `RATE_LIMITER_PUBLIC`, 30 requisições por minuto por IP. O `/mcp` mantém o limite por sessão (120/min).
-   Os dois bindings contam na borda, sem KV e sem nada rodando entre requisições.
-8. **Apelidos por usuário:** a parte antes do `@`; se duas contas do mesmo usuário repetem, vale o e-mail inteiro.
-   `account` aceita apelido, e-mail ou `all`.
+1. **Everyone who installs is a user.** Google login happens in Claude's own OAuth, after installing the
+   connector. The user is the `id_token`'s `sub` (stable, unlike the email) and goes into the grant `props`
+   together with the email and a session id.
+2. **Login already links the account.** Login asks for `openid email gmail.readonly` with offline access; if
+   Google grants Gmail and the refresh token, the account joins the user's accounts. A failed write does not
+   block the login.
+3. **Per-user accounts, in a single record.** `owner:<sha256(sub)>` holds the user's accounts sealed with
+   AES-256-GCM (`TOKEN_ENC_KEY`), with the `sub` inside the seal and checked on read. One KV read per tool
+   call; writes only when linking, unlinking or revoking. Up to 10 accounts per user.
+4. **More accounts through a single-use link.** The `link_account` tool generates `/accounts/link?ticket=...`:
+   a seal with the user, a 10-minute expiry and a `jti` marked in KV on first use. Without a valid ticket,
+   `/accounts/link` does nothing. The rest of linking (`__Host-` cookie, PKCE, `nonce`, `id_token`) is ADR 0014's.
+5. **`unlink_account`** removes the account from the record and revokes the refresh token at Google (best
+   effort).
+6. **`ALLOWED_EMAILS` becomes optional:** without it the connector is public; with it, only the listed emails
+   get in (private mode, 403 for everyone else).
+7. **Per-IP limit on public routes** (registration, `/authorize`, `/token`, linking and callback): the
+   `RATE_LIMITER_PUBLIC` binding, 30 requests per minute per IP. `/mcp` keeps the per-session limit (120/min).
+   Both bindings count at the edge, with no KV and nothing running between requests.
+8. **Per-user aliases:** the part before the `@`; if two of the same user's accounts collide, the full email is
+   used. `account` accepts an alias, an email or `all`.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                       | Por que não                                                                               |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| Manter a allowlist obrigatória                    | O plugin público não funcionaria para ninguém além do dono.                               |
-| Vínculo aberto em `/accounts/link` (sem ticket)   | Não há como saber a qual usuário do Claude a conta pertence.                              |
-| Guardar as contas nos `props` do grant            | Cada reconexão do Claude perderia as contas extras; os `props` não mudam fora do refresh. |
-| Uma chave do KV por conta (`owner:<sub>:<conta>`) | Listar exige `kv.list` (cobrado à parte e eventual); um registro por usuário basta.       |
-| Limite por IP com contador no KV                  | Uma escrita de KV por requisição; o binding de rate limiting não grava nada.              |
+| Alternative                                      | Why not                                                                                      |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| Keep the allowlist mandatory                     | The public plugin would work for no one but the owner.                                       |
+| Open linking at `/accounts/link` (no ticket)     | No way to know which Claude user the account belongs to.                                     |
+| Store the accounts in the grant `props`          | Every Claude reconnect would lose the extra accounts; `props` do not change off refresh.     |
+| One KV key per account (`owner:<sub>:<account>`) | Listing needs `kv.list` (billed separately and eventually consistent); one record is enough. |
+| Per-IP limit with a KV counter                   | One KV write per request; the rate limiting binding writes nothing.                          |
 
-## Consequências
+## Consequences
 
-- Positivas: qualquer pessoa instala e usa com as próprias contas; dados isolados por usuário; o dono pode
-  fechar o conector com `ALLOWED_EMAILS`; custo continua só por requisição.
-- Negativas / custos aceitos: `gmail.readonly` é um escopo **restrito** do Google. Enquanto o app não for
-  verificado, o Google mostra o aviso de app não verificado e limita a **100 usuários**. Para abrir de verdade ao
-  público é preciso a verificação do Google (política de privacidade com Uso Limitado, vídeo de demonstração) e a
-  avaliação de segurança anual (CASA). Esse processo é do dono do projeto, fora do código.
-- Os tipos mínimos do runtime do Workers ficam num único `src/remote/cloudflare-workers.d.ts`, compartilhado
-  com o WhatsApp (antes `connectors/gmail/src/workers-env.d.ts`, citado no ADR 0014), porque duas declarações
-  do módulo `cloudflare:workers` colidem.
-- O que muda nos docs: PROCESSES (P10–P12), FUNCTIONS, ARCHITECTURE (segredos), README do conector, site
-  (privacidade com o Gmail e a declaração de Uso Limitado), CHANGELOG, `.env.example`.
+- Positive: anyone installs and uses it with their own accounts; data isolated per user; the owner can close
+  the connector with `ALLOWED_EMAILS`; cost is still per request only.
+- Negative / accepted costs: `gmail.readonly` is a **restricted** Google scope. Until the app is verified,
+  Google shows the unverified-app warning and caps it at **100 users**. Truly opening it to the public requires
+  Google verification (privacy policy with Limited Use, demo video) and the annual security assessment (CASA).
+  That process belongs to the project owner, outside the code.
+- The minimal Workers runtime types live in a single `src/remote/cloudflare-workers.d.ts`, shared with WhatsApp
+  (formerly `connectors/gmail/src/workers-env.d.ts`, mentioned in ADR 0014), because two declarations of the
+  `cloudflare:workers` module clash.
+- Docs that change: PROCESSES (P10–P12), FUNCTIONS, ARCHITECTURE (secrets), connector README, site (privacy
+  with Gmail and the Limited Use statement), CHANGELOG, `.env.example`.

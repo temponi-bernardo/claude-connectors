@@ -1,109 +1,111 @@
-# Arquitetura
+# Architecture
 
-Repositório de **conectores MCP remotos** para o Claude. Cada conector é um servidor HTTP com OAuth hospedado na
-nuvem (Cloudflare Workers, [ADR 0010](adr/0010-remote-connector-on-cloudflare-workers.md)) e publicado como plugin
-do marketplace deste repositório: o plugin só aponta para a URL do servidor. Nada roda no computador de quem
-instala ([ADR 0013](adr/0013-remote-only-connector-via-marketplace.md)). O conector **Gmail**
-(`connectors/gmail/`) segue o mesmo modelo, com OAuth da biblioteca `@cloudflare/workers-oauth-provider` e estado
-no Workers KV ([ADR 0014](adr/0014-on-demand-remote-gmail-on-workers.md)). O conector **WhatsApp**
-(`connectors/whatsapp/`) é um template self-host: Worker + Durable Object + container com uma ponte em Go, sob
-demanda, com login do dono pelo GitHub ([ADR 0015](adr/0015-whatsapp-on-cloudflare-containers.md)).
+Repository of **remote MCP connectors** for Claude. Each connector is an HTTP server with OAuth hosted in the
+cloud (Cloudflare Workers, [ADR 0010](adr/0010-remote-connector-on-cloudflare-workers.md)) and published as a
+plugin in this repository's marketplace: the plugin only points to the server URL. Nothing runs on the installer's
+computer ([ADR 0013](adr/0013-remote-only-connector-via-marketplace.md)). The **Gmail** connector
+(`connectors/gmail/`) follows the same model, with OAuth from the `@cloudflare/workers-oauth-provider` library and
+state in Workers KV ([ADR 0014](adr/0014-on-demand-remote-gmail-on-workers.md)). The **WhatsApp** connector
+(`connectors/whatsapp/`) is a self-host template: Worker + Durable Object + container with a Go bridge, on
+demand, with owner login through GitHub ([ADR 0015](adr/0015-whatsapp-on-cloudflare-containers.md)).
 
-## Camadas
+## Layers
 
 ```text
 ┌───────────────────────────────────────────────┐
-│  conector  (connectors/<nome>/src/)            │  entrada (worker.ts), tools, cliente da API,
-│                                                │  OAuth do serviço, formatação das respostas
+│  connector  (connectors/<name>/src/)           │  entry (worker.ts), tools, API client,
+│                                                │  service OAuth, response formatting
 ├───────────────────────────────────────────────┤
-│  remote  (src/remote/)                         │  servidor HTTP: OAuth sem estado, página de login,
-│                                                │  /mcp sem sessão
+│  remote  (src/remote/)                         │  HTTP server: stateless OAuth, login page,
+│                                                │  sessionless /mcp
 ├───────────────────────────────────────────────┤
-│  mcp  (src/mcp/)                               │  definição/registro de ferramentas, resultados
+│  mcp  (src/mcp/)                               │  tool definition/registration, results
 ├───────────────────────────────────────────────┤
-│  core  (src/core/)                             │  lógica pura compartilhada: decide, não faz
+│  core  (src/core/)                             │  shared pure logic: decides, does not act
 └───────────────────────────────────────────────┘
-        tools/  (bundle, docs, hooks) — ferramentas do repositório, fora do servidor
+        tools/  (bundle, docs, hooks) — repository tooling, outside the server
 ```
 
-Dentro de um conector, a mesma regra vale em escala menor: funções puras (`format`, `helpers`, partes de
-`remote`) separadas das que fazem efeito (`client` → rede, `worker` → Workers, `remote-main` → HTTP no Node).
+Inside a connector the same rule applies at a smaller scale: pure functions (`format`, `helpers`, parts of
+`remote`) are kept apart from those with effects (`client` → network, `worker` → Workers, `remote-main` → HTTP on
+Node).
 
-## Regras de dependência (quem pode importar quem)
+## Dependency rules (who may import whom)
 
-| De ↓ / Para → | core | mcp | remote | conector (o próprio) | outro conector | tools |
-| ------------- | ---- | --- | ------ | -------------------- | -------------- | ----- |
-| **core**      | ✅   | ❌  | ❌     | ❌                   | ❌             | ❌    |
-| **mcp**       | ✅   | ✅  | ❌     | ❌                   | ❌             | ❌    |
-| **remote**    | ✅   | ❌  | ✅     | ❌                   | ❌             | ❌    |
-| **conector**  | ✅   | ✅  | ✅     | ✅                   | ❌             | ❌    |
-| **tools**     | ✅   | ❌  | ❌     | ❌                   | ❌             | ✅    |
+| From ↓ / To → | core | mcp | remote | connector (itself) | other connector | tools |
+| ------------- | ---- | --- | ------ | ------------------ | --------------- | ----- |
+| **core**      | ✅   | ❌  | ❌     | ❌                 | ❌              | ❌    |
+| **mcp**       | ✅   | ✅  | ❌     | ❌                 | ❌              | ❌    |
+| **remote**    | ✅   | ❌  | ✅     | ❌                 | ❌              | ❌    |
+| **connector** | ✅   | ✅  | ✅     | ✅                 | ❌              | ❌    |
+| **tools**     | ✅   | ❌  | ❌     | ❌                 | ❌              | ✅    |
 
-- Conectores **não** importam uns dos outros: lógica usada por dois conectores sobe para `src/core/` ou `src/mcp/`.
-- `remote` não conhece conector nenhum: recebe um `RemoteConnector` (textos da página, verificação da credencial e
-  fábrica de `McpServer`). Usa `node:crypto` e `node:http`, por isso não está em `core`.
-- No WhatsApp, `config`, `format`, `pair-page` e os planos (`planSend()`) são puros; `lifecycle`, `snapshots`, `pair`
-  e `tools` fazem efeito por portas injetadas (testáveis com fakes) e só `container.ts`/`index.ts` tocam o runtime.
-- `src/core/` também guarda leitores de formato usados por mais de um conector (Word, ZIP, PDF).
-- `core` nunca importa Node (`node:fs`, `node:http`) nem bibliotecas com efeito; testes de `core` não usam mocks.
+- Connectors do **not** import each other: logic used by two connectors moves up to `src/core/` or `src/mcp/`.
+- `remote` knows no connector: it receives a `RemoteConnector` (page texts, credential check and `McpServer`
+  factory). It uses `node:crypto` and `node:http`, which is why it is not in `core`.
+- In WhatsApp, `config`, `format`, `pair-page` and the plans (`planSend()`) are pure; `lifecycle`, `snapshots`,
+  `pair` and `tools` act through injected ports (testable with fakes) and only `container.ts`/`index.ts` touch the
+  runtime.
+- `src/core/` also holds format readers used by more than one connector (Word, ZIP, PDF).
+- `core` never imports Node (`node:fs`, `node:http`) or libraries with effects; `core` tests use no mocks.
 
-## Fluxo de dados
+## Data flow
 
-O Claude chama uma ferramenta → `src/mcp` valida os argumentos (zod) → a ferramenta do conector usa o cliente
-da API → o cliente autentica e pagina → as respostas são reduzidas a objetos enxutos em português → o
-resultado volta como texto JSON. Detalhe em [PROCESSES.md](PROCESSES.md) (P03–P05).
+Claude calls a tool → `src/mcp` validates the arguments (zod) → the connector's tool uses the API client → the
+client authenticates and paginates → responses are reduced to lean objects in Portuguese → the result goes back
+as JSON text. Details in [PROCESSES.md](PROCESSES.md) (P03–P05).
 
-## Instalação e deploy
+## Installation and deploy
 
-| Peça                         | Como chega ao usuário                                                       | Decisão  |
-| ---------------------------- | --------------------------------------------------------------------------- | -------- |
-| Plugin do marketplace        | Claude → Adicionar marketplace `temponi-bernardo/claude-connectors`         | ADR 0013 |
-| Servidor (Cloudflare Worker) | `npm run worker:deploy` compila `src/worker.ts` e publica                   | ADR 0010 |
-| Servidor em Node (Docker)    | Alternativa: `npm run build` gera `server/remote.js`, usado pelo Dockerfile | ADR 0009 |
+| Piece                      | How it reaches the user                                                           | Decision |
+| -------------------------- | --------------------------------------------------------------------------------- | -------- |
+| Marketplace plugin         | Claude → Add marketplace `temponi-bernardo/claude-connectors`                     | ADR 0013 |
+| Server (Cloudflare Worker) | `npm run worker:deploy` compiles `src/worker.ts` and publishes                    | ADR 0010 |
+| Node server (Docker)       | Alternative: `npm run build` generates `server/remote.js`, used by the Dockerfile | ADR 0009 |
 
-The plugin lives in `connectors/<name>/plugin/` (ADR 0020) and has only `.claude-plugin/plugin.json`, skills and `.mcp.json` (an `http` server with the Worker URL). `npm run build`
-(P05) recusa qualquer `.mcp.json` com servidor local.
+The plugin lives in `connectors/<name>/plugin/` (ADR 0020) and has only `.claude-plugin/plugin.json`, skills and
+`.mcp.json` (an `http` server with the Worker URL). `npm run build` (P05) rejects any `.mcp.json` with a local
+server.
 
-## Serviços externos
+## External services
 
-| Serviço                    | Usado para                                 | Onde está o adaptador                                  | Segredo                                                          |
-| -------------------------- | ------------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------------------- |
-| API REST do Canvas LMS     | Cursos, tarefas, notas, avisos...          | `connectors/canvas-puc/src/client.ts`                  | Token do usuário, só selado nos tokens OAuth                     |
-| Token de acesso do Canvas  | Única credencial do conector               | `connectors/canvas-puc/src/remote.ts`                  | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)              |
-| Cloudflare Workers         | Rodar o conector remoto                    | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (secret do Worker); deploy com `CLOUDFLARE_API_TOKEN` |
-| GitHub Pages               | Site público (início, privacidade, termos) | `docs/_config.yml`, `docs/_layouts/site.html`          | Nenhum (ADR 0012)                                                |
-| Google OAuth / OIDC        | Login do dono e vínculo de contas          | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`  | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (secrets do Worker)   |
-| Gmail API (`gmail.modify`) | Ler, enviar, rascunhos, organizar, lixeira | `connectors/gmail/src/gmail-api.ts`                    | Refresh token selado no KV com `TOKEN_ENC_KEY`                   |
-| Workers KV / rate limit    | Grants OAuth, contas e limite (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`; `ALLOWED_EMAILS` opcional (modo privado)       |
-| GitHub OAuth App           | Login do dono (WhatsApp)                   | `src/remote/github-login.ts`                           | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `ALLOWED_EMAILS`     |
-| Cloudflare Containers + DO | Ponte do WhatsApp sob demanda              | `connectors/whatsapp/src/container.ts`, `lifecycle.ts` | `BRIDGE_TOKEN` (Worker ↔ ponte)                                  |
-| Cloudflare R2              | Backup cifrado da sessão (WhatsApp)        | `connectors/whatsapp/src/snapshots.ts`                 | `SNAPSHOT_KEY` (só no container)                                 |
-| WhatsApp (whatsmeow)       | Mensagens do número pareado                | `connectors/whatsapp/bridge/` (Go)                     | Sessão do aparelho, dentro do snapshot                           |
+| Service                    | Used for                                       | Where the adapter is                                   | Secret                                                         |
+| -------------------------- | ---------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------- |
+| Canvas LMS REST API        | Courses, assignments, grades, announcements... | `connectors/canvas-puc/src/client.ts`                  | User token, only sealed inside the OAuth tokens                |
+| Canvas access token        | The connector's only credential                | `connectors/canvas-puc/src/remote.ts`                  | Only sealed inside the OAuth tokens (`SEAL_KEY` on the server) |
+| Cloudflare Workers         | Running the remote connector                   | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (Worker secret); deploy with `CLOUDFLARE_API_TOKEN` |
+| GitHub Pages               | Public site (home, privacy, terms)             | `docs/_config.yml`, `docs/_layouts/site.html`          | None (ADR 0012)                                                |
+| Google OAuth / OIDC        | Owner login and account linking                | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`  | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (Worker secrets)    |
+| Gmail API (`gmail.modify`) | Read, send, drafts, organize, trash            | `connectors/gmail/src/gmail-api.ts`                    | Refresh token sealed in KV with `TOKEN_ENC_KEY`                |
+| Workers KV / rate limit    | OAuth grants, accounts and limits (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`; optional `ALLOWED_EMAILS` (private mode)     |
+| GitHub OAuth App           | Owner login (WhatsApp)                         | `src/remote/github-login.ts`                           | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `ALLOWED_EMAILS`   |
+| Cloudflare Containers + DO | On-demand WhatsApp bridge                      | `connectors/whatsapp/src/container.ts`, `lifecycle.ts` | `BRIDGE_TOKEN` (Worker ↔ bridge)                               |
+| Cloudflare R2              | Encrypted session backup (WhatsApp)            | `connectors/whatsapp/src/snapshots.ts`                 | `SNAPSHOT_KEY` (container only)                                |
+| WhatsApp (whatsmeow)       | Messages of the paired number                  | `connectors/whatsapp/bridge/` (Go)                     | Device session, inside the snapshot                            |
 
-Nada de credencial no repositório nem no servidor: o token do Canvas só existe selado (AES-GCM com a `SEAL_KEY`)
-dentro dos tokens OAuth que o Claude guarda.
+No credentials in the repository or on the server: the Canvas token exists only sealed (AES-GCM with the
+`SEAL_KEY`) inside the OAuth tokens that Claude stores.
 
-## Dependências de runtime
+## Runtime dependencies
 
-| Pacote                               | Para quê                                                   |
+| Package                              | What for                                                   |
 | ------------------------------------ | ---------------------------------------------------------- |
-| `@modelcontextprotocol/sdk`          | Servidor MCP em Streamable HTTP                            |
-| `zod` (v3)                           | Esquemas de entrada das ferramentas                        |
-| `@cloudflare/workers-oauth-provider` | OAuth 2.1 do conector Gmail (DCR, PKCE, consentimento, KV) |
-| `@cloudflare/containers`             | Classe `Container` do Durable Object da ponte do WhatsApp  |
+| `@modelcontextprotocol/sdk`          | MCP server over Streamable HTTP                            |
+| `zod` (v3)                           | Tool input schemas                                         |
+| `@cloudflare/workers-oauth-provider` | OAuth 2.1 for the Gmail connector (DCR, PKCE, consent, KV) |
+| `@cloudflare/containers`             | `Container` class of the WhatsApp bridge's Durable Object  |
 
-A ponte do WhatsApp é um módulo Go à parte (`connectors/whatsapp/bridge/go.mod`: whatsmeow, SQLite), com licenças
-em `connectors/whatsapp/NOTICE.md` (atenção: `go.mau.fi/libsignal` é GPL-3.0).
+The WhatsApp bridge is a separate Go module (`connectors/whatsapp/bridge/go.mod`: whatsmeow, SQLite), with
+licenses in `connectors/whatsapp/NOTICE.md` (note: `go.mau.fi/libsignal` is GPL-3.0).
 
-Dev: `esbuild` (bundle do Dockerfile) e `wrangler` (Worker, ADR 0010), além
-das ferramentas do template.
+Dev: `esbuild` (Dockerfile bundle) and `wrangler` (Worker, ADR 0010), plus the template's tooling.
 
-## Ferramentas internas (`tools/`)
+## Internal tooling (`tools/`)
 
-`tools/docs/` é o verificador/gerador de documentação, `tools/hooks/` testa os hooks do Claude Code e
-`tools/bundle/` confere os plugins e gera o bundle do servidor. Seguem as mesmas regras do código de produto (documentação, testes,
-lint), mas não entram no servidor.
+`tools/docs/` is the documentation checker/generator, `tools/hooks/` tests the Claude Code hooks and
+`tools/bundle/` checks the plugins and builds the server bundle. They follow the same rules as product code
+(documentation, tests, lint) but do not ship in the server.
 
-## Decisões
+## Decisions
 
-Histórico e justificativas em [adr/README.md](adr/README.md).
+History and rationale in [adr/README.md](adr/README.md).

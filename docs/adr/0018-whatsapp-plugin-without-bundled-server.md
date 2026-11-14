@@ -1,36 +1,36 @@
-# 0018 — Plugin do WhatsApp sem servidor embutido
+# 0018 — WhatsApp plugin without a bundled server
 
-- **Estado:** Aceito
-- **Data:** 2026-11-14
-- **Relacionado:** ADR 0008, ADR 0013, ADR 0015
+- **Status:** Accepted
+- **Date:** 2026-11-14
+- **Related:** ADR 0008, ADR 0013, ADR 0015
 
-## Contexto
+## Context
 
-O plugin do WhatsApp usava `${user_config.server_url}` no `.mcp.json` para cada pessoa informar o próprio servidor
-(template self-host, ADR 0015). O valor só existe no computador onde foi preenchido. O plugin instalado pela
-organização no claude.ai resolve outra URL, e o botão **Vincular** recusava o login antes de abrir o GitHub, em
-qualquer conversa nova, com o servidor funcionando.
+The WhatsApp plugin used `${user_config.server_url}` in `.mcp.json` so each person could enter their own server
+(self-host template, ADR 0015). The value only exists on the computer where it was filled in. The plugin
+installed by the organization on claude.ai resolves a different URL, and the **Connect** button rejected the
+login before opening GitHub, in any new conversation, with the server working.
 
-## Decisão
+## Decision
 
-O plugin do WhatsApp **não tem `.mcp.json`**: traz só as skills. Cada pessoa conecta o próprio servidor como
-**conector personalizado** da conta (claude.ai → Configurações → Conectores), que vale no claude.ai, no app, no
-celular, no Cowork e no Claude Code; `/config-whatsapp` guia. O `npm run build` aceita plugin sem `.mcp.json` e
-recusa `${user_config.*}` na URL de qualquer `.mcp.json`.
+The WhatsApp plugin **has no `.mcp.json`**: it ships only the skills. Each person connects their own server as
+an account **custom connector** (claude.ai → Settings → Connectors), which works on claude.ai, in the app, on
+mobile, in Cowork and in Claude Code; `/config-whatsapp` guides them. `npm run build` accepts a plugin without
+`.mcp.json` and rejects `${user_config.*}` in the URL of any `.mcp.json`.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                 | Por que não                                                                         |
-| ------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Manter `${user_config.server_url}`          | É a causa do erro: o valor local não chega ao plugin instalado pela organização     |
-| URL fixa do servidor do dono no `.mcp.json` | Quebra o self-host: as outras pessoas não conseguiriam usar o próprio servidor      |
-| Roteador central que repassa para cada dono | Vira serviço multi-tenant, contra a ADR 0015, e passaria o tráfego de todos por ele |
+| Alternative                                     | Why not                                                                                  |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Keep `${user_config.server_url}`                | It causes the error: the local value never reaches the plugin the organization installed |
+| Hard-code the owner's server URL in `.mcp.json` | Breaks self-hosting: other people could not use their own server                         |
+| Central router that forwards to each owner      | Becomes a multi-tenant service, against ADR 0015, and would route everyone's traffic     |
 
-## Consequências
+## Consequences
 
-- Positivas: cada pessoa usa o próprio servidor em todos os Claude, com um só cadastro; o Vincular não depende do
-  plugin; o build impede que o formato quebrado volte.
-- Negativas / custos aceitos: instalar o plugin não conecta nada sozinho; é preciso adicionar o conector
-  personalizado (um passo, guiado por `/config-whatsapp`).
-- O que muda nos docs: README e skill `config-whatsapp` do conector, PROCESSES (P05, P07), STRUCTURE, FUNCTIONS
-  (`isRemoteMcpUrl`, `buildConnector`), CHANGELOG.
+- Positive: each person uses their own server in every Claude, with a single setup; Connect does not depend on
+  the plugin; the build keeps the broken format from coming back.
+- Negative / accepted costs: installing the plugin connects nothing by itself; the custom connector has to be
+  added (one step, guided by `/config-whatsapp`).
+- Docs that change: the connector's README and `config-whatsapp` skill, PROCESSES (P05, P07), STRUCTURE,
+  FUNCTIONS (`isRemoteMcpUrl`, `buildConnector`), CHANGELOG.

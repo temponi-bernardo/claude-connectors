@@ -1,74 +1,76 @@
-# 0014 — Gmail remoto multi-conta, só leitura, sob demanda no Cloudflare Workers
+# 0014 — Multi-account, read-only remote Gmail, on demand on Cloudflare Workers
 
-- **Estado:** Substituído em parte por 0016 e 0019 (escopo e ferramentas só de leitura: ver ADR 0019)
-- **Data:** 2026-11-14
-- **Relacionado:** ADR 0009, ADR 0010, ADR 0013
+- **Status:** Superseded in part by 0016 and 0019 (read-only scope and tools: see ADR 0019)
+- **Date:** 2026-11-14
+- **Related:** ADR 0009, ADR 0010, ADR 0013
 
-## Contexto
+## Context
 
-O dono tem duas contas Gmail (a principal e a de recibos de música) e quer que o Claude (claude.ai, app e
-Cowork) leia as duas. O conector oficial de Gmail do claude.ai aceita uma conta só. O plano é o Workers Paid
-(US$ 5/mês) e **nada pode ficar rodando continuamente**: sem Containers, Cron Triggers, alarms de Durable Object,
-polling ou keep-alive. Diferente do Canvas (ADR 0009), aqui há credencial de longa duração que precisa ser
-guardada no servidor: o refresh token do Google de cada conta, vinculado uma vez e usado por todas as sessões.
+The owner has two Gmail accounts (the main one and the one for music receipts) and wants Claude (claude.ai, app
+and Cowork) to read both. The official claude.ai Gmail connector accepts only one account. The plan is Workers
+Paid (US$ 5/month) and **nothing may run continuously**: no Containers, Cron Triggers, Durable Object alarms,
+polling or keep-alive. Unlike Canvas (ADR 0009), here there is a long-lived credential that must be stored on
+the server: each account's Google refresh token, linked once and used by every session.
 
-## Decisão
+## Decision
 
-1. **Worker sob demanda, MCP sem estado.** `connectors/gmail/` é remoto e vira plugin do marketplace como o Canvas (ADR 0013). Cada requisição monta
-   um `McpServer` novo e responde em JSON (`serveMcpRequest()`, o mesmo do Canvas); sem Durable Object. Estado só
-   no **Workers KV**. O módulo principal (`src/index.ts`) exporta só o `default`: o runtime trata cada export
-   nomeado como entrypoint e recusa constantes (achado no teste com `wrangler dev`).
-2. **OAuth 2.1 com `@cloudflare/workers-oauth-provider`** (DCR, PKCE S256, tokens e grants no KV `OAUTH_KV`),
-   em vez do OAuth selado sem estado do Canvas. Motivos: aqui o KV já é obrigatório; a biblioteca dá código de uso
-   único, rotação e revogação de refresh token e os auxiliares de consentimento contra _confused deputy_ (handle
-   e `state` de uso único presos ao navegador por cookie `__Host-`, página sem frame). O registro dinâmico só
-   aceita retorno em `claude.ai`, `claude.com` ou `localhost` (`isAllowedRedirect()`, reaproveitado do ADR 0009).
-3. **Login do dono pelo Google com allowlist.** `/authorize` mostra o consentimento por cliente (lembrado por
-   30 dias em cookie assinado com `CONSENT_SECRET`), vai ao Google só com `openid email` e, na volta, valida o
-   `id_token` (assinatura RS256 pelo JWKS do Google, emissor, audiência, validade, `nonce`, e-mail verificado).
-   E-mail fora de `ALLOWED_EMAILS` recebe **403** e nenhum código.
-4. **Vínculo de conta separado** em `/accounts/link`: Google com `gmail.readonly` + `openid email`,
-   `access_type=offline` e `prompt=consent`, `state` (prefixo `link.`) de uso único guardado no KV só pelo hash e
-   preso ao navegador por cookie `__Host-gmail-link`, PKCE S256 e `nonce`. Só e-mail da allowlist com `id_token`
-   válido e escopo do Gmail concedido grava o refresh token. Um único retorno `/google/callback` atende os dois
-   fluxos (o `state` da biblioteca nunca tem ponto).
-5. **Refresh token cifrado** com AES-256-GCM (`sealPayload()` de `src/remote/seal.ts`, chave `TOKEN_ENC_KEY`),
-   com o e-mail dentro do selo e conferido na leitura. Access tokens ficam só na memória do isolate até 1 min
-   antes de vencer. `invalid_grant` marca a conta como revogada e a ferramenta pede novo vínculo.
-6. **Ferramentas só de leitura** com `account` (`all` onde faz sentido), ids validados contra injeção de
-   caminho, respostas limitadas (20 mil caracteres por mensagem, 60 mil por conversa, anexos até 5 MB e 50 mil
-   caracteres) e aviso de conteúdo não confiável nas descrições e em cada resultado (prompt injection).
-   `get_attachment_text` lê PDF (`src/core/pdf.ts`, sem dependência), Word, HTML e texto, detectando o tipo pelos
-   bytes, porque o `attachmentId` do Gmail muda a cada leitura.
-7. **Limite por sessão** com o binding de rate limiting do Workers (120 req/min por grant): contador na borda,
-   sem escrita no KV.
-8. **Google Cloud em "In production"** (app External, não verificado, uso pessoal) para o refresh token não
-   vencer em 7 dias; cliente Web com retorno `https://<worker>/google/callback`.
-9. **Testes em Node, não em `@cloudflare/vitest-pool-workers`:** a versão atual dele exige Vitest 4 e o
-   repositório usa Vitest 5. A biblioteca OAuth roda nos testes com `cloudflare:workers` trocado por um
-   substituto (alias no `vitest.config.ts`), KV em memória e Google falso com chaves RSA reais; o runtime real é
-   conferido com `wrangler dev`. Os tipos do Workers usados pela biblioteca ficam num `.d.ts` mínimo
-   (`workers-env.d.ts`), porque `@cloudflare/workers-types` colide com `@types/node` no `tsconfig` único.
+1. **On-demand Worker, stateless MCP.** `connectors/gmail/` is remote and becomes a marketplace plugin like
+   Canvas (ADR 0013). Each request builds a new `McpServer` and replies in JSON (`serveMcpRequest()`, the same as
+   Canvas); no Durable Object. State only in **Workers KV**. The main module (`src/index.ts`) exports only the
+   `default`: the runtime treats every named export as an entrypoint and rejects constants (found while testing
+   with `wrangler dev`).
+2. **OAuth 2.1 with `@cloudflare/workers-oauth-provider`** (DCR, PKCE S256, tokens and grants in the `OAUTH_KV`
+   KV), instead of Canvas's sealed stateless OAuth. Reasons: KV is already required here; the library provides
+   single-use codes, refresh token rotation and revocation, and consent helpers against _confused deputy_
+   (single-use handle and `state` bound to the browser by a `__Host-` cookie, frameless page). Dynamic
+   registration only accepts redirects to `claude.ai`, `claude.com` or `localhost` (`isAllowedRedirect()`,
+   reused from ADR 0009).
+3. **Owner login through Google with an allowlist.** `/authorize` shows per-client consent (remembered for 30
+   days in a cookie signed with `CONSENT_SECRET`), goes to Google with only `openid email` and, on return,
+   validates the `id_token` (RS256 signature against Google's JWKS, issuer, audience, expiry, `nonce`, verified
+   email). An email outside `ALLOWED_EMAILS` gets **403** and no code.
+4. **Separate account linking** at `/accounts/link`: Google with `gmail.readonly` + `openid email`,
+   `access_type=offline` and `prompt=consent`, a single-use `state` (prefix `link.`) stored in KV only as a hash
+   and bound to the browser by the `__Host-gmail-link` cookie, PKCE S256 and `nonce`. Only an allowlisted email
+   with a valid `id_token` and the Gmail scope granted stores the refresh token. A single `/google/callback`
+   redirect serves both flows (the library's `state` never contains a dot).
+5. **Refresh token encrypted** with AES-256-GCM (`sealPayload()` from `src/remote/seal.ts`, key `TOKEN_ENC_KEY`),
+   with the email inside the seal and checked on read. Access tokens live only in isolate memory until 1 min
+   before they expire. `invalid_grant` marks the account as revoked and the tool asks for a new link.
+6. **Read-only tools** with `account` (`all` where it makes sense), ids validated against path injection,
+   bounded responses (20,000 characters per message, 60,000 per thread, attachments up to 5 MB and 50,000
+   characters) and an untrusted-content notice in the descriptions and in every result (prompt injection).
+   `get_attachment_text` reads PDF (`src/core/pdf.ts`, no dependency), Word, HTML and text, detecting the type
+   from the bytes, because Gmail's `attachmentId` changes on every read.
+7. **Per-session limit** with the Workers rate limiting binding (120 req/min per grant): a counter at the edge,
+   no KV writes.
+8. **Google Cloud "In production"** (External app, unverified, personal use) so the refresh token does not
+   expire after 7 days; Web client with redirect `https://<worker>/google/callback`.
+9. **Tests in Node, not in `@cloudflare/vitest-pool-workers`:** its current version requires Vitest 4 and the
+   repository uses Vitest 5. The OAuth library runs in tests with `cloudflare:workers` swapped for a stand-in
+   (alias in `vitest.config.ts`), in-memory KV and a fake Google with real RSA keys; the real runtime is checked
+   with `wrangler dev`. The Workers types the library uses live in a minimal `.d.ts` (`workers-env.d.ts`),
+   because `@cloudflare/workers-types` clashes with `@types/node` in the single `tsconfig`.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                                  | Por que não                                                                                           |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| AnythingMCP em Cloudflare Container          | Cold start de container, Postgres externo e custo contínuo; viola "nada rodando continuamente".       |
-| `McpAgent` (Durable Object com estado)       | Nenhuma ferramenta precisa de sessão; DO acrescenta custo e complexidade sem ganho.                   |
-| OAuth selado sem estado do Canvas (ADR 0009) | Sem revogação nem código de uso único; o KV já é necessário para os refresh tokens.                   |
-| Usar o login do Claude para vincular a conta | Misturaria identidade do dono com cada conta Gmail; vincular separado deixa a segunda conta opcional. |
-| Guardar o refresh token nos `props` do grant | Cada reconexão do Claude perderia o vínculo; as contas valem para todas as sessões.                   |
-| Biblioteca de PDF (pdf.js/unpdf)             | ~1 MB a mais no bundle e CPU alta por requisição; recibos são PDFs de texto simples.                  |
-| `@cloudflare/vitest-pool-workers`            | Exige Vitest 4; rebaixar o repositório inteiro só por este pacote não compensa.                       |
+| Alternative                                  | Why not                                                                                             |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| AnythingMCP on a Cloudflare Container        | Container cold start, external Postgres and continuous cost; breaks "nothing running continuously". |
+| `McpAgent` (stateful Durable Object)         | No tool needs a session; a DO adds cost and complexity for no gain.                                 |
+| Canvas's sealed stateless OAuth (ADR 0009)   | No revocation or single-use codes; KV is already needed for the refresh tokens.                     |
+| Use the Claude login to link the account     | Would mix the owner's identity with each Gmail account; separate linking keeps the second optional. |
+| Store the refresh token in the grant `props` | Every Claude reconnect would lose the link; accounts apply to every session.                        |
+| PDF library (pdf.js/unpdf)                   | ~1 MB more in the bundle and high CPU per request; receipts are simple text PDFs.                   |
+| `@cloudflare/vitest-pool-workers`            | Requires Vitest 4; downgrading the whole repository for this one package is not worth it.           |
 
-## Consequências
+## Consequences
 
-- Positivas: as duas contas no claude.ai, no Cowork e no celular; nenhum processo ocioso; custo dentro do plano
-  (algumas escritas de KV por login/vínculo); tokens revogáveis; segredos só em `wrangler secret`.
-- Negativas / custos aceitos: o app do Google não verificado mostra um aviso no login (uso pessoal); trocar a
-  `TOKEN_ENC_KEY` obriga a vincular as contas de novo; PDF escaneado ou com fontes sem ToUnicode não tem texto;
-  deploy manual (ADR 0010); dependência de runtime nova (`@cloudflare/workers-oauth-provider`).
-- O que muda nos docs: ARCHITECTURE (conector, serviços, dependência), STRUCTURE (`connectors/gmail/`), PROCESSES
-  (P10–P12), WORKFLOW e CLAUDE.md (`gmail:dev`, `gmail:deploy`, escopo `gmail`), UI (páginas do Gmail),
-  README do conector, CHANGELOG e ROADMAP.
+- Positive: both accounts on claude.ai, in Cowork and on mobile; no idle process; cost within the plan (a few
+  KV writes per login/link); revocable tokens; secrets only in `wrangler secret`.
+- Negative / accepted costs: the unverified Google app shows a warning at login (personal use); changing
+  `TOKEN_ENC_KEY` means linking the accounts again; scanned PDFs or PDFs with fonts lacking ToUnicode have no
+  text; manual deploy (ADR 0010); new runtime dependency (`@cloudflare/workers-oauth-provider`).
+- Docs that change: ARCHITECTURE (connector, services, dependency), STRUCTURE (`connectors/gmail/`), PROCESSES
+  (P10–P12), WORKFLOW and CLAUDE.md (`gmail:dev`, `gmail:deploy`, `gmail` scope), UI (Gmail pages), connector
+  README, CHANGELOG and ROADMAP.

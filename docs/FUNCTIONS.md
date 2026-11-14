@@ -5,7 +5,7 @@ Toda função de topo do código aparece aqui, em um modelo fixo. Os campos entr
 partir do código — não edite à mão. Os campos **Faz**, **Entrada**, **Saída**, **Efeitos** e **Erros** são
 manuais e obrigatórios; `npm run docs:check` falha enquanto houver `_preencher_`.
 
-Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
+Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 ## Índice por módulo
 

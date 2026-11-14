@@ -1,33 +1,32 @@
-# 0001 — TypeScript sobre Node como base do template
+# 0001 — TypeScript on Node as the template base
 
-- **Estado:** Aceito
-- **Data:** 2026-10-01
-- **Relacionado:** F0.1
+- **Status:** Accepted
+- **Date:** 2026-10-01
+- **Related:** F0.1
 
-## Contexto
+## Context
 
-O template precisa de uma linguagem para as próprias ferramentas (verificador de docs, inicializador) e um
-padrão inicial para o código de produto. As checagens dependem de análise sintática confiável e de um
-ecossistema de lint/teste maduro. Projetos derivados podem ter stacks diferentes (Flutter, Python), mas as
-ferramentas do repositório precisam rodar em qualquer máquina de desenvolvimento.
+The template needs a language for its own tools (docs checker, initializer) and a default for product code.
+The checks rely on reliable parsing and a mature lint/test ecosystem. Derived projects may use other stacks
+(Flutter, Python), but the repository tools must run on any development machine.
 
-## Decisão
+## Decision
 
-Node 22 + TypeScript estrito (ESM) para as ferramentas e como stack padrão do esqueleto. Vitest para testes,
-ESLint (typescript-eslint, type-checked) + Prettier para estilo, jscpd para duplicação, ts-morph para AST.
+Node 22 + strict TypeScript (ESM) for the tools and as the skeleton's default stack. Vitest for tests, ESLint
+(typescript-eslint, type-checked) + Prettier for style, jscpd for duplication, ts-morph for the AST.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                | Por que não                                                                               |
-| -------------------------- | ----------------------------------------------------------------------------------------- |
-| Python para as ferramentas | Sem parser TS nativo; duas toolchains no mesmo repositório                                |
-| Scripts shell + regex      | Frágil para ignorar strings/comentários; foi justamente o problema que o ADR 0002 resolve |
-| Deno/Bun                   | Ecossistema de lint/AST menos maduro; Node é o que já existe nas máquinas                 |
+| Alternative           | Why not                                                                   |
+| --------------------- | ------------------------------------------------------------------------- |
+| Python for the tools  | No native TS parser; two toolchains in the same repository                |
+| Shell scripts + regex | Fragile at skipping strings/comments; exactly the problem ADR 0002 solves |
+| Deno/Bun              | Less mature lint/AST ecosystem; Node is what the machines already have    |
 
-## Consequências
+## Consequences
 
-- Positivas: uma toolchain; análise por AST; tipos estritos pegam erros cedo.
-- Negativas: projetos com outra linguagem de produto (Python, Dart) precisam estender `tools/docs/ast.ts`
-  com um parser (tree-sitter) ou manter código de produto em pasta analisada por outra ferramenta — fica
-  registrado como ADR futuro quando acontecer.
-- Docs afetados: ARCHITECTURE.md, STRUCTURE.md, CODING-STANDARDS.md.
+- Positive: one toolchain; AST-based analysis; strict types catch errors early.
+- Negative: projects with another product language (Python, Dart) must extend `tools/docs/ast.ts` with a
+  parser (tree-sitter) or keep product code in a folder analyzed by another tool — to be recorded as a future
+  ADR when it happens.
+- Docs that change: ARCHITECTURE.md, STRUCTURE.md, CODING-STANDARDS.md.

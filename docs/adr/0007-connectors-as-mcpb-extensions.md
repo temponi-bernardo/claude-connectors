@@ -1,40 +1,41 @@
-# 0007 — Conectores como extensões `.mcpb`, com sessão do navegador no lugar de token
+# 0007 — Connectors as `.mcpb` extensions, with a browser session instead of a token
 
-- **Estado:** Aceito
-- **Data:** 2026-11-05
-- **Relacionado:** F1.1, F2.1, ADR 0001
+- **Status:** Accepted
+- **Date:** 2026-11-05
+- **Related:** F1.1, F2.1, ADR 0001
 
-## Contexto
+## Context
 
-O repositório reúne conectores para o Claude, usados no Claude Desktop deste PC. O primeiro é o Canvas da
-PUC Minas, onde a instituição limita tokens de acesso a 30 dias. O dono quer instalar pela aba de
-extensões/conectores, sem manutenção mensal, e sem custo de hospedagem.
+The repository gathers connectors for Claude, used in Claude Desktop on this PC. The first is PUC Minas'
+Canvas, where the institution limits access tokens to 30 days. The owner wants to install through the
+extensions/connectors tab, with no monthly maintenance and no hosting cost.
 
-## Decisão
+## Decision
 
-1. Cada conector é um servidor MCP em stdio, numa pasta `connectors/<nome>/` com `manifest.json` (formato
-   `.mcpb` 0.3), empacotado por `npm run pack:all` num `.mcpb` instalável com dois cliques.
-2. O código é unido pelo esbuild num único arquivo; só dependências que não podem ser unidas
-   (`RUNTIME_EXTERNALS`) vão em `node_modules` do pacote.
-3. A autenticação do Canvas usa a sessão de um login feito numa janela do Chrome/Edge instalado, com perfil
-   próprio. Em 401, a sessão é renovada em segundo plano (navegador oculto, SSO guardado); o token do Canvas
-   fica só como reserva.
+1. Each connector is a stdio MCP server, in a `connectors/<nome>/` folder with a `manifest.json` (`.mcpb` 0.3
+   format), packed by `npm run pack:all` into a `.mcpb` installable in two clicks.
+2. The code is bundled by esbuild into a single file; only dependencies that cannot be bundled
+   (`RUNTIME_EXTERNALS`) go into the package's `node_modules`.
+3. Canvas authentication uses the session from a login done in a window of the installed Chrome/Edge, with its
+   own profile. On 401, the session is renewed in the background (hidden browser, saved SSO); the Canvas token
+   is only a fallback.
 
-## Alternativas consideradas
+## Alternatives considered
 
-| Alternativa                               | Por que não                                                                       |
-| ----------------------------------------- | --------------------------------------------------------------------------------- |
-| Conector remoto (URL pública + OAuth)     | Exige hospedar e proteger um servidor; login por navegador não roda na nuvem.     |
-| Só token de acesso                        | Expira em 30 dias na PUC; exige trocar à mão todo mês.                            |
-| Ler cookies do perfil principal do Chrome | Bloqueado pelo Chrome (criptografia por app, perfil travado); técnica de malware. |
-| Pacote sem bundle (node_modules completo) | 6 MB+ e milhares de arquivos; o bundle reduz a ~3 MB.                             |
-| Baixar Chromium do Playwright             | +150 MB; o Chrome/Edge já instalado basta (`playwright-core` + `channel`).        |
+| Alternative                                  | Why not                                                                          |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| Remote connector (public URL + OAuth)        | Requires hosting and securing a server; browser login does not run in the cloud. |
+| Access token only                            | Expires in 30 days at PUC; must be replaced by hand every month.                 |
+| Read cookies from Chrome's main profile      | Blocked by Chrome (app-bound encryption, locked profile); a malware technique.   |
+| Package without a bundle (full node_modules) | 6 MB+ and thousands of files; the bundle cuts it to ~3 MB.                       |
+| Download Playwright's Chromium               | +150 MB; the installed Chrome/Edge is enough (`playwright-core` + `channel`).    |
 
-## Consequências
+## Consequences
 
-- Positivas: instalação pela interface do Claude, sem token para renovar, sem custo; conectores novos seguem o
-  mesmo molde e reaproveitam `src/core` e `src/mcp`.
-- Negativas / custos aceitos: funciona só no computador onde a extensão está instalada (não no celular nem na
-  web); depende de Chrome ou Edge instalados; a sessão some se a Microsoft exigir senha de novo (aí abre a janela).
-- O que muda nos docs: ARCHITECTURE (camadas, serviços), STRUCTURE (`connectors/`, `src/mcp/`, `tools/pack/`),
+- Positive: install through Claude's UI, no token to renew, no cost; new connectors follow the same mold and
+  reuse `src/core` and `src/mcp`.
+- Negative / accepted costs: only works on the computer where the extension is installed (not on mobile or the
+  web); depends on Chrome or Edge being installed; the session is lost if Microsoft asks for the password again
+  (then the window opens).
+- Docs that change: ARCHITECTURE (layers, services), STRUCTURE (`connectors/`, `src/mcp/`, `tools/pack/`),
   PROCESSES (P03–P05), PRODUCT, ROADMAP.
