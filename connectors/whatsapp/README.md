@@ -68,7 +68,8 @@ Pré-requisitos: conta Cloudflare com **Workers Paid** (US$ 5/mês, inclui Conta
    falta.
 5. **OAuth App do GitHub** (login do dono): GitHub → Settings → Developer settings → OAuth Apps → New OAuth App.
    - Homepage URL: `https://whatsapp-remote.<sua-conta>.workers.dev`
-   - Authorization callback URL: `https://whatsapp-remote.<sua-conta>.workers.dev/oauth/callback`
+   - Redirect URIs (as duas, sem wildcard): `https://whatsapp-remote.<sua-conta>.workers.dev/oauth/callback` (login
+     do Claude) e `https://whatsapp-remote.<sua-conta>.workers.dev/oauth/callback/pair` (página `/pair`)
    - Gere um _client secret_.
 6. **Secrets** (cada comando pede o valor; `--config connectors/whatsapp/wrangler.toml` em todos):
 
@@ -194,11 +195,11 @@ poucos MB por sessão. Para limitar gastos, use o _spending limit_ do Workers e 
 
 ## Problemas comuns
 
-| Sintoma                                     | O que fazer                                                                                |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| 500 "Configuração do Worker inválida"       | Falta um secret: a mensagem diz qual                                                       |
-| "WhatsApp is not paired"                    | Abra `/pair` e pareie                                                                      |
-| "Tempo esgotado esperando o WhatsApp"       | Container acordando (primeira chamada após dormir): repita em alguns segundos              |
-| "Não consegui abrir o backup criptografado" | `SNAPSHOT_KEY` mudou ou backup corrompido: volte a chave antiga ou use "Recomeçar do zero" |
-| Login do GitHub recusado                    | O e-mail precisa estar verificado no GitHub e em `ALLOWED_EMAILS`                          |
-| Callback do GitHub dá erro de redirect      | A callback do OAuth App tem de ser exatamente `<url>/oauth/callback`                       |
+| Sintoma                                     | O que fazer                                                                                    |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 500 "Configuração do Worker inválida"       | Falta um secret: a mensagem diz qual                                                           |
+| "WhatsApp is not paired"                    | Abra `/pair` e pareie                                                                          |
+| "Tempo esgotado esperando o WhatsApp"       | Container acordando (primeira chamada após dormir): repita em alguns segundos                  |
+| "Não consegui abrir o backup criptografado" | `SNAPSHOT_KEY` mudou ou backup corrompido: volte a chave antiga ou use "Recomeçar do zero"     |
+| Login do GitHub recusado                    | O e-mail precisa estar verificado no GitHub e em `ALLOWED_EMAILS`                              |
+| Callback do GitHub dá erro de redirect      | O OAuth App precisa das duas URIs exatas: `<url>/oauth/callback` e `<url>/oauth/callback/pair` |
