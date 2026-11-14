@@ -8,6 +8,11 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Adicionado
 
+- Comandos **`/config-canvas`**, **`/config-gmail`** e **`/config-whatsapp`** (skills dos plugins): configuração
+  guiada de cada conector no chat, com conexão, login pelo navegador, vínculo de contas ou pareamento e um teste.
+
+### Adicionado
+
 - Hook `SessionEnd` (`session-end-handoff.sh`): no `/clear` ou fim de sessão sem handoff, gera o `docs/STATE.md`
   via `claude -p` se houve edição ou commit depois do último handoff (ADR 0017).
 

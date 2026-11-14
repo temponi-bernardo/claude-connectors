@@ -9,6 +9,9 @@ Triggers, alarms ou polling, então ficar ocioso não custa nada. Estado no Work
 
 ## Para quem vai usar
 
+O jeito mais fácil: digite **`/config-gmail`** no chat. O Claude confere a conexão, mostra as contas, vincula
+ou desvincula contas e faz um teste. O passo a passo manual é este:
+
 1. No Claude, adicione o marketplace `temponi-bernardo/claude-connectors` e instale o plugin **`gmail`** (ou
    adicione `https://gmail-remote.bftemponi.workers.dev/mcp` em Configurações → Conectores → Adicionar
    conector personalizado).
