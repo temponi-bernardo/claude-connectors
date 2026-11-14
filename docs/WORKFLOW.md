@@ -78,7 +78,10 @@ O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, susten
 3. Ao concluir, `/handoff` sobrescreve `docs/STATE.md`, que é local de cada clone (está no `.gitignore` e
    nunca vai para commit). Se houver commit seu novo sem handoff, o hook `Stop` bloqueia o encerramento e
    pede o handoff; commits trazidos por `git pull` não contam.
-4. O Claude avisa; o usuário roda `/clear`. Se o contexto estourar antes, `PreCompact` gera um handoff
+4. Se a branch alterou plugin (`connectors/` ou `.claude-plugin/`) sem tocar documentação (`docs/`,
+   `CHANGELOG.md`, `README.md` ou o README do conector), o hook `Stop` `stop-plugin-docs.sh` bloqueia o
+   encerramento e pede a skill `/atualizar-docs`: toda mudança em plugin documenta tudo o que foi feito.
+5. O Claude avisa; o usuário roda `/clear`. Se o contexto estourar antes, `PreCompact` gera um handoff
    automático via `claude -p` (desligue com `CLAUDE_HANDOFF_AUTOGEN=0`).
 
 ## Versão e release

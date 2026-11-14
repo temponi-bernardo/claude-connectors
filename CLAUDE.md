@@ -19,7 +19,9 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 4. **Testes primeiro.** Toda função tem teste; exceções só em `src/test-exceptions.ts` com motivo
    (`docs/TESTING.md`).
 5. **Documentação na mesma mudança.** Rode `npm run docs:generate`, preencha os campos manuais, siga a
-   tabela de `docs/DOCUMENTATION.md`.
+   tabela de `docs/DOCUMENTATION.md`. **Toda alteração em plugin** (`connectors/`, `.claude-plugin/`)
+   atualiza as docs afetadas e documenta tudo o que foi feito, via `/atualizar-docs` — o hook `Stop`
+   `stop-plugin-docs.sh` bloqueia se não houver.
 6. **Interface só com o design system** (`docs/UI.md`), quando houver.
 7. **Nada direto na `main`** — branch por tarefa, PR, `pr:check` verde, squash merge (`docs/WORKFLOW.md`).
    O Claude mergeia sozinho com o `pr:check` verde, sem pedir confirmação.
@@ -65,6 +67,8 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
   leitura de `.env`/segredos negados (também por hook `PreToolUse`).
 - Hook `Stop` (`stop-docs-check.sh`): roda `docs:check` ao fim de cada resposta que alterou código ou docs.
 - Hook `Stop` (`stop-handoff.sh`): se há commit seu novo sem `docs/STATE.md` atualizado, bloqueia e pede `/handoff`.
+- Hook `Stop` (`stop-plugin-docs.sh`): se a branch alterou plugin (`connectors/`, `.claude-plugin/`) sem
+  tocar documentação (`docs/`, `CHANGELOG.md`, READMEs), bloqueia e pede `/atualizar-docs`.
 - Hook `SessionStart`: injeta `docs/STATE.md` e a próxima tarefa do roadmap (também após `/clear`).
 - Hook `PreCompact`: gera handoff automático em `docs/STATE.md` via `claude -p` antes de compactar.
 - Ciclo completo em `docs/WORKFLOW.md` → "Ciclo de contexto do Claude Code".
