@@ -84,7 +84,9 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
 - **Passos:**
   1. `scripts/pr-check.sh` exige o título do PR e roda `npm run check` (inclui o P01 via `runDocsCli()`).
   2. Roda o P05 (`npm run build`) e falha se o bundle versionado dos conectores mudar sem commit.
-  3. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
+  3. Runs `npm run plugin:validate` (`scripts/plugin-validate.sh`): `claude plugin validate --strict` on the
+     marketplace and on each `connectors/<name>/plugin`; any warning fails (needs the Claude Code CLI, ADR 0022).
+  4. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
 - **Resultado:** `✔ pr:check verde`, condição para o Claude mergear com squash.
 - **Falhas:** qualquer etapa com erro para o script com código ≠ 0.
 

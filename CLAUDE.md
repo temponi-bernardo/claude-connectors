@@ -36,22 +36,23 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 
 ## Comandos
 
-| Comando                              | Faz                                                                             |
-| ------------------------------------ | ------------------------------------------------------------------------------- |
-| `npm run check`                      | Formato, lint, tipos, testes, docs, duplicação e segredos                       |
-| `npm run pr:check -- "<título>"`     | Portão de PR (não há CI): check, build, pacotes e commitlint                    |
-| `npm run docs:generate`              | Atualiza os blocos gerados de `docs/FUNCTIONS.md` e cria seções novas           |
-| `npm run docs:check`                 | Falha se docs e código divergirem                                               |
-| `npm test` / `npm run test:coverage` | Testes / com cobertura mínima de 90%                                            |
-| `npm run lint` / `npm run lint:fix`  | ESLint                                                                          |
-| `npm run format:fix`                 | Prettier                                                                        |
-| `npm run typecheck`                  | `tsc --noEmit`                                                                  |
-| `npm run dup:check`                  | jscpd                                                                           |
-| `npm run build`                      | Valida o `.mcp.json` (só remoto) e gera `server/remote.js` de cada conector     |
-| `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)             |
-| `npm run gmail:deploy`               | Publica o Gmail remoto no Cloudflare Workers (`gmail:dev`: local)               |
-| `npm run whatsapp:deploy`            | Publica o WhatsApp (Workers + Containers); `whatsapp:build`: só bundle e imagem |
-| `npm run bridge:test`                | Ponte Go do WhatsApp: gofmt, vet e testes (Go 1.26+, parte do `pr:check`)       |
+| Comando                              | Faz                                                                               |
+| ------------------------------------ | --------------------------------------------------------------------------------- |
+| `npm run check`                      | Formato, lint, tipos, testes, docs, duplicação e segredos                         |
+| `npm run pr:check -- "<título>"`     | Portão de PR (não há CI): check, build, pacotes e commitlint                      |
+| `npm run docs:generate`              | Atualiza os blocos gerados de `docs/FUNCTIONS.md` e cria seções novas             |
+| `npm run docs:check`                 | Falha se docs e código divergirem                                                 |
+| `npm test` / `npm run test:coverage` | Testes / com cobertura mínima de 90%                                              |
+| `npm run lint` / `npm run lint:fix`  | ESLint                                                                            |
+| `npm run format:fix`                 | Prettier                                                                          |
+| `npm run typecheck`                  | `tsc --noEmit`                                                                    |
+| `npm run dup:check`                  | jscpd                                                                             |
+| `npm run build`                      | Valida o `.mcp.json` (só remoto) e gera `server/remote.js` de cada conector       |
+| `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)               |
+| `npm run gmail:deploy`               | Publica o Gmail remoto no Cloudflare Workers (`gmail:dev`: local)                 |
+| `npm run whatsapp:deploy`            | Publica o WhatsApp (Workers + Containers); `whatsapp:build`: só bundle e imagem   |
+| `npm run bridge:test`                | Ponte Go do WhatsApp: gofmt, vet e testes (Go 1.26+, parte do `pr:check`)         |
+| `npm run plugin:validate`            | `claude plugin validate --strict` on the marketplace and each plugin (`pr:check`) |
 
 ## Skills
 

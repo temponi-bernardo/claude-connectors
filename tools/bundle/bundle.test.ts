@@ -119,6 +119,37 @@ describe('plugin folder (ADR 0020)', () => {
   });
 });
 
+describe('plugin version (ADR 0022)', () => {
+  function readJson(...parts: string[]): Record<string, unknown> {
+    return JSON.parse(readFileSync(join(REPO_ROOT, ...parts), 'utf8')) as Record<string, unknown>;
+  }
+
+  it('each plugin.json has a semver version that release-please tracks and bumps', () => {
+    const config = readJson('release-please-config.json') as {
+      packages: Record<string, { 'extra-files'?: unknown[] }>;
+    };
+    const manifest = readJson('.release-please-manifest.json');
+    for (const name of listConnectors(REPO_ROOT)) {
+      const path = `${CONNECTORS_DIR}/${name}`;
+      const { version } = readJson(path, PLUGIN_MANIFEST_PATH);
+      expect(version).toMatch(/^\d+\.\d+\.\d+$/);
+      expect(manifest[path]).toBe(version);
+      expect(config.packages[path]?.['extra-files']).toContainEqual({
+        type: 'json',
+        path: `${PLUGIN_DIR}/.claude-plugin/plugin.json`,
+        jsonpath: '$.version',
+      });
+    }
+  });
+
+  it('the marketplace entries carry no version (plugin.json is the only source)', () => {
+    const market = readJson('.claude-plugin', 'marketplace.json') as {
+      plugins: Record<string, unknown>[];
+    };
+    for (const entry of market.plugins) expect(entry).not.toHaveProperty('version');
+  });
+});
+
 describe('bundleOptions', () => {
   it('gera um único ESM para Node, sem dependências externas', () => {
     const options = bundleOptions('in.ts', 'out.js');

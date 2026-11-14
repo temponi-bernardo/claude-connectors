@@ -1,8 +1,14 @@
 {
   "name": "whatsapp",
-  "description": "WhatsApp pessoal no Claude: skills de configuração e uso. Cada pessoa conecta o próprio servidor no Cloudflare (self-host) como conector personalizado.",
+  "version": "1.0.0",
+  "description": "Personal WhatsApp in Claude: setup and usage skills. Each person connects their own server on Cloudflare (self-hosted) as a custom connector.",
   "author": {
-    "name": "Bernardo Temponi"
+    "name": "Bernardo Temponi",
+    "url": "https://github.com/temponi-bernardo"
   },
-  "repository": "https://github.com/temponi-bernardo/claude-connectors"
+  "homepage": "https://temponi-bernardo.github.io/claude-connectors/",
+  "repository": "https://github.com/temponi-bernardo/claude-connectors",
+  "license": "MIT",
+  "keywords": ["whatsapp", "messaging", "chat", "self-hosted", "cloudflare"],
+  "privacyPolicyUrl": "https://temponi-bernardo.github.io/claude-connectors/privacidade.html"
 }
