@@ -16,3 +16,4 @@ marca o antigo como "Substituído por NNNN". Modelo em [0000-modelo.md](0000-mod
 | [0009](0009-conector-remoto-http-oauth.md)                | Conector remoto por HTTP com OAuth e token do Canvas        | Substituído em parte por 0010 e 0011 | 2026-11-05 |
 | [0010](0010-conector-remoto-no-cloudflare-workers.md)     | Conector remoto hospedado no Cloudflare Workers             | Aceito                               | 2026-11-05 |
 | [0011](0011-renovacao-automatica-do-token-do-canvas.md)   | Renovação automática do token do Canvas no refresh do OAuth | Aceito                               | 2026-11-05 |
+| [0012](0012-site-publico-no-github-pages.md)              | Site público no GitHub Pages, servido da pasta `docs/`      | Aceito                               | 2026-11-14 |

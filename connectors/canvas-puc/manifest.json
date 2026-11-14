@@ -133,6 +133,8 @@
       "node": ">=18.0.0"
     }
   },
+  "homepage": "https://temponi-bernardo.github.io/claude-connectors/",
+  "privacy_policies": ["https://temponi-bernardo.github.io/claude-connectors/privacidade.html"],
   "repository": {
     "type": "git",
     "url": "https://github.com/temponi-bernardo/claude-connectors"

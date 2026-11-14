@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="{{ page.description | escape }}" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'self'; img-src 'self'; base-uri 'none'; form-action 'none'"
+    />
+    <title>{{ page.title | escape }} · Claude Connectors</title>
+    <link rel="icon" href="{{ '/favicon.svg' | relative_url }}" type="image/svg+xml" />
+    <link rel="stylesheet" href="{{ '/site.css' | relative_url }}" />
+    <link rel="canonical" href="{{ page.url | absolute_url }}" />
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <a class="brand" href="{{ '/' | relative_url }}">
+          <img src="{{ '/favicon.svg' | relative_url }}" alt="" width="28" height="28" />
+          Claude Connectors
+        </a>
+        <nav aria-label="Principal">
+          <a href="{{ '/' | relative_url }}">Início</a>
+          <a href="{{ '/privacidade.html' | relative_url }}">Privacidade</a>
+          <a href="{{ '/termos.html' | relative_url }}">Termos de uso</a>
+        </nav>
+      </div>
+    </header>
+    <main class="wrap">{{ content }}</main>
+    <footer>
+      <div class="wrap">
+        <span>© 2026 Bernardo Temponi · Licença MIT</span>
+        <span
+          >Projeto independente, sem vínculo com a PUC Minas, a Instructure ou a Anthropic.</span
+        >
+      </div>
+    </footer>
+  </body>
+</html>

@@ -63,13 +63,14 @@ O `playwright-core` só é carregado quando o login pelo navegador é necessári
 
 ## Serviços externos
 
-| Serviço                   | Usado para                        | Onde está o adaptador                                  | Segredo                                                          |
-| ------------------------- | --------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------- |
-| API REST do Canvas LMS    | Cursos, tarefas, notas, avisos... | `connectors/canvas-puc/src/client.ts`                  | Sessão em `~/.canvas-puc/session.json` (fora do repo)            |
-| Login SSO da instituição  | Obter a sessão do Canvas          | `connectors/canvas-puc/src/browser-login.ts`           | Perfil do navegador em `~/.canvas-puc/browser-profile`           |
-| Token de acesso do Canvas | Reserva se o login falhar         | `connectors/canvas-puc/src/auth.ts`                    | `CANVAS_API_TOKEN` (campo sensível da extensão)                  |
-| Token de acesso (remoto)  | Única credencial do modo remoto   | `connectors/canvas-puc/src/remote.ts`                  | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)              |
-| Cloudflare Workers        | Rodar o conector remoto           | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (secret do Worker); deploy com `CLOUDFLARE_API_TOKEN` |
+| Serviço                   | Usado para                                 | Onde está o adaptador                                  | Segredo                                                          |
+| ------------------------- | ------------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------------------- |
+| API REST do Canvas LMS    | Cursos, tarefas, notas, avisos...          | `connectors/canvas-puc/src/client.ts`                  | Sessão em `~/.canvas-puc/session.json` (fora do repo)            |
+| Login SSO da instituição  | Obter a sessão do Canvas                   | `connectors/canvas-puc/src/browser-login.ts`           | Perfil do navegador em `~/.canvas-puc/browser-profile`           |
+| Token de acesso do Canvas | Reserva se o login falhar                  | `connectors/canvas-puc/src/auth.ts`                    | `CANVAS_API_TOKEN` (campo sensível da extensão)                  |
+| Token de acesso (remoto)  | Única credencial do modo remoto            | `connectors/canvas-puc/src/remote.ts`                  | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)              |
+| Cloudflare Workers        | Rodar o conector remoto                    | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (secret do Worker); deploy com `CLOUDFLARE_API_TOKEN` |
+| GitHub Pages              | Site público (início, privacidade, termos) | `docs/_config.yml`, `docs/_layouts/site.html`          | Nenhum (ADR 0012)                                                |
 
 Nada de credencial no repositório: a configuração vem do formulário da extensão (variáveis de ambiente) e a
 sessão fica na pasta do usuário.

@@ -32,7 +32,7 @@
 | `revert`   | Reverte um commit                         | —                       |
 
 Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `pack`, `docs`, `tools`, `ci`, `deps`,
-`skills`, `release`, `config`, `remote`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
+`skills`, `release`, `config`, `remote`, `site`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
 
 `BREAKING CHANGE:` no rodapé (ou `!` após o tipo) gera major. O hook `commit-msg` valida localmente; o
 `pr:check` valida o **título do PR**, porque com squash merge é ele que vira o commit da `main`.

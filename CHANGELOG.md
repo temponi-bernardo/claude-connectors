@@ -8,6 +8,9 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Adicionado
 
+- Site público no GitHub Pages (`https://temponi-bernardo.github.io/claude-connectors/`) com página inicial,
+  política de privacidade e termos de uso, para usar como link do serviço em produção; o manifesto do Canvas
+  aponta para ele (ADR 0012).
 - Canvas: o plugin agora funciona nas sessões do Claude Code na nuvem. O `.mcp.json` liga
   `NODE_USE_ENV_PROXY=1`, e o Node passa a usar o proxy do ambiente, que injeta o token do Canvas. Basta
   preencher o campo "Token de acesso" do plugin com qualquer texto (ex.: `proxy`).
