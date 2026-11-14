@@ -91,8 +91,14 @@ O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, susten
 
 ## Versão e release
 
-Versão oficial em um lugar só: `package.json` (`.release-please-manifest.json` é o espelho mantido pelo
-release-please). O fluxo é da skill `/lancar-versao`:
+Each version lives in one place ([ADR 0022](adr/0022-version-per-plugin.md)). The repository version is in
+`package.json` (package `.`, tag `vX.Y.Z`). Each plugin has its own `version` in
+`connectors/<name>/plugin/.claude-plugin/plugin.json` and is its own release-please package (`connectors/<name>`,
+`release-type: simple`, tag `<name>-vX.Y.Z`, changelog in `connectors/<name>/CHANGELOG.md`); release-please bumps
+the `plugin.json` field through `extra-files` (`jsonpath: $.version`). The marketplace entry never carries a
+version. `.release-please-manifest.json` mirrors every package's current version. A plugin only shows an update
+to users after its version is bumped, so release any change to a connector (server or plugin) that users should
+get. O fluxo é da skill `/lancar-versao`:
 
 1. Commits convencionais chegam na `main` via PR.
 2. A CLI local abre/atualiza um **PR de release** com o bump de versão e o CHANGELOG gerado:
@@ -100,7 +106,7 @@ release-please). O fluxo é da skill `/lancar-versao`:
 3. Revisar o PR de release (e a seção "Não lançado" do CHANGELOG, que vira a versão).
 4. O Claude mergeia o PR de release, como qualquer PR. A confirmação humana fica em publicar o rascunho. Depois, a mesma CLI cria a tag `vX.Y.Z` e um
    **rascunho** de release: `npx release-please github-release --draft --token "$(gh auth token)" --repo-url
-temponi-bernardo/claude-connectors`.
+temponi-bernardo/claude-connectors`. It also creates `<name>-vX.Y.Z` tags and drafts for the plugins in the release PR.
 5. Publicar o rascunho quando quiser. Não há anexo: o plugin aponta para o servidor remoto (ADR 0013).
 
 O **conector remoto** (ADR 0010) não depende de release: depois de um merge que mexe no conector, rode

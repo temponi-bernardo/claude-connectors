@@ -5,8 +5,9 @@
 #   2. npm run bridge:test (ponte Go do WhatsApp: gofmt, vet, testes) e npm run whatsapp:build (bundle do Worker)
 #   3. npm run build (o plugin de cada conector aponta para um servidor remoto e o bundle compila) e
 #      confere que o bundle versionado (server/remote.js) está commitado e atual
-#   4. commitlint em todos os commits da branch desde a main
-#   5. commitlint no título do PR (vira o commit da main no squash)
+#   4. claude plugin validate --strict on the marketplace and on each connector plugin (ADR 0022)
+#   5. commitlint em todos os commits da branch desde a main
+#   6. commitlint no título do PR (vira o commit da main no squash)
 # Uso: npm run pr:check -- "feat(canvas): título do PR"
 set -e
 title="${1:-}"
@@ -28,6 +29,8 @@ if ! git diff --quiet -- connectors || [ -n "$(git ls-files --others --exclude-s
   git status --short connectors >&2
   exit 1
 fi
+echo "→ plugin manifests (claude plugin validate --strict)"
+npm run -s plugin:validate
 echo "→ commitlint nos commits da branch"
 git fetch -q origin main
 npx --no-install commitlint --from origin/main --to HEAD
