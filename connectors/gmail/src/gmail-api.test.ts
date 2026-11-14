@@ -4,18 +4,18 @@ import {
   fakeFetch,
   gmailRoute,
   linkedTestDeps,
-  TEST_ACCOUNTS,
+  TEST_REFS,
   testDeps,
   type FakeRoute,
   type RecordedCall,
 } from './fixtures/fake-google.js';
 import { gmailGet, gmailHttpError, gmailUrl, sendGmailGet } from './gmail-api.js';
 
-const OWNER = TEST_ACCOUNTS[0]!;
+const OWNER = TEST_REFS[0]!;
 
 /** Dependências com só a conta do dono vinculada. */
 function linkedDeps(routes: FakeRoute[], calls: RecordedCall[] = []) {
-  return linkedTestDeps(routes, calls, [OWNER]);
+  return linkedTestDeps(routes, calls, [OWNER.account.email]);
 }
 
 beforeEach(() => {
@@ -41,10 +41,10 @@ describe('gmailUrl', () => {
 
 describe('gmailHttpError', () => {
   it('traduz status conhecidos e genéricos', () => {
-    expect(gmailHttpError(404, OWNER).message).toBe(
+    expect(gmailHttpError(404, 'dono').message).toBe(
       'Conta "dono": não encontrado (id errado ou de outra conta).',
     );
-    expect(gmailHttpError(500, OWNER).message).toMatch(/HTTP 500/);
+    expect(gmailHttpError(500, 'dono').message).toMatch(/HTTP 500/);
   });
 });
 

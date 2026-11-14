@@ -2,8 +2,8 @@
  * Cliente da Gmail API (só leitura): monta a URL, envia o access token da conta e o User-Agent, tenta de
  * novo uma vez depois de 401 e converte falhas HTTP em mensagens acionáveis.
  */
-import type { AllowedAccount } from './config.js';
-import { UPSTREAM_USER_AGENT, type GmailDeps } from './context.js';
+import type { AccountRef } from './accounts.js';
+import { UPSTREAM_USER_AGENT, type GmailDeps, type OwnerDeps } from './context.js';
 import { forgetAccessToken, getAccessToken } from './access-token.js';
 
 /** Base da Gmail API para a conta do token. */
@@ -37,9 +37,9 @@ export function gmailUrl(
 }
 
 /** Erro acionável para uma resposta de falha da Gmail API. */
-export function gmailHttpError(status: number, account: AllowedAccount): Error {
+export function gmailHttpError(status: number, alias: string): Error {
   const reason = GMAIL_STATUS_MESSAGES[status] ?? `o Gmail falhou (HTTP ${status}); tente de novo`;
-  return new Error(`Conta "${account.alias}": ${reason}.`);
+  return new Error(`Conta "${alias}": ${reason}.`);
 }
 
 /** Envia um GET autenticado à Gmail API com o access token dado. */
@@ -54,16 +54,12 @@ export function sendGmailGet(deps: GmailDeps, url: string, token: string): Promi
 }
 
 /** Lê um recurso da Gmail API como JSON; depois de 401 renova o token e tenta mais uma vez. */
-export async function gmailGet<T>(
-  deps: GmailDeps,
-  account: AllowedAccount,
-  url: string,
-): Promise<T> {
-  let response = await sendGmailGet(deps, url, await getAccessToken(deps, account));
+export async function gmailGet<T>(deps: OwnerDeps, ref: AccountRef, url: string): Promise<T> {
+  let response = await sendGmailGet(deps, url, await getAccessToken(deps, ref));
   if (response.status === 401) {
-    forgetAccessToken(account.email);
-    response = await sendGmailGet(deps, url, await getAccessToken(deps, account));
+    forgetAccessToken(deps.owner, ref.account.email);
+    response = await sendGmailGet(deps, url, await getAccessToken(deps, ref));
   }
-  if (!response.ok) throw gmailHttpError(response.status, account);
+  if (!response.ok) throw gmailHttpError(response.status, ref.alias);
   return (await response.json()) as T;
 }

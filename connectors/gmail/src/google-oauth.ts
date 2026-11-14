@@ -142,3 +142,23 @@ export function exchangeGoogleCode(
 export function refreshGoogleToken(deps: GmailDeps, refreshToken: string): Promise<GoogleTokens> {
   return postGoogleToken(deps, { grant_type: 'refresh_token', refresh_token: refreshToken });
 }
+
+/** Endpoint de revogação de tokens do Google. */
+export const GOOGLE_REVOKE_URL = 'https://oauth2.googleapis.com/revoke';
+
+/** Revoga o refresh token no Google (o app perde o acesso à conta); devolve se o Google confirmou. */
+export async function revokeGoogleToken(deps: GmailDeps, token: string): Promise<boolean> {
+  try {
+    const response = await deps.fetch(GOOGLE_REVOKE_URL, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent': UPSTREAM_USER_AGENT,
+      },
+      body: new URLSearchParams({ token }).toString(),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}

@@ -5,8 +5,8 @@
 import { htmlToText } from '../../../src/core/html.js';
 import { pdfToText, isPdf } from '../../../src/core/pdf.js';
 import { wordToText } from '../../../src/core/word.js';
-import type { AllowedAccount } from './config.js';
-import type { GmailDeps } from './context.js';
+import type { AccountRef } from './accounts.js';
+import type { OwnerDeps } from './context.js';
 import { gmailGet, gmailUrl } from './gmail-api.js';
 import { base64UrlToBytes, truncateText } from './message-format.js';
 
@@ -55,12 +55,12 @@ export async function attachmentBytesToText(bytes: Uint8Array): Promise<string> 
 
 /** Baixa um anexo e devolve o texto (limitado); recusa anexos acima de 5 MB. */
 export async function readAttachmentText(
-  deps: GmailDeps,
-  account: AllowedAccount,
+  deps: OwnerDeps,
+  ref: AccountRef,
   ids: { readonly messageId: string; readonly attachmentId: string },
 ): Promise<Record<string, unknown>> {
   const path = `messages/${ids.messageId}/attachments/${ids.attachmentId}`;
-  const body = await gmailGet<{ size?: number; data?: string }>(deps, account, gmailUrl(path));
+  const body = await gmailGet<{ size?: number; data?: string }>(deps, ref, gmailUrl(path));
   const size = body.size ?? 0;
   if (size > MAX_ATTACHMENT_BYTES) {
     throw new Error(
@@ -69,7 +69,7 @@ export async function readAttachmentText(
   }
   const text = await attachmentBytesToText(base64UrlToBytes(body.data ?? ''));
   return {
-    account: account.alias,
+    account: ref.alias,
     message_id: ids.messageId,
     size,
     text: truncateText(

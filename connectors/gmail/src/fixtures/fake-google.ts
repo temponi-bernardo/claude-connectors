@@ -3,27 +3,28 @@
  * JWKS e Gmail API simulados por um `fetch` com rotas, que registra cada chamada.
  */
 import { generateKeyPairSync, sign, type KeyObject } from 'node:crypto';
-import type { AllowedAccount, GmailSettings } from '../config.js';
-import type { Fetcher, GmailDeps } from '../context.js';
+import { aliasAccounts, type AccountRef } from '../accounts.js';
+import type { GmailSettings } from '../config.js';
+import type { Fetcher, OwnerDeps } from '../context.js';
 import type { RateLimiter } from '../rate-limit.js';
-import { saveLinkedAccount } from '../token-store.js';
+import { saveOwnerAccounts, type LinkedAccount } from '../token-store.js';
 import { FakeKv } from './fake-kv.js';
 
 /** Chave de teste dos selos (32 bytes). */
 export const TEST_TOKEN_KEY = Buffer.alloc(32, 7);
 
-/** Contas da allowlist dos testes. */
-export const TEST_ACCOUNTS: readonly AllowedAccount[] = [
-  { alias: 'dono', email: 'dono@example.com' },
-  { alias: 'musica', email: 'musica@example.com' },
-];
+/** E-mails das contas Gmail dos testes (fictícios). */
+export const TEST_EMAILS: readonly string[] = ['dono@example.com', 'musica@example.com'];
+
+/** Usuário do conector nos testes (`sub` do Google). */
+export const TEST_OWNER = 'sub-dono@example.com';
 
 /** Configuração dos testes. */
 export const TEST_SETTINGS: GmailSettings = {
   googleClientId: 'client-123.apps.googleusercontent.com',
   googleClientSecret: 'segredo-de-teste',
   tokenKey: TEST_TOKEN_KEY,
-  accounts: TEST_ACCOUNTS,
+  allowedEmails: null,
   consentSecret: 'c'.repeat(40),
 };
 
@@ -64,6 +65,7 @@ export function validIdToken(
     exp: 1_700_000_000 + 3600,
     email,
     email_verified: true,
+    sub: `sub-${email}`,
     nonce,
     ...extra,
   });
@@ -123,8 +125,8 @@ export function gmailRoute(responses: Readonly<Record<string, unknown>>): FakeRo
   };
 }
 
-/** Dependências de teste com KV em memória e o `fetch` dado. */
-export function testDeps(fetcher: Fetcher, kv: FakeKv = new FakeKv()): GmailDeps & { kv: FakeKv } {
+/** Dependências de teste com KV em memória, o `fetch` dado e o usuário `TEST_OWNER`. */
+export function testDeps(fetcher: Fetcher, kv: FakeKv = new FakeKv()): OwnerDeps & { kv: FakeKv } {
   kv.now = () => TEST_NOW_MS;
   return {
     settings: TEST_SETTINGS,
@@ -132,25 +134,31 @@ export function testDeps(fetcher: Fetcher, kv: FakeKv = new FakeKv()): GmailDeps
     fetch: fetcher,
     now: () => TEST_NOW_MS,
     origin: TEST_ORIGIN,
+    owner: TEST_OWNER,
   };
 }
 
-/** Dependências com as contas dadas já vinculadas (refresh `r-<apelido>`) e as rotas dadas. */
+/** Conta vinculada de teste (refresh `r-<parte antes do @>`). */
+export function testAccount(email: string, extra: Partial<LinkedAccount> = {}): LinkedAccount {
+  return {
+    email,
+    refreshToken: `r-${email.slice(0, email.indexOf('@'))}`,
+    scope: 'openid email https://www.googleapis.com/auth/gmail.readonly',
+    linkedAt: '2026-11-14T00:00:00.000Z',
+    status: 'active',
+    ...extra,
+  };
+}
+
+/** Dependências com as contas dadas já vinculadas ao `TEST_OWNER` e as rotas dadas. */
 export async function linkedTestDeps(
   routes: FakeRoute[],
   calls: RecordedCall[] = [],
-  accounts: readonly AllowedAccount[] = TEST_ACCOUNTS,
-): Promise<GmailDeps & { kv: FakeKv }> {
+  emails: readonly string[] = TEST_EMAILS,
+): Promise<OwnerDeps & { kv: FakeKv }> {
   const deps = testDeps(fakeFetch([tokenRoute(), ...routes], calls));
-  for (const account of accounts) {
-    await saveLinkedAccount(deps.kv, TEST_TOKEN_KEY, {
-      email: account.email,
-      refreshToken: `r-${account.alias}`,
-      scope: 'openid email https://www.googleapis.com/auth/gmail.readonly',
-      linkedAt: '2026-11-14T00:00:00.000Z',
-      status: 'active',
-    });
-  }
+  const accounts = emails.map((email) => testAccount(email));
+  await saveOwnerAccounts(deps.kv, TEST_TOKEN_KEY, { owner: TEST_OWNER, accounts });
   return deps;
 }
 
@@ -165,3 +173,8 @@ export function countingLimiter(allowed: number): RateLimiter & { keys: string[]
     },
   };
 }
+
+/** Contas dos testes com apelido (`dono`, `musica`), como as ferramentas as veem. */
+export const TEST_REFS: readonly AccountRef[] = aliasAccounts(
+  TEST_EMAILS.map((email) => testAccount(email)),
+);

@@ -2,8 +2,8 @@
  * Busca de conversas com a sintaxe do Gmail, numa conta ou em todas: resumo de cada conversa, ordenação
  * por data e paginação (com `all`, o `page_token` junta o de cada conta).
  */
-import type { AllowedAccount } from './config.js';
-import type { GmailDeps } from './context.js';
+import type { AccountRef } from './accounts.js';
+import type { OwnerDeps } from './context.js';
 import { gmailGet, gmailUrl } from './gmail-api.js';
 import { MESSAGE_HEADERS, summarizeThread, type GmailThread } from './message-format.js';
 
@@ -49,21 +49,21 @@ export function decodeMultiPageToken(token: string): MultiPageToken {
 
 /** Lê uma conversa só com os cabeçalhos úteis (sem corpo), para o resumo da busca. */
 export function fetchThreadMetadata(
-  deps: GmailDeps,
-  account: AllowedAccount,
+  deps: OwnerDeps,
+  ref: AccountRef,
   threadId: string,
 ): Promise<GmailThread> {
   const url = gmailUrl(`threads/${threadId}`, {
     format: 'metadata',
     metadataHeaders: MESSAGE_HEADERS,
   });
-  return gmailGet<GmailThread>(deps, account, url);
+  return gmailGet<GmailThread>(deps, ref, url);
 }
 
 /** Busca numa conta: lista as conversas e lê os cabeçalhos de cada uma em paralelo. */
 export async function searchAccount(
-  deps: GmailDeps,
-  account: AllowedAccount,
+  deps: OwnerDeps,
+  ref: AccountRef,
   request: SearchRequest,
 ): Promise<AccountSearchResult> {
   const listUrl = gmailUrl('threads', {
@@ -73,14 +73,14 @@ export async function searchAccount(
   });
   const list = await gmailGet<{ threads?: { id: string }[]; nextPageToken?: string }>(
     deps,
-    account,
+    ref,
     listUrl,
   );
   const threads = await Promise.all(
-    (list.threads ?? []).map(({ id }) => fetchThreadMetadata(deps, account, id)),
+    (list.threads ?? []).map(({ id }) => fetchThreadMetadata(deps, ref, id)),
   );
   return {
-    threads: threads.map((thread) => summarizeThread(thread, account.alias)),
+    threads: threads.map((thread) => summarizeThread(thread, ref.alias)),
     nextPageToken: list.nextPageToken ?? null,
   };
 }
@@ -97,9 +97,9 @@ export function sortByDateDesc(threads: Record<string, unknown>[]): Record<strin
 
 /** Contas a consultar e o token de cada uma, a partir do `page_token` de várias contas. */
 export function pagesToFetch(
-  accounts: readonly AllowedAccount[],
+  accounts: readonly AccountRef[],
   pageToken: string | null,
-): [AllowedAccount, string | null][] {
+): [AccountRef, string | null][] {
   if (pageToken === null) return accounts.map((account) => [account, null]);
   const tokens = decodeMultiPageToken(pageToken);
   return accounts
@@ -109,8 +109,8 @@ export function pagesToFetch(
 
 /** Busca em uma ou várias contas e devolve as conversas e o próximo `page_token`. */
 export async function searchThreads(
-  deps: GmailDeps,
-  accounts: readonly AllowedAccount[],
+  deps: OwnerDeps,
+  accounts: readonly AccountRef[],
   request: SearchRequest,
 ): Promise<Record<string, unknown>> {
   if (accounts.length === 1 && accounts[0]) {
@@ -119,7 +119,7 @@ export async function searchThreads(
   }
   const pages = pagesToFetch(accounts, request.pageToken);
   const results = await Promise.all(
-    pages.map(([account, pageToken]) => searchAccount(deps, account, { ...request, pageToken })),
+    pages.map(([ref, pageToken]) => searchAccount(deps, ref, { ...request, pageToken })),
   );
   const next = Object.fromEntries(
     results.flatMap((result, i) =>

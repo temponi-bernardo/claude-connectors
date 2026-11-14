@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { clearAccessTokenCache } from './access-token.js';
 import {
   linkedTestDeps,
-  TEST_ACCOUNTS,
+  TEST_REFS,
   type FakeRoute,
   type RecordedCall,
 } from './fixtures/fake-google.js';
@@ -18,7 +18,7 @@ import {
   threadDate,
 } from './search.js';
 
-const [OWNER, MUSIC] = [TEST_ACCOUNTS[0]!, TEST_ACCOUNTS[1]!];
+const [OWNER, MUSIC] = [TEST_REFS[0]!, TEST_REFS[1]!];
 const REQUEST = { query: 'from:image-line', maxResults: 2, pageToken: null };
 
 /** Gmail falso por conta: `threads` lista ids (com próxima página `p2`) e `threads/<id>` dá metadados. */
@@ -61,13 +61,11 @@ describe('page_token de várias contas', () => {
   });
 
   it('pagesToFetch consulta todas na primeira página e só as pendentes depois', () => {
-    expect(pagesToFetch(TEST_ACCOUNTS, null)).toEqual([
+    expect(pagesToFetch(TEST_REFS, null)).toEqual([
       [OWNER, null],
       [MUSIC, null],
     ]);
-    expect(pagesToFetch(TEST_ACCOUNTS, encodeMultiPageToken({ musica: 't' }))).toEqual([
-      [MUSIC, 't'],
-    ]);
+    expect(pagesToFetch(TEST_REFS, encodeMultiPageToken({ musica: 't' }))).toEqual([[MUSIC, 't']]);
   });
 });
 
@@ -114,7 +112,7 @@ describe('busca', () => {
 
   it('searchThreads em todas junta, ordena por data e combina os page_token', async () => {
     const deps = await linkedTestDeps([mailbox(DATES)]);
-    const first = await searchThreads(deps, TEST_ACCOUNTS, REQUEST);
+    const first = await searchThreads(deps, TEST_REFS, REQUEST);
     const threads = first.threads as Record<string, unknown>[];
     expect(threads.map((t) => `${String(t.account)}:${String(t.thread_id)}`)).toEqual([
       'dono:d2',
@@ -123,7 +121,7 @@ describe('busca', () => {
     ]);
     const token = first.next_page_token as string;
     expect(decodeMultiPageToken(token)).toEqual({ dono: 'd-p2', musica: 'm-p2' });
-    const second = await searchThreads(deps, TEST_ACCOUNTS, { ...REQUEST, pageToken: token });
+    const second = await searchThreads(deps, TEST_REFS, { ...REQUEST, pageToken: token });
     expect(second.next_page_token).toBeNull();
   });
 });

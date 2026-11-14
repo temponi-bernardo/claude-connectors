@@ -1,72 +1,80 @@
 import { describe, expect, it } from 'vitest';
 import { sealPayload } from '../../../src/remote/seal.js';
 import { FakeKv } from './fixtures/fake-kv.js';
-import { TEST_ACCOUNTS, TEST_TOKEN_KEY } from './fixtures/fake-google.js';
+import { TEST_OWNER, TEST_TOKEN_KEY, testAccount } from './fixtures/fake-google.js';
 import {
-  accountKey,
-  loadLinkedAccount,
-  openLinkedAccount,
-  saveLinkedAccount,
-  sealLinkedAccount,
-  type LinkedAccount,
+  loadOwnerAccounts,
+  MAX_LINKED_ACCOUNTS,
+  openOwnerAccounts,
+  ownerKey,
+  saveOwnerAccounts,
+  sealOwnerAccounts,
+  sha256Hex,
+  toLinkedAccount,
+  upsertAccount,
 } from './token-store.js';
 
-const ACCOUNT: LinkedAccount = {
-  email: 'dono@example.com',
-  refreshToken: 'refresh-1',
-  scope: 'openid email',
-  linkedAt: '2026-11-14T00:00:00.000Z',
-  status: 'active',
-};
+const ACCOUNT = testAccount('dono@example.com');
 
-describe('selo da conta vinculada', () => {
-  it('accountKey usa o apelido', () => {
-    expect(accountKey('dono')).toBe('account:dono');
-  });
-
-  it('sela sem expor o refresh token e abre com o e-mail certo', () => {
-    const sealed = sealLinkedAccount(ACCOUNT, TEST_TOKEN_KEY);
-    expect(sealed).not.toContain('refresh-1');
-    expect(openLinkedAccount(sealed, TEST_TOKEN_KEY, ACCOUNT.email)).toEqual(ACCOUNT);
-  });
-
-  it('não abre com outro e-mail, outra chave ou conteúdo incompleto', () => {
-    const sealed = sealLinkedAccount(ACCOUNT, TEST_TOKEN_KEY);
-    expect(openLinkedAccount(sealed, TEST_TOKEN_KEY, 'musica@example.com')).toBeNull();
-    expect(openLinkedAccount(sealed, Buffer.alloc(32, 9), ACCOUNT.email)).toBeNull();
-    const partial = sealPayload(
-      { typ: 'gmail_account', exp: 4e9, email: ACCOUNT.email },
-      TEST_TOKEN_KEY,
+describe('chaves', () => {
+  it('sha256Hex e ownerKey guardam só o hash do usuário', () => {
+    expect(sha256Hex('abc')).toBe(
+      'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
     );
-    expect(openLinkedAccount(partial, TEST_TOKEN_KEY, ACCOUNT.email)).toBeNull();
-  });
-
-  it('usa padrões para campos ausentes e reconhece revogação', () => {
-    const minimal = sealPayload(
-      {
-        typ: 'gmail_account',
-        exp: 4e9,
-        email: ACCOUNT.email,
-        refreshToken: 'r',
-        status: 'revoked',
-      },
-      TEST_TOKEN_KEY,
-    );
-    expect(openLinkedAccount(minimal, TEST_TOKEN_KEY, ACCOUNT.email)).toMatchObject({
-      scope: '',
-      linkedAt: '',
-      status: 'revoked',
-    });
+    expect(ownerKey('sub-1')).toBe(`owner:${sha256Hex('sub-1')}`);
+    expect(ownerKey('sub-1')).not.toContain('sub-1');
   });
 });
 
-describe('saveLinkedAccount e loadLinkedAccount', () => {
-  it('grava pelo apelido e lê de volta; sem vínculo devolve nulo', async () => {
+describe('selo do registro do usuário', () => {
+  it('sela sem expor o refresh token e abre só para o mesmo usuário', () => {
+    const sealed = sealOwnerAccounts(TEST_OWNER, [ACCOUNT], TEST_TOKEN_KEY);
+    expect(sealed).not.toContain(ACCOUNT.refreshToken);
+    expect(openOwnerAccounts(sealed, TEST_TOKEN_KEY, TEST_OWNER)).toEqual([ACCOUNT]);
+    expect(openOwnerAccounts(sealed, TEST_TOKEN_KEY, 'outro-usuario')).toEqual([]);
+    expect(openOwnerAccounts(sealed, Buffer.alloc(32, 9), TEST_OWNER)).toEqual([]);
+  });
+
+  it('descarta itens incompletos e aplica padrões', () => {
+    const sealed = sealPayload(
+      {
+        typ: 'gmail_owner',
+        exp: 4e9,
+        owner: TEST_OWNER,
+        accounts: [{ email: 'a@b.co', refreshToken: 'r', status: 'revoked' }, { email: 'x' }, 5],
+      },
+      TEST_TOKEN_KEY,
+    );
+    expect(openOwnerAccounts(sealed, TEST_TOKEN_KEY, TEST_OWNER)).toEqual([
+      { email: 'a@b.co', refreshToken: 'r', scope: '', linkedAt: '', status: 'revoked' },
+    ]);
+    const noList = sealPayload({ typ: 'gmail_owner', exp: 4e9, owner: TEST_OWNER }, TEST_TOKEN_KEY);
+    expect(openOwnerAccounts(noList, TEST_TOKEN_KEY, TEST_OWNER)).toEqual([]);
+    expect(toLinkedAccount(null)).toBeNull();
+  });
+});
+
+describe('saveOwnerAccounts e loadOwnerAccounts', () => {
+  it('grava, lê e apaga quando não sobra conta', async () => {
     const kv = new FakeKv();
-    const [bf, music] = TEST_ACCOUNTS;
-    await saveLinkedAccount(kv, TEST_TOKEN_KEY, ACCOUNT);
-    expect([...kv.entries.keys()]).toEqual(['account:dono']);
-    expect(await loadLinkedAccount(kv, TEST_TOKEN_KEY, bf!)).toEqual(ACCOUNT);
-    expect(await loadLinkedAccount(kv, TEST_TOKEN_KEY, music!)).toBeNull();
+    await saveOwnerAccounts(kv, TEST_TOKEN_KEY, { owner: TEST_OWNER, accounts: [ACCOUNT] });
+    expect(await loadOwnerAccounts(kv, TEST_TOKEN_KEY, TEST_OWNER)).toEqual([ACCOUNT]);
+    expect(await loadOwnerAccounts(kv, TEST_TOKEN_KEY, 'outro')).toEqual([]);
+    await saveOwnerAccounts(kv, TEST_TOKEN_KEY, { owner: TEST_OWNER, accounts: [] });
+    expect(kv.entries.size).toBe(0);
+  });
+});
+
+describe('upsertAccount', () => {
+  it('troca a conta de mesmo e-mail e acrescenta as novas', () => {
+    const renewed = { ...ACCOUNT, refreshToken: 'novo' };
+    expect(upsertAccount([ACCOUNT], renewed)).toEqual([renewed]);
+    expect(upsertAccount([ACCOUNT], testAccount('b@c.d'))).toHaveLength(2);
+  });
+
+  it('recusa passar do limite de contas', () => {
+    const full = Array.from({ length: MAX_LINKED_ACCOUNTS }, (_, i) => testAccount(`c${i}@x.io`));
+    expect(() => upsertAccount(full, testAccount('nova@x.io'))).toThrow(/Limite de 10/);
+    expect(upsertAccount(full, { ...full[0]!, refreshToken: 'r2' })).toHaveLength(10);
   });
 });

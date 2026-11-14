@@ -25,5 +25,11 @@ export interface GmailDeps {
   readonly origin: string;
 }
 
+/** Dependências de uma requisição autenticada: as de sempre mais o usuário do conector. */
+export interface OwnerDeps extends GmailDeps {
+  /** Id estável do usuário no Google (`sub` do login), dono das contas vinculadas. */
+  readonly owner: string;
+}
+
 /** User-Agent enviado ao Google (lição do Canvas: chamadas sem User-Agent podem ser barradas). */
 export const UPSTREAM_USER_AGENT = 'claude-connectors-gmail/0.1';

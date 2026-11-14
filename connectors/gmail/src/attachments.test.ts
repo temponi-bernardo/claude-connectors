@@ -9,10 +9,10 @@ import {
   MAX_ATTACHMENT_BYTES,
   readAttachmentText,
 } from './attachments.js';
-import { gmailRoute, linkedTestDeps, TEST_ACCOUNTS } from './fixtures/fake-google.js';
+import { gmailRoute, linkedTestDeps, TEST_REFS } from './fixtures/fake-google.js';
 import { b64 } from './fixtures/messages.js';
 
-const OWNER = TEST_ACCOUNTS[0]!;
+const OWNER = TEST_REFS[0]!;
 const docx = new Uint8Array(
   readFileSync(new URL('../../../src/core/fixtures/exemplo.docx', import.meta.url)),
 );
