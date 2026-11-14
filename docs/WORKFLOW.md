@@ -84,6 +84,10 @@ O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, susten
    encerramento e pede a skill `/atualizar-docs`: toda mudança em plugin documenta tudo o que foi feito.
 5. O Claude avisa; o usuário roda `/clear`. Se o contexto estourar antes, `PreCompact` gera um handoff
    automático via `claude -p` (desligue com `CLAUDE_HANDOFF_AUTOGEN=0`).
+6. Se o `/clear` (ou o fim da sessão) vier sem handoff, `SessionEnd` (`session-end-handoff.sh`) gera um do
+   mesmo jeito, mas só se o transcript tiver edição de arquivo ou `git commit`/`merge`/`push` depois da última
+   modificação do `STATE.md`; conversa e leitura não disparam. O `timeout` de 60 s no `settings.json` eleva o
+   orçamento padrão de 1,5 s do SessionEnd ([ADR 0017](adr/0017-handoff-automatico-no-session-end.md)).
 
 ## Versão e release
 

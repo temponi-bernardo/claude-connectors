@@ -77,5 +77,7 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
   (`scripts/install-gitleaks.sh`) e roda `npm install` se o lockfile mudou. O `secrets:check` usa o mesmo script
   se o gitleaks faltar na nuvem (inclusive no pre-push).
 - Hook `PreCompact`: gera handoff automático em `docs/STATE.md` via `claude -p` antes de compactar.
+- Hook `SessionEnd` (`session-end-handoff.sh`): no `/clear` ou fim de sessão, se houve edição ou commit depois do
+  último `STATE.md`, gera o handoff do mesmo jeito (sessão só de conversa não gasta nada).
 - Ciclo completo em `docs/WORKFLOW.md` → "Ciclo de contexto do Claude Code".
 - `.claude/rules/`: regras carregadas por caminho (`codigo.md`, `testes.md`, `docs.md`).

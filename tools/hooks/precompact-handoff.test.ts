@@ -1,22 +1,9 @@
-import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { createTempRepo, runHook } from './fixtures/hook-test-utils.js';
+import { createTempRepo, fakeClaude, runHook } from './fixtures/hook-test-utils.js';
 
 const HOOK = 'precompact-handoff.sh';
-
-/** Cria um `claude` falso no PATH que devolve `output` (ou falha se `output` for null). */
-function fakeClaude(dir: string, output: string | null): string {
-  const bin = join(dir, 'fakebin');
-  mkdirSync(bin);
-  const body =
-    output === null
-      ? '#!/usr/bin/env bash\ncat >/dev/null\nexit 1\n'
-      : `#!/usr/bin/env bash\ncat >/dev/null\nprintf '%s' ${JSON.stringify(output)}\n`;
-  writeFileSync(join(bin, 'claude'), body);
-  chmodSync(join(bin, 'claude'), 0o755);
-  return `${bin}:${process.env.PATH ?? ''}`;
-}
 
 function withTranscript(dir: string): string {
   const t = join(dir, 'transcript.jsonl');
