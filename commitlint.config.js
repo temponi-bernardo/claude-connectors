@@ -14,7 +14,7 @@ export default {
         'core',
         'mcp',
         'canvas',
-        'pack',
+        'bundle',
         'docs',
         'tools',
         'ci',

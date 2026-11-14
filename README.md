@@ -1,6 +1,6 @@
 # claude-connectors
 
-Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo Canvas da PUC Minas.
+Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace de plugins, começando pelo Canvas da PUC Minas.
 
 ## Conectores
 
@@ -8,23 +8,23 @@ Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo
 | ----------------------------------------------- | ------------------------------------------------------------------- |
 | [`canvas-puc`](connectors/canvas-puc/README.md) | Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, arquivos |
 
-## Começando
+## Instalar no Claude
+
+No Claude (claude.ai, Cowork ou Claude Code), **Adicionar marketplace** → `temponi-bernardo/claude-connectors`
+e instale o plugin desejado. Nada é instalado no computador: o plugin aponta para o servidor remoto do
+conector, e o login acontece na primeira vez, numa página de OAuth ([ADR 0013](docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
+
+## Desenvolver
 
 ```bash
-nvm use                         # Node 22 (.nvmrc)
-npm install                     # instala e ativa os git hooks
-npm run check                   # formato, lint, tipos, testes, docs, segredos
-npm run pack -- canvas-puc      # gera dist/connectors/canvas-puc-<versão>.mcpb
+nvm use            # Node 22 (.nvmrc)
+npm install        # instala e ativa os git hooks
+npm run check      # formato, lint, tipos, testes, docs, segredos
+npm run build      # valida o plugin (só remoto) e gera server/remote.js
+npm run worker:deploy   # publica o servidor remoto no Cloudflare Workers
 ```
 
-### Instalar no Claude
-
-- **Como plugin (recomendado):** no Claude, **Adicionar marketplace** → `temponi-bernardo/claude-connectors`
-  e instale o plugin desejado. O repo é privado: o PC precisa ter acesso git ao GitHub (SSH ou
-  `gh auth setup-git`).
-- **Como extensão:** `npm run pack -- <conector>` e instale o `.mcpb` em **Configurações → Extensões**.
-
-Requisitos: Node 22, Chrome ou Edge (login dos conectores) e gitleaks (`winget install Gitleaks.Gitleaks`).
+Requisitos: Node 22 e gitleaks (`winget install Gitleaks.Gitleaks`).
 
 ## Site
 

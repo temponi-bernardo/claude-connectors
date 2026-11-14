@@ -1,9 +1,9 @@
 # claude-connectors
 
-Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo Canvas da PUC Minas.
+Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace de plugins, começando pelo Canvas da PUC Minas.
 
-Cada conector vive em `connectors/<nome>/` e vira uma extensão `.mcpb` (ADR 0007); código compartilhado
-fica em `src/`. Não há GitHub Actions: o portão de PR é `npm run pr:check` (ADR 0006).
+Cada conector vive em `connectors/<nome>/` e é um plugin do marketplace que aponta para o servidor remoto dele
+(ADR 0013); código compartilhado fica em `src/`. Não há GitHub Actions: o portão de PR é `npm run pr:check` (ADR 0006).
 
 A documentação em `docs/` é a fonte da verdade. **Antes de mexer em código, leia `docs/README.md`** e siga
 o "quero... → leia...". Não varra o código para descobrir o que existe: `docs/FUNCTIONS.md`,
@@ -35,19 +35,19 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 
 ## Comandos
 
-| Comando                              | Faz                                                                   |
-| ------------------------------------ | --------------------------------------------------------------------- |
-| `npm run check`                      | Formato, lint, tipos, testes, docs, duplicação e segredos             |
-| `npm run pr:check -- "<título>"`     | Portão de PR (não há CI): check, build, pacotes e commitlint          |
-| `npm run docs:generate`              | Atualiza os blocos gerados de `docs/FUNCTIONS.md` e cria seções novas |
-| `npm run docs:check`                 | Falha se docs e código divergirem                                     |
-| `npm test` / `npm run test:coverage` | Testes / com cobertura mínima de 90%                                  |
-| `npm run lint` / `npm run lint:fix`  | ESLint                                                                |
-| `npm run format:fix`                 | Prettier                                                              |
-| `npm run typecheck`                  | `tsc --noEmit`                                                        |
-| `npm run dup:check`                  | jscpd                                                                 |
-| `npm run pack -- <conector>`         | Gera `dist/connectors/<conector>-<versão>.mcpb` (`pack:all`: todos)   |
-| `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)   |
+| Comando                              | Faz                                                                         |
+| ------------------------------------ | --------------------------------------------------------------------------- |
+| `npm run check`                      | Formato, lint, tipos, testes, docs, duplicação e segredos                   |
+| `npm run pr:check -- "<título>"`     | Portão de PR (não há CI): check, build, pacotes e commitlint                |
+| `npm run docs:generate`              | Atualiza os blocos gerados de `docs/FUNCTIONS.md` e cria seções novas       |
+| `npm run docs:check`                 | Falha se docs e código divergirem                                           |
+| `npm test` / `npm run test:coverage` | Testes / com cobertura mínima de 90%                                        |
+| `npm run lint` / `npm run lint:fix`  | ESLint                                                                      |
+| `npm run format:fix`                 | Prettier                                                                    |
+| `npm run typecheck`                  | `tsc --noEmit`                                                              |
+| `npm run dup:check`                  | jscpd                                                                       |
+| `npm run build`                      | Valida o `.mcp.json` (só remoto) e gera `server/remote.js` de cada conector |
+| `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)         |
 
 ## Skills
 
