@@ -4,20 +4,20 @@ export const GENERATED_START = '<!-- generated:start -->';
 export const GENERATED_END = '<!-- generated:end -->';
 export const INDEX_START = '<!-- index:start -->';
 export const INDEX_END = '<!-- index:end -->';
-/** Marcador que o gerador deixa nos campos manuais ainda não escritos. */
+/** Marker the generator leaves in manual fields not yet written. */
 export const PLACEHOLDER = '_fill_in_';
 
-/** Devolve o primeiro grupo de captura de um match (string vazia se o grupo não casou). */
+/** Returns the first capture group of a match (empty string if the group did not match). */
 export function firstGroup(match: RegExpMatchArray): string {
   return match[1] ?? '';
 }
 
-/** Remove blocos de código cercados (``` ou ~~~) para que exemplos não contem como citações. */
+/** Removes fenced code blocks (``` or ~~~) so examples do not count as citations. */
 export function stripCodeBlocks(markdown: string): string {
   return markdown.replace(/^(```|~~~)[^\n]*\n[\s\S]*?^\1[^\n]*$/gm, '');
 }
 
-/** Extrai nomes em crase seguidos de parênteses, ex.: `` `slugify()` `` → `slugify`. */
+/** Extracts backticked names followed by parentheses, e.g. `` `slugify()` `` → `slugify`. */
 export function extractCalledNames(text: string): Set<string> {
   const names = new Set<string>();
   for (const match of stripCodeBlocks(text).matchAll(/`([A-Za-z_$][\w$]*)\(\)`/g)) {
@@ -35,7 +35,7 @@ export function sliceBetween(text: string, start: string, end: string): string |
   return text.slice(from + start.length, to).trim();
 }
 
-/** Substitui o conteúdo entre dois marcadores; se não existirem, devolve o texto intacto. */
+/** Replaces the content between two markers; if they are missing, returns the text unchanged. */
 export function replaceBetween(
   text: string,
   markers: readonly [string, string],
@@ -48,7 +48,7 @@ export function replaceBetween(
   return `${text.slice(0, from + start.length)}\n${content}\n${text.slice(to)}`;
 }
 
-/** Divide o markdown em seções `### \`nome\``, guardando o módulo (`## ...`) acima de cada uma. */
+/** Splits the markdown into `### \`name\`` sections, keeping the module (`## ...`) above each one. */
 export function extractFunctionSections(markdown: string): FunctionSection[] {
   const sections: FunctionSection[] = [];
   let moduleHeading: string | null = null;
@@ -63,7 +63,7 @@ export function extractFunctionSections(markdown: string): FunctionSection[] {
   return sections;
 }
 
-/** Monta uma FunctionSection a partir do texto bruto de uma seção. */
+/** Builds a FunctionSection from a section's raw text. */
 export function buildSection(
   name: string,
   moduleHeading: string | null,
@@ -77,7 +77,7 @@ export function buildSection(
   return { name, moduleHeading, generatedBlock, manualText };
 }
 
-/** Lê PROCESSES.md: para cada `## P01 — ...`, as funções citadas como `` `nome()` ``. */
+/** Reads PROCESSES.md: for each `## P01 — ...`, the functions cited as `` `name()` ``. */
 export function extractProcessCitations(markdown: string): ProcessCitations {
   const citations = new Map<string, Set<string>>();
   for (const part of stripCodeBlocks(markdown).split(/^(?=## )/m)) {
@@ -88,7 +88,7 @@ export function extractProcessCitations(markdown: string): ProcessCitations {
   return citations;
 }
 
-/** Lê STRUCTURE.md: pastas documentadas como `` `pasta/` `` (com barra final). */
+/** Reads STRUCTURE.md: folders documented as `` `folder/` `` (with trailing slash). */
 export function extractDocumentedDirs(markdown: string): Set<string> {
   const dirs = new Set<string>();
   for (const match of stripCodeBlocks(markdown).matchAll(/`([^`\s]+\/)`/g)) {
@@ -98,7 +98,7 @@ export function extractDocumentedDirs(markdown: string): Set<string> {
   return dirs;
 }
 
-/** Lê nomes em crase (`` `Nome` ``) de um documento, fora de blocos de código. */
+/** Reads backticked names (`` `Name` ``) from a document, outside code blocks. */
 export function extractBacktickedNames(markdown: string): Set<string> {
   const names = new Set<string>();
   for (const match of stripCodeBlocks(markdown).matchAll(/`([A-Za-z_$][\w$]*)`/g)) {

@@ -1,4 +1,4 @@
-title = "gitleaks - configuração do projeto"
+title = "gitleaks - project configuration"
 
 [extend]
 useDefault = true

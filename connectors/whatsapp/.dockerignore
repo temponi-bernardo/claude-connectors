@@ -1,4 +1,4 @@
-# Só a ponte Go e o NOTICE entram no contexto; o Worker (TypeScript) e o resto ficam de fora.
+# Only the Go bridge and NOTICE enter the build context; the Worker (TypeScript) and the rest stay out.
 *
 !bridge/
 !NOTICE.md

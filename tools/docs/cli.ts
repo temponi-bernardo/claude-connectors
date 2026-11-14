@@ -1,6 +1,6 @@
 import { formatIssues, runCheck, runGenerate } from './run.js';
 
-/** CLI do verificador de documentação: `check` (padrão) ou `generate`. Sai com 1 se houver problemas. */
+/** Documentation checker CLI: `check` (default) or `generate`. Exits with 1 on problems. */
 export async function runDocsCli(args: readonly string[]): Promise<number> {
   const command = args[0] ?? 'check';
   const rootDir = process.cwd();

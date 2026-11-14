@@ -11,7 +11,7 @@ import {
 } from './ast.js';
 import type { DocsConfig, Inventory, TestExceptionEntry } from './types.js';
 
-/** Pastas nunca percorridas quando o git não está disponível. */
+/** Folders never walked when git is unavailable. */
 export const WALK_IGNORED_DIRS = new Set([
   'node_modules',
   '.git',
@@ -21,7 +21,7 @@ export const WALK_IGNORED_DIRS = new Set([
   'out',
 ]);
 
-/** Lista os arquivos versionados pelo git (relativos à raiz); null se não houver git. */
+/** Lists the files versioned by git (relative to the root); null when there is no git. */
 export function listGitFiles(rootDir: string): string[] | null {
   try {
     const output = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], {
@@ -35,7 +35,7 @@ export function listGitFiles(rootDir: string): string[] | null {
   }
 }
 
-/** Percorre o disco listando arquivos (relativos à raiz), pulando pastas ignoradas. */
+/** Walks the disk listing files (relative to the root), skipping ignored folders. */
 export function walkFiles(rootDir: string, relativeDir = ''): string[] {
   const entries = readdirSync(join(rootDir, relativeDir), { withFileTypes: true });
   return entries.flatMap((entry) => {
@@ -47,7 +47,7 @@ export function walkFiles(rootDir: string, relativeDir = ''): string[] {
   });
 }
 
-/** Deriva, de uma lista de arquivos, todas as pastas (com barra final), incluindo as intermediárias. */
+/** Derives every folder (with trailing slash) from a file list, including intermediate ones. */
 export function dirsFromFiles(files: readonly string[]): string[] {
   const dirs = new Set<string>();
   for (const file of files) {
@@ -59,12 +59,12 @@ export function dirsFromFiles(files: readonly string[]): string[] {
   return [...dirs].sort((a, b) => a.localeCompare(b));
 }
 
-/** Lista as pastas versionadas do repositório (git, com fallback para o disco). */
+/** Lists the repository's versioned folders (git, falling back to the disk). */
 export function listVersionedDirs(rootDir: string): string[] {
   return dirsFromFiles(listGitFiles(rootDir) ?? walkFiles(rootDir));
 }
 
-/** Concatena o conteúdo de todos os arquivos de teste das pastas de código. */
+/** Concatenates the content of every test file in the code folders. */
 export function readTestFilesText(rootDir: string, config: DocsConfig): string {
   const files = config.sourceDirs.flatMap((dir) => {
     const absolute = join(rootDir, dir);
@@ -95,7 +95,7 @@ export function listUiComponents(rootDir: string, config: DocsConfig): string[] 
     .sort((a, b) => a.localeCompare(b));
 }
 
-/** Importa a lista de exceções de teste do arquivo configurado (vazia se ele não existir). */
+/** Imports the test exceptions list from the configured file (empty if it does not exist). */
 export async function loadTestExceptions(
   rootDir: string,
   config: DocsConfig,
@@ -110,7 +110,7 @@ export async function loadTestExceptions(
   return list as TestExceptionEntry[];
 }
 
-/** Monta o inventário completo: código analisado, pastas, testes, UI e exceções. */
+/** Builds the full inventory: analyzed code, folders, tests, UI and exceptions. */
 export async function buildInventory(rootDir: string, config: DocsConfig): Promise<Inventory> {
   const project = openProject(rootDir, config);
   const functions = collectFunctions(rootDir, project);

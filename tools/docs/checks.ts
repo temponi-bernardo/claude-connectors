@@ -21,7 +21,7 @@ export interface DocsTexts {
   readonly ui: string | null;
 }
 
-/** Função no código sem seção no FUNCTIONS.md, e seção sem função no código. */
+/** Function in the code with no section in FUNCTIONS.md, and section with no function in the code. */
 export function checkFunctionsDocumented(
   functions: readonly FunctionInfo[],
   sections: readonly FunctionSection[],
@@ -48,7 +48,7 @@ export function checkFunctionsDocumented(
   return issues;
 }
 
-/** Seção que está sob o heading `## arquivo` errado. */
+/** Section under the wrong `## file` heading. */
 export function checkSectionModules(
   functions: readonly FunctionInfo[],
   sections: readonly FunctionSection[],
@@ -69,7 +69,7 @@ export function checkSectionModules(
   return issues;
 }
 
-/** Dois arquivos definem o mesmo nome de função. */
+/** Two files define the same function name. */
 export function checkUniqueNames(functions: readonly FunctionInfo[]): Issue[] {
   const files = new Map<string, string[]>();
   for (const fn of functions) files.set(fn.name, [...(files.get(fn.name) ?? []), fn.file]);
@@ -81,7 +81,7 @@ export function checkUniqueNames(functions: readonly FunctionInfo[]): Issue[] {
     }));
 }
 
-/** Bloco gerado (File, Signature, Used by, Processes) diferente do calculado a partir do código. */
+/** Generated block (File, Signature, Used by, Processes) differs from the one computed from the code. */
 export function checkGeneratedBlocks(
   inventory: Inventory,
   sections: readonly FunctionSection[],
@@ -129,7 +129,7 @@ export function checkManualFields(sections: readonly FunctionSection[]): Issue[]
   return issues;
 }
 
-/** Função citada em PROCESSES.md que não existe no código. */
+/** Function cited in PROCESSES.md that does not exist in the code. */
 export function checkProcessCitations(
   functions: readonly FunctionInfo[],
   citations: ProcessCitations,
@@ -149,7 +149,7 @@ export function checkProcessCitations(
   return issues;
 }
 
-/** Pasta versionada que não aparece em STRUCTURE.md. */
+/** Versioned folder missing from STRUCTURE.md. */
 export function checkStructure(
   versionedDirs: readonly string[],
   structureMarkdown: string,
@@ -163,7 +163,7 @@ export function checkStructure(
     }));
 }
 
-/** Componente de UI que não aparece em UI.md. */
+/** UI component missing from UI.md. */
 export function checkUiComponents(
   components: readonly string[],
   uiMarkdown: string | null,
@@ -183,7 +183,7 @@ export function checkUiComponents(
     }));
 }
 
-/** Função sem teste: o nome não aparece em nenhum arquivo de teste e não está na lista de exceções. */
+/** Untested function: its name appears in no test file and is not in the exceptions list. */
 export function checkTests(inventory: Inventory): Issue[] {
   const excepted = new Set(inventory.testExceptions.map((e) => e.name));
   const known = new Set(inventory.functions.map((f) => f.name));
@@ -207,7 +207,7 @@ export function checkTests(inventory: Inventory): Issue[] {
   return issues;
 }
 
-/** Constante exportada que não aparece na tabela "Data and constants" do FUNCTIONS.md. */
+/** Exported constant missing from the "Data and constants" table in FUNCTIONS.md. */
 export function checkConstants(inventory: Inventory, functionsMarkdown: string): Issue[] {
   const tableStart = functionsMarkdown.indexOf('## Data and constants');
   const table = tableStart === -1 ? '' : functionsMarkdown.slice(tableStart);
@@ -220,7 +220,7 @@ export function checkConstants(inventory: Inventory, functionsMarkdown: string):
     }));
 }
 
-/** Roda todas as checagens puras sobre o inventário e os textos dos documentos. */
+/** Runs every pure check over the inventory and the document texts. */
 export function runAllChecks(
   inventory: Inventory,
   docs: DocsTexts,

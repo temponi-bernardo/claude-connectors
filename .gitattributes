@@ -1,8 +1,8 @@
-# Fim de linha LF em todo o repositório, independente do core.autocrlf de cada máquina
-# (o Prettier exige LF; sem isto, o checkout no Windows vem com CRLF e o `npm run format` falha).
+# LF line endings across the repository, regardless of each machine's core.autocrlf
+# (Prettier requires LF; without this, a Windows checkout gets CRLF and `npm run format` fails).
 * text=auto eol=lf
 
-# Binários
+# Binaries
 *.png binary
 *.jpg binary
 *.ico binary

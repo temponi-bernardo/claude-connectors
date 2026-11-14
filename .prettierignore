@@ -5,5 +5,5 @@ package-lock.json
 CHANGELOG.md
 tools/**/fixtures/**
 
-# Bundle gerado do servidor remoto (npm run build), versionado para o Dockerfile
+# Generated remote server bundle (npm run build), versioned for the Dockerfile
 connectors/*/server/

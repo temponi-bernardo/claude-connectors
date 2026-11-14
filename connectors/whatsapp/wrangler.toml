@@ -1,13 +1,13 @@
-# Conector WhatsApp pessoal no Cloudflare Workers + Containers (ADR 0015). Template self-host: cada pessoa publica
-# na própria conta e pareia o próprio número. Guia completo: connectors/whatsapp/README.md.
+# Personal WhatsApp connector on Cloudflare Workers + Containers (ADR 0015). Self-host template: each person deploys
+# it to their own account and pairs their own number. Full guide: connectors/whatsapp/README.md.
 #
-# Secrets (wrangler secret put <NOME> --config connectors/whatsapp/wrangler.toml):
-#   SEAL_KEY             32 bytes em base64 (selos do OAuth e da sessão do /pair)
-#   BRIDGE_TOKEN         32+ caracteres aleatórios (Worker ↔ ponte no container)
-#   SNAPSHOT_KEY         32 bytes em base64 (AES-256-GCM dos backups no R2)
-#   GITHUB_CLIENT_ID     Client ID do OAuth App do GitHub
-#   GITHUB_CLIENT_SECRET segredo do OAuth App do GitHub
-#   ALLOWED_EMAILS       e-mail(s) verificado(s) do dono na conta do GitHub
+# Secrets (wrangler secret put <NAME> --config connectors/whatsapp/wrangler.toml):
+#   SEAL_KEY             32 bytes in base64 (OAuth and /pair session seals)
+#   BRIDGE_TOKEN         32+ random characters (Worker ↔ bridge in the container)
+#   SNAPSHOT_KEY         32 bytes in base64 (AES-256-GCM for the R2 backups)
+#   GITHUB_CLIENT_ID     GitHub OAuth App client ID
+#   GITHUB_CLIENT_SECRET GitHub OAuth App secret
+#   ALLOWED_EMAILS       the owner's verified GitHub email(s)
 name = "whatsapp-remote"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
@@ -16,31 +16,31 @@ workers_dev = true
 
 [vars]
 TIMEZONE = "America/Sao_Paulo"
-# Tempo sem uso até o container dormir (30s a 1h).
+# Idle time before the container sleeps (30s to 1h).
 SLEEP_AFTER = "5m"
 TOOL_TIMEOUT_MS = "25000"
 SYNC_WAIT_MS = "8000"
 HISTORY_DAYS = "90"
 MAX_MEDIA_BYTES = "5242880"
-# Envio ligado: send_message manda uma mensagem por vez, sempre com a confirmação explícita do dono e o limite
-# SEND_MAX_PER_HOUR. SEND_ALLOWLIST vazia = qualquer contato ou grupo; para restringir, números (DDI + número) ou
-# JIDs separados por vírgula. Para desligar de vez, ENABLE_SEND = "false".
+# Sending enabled: send_message sends one message at a time, always with the owner's explicit confirmation and the
+# SEND_MAX_PER_HOUR limit. Empty SEND_ALLOWLIST = any contact or group; to restrict it, comma-separated numbers
+# (country code + number) or JIDs. To turn sending off, ENABLE_SEND = "false".
 ENABLE_SEND = "true"
 SEND_ALLOWLIST = ""
 SEND_MAX_PER_HOUR = "10"
-# Sync periódico opcional: vazio = desligado. Para ligar, ponha a MESMA expressão aqui e em [triggers].crons.
+# Optional periodic sync: empty = off. To turn it on, put the SAME expression here and in [triggers].crons.
 SYNC_CRON = ""
 
-# Nenhum Cron Trigger por padrão: nada acorda o container sem uma chamada sua.
+# No Cron Trigger by default: nothing wakes the container without a call from you.
 [triggers]
 crons = []
 
 [[containers]]
 class_name = "WhatsAppBridge"
 image = "./Dockerfile"
-# Menor instância: 1/16 vCPU, 256 MiB, 2 GB (medição na ADR 0015).
+# Smallest instance: 1/16 vCPU, 256 MiB, 2 GB (measured in ADR 0015).
 instance_type = "lite"
-# Uma instância só: duas pontes nunca rodam a mesma sessão do WhatsApp.
+# A single instance: two bridges never run the same WhatsApp session.
 max_instances = 1
 
 [[durable_objects.bindings]]

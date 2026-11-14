@@ -2,8 +2,9 @@
 
 ## Next task
 
-**F4.3 — Complete manifests and add `claude plugin validate --strict` to `pr:check`** (ADR 0022). Phase 4 follows Anthropic's plugin
-standard; F3.2 (WhatsApp: publish on the owner's account and pair the number) still applies.
+**F3.2 — WhatsApp: publish on the owner's account and pair the number.** Phase 4 (Anthropic plugin standard and
+English) is done; the Connectors Directory submission steps left for the owner are in
+[DIRECTORY-LISTING.md](DIRECTORY-LISTING.md).
 
 ## How to read
 
@@ -67,11 +68,11 @@ Plan from the 2026-11-14 marketplace review. One PR per task, in order; each end
 | ---- | ----------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | F4.1 | Decisions: plugin subfolder, English, version per plugin (ADR 0020–0022)                        | ✅     | ADRs accepted; CLAUDE.md rules 8 and 10 in English                                                                                                                  |
 | F4.2 | Move plugin content to `connectors/<name>/plugin/` (ADR 0020)                                   | ✅     | Marketplace `source` points at `plugin/`; installed cache holds only manifests, `.mcp.json`, skills                                                                 |
-| F4.3 | Complete manifests and add `claude plugin validate --strict` to `pr:check` (ADR 0022)           | ⬜     | `version`, `license`, `keywords`, `homepage`, `author.url`; entries with `category`/`tags`; validate green                                                          |
-| F4.4 | Required `title` and read-only/destructive hints in `src/mcp/tools.ts`; Canvas tools in English | ⬜     | Typecheck fails without annotations; 18 Canvas tools and fields renamed; all three servers deployed                                                                 |
-| F4.5 | Plugin skills renamed and written in English                                                    | ⬜     | 12 skills with English names and content citing the new tool names                                                                                                  |
-| F4.6 | Translate the repo: `docs:check` labels first, then docs, project skills, hooks, site           | 🟨     | No Portuguese text left outside quoted user data; `docs:check` green                                                                                                |
-| F4.7 | Connectors Directory readiness for Canvas and Gmail (no submission)                             | ⬜     | OAuth audit (PKCE S256, resource metadata, claude.ai callback, `invalid_grant`) tested; privacy page reviewed; MCP Inspector run recorded; listing draft in `docs/` |
+| F4.3 | Complete manifests and add `claude plugin validate --strict` to `pr:check` (ADR 0022)           | ✅     | `version`, `license`, `keywords`, `homepage`, `author.url`; entries with `category`/`tags`; validate green                                                          |
+| F4.4 | Required `title` and read-only/destructive hints in `src/mcp/tools.ts`; Canvas tools in English | ✅     | Typecheck fails without annotations; 18 Canvas tools and fields renamed; all three servers deployed                                                                 |
+| F4.5 | Plugin skills renamed and written in English                                                    | ✅     | 12 skills with English names and content citing the new tool names                                                                                                  |
+| F4.6 | Translate the repo: `docs:check` labels first, then docs, project skills, hooks, site           | ✅     | No Portuguese text left outside quoted user data; `docs:check` green                                                                                                |
+| F4.7 | Connectors Directory readiness for Canvas and Gmail (no submission)                             | ✅     | OAuth audit (PKCE S256, resource metadata, claude.ai callback, `invalid_grant`) tested; privacy page reviewed; MCP Inspector run recorded; listing draft in `docs/` |
 
 ## Later phases
 

@@ -1,5 +1,5 @@
-# Ponte WhatsApp (Go + whatsmeow) para o container do Cloudflare. Contexto do build: connectors/whatsapp/.
-# Binário estático (modernc.org/sqlite é Go puro, CGO desligado) numa imagem distroless sem shell, não-root.
+# WhatsApp bridge (Go + whatsmeow) for the Cloudflare container. Build context: connectors/whatsapp/.
+# Static binary (modernc.org/sqlite is pure Go, CGO off) in a distroless image with no shell, non-root.
 
 FROM mirror.gcr.io/library/golang:1.27 AS build
 WORKDIR /src
@@ -9,7 +9,7 @@ RUN go mod download
 COPY bridge/ ./
 RUN go build -trimpath -ldflags="-s -w" -o /out/bridge . && mkdir -p /out/data
 
-# distroless/static: certificados CA, tzdata e usuário nonroot (65532); sem shell nem gerenciador de pacotes.
+# distroless/static: CA certificates, tzdata and the nonroot user (65532); no shell or package manager.
 FROM gcr.io/distroless/static-debian12:nonroot
 COPY --from=build /out/bridge /bridge
 COPY --from=build --chown=65532:65532 /out/data /data

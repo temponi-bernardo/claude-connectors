@@ -1,15 +1,15 @@
-/** Tipos compartilhados pelo verificador/gerador de documentação. */
+/** Types shared by the documentation checker/generator. */
 
 export interface DocsConfig {
-  /** Pastas com código-fonte analisado (relativas à raiz). */
+  /** Folders with analyzed source code (relative to the root). */
   readonly sourceDirs: readonly string[];
-  /** Globs (estilo minimatch simplificado) de arquivos ignorados na análise. */
+  /** Globs (simplified minimatch style) of files ignored by the analysis. */
   readonly ignore: readonly string[];
   /** Sufixo que identifica arquivos de teste. */
   readonly testSuffix: string;
   /** Arquivo TS que exporta TEST_EXCEPTIONS. */
   readonly testExceptionsFile: string;
-  /** Pasta de componentes de UI (null quando o projeto não tem interface). */
+  /** UI components folder (null when the project has no interface). */
   readonly uiDir: string | null;
   readonly functionsDoc: string;
   readonly processesDoc: string;
@@ -19,7 +19,7 @@ export interface DocsConfig {
 
 export interface FunctionInfo {
   readonly name: string;
-  /** Caminho relativo à raiz, com `/`. */
+  /** Path relative to the root, with `/`. */
   readonly file: string;
   /** Assinatura sem o corpo, ex.: `slugify(title: string): string`. */
   readonly signature: string;
@@ -30,13 +30,13 @@ export interface ConstantInfo {
   readonly file: string;
 }
 
-/** Nome da função → rótulos de quem a referencia (`fn()` ou `arquivo (módulo)`). */
+/** Function name → labels of whoever references it (`fn()` or `file (module)`). */
 export type ReferenceIndex = ReadonlyMap<string, ReadonlySet<string>>;
 
-/** Nome da função → nomes das funções do registro que ela chama ou passa como valor. */
+/** Function name → names of the registry functions it calls or passes as a value. */
 export type CallGraph = ReadonlyMap<string, ReadonlySet<string>>;
 
-/** Id do processo (P01) → funções citadas no texto. */
+/** Process id (P01) → functions cited in the text. */
 export type ProcessCitations = ReadonlyMap<string, ReadonlySet<string>>;
 
 export interface GeneratedData {
@@ -46,11 +46,11 @@ export interface GeneratedData {
 
 export interface FunctionSection {
   readonly name: string;
-  /** Heading `## ...` mais próximo acima da seção (módulo). */
+  /** Nearest `## ...` heading above the section (module). */
   readonly moduleHeading: string | null;
-  /** Conteúdo entre os marcadores gerados (null se não houver). */
+  /** Content between the generated markers (null if none). */
   readonly generatedBlock: string | null;
-  /** Texto manual da seção (fora do bloco gerado). */
+  /** Manual text of the section (outside the generated block). */
   readonly manualText: string;
 }
 

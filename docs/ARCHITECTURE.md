@@ -52,7 +52,7 @@ Node).
 ## Data flow
 
 Claude calls a tool → `src/mcp` validates the arguments (zod) → the connector's tool uses the API client → the
-client authenticates and paginates → responses are reduced to lean objects in Portuguese → the result goes back
+client authenticates and paginates → responses are reduced to lean objects with English field names → the result goes back
 as JSON text. Details in [PROCESSES.md](PROCESSES.md) (P03–P05).
 
 ## Installation and deploy
