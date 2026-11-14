@@ -6,6 +6,8 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ## [Não lançado]
 
+## [0.1.0](https://github.com/temponi-bernardo/claude-connectors/releases/tag/v0.1.0) (2026-11-14)
+
 ### Alterado
 
 - Canvas (v2.0.0): o conector roda só na nuvem. O plugin do marketplace aponta para o servidor remoto
