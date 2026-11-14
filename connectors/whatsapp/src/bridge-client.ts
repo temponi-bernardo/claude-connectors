@@ -18,35 +18,34 @@ export class BridgeError extends Error {
   }
 }
 
-/** Mensagens ao usuário para os códigos de erro conhecidos da ponte. */
+/** User-facing messages for the bridge's known error codes. */
 export const BRIDGE_ERROR_MESSAGES: Readonly<Record<string, string>> = {
-  not_ready: 'O WhatsApp ainda está iniciando. Tente de novo em alguns segundos.',
-  chat_not_found: 'Conversa não encontrada. Use list_chats para ver os JIDs.',
-  not_found: 'Mensagem ou mídia não encontrada.',
-  too_large: 'A mídia passa do limite de tamanho configurado (MAX_MEDIA_BYTES).',
-  media_expired: 'O WhatsApp não tem mais esse arquivo (mídia antiga).',
-  send_disabled: 'Envio desligado neste servidor (ENABLE_SEND=false).',
-  recipient_not_allowed: 'Destinatário fora da SEND_ALLOWLIST: envio recusado.',
-  quoted_not_found:
-    'Mensagem citada não encontrada nesta conversa. Use get_messages para ver os ids.',
-  rate_limited: 'Limite de envios por hora atingido. Tente mais tarde.',
+  not_ready: 'WhatsApp is still starting. Try again in a few seconds.',
+  chat_not_found: 'Chat not found. Use list_chats to see the JIDs.',
+  not_found: 'Message or media not found.',
+  too_large: 'The media is above the configured size limit (MAX_MEDIA_BYTES).',
+  media_expired: 'WhatsApp no longer has this file (old media).',
+  send_disabled: 'Sending is turned off on this server (ENABLE_SEND=false).',
+  recipient_not_allowed: 'Recipient is not in SEND_ALLOWLIST: sending refused.',
+  quoted_not_found: 'Quoted message not found in this chat. Use get_messages to see the ids.',
+  rate_limited: 'Hourly sending limit reached. Try again later.',
   bad_snapshot:
-    'Não consegui abrir o backup criptografado (SNAPSHOT_KEY trocada ou arquivo corrompido). Veja /pair.',
-  unauthorized: 'A ponte recusou o BRIDGE_TOKEN: confira os secrets do Worker.',
-  not_connected: 'O WhatsApp ainda não conectou. Tente de novo em alguns segundos.',
-  download_failed: 'O WhatsApp não entregou a mídia agora. Tente de novo.',
-  qr_not_ready: 'O QR ainda não chegou do WhatsApp. Tente de novo em alguns segundos.',
-  pair_failed: 'O WhatsApp recusou o pedido de pareamento. Confira o número e tente de novo.',
-  logout_failed: 'Não consegui desvincular agora. Tente de novo.',
-  send_failed: 'O WhatsApp não aceitou o envio.',
+    'Could not open the encrypted backup (SNAPSHOT_KEY changed or file corrupted). See /pair.',
+  unauthorized: 'The bridge rejected BRIDGE_TOKEN: check the Worker secrets.',
+  not_connected: 'WhatsApp has not connected yet. Try again in a few seconds.',
+  download_failed: 'WhatsApp did not deliver the media right now. Try again.',
+  qr_not_ready: 'The QR code has not arrived from WhatsApp yet. Try again in a few seconds.',
+  pair_failed: 'WhatsApp rejected the pairing request. Check the number and try again.',
+  logout_failed: 'Could not unlink right now. Try again.',
+  send_failed: 'WhatsApp did not accept the message.',
 };
 
-/** Traduz uma resposta de erro da ponte em `BridgeError` com mensagem em português. */
+/** Turns a bridge error response into a `BridgeError` with a user-facing message. */
 export function bridgeErrorFrom(status: number, body: unknown): BridgeError {
   const record = typeof body === 'object' && body !== null ? (body as Record<string, unknown>) : {};
   const code = typeof record.error === 'string' ? record.error : `http_${status}`;
   const fallback =
-    typeof record.message === 'string' ? record.message : `A ponte respondeu ${status}.`;
+    typeof record.message === 'string' ? record.message : `The bridge answered ${status}.`;
   return new BridgeError(BRIDGE_ERROR_MESSAGES[code] ?? fallback, status, code);
 }
 

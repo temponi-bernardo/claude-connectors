@@ -15,3 +15,6 @@ paths:
 - Constante exportada nova → linha na tabela "Dados e constantes".
 - Pasta nova → linha em `docs/STRUCTURE.md`.
 - Nunca leia `.env`; os nomes das variáveis estão em `.env.example`.
+- New MCP tool: English `name` and `title`, and `annotations: toolAnnotations('<Title>', <PRESET>)` from
+  `src/mcp/annotations.ts` (`READ_ONLY_HINTS` for reads; `SEND_HINTS`/`DESTRUCTIVE_HINTS` for anything that
+  sends, submits, overwrites or deletes). The typecheck fails without them (Connectors Directory requirement).

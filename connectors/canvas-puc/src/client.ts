@@ -37,7 +37,7 @@ export interface CanvasClient {
 
 /** Mensagem de 401: o token venceu ou foi revogado; orienta a gerar outro e reconectar. */
 export function unauthorizedMessage(baseUrl: string): string {
-  return `O Canvas recusou o token (vencido ou revogado). Gere outro em ${baseUrl}/profile/settings e reconecte o conector nas configurações do Claude.`;
+  return `Canvas rejected the token (expired or revoked). Generate a new one at ${baseUrl}/profile/settings and reconnect the connector in Claude's settings.`;
 }
 
 /** Envia uma requisição com o token (sem tratar o status). */
@@ -60,7 +60,7 @@ export async function requestCanvas(deps: ClientDeps, req: CanvasRequest): Promi
   if (res.status === 401) throw new Error(unauthorizedMessage(deps.baseUrl));
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`Canvas ${res.status} em ${req.method} ${req.path}: ${text.slice(0, 300)}`);
+    throw new Error(`Canvas ${res.status} on ${req.method} ${req.path}: ${text.slice(0, 300)}`);
   }
   return res;
 }
@@ -86,7 +86,7 @@ export async function collectPages<T>(
 /** Baixa um arquivo por URL direta (links de download do Canvas já trazem a autorização). */
 export async function fetchDownload(fetchFn: typeof fetch, url: string): Promise<Response> {
   const res = await fetchFn(url);
-  if (!res.ok) throw new Error(`Falha ao baixar o arquivo (${res.status}).`);
+  if (!res.ok) throw new Error(`Failed to download the file (${res.status}).`);
   return res;
 }
 

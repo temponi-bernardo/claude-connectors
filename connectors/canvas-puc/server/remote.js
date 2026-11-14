@@ -14751,7 +14751,7 @@ function parseNextLink(linkHeader) {
 var CANVAS_PAGE_SIZE = 100;
 var DEFAULT_MAX_ITEMS = 200;
 function unauthorizedMessage(baseUrl) {
-  return `O Canvas recusou o token (vencido ou revogado). Gere outro em ${baseUrl}/profile/settings e reconecte o conector nas configura\xE7\xF5es do Claude.`;
+  return `Canvas rejected the token (expired or revoked). Generate a new one at ${baseUrl}/profile/settings and reconnect the connector in Claude's settings.`;
 }
 function sendCanvasRequest(deps, req) {
   const hasBody = req.body !== void 0;
@@ -14770,7 +14770,7 @@ async function requestCanvas(deps, req) {
   if (res.status === 401) throw new Error(unauthorizedMessage(deps.baseUrl));
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`Canvas ${res.status} em ${req.method} ${req.path}: ${text.slice(0, 300)}`);
+    throw new Error(`Canvas ${res.status} on ${req.method} ${req.path}: ${text.slice(0, 300)}`);
   }
   return res;
 }
@@ -14788,7 +14788,7 @@ async function collectPages(deps, first, max) {
 }
 async function fetchDownload(fetchFn, url) {
   const res = await fetchFn(url);
-  if (!res.ok) throw new Error(`Falha ao baixar o arquivo (${res.status}).`);
+  if (!res.ok) throw new Error(`Failed to download the file (${res.status}).`);
   return res;
 }
 async function fetchPlainText(fetchFn, url) {
@@ -22982,6 +22982,14 @@ var EMPTY_COMPLETION_RESULT = {
   }
 };
 
+// src/mcp/server-version.ts
+var FALLBACK_SERVER_VERSION = "0.0.0";
+function manifestVersion(manifest) {
+  if (typeof manifest !== "object" || manifest === null) return FALLBACK_SERVER_VERSION;
+  const version2 = manifest.version;
+  return typeof version2 === "string" && version2 !== "" ? version2 : FALLBACK_SERVER_VERSION;
+}
+
 // src/core/bytes.ts
 function byteView(bytes) {
   return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
@@ -23017,7 +23025,7 @@ function defineTool(def) {
     name: def.name,
     description: def.description,
     shape: def.shape,
-    ...def.annotations ? { annotations: def.annotations } : {},
+    annotations: def.annotations,
     run: async (ctx, rawArgs) => def.run(ctx, schema.parse(rawArgs ?? {}))
   };
 }
@@ -23051,9 +23059,10 @@ function registerToolSpecs(server, specs, ctx) {
     server.registerTool(
       spec.name,
       {
+        title: spec.annotations.title,
         description: spec.description,
         inputSchema: spec.shape,
-        ...spec.annotations ? { annotations: spec.annotations } : {}
+        annotations: spec.annotations
       },
       (args) => runToolSafely(spec, ctx, args)
     );
@@ -23089,6 +23098,23 @@ function htmlToText(html) {
     html
   );
   return text.trim();
+}
+
+// src/mcp/annotations.ts
+var READ_ONLY_HINTS = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true
+};
+var SEND_HINTS = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: false,
+  openWorldHint: true
+};
+function toolAnnotations(title, hints) {
+  return { title, ...hints };
 }
 
 // src/core/cfb.ts
@@ -23188,7 +23214,7 @@ function findEndOfCentralDirectory(bytes) {
   for (let pos = bytes.length - 22; pos >= 0; pos--) {
     if (view.getUint32(pos, true) === EOCD_SIGNATURE) return pos;
   }
-  throw new Error("Arquivo ZIP inv\xE1lido: diret\xF3rio central n\xE3o encontrado.");
+  throw new Error("Invalid ZIP file: central directory not found.");
 }
 function listZipEntries(bytes) {
   const view = byteView(bytes);
@@ -23226,7 +23252,7 @@ async function readZipEntry(bytes, name) {
   const data = zipEntryBytes(bytes, entry);
   if (entry.method === 0) return data;
   if (entry.method === 8) return inflateRaw(data);
-  throw new Error(`Compress\xE3o ZIP n\xE3o suportada (m\xE9todo ${entry.method}).`);
+  throw new Error(`Unsupported ZIP compression (method ${entry.method}).`);
 }
 
 // src/core/word.ts
@@ -23244,7 +23270,7 @@ function docxXmlToText(xml) {
 }
 async function docxToText(bytes) {
   const xml = await readZipEntry(bytes, "word/document.xml");
-  if (!xml) throw new Error("Arquivo .docx sem word/document.xml.");
+  if (!xml) throw new Error(".docx file without word/document.xml.");
   return docxXmlToText(new TextDecoder().decode(xml));
 }
 function cp1252ToString(bytes) {
@@ -23258,7 +23284,7 @@ function parsePieceTable(table, fcClx) {
   const v = byteView(table);
   let pos = fcClx;
   while (table[pos] === 1) pos += 3 + v.getUint16(pos + 1, true);
-  if (table[pos] !== 2) throw new Error("Documento .doc com tabela de texto inv\xE1lida.");
+  if (table[pos] !== 2) throw new Error(".doc document with an invalid text table.");
   const lcb = v.getUint32(pos + 1, true);
   const plc = pos + 5;
   const count = (lcb - 4) / 12;
@@ -23312,11 +23338,11 @@ function wordToText(kind, bytes) {
 
 // connectors/canvas-puc/src/helpers.ts
 var ASSIGNMENT_BUCKETS = {
-  todas: void 0,
-  futuras: "upcoming",
-  passadas: "past",
-  sem_entrega: "unsubmitted",
-  atrasadas: "overdue"
+  all: void 0,
+  upcoming: "upcoming",
+  past: "past",
+  unsubmitted: "unsubmitted",
+  overdue: "overdue"
 };
 function isoDaysFrom(now, days) {
   return new Date(now.getTime() + days * 864e5).toISOString();
@@ -23339,7 +23365,7 @@ function isTextFile(contentType2, name) {
 function matchModuleItems(modules, term) {
   const q = term.toLowerCase();
   return modules.flatMap(
-    (m) => (m.items ?? []).filter((i) => i.title?.toLowerCase().includes(q)).map((i) => ({ modulo: m.name, titulo: i.title, tipo: i.type }))
+    (m) => (m.items ?? []).filter((i) => i.title?.toLowerCase().includes(q)).map((i) => ({ module: m.name, title: i.title, type: i.type }))
   );
 }
 function activeCourses(client) {
@@ -23373,10 +23399,10 @@ function downloadedFileResult(file, bytes) {
 }
 function downloadRefusal(file) {
   const name = String(file.display_name);
-  if (!file.url) return `"${name}" n\xE3o tem link de download dispon\xEDvel para esta conta.`;
+  if (!file.url) return `"${name}" has no download link available for this account.`;
   if ((file.size ?? 0) > MAX_DOWNLOAD_BYTES) {
     const mb = ((file.size ?? 0) / 1024 / 1024).toFixed(1);
-    return `"${name}" tem ${mb} MB, acima do limite de 10 MB para trazer \xE0 conversa; baixe pelo link: ${file.url}`;
+    return `"${name}" is ${mb} MB, above the 10 MB limit for the conversation; download it from the link: ${file.url}`;
   }
   return null;
 }
@@ -23390,7 +23416,7 @@ async function readCanvasFileText(client, file) {
   const name = file.display_name ?? "";
   const word = wordKind(type, name);
   if (!file.url || !word && !isTextFile(type, name)) {
-    return `"${name}" \xE9 ${type}; use \`baixar_arquivo\` para trazer o conte\xFAdo ou baixe pelo link: ${String(file.url)}`;
+    return `"${name}" is ${type}; use \`download_file\` to bring its content or download it from the link: ${String(file.url)}`;
   }
   const text = word ? await wordToText(word, await client.fetchBytes(file.url)) : await client.fetchText(file.url);
   const body = type.includes("html") ? htmlToText(text) : text;
@@ -23405,38 +23431,44 @@ function shortText(html) {
   return htmlToText(html).slice(0, MAX_TEXT_LENGTH);
 }
 function toProfile(p) {
-  return { id: p.id, nome: p.name, email: p.primary_email, login: p.login_id, fuso: p.time_zone };
+  return {
+    id: p.id,
+    name: p.name,
+    email: p.primary_email,
+    login: p.login_id,
+    time_zone: p.time_zone
+  };
 }
 function toCourse(c) {
   const enrollment = c.enrollments?.[0] ?? {};
   return {
     id: c.id,
-    nome: c.name,
-    codigo: c.course_code,
-    periodo: c.term?.name,
-    nota_atual: enrollment.computed_current_score ?? null,
-    conceito_atual: enrollment.computed_current_grade ?? null
+    name: c.name,
+    code: c.course_code,
+    term: c.term?.name,
+    current_score: enrollment.computed_current_score ?? null,
+    current_grade: enrollment.computed_current_grade ?? null
   };
 }
 function toSubmissionFlags(flags) {
   if (!flags) return null;
   return {
-    entregue: flags.submitted,
-    atrasado: flags.late,
-    faltando: flags.missing,
-    corrigido: flags.graded
+    submitted: flags.submitted,
+    late: flags.late,
+    missing: flags.missing,
+    graded: flags.graded
   };
 }
 function toPlannerItem(i, baseUrl) {
   return {
-    tipo: i.plannable_type,
-    titulo: i.plannable?.title ?? i.plannable?.name,
-    curso: i.context_name,
+    type: i.plannable_type,
+    title: i.plannable?.title ?? i.plannable?.name,
+    course: i.context_name,
     course_id: i.course_id,
     id: i.plannable_id,
-    data: i.plannable_date,
-    pontos: i.plannable?.points_possible,
-    entrega: toSubmissionFlags(i.submissions),
+    date: i.plannable_date,
+    points: i.plannable?.points_possible,
+    submission: toSubmissionFlags(i.submissions),
     url: i.html_url ? `${baseUrl}${i.html_url}` : void 0
   };
 }
@@ -23444,189 +23476,193 @@ function toAssignmentSummary(a) {
   const s = a.submission ?? {};
   return {
     id: a.id,
-    nome: a.name,
-    prazo: a.due_at,
-    pontos: a.points_possible,
-    tipos_entrega: a.submission_types,
+    name: a.name,
+    due_at: a.due_at,
+    points: a.points_possible,
+    submission_types: a.submission_types,
     status: s.workflow_state,
-    nota: s.score ?? null,
-    atrasada: s.late ?? null,
-    faltando: s.missing ?? null,
+    score: s.score ?? null,
+    late: s.late ?? null,
+    missing: s.missing ?? null,
     url: a.html_url
   };
 }
 function toRubricCriterion(r) {
   const levels = (r.ratings ?? []).map((x) => `${String(x.points)}: ${String(x.description)}`);
-  return { criterio: r.description, pontos: r.points, niveis: levels };
+  return { criterion: r.description, points: r.points, ratings: levels };
 }
 function toFileInfo(f) {
   return {
     id: f.id,
-    nome: f.display_name,
-    tipo: f["content-type"],
-    tamanho_kb: Math.round((f.size ?? 0) / 1024),
-    atualizado_em: f.updated_at,
+    name: f.display_name,
+    content_type: f["content-type"],
+    size_kb: Math.round((f.size ?? 0) / 1024),
+    updated_at: f.updated_at,
     download: f.url
   };
 }
 function toSubmissionDetail(s) {
   return {
     status: s.workflow_state,
-    enviada_em: s.submitted_at,
-    nota: s.score,
-    conceito: s.grade,
-    atrasada: s.late,
-    comentarios: (s.submission_comments ?? []).map((c) => ({
-      autor: c.author_name,
-      texto: c.comment,
-      data: c.created_at
+    submitted_at: s.submitted_at,
+    score: s.score,
+    grade: s.grade,
+    late: s.late,
+    comments: (s.submission_comments ?? []).map((c) => ({
+      author: c.author_name,
+      text: c.comment,
+      date: c.created_at
     })),
-    avaliacao_rubrica: s.rubric_assessment ?? null,
-    anexos: (s.attachments ?? []).map(toFileInfo)
+    rubric_assessment: s.rubric_assessment ?? null,
+    attachments: (s.attachments ?? []).map(toFileInfo)
   };
 }
 function toAssignmentDetail(a, submission) {
   return {
     id: a.id,
-    nome: a.name,
-    prazo: a.due_at,
-    disponivel_de: a.unlock_at,
-    disponivel_ate: a.lock_at,
-    pontos: a.points_possible,
-    tipos_entrega: a.submission_types,
-    extensoes_permitidas: a.allowed_extensions,
-    enunciado: htmlToText(a.description),
-    rubrica: (a.rubric ?? []).map(toRubricCriterion),
-    entrega: submission ? toSubmissionDetail(submission) : null,
+    name: a.name,
+    due_at: a.due_at,
+    unlock_at: a.unlock_at,
+    lock_at: a.lock_at,
+    points: a.points_possible,
+    submission_types: a.submission_types,
+    allowed_extensions: a.allowed_extensions,
+    description: htmlToText(a.description),
+    rubric: (a.rubric ?? []).map(toRubricCriterion),
+    submission: submission ? toSubmissionDetail(submission) : null,
     url: a.html_url
   };
 }
 function toGradeRow(s) {
   return {
-    tarefa: s.assignment?.name,
+    assignment: s.assignment?.name,
     assignment_id: s.assignment_id,
-    nota: s.score,
-    de: s.assignment?.points_possible,
-    conceito: s.grade,
+    score: s.score,
+    points_possible: s.assignment?.points_possible,
+    grade: s.grade,
     status: s.workflow_state,
-    prazo: s.assignment?.due_at
+    due_at: s.assignment?.due_at
   };
 }
 function toEnrollmentGrade(e, courseNames) {
   return {
     course_id: e.course_id,
-    curso: courseNames.get(String(e.course_id)),
-    nota_atual: e.grades?.current_score,
-    conceito_atual: e.grades?.current_grade,
-    nota_final: e.grades?.final_score
+    course: courseNames.get(String(e.course_id)),
+    current_score: e.grades?.current_score,
+    current_grade: e.grades?.current_grade,
+    final_score: e.grades?.final_score
   };
 }
 function toAnnouncement(a) {
   return {
     id: a.id,
-    titulo: a.title,
-    curso: a.context_code,
-    autor: a.author?.display_name ?? a.user_name,
-    data: a.posted_at,
-    texto: shortText(a.message),
+    title: a.title,
+    course: a.context_code,
+    author: a.author?.display_name ?? a.user_name,
+    posted_at: a.posted_at,
+    text: shortText(a.message),
     url: a.html_url
   };
 }
 function toModuleItem(i) {
   return {
     id: i.id,
-    tipo: i.type,
-    titulo: i.title,
+    type: i.type,
+    title: i.title,
     content_id: i.content_id,
     page_url: i.page_url,
-    url_externa: i.external_url,
-    concluido: i.completion_requirement?.completed ?? null
+    external_url: i.external_url,
+    completed: i.completion_requirement?.completed ?? null
   };
 }
 function toModule(m) {
-  return { id: m.id, nome: m.name, itens: (m.items ?? []).map(toModuleItem) };
+  return { id: m.id, name: m.name, items: (m.items ?? []).map(toModuleItem) };
 }
 function toDiscussionSummary(d) {
   return {
     id: d.id,
-    titulo: d.title,
-    prazo: d.assignment?.due_at ?? null,
-    respostas: d.discussion_subentry_count,
-    nao_lidas: d.unread_count,
-    ultima_resposta: d.last_reply_at,
+    title: d.title,
+    due_at: d.assignment?.due_at ?? null,
+    reply_count: d.discussion_subentry_count,
+    unread_count: d.unread_count,
+    last_reply_at: d.last_reply_at,
     url: d.html_url
   };
 }
 function flattenDiscussion(entries, names, depth = 0) {
   return (entries ?? []).flatMap((e) => [
     {
-      nivel: depth,
-      autor: names.get(String(e.user_id)),
-      data: e.created_at,
-      texto: htmlToText(e.message)
+      depth,
+      author: names.get(String(e.user_id)),
+      date: e.created_at,
+      text: htmlToText(e.message)
     },
     ...flattenDiscussion(e.replies, names, depth + 1)
   ]);
 }
 function toCalendarEvent(e) {
   return {
-    titulo: e.title,
-    inicio: e.start_at,
-    fim: e.end_at,
-    local: e.location_name,
-    curso: e.context_name,
-    descricao: shortText(e.description).slice(0, 1e3)
+    title: e.title,
+    start_at: e.start_at,
+    end_at: e.end_at,
+    location: e.location_name,
+    course: e.context_name,
+    description: shortText(e.description).slice(0, 1e3)
   };
 }
 
 // connectors/canvas-puc/src/tools-read.ts
 var id = external_exports.union([external_exports.string(), external_exports.number()]);
-var courseId = id.describe("ID do curso (veja listar_cursos)");
+var courseId = id.describe("Course ID (see list_courses)");
 var CANVAS_READ_TOOLS = [
   defineTool({
-    name: "quem_sou_eu",
-    description: "Mostra o perfil do usu\xE1rio autenticado no Canvas (\xFAtil para testar a conex\xE3o).",
+    name: "whoami",
+    description: "Show the signed-in user's Canvas profile (useful to test the connection).",
     shape: {},
+    annotations: toolAnnotations("Who am I", READ_ONLY_HINTS),
     run: async ({ client }) => toProfile(await client.get("/users/self/profile"))
   }),
   defineTool({
-    name: "listar_cursos",
-    description: "Lista os cursos/disciplinas do aluno com a nota atual. Por padr\xE3o s\xF3 os ativos.",
-    shape: { incluir_concluidos: external_exports.boolean().optional().describe("Incluir cursos j\xE1 encerrados") },
+    name: "list_courses",
+    description: "List the student's courses with the current grade. Active ones only by default.",
+    shape: { include_completed: external_exports.boolean().optional().describe("Include courses that ended") },
+    annotations: toolAnnotations("List courses", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
-      const state = args.incluir_concluidos ? void 0 : "active";
+      const state = args.include_completed ? void 0 : "active";
       const params = { include: ["term", "total_scores"], enrollment_state: state };
       const courses = await client.getAll("/courses", params);
       return courses.filter((c) => c.name).map(toCourse);
     }
   }),
   defineTool({
-    name: "proximas_entregas",
-    description: "O que vence nos pr\xF3ximos dias em todos os cursos: tarefas, quizzes e eventos (agenda do aluno).",
+    name: "upcoming_assignments",
+    description: "What is due in the next days across all courses: assignments, quizzes and events (the student's planner).",
     shape: {
-      dias: external_exports.number().int().min(1).max(120).optional().describe("Janela em dias (padr\xE3o 14)")
+      days: external_exports.number().int().min(1).max(120).optional().describe("Window in days (default 14)")
     },
+    annotations: toolAnnotations("Upcoming assignments", READ_ONLY_HINTS),
     run: async ({ client, now }, args) => {
       const params = {
         start_date: now().toISOString(),
-        end_date: isoDaysFrom(now(), args.dias ?? 14)
+        end_date: isoDaysFrom(now(), args.days ?? 14)
       };
       const items = await client.getAll("/planner/items", params);
       return items.map((i) => toPlannerItem(i, client.baseUrl));
     }
   }),
   defineTool({
-    name: "listar_tarefas",
-    description: "Lista as tarefas de um curso com prazo, status da entrega e nota.",
+    name: "list_assignments",
+    description: "List the assignments of a course with due date, submission status and score.",
     shape: {
       course_id: courseId,
-      filtro: external_exports.enum(["todas", "futuras", "passadas", "sem_entrega", "atrasadas"]).optional()
+      filter: external_exports.enum(["all", "upcoming", "past", "unsubmitted", "overdue"]).optional()
     },
+    annotations: toolAnnotations("List assignments", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const params = {
         include: ["submission"],
         order_by: "due_at",
-        bucket: ASSIGNMENT_BUCKETS[args.filtro ?? "todas"]
+        bucket: ASSIGNMENT_BUCKETS[args.filter ?? "all"]
       };
       const list = await client.getAll(
         `/courses/${String(args.course_id)}/assignments`,
@@ -23636,9 +23672,10 @@ var CANVAS_READ_TOOLS = [
     }
   }),
   defineTool({
-    name: "ver_tarefa",
-    description: "Detalhes de uma tarefa: enunciado em texto, rubrica, prazos e a entrega/feedback do aluno.",
+    name: "get_assignment",
+    description: "Assignment details: description as text, rubric, dates and the student's submission and feedback.",
     shape: { course_id: courseId, assignment_id: id },
+    annotations: toolAnnotations("Get assignment", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
       const [assignment, submission] = await Promise.all([
@@ -23649,9 +23686,10 @@ var CANVAS_READ_TOOLS = [
     }
   }),
   defineTool({
-    name: "notas",
-    description: "Notas do aluno. Sem course_id: resumo de todos os cursos ativos. Com course_id: nota de cada tarefa.",
+    name: "get_grades",
+    description: "The student's grades. Without course_id: summary of every active course. With course_id: the score of each assignment.",
     shape: { course_id: courseId.optional() },
+    annotations: toolAnnotations("Get grades", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       if (args.course_id === void 0) {
         const params = { type: ["StudentEnrollment"], state: ["active"] };
@@ -23670,18 +23708,19 @@ var CANVAS_READ_TOOLS = [
     }
   }),
   defineTool({
-    name: "avisos",
-    description: "Avisos (announcements) recentes de um curso ou de todos os cursos ativos.",
+    name: "list_announcements",
+    description: "Recent announcements of one course or of every active course.",
     shape: {
-      course_id: courseId.optional().describe("Se omitido, busca em todos os cursos ativos"),
-      dias: external_exports.number().int().min(1).max(365).optional().describe("Dias para tr\xE1s (padr\xE3o 30)")
+      course_id: courseId.optional().describe("When omitted, searches every active course"),
+      days: external_exports.number().int().min(1).max(365).optional().describe("Days back (default 30)")
     },
+    annotations: toolAnnotations("List announcements", READ_ONLY_HINTS),
     run: async ({ client, now }, args) => {
       const ids = args.course_id !== void 0 ? [args.course_id] : (await activeCourses(client)).map((c) => c.id);
       if (ids.length === 0) return [];
       const params = {
         context_codes: courseContextCodes(ids),
-        start_date: isoDaysFrom(now(), -(args.dias ?? 30)),
+        start_date: isoDaysFrom(now(), -(args.days ?? 30)),
         end_date: now().toISOString()
       };
       return (await client.getAll("/announcements", params)).map(
@@ -23690,38 +23729,41 @@ var CANVAS_READ_TOOLS = [
     }
   }),
   defineTool({
-    name: "modulos",
-    description: "M\xF3dulos de um curso e os itens de cada um (aulas, arquivos, p\xE1ginas, tarefas).",
+    name: "list_modules",
+    description: "Modules of a course and the items of each one (lessons, files, pages, assignments).",
     shape: { course_id: courseId },
+    annotations: toolAnnotations("List modules", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/modules`;
       return (await client.getAll(path, { include: ["items"] })).map(toModule);
     }
   }),
   defineTool({
-    name: "ver_pagina",
-    description: "L\xEA uma p\xE1gina do curso como texto. Use o page_url de `modulos`, ou 'front_page' para a inicial.",
+    name: "get_page",
+    description: "Read a course page as text. Use the page_url from list_modules, or 'front_page' for the home page.",
     shape: { course_id: courseId, page_url: external_exports.string() },
+    annotations: toolAnnotations("Get page", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/pages/${encodeURIComponent(args.page_url)}`;
       const p = await client.get(path);
       return {
-        titulo: p.title,
-        atualizada_em: p.updated_at,
-        conteudo: htmlToText(p.body),
+        title: p.title,
+        updated_at: p.updated_at,
+        body: htmlToText(p.body),
         url: p.html_url
       };
     }
   }),
   defineTool({
-    name: "arquivos",
-    description: "Arquivos de um curso (PDFs, slides etc.) com link de download, do mais recente ao mais antigo.",
+    name: "list_files",
+    description: "Files of a course (PDFs, slides etc.) with a download link, newest first.",
     shape: {
       course_id: courseId,
-      busca: external_exports.string().min(2).optional().describe("Parte do nome do arquivo")
+      search: external_exports.string().min(2).optional().describe("Part of the file name")
     },
+    annotations: toolAnnotations("List files", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
-      const params = { search_term: args.busca, sort: "updated_at", order: "desc" };
+      const params = { search_term: args.search, sort: "updated_at", order: "desc" };
       const files = await client.getAll(
         `/courses/${String(args.course_id)}/files`,
         params
@@ -23730,59 +23772,64 @@ var CANVAS_READ_TOOLS = [
     }
   }),
   defineTool({
-    name: "ler_arquivo_texto",
-    description: "L\xEA um arquivo do curso como texto (txt, md, csv, c\xF3digo, html, doc e docx). Para PDF/slides, use baixar_arquivo.",
+    name: "read_file_text",
+    description: "Read a course file as text (txt, md, csv, code, html, doc and docx). For PDF or slides, use download_file.",
     shape: { file_id: id },
+    annotations: toolAnnotations("Read file as text", READ_ONLY_HINTS),
     run: async ({ client }, args) => readCanvasFileText(
       client,
       await client.get(`/files/${String(args.file_id)}`)
     )
   }),
   defineTool({
-    name: "baixar_arquivo",
-    description: "Baixa um arquivo do curso (PDF, slides, imagem etc., at\xE9 10 MB) e traz o conte\xFAdo para a conversa.",
+    name: "download_file",
+    description: "Download a course file (PDF, slides, image etc., up to 10 MB) and bring its content into the conversation.",
     shape: { file_id: id },
+    annotations: toolAnnotations("Download file", READ_ONLY_HINTS),
     run: async ({ client }, args) => downloadCanvasFile(
       client,
       await client.get(`/files/${String(args.file_id)}`)
     )
   }),
   defineTool({
-    name: "discussoes",
-    description: "Lista os f\xF3runs de discuss\xE3o de um curso.",
+    name: "list_discussions",
+    description: "List the discussion forums of a course.",
     shape: { course_id: courseId },
+    annotations: toolAnnotations("List discussions", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/discussion_topics`;
       return (await client.getAll(path)).map(toDiscussionSummary);
     }
   }),
   defineTool({
-    name: "ver_discussao",
-    description: "L\xEA um f\xF3rum de discuss\xE3o: enunciado e todas as postagens, com o n\xEDvel de cada resposta.",
+    name: "get_discussion",
+    description: "Read a discussion forum: its prompt and every post, with the depth of each reply.",
     shape: { course_id: courseId, topic_id: id },
+    annotations: toolAnnotations("Get discussion", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}`;
       const [topic, view] = await Promise.all([
         client.get(path),
         client.get(`${path}/view`).catch(() => ({}))
       ]);
-      const postagens = flattenDiscussion(view.view, participantNames(view));
-      return { titulo: topic.title, enunciado: htmlToText(topic.message), postagens };
+      const posts = flattenDiscussion(view.view, participantNames(view));
+      return { title: topic.title, description: htmlToText(topic.message), posts };
     }
   }),
   defineTool({
-    name: "calendario",
-    description: "Eventos do calend\xE1rio (aulas, provas marcadas) num intervalo de datas, de todos os cursos ativos.",
+    name: "get_calendar",
+    description: "Calendar events (classes, scheduled exams) in a date range, from every active course.",
     shape: {
-      inicio: external_exports.string().optional().describe("Data inicial AAAA-MM-DD (padr\xE3o hoje)"),
-      fim: external_exports.string().optional().describe("Data final AAAA-MM-DD (padr\xE3o +30 dias)")
+      start_date: external_exports.string().optional().describe("Start date YYYY-MM-DD (default today)"),
+      end_date: external_exports.string().optional().describe("End date YYYY-MM-DD (default +30 days)")
     },
+    annotations: toolAnnotations("Get calendar", READ_ONLY_HINTS),
     run: async ({ client, now }, args) => {
       const ids = (await activeCourses(client)).map((c) => c.id);
       const params = {
         type: "event",
-        start_date: args.inicio ?? dateOnly(now().toISOString()),
-        end_date: args.fim ?? dateOnly(isoDaysFrom(now(), 30)),
+        start_date: args.start_date ?? dateOnly(now().toISOString()),
+        end_date: args.end_date ?? dateOnly(isoDaysFrom(now(), 30)),
         context_codes: ["user_self", ...courseContextCodes(ids)].slice(0, 10)
       };
       return (await client.getAll("/calendar_events", params)).map(
@@ -23791,23 +23838,24 @@ var CANVAS_READ_TOOLS = [
     }
   }),
   defineTool({
-    name: "buscar",
-    description: "Busca um termo nos nomes de tarefas, p\xE1ginas, arquivos e itens de m\xF3dulo de um curso.",
-    shape: { course_id: courseId, termo: external_exports.string().min(2) },
+    name: "search",
+    description: "Search a term in the names of the assignments, pages, files and module items of a course.",
+    shape: { course_id: courseId, term: external_exports.string().min(2) },
+    annotations: toolAnnotations("Search course", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const base = `/courses/${String(args.course_id)}`;
-      const search = { search_term: args.termo };
-      const [tarefas, paginas, arquivos, modulos] = await Promise.all([
+      const search = { search_term: args.term };
+      const [assignments, pages, files, modules] = await Promise.all([
         getAllOrEmpty(client, `${base}/assignments`, search),
         getAllOrEmpty(client, `${base}/pages`, search),
         getAllOrEmpty(client, `${base}/files`, search),
         getAllOrEmpty(client, `${base}/modules`, { include: ["items"] })
       ]);
       return {
-        tarefas: tarefas.map((a) => ({ id: a.id, nome: a.name, prazo: a.due_at })),
-        paginas: paginas.map((p) => ({ page_url: p.url, titulo: p.title })),
-        arquivos: arquivos.map(toFileInfo),
-        itens_de_modulo: matchModuleItems(modulos, args.termo)
+        assignments: assignments.map((a) => ({ id: a.id, name: a.name, due_at: a.due_at })),
+        pages: pages.map((p) => ({ page_url: p.url, title: p.title })),
+        files: files.map(toFileInfo),
+        module_items: matchModuleItems(modules, args.term)
       };
     }
   })
@@ -23816,43 +23864,64 @@ var CANVAS_READ_TOOLS = [
 // connectors/canvas-puc/src/tools-write.ts
 var id2 = external_exports.union([external_exports.string(), external_exports.number()]);
 function submissionPayload(kind, content) {
-  return kind === "texto" ? { submission: { submission_type: "online_text_entry", body: content } } : { submission: { submission_type: "online_url", url: content } };
+  return kind === "text" ? { submission: { submission_type: "online_text_entry", body: content } } : { submission: { submission_type: "online_url", url: content } };
 }
 var CANVAS_WRITE_TOOLS = [
   defineTool({
-    name: "entregar_tarefa_texto",
-    description: "ENVIA uma entrega de texto ou link numa tarefa. A\xE7\xE3o real, vis\xEDvel ao professor: confirme com o usu\xE1rio antes.",
+    name: "submit_text_assignment",
+    description: "SUBMITS a text or link entry to an assignment. Real action, visible to the teacher: confirm with the user first.",
     shape: {
       course_id: id2,
       assignment_id: id2,
-      tipo: external_exports.enum(["texto", "url"]),
-      conteudo: external_exports.string().min(1).describe("Texto (pode ser HTML) ou a URL")
+      type: external_exports.enum(["text", "url"]),
+      content: external_exports.string().min(1).describe("Text (HTML allowed) or the URL")
     },
+    annotations: toolAnnotations("Submit text assignment", SEND_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}/submissions`;
       const s = await client.post(
         path,
-        submissionPayload(args.tipo, args.conteudo)
+        submissionPayload(args.type, args.content)
       );
-      return { ok: true, enviada_em: s.submitted_at, tentativa: s.attempt };
+      return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt };
     }
   }),
   defineTool({
-    name: "responder_discussao",
-    description: "PUBLICA uma resposta num f\xF3rum de discuss\xE3o. A\xE7\xE3o real, vis\xEDvel \xE0 turma: confirme com o usu\xE1rio antes.",
-    shape: { course_id: id2, topic_id: id2, mensagem: external_exports.string().min(1) },
+    name: "reply_to_discussion",
+    description: "POSTS a reply to a discussion forum. Real action, visible to the class: confirm with the user first.",
+    shape: { course_id: id2, topic_id: id2, message: external_exports.string().min(1) },
+    annotations: toolAnnotations("Reply to discussion", SEND_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}/entries`;
       const entry = await client.post(path, {
-        message: args.mensagem
+        message: args.message
       });
-      return { ok: true, id: entry.id, data: entry.created_at };
+      return { ok: true, id: entry.id, created_at: entry.created_at };
     }
   })
 ];
 
+// connectors/canvas-puc/plugin/.claude-plugin/plugin.json
+var plugin_default = {
+  name: "canvas-puc",
+  version: "3.0.0",
+  description: "Assignments, deadlines, grades, announcements, modules and files from PUC Minas Canvas, straight from the cloud: sign in with a Canvas access token the first time.",
+  author: {
+    name: "Bernardo Temponi",
+    url: "https://github.com/temponi-bernardo"
+  },
+  homepage: "https://temponi-bernardo.github.io/claude-connectors/",
+  repository: "https://github.com/temponi-bernardo/claude-connectors",
+  license: "MIT",
+  keywords: ["canvas", "lms", "puc-minas", "education", "assignments", "grades"],
+  privacyPolicyUrl: "https://temponi-bernardo.github.io/claude-connectors/privacidade.html"
+};
+
 // connectors/canvas-puc/src/tools.ts
-var CANVAS_SERVER_INFO = { name: "canvas-puc", version: "2.0.0" };
+var CANVAS_SERVER_INFO = {
+  name: "canvas-puc",
+  version: manifestVersion(plugin_default)
+};
 function canvasTools(allowWrite) {
   return [...CANVAS_READ_TOOLS, ...allowWrite ? CANVAS_WRITE_TOOLS : []];
 }
@@ -23930,7 +23999,7 @@ async function canvasTokenApi(settings, token, request) {
     },
     ...hasBody ? { body: JSON.stringify(request.body) } : {}
   });
-  if (!res.ok) throw new Error(`O Canvas respondeu ${res.status} em ${request.path}.`);
+  if (!res.ok) throw new Error(`Canvas answered ${res.status} on ${request.path}.`);
   return res.json();
 }
 async function renewCanvasToken(settings, token, now) {

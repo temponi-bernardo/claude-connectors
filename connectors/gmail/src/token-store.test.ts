@@ -74,7 +74,7 @@ describe('upsertAccount', () => {
 
   it('recusa passar do limite de contas', () => {
     const full = Array.from({ length: MAX_LINKED_ACCOUNTS }, (_, i) => testAccount(`c${i}@x.io`));
-    expect(() => upsertAccount(full, testAccount('nova@x.io'))).toThrow(/Limite de 10/);
+    expect(() => upsertAccount(full, testAccount('nova@x.io'))).toThrow(/Limit of 10/);
     expect(upsertAccount(full, { ...full[0]!, refreshToken: 'r2' })).toHaveLength(10);
   });
 });

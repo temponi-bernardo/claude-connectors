@@ -8,6 +8,21 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Alterado
 
+- **BREAKING** Canvas: the 18 tools are renamed to English, with no aliases: `quem_sou_eu` → `whoami`,
+  `listar_cursos` → `list_courses`, `proximas_entregas` → `upcoming_assignments`, `listar_tarefas` →
+  `list_assignments`, `ver_tarefa` → `get_assignment`, `notas` → `get_grades`, `avisos` → `list_announcements`,
+  `modulos` → `list_modules`, `ver_pagina` → `get_page`, `arquivos` → `list_files`, `ler_arquivo_texto` →
+  `read_file_text`, `baixar_arquivo` → `download_file`, `discussoes` → `list_discussions`, `ver_discussao` →
+  `get_discussion`, `calendario` → `get_calendar`, `buscar` → `search`, `entregar_tarefa_texto` →
+  `submit_text_assignment`, `responder_discussao` → `reply_to_discussion`. Input parameters (`dias` → `days`,
+  `filtro` → `filter` with `all`/`upcoming`/`past`/`unsubmitted`/`overdue`, `termo` → `term`...) and output fields
+  (`titulo` → `title`, `enunciado` → `description`, `nota` → `score`...) are English too (ADR 0021). Saved tool
+  permissions that use the old names must be updated.
+- All tools of the three connectors now carry an English `title` and MCP hints: read tools are `readOnlyHint`,
+  tools that send, submit, overwrite or delete are `destructiveHint` (Canvas submit and reply, Gmail send, reply,
+  forward, send/update/delete draft, trash and unlink, WhatsApp `send_message`). Tool descriptions and error
+  messages are in English, and each MCP server announces the version of its `plugin.json`.
+
 - Canvas: when the Canvas token behind a refresh token was deleted or expired in Canvas, the OAuth refresh now
   answers `invalid_grant` instead of new tokens that fail on every tool call, so Claude asks to connect again.
   Canvas outages (network errors, 5xx) still keep the session.

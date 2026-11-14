@@ -25,10 +25,10 @@ export const MAX_GMAIL_ERROR_DETAIL = 200;
 
 /** Mensagens por status HTTP da Gmail API. */
 export const GMAIL_STATUS_MESSAGES: Readonly<Record<number, string>> = {
-  400: 'o Gmail recusou o pedido (confira ids, busca e destinatários)',
-  403: 'o Gmail negou acesso (permissão ausente: use link_account e vincule a conta de novo)',
-  404: 'não encontrado (id errado ou de outra conta)',
-  429: 'limite de uso do Gmail atingido; tente de novo em instantes',
+  400: 'Gmail rejected the request (check ids, query and recipients)',
+  403: 'Gmail denied access (missing permission: use link_account and link the account again)',
+  404: 'not found (wrong id or from another account)',
+  429: 'Gmail usage limit reached; try again shortly',
 };
 
 /** Monta a URL de um caminho da Gmail API com os parâmetros dados (nulos e vazios são omitidos). */
@@ -49,8 +49,8 @@ export function gmailUrl(
 
 /** Erro acionável para uma resposta de falha da Gmail API, com o detalhe do Gmail quando houver. */
 export function gmailHttpError(status: number, alias: string, detail: string | null = null): Error {
-  const reason = GMAIL_STATUS_MESSAGES[status] ?? `o Gmail falhou (HTTP ${status}); tente de novo`;
-  return new Error(`Conta "${alias}": ${reason}${detail ? `: ${detail}` : ''}.`);
+  const reason = GMAIL_STATUS_MESSAGES[status] ?? `Gmail failed (HTTP ${status}); try again`;
+  return new Error(`Account "${alias}": ${reason}${detail ? `: ${detail}` : ''}.`);
 }
 
 /** Detalhe (`error.message`) de uma resposta de erro da Gmail API, limitado; nulo se não houver. */
