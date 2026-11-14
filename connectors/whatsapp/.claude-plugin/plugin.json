@@ -1,16 +1,8 @@
 {
   "name": "whatsapp",
-  "description": "WhatsApp pessoal no Claude: conversas, mensagens, busca, contatos e mídias pelo seu próprio servidor no Cloudflare (self-host).",
+  "description": "WhatsApp pessoal no Claude: skills de configuração e uso. Cada pessoa conecta o próprio servidor no Cloudflare (self-host) como conector personalizado.",
   "author": {
     "name": "Bernardo Temponi"
   },
-  "repository": "https://github.com/temponi-bernardo/claude-connectors",
-  "userConfig": {
-    "server_url": {
-      "type": "string",
-      "title": "Endereço do seu servidor",
-      "description": "URL do /mcp do seu Worker, ex.: https://whatsapp-remote.<conta>.workers.dev/mcp (guia no README do conector)",
-      "required": true
-    }
-  }
+  "repository": "https://github.com/temponi-bernardo/claude-connectors"
 }

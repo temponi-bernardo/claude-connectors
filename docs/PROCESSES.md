@@ -69,8 +69,9 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
 - **Gatilho:** `npm run build` ou o `pr:check`.
 - **Passos:**
   1. `runBuildCli()` acha os conectores com `listConnectors()` (pastas com `.claude-plugin/plugin.json`).
-  2. `buildConnector()` lê o `.mcp.json` do plugin e falha se `pluginMcpProblems()` (com `mcpServerProblems()`)
-     achar servidor que não seja `http` com URL `https://`, ou com `command` local.
+  2. `buildConnector()` lê o `.mcp.json` do plugin, se houver (o WhatsApp self-host não tem), e falha se
+     `pluginMcpProblems()` (com `mcpServerProblems()` e `isRemoteMcpUrl()`) achar servidor que não seja `http` com
+     URL `https://` fixa (sem `${user_config.*}`), ou com `command` local.
   3. Se houver `src/remote-main.ts`, une o servidor remoto com o esbuild (`bundleOptions()`) em
      `connectors/<nome>/server/remote.js`, usado pelo Dockerfile (P08). O Worker compila direto do `src/`.
 - **Resultado:** plugin conferido e bundle remoto atualizado na pasta do conector.
@@ -92,7 +93,8 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
 - **Gatilho:** no Claude, "Adicionar marketplace" com `temponi-bernardo/claude-connectors` e instalar o plugin.
 - **Passos:**
   1. O Claude lê `.claude-plugin/marketplace.json` e copia `connectors/<nome>/`, que só tem `plugin.json` e o
-     `.mcp.json` (P05 garante que ele aponta para um servidor remoto).
+     `.mcp.json` (P05 garante que ele aponta para um servidor remoto). O WhatsApp não tem `.mcp.json`: o plugin
+     traz só as skills e a pessoa conecta o próprio servidor como conector personalizado (P13–P17, ADR 0018).
   2. O `.mcp.json` registra o servidor `http` do Worker (`https://canvas-puc-remote.bftemponi.workers.dev/mcp`).
      Nada é instalado nem roda no computador.
   3. Na primeira chamada, o servidor responde 401 e o Claude abre o OAuth do P08 (Gmail: P10); a partir daí, P09

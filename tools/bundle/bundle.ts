@@ -31,10 +31,9 @@ export function listConnectors(rootDir: string): string[] {
     .sort();
 }
 
-/** Diz se a URL é remota: `https://` fixo, ou `${user_config.<campo>}` de um template self-host (ADR 0015). */
+/** Diz se a URL é remota e fixa (`https://`); `${user_config.*}` é recusado porque quebra o Vincular (ADR 0018). */
 export function isRemoteMcpUrl(url: unknown): boolean {
-  if (typeof url !== 'string') return false;
-  return url.startsWith('https://') || /^\$\{user_config\.[a-z][a-z0-9_]*\}$/.test(url);
+  return typeof url === 'string' && url.startsWith('https://') && !url.includes('${');
 }
 
 /** Problemas de um servidor do `.mcp.json`: precisa ser `http`, com URL `https://`, e sem comando local. */
@@ -43,7 +42,7 @@ export function mcpServerProblems(name: string, server: unknown): string[] {
   const problems: string[] = [];
   if (entry.type !== 'http') problems.push(`${name}: "type" deve ser "http".`);
   if (!isRemoteMcpUrl(entry.url)) {
-    problems.push(`${name}: "url" deve ser um endereço https:// (ou \${user_config.<campo>}).`);
+    problems.push(`${name}: "url" deve ser um endereço https:// fixo (sem \${user_config.*}).`);
   }
   if ('command' in entry) problems.push(`${name}: não pode ter "command" (nada roda localmente).`);
   return problems;

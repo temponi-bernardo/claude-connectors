@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -42,15 +42,14 @@ describe('listConnectors', () => {
 });
 
 describe('isRemoteMcpUrl', () => {
-  it('aceita https fixo e o campo de configuração do plugin (template self-host)', () => {
+  it('aceita só https fixo', () => {
     expect(isRemoteMcpUrl('https://x.dev/mcp')).toBe(true);
-    expect(isRemoteMcpUrl('${user_config.server_url}')).toBe(true);
   });
 
-  it('recusa http, texto que só contém o campo e valores que não são texto', () => {
+  it('recusa http, campo de configuração do plugin (quebra o Vincular no claude.ai) e valores que não são texto', () => {
     expect(isRemoteMcpUrl('http://x.dev/mcp')).toBe(false);
+    expect(isRemoteMcpUrl('${user_config.server_url}')).toBe(false);
     expect(isRemoteMcpUrl('http://${user_config.server_url}')).toBe(false);
-    expect(isRemoteMcpUrl('${user_config.Server}')).toBe(false);
     expect(isRemoteMcpUrl(undefined)).toBe(false);
   });
 });
@@ -63,7 +62,7 @@ describe('mcpServerProblems', () => {
   it('recusa servidor local, sem tipo http ou com URL insegura', () => {
     expect(mcpServerProblems('c', { command: 'node', args: [] })).toEqual([
       'c: "type" deve ser "http".',
-      'c: "url" deve ser um endereço https:// (ou ${user_config.<campo>}).',
+      'c: "url" deve ser um endereço https:// fixo (sem ${user_config.*}).',
       'c: não pode ter "command" (nada roda localmente).',
     ]);
     expect(mcpServerProblems('c', { type: 'http', url: 'http://x.dev/mcp' })).toHaveLength(1);
@@ -78,13 +77,24 @@ describe('pluginMcpProblems', () => {
     expect(pluginMcpProblems({ mcpServers: { a: { type: 'stdio' } } })).toHaveLength(2);
   });
 
-  it('o plugin de cada conector do repositório aponta só para servidores remotos', () => {
+  it('o plugin de cada conector com servidor fixo aponta só para servidores remotos', () => {
     const names = listConnectors(REPO_ROOT);
     expect(names.length).toBeGreaterThan(0);
     for (const name of names) {
       const file = join(REPO_ROOT, CONNECTORS_DIR, name, PLUGIN_MCP_CONFIG_PATH);
+      if (!existsSync(file)) continue;
       expect(pluginMcpProblems(JSON.parse(readFileSync(file, 'utf8')))).toEqual([]);
     }
+  });
+
+  it('o WhatsApp self-host não embute servidor no plugin (cada pessoa conecta o próprio)', () => {
+    expect(existsSync(join(REPO_ROOT, CONNECTORS_DIR, 'whatsapp', PLUGIN_MCP_CONFIG_PATH))).toBe(
+      false,
+    );
+    expect(existsSync(join(REPO_ROOT, CONNECTORS_DIR, 'canvas-puc', PLUGIN_MCP_CONFIG_PATH))).toBe(
+      true,
+    );
+    expect(existsSync(join(REPO_ROOT, CONNECTORS_DIR, 'gmail', PLUGIN_MCP_CONFIG_PATH))).toBe(true);
   });
 });
 

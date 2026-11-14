@@ -44,10 +44,16 @@ Pergunte se ela já publicou o próprio servidor (`https://whatsapp-remote.<cont
 
 O endereço do conector é `<servidor>/mcp`, por exemplo `https://whatsapp-remote.<conta>.workers.dev/mcp`.
 
-- **No Claude Code (plugin):** nas configurações do plugin **whatsapp**, campo **Endereço do seu servidor**,
-  cole a URL do `/mcp` e salve. Esse valor vale só neste computador.
-- **No claude.ai, app ou celular:** Configurações → Conectores → **Adicionar conector personalizado** com a
-  mesma URL.
+O plugin não embute servidor: cada pessoa conecta o dela como **conector personalizado** da conta, que vale no
+claude.ai, no app, no celular, no Cowork e no Claude Code logado na mesma conta.
+
+1. Abrir [claude.ai/settings/connectors](https://claude.ai/settings/connectors).
+2. **Adicionar conector personalizado**: nome `WhatsApp`, URL do `/mcp` do servidor dela.
+3. Salvar e clicar em **Conectar**. O login do GitHub abre; autorizar.
+
+Sem conta claude.ai no Claude Code: `claude mcp add --transport http whatsapp <servidor>/mcp`.
+
+Se o GitHub mostrar erro de `redirect_uri`, a OAuth App precisa das duas redirect URIs do passo 2.4.
 
 Ao usar pela primeira vez, o Claude abre o login do GitHub: só os e-mails de `ALLOWED_EMAILS` entram. Peça para
 avisar quando terminar e chame `whatsapp_status` de novo.

@@ -3962,9 +3962,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Diz se a URL é remota: `https://` fixo, ou `${user_config.<campo>}` de um template self-host (ADR 0015).
+- **Faz:** Diz se a URL é remota e fixa (`https://`); recusa `${user_config.*}`, que quebra o Vincular (ADR 0018).
 - **Entrada:** `url`: valor do campo `url` do servidor no `.mcp.json`.
-- **Saída:** `true` para `https://...` ou um placeholder `${user_config.<campo>}` inteiro; `false` para o resto.
+- **Saída:** `true` para `https://...` sem `${`; `false` para o resto (inclusive placeholders `${user_config.*}`).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -3981,7 +3981,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Valida o `.mcp.json` do conector e gera o bundle `server/remote.js`, se houver `src/remote-main.ts`.
+- **Faz:** Valida o `.mcp.json` do conector, se houver (plugin self-host não tem), e gera o bundle `server/remote.js`, se houver `src/remote-main.ts`.
 - **Entrada:** `root`: raiz do repositório; `name`: pasta do conector.
 - **Saída:** Promise vazia.
 - **Efeitos:** Lê o `.mcp.json`; roda o esbuild e grava `server/remote.js`.

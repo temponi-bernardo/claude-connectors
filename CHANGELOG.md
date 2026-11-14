@@ -12,6 +12,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
   `SEND_ALLOWLIST` virou opcional (vazia = qualquer destinatário). Continuam a confirmação explícita a cada
   mensagem (`confirmed_by_user`) e o limite por hora (`SEND_MAX_PER_HOUR`). Envio de mídia fica de fora (ADR 0015).
 
+### Corrigido
+
+- WhatsApp: o plugin deixa de embutir o servidor (`${user_config.server_url}`) e traz só as skills; cada pessoa
+  conecta o próprio servidor como conector personalizado da conta, que vale no claude.ai, app, celular, Cowork e
+  Claude Code. O campo ficava só no computador e o plugin instalado pela organização no claude.ai ficava com outra
+  URL, então o botão **Vincular** recusava o login antes de abrir o GitHub. O `npm run build` agora recusa
+  `${user_config.*}` em `.mcp.json` e aceita plugin sem `.mcp.json` (ADR 0018).
+
 ### Adicionado
 
 - WhatsApp: `send_message` aceita JID de grupo (`@g.us`) e responde citando uma mensagem da mesma conversa
