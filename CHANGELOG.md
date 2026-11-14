@@ -8,6 +8,11 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Alterado
 
+- Plugins: each `plugin.json` now has an explicit `version` (`canvas-puc` 3.0.0, `gmail` 1.0.0, `whatsapp` 1.0.0),
+  `license`, `keywords`, `homepage`, `author.url`, `privacyPolicyUrl` and a 512 px icon (`.claude-plugin/icon.png`);
+  descriptions are in English. Marketplace entries gain `category` and `tags`. release-please manages each plugin
+  as its own package and bumps the `plugin.json` version; `pr:check` runs `claude plugin validate --strict` on the
+  marketplace and every plugin (ADR 0022).
 - Plugins: each marketplace entry now points at `connectors/<name>/plugin/`, which holds only the manifest,
   `.mcp.json`, skills and a short README. Server code, tests, `Dockerfile` and bundles no longer reach the
   user's plugin cache (ADR 0020). Update the marketplace once to pick it up.
