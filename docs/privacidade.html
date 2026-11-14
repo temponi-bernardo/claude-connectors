@@ -9,12 +9,14 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
 
 <p>
   Esta política vale para os conectores do projeto Claude Connectors, mantido por Bernardo Temponi,
-  hoje os conectores <strong>Canvas PUC Minas</strong> e <strong>Gmail</strong>. Eles rodam só na
-  nuvem e são usados pelo plugin do marketplace ou como conector personalizado no claude.ai, no
-  Cowork, no app do celular e no Claude Code.
+  hoje os conectores <strong>Canvas PUC Minas</strong>, <strong>Gmail</strong> e
+  <strong>WhatsApp</strong>. Eles rodam só na nuvem e são usados pelo plugin do marketplace ou como
+  conector personalizado no claude.ai, no Cowork, no app do celular e no Claude Code. Canvas e Gmail
+  rodam no servidor do projeto; o WhatsApp roda num servidor que cada pessoa publica na própria
+  conta (veja a seção WhatsApp).
 </p>
 
-<h2>Canvas: que dados são acessados</h2>
+<h2>Que dados são acessados no Canvas</h2>
 <p>
   Só os dados da sua própria conta no Canvas, e só quando você pede algo ao Claude: perfil, cursos,
   tarefas, entregas, notas, avisos, módulos, páginas, arquivos, fóruns e calendário. O conector não
@@ -64,7 +66,34 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
   </li>
 </ul>
 
-<h2>Canvas: credenciais</h2>
+<h2>WhatsApp</h2>
+<ul>
+  <li>
+    <strong>Self-host:</strong> não existe servidor do projeto para o WhatsApp. Cada pessoa publica
+    o conector na própria conta Cloudflare (um Worker e um Container) e pareia o próprio número.
+    Nada do seu WhatsApp, nem as credenciais, chega ao mantenedor do projeto.
+  </li>
+  <li>
+    <strong>O que é acessado:</strong> conversas, mensagens, contatos e mídias do número pareado, e
+    o envio de texto quando você pede (uma mensagem por vez, com sua confirmação e limite por hora).
+  </li>
+  <li>
+    <strong>O que é guardado:</strong> a sessão do WhatsApp e o banco de mensagens ficam no disco do
+    Container e, quando ele dorme, viram um backup cifrado (AES-256-GCM, com a chave
+    <code>SNAPSHOT_KEY</code> que só você tem) no bucket R2 da sua conta Cloudflare.
+  </li>
+  <li>
+    <strong>Quem entra:</strong> o acesso do Claude e a página de pareamento exigem login no GitHub
+    com um e-mail da lista que você configurou (<code>ALLOWED_EMAILS</code>); só o dono entra.
+  </li>
+  <li>
+    <strong>Como apagar:</strong> na página <code>/pair</code>, desvincule o aparelho ou recomece do
+    zero; ou apague o Worker e o bucket R2 na sua conta Cloudflare. No celular, remova o aparelho em
+    WhatsApp → Aparelhos conectados.
+  </li>
+</ul>
+
+<h2>Credenciais do Canvas</h2>
 <ul>
   <li>
     O token que você cola na página de autorização é conferido no Canvas e depois viaja apenas
@@ -88,6 +117,10 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
   <li>
     <strong>Google (Gmail):</strong> recebe o login com a sua conta Google e as chamadas feitas em
     seu nome (leitura e, quando você pede, envio e organização da caixa).
+  </li>
+  <li>
+    <strong>WhatsApp (Meta) e GitHub:</strong> no WhatsApp self-host, o seu servidor conversa com o
+    WhatsApp como um aparelho conectado, e o GitHub recebe o seu login de dono.
   </li>
   <li>
     <strong>Anthropic (Claude):</strong> recebe o resultado de cada ferramenta que você usa na

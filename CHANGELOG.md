@@ -8,6 +8,13 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Alterado
 
+- Canvas: when the Canvas token behind a refresh token was deleted or expired in Canvas, the OAuth refresh now
+  answers `invalid_grant` instead of new tokens that fail on every tool call, so Claude asks to connect again.
+  Canvas outages (network errors, 5xx) still keep the session.
+- Gmail: the protected resource metadata `resource_name` is now "Gmail (multi-account)" (it still said
+  read-only).
+- Privacy policy: corrected what Gmail stores and sends to Google, added a WhatsApp (self-host) section and the
+  GitHub issues contact. Connectors Directory readiness is documented in `docs/DIRECTORY-LISTING.md`.
 - Plugins: each `plugin.json` now has an explicit `version` (`canvas-puc` 3.0.0, `gmail` 1.0.0, `whatsapp` 1.0.0),
   `license`, `keywords`, `homepage`, `author.url`, `privacyPolicyUrl` and a 512 px icon (`.claude-plugin/icon.png`);
   descriptions are in English. Marketplace entries gain `category` and `tags`. release-please manages each plugin
