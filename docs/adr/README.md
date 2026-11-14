@@ -17,10 +17,13 @@ marca o antigo como "Substituído por NNNN". Modelo em [0000-modelo.md](0000-mod
 | [0010](0010-conector-remoto-no-cloudflare-workers.md)     | Conector remoto hospedado no Cloudflare Workers                  | Aceito                               | 2026-11-05 |
 | [0011](0011-renovacao-automatica-do-token-do-canvas.md)   | Renovação automática do token do Canvas no refresh do OAuth      | Aceito                               | 2026-11-05 |
 | [0012](0012-site-publico-no-github-pages.md)              | Site público no GitHub Pages, servido da pasta `docs/`           | Aceito                               | 2026-11-14 |
-| [0013](0013-conector-so-remoto-pelo-marketplace.md)       | Conector só remoto, instalado pelo marketplace                   | Aceito                               | 2026-11-14 |
+| [0013](0013-conector-so-remoto-pelo-marketplace.md)       | Conector só remoto, instalado pelo marketplace                   | Substituído em parte por 0020        | 2026-11-14 |
 | [0014](0014-gmail-remoto-sob-demanda-no-workers.md)       | Gmail remoto multi-conta, só leitura, sob demanda no Workers     | Substituído em parte por 0016 e 0019 | 2026-11-14 |
 | [0015](0015-whatsapp-no-cloudflare-containers.md)         | WhatsApp pessoal no Cloudflare Workers + Containers, sob demanda | Aceito                               | 2026-11-14 |
 | [0016](0016-gmail-multiusuario-publico.md)                | Gmail remoto público e multiusuário                              | Substituído em parte por 0019        | 2026-11-14 |
 | [0017](0017-handoff-automatico-no-session-end.md)         | Handoff automático no SessionEnd                                 | Aceito                               | 2026-11-14 |
 | [0018](0018-whatsapp-plugin-sem-servidor-embutido.md)     | Plugin do WhatsApp sem servidor embutido                         | Aceito                               | 2026-11-14 |
 | [0019](0019-gmail-gerenciamento-completo.md)              | Gmail com gerenciamento completo (`gmail.modify`)                | Aceito                               | 2026-11-14 |
+| [0020](0020-plugin-content-in-plugin-subfolder.md)        | Plugin content lives in a `plugin/` subfolder                    | Aceito                               | 2026-11-14 |
+| [0021](0021-english-across-the-repository.md)             | English across the repository                                    | Aceito                               | 2026-11-14 |
+| [0022](0022-version-per-plugin.md)                        | One version per plugin                                           | Aceito                               | 2026-11-14 |

@@ -1,6 +1,6 @@
 # 0013 — Conector só remoto, instalado pelo marketplace
 
-- **Estado:** Aceito
+- **Estado:** Substituído em parte por 0020 (raiz do plugin: ver ADR 0020)
 - **Data:** 2026-11-14
 - **Relacionado:** F2.9, ADR 0007 (substituído), ADR 0008 (substituído em parte), ADR 0009, ADR 0010
 

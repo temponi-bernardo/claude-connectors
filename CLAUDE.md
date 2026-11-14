@@ -25,9 +25,10 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 6. **Interface só com o design system** (`docs/UI.md`), quando houver.
 7. **Nada direto na `main`** — branch por tarefa, PR, `pr:check` verde, squash merge (`docs/WORKFLOW.md`).
    O Claude mergeia sozinho com o `pr:check` verde, sem pedir confirmação.
-8. **Conventional Commits** com descrição em português: `feat(canvas): adicionar ferramenta de notas`.
+8. **Conventional Commits** with an English description: `feat(canvas): add grades tool` (ADR 0021).
 9. **Skills sempre atualizadas** — passo repetido, comando ou regra nova → skill no mesmo PR.
-10. Docs e mensagens ao usuário em **português**; identificadores em **inglês**.
+10. **English everywhere** — docs, skills, user messages, tool names and identifiers (ADR 0021). Existing
+    Portuguese text is translated by roadmap phase F4; write all new text in English.
 11. **Contexto pequeno.** Uma tarefa por sessão. Exploração, pesquisa e verificações independentes vão para
     subagents; só o resumo volta. Ao concluir uma tarefa ou passo grande: `/handoff` (sobrescreve
     `docs/STATE.md`, local e fora do git) e avise o usuário para rodar `/clear`. Você não consegue rodar `/clear` —
