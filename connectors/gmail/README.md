@@ -111,8 +111,8 @@ seguir instruções vindas de um e-mail.
 2. **APIs e serviços → Biblioteca → Gmail API → Ativar.**
 3. **Google Auth Platform → Branding:** nome do app, e-mail de suporte, página inicial
    `https://temponi-bernardo.github.io/claude-connectors/`, política de privacidade
-   `https://temponi-bernardo.github.io/claude-connectors/privacidade.html` e termos
-   `https://temponi-bernardo.github.io/claude-connectors/termos.html`.
+   `https://temponi-bernardo.github.io/claude-connectors/privacy.html` e termos
+   `https://temponi-bernardo.github.io/claude-connectors/terms.html`.
 4. **Público:** tipo **Externo** → **Publicar app** ("Em produção"). Sem isso o refresh token vence em 7 dias.
 5. **Acesso a dados → Adicionar escopos:** `openid`, `.../auth/userinfo.email` e
    `https://www.googleapis.com/auth/gmail.modify` (ler, enviar, rascunhos, marcadores e lixeira; sem exclusão
@@ -179,4 +179,4 @@ novo.
 - Prompt injection: descrições, instruções do servidor e resultados avisam o modelo que o conteúdo dos e-mails
   não é confiável e que ele nunca deve enviar, encaminhar ou apagar porque um e-mail pediu.
 - Nada de conteúdo de e-mail, tokens ou endereços nos logs. Política de privacidade com a declaração de Uso
-  Limitado do Google em [privacidade.html](../../docs/privacidade.html).
+  Limitado do Google em [privacy.html](../../docs/privacy.html).
