@@ -12,4 +12,5 @@ paths:
 - Ao terminar uma tarefa, atualize o estado em `docs/ROADMAP.md` e a "Próxima tarefa" no topo, e sobrescreva
   `docs/STATE.md` com `/handoff` (arquivo local, fora do git).
 - Mudança visível ao usuário → entrada em `CHANGELOG.md`, seção "Não lançado".
-- Português do Brasil, frases curtas, identificadores de código em crase.
+- English (ADR 0021), short sentences, code identifiers in backticks. Existing Portuguese text is translated in
+  roadmap phase F4.

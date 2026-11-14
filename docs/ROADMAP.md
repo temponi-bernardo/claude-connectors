@@ -2,8 +2,8 @@
 
 ## Próxima tarefa
 
-**F2.12 — Publicar o Gmail com gerenciamento** (código no PR; falta o escopo `gmail.modify` na tela de
-consentimento do Google, `npm run gmail:deploy` e vincular as contas de novo). Ela fecha também a F2.11. Depois, F3.2.
+**F4.2 — Move plugin content to `connectors/<name>/plugin/`** (ADR 0020). Phase 4 follows Anthropic's plugin
+standard; pending deploy steps of F2.12 and F3.2 still apply.
 
 ## Como ler
 
@@ -58,6 +58,20 @@ O MVP é o conector do Canvas instalado pelo marketplace e usado no dia a dia, s
 | F3.3 | Restringir a saída do container aos hosts do WhatsApp (`allowedHosts`)          | ⬜     | Ponte conecta com `enableInternet = false` e só hosts do WhatsApp, ou ADR dizendo por que não |
 | F3.4 | Envio ligado para qualquer contato ou grupo, com citação (ADR 0015)             | ✅     | `ENABLE_SEND` ligado, allowlist opcional, confirmação e limite mantidos; testes Worker e Go   |
 | F3.5 | Avaliar envio de mídia pelo WhatsApp                                            | ⬜     | Imagem/documento enviados com miniatura e tipo conferido, ou ADR dizendo por que não          |
+
+## Fase 4 — Anthropic plugin standard and English
+
+Plan from the 2026-11-14 marketplace review. One PR per task, in order; each ends with `pr:check` green.
+
+| Id   | Tarefa                                                                                          | Estado | Pronto quando                                                                                                                                                       |
+| ---- | ----------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F4.1 | Decisions: plugin subfolder, English, version per plugin (ADR 0020–0022)                        | ✅     | ADRs accepted; CLAUDE.md rules 8 and 10 in English                                                                                                                  |
+| F4.2 | Move plugin content to `connectors/<name>/plugin/` (ADR 0020)                                   | ⬜     | Marketplace `source` points at `plugin/`; installed cache holds only manifests, `.mcp.json`, skills                                                                 |
+| F4.3 | Complete manifests and add `claude plugin validate --strict` to `pr:check` (ADR 0022)           | ⬜     | `version`, `license`, `keywords`, `homepage`, `author.url`; entries with `category`/`tags`; validate green                                                          |
+| F4.4 | Required `title` and read-only/destructive hints in `src/mcp/tools.ts`; Canvas tools in English | ⬜     | Typecheck fails without annotations; 18 Canvas tools and fields renamed; all three servers deployed                                                                 |
+| F4.5 | Plugin skills renamed and written in English                                                    | ⬜     | 12 skills with English names and content citing the new tool names                                                                                                  |
+| F4.6 | Translate the repo: `docs:check` labels first, then docs, project skills, hooks, site           | ⬜     | No Portuguese text left outside quoted user data; `docs:check` green                                                                                                |
+| F4.7 | Connectors Directory readiness for Canvas and Gmail (no submission)                             | ⬜     | OAuth audit (PKCE S256, resource metadata, claude.ai callback, `invalid_grant`) tested; privacy page reviewed; MCP Inspector run recorded; listing draft in `docs/` |
 
 ## Fases seguintes
 
