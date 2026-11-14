@@ -1,7 +1,7 @@
 {
   "name": "claude-connectors",
   "version": "0.1.0",
-  "description": "Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo Canvas da PUC Minas.",
+  "description": "Conectores MCP remotos para o Claude, instalados pelo marketplace de plugins, começando pelo Canvas da PUC Minas.",
   "type": "module",
   "private": true,
   "license": "MIT",
@@ -11,8 +11,7 @@
   "scripts": {
     "prepare": "git config core.hooksPath .githooks || true",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "pack": "tsx tools/pack/cli.ts",
-    "pack:all": "tsx tools/pack/cli.ts --all",
+    "build": "tsx tools/bundle/cli.ts",
     "worker:dev": "wrangler dev --config connectors/canvas-puc/wrangler.toml",
     "worker:deploy": "wrangler deploy --config connectors/canvas-puc/wrangler.toml",
     "lint": "eslint .",
@@ -39,7 +38,6 @@
     ]
   },
   "devDependencies": {
-    "@anthropic-ai/mcpb": "^2.1.2",
     "@commitlint/cli": "^21.2.4",
     "@commitlint/config-conventional": "^21.2.4",
     "@eslint/js": "^10.0.1",
@@ -61,7 +59,6 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
-    "playwright-core": "^1.64.1",
     "zod": "^3.25.76"
   }
 }

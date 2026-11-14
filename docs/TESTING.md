@@ -16,7 +16,7 @@ conduz o ciclo.
   `*.test.ts`. Isso confere presença, não qualidade: a revisão confere se o teste cobre comportamento,
   bordas e erros.
 - Cobertura mínima **90%** (linhas, funções, ramos, statements) em `src/**` e `tools/**`, medida por
-  `npm run test:coverage`. Pontos de entrada (`main.ts`, `cli.ts`) e fixtures ficam fora da medição.
+  `npm run test:coverage`. Pontos de entrada (`remote-main.ts`, `cli.ts`) e fixtures ficam fora da medição.
 - Teste fica ao lado do código: `client.ts` → `client.test.ts`.
 - Funções puras: testes de tabela (entrada → saída), sem mocks.
 - Funções com efeito: use um diretório temporário real (`mkdtempSync`) em vez de mockar `fs`; limpe no

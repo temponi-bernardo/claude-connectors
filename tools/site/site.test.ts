@@ -62,13 +62,21 @@ describe('site do GitHub Pages', () => {
     }
   });
 
-  it('o manifesto do Canvas aponta para o site', () => {
-    const manifest = JSON.parse(
-      readFileSync(join(DOCS, '..', 'connectors', 'canvas-puc', 'manifest.json'), 'utf8'),
-    ) as { homepage?: string; privacy_policies?: string[] };
-    expect(manifest.homepage).toBe('https://temponi-bernardo.github.io/claude-connectors/');
-    expect(manifest.privacy_policies).toEqual([
-      'https://temponi-bernardo.github.io/claude-connectors/privacidade.html',
-    ]);
+  it('o plugin do Canvas aponta para o site', () => {
+    const plugin = JSON.parse(
+      readFileSync(
+        join(DOCS, '..', 'connectors', 'canvas-puc', '.claude-plugin', 'plugin.json'),
+        'utf8',
+      ),
+    ) as { homepage?: string };
+    expect(plugin.homepage).toBe('https://temponi-bernardo.github.io/claude-connectors/');
+  });
+
+  it('as páginas não descrevem mais o conector local', () => {
+    for (const page of ['index.html', 'privacidade.html']) {
+      const html = readFileSync(join(DOCS, page), 'utf8');
+      expect(html).not.toContain('desconectar_canvas');
+      expect(html).not.toContain('~/.canvas-puc');
+    }
   });
 });
