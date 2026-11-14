@@ -54,6 +54,8 @@ O MVP é o conector do Canvas instalado pelo marketplace e usado no dia a dia, s
 | F3.1 | Conector `whatsapp`: Worker + OAuth GitHub, ponte Go no container, snapshots R2 | ✅     | `pr:check` verde com leitura completa, `/pair`, envio atrás de flag e ADR 0015 com a medição  |
 | F3.2 | Publicar na conta do dono e parear o número                                     | 🟨     | `list_chats` respondendo no claude.ai; RSS real do history sync registrado na ADR             |
 | F3.3 | Restringir a saída do container aos hosts do WhatsApp (`allowedHosts`)          | ⬜     | Ponte conecta com `enableInternet = false` e só hosts do WhatsApp, ou ADR dizendo por que não |
+| F3.4 | Envio ligado para qualquer contato ou grupo, com citação (ADR 0015)             | ✅     | `ENABLE_SEND` ligado, allowlist opcional, confirmação e limite mantidos; testes Worker e Go   |
+| F3.5 | Avaliar envio de mídia pelo WhatsApp                                            | ⬜     | Imagem/documento enviados com miniatura e tipo conferido, ou ADR dizendo por que não          |
 
 ## Fases seguintes
 

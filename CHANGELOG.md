@@ -6,7 +6,16 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ## [Não lançado]
 
+### Alterado
+
+- WhatsApp: **envio ligado** (`ENABLE_SEND = "true"` no `wrangler.toml`) para qualquer contato ou grupo;
+  `SEND_ALLOWLIST` virou opcional (vazia = qualquer destinatário). Continuam a confirmação explícita a cada
+  mensagem (`confirmed_by_user`) e o limite por hora (`SEND_MAX_PER_HOUR`). Envio de mídia fica de fora (ADR 0015).
+
 ### Adicionado
+
+- WhatsApp: `send_message` aceita JID de grupo (`@g.us`) e responde citando uma mensagem da mesma conversa
+  (`reply_to_message_id`).
 
 - Comandos **`/config-canvas`**, **`/config-gmail`** e **`/config-whatsapp`** (skills dos plugins): configuração
   guiada de cada conector no chat, com conexão, login pelo navegador, vínculo de contas ou pareamento e um teste.

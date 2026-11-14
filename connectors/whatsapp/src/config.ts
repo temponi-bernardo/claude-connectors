@@ -17,7 +17,7 @@ export interface WhatsAppSettings {
   /** Quanto esperar a sincronização de pendências antes de responder com o que houver (ms). */
   readonly syncWaitMs: number;
   readonly enableSend: boolean;
-  /** Destinatários permitidos para envio, só dígitos (DDI + número). */
+  /** Destinatários permitidos para envio, como JID; vazia = qualquer contato ou grupo. */
   readonly sendAllowlist: readonly string[];
   readonly sendMaxPerHour: number;
   /** Expressão cron do sync periódico opcional; vazia = desligado. */
@@ -76,13 +76,26 @@ export function normalizePhone(raw: string): string | null {
   return /^\d{8,15}$/.test(digits) ? digits : null;
 }
 
-/** Lê `SEND_ALLOWLIST` (números separados por vírgula); item inválido lança. */
+/** JIDs aceitos como destinatário: contato, LID e grupo (inclusive o formato antigo `criador-timestamp`). */
+const RECIPIENT_JID = /^(?:\d{5,30}@(?:s\.whatsapp\.net|lid|g\.us)|\d{5,30}-\d{5,30}@g\.us)$/;
+
+/** Normaliza um destinatário de envio para JID (número vira contato); nulo se não for contato nem grupo. */
+export function normalizeRecipient(raw: string): string | null {
+  const trimmed = raw.trim();
+  if (!trimmed.includes('@')) {
+    const phone = normalizePhone(trimmed);
+    return phone ? `${phone}@s.whatsapp.net` : null;
+  }
+  return RECIPIENT_JID.test(trimmed) ? trimmed : null;
+}
+
+/** Lê `SEND_ALLOWLIST` (números ou JIDs separados por vírgula; vazia = qualquer um); item inválido lança. */
 export function readSendAllowlist(env: EnvVars): string[] {
   const items = (envValue(env, 'SEND_ALLOWLIST') ?? '').split(',').filter((item) => item.trim());
   return items.map((item) => {
-    const phone = normalizePhone(item);
-    if (!phone) throw new Error(`SEND_ALLOWLIST tem um número inválido: "${item.trim()}".`);
-    return phone;
+    const jid = normalizeRecipient(item);
+    if (!jid) throw new Error(`SEND_ALLOWLIST tem um destinatário inválido: "${item.trim()}".`);
+    return jid;
   });
 }
 
@@ -115,7 +128,7 @@ export function readTimingSettings(
   };
 }
 
-/** Lê a configuração de envio (fase 2): ligado ou não, allowlist e limite por hora. */
+/** Lê a configuração de envio: ligado ou não, allowlist opcional e limite por hora. */
 export function readSendSettings(
   env: EnvVars,
 ): Pick<WhatsAppSettings, 'enableSend' | 'sendAllowlist' | 'sendMaxPerHour'> {

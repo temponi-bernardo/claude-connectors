@@ -3,6 +3,7 @@ import {
   BRIDGE_ENV_KEYS,
   containerEnvVars,
   normalizePhone,
+  normalizeRecipient,
   readAllowedEmails,
   readIntInRange,
   readSendAllowlist,
@@ -58,10 +59,24 @@ describe('normalizePhone e readSendAllowlist', () => {
     expect(normalizePhone('abc@g.us')).toBeNull();
   });
 
-  it('lê a allowlist e recusa item inválido', () => {
-    expect(readSendAllowlist({ SEND_ALLOWLIST: '+55 31 99999-9999, 5511888888888' })).toEqual([
-      '5531999999999',
-      '5511888888888',
+  it('normaliza destinatário: número, contato, LID e grupo viram JID; o resto é nulo', () => {
+    expect(normalizeRecipient('+55 (31) 99999-9999')).toBe('5531999999999@s.whatsapp.net');
+    expect(normalizeRecipient('5531999999999@s.whatsapp.net')).toBe('5531999999999@s.whatsapp.net');
+    expect(normalizeRecipient(' 120363000000000001@g.us ')).toBe('120363000000000001@g.us');
+    expect(normalizeRecipient('5531999999999-1500000000@g.us')).toBe(
+      '5531999999999-1500000000@g.us',
+    );
+    expect(normalizeRecipient('123456789012345@lid')).toBe('123456789012345@lid');
+    for (const bad of ['123', 'status@broadcast', 'abc@g.us', '5531999999999@x.com', '']) {
+      expect(normalizeRecipient(bad)).toBeNull();
+    }
+  });
+
+  it('lê a allowlist (números e grupos) e recusa item inválido', () => {
+    const raw = '+55 31 99999-9999, 120363000000000001@g.us';
+    expect(readSendAllowlist({ SEND_ALLOWLIST: raw })).toEqual([
+      '5531999999999@s.whatsapp.net',
+      '120363000000000001@g.us',
     ]);
     expect(readSendAllowlist({})).toEqual([]);
     expect(() => readSendAllowlist({ SEND_ALLOWLIST: '12' })).toThrow('inválido');
@@ -97,7 +112,7 @@ describe('readWhatsAppSettings', () => {
     const send = { ENABLE_SEND: 'true', SEND_ALLOWLIST: '5531999999999', SEND_MAX_PER_HOUR: '3' };
     expect(readSendSettings(send)).toEqual({
       enableSend: true,
-      sendAllowlist: ['5531999999999'],
+      sendAllowlist: ['5531999999999@s.whatsapp.net'],
       sendMaxPerHour: 3,
     });
     expect(readWhatsAppSettings(env).syncCron).toBe('0 */6 * * *');

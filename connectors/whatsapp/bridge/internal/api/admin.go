@@ -14,6 +14,7 @@ import (
 
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/bridge"
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/config"
+	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/store"
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/wa"
 )
 
@@ -170,13 +171,18 @@ func (s *Server) handleLogout(w http.ResponseWriter, r *http.Request) {
 // maxSendRunes é o tamanho máximo do texto enviado.
 const maxSendRunes = 4096
 
+// maxReplyToLen é o tamanho máximo do id da mensagem citada.
+const maxReplyToLen = 200
+
 // sendRequest é o corpo de POST /send.
 type sendRequest struct {
 	Recipient string `json:"recipient"`
 	Text      string `json:"text"`
+	ReplyTo   string `json:"reply_to"`
 }
 
 // checkSend decide o erro de validação de um envio (função pura): status, código e mensagem; status 0 = ok.
+// Allowlist vazia libera qualquer contato ou grupo; com itens, só eles.
 func (s *Server) checkSend(req sendRequest) (string, int, string, string) {
 	if !s.opts.EnableSend {
 		return "", http.StatusForbidden, "send_disabled", "O envio está desligado nesta ponte."
@@ -185,11 +191,14 @@ func (s *Server) checkSend(req sendRequest) (string, int, string, string) {
 	if !ok {
 		return "", http.StatusBadRequest, "bad_request", "recipient precisa ser um número com DDI ou um JID."
 	}
-	if !s.allowlist[jid] {
+	if len(s.allowlist) > 0 && !s.allowlist[jid] {
 		return "", http.StatusForbidden, "recipient_not_allowed", "Destinatário fora da lista permitida."
 	}
 	if n := utf8.RuneCountInString(req.Text); strings.TrimSpace(req.Text) == "" || n > maxSendRunes || !utf8.ValidString(req.Text) {
 		return "", http.StatusBadRequest, "bad_request", "text precisa ter de 1 a 4096 caracteres."
+	}
+	if len(req.ReplyTo) > maxReplyToLen {
+		return "", http.StatusBadRequest, "bad_request", "reply_to precisa ter até 200 caracteres."
 	}
 	return jid, 0, "", ""
 }
@@ -209,10 +218,29 @@ func (s *Server) handleSend(w http.ResponseWriter, r *http.Request) {
 		writeError(w, status, code, msg)
 		return
 	}
-	if !s.reserveSend(w, r) {
+	out := wa.Outgoing{To: jid, Text: req.Text}
+	if !s.resolveQuote(w, r, &out, req.ReplyTo) || !s.reserveSend(w, r) {
 		return
 	}
-	s.deliverSend(w, r, jid, req.Text)
+	s.deliverSend(w, r, out)
+}
+
+// resolveQuote busca a mensagem citada na mesma conversa; ausente responde 404 sem gastar a cota de envios.
+func (s *Server) resolveQuote(w http.ResponseWriter, r *http.Request, out *wa.Outgoing, replyTo string) bool {
+	if replyTo == "" {
+		return true
+	}
+	q, err := s.st().GetQuoted(r.Context(), out.To, replyTo)
+	switch {
+	case errors.Is(err, store.ErrNotFound):
+		writeError(w, http.StatusNotFound, "quoted_not_found", "Mensagem citada não encontrada nesta conversa.")
+		return false
+	case err != nil:
+		s.internalError(w, "quote", err)
+		return false
+	}
+	out.Quote = &q
+	return true
 }
 
 // reserveSend aplica o limite por hora; responde 429 quando estourado.
@@ -231,8 +259,8 @@ func (s *Server) reserveSend(w http.ResponseWriter, r *http.Request) bool {
 }
 
 // deliverSend envia de fato e responde com id e horário.
-func (s *Server) deliverSend(w http.ResponseWriter, r *http.Request, jid, text string) {
-	sent, err := s.client().SendText(r.Context(), jid, text)
+func (s *Server) deliverSend(w http.ResponseWriter, r *http.Request, out wa.Outgoing) {
+	sent, err := s.client().SendText(r.Context(), out)
 	switch {
 	case errors.Is(err, wa.ErrNotConnected):
 		writeError(w, http.StatusServiceUnavailable, "not_connected", "O WhatsApp não está conectado.")

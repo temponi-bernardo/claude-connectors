@@ -1,7 +1,8 @@
 # WhatsApp pessoal no Claude (`whatsapp`)
 
 Conector MCP **remoto** que deixa o Claude (claude.ai, app, Cowork e Claude Code) ler o seu WhatsApp **pessoal**
-(não Business): conversas, mensagens, busca, contatos e mídias. Envio existe, mas vem **desligado**.
+(não Business): conversas, mensagens, busca, contatos e mídias, e **enviar** texto para qualquer contato ou grupo —
+uma mensagem por vez, sempre com a sua confirmação explícita e com limite por hora.
 
 É um **template self-host**: cada pessoa publica na **própria conta Cloudflare** e pareia o **próprio número**.
 Não existe servidor central nem serviço hospedado por terceiros. Decisões em
@@ -40,7 +41,7 @@ Claude ──OAuth 2.1 + MCP (HTTPS)──▶ Worker ──▶ Durable Object "o
 | `search_messages` | Busca no texto das mensagens guardadas, opcionalmente numa conversa               |
 | `search_contacts` | Contatos por nome ou número                                                       |
 | `get_media`       | Imagem, áudio ou documento de uma mensagem (até `MAX_MEDIA_BYTES`, 5 MB)          |
-| `send_message`    | **Só com `ENABLE_SEND=true`**: uma mensagem de texto para um número da allowlist  |
+| `send_message`    | Uma mensagem de texto para um contato ou grupo, opcionalmente citando outra       |
 
 Datas em ISO 8601 com fuso (`TIMEZONE`, padrão `America/Sao_Paulo`). Respostas compactas e com o aviso de que o
 conteúdo das mensagens é dado de terceiros não confiável.
@@ -135,18 +136,33 @@ revoga na hora (o `/mcp` passa a responder 403).
 | `TIMEZONE`          | `America/Sao_Paulo` | Fuso das datas                                                         |
 | `HISTORY_DAYS`      | `90`                | Histórico guardado no sync inicial                                     |
 | `MAX_MEDIA_BYTES`   | `5242880`           | Limite do `get_media`                                                  |
-| `ENABLE_SEND`       | `false`             | Liga `send_message`                                                    |
-| `SEND_ALLOWLIST`    | vazio               | Números (DDI + número) que podem receber envio                         |
+| `ENABLE_SEND`       | `true`              | Liga `send_message` (`"false"` desliga de vez)                         |
+| `SEND_ALLOWLIST`    | vazio               | Opcional: restringe o envio a números ou JIDs; vazia = qualquer um     |
 | `SEND_MAX_PER_HOUR` | `10`                | Limite rígido de envios por hora (Worker e ponte)                      |
 | `SYNC_CRON`         | vazio               | Sync periódico opcional (ver abaixo)                                   |
 | `PUBLIC_URL`        | —                   | Domínio próprio; sem ela vale o `*.workers.dev`                        |
 
-### Envio (fase 2, desligado)
+### Envio
 
-Para ligar: `ENABLE_SEND = "true"` e `SEND_ALLOWLIST = "5531999999999,5511888888888"`, depois deploy. Proteções:
-só números da allowlist (conferido no Worker e na ponte), uma mensagem de texto por chamada (sem mídia, sem
-massa), limite por hora guardado no Durable Object (conta mesmo envio que falhou) e na ponte, e a ferramenta
-exige `confirmed_by_user: true` e diz ao modelo para mostrar destinatário e texto e pedir sua confirmação antes.
+Ligado por padrão no `wrangler.toml` (`ENABLE_SEND = "true"`), para **qualquer contato ou grupo**. Proteções:
+
+- **Confirmação a cada mensagem:** a ferramenta exige `confirmed_by_user: true` e manda o modelo mostrar
+  destinatário, texto e mensagem citada e pedir a sua confirmação daquela mensagem exata antes de cada envio.
+- **Limite por hora** (`SEND_MAX_PER_HOUR`, 10): guardado no Durable Object e na ponte; tentativa que falhou também
+  conta.
+- **Uma mensagem de texto por chamada**, sem envio em massa. Destinatário só como número (DDI + número) ou JID de
+  contato (`@s.whatsapp.net`, `@lid`) ou de grupo (`@g.us`, de `list_chats`); status e listas de transmissão
+  são recusados.
+- **Allowlist opcional:** com `SEND_ALLOWLIST = "5531999999999,120363000000000001@g.us"`, só esses destinatários
+  (conferido no Worker e na ponte). Vazia, vale qualquer um.
+
+**Responder citando** (`reply_to_message_id`): o id de uma mensagem da **mesma conversa**, como `get_messages`
+devolve. A ponte busca a mensagem no banco local e a resposta sai citada; id desconhecido é recusado sem gastar o
+limite.
+
+**Fora, por ora:** envio de mídia (imagem, áudio, documento). Exigiria passar o arquivo em base64 dentro da
+chamada da ferramenta (pesa no contexto e no teto de 25 s), validar o tipo real do arquivo e gerar miniatura e
+dimensões para o WhatsApp exibir direito — mais risco de mandar o arquivo errado e de bloqueio. Detalhes na ADR 0015.
 
 ### Sync periódico (opcional, desligado)
 

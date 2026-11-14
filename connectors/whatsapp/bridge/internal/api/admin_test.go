@@ -92,3 +92,33 @@ func TestSendFailure(t *testing.T) {
 	e.fake.sendErr = errors.New("recusado")
 	expect(t, e.postJSON("/send", `{"recipient":"5531999990001","text":"oi"}`), 502, "send_failed")
 }
+
+func TestSendWithoutAllowlistReachesAnyContactAndGroups(t *testing.T) {
+	e := newEnv(t, func(o *Options) { o.Allowlist = nil; o.SendMaxPerHour = 5 }).ready()
+	for _, to := range []string{"5511988887777", "120363000000000001@g.us", "123456789012345@lid"} {
+		if m := decode(t, e.postJSON("/send", `{"recipient":"`+to+`","text":"oi"}`)); m["id"] != "SENT1" {
+			t.Fatalf("%s: %v", to, m)
+		}
+	}
+	want := "5511988887777@s.whatsapp.net|oi"
+	if len(e.fake.sent) != 3 || e.fake.sent[0] != want || e.fake.sent[1] != "120363000000000001@g.us|oi" {
+		t.Fatalf("%v", e.fake.sent)
+	}
+	expect(t, e.postJSON("/send", `{"recipient":"status@broadcast","text":"oi"}`), 400, "bad_request")
+}
+
+func TestSendReplyQuotesStoredMessage(t *testing.T) {
+	e := newEnv(t, func(o *Options) { o.Allowlist = nil; o.SendMaxPerHour = 1 }).ready()
+	e.seed()
+	missing := `{"recipient":"5531999990001","text":"oi","reply_to":"G1"}`
+	expect(t, e.postJSON("/send", missing), 404, "quoted_not_found")
+	tooLong := `{"recipient":"5531999990001","text":"oi","reply_to":"` + strings.Repeat("x", 201) + `"}`
+	expect(t, e.postJSON("/send", tooLong), 400, "bad_request")
+	ok := `{"recipient":"120363000000000001@g.us","text":"combinado","reply_to":"G1"}`
+	if m := decode(t, e.postJSON("/send", ok)); m["id"] != "SENT1" {
+		t.Fatalf("%v", m)
+	}
+	if e.fake.sent[0] != "120363000000000001@g.us|combinado|quote:G1" {
+		t.Fatalf("%v", e.fake.sent)
+	}
+}

@@ -63,7 +63,7 @@ func TestNewManagerNeedsPairing(t *testing.T) {
 func TestOperationsRequireLogin(t *testing.T) {
 	m, _ := newOfflineManager(t)
 	ctx := context.Background()
-	if _, err := m.SendText(ctx, alice.String(), "oi"); !errors.Is(err, ErrNotConnected) {
+	if _, err := m.SendText(ctx, Outgoing{To: alice.String(), Text: "oi"}); !errors.Is(err, ErrNotConnected) {
 		t.Fatal(err)
 	}
 	if _, err := m.Download(ctx, store.Media{Kind: "image", DirectPath: "/x"}); !errors.Is(err, ErrNotConnected) {

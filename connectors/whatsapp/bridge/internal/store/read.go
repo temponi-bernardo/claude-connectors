@@ -170,6 +170,25 @@ func (s *Store) GetMedia(ctx context.Context, chatJID, id string) (Media, error)
 	return m, err
 }
 
+// Quoted é o mínimo de uma mensagem guardada para citá-la numa resposta.
+type Quoted struct {
+	ID        string
+	SenderJID string
+	FromMe    bool
+	Text      string
+}
+
+// GetQuoted devolve a mensagem id da conversa chatJID para ser citada, ou ErrNotFound.
+func (s *Store) GetQuoted(ctx context.Context, chatJID, id string) (Quoted, error) {
+	q := Quoted{ID: id}
+	err := s.db.QueryRowContext(ctx, `SELECT sender_jid, from_me, text FROM messages WHERE chat_jid = ? AND id = ?`,
+		chatJID, id).Scan(&q.SenderJID, &q.FromMe, &q.Text)
+	if errors.Is(err, sql.ErrNoRows) {
+		return q, ErrNotFound
+	}
+	return q, err
+}
+
 // Counts devolve o total de conversas e de mensagens.
 func (s *Store) Counts(ctx context.Context) (chats, messages int64, err error) {
 	err = s.db.QueryRowContext(ctx, `SELECT (SELECT COUNT(*) FROM chats), (SELECT COUNT(*) FROM messages)`).

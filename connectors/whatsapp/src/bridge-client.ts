@@ -27,6 +27,8 @@ export const BRIDGE_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   media_expired: 'O WhatsApp não tem mais esse arquivo (mídia antiga).',
   send_disabled: 'Envio desligado neste servidor (ENABLE_SEND=false).',
   recipient_not_allowed: 'Destinatário fora da SEND_ALLOWLIST: envio recusado.',
+  quoted_not_found:
+    'Mensagem citada não encontrada nesta conversa. Use get_messages para ver os ids.',
   rate_limited: 'Limite de envios por hora atingido. Tente mais tarde.',
   bad_snapshot:
     'Não consegui abrir o backup criptografado (SNAPSHOT_KEY trocada ou arquivo corrompido). Veja /pair.',
