@@ -1,7 +1,7 @@
 /**
- * Ciclo de vida da ponte dentro do Durable Object `WhatsAppBridge`: restaura o snapshot do R2 quando o container
- * acorda vazio, repassa as chamadas com o `BRIDGE_TOKEN`, guarda snapshots depois das sincronizações (no máximo um
- * por minuto) e aplica o limite rígido de envios por hora no armazenamento do Durable Object.
+ * Bridge lifecycle inside the `WhatsAppBridge` Durable Object: restores the R2 snapshot when the container wakes up
+ * empty, forwards calls with the `BRIDGE_TOKEN`, saves snapshots after syncs (at most one per minute) and enforces
+ * the hard hourly send limit in the Durable Object storage.
  */
 import { bridgeErrorFrom } from './bridge-client.js';
 import {
@@ -13,9 +13,9 @@ import {
   SNAPSHOT_KEY_NAME,
 } from './snapshots.js';
 
-/** O que o ciclo de vida precisa do Durable Object (porta, testável com fakes). */
+/** What the lifecycle needs from the Durable Object (a port, testable with fakes). */
 export interface BridgeHost {
-  /** `containerFetch` do `Container`: acorda o container se preciso e repassa a requisição. */
+  /** The `Container`'s `containerFetch`: wakes the container if needed and forwards the request. */
   readonly containerFetch: (url: string, init?: RequestInit) => Promise<Response>;
   readonly bucket: SnapshotBucket;
   readonly fixedLength: FixedLength;
@@ -30,10 +30,10 @@ export interface BridgeHost {
   readonly now: () => number;
 }
 
-/** Intervalo mínimo entre snapshots disparados por uso (ms). */
+/** Minimum interval between usage-triggered snapshots (ms). */
 export const SNAPSHOT_INTERVAL_MS = 60_000;
 
-/** Rotas da ponte depois das quais o banco pode ter mudado e vale tentar um snapshot. */
+/** Bridge routes after which the database may have changed and a snapshot is worth trying. */
 export const SNAPSHOT_AFTER_PATHS: ReadonlySet<string> = new Set([
   '/sync/wait',
   '/status',
@@ -43,29 +43,29 @@ export const SNAPSHOT_AFTER_PATHS: ReadonlySet<string> = new Set([
   '/pair/qr',
 ]);
 
-/** Chave, no armazenamento do Durable Object, dos instantes dos envios recentes. */
+/** Durable Object storage key holding the timestamps of recent sends. */
 export const SEND_HISTORY_KEY = 'send-history';
 
-/** Junta o `Authorization` da ponte às opções de uma requisição. */
+/** Adds the bridge `Authorization` to a request's options. */
 export function withBridgeToken(token: string, init: RequestInit = {}): RequestInit {
   const headers = new Headers(init.headers);
   headers.set('authorization', `Bearer ${token}`);
   return { ...init, headers };
 }
 
-/** Faz uma requisição à ponte dentro do container, já autenticada. */
+/** Makes an authenticated request to the bridge inside the container. */
 export function fetchBridge(host: BridgeHost, path: string, init?: RequestInit): Promise<Response> {
   return host.containerFetch(`http://bridge${path}`, withBridgeToken(host.bridgeToken, init));
 }
 
-/** Lê a fase da ponte (`GET /health`). */
+/** Reads the bridge phase (`GET /health`). */
 export async function readBridgePhase(host: BridgeHost): Promise<string> {
   const res = await fetchBridge(host, '/health');
   const body = (await res.json()) as { phase?: unknown };
   return typeof body.phase === 'string' ? body.phase : 'unknown';
 }
 
-/** Opções do `POST /restore`: o snapshot do bucket em fluxo, ou `X-Snapshot: none` se não houver. */
+/** Options for `POST /restore`: the bucket snapshot as a stream, or `X-Snapshot: none` if there is none. */
 export async function restoreRequestInit(host: BridgeHost): Promise<RequestInit> {
   const snapshot = await host.bucket.get(SNAPSHOT_KEY_NAME);
   if (!snapshot) return { method: 'POST', headers: { 'x-snapshot': 'none' } };
@@ -79,23 +79,23 @@ export async function restoreRequestInit(host: BridgeHost): Promise<RequestInit>
   };
 }
 
-/** Restaura a ponte se ela acabou de acordar; snapshot recusado lança (nunca recomeça do zero sozinho). */
+/** Restores the bridge if it just woke up; a rejected snapshot throws (never starts over on its own). */
 export async function ensureRestored(host: BridgeHost): Promise<void> {
   if ((await readBridgePhase(host)) !== 'awaiting_restore') return;
   const res = await fetchBridge(host, '/restore', await restoreRequestInit(host));
-  // 409: outra requisição restaurou primeiro.
+  // 409: another request restored first.
   if (res.ok || res.status === 409) return;
   throw bridgeErrorFrom(res.status, await res.json().catch(() => null));
 }
 
-/** Pede o snapshot à ponte e grava no bucket. */
+/** Asks the bridge for the snapshot and writes it to the bucket. */
 export async function snapshotBridge(host: BridgeHost, force = false): Promise<SnapshotOutcome> {
-  // force=1: depois de uma gravação que falhou, a ponte devolveria 204 (já entregue) sem isso.
+  // force=1: after a failed write, the bridge would otherwise return 204 (already delivered).
   const res = await fetchBridge(host, force ? '/snapshot?force=1' : '/snapshot');
   return storeSnapshotResponse(host.bucket, res, host.fixedLength);
 }
 
-/** Decide um envio: permitido (e o histórico novo) ou recusado com quantos segundos esperar. Pura. */
+/** Decides a send: allowed (with the new history) or refused with how many seconds to wait. Pure. */
 export function planSend(
   history: readonly number[],
   now: number,
@@ -112,7 +112,7 @@ export function planSend(
   };
 }
 
-/** Aplica o limite de envios; devolve a resposta 429 se estourou, ou nulo (e registra o envio) se pode. */
+/** Enforces the send limit; returns the 429 response if exceeded, or null (and records the send) if allowed. */
 export async function guardSend(host: BridgeHost): Promise<Response | null> {
   const history = (await host.storage.get<number[]>(SEND_HISTORY_KEY)) ?? [];
   const plan = planSend(history, host.now(), host.sendMaxPerHour);
@@ -124,7 +124,7 @@ export async function guardSend(host: BridgeHost): Promise<Response | null> {
   );
 }
 
-/** Opções para repassar uma requisição recebida à ponte (método, tipo e corpo). */
+/** Options to forward an incoming request to the bridge (method, type and body). */
 export function forwardInit(request: Request): RequestInit {
   const type = request.headers.get('content-type');
   const hasBody = request.method !== 'GET' && request.method !== 'HEAD';
@@ -135,14 +135,14 @@ export function forwardInit(request: Request): RequestInit {
   };
 }
 
-/** Ciclo de vida montado: atende requisições e guarda snapshots em série. */
+/** Assembled lifecycle: handles requests and saves snapshots serially. */
 export interface BridgeLifecycle {
   readonly handle: (request: Request) => Promise<Response>;
   readonly snapshotNow: () => Promise<SnapshotOutcome>;
   readonly snapshotQuietly: () => Promise<void>;
 }
 
-/** Guarda snapshots em série (nunca dois ao mesmo tempo) e decide quando um uso merece snapshot. */
+/** Saves snapshots serially (never two at once) and decides when usage deserves a snapshot. */
 export class SnapshotScheduler {
   private chain: Promise<unknown> = Promise.resolve();
   private lastAt = 0;
@@ -150,7 +150,7 @@ export class SnapshotScheduler {
 
   constructor(private readonly host: BridgeHost) {}
 
-  /** Tira um snapshot depois dos que já estão na fila. */
+  /** Takes a snapshot after the ones already queued. */
   snapshotNow(): Promise<SnapshotOutcome> {
     const run = this.chain.then(() => this.runSnapshot());
     this.chain = run.catch(() => undefined);
@@ -158,7 +158,7 @@ export class SnapshotScheduler {
     return run;
   }
 
-  /** Pede o snapshot; se falhar, o próximo é forçado para não perder o que não chegou ao R2. */
+  /** Requests the snapshot; if it fails, the next one is forced so nothing that missed R2 is lost. */
   private async runSnapshot(): Promise<SnapshotOutcome> {
     const force = this.forceNext;
     try {
@@ -171,12 +171,12 @@ export class SnapshotScheduler {
     }
   }
 
-  /** Tira um snapshot e só registra a falha no log. */
+  /** Takes a snapshot and only logs a failure. */
   snapshotQuietly(): Promise<void> {
     return logSnapshotFailure(this.snapshotNow());
   }
 
-  /** Depois de uma rota que pode mudar o banco, agenda um snapshot se o último tem mais de um minuto. */
+  /** After a route that may change the database, schedules a snapshot if the last one is over a minute old. */
   maybeSnapshot(path: string): void {
     if (SNAPSHOT_AFTER_PATHS.has(path) && this.host.now() - this.lastAt >= SNAPSHOT_INTERVAL_MS) {
       this.host.waitUntil(this.snapshotQuietly());
@@ -184,7 +184,7 @@ export class SnapshotScheduler {
   }
 }
 
-/** Monta o ciclo de vida da ponte para um Durable Object. */
+/** Builds the bridge lifecycle for a Durable Object. */
 export function createBridgeLifecycle(host: BridgeHost): BridgeLifecycle {
   const scheduler = new SnapshotScheduler(host);
   return {
@@ -194,29 +194,29 @@ export function createBridgeLifecycle(host: BridgeHost): BridgeLifecycle {
   };
 }
 
-/** Espera um snapshot e só registra a falha no log (sem dados de mensagens). */
+/** Awaits a snapshot and only logs a failure (without message data). */
 export async function logSnapshotFailure(run: Promise<SnapshotOutcome>): Promise<void> {
   try {
     await run;
   } catch (error) {
-    console.warn('Snapshot falhou:', error instanceof Error ? error.message : String(error));
+    console.warn('Snapshot failed:', error instanceof Error ? error.message : String(error));
   }
 }
 
-/** Dependências do roteador do Durable Object. */
+/** Dependencies of the Durable Object router. */
 export interface BridgeRouter {
   readonly host: BridgeHost;
   readonly scheduler: Pick<SnapshotScheduler, 'snapshotNow' | 'maybeSnapshot'>;
 }
 
-/** Recomeça do zero: arquiva o snapshot atual e para o container (o próximo uso sobe vazio). */
+/** Starts over: archives the current snapshot and stops the container (the next use starts empty). */
 export async function resetBridge(host: BridgeHost): Promise<Response> {
   const archived = await archiveSnapshot(host.bucket, new Date(host.now()), host.fixedLength);
   await host.stop();
   return Response.json({ reset: true, archived });
 }
 
-/** Atende uma requisição do Worker: rotas internas (`/__snapshot`, `/__reset`) ou repasse à ponte. */
+/** Handles a Worker request: internal routes (`/__snapshot`, `/__reset`) or forwarding to the bridge. */
 export async function routeBridgeRequest(
   router: BridgeRouter,
   request: Request,

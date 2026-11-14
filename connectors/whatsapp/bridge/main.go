@@ -1,4 +1,4 @@
-// Comando bridge: ponte HTTP interna entre o Worker (Durable Object) e o WhatsApp via whatsmeow.
+// Command bridge: internal HTTP bridge between the Worker (Durable Object) and WhatsApp via whatsmeow.
 package main
 
 import (
@@ -21,21 +21,21 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/wa"
 )
 
-// maxRestore é o teto do snapshot recebido no /restore e de cada banco extraído.
+// maxRestore caps the snapshot received on /restore and each extracted database.
 const maxRestore = 1 << 30
 
-// memoryLimit é o alvo de heap do GC (o container lite tem 256 MiB no total).
+// memoryLimit is the GC heap target (the lite container has 256 MiB in total).
 const memoryLimit = 160 << 20
 
 func main() {
 	log := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	if err := run(log); err != nil {
-		log.Error("a ponte parou com erro", "err", err.Error())
+		log.Error("the bridge stopped with an error", "err", err.Error())
 		os.Exit(1)
 	}
 }
 
-// run carrega a configuração, sobe o HTTP e espera o SIGTERM.
+// run loads the configuration, starts HTTP and waits for SIGTERM.
 func run(log *slog.Logger) error {
 	cfg, err := config.Load(os.Getenv)
 	if err != nil {
@@ -50,7 +50,7 @@ func run(log *slog.Logger) error {
 	defer stop()
 	errCh := make(chan error, 1)
 	go func() { errCh <- srv.ListenAndServe() }()
-	log.Info("ponte ouvindo", "porta", cfg.Port)
+	log.Info("bridge listening", "port", cfg.Port)
 	select {
 	case err := <-errCh:
 		return err
@@ -60,7 +60,7 @@ func run(log *slog.Logger) error {
 	return nil
 }
 
-// newBridge cria a ponte; cada mudança de sessão (pareou, conectou, saiu) envia o snapshot na hora ao Worker.
+// newBridge creates the bridge; every session change (paired, connected, logged out) pushes the snapshot to the Worker right away.
 func newBridge(cfg config.Config, log *slog.Logger) *bridge.Bridge {
 	var b *bridge.Bridge
 	onChange := func() {
@@ -71,14 +71,14 @@ func newBridge(cfg config.Config, log *slog.Logger) *bridge.Bridge {
 	return b
 }
 
-// apiOptions traduz a configuração para a API.
+// apiOptions maps the configuration to the API options.
 func apiOptions(cfg config.Config, log *slog.Logger) api.Options {
 	return api.Options{Token: cfg.Token, Location: cfg.Location, MaxMediaBytes: cfg.MaxMediaBytes, MaxRestore: maxRestore,
 		EnableSend: cfg.EnableSend, Allowlist: cfg.SendAllowlist, SendMaxPerHour: cfg.SendMaxPerHour, Log: log}
 }
 
-// startWhatsApp cria o StartFunc que liga o whatsmeow aos bancos restaurados.
-// onChange é chamado quando a sessão muda (pareou, conectou, saiu), para enviar o snapshot na hora.
+// startWhatsApp creates the StartFunc that wires whatsmeow to the restored databases.
+// onChange is called when the session changes (paired, connected, logged out), to push the snapshot right away.
 func startWhatsApp(historyDays int, log *slog.Logger, onChange func()) bridge.StartFunc {
 	return func(ctx context.Context, sessionDB *sql.DB, st *store.Store) (bridge.WhatsApp, error) {
 		m, err := wa.New(ctx, wa.Options{SessionDB: sessionDB, Store: st, HistoryDays: historyDays, Log: log,
@@ -91,13 +91,13 @@ func startWhatsApp(historyDays int, log *slog.Logger, onChange func()) bridge.St
 	}
 }
 
-// shutdown para de aceitar requisições, desconecta e faz o push best-effort do snapshot.
+// shutdown stops accepting requests, disconnects and pushes the snapshot best-effort.
 func shutdown(srv *http.Server, b *bridge.Bridge, cfg config.Config, log *slog.Logger) {
-	log.Info("SIGTERM recebido; encerrando")
+	log.Info("SIGTERM received; shutting down")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Warn("encerramento do HTTP", "err", err.Error())
+		log.Warn("HTTP shutdown", "err", err.Error())
 	}
 	b.Shutdown(context.Background(), &http.Client{Timeout: bridge.PushTimeout}, cfg.SnapshotPushURL, cfg.Token)
 }

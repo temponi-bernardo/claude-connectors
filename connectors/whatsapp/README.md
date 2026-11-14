@@ -108,15 +108,14 @@ running (`wrangler` builds the bridge image) and a GitHub account.
 
 1. Open `https://whatsapp-remote.<your-account>.workers.dev/pair` and sign in with GitHub (only emails in
    `ALLOWED_EMAILS` get through). The first visit wakes the container (a few seconds).
-2. Type your number with country code (e.g. `5531999999999`) and click **Gerar código de pareamento** (generate
-   pairing code).
+2. Type your number with country code (e.g. `5531999999999`) and click **Generate pairing code**.
 3. On your phone: WhatsApp → **Linked devices** → **Link a device** → **Link with phone number instead** and
-   type the code. Alternative: **Mostrar QR** (show QR) and scan the QR code.
-4. The page refreshes on its own; when it shows "Conectado" (connected), recent history starts arriving (up to
+   type the code. Alternative: **Show QR** and scan the QR code.
+4. The page refreshes on its own; when it shows "Connected", recent history starts arriving (up to
    `HISTORY_DAYS`, 90 days).
 
-On the same page: **Desvincular este aparelho** (unlink this device, i.e. logout) and **Recomeçar do zero**
-(start over: archives the backup in R2 and asks for pairing again; use it if you change the `SNAPSHOT_KEY` or the
+On the same page: **Unlink this device** (logout) and **Start over**
+(archives the backup in R2 and asks for pairing again; use it if you change the `SNAPSHOT_KEY` or the
 backup gets corrupted).
 
 ## Connect to Claude
@@ -227,7 +226,7 @@ few MB per session. To cap spending, use the Workers _spending limit_ and lower 
 - **Backup:** encrypted in the bridge with chunked AES-256-GCM (HKDF per snapshot, authenticated header):
   truncating, reordering or changing any byte makes the restore fail. The key never goes to R2.
 - **Limitations:** whoever controls your Cloudflare account controls the connector (secrets and container). The
-  old backup archived by "Recomeçar do zero" stays in R2 until you delete it.
+  old backup archived by "Start over" stays in R2 until you delete it.
 
 ## Development
 
@@ -241,12 +240,12 @@ few MB per session. To cap spending, use the Workers _spending limit_ and lower 
 
 ## Common problems
 
-| Symptom                                     | What to do                                                                                           |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 500 "Configuração do Worker inválida"       | A secret is missing: the message says which one                                                      |
-| "WhatsApp is not paired"                    | Open `/pair` and pair                                                                                |
-| Pairing disappears after a deploy/restart   | Check R2 for the `whatsapp/snapshot.was1` object; if missing, look for "Snapshot falhou" in the logs |
-| "Tempo esgotado esperando o WhatsApp"       | Container waking up (first call after sleeping): retry in a few seconds                              |
-| "Não consegui abrir o backup criptografado" | `SNAPSHOT_KEY` changed or the backup is corrupted: restore the old key or use "Recomeçar do zero"    |
-| GitHub login rejected                       | The email must be verified on GitHub and listed in `ALLOWED_EMAILS`                                  |
-| GitHub callback gives a redirect error      | The OAuth App needs both exact URIs: `<url>/oauth/callback` and `<url>/oauth/callback/pair`          |
+| Symptom                                   | What to do                                                                                           |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 500 "Invalid Worker configuration"        | A secret is missing: the message says which one                                                      |
+| "WhatsApp is not paired"                  | Open `/pair` and pair                                                                                |
+| Pairing disappears after a deploy/restart | Check R2 for the `whatsapp/snapshot.was1` object; if missing, look for "Snapshot failed" in the logs |
+| "Timed out waiting for WhatsApp"          | Container waking up (first call after sleeping): retry in a few seconds                              |
+| "Could not open the encrypted backup"     | `SNAPSHOT_KEY` changed or the backup is corrupted: restore the old key or use "Start over"           |
+| GitHub login rejected                     | The email must be verified on GitHub and listed in `ALLOWED_EMAILS`                                  |
+| GitHub callback gives a redirect error    | The OAuth App needs both exact URIs: `<url>/oauth/callback` and `<url>/oauth/callback/pair`          |

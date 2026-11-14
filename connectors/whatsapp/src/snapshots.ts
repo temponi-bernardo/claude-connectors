@@ -1,19 +1,20 @@
 /**
- * Snapshots cifrados da ponte no R2. O conteúdo já chega cifrado pela ponte (formato `WAS1`, `bridge/API.md`):
- * aqui só se guarda o fluxo sem carregá-lo na memória, e se recusa gravar uma geração mais velha que a atual.
+ * Encrypted bridge snapshots in R2. The content arrives already encrypted by the bridge (`WAS1` format,
+ * `bridge/API.md`): here the stream is only stored without loading it into memory, and an older generation than the
+ * current one is never written.
  */
 
-/** Chave do snapshot atual no bucket. */
+/** Key of the current snapshot in the bucket. */
 export const SNAPSHOT_KEY_NAME = 'whatsapp/snapshot.was1';
 
-/** Objeto lido do bucket (subconjunto do `R2ObjectBody`). */
+/** Object read from the bucket (subset of `R2ObjectBody`). */
 export interface SnapshotObject {
   readonly body: ReadableStream<Uint8Array>;
   readonly size: number;
   readonly customMetadata?: Readonly<Record<string, string>>;
 }
 
-/** Bucket de snapshots (subconjunto do binding R2). */
+/** Snapshot bucket (subset of the R2 binding). */
 export interface SnapshotBucket {
   get(key: string): Promise<SnapshotObject | null>;
   head(key: string): Promise<Omit<SnapshotObject, 'body'> | null>;
@@ -25,27 +26,27 @@ export interface SnapshotBucket {
   delete(key: string): Promise<void>;
 }
 
-/** Fluxo de snapshot pronto para gravar: corpo, tamanho e geração. */
+/** Snapshot stream ready to write: body, length and generation. */
 export interface SnapshotUpload {
   readonly body: ReadableStream<Uint8Array>;
   readonly length: number;
   readonly generation: number;
 }
 
-/** Converte um fluxo em fluxo de tamanho conhecido (o R2 exige; no Workers é o `FixedLengthStream`). */
+/** Turns a stream into a stream of known length (R2 requires it; on Workers it is `FixedLengthStream`). */
 export type FixedLength = (
   body: ReadableStream<Uint8Array>,
   length: number,
 ) => ReadableStream<Uint8Array>;
 
-/** Resultado de uma tentativa de gravar snapshot. */
+/** Result of an attempt to write a snapshot. */
 export type SnapshotOutcome = 'saved' | 'unchanged' | 'stale';
 
 /**
- * Copia `source` para `writable` bloco a bloco e fecha o destino. Não usa `pipeTo`: no Workers, ligar o corpo da
- * resposta do container a um `FixedLengthStream` falha ("Inter-TransformStream ReadableStream.pipeTo() is not
- * implemented") e o snapshot nunca chegava ao R2. Erro de um lado aborta o outro; nunca rejeita (quem lê o destino
- * recebe o erro).
+ * Copies `source` into `writable` chunk by chunk and closes the destination. Does not use `pipeTo`: on Workers,
+ * piping the container response body into a `FixedLengthStream` fails ("Inter-TransformStream
+ * ReadableStream.pipeTo() is not implemented") and the snapshot never reached R2. An error on one side aborts the
+ * other; never rejects (whoever reads the destination gets the error).
  */
 export async function pumpInto(
   source: ReadableStream<Uint8Array>,
@@ -63,13 +64,13 @@ export async function pumpInto(
   }
 }
 
-/** Lê a geração gravada nos metadados de um objeto; 0 se ausente ou inválida. */
+/** Reads the generation stored in an object's metadata; 0 if missing or invalid. */
 export function storedGeneration(meta: Pick<SnapshotObject, 'customMetadata'> | null): number {
   const value = Number(meta?.customMetadata?.generation ?? 0);
   return Number.isSafeInteger(value) && value > 0 ? value : 0;
 }
 
-/** Lê tamanho e geração dos headers de uma resposta de snapshot; nulo se faltarem ou forem inválidos. */
+/** Reads length and generation from a snapshot response's headers; null if missing or invalid. */
 export function readUploadHeaders(
   headers: Headers,
 ): { readonly length: number; readonly generation: number } | null {
@@ -79,7 +80,7 @@ export function readUploadHeaders(
   return valid ? { length, generation } : null;
 }
 
-/** Grava o snapshot se a geração for mais nova que a do bucket; senão descarta o fluxo e diz `stale`. */
+/** Writes the snapshot if its generation is newer than the bucket's; otherwise discards the stream and says `stale`. */
 export async function storeSnapshot(
   bucket: SnapshotBucket,
   upload: SnapshotUpload,
@@ -96,7 +97,7 @@ export async function storeSnapshot(
   return 'saved';
 }
 
-/** Grava a resposta de `GET /snapshot` da ponte: 204 (sem mudança) e 503 (ainda iniciando) são `unchanged`. */
+/** Writes the bridge's `GET /snapshot` response: 204 (no change) and 503 (still starting) are `unchanged`. */
 export async function storeSnapshotResponse(
   bucket: SnapshotBucket,
   res: Response,
@@ -110,12 +111,12 @@ export async function storeSnapshotResponse(
   const meta = readUploadHeaders(res.headers);
   if (!res.ok || !meta) {
     await res.body.cancel();
-    throw new Error(`Snapshot inválido da ponte (status ${res.status}).`);
+    throw new Error(`Invalid snapshot from the bridge (status ${res.status}).`);
   }
   return storeSnapshot(bucket, { body: res.body, ...meta }, fixedLength);
 }
 
-/** Tira o snapshot atual do caminho (guarda uma cópia com data) para recomeçar do zero. */
+/** Moves the current snapshot out of the way (keeps a dated copy) to start over. */
 export async function archiveSnapshot(
   bucket: SnapshotBucket,
   now: Date,
@@ -131,7 +132,7 @@ export async function archiveSnapshot(
   return true;
 }
 
-/** Compara dois textos em tempo constante (para tokens). */
+/** Compares two strings in constant time (for tokens). */
 export function sameSecret(given: string, expected: string): boolean {
   const a = new TextEncoder().encode(given);
   const b = new TextEncoder().encode(expected);
@@ -140,7 +141,7 @@ export function sameSecret(given: string, expected: string): boolean {
   return diff === 0 && b.length > 0;
 }
 
-/** Recebe o snapshot que a ponte envia sozinha no `SIGTERM` (melhor esforço): confere o token e grava. */
+/** Receives the snapshot the bridge sends on its own on `SIGTERM` (best effort): checks the token and writes it. */
 export async function acceptSnapshotPush(
   bucket: SnapshotBucket,
   request: Request,

@@ -17,25 +17,25 @@ import {
 const doc = new Uint8Array(readFileSync(new URL('./fixtures/exemplo.doc', import.meta.url)));
 
 describe('isCfb', () => {
-  it('reconhece a assinatura OLE', () => {
+  it('recognizes the OLE signature', () => {
     expect(isCfb(doc)).toBe(true);
     expect(isCfb(new Uint8Array(8))).toBe(false);
   });
 });
 
 describe('readCfbHeader', () => {
-  it('lê os tamanhos de setor e recusa o que não é OLE', () => {
+  it('reads the sector sizes and rejects what is not OLE', () => {
     expect(readCfbHeader(doc)).toMatchObject({
       sectorSize: 512,
       miniSectorSize: 64,
       miniCutoff: 4096,
     });
-    expect(() => readCfbHeader(new Uint8Array(512))).toThrow('não é um documento do Office');
+    expect(() => readCfbHeader(new Uint8Array(512))).toThrow('not an Office');
   });
 });
 
 describe('cfbSector', () => {
-  it('pula o cabeçalho de 512 bytes', () => {
+  it('skips the 512-byte header', () => {
     const header = readCfbHeader(doc);
     expect(cfbSector(doc, header, 0).byteOffset).toBe(512);
     expect(cfbSector(doc, header, 0)).toHaveLength(512);
@@ -43,7 +43,7 @@ describe('cfbSector', () => {
 });
 
 describe('sectorWords', () => {
-  it('lê inteiros de 32 bits little-endian', () => {
+  it('reads little-endian 32-bit integers', () => {
     expect(sectorWords(new Uint8Array([1, 0, 0, 0, 0xff, 0xff, 0xff, 0xff]))).toEqual([
       1, 0xffffffff,
     ]);
@@ -51,7 +51,7 @@ describe('sectorWords', () => {
 });
 
 describe('fatSectorIds', () => {
-  it('usa a lista do cabeçalho e segue a cadeia DIFAT', () => {
+  it('uses the header list and follows the DIFAT chain', () => {
     const header = readCfbHeader(doc);
     expect(fatSectorIds(doc, header).length).toBeGreaterThan(0);
     const bytes = new Uint8Array(512 * 3);
@@ -67,7 +67,7 @@ describe('fatSectorIds', () => {
 });
 
 describe('followChain', () => {
-  it('segue até o fim de cadeia e não entra em laço', () => {
+  it('follows to the end of the chain and does not loop', () => {
     expect(followChain([1, 2, 0xfffffffe], 0)).toEqual([0, 1, 2]);
     expect(followChain([1, 0], 0)).toEqual([0, 1]);
     expect(followChain([], 0xfffffffe)).toEqual([]);
@@ -75,7 +75,7 @@ describe('followChain', () => {
 });
 
 describe('parseDirectory', () => {
-  it('lê nome, início e tamanho de cada entrada de 128 bytes', () => {
+  it('reads name, start and size of each 128-byte entry', () => {
     const dir = new Uint8Array(128);
     const v = new DataView(dir.buffer);
     dir.set([0x41, 0, 0x42, 0, 0, 0]);
@@ -87,17 +87,17 @@ describe('parseDirectory', () => {
   });
 });
 
-describe('openCfb, readRegularChain, readMiniStream e readCfbStream', () => {
-  it('abre o .doc e lê streams grandes e pequenos', () => {
+describe('openCfb, readRegularChain, readMiniStream and readCfbStream', () => {
+  it('opens the .doc and reads large and small streams', () => {
     const file = openCfb(doc);
     expect(file.entries[0]?.name).toBe('Root Entry');
     const word = readCfbStream(file, 'WordDocument');
     expect(new DataView(word!.buffer, word!.byteOffset).getUint16(0, true)).toBe(0xa5ec);
     expect(readRegularChain(file, file.header.firstDirSector).length % 512).toBe(0);
-    expect(readCfbStream(file, 'Inexistente')).toBeNull();
+    expect(readCfbStream(file, 'Missing')).toBeNull();
   });
 
-  it('lê streams pequenos do mini stream, seguindo a mini FAT', () => {
+  it('reads small streams from the mini stream, following the mini FAT', () => {
     const END = 0xfffffffe;
     const bytes = new Uint8Array(512 * 3);
     const miniFat = new DataView(bytes.buffer, 512, 512);
@@ -118,7 +118,7 @@ describe('openCfb, readRegularChain, readMiniStream e readCfbStream', () => {
     expect(text).toBe('A'.repeat(64) + 'B'.repeat(36));
   });
 
-  it('tolera um diretório sem entrada raiz ao ler o mini stream', () => {
+  it('tolerates a directory without a root entry when reading the mini stream', () => {
     const file = { ...openCfb(doc), entries: [] };
     expect(readMiniStream(file, { name: 'x', start: 0xfffffffe, size: 1 })).toHaveLength(0);
   });

@@ -1,13 +1,13 @@
 /**
- * Utilitários de bytes compartilhados pelos leitores de formatos binários (ZIP, CFB, Word). Puros.
+ * Byte helpers shared by the binary format readers (ZIP, CFB, Word). Pure.
  */
 
-/** Visão little-endian (`DataView`) sobre exatamente os bytes dados. */
+/** Little-endian view (`DataView`) over exactly the given bytes. */
 export function byteView(bytes: Uint8Array): DataView {
   return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
 
-/** Junta pedaços de bytes num só buffer. */
+/** Joins byte chunks into a single buffer. */
 export function concatBytes(parts: readonly Uint8Array[]): Uint8Array {
   const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let pos = 0;
@@ -18,7 +18,7 @@ export function concatBytes(parts: readonly Uint8Array[]): Uint8Array {
   return out;
 }
 
-/** Decodifica UTF-16LE sem depender de `TextDecoder` (o Workers só garante UTF-8). */
+/** Decodes UTF-16LE without relying on `TextDecoder` (Workers only guarantees UTF-8). */
 export function utf16leToString(bytes: Uint8Array): string {
   const v = byteView(bytes);
   let out = '';
@@ -27,7 +27,7 @@ export function utf16leToString(bytes: Uint8Array): string {
   return out;
 }
 
-/** Codifica bytes em base64 sem `Buffer` (funciona no Node e no Workers). */
+/** Encodes bytes as base64 without `Buffer` (works in Node and in Workers). */
 export function bytesToBase64(bytes: Uint8Array): string {
   let binary = '';
   for (let pos = 0; pos < bytes.length; pos += 0x8000) {

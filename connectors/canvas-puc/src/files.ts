@@ -1,5 +1,5 @@
 /**
- * Arquivos do Canvas: ler como texto (inclusive .doc/.docx) e baixar o conteúdo para a conversa.
+ * Canvas files: read as text (including .doc/.docx) and download the content into the conversation.
  */
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { htmlToText } from '../../../src/core/html.js';
@@ -9,13 +9,13 @@ import type { CanvasAttachment } from './canvas-types.js';
 import type { CanvasClient } from './client.js';
 import { isTextFile } from './helpers.js';
 
-/** Maior arquivo que `download_file` embute na conversa (10 MB; em base64 cresce ~33%). */
+/** Largest file `download_file` embeds in the conversation (10 MB; base64 grows it ~33%). */
 export const MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
 
-/** Maior texto devolvido por `read_file_text`, em caracteres. */
+/** Longest text returned by `read_file_text`, in characters. */
 export const MAX_TEXT_CHARS = 100_000;
 
-/** Bloco MCP com o conteúdo do arquivo: imagem para `image/*`, recurso embutido para o resto. */
+/** MCP block with the file content: an image for `image/*`, an embedded resource for the rest. */
 export function fileContentBlock(
   file: CanvasAttachment,
   bytes: Uint8Array,
@@ -24,14 +24,14 @@ export function fileContentBlock(
   return binaryContentBlock(mimeType, bytes, file.url ?? `canvas-file:${String(file.id)}`);
 }
 
-/** Resultado de `download_file`: uma linha de descrição e o conteúdo do arquivo. */
+/** Result of `download_file`: a description line and the file content. */
 export function downloadedFileResult(file: CanvasAttachment, bytes: Uint8Array): RawToolResult {
   const kb = Math.round(bytes.length / 1024);
   const text = `"${String(file.display_name)}" (${String(file['content-type'])}, ${kb} KB). Link: ${String(file.url)}`;
   return rawToolResult({ content: [{ type: 'text', text }, fileContentBlock(file, bytes)] });
 }
 
-/** Motivo para não baixar o arquivo pela conversa (sem link ou grande demais), ou `null` se pode. */
+/** Why the file cannot be downloaded into the conversation (no link or too large), or `null` if it can. */
 export function downloadRefusal(file: CanvasAttachment): string | null {
   const name = String(file.display_name);
   if (!file.url) return `"${name}" has no download link available for this account.`;
@@ -42,7 +42,7 @@ export function downloadRefusal(file: CanvasAttachment): string | null {
   return null;
 }
 
-/** Baixa o arquivo e devolve seu conteúdo para a conversa, ou o motivo de não baixar. */
+/** Downloads the file and returns its content to the conversation, or the reason it was not downloaded. */
 export async function downloadCanvasFile(
   client: CanvasClient,
   file: CanvasAttachment,
@@ -52,7 +52,7 @@ export async function downloadCanvasFile(
   return downloadedFileResult(file, await client.fetchBytes(String(file.url)));
 }
 
-/** Lê um arquivo como texto: texto puro, HTML ou documento do Word; outros tipos devolvem o link. */
+/** Reads a file as text: plain text, HTML or a Word document; other types return the link. */
 export async function readCanvasFileText(
   client: CanvasClient,
   file: CanvasAttachment,

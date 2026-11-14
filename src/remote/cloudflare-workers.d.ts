@@ -1,31 +1,31 @@
 /**
- * Tipos mínimos do runtime do Cloudflare Workers, um só arquivo para todos os conectores. O projeto não carrega
- * `@cloudflare/workers-types` (conflita com os tipos globais do Node usados nos testes); estes cobrem o que usam
- * o `Container` de `@cloudflare/containers` e o Durable Object do WhatsApp, e as declarações de
- * `@cloudflare/workers-oauth-provider` usadas pelo Gmail (ADR 0014).
+ * Minimal Cloudflare Workers runtime types, one file for every connector. The project does not load
+ * `@cloudflare/workers-types` (it clashes with the global Node types used by the tests); these cover what
+ * `@cloudflare/containers`' `Container` and the WhatsApp Durable Object use, plus the
+ * `@cloudflare/workers-oauth-provider` declarations used by Gmail (ADR 0014).
  */
 declare module 'cloudflare:workers' {
-  /** Armazenamento transacional do Durable Object (subconjunto). */
+  /** Transactional Durable Object storage (subset). */
   export interface DurableObjectStorageLike {
     get<T>(key: string): Promise<T | undefined>;
     put(key: string, value: unknown): Promise<void>;
   }
 
-  /** Estado do Durable Object (subconjunto). */
+  /** Durable Object state (subset). */
   export interface DurableObjectStateLike {
     readonly storage: DurableObjectStorageLike;
     waitUntil(promise: Promise<unknown>): void;
     readonly container?: { readonly running: boolean };
   }
 
-  /** Classe base de Durable Object. */
+  /** Durable Object base class. */
   export abstract class DurableObject<Env = unknown> {
     protected readonly ctx: DurableObjectStateLike;
     protected readonly env: Env;
     constructor(ctx: DurableObjectStateLike, env: Env);
   }
 
-  /** Classe base de entrypoint de Worker. */
+  /** Worker entrypoint base class. */
   export abstract class WorkerEntrypoint<Env = unknown, Props = unknown> {
     protected readonly ctx: ExecutionContext<Props>;
     protected readonly env: Env;
@@ -35,15 +35,15 @@ declare module 'cloudflare:workers' {
   }
 }
 
-/** Contexto de execução de uma requisição do Worker (`props` vem do OAuth). */
+/** Execution context of a Worker request (`props` comes from OAuth). */
 interface ExecutionContext<Props = unknown> {
   waitUntil(promise: Promise<unknown>): void;
   passThroughOnException(): void;
   readonly props: Props;
 }
 
-/** Handler exportado de um Worker (só `fetch`). */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- mesma aridade do tipo oficial
+/** Handler exported by a Worker (`fetch` only). */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- same arity as the official type
 interface ExportedHandler<Env = unknown, Queue = unknown, Cf = unknown, Props = unknown> {
   fetch?: (
     request: Request,
@@ -57,7 +57,7 @@ declare namespace Cloudflare {
   interface Env {}
 }
 
-/** Fluxo de tamanho conhecido do Workers (exigido pelo R2 para gravar um fluxo). */
+/** Workers stream of known length (required by R2 to write a stream). */
 declare class FixedLengthStream extends TransformStream<Uint8Array, Uint8Array> {
   constructor(expectedLength: number);
 }

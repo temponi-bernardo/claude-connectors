@@ -1,4 +1,4 @@
-// Package config lê e valida as variáveis de ambiente da ponte (ver API.md).
+// Package config reads and validates the bridge environment variables (see API.md).
 package config
 
 import (
@@ -8,10 +8,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	_ "time/tzdata" // fusos embutidos: a imagem não tem /usr/share/zoneinfo
+	_ "time/tzdata" // embedded time zones: the image has no /usr/share/zoneinfo
 )
 
-// Config reúne a configuração já validada.
+// Config holds the validated configuration.
 type Config struct {
 	Token           string
 	SnapshotKey     []byte
@@ -26,12 +26,12 @@ type Config struct {
 	SnapshotPushURL string
 }
 
-// Getenv é a assinatura de os.Getenv, injetável em testes.
+// Getenv is the os.Getenv signature, injectable in tests.
 type Getenv func(string) string
 
 const minTokenLen = 32
 
-// Load lê e valida todas as variáveis; o erro nunca contém valores secretos.
+// Load reads and validates every variable; the error never contains secret values.
 func Load(env Getenv) (Config, error) {
 	c := Config{DataDir: orDefault(env("DATA_DIR"), "/data"), SnapshotPushURL: strings.TrimSpace(env("SNAPSHOT_PUSH_URL"))}
 	var errs []error
@@ -48,7 +48,7 @@ func Load(env Getenv) (Config, error) {
 	return c, errors.Join(errs...)
 }
 
-// loadNumbers preenche os campos numéricos com padrão e faixa.
+// loadNumbers fills the numeric fields with a default and a range.
 func loadNumbers(c *Config, env Getenv) error {
 	var errs []error
 	var err error
@@ -64,18 +64,18 @@ func loadNumbers(c *Config, env Getenv) error {
 	return errors.Join(errs...)
 }
 
-// parseToken normaliza o token (sem espaços nas pontas).
+// parseToken normalizes the token (no surrounding whitespace).
 func parseToken(v string) string { return strings.TrimSpace(v) }
 
-// checkToken exige token com pelo menos 32 caracteres.
+// checkToken requires a token of at least 32 characters.
 func checkToken(v string) error {
 	if len(parseToken(v)) < minTokenLen {
-		return errors.New("BRIDGE_TOKEN ausente ou com menos de 32 caracteres")
+		return errors.New("BRIDGE_TOKEN missing or shorter than 32 characters")
 	}
 	return nil
 }
 
-// parseKey decodifica a chave base64 (padrão ou URL, com ou sem padding) e exige 32 bytes.
+// parseKey decodes the base64 key (standard or URL, with or without padding) and requires 32 bytes.
 func parseKey(v string) ([]byte, error) {
 	v = strings.TrimSpace(v)
 	for _, enc := range []*base64.Encoding{base64.StdEncoding, base64.RawStdEncoding, base64.URLEncoding, base64.RawURLEncoding} {
@@ -83,10 +83,10 @@ func parseKey(v string) ([]byte, error) {
 			return key, nil
 		}
 	}
-	return nil, errors.New("SNAPSHOT_KEY precisa ser 32 bytes em base64")
+	return nil, errors.New("SNAPSHOT_KEY must be 32 bytes in base64")
 }
 
-// parseInt lê um inteiro com padrão e faixa [lo, hi].
+// parseInt reads an integer with a default and a range [lo, hi].
 func parseInt(v string, def, lo, hi int) (int, error) {
 	v = strings.TrimSpace(v)
 	if v == "" {
@@ -94,12 +94,12 @@ func parseInt(v string, def, lo, hi int) (int, error) {
 	}
 	n, err := strconv.Atoi(v)
 	if err != nil || n < lo || n > hi {
-		return def, fmt.Errorf("precisa ser inteiro entre %d e %d", lo, hi)
+		return def, fmt.Errorf("must be an integer between %d and %d", lo, hi)
 	}
 	return n, nil
 }
 
-// parseBool lê true/false/1/0 com padrão.
+// parseBool reads true/false/1/0 with a default.
 func parseBool(v string, def bool) (bool, error) {
 	v = strings.TrimSpace(v)
 	if v == "" {
@@ -107,12 +107,12 @@ func parseBool(v string, def bool) (bool, error) {
 	}
 	b, err := strconv.ParseBool(v)
 	if err != nil {
-		return def, errors.New("precisa ser true ou false")
+		return def, errors.New("must be true or false")
 	}
 	return b, nil
 }
 
-// ParseAllowlist normaliza a lista de destinatários: dígitos viram JID de usuário; JIDs são mantidos.
+// ParseAllowlist normalizes the recipient list: digits become a user JID; JIDs are kept.
 func ParseAllowlist(v string) ([]string, error) {
 	var out []string
 	for _, item := range strings.Split(v, ",") {
@@ -122,14 +122,14 @@ func ParseAllowlist(v string) ([]string, error) {
 		}
 		jid, ok := NormalizeRecipient(item)
 		if !ok {
-			return nil, fmt.Errorf("entrada inválida na posição %d", len(out)+1)
+			return nil, fmt.Errorf("invalid entry at position %d", len(out)+1)
 		}
 		out = append(out, jid)
 	}
 	return out, nil
 }
 
-// NormalizeRecipient converte "5531999999999" ou um JID ("...@s.whatsapp.net", "...@g.us") para a forma JID.
+// NormalizeRecipient converts "5531999999999" or a JID ("...@s.whatsapp.net", "...@g.us") to JID form.
 func NormalizeRecipient(v string) (string, bool) {
 	v = strings.TrimPrefix(strings.TrimSpace(v), "+")
 	user, server, hasAt := strings.Cut(v, "@")
@@ -146,13 +146,13 @@ func NormalizeRecipient(v string) (string, bool) {
 	return "", false
 }
 
-// isGroupUser aceita o formato antigo de grupo "criador-timestamp".
+// isGroupUser accepts the legacy group format "creator-timestamp".
 func isGroupUser(u string) bool {
 	a, b, ok := strings.Cut(u, "-")
 	return ok && isDigits(a, 5, 30) && isDigits(b, 5, 30)
 }
 
-// isDigits diz se s tem só dígitos ASCII e comprimento entre lo e hi.
+// isDigits reports whether s has only ASCII digits and a length between lo and hi.
 func isDigits(s string, lo, hi int) bool {
 	if len(s) < lo || len(s) > hi {
 		return false
@@ -165,7 +165,7 @@ func isDigits(s string, lo, hi int) bool {
 	return true
 }
 
-// orDefault devolve def quando v está vazio.
+// orDefault returns def when v is empty.
 func orDefault(v, def string) string {
 	if strings.TrimSpace(v) == "" {
 		return def
@@ -173,7 +173,7 @@ func orDefault(v, def string) string {
 	return strings.TrimSpace(v)
 }
 
-// wrap prefixa o erro com o nome da variável.
+// wrap prefixes the error with the variable name.
 func wrap(name string, err error) error {
 	if err == nil {
 		return nil
@@ -181,7 +181,7 @@ func wrap(name string, err error) error {
 	return fmt.Errorf("%s: %w", name, err)
 }
 
-// appendErr acrescenta err à lista se não for nil.
+// appendErr appends err to the list when it is not nil.
 func appendErr(errs []error, err error) []error {
 	if err != nil {
 		return append(errs, err)

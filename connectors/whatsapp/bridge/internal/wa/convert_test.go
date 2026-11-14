@@ -60,7 +60,7 @@ func TestDecideMessageTypes(t *testing.T) {
 	}
 	a := decideMessage(msgEvent(alice, "D", &waE2E.Message{DocumentMessage: &waE2E.DocumentMessage{Title: proto.String("t")}}), identity)
 	if a.msg.Media.Filename != "t" {
-		t.Fatalf("documento sem nome deveria usar o título: %+v", a.msg.Media)
+		t.Fatalf("document without a name should use the title: %+v", a.msg.Media)
 	}
 }
 
@@ -71,11 +71,11 @@ func TestDecideMessageTextAndOthers(t *testing.T) {
 	}{
 		{&waE2E.Message{Conversation: proto.String("oi")}, "text", "oi"},
 		{&waE2E.Message{ExtendedTextMessage: &waE2E.ExtendedTextMessage{Text: proto.String("link")}}, "text", "link"},
-		{&waE2E.Message{LocationMessage: &waE2E.LocationMessage{Name: proto.String("Casa"), DegreesLatitude: proto.Float64(-19.9), DegreesLongitude: proto.Float64(-43.9)}}, "location", "Casa (-19.900000, -43.900000)"},
+		{&waE2E.Message{LocationMessage: &waE2E.LocationMessage{Name: proto.String("Home"), DegreesLatitude: proto.Float64(-19.9), DegreesLongitude: proto.Float64(-43.9)}}, "location", "Home (-19.900000, -43.900000)"},
 		{&waE2E.Message{LiveLocationMessage: &waE2E.LiveLocationMessage{DegreesLatitude: proto.Float64(1)}}, "location", "(1.000000, 0.000000)"},
 		{&waE2E.Message{ContactMessage: &waE2E.ContactMessage{DisplayName: proto.String("Bob")}}, "contact", "Bob"},
-		{&waE2E.Message{ContactsArrayMessage: &waE2E.ContactsArrayMessage{DisplayName: proto.String("2 contatos")}}, "contact", "2 contatos"},
-		{&waE2E.Message{PollCreationMessageV3: &waE2E.PollCreationMessage{Name: proto.String("Pizza?")}}, "other", "Enquete: Pizza?"},
+		{&waE2E.Message{ContactsArrayMessage: &waE2E.ContactsArrayMessage{DisplayName: proto.String("2 contacts")}}, "contact", "2 contacts"},
+		{&waE2E.Message{PollCreationMessageV3: &waE2E.PollCreationMessage{Name: proto.String("Pizza?")}}, "other", "Poll: Pizza?"},
 	}
 	for _, c := range cases {
 		a := decideMessage(msgEvent(grp, "X", c.m), identity)
@@ -96,7 +96,7 @@ func TestDecideMessageSkipsAndProtocol(t *testing.T) {
 	}
 	for _, e := range skips {
 		if a := decideMessage(e, identity); a.kind != actionSkip {
-			t.Errorf("%s deveria ser ignorada: %+v", e.Info.ID, a)
+			t.Errorf("%s should be skipped: %+v", e.Info.ID, a)
 		}
 	}
 	rev := decideMessage(msgEvent(alice, "R", &waE2E.Message{ProtocolMessage: &waE2E.ProtocolMessage{Type: waE2E.ProtocolMessage_REVOKE.Enum(), Key: &waCommon.MessageKey{ID: proto.String("OLD")}}}), identity)
@@ -104,8 +104,8 @@ func TestDecideMessageSkipsAndProtocol(t *testing.T) {
 		t.Fatalf("revoke: %+v", rev)
 	}
 	edit := decideMessage(msgEvent(alice, "E", &waE2E.Message{ProtocolMessage: &waE2E.ProtocolMessage{Type: waE2E.ProtocolMessage_MESSAGE_EDIT.Enum(),
-		Key: &waCommon.MessageKey{ID: proto.String("OLD")}, EditedMessage: &waE2E.Message{Conversation: proto.String("novo")}}}), identity)
-	if edit.kind != actionEdit || edit.text != "novo" {
+		Key: &waCommon.MessageKey{ID: proto.String("OLD")}, EditedMessage: &waE2E.Message{Conversation: proto.String("new")}}}), identity)
+	if edit.kind != actionEdit || edit.text != "new" {
 		t.Fatalf("edit: %+v", edit)
 	}
 }
@@ -121,15 +121,15 @@ func TestBuildHistoryBatch(t *testing.T) {
 	data := &waHistorySync.HistorySync{
 		Conversations: []*waHistorySync.Conversation{
 			{ID: proto.String(alice.String()), DisplayName: proto.String("Alice"), ConversationTimestamp: proto.Uint64(2000),
-				Messages: []*waHistorySync.HistorySyncMsg{webMsg("new", 2000, "oi"), webMsg("old", 10, "velha"), webMsg("bad", 2000, "erro"), {}}},
+				Messages: []*waHistorySync.HistorySyncMsg{webMsg("new", 2000, "oi"), webMsg("old", 10, "old"), webMsg("bad", 2000, "error"), {}}},
 			{ID: proto.String("status@broadcast")},
-			{ID: proto.String("inválido@@")},
+			{ID: proto.String("invalid@@")},
 		},
 		Pushnames: []*waHistorySync.Pushname{{ID: proto.String(alice.String()), Pushname: proto.String("Ali")}, {ID: proto.String(alice.String()), Pushname: proto.String("-")}},
 	}
 	parse := func(chat types.JID, w *waWeb.WebMessageInfo) (*events.Message, error) {
 		if w.GetKey().GetID() == "bad" {
-			return nil, errors.New("falha")
+			return nil, errors.New("failed")
 		}
 		e := msgEvent(chat, w.GetKey().GetID(), w.GetMessage())
 		e.Info.Timestamp = time.Unix(int64(w.GetMessageTimestamp()), 0)
@@ -140,10 +140,10 @@ func TestBuildHistoryBatch(t *testing.T) {
 		t.Fatalf("chats: %+v", b.Chats)
 	}
 	if len(b.Messages) != 1 || b.Messages[0].ID != "new" {
-		t.Fatalf("mensagens: %+v", b.Messages)
+		t.Fatalf("messages: %+v", b.Messages)
 	}
 	if len(b.Contacts) != 1 || b.Contacts[0].PushName != "Ali" {
-		t.Fatalf("contatos: %+v", b.Contacts)
+		t.Fatalf("contacts: %+v", b.Contacts)
 	}
 }
 
@@ -162,12 +162,12 @@ func TestMaskAndRedact(t *testing.T) {
 func TestLoggerRedactsAndDropsDebug(t *testing.T) {
 	var buf bytes.Buffer
 	l := NewLogger(slog.New(slog.NewTextHandler(&buf, &slog.HandlerOptions{Level: slog.LevelDebug})), "wa").Sub("sub")
-	l.Infof("pareado %s", "5531912345612")
-	l.Warnf("aviso")
-	l.Errorf("erro %d", 1)
-	l.Debugf("conteúdo secreto")
+	l.Infof("paired %s", "5531912345612")
+	l.Warnf("warning")
+	l.Errorf("error %d", 1)
+	l.Debugf("secret content")
 	out := buf.String()
-	if strings.Contains(out, "5531912345612") || strings.Contains(out, "secreto") || !strings.Contains(out, "wa/sub") || strings.Count(out, "\n") != 3 {
+	if strings.Contains(out, "5531912345612") || strings.Contains(out, "secret") || !strings.Contains(out, "wa/sub") || strings.Count(out, "\n") != 3 {
 		t.Fatalf("log: %s", out)
 	}
 }
@@ -179,7 +179,7 @@ func TestQRFromItemAndExpired(t *testing.T) {
 		t.Fatal(qr)
 	}
 	if qrFromItem(whatsmeow.QRChannelSuccess, now).Code != "" {
-		t.Fatal("sucesso deveria limpar o QR")
+		t.Fatal("success should clear the QR")
 	}
 	if !isExpired(whatsmeow.ErrMediaDownloadFailedWith404) || isExpired(errors.New("x")) || isExpired(nil) {
 		t.Fatal("isExpired")
@@ -203,9 +203,9 @@ func TestBuildOutgoing(t *testing.T) {
 		t.Fatal(plain)
 	}
 	q := &store.Quoted{ID: "G1", SenderJID: "5531999990002@s.whatsapp.net", Text: "original"}
-	ext := buildOutgoing("resposta", q, "me@s.whatsapp.net").GetExtendedTextMessage()
+	ext := buildOutgoing("reply", q, "me@s.whatsapp.net").GetExtendedTextMessage()
 	ci := ext.GetContextInfo()
-	if ext.GetText() != "resposta" || ci.GetStanzaID() != "G1" || ci.GetParticipant() != q.SenderJID ||
+	if ext.GetText() != "reply" || ci.GetStanzaID() != "G1" || ci.GetParticipant() != q.SenderJID ||
 		ci.GetQuotedMessage().GetConversation() != "original" {
 		t.Fatal(ext)
 	}

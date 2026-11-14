@@ -10,22 +10,22 @@ import (
 	"time"
 )
 
-// Nomes de arquivo aceitos dentro do tar, nesta ordem.
+// File names accepted inside the tar, in this order.
 const (
 	SessionFile  = "session.db"
 	MessagesFile = "messages.db"
 )
 
-// FileNames lista os arquivos que compõem um snapshot.
+// FileNames lists the files that make up a snapshot.
 var FileNames = []string{SessionFile, MessagesFile}
 
-// ErrBadArchive indica um tar com nomes inesperados, tipos inválidos, duplicatas ou arquivos faltando.
-var ErrBadArchive = errors.New("snapshot: conteúdo do tar inválido")
+// ErrBadArchive signals a tar with unexpected names, invalid types, duplicates or missing files.
+var ErrBadArchive = errors.New("snapshot: invalid tar content")
 
-// ErrTooLarge indica um arquivo do tar acima do teto permitido.
-var ErrTooLarge = errors.New("snapshot: arquivo grande demais")
+// ErrTooLarge signals a tar file above the allowed cap.
+var ErrTooLarge = errors.New("snapshot: file too large")
 
-// Pack grava em w um tar determinístico (sem datas nem donos) com os arquivos de dir listados em FileNames.
+// Pack writes to w a deterministic tar (no dates or owners) with the files of dir listed in FileNames.
 func Pack(w io.Writer, dir string) error {
 	tw := tar.NewWriter(w)
 	for _, name := range FileNames {
@@ -36,7 +36,7 @@ func Pack(w io.Writer, dir string) error {
 	return tw.Close()
 }
 
-// packFile adiciona um arquivo ao tar com cabeçalho fixo.
+// packFile adds a file to the tar with a fixed header.
 func packFile(tw *tar.Writer, path, name string) error {
 	f, err := os.Open(path)
 	if err != nil {
@@ -55,7 +55,7 @@ func packFile(tw *tar.Writer, path, name string) error {
 	return err
 }
 
-// Unpack extrai de r, para dir, exatamente os arquivos de FileNames, cada um com no máximo maxFile bytes.
+// Unpack extracts from r into dir exactly the files in FileNames, each at most maxFile bytes.
 func Unpack(r io.Reader, dir string, maxFile int64) error {
 	tr := tar.NewReader(r)
 	seen := map[string]bool{}
@@ -80,7 +80,7 @@ func Unpack(r io.Reader, dir string, maxFile int64) error {
 	return nil
 }
 
-// checkEntry decide se uma entrada do tar é aceitável (nome conhecido, arquivo regular, sem repetição, tamanho).
+// checkEntry decides whether a tar entry is acceptable (known name, regular file, no repeats, size).
 func checkEntry(hdr *tar.Header, seen map[string]bool, maxFile int64) error {
 	if !isAllowedName(hdr.Name) || hdr.Typeflag != tar.TypeReg || seen[hdr.Name] {
 		return ErrBadArchive
@@ -92,7 +92,7 @@ func checkEntry(hdr *tar.Header, seen map[string]bool, maxFile int64) error {
 	return nil
 }
 
-// isAllowedName aceita só os nomes exatos esperados (impede path traversal).
+// isAllowedName accepts only the exact expected names (prevents path traversal).
 func isAllowedName(name string) bool {
 	for _, n := range FileNames {
 		if name == n {
@@ -102,7 +102,7 @@ func isAllowedName(name string) bool {
 	return false
 }
 
-// extractFile copia o conteúdo da entrada atual para path, respeitando o teto.
+// extractFile copies the current entry content to path, respecting the cap.
 func extractFile(r io.Reader, path string, maxFile int64) error {
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o600)
 	if err != nil {

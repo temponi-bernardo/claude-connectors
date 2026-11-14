@@ -43,7 +43,7 @@ and it is not).
 
 Returned text (messages, names, file names) comes without control characters (except `\n` and `\t`) and without
 bidi overrides (U+202A–U+202E, U+2066–U+2069). Searches (`query`) ignore case and accents (`joao` finds `João`).
-`sender_name` is `"Você"` on messages sent by the account itself; with no known name, the phone number is used
+`sender_name` is `"You"` on messages sent by the account itself; with no known name, the phone number is used
 (`+5531...`).
 
 ### `GET /health` (no auth)

@@ -1,24 +1,24 @@
-/** Fakes para os testes do conector WhatsApp: bucket R2 em memória, armazenamento e host da ponte. */
+/** Fakes for the WhatsApp connector tests: in-memory R2 bucket, storage and bridge host. */
 import type { BridgeHost } from '../lifecycle.js';
 import type { SnapshotBucket, SnapshotObject } from '../snapshots.js';
 
-/** Fluxo com os bytes dados. */
+/** Stream with the given bytes. */
 export function streamOf(bytes: Uint8Array | string): ReadableStream<Uint8Array> {
   const data = typeof bytes === 'string' ? new TextEncoder().encode(bytes) : bytes;
   return new Response(data).body ?? new ReadableStream();
 }
 
-/** Lê um fluxo inteiro como texto. */
+/** Reads a whole stream as text. */
 export function textOf(stream: ReadableStream<Uint8Array>): Promise<string> {
   return new Response(stream).text();
 }
 
-/** Bucket em memória que guarda o texto e os metadados. */
+/** In-memory bucket that keeps the text and the metadata. */
 export interface MemoryBucket extends SnapshotBucket {
   readonly items: Map<string, { text: string; customMetadata: Record<string, string> }>;
 }
 
-/** Cria um bucket em memória. */
+/** Creates an in-memory bucket. */
 export function memoryBucket(): MemoryBucket {
   const items = new Map<string, { text: string; customMetadata: Record<string, string> }>();
   function meta(key: string): Omit<SnapshotObject, 'body'> | null {
@@ -43,10 +43,10 @@ export function memoryBucket(): MemoryBucket {
   };
 }
 
-/** Rota falsa da ponte: recebe caminho e opções e devolve a resposta. */
+/** Fake bridge route: takes path and options and returns the response. */
 export type FakeRoute = (path: string, init: RequestInit) => Response | Promise<Response>;
 
-/** Host falso da ponte, com registro das chamadas. */
+/** Fake bridge host that records the calls. */
 export function fakeHost(
   route: FakeRoute,
   overrides: Partial<BridgeHost> = {},
@@ -65,14 +65,14 @@ export function fakeHost(
       waited.push(promise);
     },
     stop: () => Promise.resolve(),
-    bridgeToken: 'token-da-ponte',
+    bridgeToken: 'bridge-token',
     sendMaxPerHour: 2,
     now: () => (clock += 1000),
     ...overrides,
   };
 }
 
-/** Armazenamento de Durable Object em memória. */
+/** In-memory Durable Object storage. */
 export function memoryStorage(): BridgeHost['storage'] {
   const store = new Map<string, unknown>();
   return {
@@ -84,7 +84,7 @@ export function memoryStorage(): BridgeHost['storage'] {
   };
 }
 
-/** `containerFetch` falso que registra caminho e opções de cada chamada. */
+/** Fake `containerFetch` that records the path and options of each call. */
 export function recordingFetch(
   route: FakeRoute,
   calls: { path: string; init: RequestInit }[],
@@ -96,7 +96,7 @@ export function recordingFetch(
   };
 }
 
-/** Status de ponte pronta e sincronizada. */
+/** Status of a ready, synced bridge. */
 export const READY_STATUS = {
   phase: 'ready',
   connected: true,
@@ -110,7 +110,7 @@ export const READY_STATUS = {
   send_enabled: false,
 } as const;
 
-/** Ponte falsa (`BridgeFetch`) que responde por caminho sem query, com registro das chamadas. */
+/** Fake bridge (`BridgeFetch`) that answers by path without the query and records the calls. */
 export function fakeBridge(
   routes: Readonly<Record<string, (init: RequestInit | undefined, path: string) => Response>>,
 ): ((path: string, init?: RequestInit) => Promise<Response>) & { paths: string[] } {

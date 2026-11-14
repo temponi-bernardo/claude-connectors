@@ -6,17 +6,17 @@ import (
 	"time"
 )
 
-// SendWindow é a janela do limite de envios.
+// SendWindow is the window of the send limit.
 const SendWindow = time.Hour
 
-// retryAfter decide quantos segundos faltam para a vaga mais antiga sair da janela (função pura).
+// retryAfter decides how many seconds remain until the oldest slot leaves the window (pure).
 func retryAfter(oldest, now int64) int {
 	wait := oldest + int64(SendWindow/time.Second) - now
 	return int(max(wait, 1))
 }
 
-// ReserveSend registra uma tentativa de envio se houver vaga na última hora.
-// Sem vaga, devolve false e os segundos até liberar. A tabela sends persiste o limite entre reinícios.
+// ReserveSend records a send attempt if there is a free slot in the last hour.
+// With no free slot it returns false and the seconds until one frees up. The sends table keeps the limit across restarts.
 func (s *Store) ReserveSend(ctx context.Context, now time.Time, maxPerHour int) (bool, int, error) {
 	s.sendMu.Lock()
 	defer s.sendMu.Unlock()
@@ -30,7 +30,7 @@ func (s *Store) ReserveSend(ctx context.Context, now time.Time, maxPerHour int) 
 	return ok, wait, err
 }
 
-// reserveInTx limpa registros velhos, conta a janela e grava a nova tentativa quando cabe.
+// reserveInTx clears old records, counts the window and stores the new attempt when it fits.
 func reserveInTx(ctx context.Context, tx *sql.Tx, now int64, maxPerHour int) (bool, int, error) {
 	since := now - int64(SendWindow/time.Second)
 	if _, err := tx.ExecContext(ctx, `DELETE FROM sends WHERE ts <= ?`, since); err != nil {

@@ -1,6 +1,6 @@
 /**
- * Código de autorização, access token e refresh token do OAuth sem estado: todos são selos que carregam
- * o segredo do usuário no serviço de destino (ex.: token do Canvas) e só abrem com a chave do servidor.
+ * Authorization code, access token and refresh token of the stateless OAuth: all are seals that carry
+ * the user's secret for the target service (e.g. the Canvas token) and only open with the server key.
  */
 import {
   oauthError,
@@ -11,13 +11,13 @@ import {
 } from './oauth.js';
 import { openSealed, sealPayload } from './seal.js';
 
-/** Validades em segundos: pedido em andamento, código, access token e refresh token. */
+/** Lifetimes in seconds: pending request, code, access token and refresh token. */
 export const PENDING_TTL_SECONDS = 15 * 60;
 export const CODE_TTL_SECONDS = 5 * 60;
 export const ACCESS_TTL_SECONDS = 60 * 60;
 export const REFRESH_TTL_SECONDS = 30 * 24 * 3600;
 
-/** Resposta do endpoint `/token`. */
+/** Response of the `/token` endpoint. */
 export interface TokenSet {
   readonly access_token: string;
   readonly token_type: 'Bearer';
@@ -25,20 +25,20 @@ export interface TokenSet {
   readonly refresh_token: string;
 }
 
-/** Resultado do `/token`: os tokens novos, o segredo selado neles e se veio de um refresh. */
+/** Result of `/token`: the new tokens, the secret sealed in them and whether it came from a refresh. */
 export interface RedeemedGrant {
   readonly tokens: TokenSet;
   readonly secret: string;
   readonly refreshed: boolean;
 }
 
-/** Pedido aprovado: o pedido validado e o segredo que o usuário informou. */
+/** Approved request: the validated request and the secret the user provided. */
 export interface ApprovedGrant {
   readonly request: AuthorizeRequest;
   readonly secret: string;
 }
 
-/** Sela o pedido de autorização para viajar no formulário de login sem poder ser alterado. */
+/** Seals the authorization request so it travels in the login form without being tampered with. */
 export function sealAuthorizeRequest(
   request: AuthorizeRequest,
   settings: OAuthSettings,
@@ -47,7 +47,7 @@ export function sealAuthorizeRequest(
   return sealPayload({ typ: 'pending', exp: now + PENDING_TTL_SECONDS, request }, settings.key);
 }
 
-/** Abre o pedido selado do formulário; nulo se inválido ou vencido. */
+/** Opens the sealed request from the form; null if invalid or expired. */
 export function openAuthorizeRequest(
   sealed: string,
   settings: OAuthSettings,
@@ -57,7 +57,7 @@ export function openAuthorizeRequest(
   return claims ? (claims.request as AuthorizeRequest) : null;
 }
 
-/** Emite o código de autorização (5 minutos) amarrado a cliente, retorno e desafio PKCE. */
+/** Issues the authorization code (5 minutes) bound to client, redirect and PKCE challenge. */
 export function issueAuthorizationCode(
   grant: ApprovedGrant,
   settings: OAuthSettings,
@@ -77,7 +77,7 @@ export function issueAuthorizationCode(
   );
 }
 
-/** Emite o par access token (1 hora) + refresh token (30 dias) para um segredo. */
+/** Issues the access token (1 hour) + refresh token (30 days) pair for a secret. */
 export function issueTokenSet(secret: string, settings: OAuthSettings, now: number): TokenSet {
   return {
     access_token: sealPayload(
@@ -93,7 +93,7 @@ export function issueTokenSet(secret: string, settings: OAuthSettings, now: numb
   };
 }
 
-/** Confere o código contra cliente, retorno e verificador PKCE; devolve o segredo dele. */
+/** Checks the code against client, redirect and PKCE verifier; returns its secret. */
 export function redeemAuthorizationCode(
   form: URLSearchParams,
   settings: OAuthSettings,
@@ -105,11 +105,12 @@ export function redeemAuthorizationCode(
     claims.clientId === form.get('client_id') &&
     claims.redirectUri === form.get('redirect_uri') &&
     claims.codeChallenge === pkceChallenge(form.get('code_verifier') ?? '');
-  if (!matches) return oauthError('invalid_grant', 'Código inválido, vencido ou de outro cliente.');
+  if (!matches)
+    return oauthError('invalid_grant', 'Invalid or expired code, or code from another client.');
   return { ok: true, value: String(claims.secret) };
 }
 
-/** Confere o refresh token; devolve o segredo dele. */
+/** Checks the refresh token; returns its secret. */
 export function redeemRefreshToken(
   form: URLSearchParams,
   settings: OAuthSettings,
@@ -117,11 +118,11 @@ export function redeemRefreshToken(
 ): OAuthResult<string> {
   const claims = openSealed(form.get('refresh_token') ?? '', settings.key, { typ: 'refresh', now });
   if (!claims)
-    return oauthError('invalid_grant', 'Refresh token inválido ou vencido: conecte de novo.');
+    return oauthError('invalid_grant', 'Invalid or expired refresh token: connect again.');
   return { ok: true, value: String(claims.secret) };
 }
 
-/** Atende o `/token`: troca código ou refresh token por um novo par de tokens. */
+/** Serves `/token`: exchanges a code or refresh token for a new token pair. */
 export function redeemTokenRequest(
   form: URLSearchParams,
   settings: OAuthSettings,
@@ -131,7 +132,7 @@ export function redeemTokenRequest(
   let secret: OAuthResult<string>;
   if (grantType === 'authorization_code') secret = redeemAuthorizationCode(form, settings, now);
   else if (grantType === 'refresh_token') secret = redeemRefreshToken(form, settings, now);
-  else return oauthError('unsupported_grant_type', 'Use authorization_code ou refresh_token.');
+  else return oauthError('unsupported_grant_type', 'Use authorization_code or refresh_token.');
   if (!secret.ok) return secret;
   const tokens = issueTokenSet(secret.value, settings, now);
   return {
@@ -140,7 +141,7 @@ export function redeemTokenRequest(
   };
 }
 
-/** Lê o segredo de um header `Authorization: Bearer <access token>`; nulo se ausente ou inválido. */
+/** Reads the secret from an `Authorization: Bearer <access token>` header; null if missing or invalid. */
 export function readAccessSecret(
   authorization: string | null,
   settings: OAuthSettings,

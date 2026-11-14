@@ -9,7 +9,7 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/store"
 )
 
-// lastMessageJSON é o resumo da última mensagem de uma conversa.
+// lastMessageJSON summarizes the last message of a chat.
 type lastMessageJSON struct {
 	FromMe     bool   `json:"from_me"`
 	SenderName string `json:"sender_name"`
@@ -17,7 +17,7 @@ type lastMessageJSON struct {
 	Type       string `json:"type"`
 }
 
-// chatJSON é uma conversa na resposta de /chats.
+// chatJSON is a chat in the /chats response.
 type chatJSON struct {
 	JID           string           `json:"jid"`
 	Name          string           `json:"name"`
@@ -26,14 +26,14 @@ type chatJSON struct {
 	LastMessage   *lastMessageJSON `json:"last_message"`
 }
 
-// mediaJSON são os metadados públicos de mídia.
+// mediaJSON is the public media metadata.
 type mediaJSON struct {
 	Mime     string  `json:"mime"`
 	Size     int64   `json:"size"`
 	Filename *string `json:"filename"`
 }
 
-// messageJSON é uma mensagem em /messages e /search.
+// messageJSON is a message in /messages and /search.
 type messageJSON struct {
 	ID         string     `json:"id"`
 	ChatJID    string     `json:"chat_jid"`
@@ -47,12 +47,12 @@ type messageJSON struct {
 	Media      *mediaJSON `json:"media,omitempty"`
 }
 
-// formatTime converte unix em RFC 3339 com o fuso configurado.
+// formatTime converts to RFC 3339 in the configured time zone.
 func (s *Server) formatTime(t time.Time) string {
 	return t.In(s.opts.Location).Format(time.RFC3339)
 }
 
-// formatUnix é formatTime para segundos unix; 0 vira null.
+// formatUnix is formatTime for unix seconds; 0 becomes null.
 func (s *Server) formatUnix(ts int64) *string {
 	if ts <= 0 {
 		return nil
@@ -61,7 +61,7 @@ func (s *Server) formatUnix(ts int64) *string {
 	return &v
 }
 
-// toChatJSON converte uma conversa do banco.
+// toChatJSON converts a chat from the database.
 func (s *Server) toChatJSON(c store.ChatView) chatJSON {
 	out := chatJSON{JID: c.JID, Name: c.Name, IsGroup: c.IsGroup, LastMessageAt: s.formatUnix(c.LastTS)}
 	if c.Last != nil {
@@ -70,7 +70,7 @@ func (s *Server) toChatJSON(c store.ChatView) chatJSON {
 	return out
 }
 
-// toMessageJSON converte uma mensagem do banco; withChat inclui chat_name (busca).
+// toMessageJSON converts a message from the database; withChat includes chat_name (search).
 func (s *Server) toMessageJSON(m store.MessageView, withChat bool) messageJSON {
 	out := messageJSON{ID: m.ID, ChatJID: m.ChatJID, SenderJID: m.SenderJID, SenderName: m.SenderName, FromMe: m.FromMe,
 		Timestamp: s.formatTime(time.Unix(m.Timestamp, 0)), Type: m.Type, Text: m.Text}
@@ -83,7 +83,7 @@ func (s *Server) toMessageJSON(m store.MessageView, withChat bool) messageJSON {
 	return out
 }
 
-// toMessagesJSON converte uma lista de mensagens (nunca devolve null).
+// toMessagesJSON converts a list of messages (never returns null).
 func (s *Server) toMessagesJSON(msgs []store.MessageView, withChat bool) []messageJSON {
 	out := make([]messageJSON, 0, len(msgs))
 	for _, m := range msgs {
@@ -92,7 +92,7 @@ func (s *Server) toMessagesJSON(msgs []store.MessageView, withChat bool) []messa
 	return out
 }
 
-// nilIfEmpty devolve nil para "".
+// nilIfEmpty returns nil for "".
 func nilIfEmpty(s string) *string {
 	if s == "" {
 		return nil
@@ -100,7 +100,7 @@ func nilIfEmpty(s string) *string {
 	return &s
 }
 
-// encodeNext serializa o cursor da próxima página (null no fim).
+// encodeNext serializes the next-page cursor (null at the end).
 func encodeNext(c *store.Cursor) *string {
 	if c == nil {
 		return nil
@@ -109,7 +109,7 @@ func encodeNext(c *store.Cursor) *string {
 	return &v
 }
 
-// parseLimit lê limit (1–100) com padrão.
+// parseLimit reads limit (1–100) with a default.
 func parseLimit(r *http.Request, def int) (int, bool) {
 	v := r.URL.Query().Get("limit")
 	if v == "" {
@@ -119,22 +119,22 @@ func parseLimit(r *http.Request, def int) (int, bool) {
 	return n, err == nil && n >= 1 && n <= 100
 }
 
-// parseQuery lê query com tamanho máximo; required exige não vazio.
+// parseQuery reads query with a maximum length; required demands a non-empty value.
 func parseQuery(r *http.Request, required bool) (string, bool) {
 	q := r.URL.Query().Get("query")
 	n := utf8.RuneCountInString(q)
 	return q, utf8.ValidString(q) && n <= maxQueryLen && (!required || n >= 1)
 }
 
-// maxQueryLen é o tamanho máximo de busca (API.md: 1–200 caracteres).
+// maxQueryLen is the maximum search length (API.md: 1–200 characters).
 const maxQueryLen = 200
 
-// validJID faz uma checagem barata de formato de JID vindo da query.
+// validJID is a cheap format check for a JID coming from the query.
 func validJID(jid string) bool {
 	return len(jid) >= 3 && len(jid) <= 128 && utf8.ValidString(jid) && containsAt(jid)
 }
 
-// containsAt diz se há exatamente um "@" que não está nas pontas.
+// containsAt reports whether there is exactly one "@" that is not at either end.
 func containsAt(s string) bool {
 	i := -1
 	for idx, r := range s {

@@ -22,12 +22,12 @@ const BASE = {
   nonce: 'no',
 };
 
-describe('URL de autorização', () => {
-  it('googleRedirectUri aponta para /google/callback', () => {
+describe('authorization URL', () => {
+  it('googleRedirectUri points to /google/callback', () => {
     expect(googleRedirectUri('https://w.test')).toBe('https://w.test/google/callback');
   });
 
-  it('pede PKCE S256, nonce e state; offline pede consentimento e refresh token', () => {
+  it('asks for PKCE S256, nonce and state; offline asks for consent and a refresh token', () => {
     const offline = new URL(googleAuthorizeUrl({ ...BASE, offline: true })).searchParams;
     expect(Object.fromEntries(offline)).toMatchObject({
       client_id: 'cid',
@@ -44,14 +44,14 @@ describe('URL de autorização', () => {
     expect(online.get('prompt')).toBe('select_account');
   });
 
-  it('randomToken gera textos base64url distintos', () => {
+  it('randomToken generates distinct base64url strings', () => {
     expect(randomToken()).toMatch(/^[A-Za-z0-9_-]{43}$/);
     expect(randomToken(16)).not.toBe(randomToken(16));
   });
 });
 
-describe('respostas de token', () => {
-  it('parseGoogleTokens lê campos e aplica padrões', () => {
+describe('token responses', () => {
+  it('parseGoogleTokens reads fields and applies defaults', () => {
     expect(parseGoogleTokens({ access_token: 'a' })).toEqual({
       accessToken: 'a',
       expiresIn: 3600,
@@ -75,7 +75,7 @@ describe('respostas de token', () => {
     expect(() => parseGoogleTokens(null)).toThrow(GoogleTokenError);
   });
 
-  it('googleErrorCode usa o campo error ou o status', async () => {
+  it('googleErrorCode uses the error field or the status', async () => {
     const denied = Response.json({ error: 'invalid_grant' }, { status: 400 });
     expect(await googleErrorCode(denied)).toBe('invalid_grant');
     expect(await googleErrorCode(Response.json({}, { status: 500 }))).toBe('http_500');
@@ -83,20 +83,20 @@ describe('respostas de token', () => {
   });
 });
 
-describe('chamadas ao endpoint de tokens', () => {
-  it('postGoogleToken envia credenciais e User-Agent; falha vira GoogleTokenError', async () => {
+describe('token endpoint calls', () => {
+  it('postGoogleToken sends credentials and User-Agent; failure becomes GoogleTokenError', async () => {
     const calls: RecordedCall[] = [];
     const deps = testDeps(fakeFetch([tokenRoute()], calls));
     await expect(
       postGoogleToken(deps, { grant_type: 'authorization_code', code: 'c' }),
     ).rejects.toMatchObject({ code: 'http_400' });
     const body = new URLSearchParams(calls[0]?.init?.body as string);
-    expect(body.get('client_secret')).toBe('segredo-de-teste');
+    expect(body.get('client_secret')).toBe('test-secret');
     const headers = calls[0]?.init?.headers as Record<string, string>;
     expect(headers['user-agent']).toMatch(/claude-connectors-gmail/);
   });
 
-  it('exchangeGoogleCode manda verificador e redirect; refreshGoogleToken manda o refresh', async () => {
+  it('exchangeGoogleCode sends verifier and redirect; refreshGoogleToken sends the refresh token', async () => {
     const seen: URLSearchParams[] = [];
     const deps = testDeps(
       fakeFetch([
@@ -114,7 +114,7 @@ describe('chamadas ao endpoint de tokens', () => {
 });
 
 describe('revokeGoogleToken', () => {
-  it('manda o token ao endpoint de revogação e diz se o Google confirmou', async () => {
+  it('sends the token to the revocation endpoint and tells whether Google confirmed', async () => {
     const calls: RecordedCall[] = [];
     const ok = testDeps(fakeFetch([() => new Response('')], calls));
     expect(await revokeGoogleToken(ok, 'r1')).toBe(true);
@@ -122,7 +122,7 @@ describe('revokeGoogleToken', () => {
     expect(new URLSearchParams(calls[0]?.init?.body as string).get('token')).toBe('r1');
     const refused = testDeps(() => Promise.resolve(new Response('', { status: 400 })));
     expect(await revokeGoogleToken(refused, 'r1')).toBe(false);
-    const offline = testDeps(() => Promise.reject(new Error('rede')));
+    const offline = testDeps(() => Promise.reject(new Error('network')));
     expect(await revokeGoogleToken(offline, 'r1')).toBe(false);
   });
 });

@@ -1,41 +1,41 @@
 /**
- * Access tokens do Google por conta vinculada: renova pelo refresh token e guarda o resultado na memória do
- * isolate até perto de vencer (por usuário e conta). Acesso revogado no Google marca a conta para novo vínculo.
+ * Google access tokens per linked account: refreshed with the refresh token and kept in the isolate memory
+ * until close to expiry (per user and account). Access revoked at Google flags the account for relinking.
  */
 import type { AccountRef } from './accounts.js';
 import type { OwnerDeps } from './context.js';
 import { GoogleTokenError, refreshGoogleToken } from './google-oauth.js';
 import { loadOwnerAccounts, saveOwnerAccounts } from './token-store.js';
 
-/** Margem antes do vencimento em que o access token já é renovado (ms). */
+/** Margin before expiry at which the access token is already refreshed (ms). */
 export const ACCESS_TOKEN_MARGIN_MS = 60_000;
 
-/** Access tokens em memória por usuário e conta (vivem só enquanto o isolate do Worker vive). */
+/** In-memory access tokens per user and account (they live only as long as the Worker isolate). */
 const accessTokenCache = new Map<string, { token: string; expiresAt: number }>();
 
-/** Chave do cache: usuário e conta (a mesma conta Gmail pode estar vinculada a dois usuários). */
+/** Cache key: user and account (the same Gmail account may be linked to two users). */
 export function accessTokenKey(owner: string, email: string): string {
   return `${owner}\n${email}`;
 }
 
-/** Esquece o access token guardado de uma conta (ex.: depois de um 401 do Gmail ou de um novo vínculo). */
+/** Forgets an account's cached access token (e.g. after a Gmail 401 or a new link). */
 export function forgetAccessToken(owner: string, email: string): void {
   accessTokenCache.delete(accessTokenKey(owner, email));
 }
 
-/** Esquece todos os access tokens guardados. */
+/** Forgets every cached access token. */
 export function clearAccessTokenCache(): void {
   accessTokenCache.clear();
 }
 
-/** Erro acionável de conta que perdeu o acesso ao Gmail. */
+/** Actionable error for an account that lost Gmail access. */
 export function relinkError(alias: string): Error {
   return new Error(
     `Account "${alias}" lost access to Gmail (revoked or expired). Use link_account and sign in with it again.`,
   );
 }
 
-/** Marca a conta do usuário como revogada no KV. */
+/** Marks the user's account as revoked in KV. */
 export async function markAccountRevoked(deps: OwnerDeps, email: string): Promise<void> {
   const accounts = await loadOwnerAccounts(deps.kv, deps.settings.tokenKey, deps.owner);
   const updated = accounts.map((a) =>
@@ -47,7 +47,7 @@ export async function markAccountRevoked(deps: OwnerDeps, email: string): Promis
   });
 }
 
-/** Renova o access token; se o Google disser `invalid_grant`, marca a conta como revogada e pede novo vínculo. */
+/** Refreshes the access token; if Google says `invalid_grant`, marks the account revoked and asks for relinking. */
 export async function renewAccessToken(deps: OwnerDeps, ref: AccountRef): Promise<string> {
   try {
     const tokens = await refreshGoogleToken(deps, ref.account.refreshToken);
@@ -64,7 +64,7 @@ export async function renewAccessToken(deps: OwnerDeps, ref: AccountRef): Promis
   }
 }
 
-/** Access token válido da conta: da memória, ou renovado pelo refresh token. */
+/** Valid access token for the account: from memory, or refreshed with the refresh token. */
 export async function getAccessToken(deps: OwnerDeps, ref: AccountRef): Promise<string> {
   if (ref.account.status === 'revoked') throw relinkError(ref.alias);
   const cached = accessTokenCache.get(accessTokenKey(deps.owner, ref.account.email));

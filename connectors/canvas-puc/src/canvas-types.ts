@@ -1,6 +1,6 @@
 /**
- * Formas (parciais) das respostas da API REST do Canvas usadas pelo conector.
- * Só os campos lidos aqui; todos opcionais porque o Canvas omite campos conforme permissões.
+ * (Partial) shapes of the Canvas REST API responses used by the connector.
+ * Only the fields read here; all optional because Canvas omits fields depending on permissions.
  */
 
 export type Id = number | string;

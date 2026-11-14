@@ -1,24 +1,24 @@
 /**
- * Montagem de e-mails MIME (RFC 5322/2045/2047) para enviar pela Gmail API: endereços validados, cabeçalhos
- * sem quebras de linha (sem injeção de cabeçalho), nomes e assunto em UTF-8 codificados, corpo em texto plano
- * e anexos em base64. Pura.
+ * Builds MIME emails (RFC 5322/2045/2047) to send through the Gmail API: validated addresses, headers
+ * without line breaks (no header injection), UTF-8 names and subject encoded, plain-text body and base64
+ * attachments. Pure.
  */
 import { isEmailAddress } from './config.js';
 
-/** Endereço de e-mail com nome opcional. */
+/** Email address with an optional name. */
 export interface MailAddress {
   readonly name: string;
   readonly email: string;
 }
 
-/** Anexo de um e-mail a enviar. */
+/** Attachment of an email to send. */
 export interface MailAttachment {
   readonly filename: string;
   readonly mimeType: string;
   readonly data: Uint8Array;
 }
 
-/** E-mail a enviar, já validado. `inReplyTo` e `references` mantêm a conversa. */
+/** Email to send, already validated. `inReplyTo` and `references` keep the thread. */
 export interface OutgoingEmail {
   readonly to: readonly MailAddress[];
   readonly cc: readonly MailAddress[];
@@ -30,13 +30,13 @@ export interface OutgoingEmail {
   readonly attachments: readonly MailAttachment[];
 }
 
-/** Maior trecho UTF-8 (bytes) de uma palavra codificada: 45 bytes = 60 em base64, palavra ≤ 75. */
+/** Largest UTF-8 chunk (bytes) of an encoded word: 45 bytes = 60 in base64, word ≤ 75. */
 export const MAX_ENCODED_WORD_BYTES = 45;
 
-/** Pedaços de uma lista de endereços: texto entre aspas, `<...>`, texto comum ou separador. */
+/** Pieces of an address list: quoted text, `<...>`, plain text or separator. */
 const ADDRESS_TOKEN = /"(?:\\.|[^"\\])*"?|<[^>]*>?|[^,;"<]+|[,;]/gs;
 
-/** Separa uma lista de endereços por vírgula ou ponto e vírgula, fora de aspas e de `<...>`. */
+/** Splits an address list on commas or semicolons outside quotes and `<...>`. */
 export function splitAddressList(text: string): string[] {
   const items: string[] = [''];
   for (const [token] of text.matchAll(ADDRESS_TOKEN)) {
@@ -46,7 +46,7 @@ export function splitAddressList(text: string): string[] {
   return items.map((item) => item.trim()).filter(Boolean);
 }
 
-/** Lê `Nome <e-mail>`, `"Nome" <e-mail>` ou `e-mail`; nulo se o e-mail for inválido. */
+/** Reads `Name <email>`, `"Name" <email>` or `email`; null if the email is invalid. */
 export function parseMailAddress(item: string): MailAddress | null {
   const match = /^(.*)<([^<>]*)>\s*$/s.exec(item.trim());
   const rawName = match ? (match[1] ?? '') : '';
@@ -59,7 +59,7 @@ export function parseMailAddress(item: string): MailAddress | null {
   return { name: cleanHeaderText(name), email };
 }
 
-/** Endereços válidos de um cabeçalho (`To`, `Cc`, `Reply-To`...); os inválidos são descartados. */
+/** Valid addresses of a header (`To`, `Cc`, `Reply-To`...); invalid ones are dropped. */
 export function parseAddressList(text: string): MailAddress[] {
   return splitAddressList(text).flatMap((item) => {
     const address = parseMailAddress(item);
@@ -67,7 +67,7 @@ export function parseAddressList(text: string): MailAddress[] {
   });
 }
 
-/** Endereços pedidos pelo usuário num campo; lança erro dizendo qual item é inválido. */
+/** Addresses the user asked for in a field; throws saying which item is invalid. */
 export function parseRecipients(items: readonly string[], field: string): MailAddress[] {
   return items.flatMap(splitAddressList).map((item) => {
     const address = parseMailAddress(item);
@@ -76,17 +76,17 @@ export function parseRecipients(items: readonly string[], field: string): MailAd
   });
 }
 
-/** Troca quebras de linha e tabs por espaço e apara (um cabeçalho nunca ganha linha nova). */
+/** Replaces line breaks and tabs with a space and trims (a header never gets a new line). */
 export function cleanHeaderText(text: string): string {
   return text.replace(/[\r\n\t]+/g, ' ').trim();
 }
 
-/** Diz se o texto só tem ASCII imprimível (vai no cabeçalho sem codificar). */
+/** Tells whether the text is printable ASCII only (goes into the header unencoded). */
 export function isPrintableAscii(text: string): boolean {
   return /^[\x20-\x7e]*$/.test(text);
 }
 
-/** Codifica texto não ASCII em palavras `=?UTF-8?B?...?=` (RFC 2047) de até 75 caracteres. */
+/** Encodes non-ASCII text as `=?UTF-8?B?...?=` words (RFC 2047) of up to 75 characters. */
 export function encodeHeaderWord(text: string): string {
   if (isPrintableAscii(text)) return text;
   const chunks: string[] = [];
@@ -103,7 +103,7 @@ export function encodeHeaderWord(text: string): string {
     .join('\r\n ');
 }
 
-/** Endereço pronto para o cabeçalho: nome entre aspas (ou codificado) e e-mail entre `<>`. */
+/** Address ready for the header: quoted (or encoded) name and email in `<>`. */
 export function formatMailAddress(address: MailAddress): string {
   if (!address.name) return address.email;
   const name = isPrintableAscii(address.name)
@@ -112,18 +112,18 @@ export function formatMailAddress(address: MailAddress): string {
   return `${name} <${address.email}>`;
 }
 
-/** Linha de um cabeçalho de endereços; nenhuma se a lista for vazia. */
+/** Line of an address header; none if the list is empty. */
 export function addressHeader(name: string, addresses: readonly MailAddress[]): string[] {
   return addresses.length === 0 ? [] : [`${name}: ${addresses.map(formatMailAddress).join(', ')}`];
 }
 
-/** Só os ids `<...>` de um `Message-ID`/`References` (o resto é descartado); nulo se não houver. */
+/** Only the `<...>` ids of a `Message-ID`/`References` (the rest is dropped); null if there are none. */
 export function messageIdList(text: string | undefined): string | null {
   const ids = (text ?? '').match(/<[^<>\s]+>/g) ?? [];
   return ids.length > 0 ? ids.join(' ') : null;
 }
 
-/** Cabeçalhos do e-mail: versão MIME, destinatários, assunto e os de conversa (`In-Reply-To`...). */
+/** Email headers: MIME version, recipients, subject and the threading ones (`In-Reply-To`...). */
 export function mimeHeaderLines(email: OutgoingEmail): string[] {
   return [
     'MIME-Version: 1.0',
@@ -136,7 +136,7 @@ export function mimeHeaderLines(email: OutgoingEmail): string[] {
   ];
 }
 
-/** Bytes em base64 com linhas de 76 caracteres (RFC 2045). */
+/** Bytes in base64 with 76-character lines (RFC 2045). */
 export function wrapBase64(bytes: Uint8Array): string {
   return (
     Buffer.from(bytes)
@@ -145,7 +145,7 @@ export function wrapBase64(bytes: Uint8Array): string {
   ).join('\r\n');
 }
 
-/** Parte de texto plano em UTF-8 (base64, com quebras CRLF). */
+/** UTF-8 plain-text part (base64, with CRLF line breaks). */
 export function textPart(body: string): string[] {
   return [
     'Content-Type: text/plain; charset="UTF-8"',
@@ -155,12 +155,12 @@ export function textPart(body: string): string[] {
   ];
 }
 
-/** Tipo MIME seguro para o cabeçalho; o resto vira `application/octet-stream`. */
+/** MIME type safe for the header; anything else becomes `application/octet-stream`. */
 export function safeMimeType(mimeType: string): string {
   return /^[\w.+-]+\/[\w.+-]+$/.test(mimeType) ? mimeType : 'application/octet-stream';
 }
 
-/** Parte de um anexo: tipo, nome (limpo e codificado) e conteúdo em base64. */
+/** Attachment part: type, name (cleaned and encoded) and base64 content. */
 export function attachmentPart(attachment: MailAttachment): string[] {
   const name = encodeHeaderWord(cleanHeaderText(attachment.filename).replace(/["\\]/g, ''));
   return [
@@ -172,7 +172,7 @@ export function attachmentPart(attachment: MailAttachment): string[] {
   ];
 }
 
-/** Mensagem MIME completa; com anexos vira `multipart/mixed` com a fronteira dada. */
+/** Full MIME message; with attachments it becomes `multipart/mixed` with the given boundary. */
 export function buildMimeMessage(email: OutgoingEmail, boundary: string): string {
   const headers = mimeHeaderLines(email);
   if (email.attachments.length === 0) return [...headers, ...textPart(email.body)].join('\r\n');
@@ -187,7 +187,7 @@ export function buildMimeMessage(email: OutgoingEmail, boundary: string): string
   ].join('\r\n');
 }
 
-/** Mensagem MIME em base64url, como o campo `raw` da Gmail API pede. */
+/** MIME message in base64url, as the Gmail API `raw` field expects. */
 export function toRawMessage(mime: string): string {
   return Buffer.from(mime).toString('base64url');
 }

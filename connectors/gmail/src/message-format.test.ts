@@ -20,29 +20,29 @@ import {
   truncateText,
 } from './message-format.js';
 
-describe('decodificação de corpo', () => {
-  it('base64UrlToBytes decodifica base64url', () => {
+describe('body decoding', () => {
+  it('base64UrlToBytes decodes base64url', () => {
     expect(new TextDecoder().decode(base64UrlToBytes(b64('olá')))).toBe('olá');
   });
 
-  it('partCharset lê o charset ou assume utf-8', () => {
+  it('partCharset reads the charset or assumes utf-8', () => {
     expect(partCharset(HTML_ONLY.payload!)).toBe('iso-8859-1');
     expect(partCharset({})).toBe('utf-8');
   });
 
-  it('decodePartBody respeita latin1 e usa UTF-8 nos demais', () => {
+  it('decodePartBody honors latin1 and uses UTF-8 otherwise', () => {
     expect(decodePartBody(HTML_ONLY.payload!)).toBe('<p>Olá</p>');
     expect(decodePartBody({ body: { data: b64('ação') } })).toBe('ação');
     expect(decodePartBody({})).toBe('');
   });
 });
 
-describe('estrutura MIME', () => {
-  it('headerValues fica com o primeiro de cada nome', () => {
-    expect(headerValues(RECEIPT.payload!.headers!).get('subject')).toBe('Seu recibo FL Cloud');
+describe('MIME structure', () => {
+  it('headerValues keeps the first of each name', () => {
+    expect(headerValues(RECEIPT.payload!.headers!).get('subject')).toBe('Your FL Cloud receipt');
   });
 
-  it('flattenParts percorre a árvore e tolera ausência', () => {
+  it('flattenParts walks the tree and tolerates absence', () => {
     expect(flattenParts(RECEIPT.payload).map((p) => p.mimeType)).toEqual([
       'multipart/mixed',
       'multipart/alternative',
@@ -53,7 +53,7 @@ describe('estrutura MIME', () => {
     expect(flattenParts(undefined)).toEqual([]);
   });
 
-  it('isBodyPart ignora anexos e partes sem dados', () => {
+  it('isBodyPart ignores attachments and parts without data', () => {
     expect(isBodyPart({ mimeType: 'text/plain', body: { data: '' } }, 'text/plain')).toBe(true);
     expect(
       isBodyPart({ mimeType: 'text/plain', filename: 'a.txt', body: { data: '' } }, 'text/plain'),
@@ -61,15 +61,15 @@ describe('estrutura MIME', () => {
     expect(isBodyPart({ mimeType: 'text/plain' }, 'text/plain')).toBe(false);
   });
 
-  it('messageBodyText prefere texto puro e converte HTML na falta dele', () => {
+  it('messageBodyText prefers plain text and converts HTML when missing', () => {
     expect(messageBodyText(RECEIPT.payload)).toBe('Total: US$ 9,99');
     expect(messageBodyText(HTML_ONLY.payload)).toBe('Olá');
     expect(messageBodyText(undefined)).toBe('');
   });
 
-  it('messageAttachments lista nome, tipo, tamanho e id', () => {
+  it('messageAttachments lists name, type, size and id', () => {
     expect(messageAttachments(RECEIPT.payload)).toEqual([
-      { attachment_id: 'att-1', filename: 'recibo.pdf', mime_type: 'application/pdf', size: 1234 },
+      { attachment_id: 'att-1', filename: 'receipt.pdf', mime_type: 'application/pdf', size: 1234 },
     ]);
     const bare = { filename: 'x', body: { attachmentId: 'a' } };
     expect(messageAttachments(bare)[0]).toMatchObject({
@@ -79,19 +79,19 @@ describe('estrutura MIME', () => {
   });
 });
 
-describe('limites e datas', () => {
-  it('truncateText corta e informa o resto', () => {
+describe('limits and dates', () => {
+  it('truncateText cuts and reports the rest', () => {
     expect(truncateText('abc', 5)).toBe('abc');
-    expect(truncateText('abcdef', 2)).toBe('ab\n[... cortado: mais 4 caracteres]');
+    expect(truncateText('abcdef', 2)).toBe('ab\n[... truncated: 4 more characters]');
   });
 
-  it('internalDateIso converte ou devolve nulo', () => {
+  it('internalDateIso converts or returns null', () => {
     expect(internalDateIso('0')).toBe('1970-01-01T00:00:00.000Z');
     expect(internalDateIso(undefined)).toBeNull();
     expect(internalDateIso('abc')).toBeNull();
   });
 
-  it('perMessageLimit divide a conversa entre as mensagens', () => {
+  it('perMessageLimit splits the thread among the messages', () => {
     expect(perMessageLimit(1)).toBe(MAX_MESSAGE_CHARS);
     expect(perMessageLimit(0)).toBe(MAX_MESSAGE_CHARS);
     expect(perMessageLimit(10)).toBe(6000);
@@ -99,20 +99,20 @@ describe('limites e datas', () => {
   });
 });
 
-describe('formatação', () => {
-  it('pickHeaders devolve só os cabeçalhos úteis', () => {
-    expect(pickHeaders(HTML_ONLY.payload)).toEqual({ from: 'Suporte <help@image-line.example>' });
+describe('formatting', () => {
+  it('pickHeaders returns only the useful headers', () => {
+    expect(pickHeaders(HTML_ONLY.payload)).toEqual({ from: 'Support <help@image-line.example>' });
     expect(pickHeaders(undefined)).toEqual({});
   });
 
-  it('formatMessage inclui o corpo só no formato text e respeita o limite', () => {
+  it('formatMessage includes the body only in text format and honors the limit', () => {
     const text = formatMessage(RECEIPT, 'text', 5);
     expect(text).toMatchObject({
       message_id: 'm1',
       thread_id: 't1',
-      subject: 'Seu recibo FL Cloud',
+      subject: 'Your FL Cloud receipt',
     });
-    expect(text.body).toBe('Total\n[... cortado: mais 10 caracteres]');
+    expect(text.body).toBe('Total\n[... truncated: 10 more characters]');
     expect(formatMessage(RECEIPT, 'minimal')).not.toHaveProperty('body');
     expect(formatMessage({ id: 'x' }, 'minimal')).toMatchObject({
       thread_id: null,
@@ -121,24 +121,24 @@ describe('formatação', () => {
     });
   });
 
-  it('formatThread formata todas as mensagens', () => {
+  it('formatThread formats every message', () => {
     const thread = formatThread(THREAD, 'text');
     expect(thread).toMatchObject({ thread_id: 't1', message_count: 2 });
     expect(formatThread({ id: 'v' }, 'minimal')).toMatchObject({ message_count: 0, messages: [] });
   });
 
-  it('summarizeThread usa o assunto da primeira e o remetente da última', () => {
-    expect(summarizeThread(THREAD, 'dono')).toEqual({
-      account: 'dono',
+  it('summarizeThread uses the subject of the first and the sender of the last', () => {
+    expect(summarizeThread(THREAD, 'owner')).toEqual({
+      account: 'owner',
       thread_id: 't1',
-      subject: 'Seu recibo FL Cloud',
-      from: 'Suporte <help@image-line.example>',
+      subject: 'Your FL Cloud receipt',
+      from: 'Support <help@image-line.example>',
       date: '2025-11-11T10:00:00.000Z',
       message_count: 2,
-      snippet: 'Resposta',
+      snippet: 'Reply',
       labels: [],
     });
-    expect(summarizeThread({ id: 'vazia' }, 'dono')).toMatchObject({
+    expect(summarizeThread({ id: 'empty' }, 'owner')).toMatchObject({
       subject: '',
       from: '',
       date: null,

@@ -261,7 +261,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      cleaned by `sanitizeText()` and `isHiddenChar()`) and wrapped by `untrusted()`; `partialSyncWarning()` adds the
      partial-result notice. Media becomes an MCP block in `mediaResult()` (`binaryContentBlock()`, `bytesToBase64()`).
 - **Result:** compact response, with ISO dates with time zone and the untrusted-content notice.
-- **Failures:** slow cold start → `Tempo esgotado…, tente de novo` (timed out, try again); a snapshot that does not open → `bad_snapshot` error
+- **Failures:** slow cold start → `Timed out waiting for WhatsApp…: try again in a moment`; a snapshot that does not open → `bad_snapshot` error
   (the bridge never restarts from scratch on its own); email removed from the list → 403.
 
 ## P15 — Pair the number (`/pair`)
@@ -281,7 +281,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      `pairActionError()`.
 - **Result:** pairing code (or QR) on screen; once typed on the phone, the bridge stays connected.
 - **Failures:** stale form or from another origin → 403; invalid number → notice on the page; bridge not responding →
-  `Não consegui ler o status` (could not read the status).
+  `Could not read the WhatsApp status right now.`.
 
 ## P16 — Save and restore the session (snapshots in R2)
 
@@ -299,7 +299,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      `sameSecret()`). So a new pairing goes to R2 right away, without waiting for use or for the container to sleep.
   5. On the next boot, `ensureRestored()` hands the snapshot back to the bridge (P14, step 4).
 - **Result:** session and messages survive the container sleeping, without the Worker seeing the content in clear text.
-- **Failures:** snapshot rejected by the bridge → error until `Recomeçar do zero` (start over) on `/pair`; abrupt crash without `SIGTERM`
+- **Failures:** snapshot rejected by the bridge → error until `Start over` (start over) on `/pair`; abrupt crash without `SIGTERM`
   → loses only what changed since the last snapshot (WhatsApp resends pending items); a failed R2 write →
   the next snapshot is forced (`?force=1`).
 

@@ -1,7 +1,7 @@
 /**
- * Ferramentas MCP de envio: e-mail novo, responder, responder a todos e encaminhar (com os anexos
- * originais). Todas são marcadas como destrutivas (`destructiveHint`) para o Claude pedir confirmação, e a
- * conta precisa do escopo `gmail.modify` (contas antigas recebem o pedido de novo vínculo).
+ * Sending MCP tools: new email, reply, reply all and forward (with the original attachments). All are
+ * annotated as destructive (`destructiveHint`) so Claude asks for confirmation, and the account needs the
+ * `gmail.modify` scope (old accounts get the relinking request).
  */
 import { z } from 'zod';
 import { SEND_HINTS, toolAnnotations } from '../../../src/mcp/annotations.js';
@@ -16,22 +16,22 @@ import {
 } from './send.js';
 import { CONFIRM_HINT, GMAIL_ID, ONE_ACCOUNT, resolveWritableAccount } from './tools.js';
 
-/** Maior corpo de e-mail aceito, em caracteres. */
+/** Longest email body accepted, in characters. */
 export const MAX_BODY_CHARS = 100_000;
 
-/** Lista de destinatários (`Nome <e-mail>` ou `e-mail`; um item pode ter vários separados por vírgula). */
+/** Recipient list (`Name <email>` or `email`; one item may hold several, comma-separated). */
 export const RECIPIENTS = z
   .array(z.string().min(3).max(1000))
   .max(MAX_RECIPIENTS)
   .describe('Addresses like "Name <a@b.com>" or "a@b.com".');
 
-/** Corpo em texto plano. */
+/** Plain-text body. */
 export const BODY = z.string().max(MAX_BODY_CHARS).describe('Plain-text body.');
 
-/** Assunto (até 998 caracteres, o limite de uma linha de cabeçalho). */
+/** Subject (up to 998 characters, the limit of a header line). */
 export const SUBJECT = z.string().max(998);
 
-/** `send_email`: e-mail novo em texto plano. */
+/** `send_email`: a new plain-text email. */
 export const sendEmailTool = defineTool({
   name: 'send_email',
   description: `Send a new plain-text email from one linked account. ${CONFIRM_HINT}`,
@@ -50,7 +50,7 @@ export const sendEmailTool = defineTool({
   },
 });
 
-/** Variante de resposta: nome e título da ferramenta, se é para todos e a descrição. */
+/** Reply variant: tool name and title, whether to reply all and the description. */
 export interface ReplyToolOptions {
   readonly name: string;
   readonly title: string;
@@ -58,7 +58,7 @@ export interface ReplyToolOptions {
   readonly description: string;
 }
 
-/** Monta a ferramenta de resposta (ao remetente ou a todos), que cita o original e mantém a conversa. */
+/** Builds the reply tool (to the sender or to all), which quotes the original and keeps the thread. */
 export function replyTool(options: ReplyToolOptions): ToolSpec<OwnerDeps> {
   return defineTool({
     name: options.name,
@@ -77,7 +77,7 @@ export function replyTool(options: ReplyToolOptions): ToolSpec<OwnerDeps> {
   });
 }
 
-/** `reply_email`: responde ao remetente (ou ao `Reply-To`). */
+/** `reply_email`: replies to the sender (or to `Reply-To`). */
 export const replyEmailTool = replyTool({
   name: 'reply_email',
   title: 'Reply to email',
@@ -85,7 +85,7 @@ export const replyEmailTool = replyTool({
   description: 'Reply to the sender of a message.',
 });
 
-/** `reply_all_email`: responde ao remetente e a todos em To e Cc, menos a própria conta. */
+/** `reply_all_email`: replies to the sender and everyone in To and Cc, except the account itself. */
 export const replyAllEmailTool = replyTool({
   name: 'reply_all_email',
   title: 'Reply to all',
@@ -93,7 +93,7 @@ export const replyAllEmailTool = replyTool({
   description: 'Reply to the sender and everyone in To and Cc (except this account).',
 });
 
-/** `forward_email`: encaminha a mensagem com os anexos originais e uma nota opcional. */
+/** `forward_email`: forwards the message with its original attachments and an optional note. */
 export const forwardEmailTool = defineTool({
   name: 'forward_email',
   description: `Forward a message with its original attachments (up to 18 MB) and an optional note on top. ${CONFIRM_HINT}`,

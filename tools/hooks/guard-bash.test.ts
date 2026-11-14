@@ -28,7 +28,7 @@ describe('hook guard-bash (PreToolUse)', () => {
     ['rm -rf /', 'rm -rf on the root'],
     ['rm -rf ~', 'rm -rf on the root'],
     ['git config core.hooksPath /dev/null', 'disable the git hooks'],
-  ])('bloqueia: %s', (command, reason) => {
+  ])('blocks: %s', (command, reason) => {
     const { status, stderr } = runGuard(command);
     expect(status).toBe(2);
     expect(stderr).toContain(reason);
@@ -43,13 +43,13 @@ describe('hook guard-bash (PreToolUse)', () => {
     'cp .env.example .env',
     'npm run check',
     'rm -rf dist/',
-    'echo "leia o .env.example"',
-  ])('permite: %s', (command) => {
+    'echo "read .env.example"',
+  ])('allows: %s', (command) => {
     expect(runGuard(command).status).toBe(0);
   });
 
-  it('entrada inválida não bloqueia', () => {
-    const result = spawnSync('node', [HOOK], { input: 'não é json', encoding: 'utf8' });
+  it('invalid input does not block', () => {
+    const result = spawnSync('node', [HOOK], { input: 'not json', encoding: 'utf8' });
     expect(result.status).toBe(0);
   });
 });

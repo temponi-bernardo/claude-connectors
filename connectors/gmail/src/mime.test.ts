@@ -25,20 +25,20 @@ const EMAIL: OutgoingEmail = {
   cc: [],
   bcc: [],
   subject: 'Olá',
-  body: 'linha 1\nlinha 2',
+  body: 'line 1\nline 2',
   inReplyTo: null,
   references: null,
   attachments: [],
 };
 
-/** Decodifica o corpo base64 de uma mensagem simples (o que vem depois da linha em branco). */
+/** Decodes the base64 body of a simple message (what follows the blank line). */
 function decodeBody(mime: string): string {
   const body = mime.slice(mime.indexOf('\r\n\r\n') + 4).replace(/\r\n/g, '');
   return Buffer.from(body, 'base64').toString('utf8');
 }
 
-describe('endereços', () => {
-  it('splitAddressList respeita aspas e <>', () => {
+describe('addresses', () => {
+  it('splitAddressList honors quotes and <>', () => {
     expect(splitAddressList('"Silva, Ana" <ana@x.com>, b@x.com; <c@x.com>')).toEqual([
       '"Silva, Ana" <ana@x.com>',
       'b@x.com',
@@ -48,29 +48,29 @@ describe('endereços', () => {
     expect(splitAddressList(' , ')).toEqual([]);
   });
 
-  it('parseMailAddress lê nome e e-mail e recusa inválidos', () => {
+  it('parseMailAddress reads name and email and rejects invalid ones', () => {
     expect(parseMailAddress('"Silva, Ana" <ana@x.com>')).toEqual({
       name: 'Silva, Ana',
       email: 'ana@x.com',
     });
     expect(parseMailAddress('Bob <bob@x.com>')).toEqual({ name: 'Bob', email: 'bob@x.com' });
     expect(parseMailAddress(' c@x.com ')).toEqual({ name: '', email: 'c@x.com' });
-    expect(parseMailAddress('sem arroba')).toBeNull();
+    expect(parseMailAddress('no at sign')).toBeNull();
     expect(parseMailAddress('a@x.com\r\nBcc: z@x.com')).toBeNull();
   });
 
-  it('parseAddressList descarta itens inválidos', () => {
-    expect(parseAddressList('Ana <ana@x.com>, lixo')).toEqual([
+  it('parseAddressList drops invalid items', () => {
+    expect(parseAddressList('Ana <ana@x.com>, junk')).toEqual([
       { name: 'Ana', email: 'ana@x.com' },
     ]);
   });
 
-  it('parseRecipients aceita lista e lança erro com o item inválido', () => {
+  it('parseRecipients accepts a list and throws naming the invalid item', () => {
     expect(parseRecipients(['a@x.com, B <b@x.com>'], 'to')).toHaveLength(2);
-    expect(() => parseRecipients(['a@x.com', 'ruim'], 'cc')).toThrow(/cc.*"ruim"/);
+    expect(() => parseRecipients(['a@x.com', 'bad'], 'cc')).toThrow(/cc.*"bad"/);
   });
 
-  it('formatMailAddress escapa aspas e codifica nomes não ASCII', () => {
+  it('formatMailAddress escapes quotes and encodes non-ASCII names', () => {
     expect(formatMailAddress({ name: '', email: 'a@x.com' })).toBe('a@x.com');
     expect(formatMailAddress({ name: 'A "B"', email: 'a@x.com' })).toBe('"A \\"B\\"" <a@x.com>');
     expect(formatMailAddress({ name: 'João', email: 'j@x.com' })).toBe(
@@ -78,14 +78,14 @@ describe('endereços', () => {
     );
   });
 
-  it('addressHeader omite listas vazias', () => {
+  it('addressHeader omits empty lists', () => {
     expect(addressHeader('Cc', [])).toEqual([]);
     expect(addressHeader('To', EMAIL.to)).toEqual(['To: "Ana" <ana@example.com>']);
   });
 });
 
-describe('cabeçalhos', () => {
-  it('cleanHeaderText troca quebras e tabs por espaço (sem injeção de cabeçalho)', () => {
+describe('headers', () => {
+  it('cleanHeaderText replaces breaks and tabs with a space (no header injection)', () => {
     expect(cleanHeaderText(' a\r\nBcc: x@y.com\tb ')).toBe('a Bcc: x@y.com b');
   });
 
@@ -94,8 +94,8 @@ describe('cabeçalhos', () => {
     expect(isPrintableAscii('Hello!')).toBe(true);
   });
 
-  it('encodeHeaderWord mantém ASCII e codifica UTF-8 em palavras curtas', () => {
-    expect(encodeHeaderWord('Recibo')).toBe('Recibo');
+  it('encodeHeaderWord keeps ASCII and encodes UTF-8 in short words', () => {
+    expect(encodeHeaderWord('Receipt')).toBe('Receipt');
     expect(encodeHeaderWord('Olá')).toBe(`=?UTF-8?B?${Buffer.from('Olá').toString('base64')}?=`);
     const long = encodeHeaderWord('ç'.repeat(60));
     const words = long.split('\r\n ');
@@ -107,18 +107,18 @@ describe('cabeçalhos', () => {
     expect(decoded).toBe('ç'.repeat(60));
   });
 
-  it('messageIdList guarda só ids entre <>', () => {
-    expect(messageIdList('<a@x> lixo\r\nBcc: <b@y>')).toBe('<a@x> <b@y>');
+  it('messageIdList keeps only ids in <>', () => {
+    expect(messageIdList('<a@x> junk\r\nBcc: <b@y>')).toBe('<a@x> <b@y>');
     expect(messageIdList('')).toBeNull();
     expect(messageIdList(undefined)).toBeNull();
   });
 
-  it('mimeHeaderLines inclui destinatários, assunto e threading', () => {
+  it('mimeHeaderLines includes recipients, subject and threading', () => {
     const lines = mimeHeaderLines({
       ...EMAIL,
       cc: [{ name: '', email: 'c@x.com' }],
       bcc: [{ name: '', email: 'b@x.com' }],
-      subject: 'Re: oi\r\nX: y',
+      subject: 'Re: hi\r\nX: y',
       inReplyTo: '<m1@x>',
       references: '<m0@x> <m1@x>',
     });
@@ -127,32 +127,32 @@ describe('cabeçalhos', () => {
       'To: "Ana" <ana@example.com>',
       'Cc: c@x.com',
       'Bcc: b@x.com',
-      'Subject: Re: oi X: y',
+      'Subject: Re: hi X: y',
       'In-Reply-To: <m1@x>',
       'References: <m0@x> <m1@x>',
     ]);
   });
 });
 
-describe('corpo e anexos', () => {
-  it('wrapBase64 quebra em linhas de 76', () => {
+describe('body and attachments', () => {
+  it('wrapBase64 wraps at 76-character lines', () => {
     const lines = wrapBase64(new Uint8Array(100)).split('\r\n');
     expect(lines[0]).toHaveLength(76);
     expect(lines.join('')).toBe(Buffer.alloc(100).toString('base64'));
   });
 
-  it('textPart usa UTF-8 em base64 com CRLF', () => {
+  it('textPart uses base64 UTF-8 with CRLF', () => {
     const part = textPart('a\nb');
     expect(part[0]).toBe('Content-Type: text/plain; charset="UTF-8"');
     expect(Buffer.from(part[3] ?? '', 'base64').toString()).toBe('a\r\nb');
   });
 
-  it('safeMimeType recusa tipos estranhos', () => {
+  it('safeMimeType rejects odd types', () => {
     expect(safeMimeType('application/pdf')).toBe('application/pdf');
     expect(safeMimeType('text/html\r\nX: y')).toBe('application/octet-stream');
   });
 
-  it('attachmentPart limpa o nome e codifica não ASCII', () => {
+  it('attachmentPart cleans the name and encodes non-ASCII', () => {
     const part = attachmentPart({
       filename: 're"ci\r\nbo.pdf',
       mimeType: 'application/pdf',
@@ -173,19 +173,19 @@ describe('corpo e anexos', () => {
 });
 
 describe('buildMimeMessage', () => {
-  it('mensagem simples: cabeçalhos, linha em branco e corpo base64', () => {
+  it('simple message: headers, blank line and base64 body', () => {
     const mime = buildMimeMessage(EMAIL, 'B');
     expect(mime).toContain('Subject: =?UTF-8?B?');
     expect(mime).toContain('Content-Type: text/plain; charset="UTF-8"');
     expect(mime).not.toContain('multipart');
-    expect(decodeBody(mime)).toBe('linha 1\r\nlinha 2');
+    expect(decodeBody(mime)).toBe('line 1\r\nline 2');
   });
 
-  it('com anexos vira multipart/mixed com a fronteira dada', () => {
+  it('with attachments becomes multipart/mixed with the given boundary', () => {
     const mime = buildMimeMessage(
       {
         ...EMAIL,
-        attachments: [{ filename: 'a.txt', mimeType: 'text/plain', data: Buffer.from('oi') }],
+        attachments: [{ filename: 'a.txt', mimeType: 'text/plain', data: Buffer.from('hi') }],
       },
       '=_b1',
     );
@@ -195,7 +195,7 @@ describe('buildMimeMessage', () => {
     expect(mime).toContain('filename="a.txt"');
   });
 
-  it('toRawMessage codifica em base64url', () => {
+  it('toRawMessage encodes in base64url', () => {
     expect(Buffer.from(toRawMessage('To: a\r\n\r\n?>'), 'base64url').toString()).toBe(
       'To: a\r\n\r\n?>',
     );

@@ -1,8 +1,8 @@
 /**
- * Login de quem instalou o conector (OAuth 2.1 do Claude → Worker): consentimento por cliente, ida ao Google
- * com `openid email` e `gmail.modify` (acesso offline), volta validada pela biblioteca (`state` de uso único
- * preso ao navegador) e checagem do `id_token`. A conta que entrou já fica vinculada ao usuário. Qualquer
- * conta Google entra, a menos que `ALLOWED_EMAILS` restrinja (modo privado).
+ * Sign-in of whoever installed the connector (Claude → Worker OAuth 2.1): per-client consent, trip to Google
+ * with `openid email` and `gmail.modify` (offline access), return validated by the library (single-use
+ * `state` bound to the browser) and `id_token` check. The account that signed in is linked to the user right
+ * away. Any Google account may sign in, unless `ALLOWED_EMAILS` restricts it (private mode).
  */
 import {
   AuthorizationError,
@@ -25,32 +25,36 @@ import { verifyGoogleIdToken, type GoogleIdentity } from './id-token.js';
 import { linkRefusalReason, storeGoogleAccount } from './link-flow.js';
 import { consentPage, messagePage, redirectWith } from './pages.js';
 
-/** Dados guardados (cifrados) pela biblioteca entre a ida ao Google e a volta. */
+/** Data kept (encrypted) by the library between the trip to Google and the return. */
 export interface SignInData {
   readonly verifier: string;
   readonly nonce: string;
 }
 
-/** O que o token do Claude carrega (`ctx.props` no `/mcp`): o usuário (`sub`), o e-mail e um id da sessão. */
+/** What Claude's token carries (`ctx.props` on `/mcp`): the user (`sub`), the email and a session id. */
 export interface GrantProps {
   readonly owner: string;
   readonly email: string;
   readonly sid: string;
 }
 
-/** Página 403 para contas Google fora de `ALLOWED_EMAILS` (só no modo privado). */
+/** 403 page for Google accounts outside `ALLOWED_EMAILS` (private mode only). */
 export function accessDeniedPage(): Response {
-  return messagePage('Acesso negado', 'Esta conta Google não está autorizada neste conector.', 403);
+  return messagePage(
+    'Access denied',
+    'This Google account is not authorized for this connector.',
+    403,
+  );
 }
 
-/** Resposta para um erro de autorização: volta ao cliente quando a biblioteca diz para onde, senão página. */
+/** Response to an authorization error: back to the client when the library says where, otherwise a page. */
 export function authorizationErrorResponse(error: unknown): Response {
   if (error instanceof AuthorizationError && error.redirectTo) {
     return redirectWith(error.redirectTo);
   }
   const message =
-    error instanceof AuthorizationError ? error.description : 'Pedido de autorização inválido.';
-  return messagePage('Não foi possível conectar', message, 400);
+    error instanceof AuthorizationError ? error.description : 'Invalid authorization request.';
+  return messagePage('Could not connect', message, 400);
 }
 
 /** Starts the Google sign-in asking for identity and Gmail (`gmail.modify`) with a refresh token. */
@@ -76,7 +80,7 @@ export async function beginGoogleSignIn(
   return redirectWith(location, headers);
 }
 
-/** `GET /authorize`: valida o pedido do Claude e mostra o consentimento (ou segue, se já foi lembrado). */
+/** `GET /authorize`: validates Claude's request and shows the consent (or moves on, if remembered). */
 export async function showAuthorize(
   deps: GmailDeps,
   oauth: OAuthHelpers,
@@ -96,7 +100,7 @@ export async function showAuthorize(
   }
 }
 
-/** `POST /authorize`: aprova (lembrando por 30 dias) e vai ao Google, ou nega e volta ao Claude. */
+/** `POST /authorize`: approves (remembering for 30 days) and goes to Google, or denies and returns to Claude. */
 export async function submitAuthorize(
   deps: GmailDeps,
   oauth: OAuthHelpers,
@@ -118,7 +122,7 @@ export async function submitAuthorize(
   }
 }
 
-/** Vincula a conta que acabou de entrar, se o Google deu o Gmail e o refresh token; falha não impede o login. */
+/** Links the account that just signed in, if Google granted Gmail and a refresh token; failure does not block sign-in. */
 export async function linkSignedInAccount(
   deps: GmailDeps,
   identity: GoogleIdentity,
@@ -133,14 +137,14 @@ export async function linkSignedInAccount(
   }
 }
 
-/** Valida o código do Google e, se a conta pode entrar, vincula-a e conclui a autorização do Claude. */
+/** Validates the Google code and, if the account may sign in, links it and completes Claude's authorization. */
 export async function completeSignIn(
   deps: GmailDeps,
   oauth: OAuthHelpers,
   resumed: { readonly request: AuthRequest; readonly data: SignInData; readonly code: string },
 ): Promise<string | null> {
   const tokens = await exchangeGoogleCode(deps, resumed.code, resumed.data.verifier);
-  if (tokens.idToken === null) throw new Error('O Google não devolveu o id_token.');
+  if (tokens.idToken === null) throw new Error('Google did not return the id_token.');
   const identity = await verifyGoogleIdToken(deps, tokens.idToken, resumed.data.nonce);
   if (!isEmailAllowed(deps.settings, identity.email)) return null;
   await linkSignedInAccount(deps, identity, tokens);
@@ -155,7 +159,7 @@ export async function completeSignIn(
   return redirectTo;
 }
 
-/** Volta do Google no login: recusa vira `access_denied` para o Claude; conta fora da allowlist, 403. */
+/** Return from Google at sign-in: a refusal becomes `access_denied` for Claude; an account off the allowlist, 403. */
 export async function finishSignIn(
   deps: GmailDeps,
   oauth: OAuthHelpers,

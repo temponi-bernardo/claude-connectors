@@ -1,6 +1,6 @@
 /**
- * Google falso para os testes: chaves RSA reais (id_token assinado de verdade), endpoint de tokens,
- * JWKS e Gmail API simulados por um `fetch` com rotas, que registra cada chamada.
+ * Fake Google for tests: real RSA keys (a truly signed id_token), token endpoint, JWKS and Gmail API
+ * simulated by a routed `fetch` that records every call.
  */
 import { generateKeyPairSync, sign, type KeyObject } from 'node:crypto';
 import { aliasAccounts, type AccountRef } from '../accounts.js';
@@ -10,30 +10,30 @@ import type { RateLimiter } from '../rate-limit.js';
 import { saveOwnerAccounts, type LinkedAccount } from '../token-store.js';
 import { FakeKv } from './fake-kv.js';
 
-/** Chave de teste dos selos (32 bytes). */
+/** Test seal key (32 bytes). */
 export const TEST_TOKEN_KEY = Buffer.alloc(32, 7);
 
-/** E-mails das contas Gmail dos testes (fictícios). */
-export const TEST_EMAILS: readonly string[] = ['dono@example.com', 'musica@example.com'];
+/** Emails of the test Gmail accounts (fictitious). */
+export const TEST_EMAILS: readonly string[] = ['owner@example.com', 'music@example.com'];
 
-/** Usuário do conector nos testes (`sub` do Google). */
-export const TEST_OWNER = 'sub-dono@example.com';
+/** Connector user in tests (Google `sub`). */
+export const TEST_OWNER = 'sub-owner@example.com';
 
-/** Configuração dos testes. */
+/** Test settings. */
 export const TEST_SETTINGS: GmailSettings = {
   googleClientId: 'client-123.apps.googleusercontent.com',
-  googleClientSecret: 'segredo-de-teste',
+  googleClientSecret: 'test-secret',
   tokenKey: TEST_TOKEN_KEY,
   allowedEmails: null,
   consentSecret: 'c'.repeat(40),
 };
 
-/** Origem do Worker nos testes. */
+/** Worker origin in tests. */
 export const TEST_ORIGIN = 'https://gmail.test';
 
 const keys = generateKeyPairSync('rsa', { modulusLength: 2048 });
 
-/** Chave pública de teste em JWK, com `kid`. */
+/** Test public key as JWK, with `kid`. */
 export const TEST_JWK = {
   ...keys.publicKey.export({ format: 'jwk' }),
   kid: 'kid-1',
@@ -41,7 +41,7 @@ export const TEST_JWK = {
   use: 'sig',
 };
 
-/** Assina um JWT RS256 com a chave de teste (ou outra). */
+/** Signs an RS256 JWT with the test key (or another one). */
 export function signJwt(
   payload: Record<string, unknown>,
   header: Record<string, unknown> = { alg: 'RS256', kid: 'kid-1' },
@@ -53,7 +53,7 @@ export function signJwt(
   return `${input}.${sign('sha256', Buffer.from(input), key).toString('base64url')}`;
 }
 
-/** `id_token` válido para o e-mail e o `nonce` dados (agora = 1_700_000_000 s). */
+/** Valid `id_token` for the given email and `nonce` (now = 1_700_000_000 s). */
 export function validIdToken(
   email: string,
   nonce: string,
@@ -71,19 +71,19 @@ export function validIdToken(
   });
 }
 
-/** Instante fixo dos testes, em ms. */
+/** Fixed test time, in ms. */
 export const TEST_NOW_MS = 1_700_000_000_000;
 
-/** Chamada registrada pelo `fetch` falso. */
+/** Call recorded by the fake `fetch`. */
 export interface RecordedCall {
   readonly url: string;
   readonly init: RequestInit | undefined;
 }
 
-/** Rota do `fetch` falso: recebe a URL e as opções e devolve a resposta (ou nada, para seguir adiante). */
+/** Fake `fetch` route: gets the URL and options and returns the response (or nothing, to move on). */
 export type FakeRoute = (url: URL, init: RequestInit | undefined) => Response | undefined;
 
-/** `fetch` falso com rotas; o JWKS do Google já vem respondido. Sem rota, 599. */
+/** Routed fake `fetch`; the Google JWKS is answered already. No route, 599. */
 export function fakeFetch(routes: FakeRoute[], calls: RecordedCall[] = []): Fetcher {
   return (input, init) => {
     calls.push({ url: input, init });
@@ -95,11 +95,11 @@ export function fakeFetch(routes: FakeRoute[], calls: RecordedCall[] = []): Fetc
       const response = route(url, init);
       if (response) return Promise.resolve(response);
     }
-    return Promise.resolve(new Response(`sem rota para ${url.href}`, { status: 599 }));
+    return Promise.resolve(new Response(`no route for ${url.href}`, { status: 599 }));
   };
 }
 
-/** Rota do endpoint de tokens do Google: refresh devolve `access-<refresh>`; código usa `onCode`. */
+/** Google token endpoint route: refresh returns `access-<refresh>`; a code uses `onCode`. */
 export function tokenRoute(
   onCode: (form: URLSearchParams) => Response = () => new Response('', { status: 400 }),
 ): FakeRoute {
@@ -108,13 +108,13 @@ export function tokenRoute(
     const form = new URLSearchParams(String(init?.body));
     if (form.get('grant_type') === 'authorization_code') return onCode(form);
     const refresh = form.get('refresh_token') ?? '';
-    if (refresh.startsWith('revogado'))
+    if (refresh.startsWith('revoked'))
       return Response.json({ error: 'invalid_grant' }, { status: 400 });
     return Response.json({ access_token: `access-${refresh}`, expires_in: 3600 });
   };
 }
 
-/** Rota da Gmail API: responde o JSON de `responses[caminho]` (caminho depois de `/users/me/`). */
+/** Gmail API route: answers the JSON of `responses[path]` (path after `/users/me/`). */
 export function gmailRoute(responses: Readonly<Record<string, unknown>>): FakeRoute {
   return (url) => {
     const prefix = '/gmail/v1/users/me/';
@@ -125,7 +125,7 @@ export function gmailRoute(responses: Readonly<Record<string, unknown>>): FakeRo
   };
 }
 
-/** Dependências de teste com KV em memória, o `fetch` dado e o usuário `TEST_OWNER`. */
+/** Test dependencies with in-memory KV, the given `fetch` and the `TEST_OWNER` user. */
 export function testDeps(fetcher: Fetcher, kv: FakeKv = new FakeKv()): OwnerDeps & { kv: FakeKv } {
   kv.now = () => TEST_NOW_MS;
   return {
@@ -138,7 +138,7 @@ export function testDeps(fetcher: Fetcher, kv: FakeKv = new FakeKv()): OwnerDeps
   };
 }
 
-/** Conta vinculada de teste (refresh `r-<parte antes do @>`). */
+/** Test linked account (refresh `r-<part before the @>`). */
 export function testAccount(email: string, extra: Partial<LinkedAccount> = {}): LinkedAccount {
   return {
     email,
@@ -150,7 +150,7 @@ export function testAccount(email: string, extra: Partial<LinkedAccount> = {}): 
   };
 }
 
-/** Dependências com as contas dadas já vinculadas ao `TEST_OWNER` e as rotas dadas. */
+/** Dependencies with the given accounts already linked to `TEST_OWNER` and the given routes. */
 export async function linkedTestDeps(
   routes: FakeRoute[],
   calls: RecordedCall[] = [],
@@ -162,7 +162,7 @@ export async function linkedTestDeps(
   return deps;
 }
 
-/** Limitador falso que libera as primeiras `allowed` chamadas por chave. */
+/** Fake limiter that lets the first `allowed` calls per key through. */
 export function countingLimiter(allowed: number): RateLimiter & { keys: string[] } {
   const keys: string[] = [];
   return {
@@ -174,19 +174,19 @@ export function countingLimiter(allowed: number): RateLimiter & { keys: string[]
   };
 }
 
-/** Contas dos testes com apelido (`dono`, `musica`), como as ferramentas as veem. */
+/** Test accounts with aliases (`owner`, `music`), as the tools see them. */
 export const TEST_REFS: readonly AccountRef[] = aliasAccounts(
   TEST_EMAILS.map((email) => testAccount(email)),
 );
 
-/** Escrita registrada pela rota de escrita da Gmail API. */
+/** Write recorded by the Gmail API write route. */
 export interface GmailWrite {
   readonly method: string;
   readonly path: string;
   readonly body: unknown;
 }
 
-/** Rota de escrita da Gmail API: registra POST/PUT/DELETE e responde `respond(escrita)` (nulo = 204). */
+/** Gmail API write route: records POST/PUT/DELETE and answers `respond(write)` (null = 204). */
 export function gmailWriteRoute(
   writes: GmailWrite[],
   respond: (write: GmailWrite) => unknown = () => ({}),
@@ -206,5 +206,5 @@ export function gmailWriteRoute(
   };
 }
 
-/** Escopo das contas vinculadas antes do gerenciamento (só leitura). */
+/** Scope of accounts linked before Gmail management (read-only). */
 export const READONLY_SCOPE = 'openid email https://www.googleapis.com/auth/gmail.readonly';

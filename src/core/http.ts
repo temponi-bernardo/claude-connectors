@@ -1,15 +1,15 @@
 /**
- * Utilitários puros para APIs REST paginadas (montagem de URL e header `Link`).
+ * Pure helpers for paginated REST APIs (URL building and the `Link` header).
  */
 
-/** Valor aceito como parâmetro de query: listas viram `chave[]=a&chave[]=b`; nulos são omitidos. */
+/** Value accepted as a query parameter: lists become `key[]=a&key[]=b`; nulls are omitted. */
 export type QueryValue =
   string | number | boolean | readonly (string | number)[] | null | undefined;
 
-/** Parâmetros de query de uma requisição. */
+/** Query parameters of a request. */
 export type QueryParams = Readonly<Record<string, QueryValue>>;
 
-/** Monta a URL de uma requisição: caminho relativo a `base` (ou URL absoluta) mais os parâmetros. */
+/** Builds a request URL: a path relative to `base` (or an absolute URL) plus the parameters. */
 export function buildUrl(base: string, path: string, params: QueryParams = {}): URL {
   const url = new URL(path.startsWith('http') ? path : `${base}${path}`);
   for (const [key, value] of Object.entries(params)) {
@@ -25,7 +25,7 @@ export function buildUrl(base: string, path: string, params: QueryParams = {}): 
   return url;
 }
 
-/** Extrai a URL `rel="next"` de um header `Link` de paginação (RFC 8288), ou `null` se não houver. */
+/** Extracts the `rel="next"` URL from a pagination `Link` header (RFC 8288), or `null` if absent. */
 export function parseNextLink(linkHeader: string | null): string | null {
   if (!linkHeader) return null;
   const next = linkHeader.split(',').find((part) => part.includes('rel="next"'));

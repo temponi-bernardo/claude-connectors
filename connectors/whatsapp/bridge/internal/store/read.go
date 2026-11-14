@@ -6,17 +6,17 @@ import (
 	"errors"
 )
 
-// ErrNotFound indica conversa ou mensagem inexistente.
-var ErrNotFound = errors.New("não encontrado")
+// ErrNotFound signals a missing chat or message.
+var ErrNotFound = errors.New("not found")
 
-// MediaInfo é a parte pública dos metadados de mídia.
+// MediaInfo is the public part of the media metadata.
 type MediaInfo struct {
 	Mime     string
 	Size     int64
 	Filename string
 }
 
-// MessageView é uma mensagem pronta para a API (nomes resolvidos, texto limpo).
+// MessageView is a message ready for the API (resolved names, cleaned text).
 type MessageView struct {
 	ID         string
 	ChatJID    string
@@ -30,7 +30,7 @@ type MessageView struct {
 	Media      *MediaInfo
 }
 
-// ChatView é uma conversa pronta para a API.
+// ChatView is a chat ready for the API.
 type ChatView struct {
 	JID     string
 	Name    string
@@ -39,7 +39,7 @@ type ChatView struct {
 	Last    *MessageView
 }
 
-// ContactView é um contato pronto para a API.
+// ContactView is a contact ready for the API.
 type ContactView struct {
 	JID      string
 	Name     string
@@ -47,10 +47,10 @@ type ContactView struct {
 	Phone    string
 }
 
-// SelfName é o nome mostrado como remetente das mensagens enviadas pela própria conta.
-const SelfName = "Você"
+// SelfName is the sender name shown for messages sent by the account itself.
+const SelfName = "You"
 
-// displayName escolhe o primeiro nome não vazio; sem nenhum, usa o telefone do JID.
+// displayName picks the first non-empty name; with none, it uses the JID's phone number.
 func displayName(jid string, names ...string) string {
 	for _, n := range names {
 		if c := Clean(n); c != "" {
@@ -60,7 +60,7 @@ func displayName(jid string, names ...string) string {
 	return PhoneFromJID(jid)
 }
 
-// senderName decide o nome do remetente de uma mensagem.
+// senderName decides the sender name of a message.
 func senderName(fromMe bool, jid string, names ...string) string {
 	if fromMe {
 		return SelfName
@@ -68,7 +68,7 @@ func senderName(fromMe bool, jid string, names ...string) string {
 	return displayName(jid, names...)
 }
 
-// messageSelect é a consulta-base de mensagens com nomes de remetente e da conversa resolvidos.
+// messageSelect is the base message query with resolved sender and chat names.
 const messageSelect = `SELECT m.id, m.chat_jid, m.sender_jid, m.from_me, m.ts, m.type, m.text,
 	m.media_mime, m.media_size, m.media_filename, m.media_kind,
 	COALESCE(sc.full_name, ''), COALESCE(sc.push_name, ''), m.sender_push,
@@ -78,10 +78,10 @@ LEFT JOIN contacts sc ON sc.jid = m.sender_jid
 LEFT JOIN chats c ON c.jid = m.chat_jid
 LEFT JOIN contacts cc ON cc.jid = m.chat_jid `
 
-// scanner é o pedaço comum de *sql.Row e *sql.Rows.
+// scanner is the common part of *sql.Row and *sql.Rows.
 type scanner interface{ Scan(dest ...any) error }
 
-// scanMessage lê uma linha de messageSelect.
+// scanMessage reads one messageSelect row.
 func scanMessage(sc scanner) (MessageView, error) {
 	var m MessageView
 	var mime, filename, kind sql.NullString
@@ -101,7 +101,7 @@ func scanMessage(sc scanner) (MessageView, error) {
 	return m, nil
 }
 
-// queryMessages roda uma consulta de mensagens e lê todas as linhas.
+// queryMessages runs a message query and reads all rows.
 func (s *Store) queryMessages(ctx context.Context, query string, args ...any) ([]MessageView, error) {
 	rows, err := s.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -119,7 +119,7 @@ func (s *Store) queryMessages(ctx context.Context, query string, args ...any) ([
 	return out, rows.Err()
 }
 
-// GetChat devolve uma conversa (sem última mensagem) ou ErrNotFound.
+// GetChat returns a chat (without its last message) or ErrNotFound.
 func (s *Store) GetChat(ctx context.Context, jid string) (ChatView, error) {
 	var c ChatView
 	var name, full, push string
@@ -134,8 +134,8 @@ func (s *Store) GetChat(ctx context.Context, jid string) (ChatView, error) {
 	return c, err
 }
 
-// ListMessages devolve até limit mensagens da conversa, mais novas primeiro, antes do cursor.
-// O segundo retorno é o cursor da próxima página (nil no fim).
+// ListMessages returns up to limit messages of the chat, newest first, before the cursor.
+// The second return value is the next-page cursor (nil at the end).
 func (s *Store) ListMessages(ctx context.Context, chatJID string, limit int, before *Cursor) ([]MessageView, *Cursor, error) {
 	has, ts, key := cursorArgs(before)
 	msgs, err := s.queryMessages(ctx, messageSelect+`WHERE m.chat_jid = ?
@@ -148,14 +148,14 @@ func (s *Store) ListMessages(ctx context.Context, chatJID string, limit int, bef
 	return page, next, nil
 }
 
-// SearchMessages busca texto (sem diferenciar caixa e acentos) em todas as conversas ou numa só.
+// SearchMessages searches text (case- and accent-insensitive) in all chats or in one.
 func (s *Store) SearchMessages(ctx context.Context, query, chatJID string, limit int) ([]MessageView, error) {
 	return s.queryMessages(ctx, messageSelect+`WHERE (? = '' OR m.chat_jid = ?)
 		AND m.text_fold LIKE ? ESCAPE '\'
 		ORDER BY m.ts DESC, m.id DESC LIMIT ?`, chatJID, chatJID, ContainsPattern(query), limit)
 }
 
-// GetMedia devolve os metadados completos de mídia de uma mensagem, ou ErrNotFound.
+// GetMedia returns a message's full media metadata, or ErrNotFound.
 func (s *Store) GetMedia(ctx context.Context, chatJID, id string) (Media, error) {
 	var m Media
 	var kind, mime, filename, path sql.NullString
@@ -170,7 +170,7 @@ func (s *Store) GetMedia(ctx context.Context, chatJID, id string) (Media, error)
 	return m, err
 }
 
-// Quoted é o mínimo de uma mensagem guardada para citá-la numa resposta.
+// Quoted is the minimum of a stored message needed to quote it in a reply.
 type Quoted struct {
 	ID        string
 	SenderJID string
@@ -178,7 +178,7 @@ type Quoted struct {
 	Text      string
 }
 
-// GetQuoted devolve a mensagem id da conversa chatJID para ser citada, ou ErrNotFound.
+// GetQuoted returns message id of chat chatJID to be quoted, or ErrNotFound.
 func (s *Store) GetQuoted(ctx context.Context, chatJID, id string) (Quoted, error) {
 	q := Quoted{ID: id}
 	err := s.db.QueryRowContext(ctx, `SELECT sender_jid, from_me, text FROM messages WHERE chat_jid = ? AND id = ?`,
@@ -189,14 +189,14 @@ func (s *Store) GetQuoted(ctx context.Context, chatJID, id string) (Quoted, erro
 	return q, err
 }
 
-// Counts devolve o total de conversas e de mensagens.
+// Counts returns the total number of chats and messages.
 func (s *Store) Counts(ctx context.Context) (chats, messages int64, err error) {
 	err = s.db.QueryRowContext(ctx, `SELECT (SELECT COUNT(*) FROM chats), (SELECT COUNT(*) FROM messages)`).
 		Scan(&chats, &messages)
 	return chats, messages, err
 }
 
-// cursorArgs transforma um cursor opcional nos parâmetros (tem, ts, chave) das consultas.
+// cursorArgs turns an optional cursor into the query parameters (has, ts, key).
 func cursorArgs(c *Cursor) (int, int64, string) {
 	if c == nil {
 		return 0, 0, ""
@@ -204,7 +204,7 @@ func cursorArgs(c *Cursor) (int, int64, string) {
 	return 1, c.TS, c.Key
 }
 
-// splitPage corta a lista lida com limit+1 e decide o cursor da próxima página.
+// splitPage trims the list read with limit+1 and decides the next-page cursor.
 func splitPage[T any](items []T, limit int, cursorOf func(T) Cursor) ([]T, *Cursor) {
 	if len(items) <= limit {
 		return items, nil

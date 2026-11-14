@@ -25,7 +25,7 @@ import {
 
 const OWNER = TEST_REFS[0]!;
 
-/** Dependências com só a conta do dono vinculada. */
+/** Dependencies with only the owner account linked. */
 function linkedDeps(routes: FakeRoute[], calls: RecordedCall[] = []) {
   return linkedTestDeps(routes, calls, [OWNER.account.email]);
 }
@@ -35,7 +35,7 @@ beforeEach(() => {
 });
 
 describe('gmailUrl', () => {
-  it('omite vazios e repete parâmetros de lista', () => {
+  it('omits empties and repeats list parameters', () => {
     const url = gmailUrl('threads/t1', {
       format: 'metadata',
       metadataHeaders: ['From', 'Subject'],
@@ -52,50 +52,50 @@ describe('gmailUrl', () => {
 });
 
 describe('gmailHttpError', () => {
-  it('traduz status conhecidos e genéricos', () => {
-    expect(gmailHttpError(404, 'dono').message).toBe(
-      'Account "dono": not found (wrong id or from another account).',
+  it('translates known and generic statuses', () => {
+    expect(gmailHttpError(404, 'owner').message).toBe(
+      'Account "owner": not found (wrong id or from another account).',
     );
-    expect(gmailHttpError(500, 'dono').message).toMatch(/HTTP 500/);
-    expect(gmailHttpError(403, 'dono').message).toMatch(/link_account/);
+    expect(gmailHttpError(500, 'owner').message).toMatch(/HTTP 500/);
+    expect(gmailHttpError(403, 'owner').message).toMatch(/link_account/);
   });
 
-  it('acrescenta o detalhe do Gmail quando houver', () => {
-    expect(gmailHttpError(400, 'dono', 'Invalid To header').message).toBe(
-      'Account "dono": Gmail rejected the request (check ids, query and recipients): Invalid To header.',
+  it('appends the Gmail detail when present', () => {
+    expect(gmailHttpError(400, 'owner', 'Invalid To header').message).toBe(
+      'Account "owner": Gmail rejected the request (check ids, query and recipients): Invalid To header.',
     );
   });
 });
 
 describe('gmailErrorDetail', () => {
-  it('lê error.message do JSON, limita o tamanho e ignora corpo inválido', async () => {
+  it('reads error.message from the JSON, caps the length and ignores an invalid body', async () => {
     const json = Response.json({ error: { message: 'Invalid To header' } }, { status: 400 });
     expect(await gmailErrorDetail(json)).toBe('Invalid To header');
     const long = Response.json({ error: { message: 'x'.repeat(500) } }, { status: 400 });
     expect(await gmailErrorDetail(long)).toHaveLength(200);
-    expect(await gmailErrorDetail(new Response('não é json', { status: 500 }))).toBeNull();
+    expect(await gmailErrorDetail(new Response('not json', { status: 500 }))).toBeNull();
     expect(await gmailErrorDetail(Response.json({ error: 'x' }))).toBeNull();
   });
 });
 
 describe('readGmailJson', () => {
-  it('resposta vazia (204) vira objeto vazio', async () => {
+  it('an empty response (204) becomes an empty object', async () => {
     expect(await readGmailJson(new Response(null, { status: 204 }))).toEqual({});
     expect(await readGmailJson(Response.json({ a: 1 }))).toEqual({ a: 1 });
   });
 });
 
 describe('gmailGet', () => {
-  it('envia token, accept e User-Agent', async () => {
+  it('sends token, accept and User-Agent', async () => {
     const calls: RecordedCall[] = [];
     const deps = await linkedDeps([gmailRoute({ labels: { labels: [] } })], calls);
     expect(await gmailGet(deps, OWNER, gmailUrl('labels'))).toEqual({ labels: [] });
     const headers = calls[1]?.init?.headers as Record<string, string>;
-    expect(headers.authorization).toBe('Bearer access-r-dono');
+    expect(headers.authorization).toBe('Bearer access-r-owner');
     expect(headers['user-agent']).toMatch(/claude-connectors-gmail/);
   });
 
-  it('depois de 401 renova o token e tenta de novo uma vez', async () => {
+  it('after a 401 refreshes the token and retries once', async () => {
     let first = true;
     function flaky(url: URL): Response | undefined {
       if (url.hostname !== 'gmail.googleapis.com') return undefined;
@@ -111,12 +111,12 @@ describe('gmailGet', () => {
     expect(calls.filter((c) => c.url.includes('oauth2.googleapis.com'))).toHaveLength(2);
   });
 
-  it('falha HTTP vira erro acionável', async () => {
+  it('an HTTP failure becomes an actionable error', async () => {
     const deps = await linkedDeps([gmailRoute({})]);
     await expect(gmailGet(deps, OWNER, gmailUrl('messages/zz'))).rejects.toThrow(/not found/);
   });
 
-  it('sendGmailRequest usa o token dado', async () => {
+  it('sendGmailRequest uses the given token', async () => {
     const calls: RecordedCall[] = [];
     const deps = testDeps(fakeFetch([gmailRoute({ a: {} })], calls));
     expect((await sendGmailRequest(deps, { url: gmailUrl('a') }, 'tok')).status).toBe(200);
@@ -125,8 +125,8 @@ describe('gmailGet', () => {
   });
 });
 
-describe('gmailCall e gmailWrite', () => {
-  it('envia método e corpo JSON', async () => {
+describe('gmailCall and gmailWrite', () => {
+  it('sends method and JSON body', async () => {
     const writes: GmailWrite[] = [];
     const deps = await linkedDeps([gmailWriteRoute(writes, () => ({ id: 'x' }))]);
     const request = { url: gmailUrl('messages/send'), method: 'POST' as const, body: { raw: 'r' } };
@@ -134,7 +134,7 @@ describe('gmailCall e gmailWrite', () => {
     expect(writes).toEqual([{ method: 'POST', path: 'messages/send', body: { raw: 'r' } }]);
   });
 
-  it('erro de escrita traz o detalhe do Gmail', async () => {
+  it('a write error carries the Gmail detail', async () => {
     function refuse(url: URL): Response | undefined {
       if (url.hostname !== 'gmail.googleapis.com') return undefined;
       return Response.json({ error: { message: 'Invalid To header' } }, { status: 400 });
@@ -144,7 +144,7 @@ describe('gmailCall e gmailWrite', () => {
     await expect(gmailWrite(deps, OWNER, request)).rejects.toThrow(/Invalid To header/);
   });
 
-  it('gmailWrite recusa conta vinculada só para leitura, sem chamar o Gmail', async () => {
+  it('gmailWrite refuses a read-only linked account without calling Gmail', async () => {
     const calls: RecordedCall[] = [];
     const deps = await linkedDeps([], calls);
     const old = { ...OWNER, account: { ...OWNER.account, scope: READONLY_SCOPE } };

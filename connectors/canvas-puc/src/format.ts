@@ -1,6 +1,6 @@
 /**
- * Conversão das respostas do Canvas em objetos enxutos, com chaves em inglês, para o modelo.
- * Tudo puro: recebe o JSON da API e devolve só os campos úteis.
+ * Turns Canvas responses into lean objects, with English keys, for the model.
+ * All pure: takes the API JSON and returns only the useful fields.
  */
 import { htmlToText } from '../../../src/core/html.js';
 import type {
@@ -21,18 +21,18 @@ import type {
   CanvasSubmissionFlags,
 } from './canvas-types.js';
 
-/** Objeto de visualização devolvido ao modelo (serializado como JSON). */
+/** View object returned to the model (serialized as JSON). */
 export type View = Readonly<Record<string, unknown>>;
 
-/** Tamanho máximo de textos longos (avisos, descrições) devolvidos ao modelo. */
+/** Maximum length of long texts (announcements, descriptions) returned to the model. */
 export const MAX_TEXT_LENGTH = 3000;
 
-/** Converte HTML em texto e corta em `MAX_TEXT_LENGTH`. */
+/** Converts HTML to text and cuts it at `MAX_TEXT_LENGTH`. */
 export function shortText(html: string | null | undefined): string {
   return htmlToText(html).slice(0, MAX_TEXT_LENGTH);
 }
 
-/** Perfil do usuário autenticado. */
+/** Profile of the signed-in user. */
 export function toProfile(p: CanvasProfile): View {
   return {
     id: p.id,
@@ -43,7 +43,7 @@ export function toProfile(p: CanvasProfile): View {
   };
 }
 
-/** Curso com a nota atual da matrícula do aluno. */
+/** Course with the current grade of the student's enrollment. */
 export function toCourse(c: CanvasCourse): View {
   const enrollment: CanvasEnrollment = c.enrollments?.[0] ?? {};
   return {
@@ -56,7 +56,7 @@ export function toCourse(c: CanvasCourse): View {
   };
 }
 
-/** Status de entrega de um item da agenda (`null` quando o item não tem entrega). */
+/** Submission status of a planner item (`null` when the item has no submission). */
 export function toSubmissionFlags(flags: CanvasSubmissionFlags | false | undefined): View | null {
   if (!flags) return null;
   return {
@@ -67,7 +67,7 @@ export function toSubmissionFlags(flags: CanvasSubmissionFlags | false | undefin
   };
 }
 
-/** Item da agenda do aluno (tarefa, quiz, evento) com link absoluto. */
+/** Item of the student's planner (assignment, quiz, event) with an absolute link. */
 export function toPlannerItem(i: CanvasPlannerItem, baseUrl: string): View {
   return {
     type: i.plannable_type,
@@ -82,7 +82,7 @@ export function toPlannerItem(i: CanvasPlannerItem, baseUrl: string): View {
   };
 }
 
-/** Tarefa numa listagem, com status e nota da entrega do aluno. */
+/** Assignment in a listing, with the status and score of the student's submission. */
 export function toAssignmentSummary(a: CanvasAssignment): View {
   const s: CanvasSubmission = a.submission ?? {};
   return {
@@ -99,13 +99,13 @@ export function toAssignmentSummary(a: CanvasAssignment): View {
   };
 }
 
-/** Critério de rubrica com seus níveis como `points: description`. */
+/** Rubric criterion with its ratings as `points: description`. */
 export function toRubricCriterion(r: CanvasRubricCriterion): View {
   const levels = (r.ratings ?? []).map((x) => `${String(x.points)}: ${String(x.description)}`);
   return { criterion: r.description, points: r.points, ratings: levels };
 }
 
-/** Anexo (arquivo enviado ou arquivo do curso) com tamanho em KB. */
+/** Attachment (submitted file or course file) with its size in KB. */
 export function toFileInfo(f: CanvasAttachment): View {
   return {
     id: f.id,
@@ -117,7 +117,7 @@ export function toFileInfo(f: CanvasAttachment): View {
   };
 }
 
-/** Entrega do aluno com nota, comentários do professor, rubrica e anexos. */
+/** The student's submission with score, teacher comments, rubric and attachments. */
 export function toSubmissionDetail(s: CanvasSubmission): View {
   return {
     status: s.workflow_state,
@@ -135,7 +135,7 @@ export function toSubmissionDetail(s: CanvasSubmission): View {
   };
 }
 
-/** Tarefa completa: enunciado em texto, datas, rubrica e (se houver) a entrega do aluno. */
+/** Full assignment: description as text, dates, rubric and (if any) the student's submission. */
 export function toAssignmentDetail(a: CanvasAssignment, submission: CanvasSubmission | null): View {
   return {
     id: a.id,
@@ -153,7 +153,7 @@ export function toAssignmentDetail(a: CanvasAssignment, submission: CanvasSubmis
   };
 }
 
-/** Nota de uma tarefa (vinda de `students/submissions` com `include[]=assignment`). */
+/** Score of an assignment (from `students/submissions` with `include[]=assignment`). */
 export function toGradeRow(s: CanvasSubmission): View {
   return {
     assignment: s.assignment?.name,
@@ -166,7 +166,7 @@ export function toGradeRow(s: CanvasSubmission): View {
   };
 }
 
-/** Resumo de notas de uma matrícula, com o nome do curso. */
+/** Grade summary of an enrollment, with the course name. */
 export function toEnrollmentGrade(
   e: CanvasEnrollment,
   courseNames: ReadonlyMap<string, string>,
@@ -180,7 +180,7 @@ export function toEnrollmentGrade(
   };
 }
 
-/** Aviso do curso com o texto convertido e cortado. */
+/** Course announcement with its text converted and cut. */
 export function toAnnouncement(a: CanvasAnnouncement): View {
   return {
     id: a.id,
@@ -193,7 +193,7 @@ export function toAnnouncement(a: CanvasAnnouncement): View {
   };
 }
 
-/** Item de módulo (aula, arquivo, página, tarefa). */
+/** Module item (lesson, file, page, assignment). */
 export function toModuleItem(i: CanvasModuleItem): View {
   return {
     id: i.id,
@@ -206,12 +206,12 @@ export function toModuleItem(i: CanvasModuleItem): View {
   };
 }
 
-/** Módulo com seus itens. */
+/** Module with its items. */
 export function toModule(m: CanvasModule): View {
   return { id: m.id, name: m.name, items: (m.items ?? []).map(toModuleItem) };
 }
 
-/** Fórum de discussão numa listagem. */
+/** Discussion forum in a listing. */
 export function toDiscussionSummary(d: CanvasDiscussionTopic): View {
   return {
     id: d.id,
@@ -224,7 +224,7 @@ export function toDiscussionSummary(d: CanvasDiscussionTopic): View {
   };
 }
 
-/** Achata a árvore de postagens de um fórum, marcando o nível de cada resposta. */
+/** Flattens a forum's post tree, marking the depth of each reply. */
 export function flattenDiscussion(
   entries: readonly CanvasDiscussionEntry[] | undefined,
   names: ReadonlyMap<string, string>,
@@ -241,7 +241,7 @@ export function flattenDiscussion(
   ]);
 }
 
-/** Evento do calendário com descrição em texto curto. */
+/** Calendar event with a short text description. */
 export function toCalendarEvent(e: CanvasCalendarEvent): View {
   return {
     title: e.title,

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-// Media são os metadados necessários para mostrar e baixar uma mídia depois.
+// Media is the metadata needed to show and download a media file later.
 type Media struct {
 	Kind          string // image, video, audio, document, sticker
 	Mime          string
@@ -17,41 +17,41 @@ type Media struct {
 	FileEncSHA256 []byte
 }
 
-// Message é uma mensagem já convertida do whatsmeow (só texto/legenda + metadados de mídia).
+// Message is a message already converted from whatsmeow (text/caption only + media metadata).
 type Message struct {
 	ChatJID    string
 	ID         string
 	SenderJID  string
 	SenderPush string
 	FromMe     bool
-	Timestamp  int64 // unix, segundos
+	Timestamp  int64 // unix, seconds
 	Type       string
 	Text       string
 	Media      *Media
 }
 
-// Chat é a conversa como chega dos eventos.
+// Chat is the chat as it arrives from events.
 type Chat struct {
 	JID    string
 	Name   string
 	LastTS int64
 }
 
-// Contact junta nome salvo na agenda e push name.
+// Contact combines the address book name and the push name.
 type Contact struct {
 	JID      string
 	FullName string
 	PushName string
 }
 
-// HistoryBatch é o que um evento de sincronização de histórico produz.
+// HistoryBatch is what a history sync event produces.
 type HistoryBatch struct {
 	Chats    []Chat
 	Messages []Message
 	Contacts []Contact
 }
 
-// execer é o pedaço comum de *sql.DB e *sql.Tx.
+// execer is the common part of *sql.DB and *sql.Tx.
 type execer interface {
 	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
 }
@@ -72,13 +72,13 @@ ON CONFLICT (jid) DO UPDATE SET
 	full_name = CASE WHEN excluded.full_name <> '' THEN excluded.full_name ELSE contacts.full_name END,
 	push_name = CASE WHEN excluded.push_name <> '' THEN excluded.push_name ELSE contacts.push_name END`
 
-// upsertChat cria ou atualiza a conversa sem apagar nome conhecido nem regredir a data.
+// upsertChat creates or updates the chat without erasing a known name or moving the date backwards.
 func upsertChat(ctx context.Context, ex execer, c Chat) error {
 	_, err := ex.ExecContext(ctx, upsertChatSQL, c.JID, c.Name, IsGroupJID(c.JID), c.LastTS)
 	return err
 }
 
-// upsertMessage grava a mensagem (repetições do histórico só atualizam o texto).
+// upsertMessage stores the message (history repeats only update the text).
 func upsertMessage(ctx context.Context, ex execer, m Message) error {
 	md := m.Media
 	if md == nil {
@@ -90,7 +90,7 @@ func upsertMessage(ctx context.Context, ex execer, m Message) error {
 	return err
 }
 
-// upsertContact grava nomes sem apagar os já conhecidos.
+// upsertContact stores names without erasing known ones.
 func upsertContact(ctx context.Context, ex execer, c Contact) error {
 	if c.FullName == "" && c.PushName == "" {
 		return nil
@@ -99,7 +99,7 @@ func upsertContact(ctx context.Context, ex execer, c Contact) error {
 	return err
 }
 
-// nullIfEmpty converte "" em NULL.
+// nullIfEmpty converts "" to NULL.
 func nullIfEmpty(s string) any {
 	if s == "" {
 		return nil
@@ -107,12 +107,12 @@ func nullIfEmpty(s string) any {
 	return s
 }
 
-// SaveMessage grava uma mensagem nova e atualiza a conversa e o push name do remetente.
+// SaveMessage stores a new message and updates the chat and the sender's push name.
 func (s *Store) SaveMessage(ctx context.Context, m Message) error {
 	return s.SaveHistory(ctx, HistoryBatch{Messages: []Message{m}})
 }
 
-// SaveHistory grava um lote (conversas, mensagens, contatos) numa transação.
+// SaveHistory stores a batch (chats, messages, contacts) in one transaction.
 func (s *Store) SaveHistory(ctx context.Context, b HistoryBatch) error {
 	return s.inTx(ctx, func(tx *sql.Tx) error {
 		for _, c := range b.Chats {
@@ -129,7 +129,7 @@ func (s *Store) SaveHistory(ctx context.Context, b HistoryBatch) error {
 	})
 }
 
-// saveMessages grava cada mensagem com sua conversa e o push name do remetente.
+// saveMessages stores each message with its chat and the sender's push name.
 func saveMessages(ctx context.Context, tx *sql.Tx, msgs []Message) error {
 	for _, m := range msgs {
 		if err := upsertChat(ctx, tx, Chat{JID: m.ChatJID, LastTS: m.Timestamp}); err != nil {
@@ -147,30 +147,30 @@ func saveMessages(ctx context.Context, tx *sql.Tx, msgs []Message) error {
 	return nil
 }
 
-// UpsertContacts grava nomes de contatos (agenda, push names).
+// UpsertContacts stores contact names (address book, push names).
 func (s *Store) UpsertContacts(ctx context.Context, cs []Contact) error {
 	return s.SaveHistory(ctx, HistoryBatch{Contacts: cs})
 }
 
-// SetChatName define o nome de uma conversa (ex.: nome de grupo).
+// SetChatName sets a chat's name (e.g. a group name).
 func (s *Store) SetChatName(ctx context.Context, jid, name string) error {
 	return upsertChat(ctx, s.db, Chat{JID: jid, Name: name})
 }
 
-// EditMessage troca o texto de uma mensagem editada.
+// EditMessage replaces the text of an edited message.
 func (s *Store) EditMessage(ctx context.Context, chatJID, id, text string) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE messages SET text = ?, text_fold = ? WHERE chat_jid = ? AND id = ?`,
 		text, Fold(text), chatJID, id)
 	return err
 }
 
-// DeleteMessage remove uma mensagem apagada para todos.
+// DeleteMessage removes a message deleted for everyone.
 func (s *Store) DeleteMessage(ctx context.Context, chatJID, id string) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM messages WHERE chat_jid = ? AND id = ?`, chatJID, id)
 	return err
 }
 
-// inTx roda fn numa transação, com commit ou rollback.
+// inTx runs fn in a transaction, with commit or rollback.
 func (s *Store) inTx(ctx context.Context, fn func(*sql.Tx) error) error {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {

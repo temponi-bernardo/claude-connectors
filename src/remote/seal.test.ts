@@ -5,43 +5,43 @@ import { openSealed, parseSealKey, sealPayload, unsealPayload } from './seal.js'
 const KEY = randomBytes(32);
 
 describe('parseSealKey', () => {
-  it('aceita 32 bytes em base64 ou base64url', () => {
+  it('accepts 32 bytes in base64 or base64url', () => {
     expect(parseSealKey(KEY.toString('base64')).equals(KEY)).toBe(true);
     expect(parseSealKey(KEY.toString('base64url')).equals(KEY)).toBe(true);
   });
 
-  it('recusa chave ausente ou de tamanho errado, dizendo como gerar', () => {
+  it('rejects a missing or wrong-size key, saying how to generate one', () => {
     expect(() => parseSealKey(null)).toThrow(/SEAL_KEY/);
     expect(() => parseSealKey(randomBytes(16).toString('base64'))).toThrow(/32 bytes/);
   });
 
-  it('cita no erro o nome da variável dada', () => {
+  it('names the given variable in the error', () => {
     expect(() => parseSealKey(null, 'TOKEN_ENC_KEY')).toThrow(/TOKEN_ENC_KEY/);
-    expect(() => parseSealKey('YQ==', 'TOKEN_ENC_KEY')).toThrow(/TOKEN_ENC_KEY precisa/);
+    expect(() => parseSealKey('YQ==', 'TOKEN_ENC_KEY')).toThrow(/TOKEN_ENC_KEY must/);
   });
 });
 
-describe('sealPayload e unsealPayload', () => {
-  it('abre o que selou, com IV diferente a cada selo', () => {
+describe('sealPayload and unsealPayload', () => {
+  it('opens what it sealed, with a different IV for each seal', () => {
     const a = sealPayload({ typ: 'x', n: 1 }, KEY);
     const b = sealPayload({ typ: 'x', n: 1 }, KEY);
     expect(a).not.toBe(b);
     expect(unsealPayload(a, KEY)).toEqual({ typ: 'x', n: 1 });
   });
 
-  it('devolve nulo para outra chave, texto adulterado ou lixo', () => {
+  it('returns null for another key, tampered text or garbage', () => {
     const sealed = sealPayload({ typ: 'x' }, KEY);
     expect(unsealPayload(sealed, randomBytes(32))).toBeNull();
     expect(unsealPayload(`${sealed.slice(0, -2)}AA`, KEY)).toBeNull();
     expect(unsealPayload('abc', KEY)).toBeNull();
-    expect(unsealPayload(sealPayload('texto', KEY), KEY)).toBeNull();
+    expect(unsealPayload(sealPayload('text', KEY), KEY)).toBeNull();
   });
 });
 
 describe('openSealed', () => {
   const now = 1_000;
 
-  it('abre só o tipo pedido e dentro da validade', () => {
+  it('opens only the requested type and within its validity', () => {
     const sealed = sealPayload({ typ: 'code', exp: now + 1, v: 'ok' }, KEY);
     expect(openSealed(sealed, KEY, { typ: 'code', now })).toEqual({
       typ: 'code',
@@ -52,7 +52,7 @@ describe('openSealed', () => {
     expect(openSealed(sealed, KEY, { typ: 'code', now: now + 1 })).toBeNull();
   });
 
-  it('recusa selo sem validade numérica', () => {
+  it('rejects a seal without a numeric expiry', () => {
     expect(openSealed(sealPayload({ typ: 'code' }, KEY), KEY, { typ: 'code', now })).toBeNull();
   });
 });

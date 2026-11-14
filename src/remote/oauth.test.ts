@@ -19,48 +19,48 @@ import {
 import { sealPayload } from './seal.js';
 
 const settings: OAuthSettings = {
-  issuer: 'https://canvas.exemplo.dev',
+  issuer: 'https://canvas.example.dev',
   key: randomBytes(32),
   redirectHosts: ['claude.ai', 'localhost'],
 };
 const NOW = 1_000_000;
 const CALLBACK = 'https://claude.ai/api/mcp/auth_callback';
 
-describe('metadados', () => {
-  it('anunciam os endpoints do servidor de autorização com PKCE S256', () => {
+describe('metadata', () => {
+  it('advertise the authorization server endpoints with PKCE S256', () => {
     const meta = authorizationServerMetadata(settings.issuer);
-    expect(meta.authorization_endpoint).toBe('https://canvas.exemplo.dev/authorize');
-    expect(meta.registration_endpoint).toBe('https://canvas.exemplo.dev/register');
+    expect(meta.authorization_endpoint).toBe('https://canvas.example.dev/authorize');
+    expect(meta.registration_endpoint).toBe('https://canvas.example.dev/register');
     expect(meta.code_challenge_methods_supported).toEqual(['S256']);
   });
 
-  it('apontam o recurso /mcp para o próprio emissor', () => {
+  it('point the /mcp resource at the issuer itself', () => {
     expect(protectedResourceMetadata(settings.issuer)).toMatchObject({
-      resource: 'https://canvas.exemplo.dev/mcp',
-      authorization_servers: ['https://canvas.exemplo.dev'],
+      resource: 'https://canvas.example.dev/mcp',
+      authorization_servers: ['https://canvas.example.dev'],
     });
   });
 });
 
 describe('isAllowedRedirect', () => {
-  it('aceita https em host listado, subdomínio dele e localhost em http', () => {
+  it('accepts https on a listed host, its subdomains and localhost over http', () => {
     expect(isAllowedRedirect(CALLBACK, settings.redirectHosts)).toBe(true);
     expect(isAllowedRedirect('https://www.claude.ai/cb', settings.redirectHosts)).toBe(true);
     expect(isAllowedRedirect('http://localhost:3118/callback', settings.redirectHosts)).toBe(true);
     expect(isAllowedRedirect('http://127.0.0.1:3118/callback', settings.redirectHosts)).toBe(true);
   });
 
-  it('recusa host fora da lista, http público e texto inválido', () => {
+  it('rejects an unlisted host, public http and invalid text', () => {
     expect(isAllowedRedirect('https://evil.com/cb', settings.redirectHosts)).toBe(false);
     expect(isAllowedRedirect('https://claude.ai.evil.com/cb', settings.redirectHosts)).toBe(false);
     expect(isAllowedRedirect('http://claude.ai/cb', settings.redirectHosts)).toBe(false);
-    expect(isAllowedRedirect('nada', settings.redirectHosts)).toBe(false);
+    expect(isAllowedRedirect('nothing', settings.redirectHosts)).toBe(false);
     expect(isAllowedRedirect('http://localhost/cb', ['claude.ai'])).toBe(false);
   });
 });
 
 describe('pkceChallenge', () => {
-  it('calcula o desafio S256 do exemplo da RFC 7636', () => {
+  it('computes the S256 challenge of the RFC 7636 example', () => {
     expect(pkceChallenge('dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk')).toBe(
       'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
     );
@@ -68,7 +68,7 @@ describe('pkceChallenge', () => {
 });
 
 describe('registerClient', () => {
-  it('sela os endereços de retorno no client_id', () => {
+  it('seals the redirect addresses into the client_id', () => {
     const result = registerClient(
       { redirect_uris: [CALLBACK], client_name: 'Claude' },
       settings,
@@ -81,7 +81,7 @@ describe('registerClient', () => {
     expect(typeof result.value.client_id).toBe('string');
   });
 
-  it('recusa corpo sem endereços ou com endereço fora da lista', () => {
+  it('rejects a body without addresses or with an unlisted address', () => {
     expect(registerClient({}, settings, NOW)).toMatchObject({
       ok: false,
       error: 'invalid_redirect_uri',
@@ -99,7 +99,7 @@ describe('registerClient', () => {
 describe('parseAuthorizeQuery', () => {
   function clientId(): string {
     const result = registerClient({ redirect_uris: [CALLBACK] }, settings, NOW);
-    if (!result.ok) throw new Error('registro falhou');
+    if (!result.ok) throw new Error('registration failed');
     return result.value.client_id;
   }
 
@@ -108,22 +108,22 @@ describe('parseAuthorizeQuery', () => {
       response_type: 'code',
       client_id: clientId(),
       redirect_uri: CALLBACK,
-      code_challenge: 'desafio',
+      code_challenge: 'challenge',
       code_challenge_method: 'S256',
       state: 'xyz',
       ...overrides,
     });
   }
 
-  it('devolve o pedido validado', () => {
+  it('returns the validated request', () => {
     const result = parseAuthorizeQuery(query(), settings, NOW);
     expect(result).toMatchObject({
       ok: true,
-      value: { redirectUri: CALLBACK, codeChallenge: 'desafio', state: 'xyz' },
+      value: { redirectUri: CALLBACK, codeChallenge: 'challenge', state: 'xyz' },
     });
   });
 
-  it('recusa cliente desconhecido, retorno não registrado e PKCE ausente ou plain', () => {
+  it('rejects an unknown client, an unregistered redirect and missing or plain PKCE', () => {
     const forged = sealPayload(
       { typ: 'client', exp: NOW + 10, redirect_uris: [CALLBACK] },
       randomBytes(32),
@@ -133,7 +133,7 @@ describe('parseAuthorizeQuery', () => {
       error: 'invalid_client',
     });
     expect(
-      parseAuthorizeQuery(query({ redirect_uri: 'https://claude.ai/outro' }), settings, NOW),
+      parseAuthorizeQuery(query({ redirect_uri: 'https://claude.ai/other' }), settings, NOW),
     ).toMatchObject({ ok: false, error: 'invalid_request' });
     expect(parseAuthorizeQuery(query({ code_challenge: '' }), settings, NOW)).toMatchObject({
       ok: false,
@@ -149,26 +149,26 @@ describe('parseAuthorizeQuery', () => {
   });
 });
 
-describe('auxiliares do OAuth', () => {
-  it('oauthError monta o erro sem valor', () => {
+describe('OAuth helpers', () => {
+  it('oauthError builds the error without a value', () => {
     expect(oauthError('x', 'y')).toEqual({ ok: false, error: 'x', description: 'y' });
   });
 
-  it('readRedirectUris aceita só lista não vazia de textos', () => {
+  it('readRedirectUris accepts only a non-empty list of strings', () => {
     expect(readRedirectUris({ redirect_uris: [CALLBACK] })).toEqual([CALLBACK]);
     expect(readRedirectUris({ redirect_uris: [] })).toBeNull();
     expect(readRedirectUris({ redirect_uris: [1] })).toBeNull();
     expect(readRedirectUris('x')).toBeNull();
   });
 
-  it('clientRedirectUris abre só client_id selado por este servidor', () => {
+  it('clientRedirectUris opens only a client_id sealed by this server', () => {
     const result = registerClient({ redirect_uris: [CALLBACK] }, settings, NOW);
-    if (!result.ok) throw new Error('registro falhou');
+    if (!result.ok) throw new Error('registration failed');
     expect(clientRedirectUris(result.value.client_id, settings, NOW)).toEqual([CALLBACK]);
-    expect(clientRedirectUris('falso', settings, NOW)).toBeNull();
+    expect(clientRedirectUris('fake', settings, NOW)).toBeNull();
   });
 
-  it('readCodeChallenge exige response_type=code e S256', () => {
+  it('readCodeChallenge requires response_type=code and S256', () => {
     const ok = new URLSearchParams({
       response_type: 'code',
       code_challenge: 'c',
@@ -180,7 +180,7 @@ describe('auxiliares do OAuth', () => {
 });
 
 describe('resolveIssuer', () => {
-  it('prefere PUBLIC_URL sem barra final; sem ela, usa a origem', () => {
+  it('prefers PUBLIC_URL without a trailing slash; without it, uses the origin', () => {
     expect(resolveIssuer({ PUBLIC_URL: 'https://a.dev//' }, 'https://b.dev')).toBe('https://a.dev');
     expect(resolveIssuer({}, 'https://b.dev')).toBe('https://b.dev');
   });
@@ -189,14 +189,14 @@ describe('resolveIssuer', () => {
 describe('readOAuthSettings', () => {
   const key = randomBytes(32).toString('base64');
 
-  it('usa o emissor dado, a chave e os hosts padrão', () => {
+  it('uses the given issuer, the key and the default hosts', () => {
     const read = readOAuthSettings({ SEAL_KEY: key }, 'https://x.dev');
     expect(read.issuer).toBe('https://x.dev');
     expect(read.key.length).toBe(32);
     expect(read.redirectHosts).toEqual(DEFAULT_REDIRECT_HOSTS);
   });
 
-  it('aceita hosts separados por vírgula e exige SEAL_KEY', () => {
+  it('accepts comma-separated hosts and requires SEAL_KEY', () => {
     const read = readOAuthSettings(
       { SEAL_KEY: key, OAUTH_REDIRECT_HOSTS: 'a.dev, ,b.dev' },
       'https://x',

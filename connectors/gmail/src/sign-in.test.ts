@@ -35,9 +35,9 @@ const AUTH: AuthRequest = {
 };
 const EXP = { exp: 1_700_000_000 + 600 };
 const GMAIL_SCOPE = 'openid email https://www.googleapis.com/auth/gmail.modify';
-const PRIVATE = { ...TEST_SETTINGS, allowedEmails: ['dono@example.com'] };
+const PRIVATE = { ...TEST_SETTINGS, allowedEmails: ['owner@example.com'] };
 
-/** `OAuthHelpers` falso que registra o que recebe e devolve valores fixos. */
+/** Fake `OAuthHelpers` that records what it gets and returns fixed values. */
 function fakeOAuth(overrides: Partial<OAuthHelpers> = {}) {
   const seen: Record<string, unknown> = {};
   const oauth = {
@@ -75,7 +75,7 @@ function fakeOAuth(overrides: Partial<OAuthHelpers> = {}) {
   return { oauth, seen };
 }
 
-/** Google cuja troca de código devolve o id_token do e-mail dado com o nonce guardado em `seen.data`. */
+/** Google whose code exchange returns the given email's id_token with the nonce kept in `seen.data`. */
 function googleFor(email: string, seen: Record<string, unknown>) {
   return fakeFetch([
     tokenRoute(() => {
@@ -90,7 +90,7 @@ function googleFor(email: string, seen: Record<string, unknown>) {
   ]);
 }
 
-/** Envio do formulário de consentimento. */
+/** Consent form submission. */
 function form(body: string): Request {
   return new Request('https://gmail.test/authorize', {
     method: 'POST',
@@ -100,16 +100,16 @@ function form(body: string): Request {
 }
 
 describe('authorizationErrorResponse', () => {
-  it('mostra a descrição do erro da biblioteca', async () => {
-    const error = new AuthorizationError('invalid_request', { description: 'cliente ruim' });
+  it('shows the library error description', async () => {
+    const error = new AuthorizationError('invalid_request', { description: 'bad client' });
     const response = authorizationErrorResponse(error);
     expect(response.status).toBe(400);
-    expect(await response.text()).toContain('cliente ruim');
+    expect(await response.text()).toContain('bad client');
   });
 });
 
 describe('beginGoogleSignIn', () => {
-  it('guarda verificador e nonce na transação e pede gerenciar o Gmail com acesso offline', async () => {
+  it('keeps verifier and nonce in the transaction and asks to manage Gmail with offline access', async () => {
     const { oauth, seen } = fakeOAuth();
     const response = await beginGoogleSignIn(testDeps(fakeFetch([])), oauth, {
       request: AUTH,
@@ -124,7 +124,7 @@ describe('beginGoogleSignIn', () => {
 });
 
 describe('showAuthorize', () => {
-  it('mostra o consentimento ou segue direto quando lembrado', async () => {
+  it('shows the consent or goes straight on when remembered', async () => {
     const deps = testDeps(fakeFetch([]));
     const page = await showAuthorize(
       deps,
@@ -141,7 +141,7 @@ describe('showAuthorize', () => {
     expect(direct.status).toBe(302);
   });
 
-  it('pedido inválido vira página 400', async () => {
+  it('an invalid request becomes a 400 page', async () => {
     const failing = fakeOAuth({ parseAuthRequest: () => Promise.reject(new Error('x')) }).oauth;
     const response = await showAuthorize(
       testDeps(fakeFetch([])),
@@ -153,7 +153,7 @@ describe('showAuthorize', () => {
 });
 
 describe('submitAuthorize', () => {
-  it('aprovar segue ao Google; negar volta ao cliente', async () => {
+  it('approving goes to Google; denying returns to the client', async () => {
     const deps = testDeps(fakeFetch([]));
     const approved = await submitAuthorize(
       deps,
@@ -166,8 +166,8 @@ describe('submitAuthorize', () => {
   });
 });
 
-describe('accessDeniedPage e linkSignedInAccount', () => {
-  const identity = { sub: 'sub-1', email: 'dono@example.com' };
+describe('accessDeniedPage and linkSignedInAccount', () => {
+  const identity = { sub: 'sub-1', email: 'owner@example.com' };
   const tokens: GoogleTokens = {
     accessToken: 'a',
     expiresIn: 3600,
@@ -176,11 +176,11 @@ describe('accessDeniedPage e linkSignedInAccount', () => {
     scope: GMAIL_SCOPE,
   };
 
-  it('accessDeniedPage dá 403', () => {
+  it('accessDeniedPage gives 403', () => {
     expect(accessDeniedPage().status).toBe(403);
   });
 
-  it('vincula a conta do login, ou não vincula sem o Gmail, sem barrar o login', async () => {
+  it('links the sign-in account, or skips it without Gmail, without blocking sign-in', async () => {
     const deps = testDeps(fakeFetch([]));
     expect(await linkSignedInAccount(deps, identity, tokens)).toBe(true);
     expect(await loadOwnerAccounts(deps.kv, TEST_TOKEN_KEY, 'sub-1')).toHaveLength(1);
@@ -188,10 +188,10 @@ describe('accessDeniedPage e linkSignedInAccount', () => {
     expect(await linkSignedInAccount(testDeps(fakeFetch([])), identity, noGmail)).toBe(false);
   });
 
-  it('falha ao gravar não impede o login', async () => {
+  it('a write failure does not block sign-in', async () => {
     const deps = testDeps(fakeFetch([]));
     const failingKv = {
-      get: () => Promise.reject(new Error('KV fora')),
+      get: () => Promise.reject(new Error('KV down')),
       put: () => Promise.resolve(),
       delete: () => Promise.resolve(),
     };
@@ -200,11 +200,11 @@ describe('accessDeniedPage e linkSignedInAccount', () => {
   });
 });
 
-describe('completeSignIn e finishSignIn', () => {
-  it('conclui com o sub como usuário, vincula a conta e põe id de sessão', async () => {
+describe('completeSignIn and finishSignIn', () => {
+  it('completes with the sub as user, links the account and sets a session id', async () => {
     const { oauth, seen } = fakeOAuth();
     seen.data = { verifier: 'v', nonce: 'n' };
-    const deps = testDeps(googleFor('qualquer@example.com', seen));
+    const deps = testDeps(googleFor('anyone@example.com', seen));
     const redirect = await completeSignIn(deps, oauth, {
       request: AUTH,
       data: seen.data as SignInData,
@@ -215,20 +215,20 @@ describe('completeSignIn e finishSignIn', () => {
       userId: string;
       props: { owner: string; email: string; sid: string };
     };
-    expect(completed.userId).toBe('sub-qualquer@example.com');
+    expect(completed.userId).toBe('sub-anyone@example.com');
     expect(completed.props).toMatchObject({
-      owner: 'sub-qualquer@example.com',
-      email: 'qualquer@example.com',
+      owner: 'sub-anyone@example.com',
+      email: 'anyone@example.com',
     });
     expect(completed.props.sid).toMatch(/^[A-Za-z0-9_-]{22}$/);
-    const linked = await loadOwnerAccounts(deps.kv, TEST_TOKEN_KEY, 'sub-qualquer@example.com');
-    expect(linked.map((a) => a.email)).toEqual(['qualquer@example.com']);
+    const linked = await loadOwnerAccounts(deps.kv, TEST_TOKEN_KEY, 'sub-anyone@example.com');
+    expect(linked.map((a) => a.email)).toEqual(['anyone@example.com']);
   });
 
-  it('no modo privado devolve nulo para e-mail fora da lista; falha sem id_token', async () => {
+  it('in private mode returns null for an unlisted email; fails without id_token', async () => {
     const { oauth, seen } = fakeOAuth();
     seen.data = { verifier: 'v', nonce: 'n' };
-    const outsider = { ...testDeps(googleFor('intruso@example.com', seen)), settings: PRIVATE };
+    const outsider = { ...testDeps(googleFor('intruder@example.com', seen)), settings: PRIVATE };
     const args = { request: AUTH, data: seen.data as SignInData, code: 'c' };
     expect(await completeSignIn(outsider, oauth, args)).toBeNull();
     expect(outsider.kv.entries.size).toBe(0);
@@ -236,17 +236,17 @@ describe('completeSignIn e finishSignIn', () => {
     await expect(completeSignIn(noId, oauth, args)).rejects.toThrow(/id_token/);
   });
 
-  it('finishSignIn redireciona, nega com 403 ou devolve access_denied sem código', async () => {
+  it('finishSignIn redirects, denies with 403 or returns access_denied without a code', async () => {
     const { oauth, seen } = fakeOAuth();
     seen.data = { verifier: 'v', nonce: 'n' };
-    const ok = testDeps(googleFor('dono@example.com', seen));
+    const ok = testDeps(googleFor('owner@example.com', seen));
     function callback(query: string): Request {
       return new Request(`https://gmail.test/google/callback?${query}`);
     }
     expect(
       (await finishSignIn(ok, oauth, callback('state=s&code=c'))).headers.get('location'),
     ).toBe('https://claude.ai/cb?code=ok');
-    const outsider = { ...testDeps(googleFor('intruso@example.com', seen)), settings: PRIVATE };
+    const outsider = { ...testDeps(googleFor('intruder@example.com', seen)), settings: PRIVATE };
     expect((await finishSignIn(outsider, oauth, callback('state=s&code=c'))).status).toBe(403);
     const denied = await finishSignIn(ok, oauth, callback('state=s&error=access_denied'));
     expect(denied.headers.get('location')).toContain('error=access_denied');

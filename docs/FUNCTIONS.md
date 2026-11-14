@@ -1310,7 +1310,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `fetchFn`: `fetch` function; `url`: download link (already authorized by Canvas).
 - **Output:** Promise with the file content.
 - **Effects:** Network.
-- **Errors:** Rejects with "Falha ao baixar o arquivo (<status>)" if the response is not ok.
+- **Errors:** Rejects with "Failed to download the file (<status>)." if the response is not ok.
 
 ### `createCanvasClient`
 
@@ -1344,7 +1344,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `fetchFn`: `fetch` function; `url`: download link (already authorized by Canvas).
 - **Output:** Promise with the ok `Response`.
 - **Effects:** Network.
-- **Errors:** Rejects with "Falha ao baixar o arquivo (<status>)" if the response is not ok.
+- **Errors:** Rejects with "Failed to download the file (<status>)." if the response is not ok.
 
 ### `fetchFileBytes`
 
@@ -1378,7 +1378,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `deps`: base URL, token and `fetchFn`; `req`: method, path, parameters and optional body.
 - **Output:** Promise with the 2xx `Response`.
 - **Effects:** Network (via `deps.fetchFn`).
-- **Errors:** Rejects with `unauthorizedMessage()` on 401 and with "Canvas <status> em <método> <caminho>: <corpo>" on any other non-2xx status.
+- **Errors:** Rejects with `unauthorizedMessage()` on 401 and with "Canvas <status> on <method> <path>: <body>" on any other non-2xx status.
 
 ## `connectors/canvas-puc/src/format.ts`
 
@@ -1495,7 +1495,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Converts a rubric criterion with its ratings as `pontos: descrição`.
+- **Does:** Converts a rubric criterion with its ratings as `points: description`.
 - **Input:** `r`: criterion from the API.
 - **Output:** `View` with `criterion`, `points` and `ratings` (empty list without ratings).
 - **Effects:** None (pure).
@@ -3458,7 +3458,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `bytes`: CFB file.
 - **Output:** `CfbHeader`.
 - **Effects:** None (pure).
-- **Errors:** Throws "Arquivo não é um documento do Office (OLE)." without the signature.
+- **Errors:** Throws "File is not an Office (OLE) document." without the signature.
 
 ### `cfbSector`
 
@@ -3681,7 +3681,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `table`: 0Table/1Table stream; `fcClx`: Clx position (from the FIB).
 - **Output:** List of `DocPiece`.
 - **Effects:** None (pure).
-- **Errors:** Throws "Documento .doc com tabela de texto inválida." if the Clx has no table.
+- **Errors:** Throws ".doc document with an invalid text table." if the Clx has no table.
 
 ### `pieceText`
 
@@ -3732,7 +3732,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `bytes`: .doc file.
 - **Output:** Text.
 - **Effects:** None (pure).
-- **Errors:** Throws "O .doc está protegido por senha.", "Arquivo .doc sem o stream WordDocument.", "Arquivo .doc sem o stream de tabela." or the errors of `openCfb`/`parsePieceTable`.
+- **Errors:** Throws "The .doc is password-protected.", ".doc file without the WordDocument stream.", ".doc file without the table stream." or the errors of `openCfb`/`parsePieceTable`.
 
 ### `wordKind`
 
@@ -3785,7 +3785,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `bytes`: ZIP file.
 - **Output:** EOCD position.
 - **Effects:** None (pure).
-- **Errors:** Throws "Arquivo ZIP inválido: diretório central não encontrado.".
+- **Errors:** Throws "Invalid ZIP file: central directory not found.".
 
 ### `listZipEntries`
 
@@ -3853,7 +3853,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `bytes`: ZIP; `name`: entry path.
 - **Output:** Promise with the bytes, or `null` if the entry does not exist.
 - **Effects:** None (CPU only).
-- **Errors:** Rejects with "Compressão ZIP não suportada (método N)." for other methods.
+- **Errors:** Rejects with "Unsupported ZIP compression (method N)." for other methods.
 
 ### `decompressBytes`
 
@@ -5479,7 +5479,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `token`: `next_page_token` from a previous search with `all`.
 - **Output:** `page_token` per alias; non-string entries are discarded.
 - **Effects:** None (pure).
-- **Errors:** Throws an actionable error ("page_token inválido") if the text is not base64url of a JSON object.
+- **Errors:** Throws an actionable error ("Invalid page_token: ...") if the text is not base64url of a JSON object.
 
 ### `fetchThreadMetadata`
 
@@ -7051,7 +7051,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Normalizes a send recipient to a JID: a number (with or without `+`, spaces, dashes) becomes `<dígitos>@s.whatsapp.net`; contact, LID and group JIDs (`@g.us`, including `criador-timestamp`) pass through as is. Pure.
+- **Does:** Normalizes a send recipient to a JID: a number (with or without `+`, spaces, dashes) becomes `<digits>@s.whatsapp.net`; contact, LID and group JIDs (`@g.us`, including `creator-timestamp`) pass through as is. Pure.
 - **Input:** `raw`: typed number or JID.
 - **Output:** Normalized JID, or `null` if it is neither a contact nor a group (e.g. `status@broadcast`).
 - **Effects:** None (pure).
@@ -9507,7 +9507,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Generates a random MIME boundary that does not collide with base64.
 - **Input:** None.
-- **Output:** `=_part_<aleatório>`.
+- **Output:** `=_part_<random>`.
 - **Effects:** Reads the random generator.
 - **Errors:** None.
 

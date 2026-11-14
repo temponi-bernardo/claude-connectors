@@ -7,8 +7,8 @@ import {
 } from './worker-env.js';
 import { memoryBucket } from './fixtures/fakes.js';
 
-describe('bridgeStub e bridgeFetchFor', () => {
-  it('usa sempre a mesma instância nomeada', () => {
+describe('bridgeStub and bridgeFetchFor', () => {
+  it('always uses the same named instance', () => {
     const stub = { fetch: vi.fn(() => Promise.resolve(new Response('ok'))) };
     const idFromName = vi.fn((name: string) => `id:${name}`);
     const get = vi.fn(() => stub);
@@ -18,7 +18,7 @@ describe('bridgeStub e bridgeFetchFor', () => {
     expect(get).toHaveBeenCalledWith(`id:${BRIDGE_INSTANCE_NAME}`);
   });
 
-  it('transforma caminhos relativos em requisições ao stub', async () => {
+  it('turns relative paths into requests to the stub', async () => {
     const fetch = vi.fn((request: Request) => Promise.resolve(new Response(request.url)));
     const res = await bridgeFetchFor({ fetch })('/status?x=1', { method: 'POST' });
     expect(await res.text()).toBe('http://bridge/status?x=1');

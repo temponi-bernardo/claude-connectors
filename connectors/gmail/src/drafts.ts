@@ -1,6 +1,6 @@
 /**
- * Rascunhos do Gmail: listar, criar (novo ou como resposta, na mesma conversa), substituir o conteúdo,
- * enviar e apagar. Escritas passam por `gmailWrite` (escopo `gmail.modify`).
+ * Gmail drafts: list, create (new or as a reply, in the same thread), replace the content, send and delete.
+ * Writes go through `gmailWrite` (`gmail.modify` scope).
  */
 import type { AccountRef } from './accounts.js';
 import type { PreparedEmail } from './compose.js';
@@ -20,19 +20,19 @@ import {
   type ComposeArgs,
 } from './send.js';
 
-/** Rascunho da Gmail API. */
+/** Gmail API draft. */
 export interface GmailDraft {
   readonly id: string;
   readonly message?: GmailMessage;
 }
 
-/** Argumentos de um rascunho: e-mail novo, ou resposta a `replyToMessageId` (destinatários do original). */
+/** Draft arguments: a new email, or a reply to `replyToMessageId` (recipients from the original). */
 export interface DraftArgs extends ComposeArgs {
   readonly replyToMessageId: string | null;
   readonly replyAll: boolean;
 }
 
-/** Resumo de um rascunho: ids, destinatários, assunto, data e trecho. */
+/** Draft summary: ids, recipients, subject, date and snippet. */
 export function draftSummary(draft: GmailDraft): Record<string, unknown> {
   const { to, cc, subject } = {
     to: '',
@@ -50,7 +50,7 @@ export function draftSummary(draft: GmailDraft): Record<string, unknown> {
   };
 }
 
-/** Lista os rascunhos da conta (até `maxResults`) com o resumo de cada um. */
+/** Lists the account drafts (up to `maxResults`) with a summary of each. */
 export async function listDrafts(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -70,7 +70,7 @@ export async function listDrafts(
   return { account: ref.alias, drafts: drafts.map(draftSummary) };
 }
 
-/** E-mail do rascunho: resposta ao original (se pedido) ou e-mail novo com os destinatários dados. */
+/** Draft email: a reply to the original (if asked) or a new email with the given recipients. */
 export function prepareDraftEmail(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -84,7 +84,7 @@ export function prepareDraftEmail(
   });
 }
 
-/** Ids devolvidos por uma operação de rascunho. */
+/** Ids returned by a draft operation. */
 export function draftIds(draft: GmailDraft): Record<string, unknown> {
   return {
     draft_id: draft.id || null,
@@ -93,7 +93,7 @@ export function draftIds(draft: GmailDraft): Record<string, unknown> {
   };
 }
 
-/** Cria um rascunho com o e-mail pronto. */
+/** Creates a draft with the ready email. */
 export async function createDraft(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -107,7 +107,7 @@ export async function createDraft(
   return { account: ref.alias, ...draftIds(draft) };
 }
 
-/** Substitui todo o conteúdo de um rascunho pelo e-mail pronto. */
+/** Replaces the whole content of a draft with the ready email. */
 export async function updateDraft(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -121,7 +121,7 @@ export async function updateDraft(
   return { account: ref.alias, ...draftIds(draft) };
 }
 
-/** Envia um rascunho existente e devolve os ids da mensagem enviada. */
+/** Sends an existing draft and returns the sent message ids. */
 export async function sendDraft(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -135,7 +135,7 @@ export async function sendDraft(
   return sentResult(ref.alias, sent);
 }
 
-/** Apaga um rascunho (só o rascunho; mensagens enviadas não são tocadas). */
+/** Deletes a draft (only the draft; sent messages are not touched). */
 export async function deleteDraft(
   deps: OwnerDeps,
   ref: AccountRef,

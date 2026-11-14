@@ -12,7 +12,7 @@ import {
 
 const docx = new Uint8Array(readFileSync(new URL('./fixtures/exemplo.docx', import.meta.url)));
 
-/** ZIP mínimo com uma entrada sem compressão (método 0) ou com o método dado. */
+/** Minimal ZIP with one uncompressed entry (method 0) or with the given method. */
 function storedZip(name: string, content: string, method = 0): Uint8Array {
   const n = new TextEncoder().encode(name);
   const data = new TextEncoder().encode(content);
@@ -42,23 +42,23 @@ function storedZip(name: string, content: string, method = 0): Uint8Array {
 }
 
 describe('findEndOfCentralDirectory', () => {
-  it('acha o EOCD ou falha em arquivo que não é ZIP', () => {
+  it('finds the EOCD or fails on a file that is not a ZIP', () => {
     expect(findEndOfCentralDirectory(docx)).toBeGreaterThan(0);
     expect(() => findEndOfCentralDirectory(new Uint8Array(30))).toThrow('Invalid ZIP');
   });
 });
 
 describe('listZipEntries', () => {
-  it('lista as entradas do .docx e para em entrada corrompida', () => {
+  it('lists the .docx entries and stops at a corrupt entry', () => {
     expect(listZipEntries(docx).map((e) => e.name)).toContain('word/document.xml');
     const zip = storedZip('a.txt', 'oi');
-    zip[zip.length - 22 + 16] = 0; // diretório central apontando para o cabeçalho local
+    zip[zip.length - 22 + 16] = 0; // central directory pointing at the local header
     expect(listZipEntries(zip)).toEqual([]);
   });
 });
 
 describe('zipEntryBytes', () => {
-  it('pula o cabeçalho local', () => {
+  it('skips the local header', () => {
     const zip = storedZip('a.txt', 'oi');
     const [entry] = listZipEntries(zip);
     expect(new TextDecoder().decode(zipEntryBytes(zip, entry!))).toBe('oi');
@@ -66,7 +66,7 @@ describe('zipEntryBytes', () => {
 });
 
 describe('inflateRaw', () => {
-  it('descomprime DEFLATE puro', async () => {
+  it('decompresses raw DEFLATE', async () => {
     const compressed = new Uint8Array(
       await new Response(
         new Blob(['olá olá olá']).stream().pipeThrough(new CompressionStream('deflate-raw')),
@@ -77,24 +77,24 @@ describe('inflateRaw', () => {
 });
 
 describe('readZipEntry', () => {
-  it('lê entradas comprimidas e guardadas, e devolve null para nome ausente', async () => {
+  it('reads compressed and stored entries, and returns null for a missing name', async () => {
     const xml = await readZipEntry(docx, 'word/document.xml');
     expect(new TextDecoder().decode(xml!)).toContain('<w:document');
     const stored = await readZipEntry(storedZip('a.txt', 'oi'), 'a.txt');
     expect(new TextDecoder().decode(stored!)).toBe('oi');
-    await expect(readZipEntry(docx, 'nada.xml')).resolves.toBeNull();
+    await expect(readZipEntry(docx, 'missing.xml')).resolves.toBeNull();
   });
 
-  it('recusa métodos de compressão desconhecidos', async () => {
+  it('rejects unknown compression methods', async () => {
     await expect(readZipEntry(storedZip('a', 'b', 12), 'a')).rejects.toThrow('method 12');
   });
 });
 
 describe('decompressBytes', () => {
-  it('descomprime dados com cabeçalho zlib (formato deflate)', async () => {
-    const compressed = deflateSync(Buffer.from('fluxo de PDF'));
+  it('decompresses data with a zlib header (deflate format)', async () => {
+    const compressed = deflateSync(Buffer.from('PDF stream'));
     expect(new TextDecoder().decode(await decompressBytes(compressed, 'deflate'))).toBe(
-      'fluxo de PDF',
+      'PDF stream',
     );
   });
 });

@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-// chatSelect lista conversas com a última mensagem (pela rowid do índice por conversa) e nomes resolvidos.
+// chatSelect lists chats with their last message (by rowid from the per-chat index) and resolved names.
 const chatSelect = `SELECT c.jid, c.name, COALESCE(ct.full_name, ''), COALESCE(ct.push_name, ''), c.is_group, c.last_message_ts,
 	m.id, m.from_me, m.sender_jid, m.type, m.text, COALESCE(sc.full_name, ''), COALESCE(sc.push_name, ''), m.sender_push
 FROM chats c
@@ -17,14 +17,14 @@ WHERE (? = '' OR wa_fold(c.name) LIKE ? ESCAPE '\' OR wa_fold(ct.full_name) LIKE
 AND (? = 0 OR c.last_message_ts < ? OR (c.last_message_ts = ? AND c.jid < ?))
 ORDER BY c.last_message_ts DESC, c.jid DESC LIMIT ?`
 
-// chatQueryArgs monta os parâmetros de chatSelect (função pura).
+// chatQueryArgs builds the chatSelect parameters (pure).
 func chatQueryArgs(query string, limit int, after *Cursor) []any {
 	pat, digits := ContainsPattern(query), searchDigits(query)
 	has, ts, key := cursorArgs(after)
 	return []any{query, pat, pat, pat, digits, "%" + digits + "%", has, ts, ts, key, limit + 1}
 }
 
-// ListChats devolve conversas pela última mensagem (mais recente primeiro), filtrando por nome ou número.
+// ListChats returns chats by last message (most recent first), filtering by name or number.
 func (s *Store) ListChats(ctx context.Context, query string, limit int, after *Cursor) ([]ChatView, *Cursor, error) {
 	rows, err := s.db.QueryContext(ctx, chatSelect, chatQueryArgs(query, limit, after)...)
 	if err != nil {
@@ -46,7 +46,7 @@ func (s *Store) ListChats(ctx context.Context, query string, limit int, after *C
 	return page, next, nil
 }
 
-// scanChat lê uma linha de chatSelect.
+// scanChat reads one chatSelect row.
 func scanChat(sc scanner) (ChatView, error) {
 	var c ChatView
 	var name, full, push string
@@ -66,7 +66,7 @@ func scanChat(sc scanner) (ChatView, error) {
 	return c, nil
 }
 
-// SearchContacts busca pessoas (não grupos) por nome salvo, push name ou número.
+// SearchContacts searches people (not groups) by saved name, push name or number.
 func (s *Store) SearchContacts(ctx context.Context, query string, limit int) ([]ContactView, error) {
 	pat, digits := ContainsPattern(query), searchDigits(query)
 	rows, err := s.db.QueryContext(ctx, `SELECT jid, full_name, push_name FROM contacts
@@ -89,7 +89,7 @@ func (s *Store) SearchContacts(ctx context.Context, query string, limit int) ([]
 	return out, rows.Err()
 }
 
-// searchDigits devolve os dígitos da busca quando são pelo menos 3 (senão "", e o número não é filtrado).
+// searchDigits returns the query digits when there are at least 3 (otherwise "", and the number is not filtered).
 func searchDigits(query string) string {
 	if d := Digits(query); len(d) >= 3 {
 		return d

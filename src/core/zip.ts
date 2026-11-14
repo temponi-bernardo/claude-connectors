@@ -1,16 +1,16 @@
 /**
- * Leitura mínima de arquivos ZIP (o contêiner do .docx): acha uma entrada pelo nome e a descompacta.
- * Sem Node: usa `DecompressionStream`, presente no Node 22 e no Cloudflare Workers.
+ * Minimal ZIP reader (the .docx container): finds an entry by name and decompresses it.
+ * No Node APIs: uses `DecompressionStream`, available in Node 22 and in Cloudflare Workers.
  */
 import { byteView } from './bytes.js';
 
-/** Assinatura do registro "fim do diretório central" (EOCD). */
+/** Signature of the "end of central directory" (EOCD) record. */
 const EOCD_SIGNATURE = 0x06054b50;
 
-/** Assinatura de cada entrada do diretório central. */
+/** Signature of each central directory entry. */
 const CENTRAL_SIGNATURE = 0x02014b50;
 
-/** Entrada do diretório central: onde está e como foi comprimida. */
+/** Central directory entry: where it is and how it was compressed. */
 export interface ZipEntry {
   readonly name: string;
   readonly method: number;
@@ -18,7 +18,7 @@ export interface ZipEntry {
   readonly localOffset: number;
 }
 
-/** Posição do registro EOCD, procurando de trás para frente (o comentário do ZIP pode vir depois). */
+/** Position of the EOCD record, searching backwards (the ZIP comment may come after it). */
 export function findEndOfCentralDirectory(bytes: Uint8Array): number {
   const view = byteView(bytes);
   for (let pos = bytes.length - 22; pos >= 0; pos--) {
@@ -27,7 +27,7 @@ export function findEndOfCentralDirectory(bytes: Uint8Array): number {
   throw new Error('Invalid ZIP file: central directory not found.');
 }
 
-/** Lê as entradas do diretório central. */
+/** Reads the central directory entries. */
 export function listZipEntries(bytes: Uint8Array): ZipEntry[] {
   const view = byteView(bytes);
   const eocd = findEndOfCentralDirectory(bytes);
@@ -47,7 +47,7 @@ export function listZipEntries(bytes: Uint8Array): ZipEntry[] {
   return entries;
 }
 
-/** Bytes comprimidos de uma entrada, pulando o cabeçalho local. */
+/** Compressed bytes of an entry, skipping the local header. */
 export function zipEntryBytes(bytes: Uint8Array, entry: ZipEntry): Uint8Array {
   const view = byteView(bytes);
   const start =
@@ -58,7 +58,7 @@ export function zipEntryBytes(bytes: Uint8Array, entry: ZipEntry): Uint8Array {
   return bytes.subarray(start, start + entry.compressedSize);
 }
 
-/** Descomprime dados com `DecompressionStream` no formato dado (DEFLATE puro ou com cabeçalho zlib). */
+/** Decompresses data with `DecompressionStream` in the given format (raw DEFLATE or with a zlib header). */
 export async function decompressBytes(
   data: Uint8Array,
   format: 'deflate' | 'deflate-raw',
@@ -69,12 +69,12 @@ export async function decompressBytes(
   return new Uint8Array(await new Response(stream).arrayBuffer());
 }
 
-/** Descomprime dados em DEFLATE puro (método 8 do ZIP). */
+/** Decompresses raw DEFLATE data (ZIP method 8). */
 export function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
   return decompressBytes(data, 'deflate-raw');
 }
 
-/** Conteúdo descompactado da entrada `name`, ou `null` se ela não existir no ZIP. */
+/** Decompressed content of the `name` entry, or `null` if it is not in the ZIP. */
 export async function readZipEntry(bytes: Uint8Array, name: string): Promise<Uint8Array | null> {
   const entry = listZipEntries(bytes).find((e) => e.name === name);
   if (!entry) return null;

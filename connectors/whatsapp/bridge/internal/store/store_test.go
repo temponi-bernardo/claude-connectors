@@ -52,13 +52,13 @@ func TestListChatsOrderNamesAndLast(t *testing.T) {
 		t.Fatalf("chats=%v next=%v err=%v", len(chats), next, err)
 	}
 	if chats[0].JID != maria || chats[0].Name != "Maria Agenda" || chats[0].Last.ID != "A3" || chats[0].Last.SenderName != "Maria Agenda" {
-		t.Fatalf("primeira conversa: %+v %+v", chats[0], chats[0].Last)
+		t.Fatalf("first chat: %+v %+v", chats[0], chats[0].Last)
 	}
 	if chats[1].Name != "Família" || !chats[1].IsGroup || chats[1].Last.SenderName != "João" {
-		t.Fatalf("grupo: %+v %+v", chats[1], chats[1].Last)
+		t.Fatalf("group: %+v %+v", chats[1], chats[1].Last)
 	}
 	if chats[2].Name != "+5531999990009" || chats[2].Last != nil {
-		t.Fatalf("sem nome: %+v", chats[2])
+		t.Fatalf("no name: %+v", chats[2])
 	}
 }
 
@@ -69,7 +69,7 @@ func TestListChatsPaginationAndQuery(t *testing.T) {
 	p1, next, _ := s.ListChats(ctx, "", 2, nil)
 	p2, end, _ := s.ListChats(ctx, "", 2, next)
 	if len(p1) != 2 || next == nil || len(p2) != 1 || end != nil || p2[0].JID == p1[1].JID {
-		t.Fatalf("paginação: %d %v %d %v", len(p1), next, len(p2), end)
+		t.Fatalf("pagination: %d %v %d %v", len(p1), next, len(p2), end)
 	}
 	for q, want := range map[string]string{"familia": group, "MARIA": maria, "99990009": "5531999990009@s.whatsapp.net"} {
 		got, _, err := s.ListChats(ctx, q, 10, nil)
@@ -78,7 +78,7 @@ func TestListChatsPaginationAndQuery(t *testing.T) {
 		}
 	}
 	if got, _, _ := s.ListChats(ctx, "%", 10, nil); len(got) != 0 {
-		t.Fatal("curinga % não foi escapado")
+		t.Fatal("wildcard % was not escaped")
 	}
 }
 
@@ -91,7 +91,7 @@ func TestListMessagesPagination(t *testing.T) {
 		t.Fatalf("p1: %+v %v %v", p1, next, err)
 	}
 	if p1[1].SenderName != SelfName || p1[0].Media == nil || p1[0].Media.Mime != "image/jpeg" || p1[0].ChatName != "Maria Agenda" {
-		t.Fatalf("campos: %+v", p1)
+		t.Fatalf("fields: %+v", p1)
 	}
 	p2, end, _ := s.ListMessages(ctx, maria, 2, next)
 	if len(p2) != 1 || p2[0].ID != "A1" || end != nil || p2[0].Text != "Olá ação 100%" {
@@ -134,10 +134,10 @@ func TestGetChatAndMedia(t *testing.T) {
 		t.Fatal(m, err)
 	}
 	if _, err := s.GetMedia(ctx, maria, "A1"); !errors.Is(err, ErrNotFound) {
-		t.Fatal("texto sem mídia deveria ser ErrNotFound")
+		t.Fatal("text without media should be ErrNotFound")
 	}
-	if _, err := s.GetMedia(ctx, maria, "nada"); !errors.Is(err, ErrNotFound) {
-		t.Fatal("mensagem inexistente deveria ser ErrNotFound")
+	if _, err := s.GetMedia(ctx, maria, "missing"); !errors.Is(err, ErrNotFound) {
+		t.Fatal("missing message should be ErrNotFound")
 	}
 }
 
@@ -153,12 +153,12 @@ func TestContactsAndUpserts(t *testing.T) {
 		t.Fatalf("%+v %v", got, err)
 	}
 	if got, _ := s.SearchContacts(ctx, "990002", 10); len(got) != 1 || got[0].JID != joao {
-		t.Fatalf("por número: %+v", got)
+		t.Fatalf("by number: %+v", got)
 	}
-	if err := s.SetChatName(ctx, group, "Novo"); err != nil {
+	if err := s.SetChatName(ctx, group, "New"); err != nil {
 		t.Fatal(err)
 	}
-	if c, _ := s.GetChat(ctx, group); c.Name != "Novo" || c.LastTS != 150 {
+	if c, _ := s.GetChat(ctx, group); c.Name != "New" || c.LastTS != 150 {
 		t.Fatalf("SetChatName: %+v", c)
 	}
 }
@@ -167,21 +167,21 @@ func TestEditDeleteAndCounts(t *testing.T) {
 	s := openTest(t)
 	seed(t, s)
 	ctx := context.Background()
-	_ = s.EditMessage(ctx, maria, "A1", "editado")
+	_ = s.EditMessage(ctx, maria, "A1", "edited")
 	_ = s.DeleteMessage(ctx, maria, "A2")
 	msgs, _, _ := s.ListMessages(ctx, maria, 10, nil)
-	if len(msgs) != 2 || msgs[1].Text != "editado" {
+	if len(msgs) != 2 || msgs[1].Text != "edited" {
 		t.Fatalf("%+v", msgs)
 	}
 	chats, n, err := s.Counts(ctx)
 	if err != nil || chats != 3 || n != 3 {
 		t.Fatal(chats, n, err)
 	}
-	if err := s.SaveMessage(ctx, Message{ChatJID: maria, ID: "A1", Timestamp: 100, Type: "text", Text: "de novo"}); err != nil {
+	if err := s.SaveMessage(ctx, Message{ChatJID: maria, ID: "A1", Timestamp: 100, Type: "text", Text: "again"}); err != nil {
 		t.Fatal(err)
 	}
 	if _, n, _ := s.Counts(ctx); n != 3 {
-		t.Fatal("mensagem repetida duplicou")
+		t.Fatal("repeated message was duplicated")
 	}
 }
 
@@ -191,18 +191,18 @@ func TestReserveSend(t *testing.T) {
 	now := time.Unix(10_000, 0)
 	for i := 0; i < 2; i++ {
 		if ok, _, err := s.ReserveSend(ctx, now.Add(time.Duration(i)*time.Minute), 2); !ok || err != nil {
-			t.Fatal("deveria permitir", i, err)
+			t.Fatal("should allow", i, err)
 		}
 	}
 	ok, wait, _ := s.ReserveSend(ctx, now.Add(10*time.Minute), 2)
 	if ok || wait != 3000 {
-		t.Fatalf("esperava bloqueio com 3000 s, veio %v %d", ok, wait)
+		t.Fatalf("expected a block with 3000 s, got %v %d", ok, wait)
 	}
 	if ok, _, _ := s.ReserveSend(ctx, now.Add(61*time.Minute), 2); !ok {
-		t.Fatal("deveria liberar depois de 1 h")
+		t.Fatal("should free up after 1 h")
 	}
 	if ok, wait, _ := s.ReserveSend(ctx, now.Add(300*time.Minute), 0); ok || wait != 3600 {
-		t.Fatalf("limite zero: %v %d", ok, wait)
+		t.Fatalf("zero limit: %v %d", ok, wait)
 	}
 }
 
@@ -217,10 +217,10 @@ func TestVacuumIntoAndOpenErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := VacuumInto(context.Background(), s.DB(), dst); err == nil {
-		t.Fatal("VACUUM INTO em arquivo existente deveria falhar")
+		t.Fatal("VACUUM INTO an existing file should fail")
 	}
-	if _, err := Open(context.Background(), filepath.Join(t.TempDir(), "nao", "existe", "m.db")); err == nil {
-		t.Fatal("abrir em diretório inexistente deveria falhar")
+	if _, err := Open(context.Background(), filepath.Join(t.TempDir(), "does", "not-exist", "m.db")); err == nil {
+		t.Fatal("opening in a missing directory should fail")
 	}
 }
 
@@ -234,7 +234,7 @@ func TestVacuumIsDeterministic(t *testing.T) {
 	ba, _ := os.ReadFile(a)
 	bb, _ := os.ReadFile(b)
 	if string(ba) != string(bb) {
-		t.Fatal("VACUUM INTO não é determinístico; o 204 do /snapshot nunca aconteceria")
+		t.Fatal("VACUUM INTO is not deterministic; /snapshot would never return 204")
 	}
 }
 
@@ -253,25 +253,25 @@ func TestVacuumStableAcrossReopen(t *testing.T) {
 	}
 	defer s2.Close()
 	if n, _, _ := s2.Counts(context.Background()); n != 3 {
-		t.Fatal("cópia normalizada ilegível")
+		t.Fatal("normalized copy unreadable")
 	}
 	if err := VacuumInto(context.Background(), s2.DB(), b); err != nil {
 		t.Fatal(err)
 	}
 	bb, _ := os.ReadFile(b)
 	if string(ba) != string(bb) {
-		t.Fatal("VACUUM INTO depois de reabrir mudou os bytes")
+		t.Fatal("VACUUM INTO after reopening changed the bytes")
 	}
 }
 
 func TestNormalizeHeaderRejectsGarbage(t *testing.T) {
-	if normalizeHeader(make([]byte, 100)) == nil || normalizeHeader([]byte("curto")) == nil {
-		t.Fatal("deveria rejeitar")
+	if normalizeHeader(make([]byte, 100)) == nil || normalizeHeader([]byte("short")) == nil {
+		t.Fatal("should reject")
 	}
 	p := filepath.Join(t.TempDir(), "x")
-	_ = os.WriteFile(p, []byte("pequeno"), 0o600)
-	if normalizeHeaderFile(p) == nil || normalizeHeaderFile(p+"nao") == nil {
-		t.Fatal("deveria falhar")
+	_ = os.WriteFile(p, []byte("small"), 0o600)
+	if normalizeHeaderFile(p) == nil || normalizeHeaderFile(p+"missing") == nil {
+		t.Fatal("should fail")
 	}
 }
 
@@ -287,6 +287,6 @@ func TestGetQuoted(t *testing.T) {
 		t.Fatal(q, err)
 	}
 	if _, err := s.GetQuoted(ctx, joao, "A1"); !errors.Is(err, ErrNotFound) {
-		t.Fatal("mensagem de outra conversa deveria ser ErrNotFound", err)
+		t.Fatal("message from another chat should be ErrNotFound", err)
 	}
 }
