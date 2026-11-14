@@ -8,6 +8,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Adicionado
 
+- Conector **WhatsApp pessoal** (`connectors/whatsapp`, template self-host no Cloudflare Workers + Containers):
+  `whatsapp_status`, `list_chats`, `get_messages`, `search_messages`, `search_contacts` e `get_media`; envio
+  (`send_message`) atrás de `ENABLE_SEND`, desligado, com allowlist e limite por hora. Container sob demanda
+  (dorme após 5 min), sessão em backup cifrado no R2, página `/pair` com código de pareamento ou QR e login do dono
+  pelo GitHub (ADR 0012).
+- Conector remoto: login delegado a um provedor de identidade (GitHub, com `ALLOWED_EMAILS`) além do login por
+  credencial colada (`src/remote/github-login.ts`).
+
 - Canvas: o plugin agora funciona nas sessões do Claude Code na nuvem. O `.mcp.json` liga
   `NODE_USE_ENV_PROXY=1`, e o Node passa a usar o proxy do ambiente, que injeta o token do Canvas. Basta
   preencher o campo "Token de acesso" do plugin com qualquer texto (ex.: `proxy`).

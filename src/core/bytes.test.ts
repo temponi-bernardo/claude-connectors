@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { byteView, concatBytes, utf16leToString } from './bytes.js';
+import { byteView, bytesToBase64, concatBytes, utf16leToString } from './bytes.js';
 
 describe('byteView', () => {
   it('enxerga só a fatia dada, em little-endian', () => {
@@ -22,5 +22,13 @@ describe('concatBytes', () => {
 describe('utf16leToString', () => {
   it('decodifica UTF-16LE e ignora byte solto no fim', () => {
     expect(utf16leToString(new Uint8Array([0x4f, 0, 0xe1, 0, 0x21]))).toBe('Oá');
+  });
+});
+
+describe('bytesToBase64', () => {
+  it('codifica bytes, inclusive acima do tamanho de um bloco', () => {
+    expect(bytesToBase64(new Uint8Array([104, 105]))).toBe('aGk=');
+    const big = new Uint8Array(0x8000 * 2 + 5).fill(65);
+    expect(atob(bytesToBase64(big))).toBe('A'.repeat(big.length));
   });
 });

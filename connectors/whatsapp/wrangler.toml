@@ -1,0 +1,57 @@
+# Conector WhatsApp pessoal no Cloudflare Workers + Containers (ADR 0012). Template self-host: cada pessoa publica
+# na própria conta e pareia o próprio número. Guia completo: connectors/whatsapp/README.md.
+#
+# Secrets (wrangler secret put <NOME> --config connectors/whatsapp/wrangler.toml):
+#   SEAL_KEY             32 bytes em base64 (selos do OAuth e da sessão do /pair)
+#   BRIDGE_TOKEN         32+ caracteres aleatórios (Worker ↔ ponte no container)
+#   SNAPSHOT_KEY         32 bytes em base64 (AES-256-GCM dos backups no R2)
+#   GITHUB_CLIENT_ID     Client ID do OAuth App do GitHub
+#   GITHUB_CLIENT_SECRET segredo do OAuth App do GitHub
+#   ALLOWED_EMAILS       e-mail(s) verificado(s) do dono na conta do GitHub
+name = "whatsapp-remote"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[vars]
+TIMEZONE = "America/Sao_Paulo"
+# Tempo sem uso até o container dormir (30s a 1h).
+SLEEP_AFTER = "5m"
+TOOL_TIMEOUT_MS = "25000"
+SYNC_WAIT_MS = "8000"
+HISTORY_DAYS = "90"
+MAX_MEDIA_BYTES = "5242880"
+# Fase 2 (envio): desligado. Para ligar, ENABLE_SEND = "true" e números em SEND_ALLOWLIST.
+ENABLE_SEND = "false"
+SEND_ALLOWLIST = ""
+SEND_MAX_PER_HOUR = "10"
+# Sync periódico opcional: vazio = desligado. Para ligar, ponha a MESMA expressão aqui e em [triggers].crons.
+SYNC_CRON = ""
+
+# Nenhum Cron Trigger por padrão: nada acorda o container sem uma chamada sua.
+[triggers]
+crons = []
+
+[[containers]]
+class_name = "WhatsAppBridge"
+image = "./Dockerfile"
+# Menor instância: 1/16 vCPU, 256 MiB, 2 GB (medição na ADR 0012).
+instance_type = "lite"
+# Uma instância só: duas pontes nunca rodam a mesma sessão do WhatsApp.
+max_instances = 1
+
+[[durable_objects.bindings]]
+name = "WHATSAPP_BRIDGE"
+class_name = "WhatsAppBridge"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["WhatsAppBridge"]
+
+[[r2_buckets]]
+binding = "SNAPSHOTS"
+bucket_name = "whatsapp-snapshots"
+
+[observability]
+enabled = true

@@ -1,14 +1,21 @@
 {
   "name": "claude-connectors",
-  "owner": { "name": "Bernardo Temponi" },
+  "owner": {
+    "name": "Bernardo Temponi"
+  },
   "metadata": {
-    "description": "Conectores MCP para o Claude, começando pelo Canvas da PUC Minas."
+    "description": "Conectores MCP para o Claude: Canvas da PUC Minas e WhatsApp pessoal (self-host)."
   },
   "plugins": [
     {
       "name": "canvas-puc",
       "source": "./connectors/canvas-puc",
       "description": "Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, módulos, arquivos e fóruns, com login pelo navegador."
+    },
+    {
+      "name": "whatsapp",
+      "source": "./connectors/whatsapp",
+      "description": "WhatsApp pessoal (leitura; envio opcional) por um servidor seu no Cloudflare Workers + Containers. Requer publicar o template antes (README do conector)."
     }
   ]
 }

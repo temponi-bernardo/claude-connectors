@@ -114,4 +114,11 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
     manualTest:
       'Rodar `npm run pack:all` e conferir .mcp.json e .claude-plugin/plugin.json do conector.',
   },
+  {
+    name: 'workersFixedLength',
+    reason:
+      'Usa o FixedLengthStream, que só existe no runtime do Cloudflare Workers; os testes injetam um conversor falso (snapshots.test.ts).',
+    manualTest:
+      'Com o Worker publicado, usar uma ferramenta e conferir no R2 o objeto `whatsapp/snapshot.was1` com o tamanho do snapshot.',
+  },
 ];

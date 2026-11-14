@@ -15,6 +15,10 @@
     "pack:all": "tsx tools/pack/cli.ts --all",
     "worker:dev": "wrangler dev --config connectors/canvas-puc/wrangler.toml",
     "worker:deploy": "wrangler deploy --config connectors/canvas-puc/wrangler.toml",
+    "whatsapp:dev": "wrangler dev --config connectors/whatsapp/wrangler.toml",
+    "whatsapp:deploy": "wrangler deploy --config connectors/whatsapp/wrangler.toml",
+    "whatsapp:build": "wrangler deploy --dry-run --config connectors/whatsapp/wrangler.toml",
+    "bridge:test": "sh scripts/bridge-test.sh",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
@@ -60,6 +64,7 @@
     "wrangler": "^4.158.0"
   },
   "dependencies": {
+    "@cloudflare/containers": "0.3.7",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "playwright-core": "^1.64.1",
     "zod": "^3.25.76"

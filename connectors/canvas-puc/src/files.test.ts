@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { toToolResult } from '../../../src/mcp/tools.js';
 import { fakeContext } from './fixtures/fake-context.js';
 import {
-  bytesToBase64,
   downloadCanvasFile,
   downloadedFileResult,
   downloadRefusal,
@@ -18,14 +17,6 @@ function fixture(name: string): Uint8Array {
     readFileSync(new URL(`../../../src/core/fixtures/${name}`, import.meta.url)),
   );
 }
-
-describe('bytesToBase64', () => {
-  it('codifica bytes, inclusive acima do tamanho de um bloco', () => {
-    expect(bytesToBase64(new Uint8Array([104, 105]))).toBe('aGk=');
-    const big = new Uint8Array(0x8000 * 2 + 5).fill(65);
-    expect(atob(bytesToBase64(big))).toBe('A'.repeat(big.length));
-  });
-});
 
 describe('fileContentBlock', () => {
   it('usa bloco de imagem para image/* e recurso embutido para o resto', () => {

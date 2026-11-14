@@ -57,6 +57,18 @@ pacotes `.mcpb`, commitlint dos commits e do título).
 **Conector remoto** — Modo de um conector servido por HTTP (`server/remote.js`) e adicionado no claude.ai como
 conector personalizado; autoriza por OAuth e funciona na web, no Cowork e no celular (ADR 0009).
 
+**Ponte (WhatsApp)** — Servidor Go com whatsmeow dentro do container (`connectors/whatsapp/bridge/`), com API HTTP
+interna protegida por `BRIDGE_TOKEN`; o Worker fala com ela pelo Durable Object `WhatsAppBridge`.
+
+**Pareamento** — Vincular o número ao conector como "aparelho conectado" do WhatsApp, por código (PairPhone) ou
+QR, na página `/pair`.
+
+**Login delegado (upstream)** — Variante do OAuth do conector remoto em que o `/authorize` manda o navegador a um
+provedor de identidade (GitHub) e o segredo selado é o e-mail aceito em `ALLOWED_EMAILS`.
+
+**Snapshot (WhatsApp)** — Cópia cifrada (formato `WAS1`, AES-256-GCM) da sessão e do banco de mensagens da ponte,
+guardada no R2 e restaurada quando o container acorda.
+
 **Selo** — Texto cifrado e autenticado (AES-256-GCM, chave `SEAL_KEY`) que carrega `client_id`, código e tokens
 do OAuth sem estado; só o servidor abre e ninguém altera.
 

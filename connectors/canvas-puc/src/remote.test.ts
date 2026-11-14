@@ -131,8 +131,10 @@ describe('canvasRemoteConnector', () => {
   it('cria um servidor MCP por token e confere o token no Canvas', async () => {
     const settings = settingsWith(new Response('{}'));
     const connector = canvasRemoteConnector(settings);
-    expect(connector.loginText.title).toContain('Canvas');
-    await expect(connector.verifySecret('abc')).resolves.toBeUndefined();
+    expect(connector.login.kind === 'secret' && connector.login.text.title).toContain('Canvas');
+    await expect(
+      connector.login.kind === 'secret' && connector.login.verify('abc'),
+    ).resolves.toBeUndefined();
     expect(connector.createServer('abc').isConnected()).toBe(false);
   });
 

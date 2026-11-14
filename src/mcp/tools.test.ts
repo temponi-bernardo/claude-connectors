@@ -9,6 +9,7 @@ import {
   runToolSafely,
   textResult,
   toToolResult,
+  binaryContentBlock,
 } from './tools.js';
 
 const echo = defineTool({
@@ -92,5 +93,25 @@ describe('registerToolSpecs', () => {
       a: unknown,
     ) => Promise<{ content: unknown[] }>;
     expect((await handler({ texto: 'z' })).content).toEqual([{ type: 'text', text: 'z' }]);
+  });
+});
+
+describe('binaryContentBlock', () => {
+  it('usa imagem para image/*, áudio para audio/* e recurso embutido para o resto', () => {
+    const bytes = new Uint8Array([1]);
+    expect(binaryContentBlock('image/png', bytes, 'u')).toEqual({
+      type: 'image',
+      data: 'AQ==',
+      mimeType: 'image/png',
+    });
+    expect(binaryContentBlock('audio/ogg', bytes, 'u')).toEqual({
+      type: 'audio',
+      data: 'AQ==',
+      mimeType: 'audio/ogg',
+    });
+    expect(binaryContentBlock('application/pdf', bytes, 'x:1')).toEqual({
+      type: 'resource',
+      resource: { uri: 'x:1', mimeType: 'application/pdf', blob: 'AQ==' },
+    });
   });
 });

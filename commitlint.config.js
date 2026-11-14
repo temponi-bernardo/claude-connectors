@@ -23,6 +23,7 @@ export default {
         'release',
         'config',
         'remote',
+        'whatsapp',
       ],
     ],
     'scope-empty': [2, 'never'],

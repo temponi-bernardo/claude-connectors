@@ -1,20 +1,14 @@
 import { randomBytes } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { createWorkerApp, handleWorkerFetch, toEnvVars } from './worker.js';
+import { createWorkerApp, handleWorkerFetch } from './worker.js';
 
 const KEY = randomBytes(32).toString('base64');
-
-describe('toEnvVars', () => {
-  it('mantém só os valores de texto do ambiente do Worker', () => {
-    expect(toEnvVars({ A: 'x', B: 1, C: { binding: true } })).toEqual({ A: 'x' });
-  });
-});
 
 describe('createWorkerApp', () => {
   it('usa a origem da requisição como emissor quando PUBLIC_URL não vem', () => {
     const app = createWorkerApp({ SEAL_KEY: KEY }, 'https://canvas.contas.workers.dev');
     expect(app.settings.issuer).toBe('https://canvas.contas.workers.dev');
-    expect(app.connector.loginText.helpUrl).toBe(
+    expect(app.connector.login.kind === 'secret' && app.connector.login.text.helpUrl).toBe(
       'https://pucminas.instructure.com/profile/settings',
     );
     expect(app.now()).toBeGreaterThan(1_700_000_000);

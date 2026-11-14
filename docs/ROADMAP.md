@@ -2,7 +2,8 @@
 
 ## Próxima tarefa
 
-**F2.1 — Primeira release `v0.1.0`** com o `canvas-puc-1.3.0.mcpb` anexado (skill `/lancar-versao`).
+**F3.2 — Publicar o WhatsApp na conta do dono e parear o número** (guia em `connectors/whatsapp/README.md`).
+Depois, F2.1 (primeira release `v0.1.0`).
 
 ## Como ler
 
@@ -43,6 +44,14 @@ O MVP é o conector do Canvas instalado como extensão e usado no dia a dia: **F
 | F2.6 | Conector remoto do Canvas: HTTP + OAuth com token (ADR 0009)           | ✅     | `server/remote.js` faz o OAuth completo e responde as ferramentas; Dockerfile e Render |
 | F2.7 | Conector remoto no Cloudflare Workers e conectado no claude.ai         | ✅     | Worker no ar e `proximas_entregas` respondendo numa sessão do Cowork (ADR 0010)        |
 | F2.8 | Renovação automática do token do Canvas no refresh do OAuth            | ✅     | Refresh do OAuth estende a validade do token na PUC (ADR 0011)                         |
+
+## Fase 3 — WhatsApp pessoal (remoto, self-host)
+
+| Id   | Tarefa                                                                          | Estado | Pronto quando                                                                                           |
+| ---- | ------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------- |
+| F3.1 | Conector `whatsapp`: Worker + OAuth GitHub, ponte Go no container, snapshots R2 | 🟨     | `pr:check` verde com leitura completa, `/pair`, envio atrás de flag e ADR 0012 com a medição            |
+| F3.2 | Publicar na conta do dono e parear o número                                     | ⬜     | `list_chats` respondendo numa sessão do claude.ai; RSS real do container registrado na ADR              |
+| F3.3 | Restringir a saída do container aos hosts do WhatsApp (`allowedHosts`)          | ⬜     | Ponte conecta com `enableInternet = false` e só hosts do WhatsApp liberados, ou ADR dizendo por que não |
 
 ## Fases seguintes
 

@@ -2,10 +2,11 @@
 # Portão local de PR: substitui o CI do GitHub Actions, que está desligado neste repositório
 # (ADR 0006 — nenhum custo de Actions). Roda o que os jobs de CI rodavam:
 #   1. npm run check (formato, lint, tipos, testes com cobertura, docs, duplicação, gitleaks)
-#   2. npm run pack:all (todos os conectores compilam e empacotam em .mcpb) e confere que o runtime
+#   2. npm run bridge:test (ponte Go do WhatsApp: gofmt, vet, testes) e npm run whatsapp:build (bundle do Worker)
+#   3. npm run pack:all (todos os conectores compilam e empacotam em .mcpb) e confere que o runtime
 #      versionado de cada conector (server/, package.json, package-lock.json) está commitado e atual
-#   3. commitlint em todos os commits da branch desde a main
-#   4. commitlint no título do PR (vira o commit da main no squash)
+#   4. commitlint em todos os commits da branch desde a main
+#   5. commitlint no título do PR (vira o commit da main no squash)
 # Uso: npm run pr:check -- "feat(canvas): título do PR"
 set -e
 title="${1:-}"
@@ -16,6 +17,10 @@ fi
 
 echo "→ check completo"
 npm run -s check
+echo "→ ponte Go do WhatsApp"
+npm run -s bridge:test
+echo "→ bundle do Worker do WhatsApp"
+npm run -s whatsapp:build >/dev/null
 echo "→ empacotamento dos conectores"
 npm run -s pack:all
 if ! git diff --quiet -- connectors || [ -n "$(git ls-files --others --exclude-standard connectors)" ]; then

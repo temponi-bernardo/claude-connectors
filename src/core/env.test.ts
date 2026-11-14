@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { envValue, parseFlag } from './env.js';
+import { envValue, parseFlag, toEnvVars } from './env.js';
 
 describe('envValue', () => {
   it('devolve o valor sem espaços', () => {
@@ -21,5 +21,11 @@ describe('parseFlag', () => {
   it('desliga com o resto e com nulo', () => {
     expect(['0', 'false', 'x'].map(parseFlag)).toEqual([false, false, false]);
     expect(parseFlag(null)).toBe(false);
+  });
+});
+
+describe('toEnvVars', () => {
+  it('mantém só os valores de texto do ambiente do Worker', () => {
+    expect(toEnvVars({ A: 'x', B: 1, C: { binding: true } })).toEqual({ A: 'x' });
   });
 });

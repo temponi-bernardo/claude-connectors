@@ -1,9 +1,15 @@
 # Interface
 
 **Este projeto não tem interface de aplicativo.** `docs.config.json` tem `"uiDir": null`, então o `docs:check`
-não cobra componentes. A única tela é a **página de autorização do conector remoto** (ADR 0009): HTML estático,
-sem script, gerado por `renderLoginPage()` em `src/remote/login-page.ts`, com o estilo em `LOGIN_PAGE_CSS` e os
-tokens abaixo (claro e escuro por `prefers-color-scheme`).
+não cobra componentes. As telas são HTML estático, sem script, com os tokens abaixo (claro e escuro por `prefers-color-scheme`):
+
+- **Página de autorização do conector remoto** (ADR 0009): `renderLoginPage()` em `src/remote/login-page.ts`, estilo
+  em `LOGIN_PAGE_CSS`.
+- **Página `/pair` do WhatsApp** (ADR 0012): `renderPairPage()` em `connectors/whatsapp/src/pair-page.ts`, que usa o
+  mesmo `LOGIN_PAGE_CSS` mais `PAIR_PAGE_CSS` (código de pareamento em fonte mono grande, QR com fundo branco para
+  leitura no escuro, botões `secondary` e `danger`). Estados: precisa parear (formulários de código e QR),
+  conectando, conectado, sem resposta da ponte, erro (`role="alert"`) e mensagem (`role="status"`); com código ou QR
+  na tela, a página se recarrega a cada 20 s. A CSP libera só `img-src data:` para o QR.
 
 ## Quando houver interface
 
