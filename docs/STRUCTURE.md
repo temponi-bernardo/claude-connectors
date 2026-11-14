@@ -11,7 +11,7 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 ├── .github/          # Templates de PR/issue, Dependabot, CODEOWNERS (sem Actions, ADR 0006)
 ├── connectors/       # Um conector MCP por pasta, cada um vira uma extensão .mcpb
 │   └── canvas-puc/   # Canvas LMS da PUC Minas (plugin + manifest .mcpb + src/ + server/ gerado)
-├── docs/             # Documentação — fonte da verdade
+├── docs/             # Documentação — fonte da verdade (e o site público do GitHub Pages)
 ├── scripts/          # Scripts de shell auxiliares (GitHub, segredos, pr:check)
 ├── src/              # Código compartilhado entre conectores (core puro, mcp, remote)
 └── tools/            # Ferramentas internas do repositório (docs, hooks, pack)
@@ -42,7 +42,8 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 | `connectors/canvas-puc/server/`         | Bundles gerados por `npm run pack` (versionados; não editar à mão)            | `index.js` (stdio), `remote.js` (HTTP)                       |
 | `connectors/canvas-puc/src/`            | Código do conector: config, sessão, auth, cliente, formatação, tools, remoto  | `main.ts`, `worker.ts`, `remote.ts`, `client.ts`             |
 | `connectors/canvas-puc/src/fixtures/`   | Contexto falso (cliente e auth simulados) para os testes das ferramentas      | `fake-context.ts`                                            |
-| `docs/`                                 | Documentação do projeto (índice em `README.md`)                               | `FUNCTIONS.md`, `PROCESSES.md`, `ROADMAP.md`                 |
+| `docs/`                                 | Documentação (índice em `README.md`) e site do GitHub Pages (`*.html`)        | `FUNCTIONS.md`, `index.html`, `_config.yml`                  |
+| `docs/_layouts/`                        | Layout Jekyll do site público (cabeçalho, rodapé, CSP), ADR 0012              | `site.html`                                                  |
 | `docs/adr/`                             | Registros de decisão de arquitetura                                           | `README.md`, `0000-modelo.md`                                |
 | `scripts/`                              | Scripts de shell                                                              | `setup-github.sh`, `secrets-check.sh`, `pr-check.sh`         |
 | `src/`                                  | Código compartilhado entre conectores e lista de exceções de teste            | `test-exceptions.ts`                                         |
@@ -54,6 +55,7 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 | `tools/docs/`                           | Verificador e gerador de documentação (`docs:check`, `docs:generate`)         | `cli.ts`, `run.ts`, `checks.ts`, `ast.ts`                    |
 | `tools/hooks/`                          | Testes dos hooks do Claude Code que vivem em `.claude/hooks/`                 | `guard-bash.test.ts`, `stop-handoff.test.ts`                 |
 | `tools/hooks/fixtures/`                 | Utilitários dos testes de hooks (repositório git temporário, runner)          | `hook-test-utils.ts`                                         |
+| `tools/site/`                           | Testes do site público (páginas, links, exclusão dos docs internos)           | `site.test.ts`                                               |
 | `tools/pack/`                           | Empacotador de conectores em `.mcpb` (`npm run pack`, `pack:all`)             | `cli.ts`, `pack.ts`                                          |
 
 ## Onde colocar algo novo

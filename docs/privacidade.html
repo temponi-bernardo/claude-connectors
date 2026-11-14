@@ -1,0 +1,91 @@
+---
+layout: site
+title: Política de privacidade
+description: Que dados os conectores do Claude Connectors acessam, onde ficam e como apagá-los.
+---
+
+<h1>Política de privacidade</h1>
+<p class="meta">Atualizada em 14 de novembro de 2026.</p>
+
+<p>
+  Esta política vale para os conectores do projeto Claude Connectors, mantido por Bernardo Temponi,
+  hoje o conector <strong>Canvas PUC Minas</strong> nas suas duas formas: local (extensão ou plugin
+  no seu computador) e remota (conector personalizado no claude.ai, no Cowork e no app do celular).
+</p>
+
+<h2>Que dados são acessados</h2>
+<p>
+  Só os dados da sua própria conta no Canvas, e só quando você pede algo ao Claude: perfil, cursos,
+  tarefas, entregas, notas, avisos, módulos, páginas, arquivos, fóruns e calendário. O conector não
+  acessa nenhum outro sistema e não vê dados de outras pessoas além do que a sua conta já pode ver
+  no Canvas.
+</p>
+
+<h2>Credenciais</h2>
+<ul>
+  <li>
+    <strong>Conector local:</strong> a sessão do login (cookies do Canvas) fica em uma pasta do seu
+    computador (<code>~/.canvas-puc</code>). O token opcional fica na configuração da extensão,
+    guardada pelo próprio Claude. Nada disso é enviado ao autor.
+  </li>
+  <li>
+    <strong>Conector remoto:</strong> o token que você cola na página de autorização é conferido no
+    Canvas e depois viaja apenas cifrado (AES-256-GCM) dentro dos tokens de acesso entregues ao
+    Claude. O servidor não tem banco de dados e não grava o token nem as respostas do Canvas.
+  </li>
+  <li>
+    Para que você não precise reconectar todo mês, o conector remoto estende a validade do próprio
+    token no Canvas, no máximo uma vez por dia, quando o Claude renova o acesso. Nenhum token novo é
+    criado.
+  </li>
+</ul>
+
+<h2>Com quem os dados são compartilhados</h2>
+<ul>
+  <li>
+    <strong>Canvas (Instructure / PUC Minas):</strong> recebe as chamadas feitas em seu nome, como
+    no site.
+  </li>
+  <li>
+    <strong>Anthropic (Claude):</strong> recebe o resultado de cada ferramenta que você usa na
+    conversa, conforme a política de privacidade da Anthropic.
+  </li>
+  <li>
+    <strong>Provedor de hospedagem do conector remoto</strong> (hoje, Cloudflare Workers): processa
+    as requisições e pode manter registros técnicos, como endereço IP e horário.
+  </li>
+</ul>
+<p>Os dados não são vendidos, não alimentam anúncios e não são usados para nenhum outro fim.</p>
+
+<h2>Este site</h2>
+<p>Este site não usa cookies, rastreadores, análise de audiência nem scripts.</p>
+
+<h2>Envios em seu nome</h2>
+<p>
+  Entregar tarefa e responder fórum só existem com a opção de envios ligada, e o Claude pede sua
+  confirmação antes de cada envio.
+</p>
+
+<h2>Segurança</h2>
+<p>
+  Todo tráfego usa HTTPS. A autorização segue OAuth 2.1 com PKCE e só devolve o acesso para
+  endereços permitidos, como claude.ai e claude.com. O endereço do Canvas é fixo no servidor.
+</p>
+
+<h2>Como apagar seus dados</h2>
+<ul>
+  <li>
+    Conector local: peça ao Claude <code>desconectar_canvas</code> ou apague a pasta
+    <code>~/.canvas-puc</code>.
+  </li>
+  <li>
+    Conector remoto: remova o conector no Claude e apague o token em Canvas → Conta → Configurações.
+    Sem o token, o acesso guardado pelo Claude deixa de funcionar.
+  </li>
+</ul>
+
+<h2>Mudanças e contato</h2>
+<p>
+  Mudanças nesta política aparecem nesta página, com a data acima atualizada. Dúvidas:
+  <a href="https://github.com/temponi-bernardo">github.com/temponi-bernardo</a>.
+</p>

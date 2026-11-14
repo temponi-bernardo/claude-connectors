@@ -23,6 +23,7 @@ export default {
         'release',
         'config',
         'remote',
+        'site',
       ],
     ],
     'scope-empty': [2, 'never'],

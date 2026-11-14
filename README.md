@@ -26,6 +26,11 @@ npm run pack -- canvas-puc      # gera dist/connectors/canvas-puc-<versão>.mcpb
 
 Requisitos: Node 22, Chrome ou Edge (login dos conectores) e gitleaks (`winget install Gitleaks.Gitleaks`).
 
+## Site
+
+Página pública do serviço, política de privacidade e termos: <https://temponi-bernardo.github.io/claude-connectors/>
+(GitHub Pages servido de `docs/`, ADR 0012).
+
 ## Sem GitHub Actions
 
 Nada roda no GitHub: o portão de PR é `npm run pr:check -- "<título do PR>"` e a release usa a CLI do

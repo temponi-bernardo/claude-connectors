@@ -3,7 +3,8 @@
 **Este projeto não tem interface de aplicativo.** `docs.config.json` tem `"uiDir": null`, então o `docs:check`
 não cobra componentes. A única tela é a **página de autorização do conector remoto** (ADR 0009): HTML estático,
 sem script, gerado por `renderLoginPage()` em `src/remote/login-page.ts`, com o estilo em `LOGIN_PAGE_CSS` e os
-tokens abaixo (claro e escuro por `prefers-color-scheme`).
+tokens abaixo (claro e escuro por `prefers-color-scheme`). O **site público** do GitHub Pages (ADR 0012:
+`docs/index.html`, `privacidade.html`, `termos.html`) usa os mesmos tokens em `docs/site.css`, sem script.
 
 ## Quando houver interface
 
