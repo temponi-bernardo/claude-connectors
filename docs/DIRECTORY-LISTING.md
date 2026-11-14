@@ -142,8 +142,8 @@ login, and also try the UI (`npx @modelcontextprotocol/inspector`) for `tools/ca
 
 1. Deploy both servers (`npm run worker:deploy`, `npm run gmail:deploy`) so the revocation fix and the new
    `resource_name` are live, and rerun the checks above.
-2. Wait for the parallel PR that renames and annotates the tools (`readOnlyHint` / `destructiveHint`, English
-   names), then confirm in the Inspector that every tool has a title and annotations.
+2. Tool names are English and every tool has a `title` plus `readOnlyHint` or an explicit `destructiveHint`
+   (enforced by the type in `src/mcp/annotations.ts`, F4.4). After deploying, confirm it in the Inspector.
 3. Run the authenticated Inspector session described above for each server and connect each one in claude.ai
    (web) and the Claude desktop app as a custom connector, end to end.
 4. Gmail: Google OAuth verification of the app for the restricted `gmail.modify` scope (including the security

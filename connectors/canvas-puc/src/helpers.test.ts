@@ -24,9 +24,9 @@ describe('isoDaysFrom e dateOnly', () => {
 });
 
 describe('ASSIGNMENT_BUCKETS', () => {
-  it('não filtra em todas', () => {
-    expect(ASSIGNMENT_BUCKETS.todas).toBeUndefined();
-    expect(ASSIGNMENT_BUCKETS.atrasadas).toBe('overdue');
+  it('does not filter with all', () => {
+    expect(ASSIGNMENT_BUCKETS.all).toBeUndefined();
+    expect(ASSIGNMENT_BUCKETS.overdue).toBe('overdue');
   });
 });
 
@@ -56,7 +56,7 @@ describe('matchModuleItems', () => {
       { id: 2 },
     ];
     expect(matchModuleItems(modules, 'grafos')).toEqual([
-      { modulo: 'M1', titulo: 'Aula de Grafos', tipo: 'Page' },
+      { module: 'M1', title: 'Aula de Grafos', type: 'Page' },
     ]);
   });
 });

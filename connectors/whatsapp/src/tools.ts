@@ -4,6 +4,8 @@
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
+import { manifestVersion } from '../../../src/mcp/server-version.js';
+import { READ_ONLY_HINTS, SEND_HINTS, toolAnnotations } from '../../../src/mcp/annotations.js';
 import {
   binaryContentBlock,
   defineTool,
@@ -32,6 +34,7 @@ import {
   type BridgeMessage,
   type BridgeStatus,
 } from './format.js';
+import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
 
 /** Contexto das ferramentas: ponte, configuração, endereço da página de pareamento e relógio (ms). */
 export interface WhatsAppToolContext {
@@ -43,6 +46,12 @@ export interface WhatsAppToolContext {
 
 /** Folga reservada, dentro do prazo, para a consulta que vem depois da espera do sync (ms). */
 const QUERY_RESERVE_MS = 4_000;
+
+/** MCP server name and version (the version comes from the plugin manifest). */
+export const WHATSAPP_SERVER_INFO = {
+  name: 'whatsapp',
+  version: manifestVersion(manifest),
+} as const;
 
 /** Instruções do servidor MCP: o que é o conector e a regra sobre conteúdo não confiável. */
 export const WHATSAPP_INSTRUCTIONS =
@@ -98,6 +107,7 @@ const statusTool = defineTool({
   name: 'whatsapp_status',
   description: 'WhatsApp connection status: connected, last sync, whether pairing is needed.',
   shape: {},
+  annotations: toolAnnotations('WhatsApp status', READ_ONLY_HINTS),
   run: async (ctx: WhatsAppToolContext) => {
     const deadline = toolDeadline(ctx);
     const status = await bridgeJson<BridgeStatus>(ctx.bridge, '/status', { deadline });
@@ -114,6 +124,7 @@ const listChatsTool = defineTool({
     limit: z.number().int().min(1).max(100).default(20),
     cursor: z.string().max(500).optional().describe('next_cursor from a previous call'),
   },
+  annotations: toolAnnotations('List chats', READ_ONLY_HINTS),
   run: (ctx: WhatsAppToolContext, args) =>
     runRead(ctx, async (deadline) => {
       const path = bridgePath('/chats', {
@@ -138,6 +149,7 @@ const getMessagesTool = defineTool({
     limit: z.number().int().min(1).max(100).default(30),
     before: z.string().max(500).optional().describe('next_before from a previous call'),
   },
+  annotations: toolAnnotations('Get messages', READ_ONLY_HINTS),
   run: (ctx: WhatsAppToolContext, args) =>
     runRead(ctx, async (deadline) => {
       const path = bridgePath('/messages', {
@@ -171,6 +183,7 @@ const searchMessagesTool = defineTool({
     chat_jid: z.string().min(3).max(200).optional(),
     limit: z.number().int().min(1).max(100).default(20),
   },
+  annotations: toolAnnotations('Search messages', READ_ONLY_HINTS),
   run: (ctx: WhatsAppToolContext, args) =>
     runRead(ctx, async (deadline) => {
       const path = bridgePath('/search', {
@@ -187,6 +200,7 @@ const searchContactsTool = defineTool({
   name: 'search_contacts',
   description: 'Find WhatsApp contacts by name or phone number.',
   shape: { query: z.string().min(1).max(100), limit: z.number().int().min(1).max(100).default(20) },
+  annotations: toolAnnotations('Search contacts', READ_ONLY_HINTS),
   run: (ctx: WhatsAppToolContext, args) =>
     runRead(ctx, async (deadline) => {
       const path = bridgePath('/contacts', { query: args.query, limit: args.limit });
@@ -238,6 +252,7 @@ const getMediaTool = defineTool({
   name: 'get_media',
   description: 'Download the image, audio or document of one message (size-limited).',
   shape: { chat_jid: z.string().min(3).max(200), message_id: z.string().min(1).max(200) },
+  annotations: toolAnnotations('Get media', READ_ONLY_HINTS),
   run: (ctx: WhatsAppToolContext, args) =>
     runRead(ctx, async (deadline) => {
       const path = bridgePath('/media', { chat_jid: args.chat_jid, message_id: args.message_id });
@@ -278,6 +293,7 @@ const sendMessageTool = defineTool({
       .literal(true)
       .describe('true only after the user explicitly approved this exact message'),
   },
+  annotations: toolAnnotations('Send message', SEND_HINTS),
   run: async (ctx: WhatsAppToolContext, args) => {
     const recipient = allowedRecipient(ctx.settings, args.recipient);
     const quote = args.reply_to_message_id ? { reply_to: args.reply_to_message_id } : {};
@@ -306,7 +322,7 @@ export function whatsappTools(settings: WhatsAppSettings): ToolSpec<WhatsAppTool
 /** Cria o servidor MCP do WhatsApp com as ferramentas ativas. */
 export function createWhatsAppMcpServer(ctx: WhatsAppToolContext): McpServer {
   const server = new McpServer(
-    { name: 'whatsapp', version: '0.1.0' },
+    { ...WHATSAPP_SERVER_INFO },
     { instructions: WHATSAPP_INSTRUCTIONS },
   );
   registerToolSpecs(server, whatsappTools(ctx.settings), ctx);

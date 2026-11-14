@@ -30,8 +30,8 @@ describe('GMAIL_TOOLS', () => {
     ]);
   });
 
-  it('toda ferramenta tem anotações MCP; só as de leitura são readOnly', () => {
-    const readOnly = GMAIL_TOOLS.filter((t) => t.annotations?.readOnlyHint).map((t) => t.name);
+  it('every tool has a unique title; only the read tools are readOnly', () => {
+    const readOnly = GMAIL_TOOLS.filter((t) => t.annotations.readOnlyHint).map((t) => t.name);
     expect(readOnly).toEqual([
       'list_accounts',
       'search_threads',
@@ -41,6 +41,8 @@ describe('GMAIL_TOOLS', () => {
       'get_attachment_text',
       'list_drafts',
     ]);
-    for (const tool of GMAIL_TOOLS) expect(tool.annotations).toBeDefined();
+    const titles = GMAIL_TOOLS.map((t) => t.annotations.title);
+    expect(new Set(titles).size).toBe(GMAIL_TOOLS.length);
+    for (const title of titles) expect(title).toMatch(/^[A-Z][a-z]/);
   });
 });

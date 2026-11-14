@@ -102,7 +102,7 @@ export function replyRecipients(
   const to = uniqueAddresses(replyToList(headers, self, replyAll), new Set([self]));
   if (to.length === 0) {
     throw new Error(
-      'Não há destinatário para a resposta: a mensagem original só tem o seu endereço.',
+      'There is no recipient for the reply: the original message only has your own address.',
     );
   }
   const taken = new Set([self, ...to.map((address) => address.email.toLowerCase())]);

@@ -30,9 +30,7 @@ export function aliasAccounts(accounts: readonly LinkedAccount[]): AccountRef[] 
 
 /** Erro de quem ainda não vinculou nenhuma conta. */
 export function noAccountsError(): Error {
-  return new Error(
-    'Nenhuma conta Gmail vinculada. Use a ferramenta link_account para vincular uma.',
-  );
+  return new Error('No Gmail account linked. Use the link_account tool to link one.');
 }
 
 /** Contas pedidas: `all` são todas; apelido ou e-mail escolhem uma; o resto vira erro com os válidos. */
@@ -44,14 +42,14 @@ export function resolveAccounts(refs: readonly AccountRef[], requested: string):
   if (found) return [found];
   const valid = [...refs.map((ref) => `"${ref.alias}"`), '"all"'].join(', ');
   throw new Error(
-    `Conta "${requested}" não vinculada. Use ${valid}, ou link_account para vincular.`,
+    `Account "${requested}" is not linked. Use ${valid}, or link_account to link it.`,
   );
 }
 
 /** Erro de conta vinculada antes do gerenciamento (token só com `gmail.readonly`). */
 export function writeAccessError(alias: string): Error {
   return new Error(
-    `A conta "${alias}" foi vinculada só para leitura. Para enviar, organizar ou apagar e-mails, use link_account e entre com ela de novo, permitindo gerenciar o Gmail.`,
+    `Account "${alias}" was linked read-only. To send, organize or delete email, use link_account and sign in with it again, allowing Gmail management.`,
   );
 }
 

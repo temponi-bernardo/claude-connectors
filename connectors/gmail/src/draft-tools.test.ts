@@ -15,7 +15,12 @@ import {
   type GmailWrite,
 } from './fixtures/fake-google.js';
 import { RECEIPT } from './fixtures/messages.js';
-import { CREATE_HINTS, DESTRUCTIVE_HINTS, READ_ONLY_HINTS, SEND_HINTS } from './tools.js';
+import {
+  CREATE_HINTS,
+  DESTRUCTIVE_HINTS,
+  READ_ONLY_HINTS,
+  SEND_HINTS,
+} from '../../../src/mcp/annotations.js';
 
 beforeEach(() => {
   clearAccessTokenCache();
@@ -49,11 +54,11 @@ describe('draftArgs', () => {
 
 describe('ferramentas de rascunho', () => {
   it('anotações: listar lê, criar cria, editar e apagar destroem, enviar envia', () => {
-    expect(listDraftsTool.annotations).toEqual(READ_ONLY_HINTS);
-    expect(createDraftTool.annotations).toEqual(CREATE_HINTS);
-    expect(updateDraftTool.annotations).toEqual(DESTRUCTIVE_HINTS);
-    expect(deleteDraftTool.annotations).toEqual(DESTRUCTIVE_HINTS);
-    expect(sendDraftTool.annotations).toEqual(SEND_HINTS);
+    expect(listDraftsTool.annotations).toMatchObject(READ_ONLY_HINTS);
+    expect(createDraftTool.annotations).toMatchObject(CREATE_HINTS);
+    expect(updateDraftTool.annotations).toMatchObject(DESTRUCTIVE_HINTS);
+    expect(deleteDraftTool.annotations).toMatchObject(DESTRUCTIVE_HINTS);
+    expect(sendDraftTool.annotations).toMatchObject(SEND_HINTS);
   });
 
   it('list_drafts lista os rascunhos', async () => {
@@ -99,7 +104,7 @@ describe('ferramentas de rascunho', () => {
   it('rascunho novo sem destinatário é recusado', async () => {
     const deps = await linkedTestDeps([]);
     await expect(createDraftTool.run(deps, { account: 'dono', body: 'x' })).rejects.toThrow(
-      /ao menos um/,
+      /at least one/,
     );
   });
 });

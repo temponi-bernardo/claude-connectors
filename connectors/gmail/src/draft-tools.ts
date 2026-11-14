@@ -3,6 +3,13 @@
  * Enviar é marcado como envio (destrutivo); substituir e apagar, como destrutivos; criar, como criação.
  */
 import { z } from 'zod';
+import {
+  CREATE_HINTS,
+  DESTRUCTIVE_HINTS,
+  READ_ONLY_HINTS,
+  SEND_HINTS,
+  toolAnnotations,
+} from '../../../src/mcp/annotations.js';
 import { defineTool } from '../../../src/mcp/tools.js';
 import type { OwnerDeps } from './context.js';
 import {
@@ -17,14 +24,10 @@ import {
 import { BODY, RECIPIENTS, SUBJECT } from './send-tools.js';
 import {
   CONFIRM_HINT,
-  CREATE_HINTS,
-  DESTRUCTIVE_HINTS,
   GMAIL_ID,
   ONE_ACCOUNT,
-  READ_ONLY_HINTS,
   resolveSingleAccount,
   resolveWritableAccount,
-  SEND_HINTS,
 } from './tools.js';
 
 /** Id de rascunho (de list_drafts ou create_draft). */
@@ -76,7 +79,7 @@ export const listDraftsTool = defineTool({
     account: ONE_ACCOUNT,
     max_results: z.number().int().min(1).max(25).default(10),
   },
-  annotations: READ_ONLY_HINTS,
+  annotations: toolAnnotations('List drafts', READ_ONLY_HINTS),
   run: async (deps: OwnerDeps, args) =>
     listDrafts(deps, await resolveSingleAccount(deps, args.account), args.max_results),
 });
@@ -87,7 +90,7 @@ export const createDraftTool = defineTool({
   description:
     'Create a plain-text draft (nothing is sent). With reply_to_message_id it becomes a reply in that thread.',
   shape: DRAFT_SHAPE,
-  annotations: CREATE_HINTS,
+  annotations: toolAnnotations('Create draft', CREATE_HINTS),
   run: async (deps: OwnerDeps, args) => {
     const ref = await resolveWritableAccount(deps, args.account);
     return createDraft(deps, ref, await prepareDraftEmail(deps, ref, draftArgs(args)));
@@ -99,7 +102,7 @@ export const updateDraftTool = defineTool({
   name: 'update_draft',
   description: `Replace the whole content of a draft (send every field again). ${CONFIRM_HINT}`,
   shape: { ...DRAFT_SHAPE, draft_id: DRAFT_ID },
-  annotations: DESTRUCTIVE_HINTS,
+  annotations: toolAnnotations('Update draft', DESTRUCTIVE_HINTS),
   run: async (deps: OwnerDeps, args) => {
     const ref = await resolveWritableAccount(deps, args.account);
     const prepared = await prepareDraftEmail(deps, ref, draftArgs(args));
@@ -112,7 +115,7 @@ export const sendDraftTool = defineTool({
   name: 'send_draft',
   description: `Send an existing draft as it is. ${CONFIRM_HINT}`,
   shape: { account: ONE_ACCOUNT, draft_id: DRAFT_ID },
-  annotations: SEND_HINTS,
+  annotations: toolAnnotations('Send draft', SEND_HINTS),
   run: async (deps: OwnerDeps, args) =>
     sendDraft(deps, await resolveWritableAccount(deps, args.account), args.draft_id),
 });
@@ -122,7 +125,7 @@ export const deleteDraftTool = defineTool({
   name: 'delete_draft',
   description: `Delete a draft (only the draft; sent mail is not touched). ${CONFIRM_HINT}`,
   shape: { account: ONE_ACCOUNT, draft_id: DRAFT_ID },
-  annotations: DESTRUCTIVE_HINTS,
+  annotations: toolAnnotations('Delete draft', DESTRUCTIVE_HINTS),
   run: async (deps: OwnerDeps, args) =>
     deleteDraft(deps, await resolveWritableAccount(deps, args.account), args.draft_id),
 });

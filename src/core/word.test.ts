@@ -31,7 +31,7 @@ describe('docxToText', () => {
     await expect(docxToText(fixture('exemplo.docx'))).resolves.toBe(EXPECTED);
     const empty = new Uint8Array(22);
     new DataView(empty.buffer).setUint32(0, 0x06054b50, true);
-    await expect(docxToText(empty)).rejects.toThrow('sem word/document.xml');
+    await expect(docxToText(empty)).rejects.toThrow('without word/document.xml');
   });
 });
 
@@ -52,7 +52,7 @@ describe('parsePieceTable', () => {
     v.setUint32(12, 5, true);
     v.setUint32(16 + 2, 0x40000800, true);
     expect(parsePieceTable(t, 0)).toEqual([{ cpStart: 0, cpEnd: 5, fc: 0x40000800 }]);
-    expect(() => parsePieceTable(new Uint8Array(8), 0)).toThrow('tabela de texto inválida');
+    expect(() => parsePieceTable(new Uint8Array(8), 0)).toThrow('invalid text table');
   });
 });
 

@@ -17,7 +17,7 @@ import {
   updateLabelsTool,
   writableTargets,
 } from './mailbox-tools.js';
-import { DESTRUCTIVE_HINTS, ORGANIZE_HINTS } from './tools.js';
+import { DESTRUCTIVE_HINTS, ORGANIZE_HINTS } from '../../../src/mcp/annotations.js';
 
 const LABELS = gmailRoute({ labels: { labels: [{ id: 'Label_1', name: 'Recibos' }] } });
 
@@ -53,9 +53,9 @@ describe('writableTargets e runMailboxAction', () => {
 describe('ferramentas de organização', () => {
   it('anotações: organizar é reversível; lixeira é destrutiva', () => {
     for (const tool of [markReadTool, archiveTool, starTool, updateLabelsTool, untrashTool]) {
-      expect(tool.annotations).toEqual(ORGANIZE_HINTS);
+      expect(tool.annotations).toMatchObject(ORGANIZE_HINTS);
     }
-    expect(trashTool.annotations).toEqual(DESTRUCTIVE_HINTS);
+    expect(trashTool.annotations).toMatchObject(DESTRUCTIVE_HINTS);
   });
 
   it('mark_read, archive e star mexem nos marcadores de sistema', async () => {
@@ -89,7 +89,7 @@ describe('ferramentas de organização', () => {
     expect(result).toMatchObject({ added_labels: ['Label_1'] });
     await expect(
       updateLabelsTool.run(deps, { account: 'dono', message_ids: ['m1'] }),
-    ).rejects.toThrow(/ao menos um/);
+    ).rejects.toThrow(/at least one/);
     await expect(
       updateLabelsTool.run(deps, { account: 'dono', message_ids: ['m1'], add_labels: ['Nada'] }),
     ).rejects.toThrow(/list_labels/);

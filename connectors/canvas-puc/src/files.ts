@@ -9,10 +9,10 @@ import type { CanvasAttachment } from './canvas-types.js';
 import type { CanvasClient } from './client.js';
 import { isTextFile } from './helpers.js';
 
-/** Maior arquivo que `baixar_arquivo` embute na conversa (10 MB; em base64 cresce ~33%). */
+/** Maior arquivo que `download_file` embute na conversa (10 MB; em base64 cresce ~33%). */
 export const MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
 
-/** Maior texto devolvido por `ler_arquivo_texto`, em caracteres. */
+/** Maior texto devolvido por `read_file_text`, em caracteres. */
 export const MAX_TEXT_CHARS = 100_000;
 
 /** Bloco MCP com o conteúdo do arquivo: imagem para `image/*`, recurso embutido para o resto. */
@@ -24,7 +24,7 @@ export function fileContentBlock(
   return binaryContentBlock(mimeType, bytes, file.url ?? `canvas-file:${String(file.id)}`);
 }
 
-/** Resultado de `baixar_arquivo`: uma linha de descrição e o conteúdo do arquivo. */
+/** Resultado de `download_file`: uma linha de descrição e o conteúdo do arquivo. */
 export function downloadedFileResult(file: CanvasAttachment, bytes: Uint8Array): RawToolResult {
   const kb = Math.round(bytes.length / 1024);
   const text = `"${String(file.display_name)}" (${String(file['content-type'])}, ${kb} KB). Link: ${String(file.url)}`;
@@ -34,10 +34,10 @@ export function downloadedFileResult(file: CanvasAttachment, bytes: Uint8Array):
 /** Motivo para não baixar o arquivo pela conversa (sem link ou grande demais), ou `null` se pode. */
 export function downloadRefusal(file: CanvasAttachment): string | null {
   const name = String(file.display_name);
-  if (!file.url) return `"${name}" não tem link de download disponível para esta conta.`;
+  if (!file.url) return `"${name}" has no download link available for this account.`;
   if ((file.size ?? 0) > MAX_DOWNLOAD_BYTES) {
     const mb = ((file.size ?? 0) / 1024 / 1024).toFixed(1);
-    return `"${name}" tem ${mb} MB, acima do limite de 10 MB para trazer à conversa; baixe pelo link: ${file.url}`;
+    return `"${name}" is ${mb} MB, above the 10 MB limit for the conversation; download it from the link: ${file.url}`;
   }
   return null;
 }
@@ -61,7 +61,7 @@ export async function readCanvasFileText(
   const name = file.display_name ?? '';
   const word = wordKind(type, name);
   if (!file.url || (!word && !isTextFile(type, name))) {
-    return `"${name}" é ${type}; use \`baixar_arquivo\` para trazer o conteúdo ou baixe pelo link: ${String(file.url)}`;
+    return `"${name}" is ${type}; use \`download_file\` to bring its content or download it from the link: ${String(file.url)}`;
   }
   const text = word
     ? await wordToText(word, await client.fetchBytes(file.url))

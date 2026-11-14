@@ -1,4 +1,6 @@
 import { pkceChallenge } from '../../../src/remote/oauth.js';
+import { FALLBACK_SERVER_VERSION } from '../../../src/mcp/server-version.js';
+import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
 import { AuthorizationError } from '@cloudflare/workers-oauth-provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearAccessTokenCache } from './access-token.js';
@@ -19,6 +21,7 @@ import {
   createGmailDeps,
   createGmailProvider,
   createGmailServer,
+  GMAIL_SERVER_INFO,
   handleDefaultRequest,
   handleGmailWorkerFetch,
   handleMcpApi,
@@ -266,7 +269,7 @@ describe('login de quem instalou e /mcp', () => {
     };
     expect(anaAccounts.accounts.map((a) => a.account)).toEqual(['ana']);
     const biaCall = await toolText(new Browser(env), bia, ['list_labels', { account: 'ana' }]);
-    expect(biaCall).toMatch(/não vinculada/);
+    expect(biaCall).toMatch(/is not linked/);
   });
 
   it('link_account gera link que leva ao Google com acesso offline', async () => {
@@ -485,6 +488,13 @@ describe('rotas públicas', () => {
     expect(clientIpKey(new Request(ORIGIN))).toBe('ip:unknown');
     expect(isMcpPath(request)).toBe(true);
     expect(isMcpPath(new Request(`${ORIGIN}/mcpx`))).toBe(false);
+  });
+});
+
+describe('GMAIL_SERVER_INFO', () => {
+  it('announces the version of the plugin manifest', () => {
+    expect(GMAIL_SERVER_INFO.version).toBe(manifest.version);
+    expect(GMAIL_SERVER_INFO.version).not.toBe(FALLBACK_SERVER_VERSION);
   });
 });
 

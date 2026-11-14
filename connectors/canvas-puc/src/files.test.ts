@@ -50,10 +50,10 @@ describe('downloadedFileResult', () => {
 
 describe('downloadRefusal', () => {
   it('recusa sem link ou acima do limite, e libera o resto', () => {
-    expect(downloadRefusal({ display_name: 'a' })).toContain('não tem link');
+    expect(downloadRefusal({ display_name: 'a' })).toContain('has no download link');
     const big = { display_name: 'v.mp4', url: 'u', size: MAX_DOWNLOAD_BYTES + 1 };
     expect(downloadRefusal(big)).toBe(
-      '"v.mp4" tem 10.0 MB, acima do limite de 10 MB para trazer à conversa; baixe pelo link: u',
+      '"v.mp4" is 10.0 MB, above the 10 MB limit for the conversation; download it from the link: u',
     );
     expect(downloadRefusal({ url: 'u', size: 10 })).toBeNull();
     expect(downloadRefusal({ url: 'u' })).toBeNull();
@@ -66,7 +66,7 @@ describe('downloadCanvasFile', () => {
     const ok = await downloadCanvasFile(ctx.client, { url: 'u', 'content-type': 'image/png' });
     expect(fetchBytes).toHaveBeenCalledWith('u');
     expect(toToolResult(ok).content[1]).toMatchObject({ type: 'image', data: 'AQ==' });
-    await expect(downloadCanvasFile(ctx.client, {})).resolves.toContain('não tem link');
+    await expect(downloadCanvasFile(ctx.client, {})).resolves.toContain('has no download link');
   });
 });
 
@@ -89,6 +89,8 @@ describe('readCanvasFileText', () => {
     await expect(readCanvasFileText(ctx.client, html)).resolves.toBe('# a.html\n\nx');
     const big = await readCanvasFileText(ctx.client, { display_name: 'g.txt', url: 'g' });
     expect(big).toHaveLength(MAX_TEXT_CHARS);
-    await expect(readCanvasFileText(ctx.client, {})).resolves.toContain('baixe pelo link');
+    await expect(readCanvasFileText(ctx.client, {})).resolves.toContain(
+      'download it from the link',
+    );
   });
 });
