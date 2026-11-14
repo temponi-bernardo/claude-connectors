@@ -2,7 +2,7 @@
 
 ## Próxima tarefa
 
-**F2.1 — Primeira release `v0.1.0`** do conector remoto (skill `/lancar-versao`).
+**F2.11 — Gmail remoto publicado** (Worker no ar; falta vincular as contas no claude.ai). Depois, F3.2.
 
 ## Como ler
 
@@ -35,7 +35,7 @@ O MVP é o conector do Canvas instalado pelo marketplace e usado no dia a dia, s
 
 | Id    | Tarefa                                                                 | Estado | Pronto quando                                                                            |
 | ----- | ---------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| F2.1  | Primeira release `v0.1.0` do conector remoto                           | ⬜     | Tag e notas da `v0.1.0` publicadas, sem anexo (ADR 0013)                                 |
+| F2.1  | Primeira release `v0.1.0` do conector remoto                           | ✅     | Tag e notas da `v0.1.0` publicadas, sem anexo (ADR 0013)                                 |
 | F2.2  | Instalar pelo marketplace e aposentar `Documents/canvas-mcp`           | ⬜     | Plugin instalado pelo marketplace conecta por OAuth; registro antigo e `.mcpb` removidos |
 | F2.3  | Escolher e esboçar o próximo conector (PRODUCT Q4)                     | ⬜     | Pergunta Q4 decidida e tarefas da Fase 3 escritas                                        |
 | F2.4  | Avaliar a migração para zod 4 (Dependabot ignora majors do zod até lá) | ⬜     | Conector testado com zod 4 e regra de ignore removida, ou ADR dizendo por que não        |
