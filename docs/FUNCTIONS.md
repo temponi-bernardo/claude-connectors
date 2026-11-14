@@ -5,7 +5,7 @@ Every top-level function in the code appears here, in a fixed template. The fiel
 the code — do not edit them by hand. The **Does**, **Input**, **Output**, **Effects** and **Errors** fields are
 manual and mandatory; `npm run docs:check` fails while any `_fill_in_` remains.
 
-Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#função).
+Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 ## Index by module
 

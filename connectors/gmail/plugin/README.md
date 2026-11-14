@@ -10,3 +10,10 @@ Nothing runs on your computer. The server code and the full guide live one folde
 ```
 /plugin install gmail --marketplace temponi-bernardo/claude-connectors
 ```
+
+## Skills
+
+- `/setup-gmail` — guided setup (connection, accounts and test).
+- `/triage-inbox` — inbox of every linked account, by priority.
+- `/find-document` — bank slips, invoices, receipts and contracts, with the attachment data.
+- `/summarize-thread` — thread summary, open items and a draft reply.

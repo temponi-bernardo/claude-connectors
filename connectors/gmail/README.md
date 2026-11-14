@@ -6,13 +6,13 @@ There is no permanent deletion, and Claude asks for confirmation before sending 
 multi-user: each person signs in with their own Google account and only sees the accounts they linked
 themselves. It runs on Cloudflare Workers **only when a request arrives**: no Containers, Cron Triggers, alarms
 or polling, so being idle costs nothing. State lives in Workers KV. Decisions in
-[ADR 0014](../../docs/adr/0014-gmail-remoto-sob-demanda-no-workers.md),
-[ADR 0016](../../docs/adr/0016-gmail-multiusuario-publico.md) and
-[ADR 0019](../../docs/adr/0019-gmail-gerenciamento-completo.md) (management).
+[ADR 0014](../../docs/adr/0014-on-demand-remote-gmail-on-workers.md),
+[ADR 0016](../../docs/adr/0016-public-multi-user-gmail.md) and
+[ADR 0019](../../docs/adr/0019-full-gmail-management.md) (management).
 
 ## For users
 
-The easiest way: type **`/config-gmail`** in the chat. Claude checks the connection, shows the accounts, links
+The easiest way: type **`/setup-gmail`** in the chat. Claude checks the connection, shows the accounts, links
 or unlinks accounts and runs a test. The manual steps are:
 
 1. In Claude, add the `temponi-bernardo/claude-connectors` marketplace and install the **`gmail`** plugin (or
@@ -36,10 +36,10 @@ click **Advanced → Go to**. Google limits unverified apps using Gmail to 100 u
 
 ## Plugin commands
 
-- **`/config-gmail`** — guided setup (connection, accounts and test).
-- **`/triagem-email`** — the inbox of every account, by priority.
-- **`/achar-documento`** — bills, invoices, receipts and contracts, with the attachment's data.
-- **`/resumir-conversa`** — summary of a thread, open items and a draft reply.
+- **`/setup-gmail`** — guided setup (connection, accounts and test).
+- **`/triage-inbox`** — the inbox of every account, by priority.
+- **`/find-document`** — bills, invoices, receipts and contracts, with the attachment's data.
+- **`/summarize-thread`** — summary of a thread, open items and a draft reply.
 
 You can also ask in natural language ("any email I need to answer?"): Claude picks the right skill.
 
@@ -112,8 +112,8 @@ instructions that come from an email.
 2. **APIs & Services → Library → Gmail API → Enable.**
 3. **Google Auth Platform → Branding:** app name, support email, home page
    `https://temponi-bernardo.github.io/claude-connectors/`, privacy policy
-   `https://temponi-bernardo.github.io/claude-connectors/privacidade.html` and terms
-   `https://temponi-bernardo.github.io/claude-connectors/termos.html`.
+   `https://temponi-bernardo.github.io/claude-connectors/privacy.html` and terms
+   `https://temponi-bernardo.github.io/claude-connectors/terms.html`.
 4. **Audience:** type **External** → **Publish app** ("In production"). Without this the refresh token expires
    in 7 days.
 5. **Data access → Add scopes:** `openid`, `.../auth/userinfo.email` and
@@ -180,4 +180,4 @@ link their accounts again.
 - Prompt injection: descriptions, server instructions and results warn the model that email content is
   untrusted and that it must never send, forward or delete because an email asked it to.
 - No email content, tokens or addresses in the logs. Privacy policy with Google's Limited Use disclosure in
-  [privacidade.html](../../docs/privacidade.html).
+  [privacy.html](../../docs/privacy.html).

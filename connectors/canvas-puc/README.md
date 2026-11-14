@@ -5,10 +5,10 @@ rubric, grades, announcements, modules, pages, files, discussions and calendar.
 
 ## Install
 
-After installing the plugin, type **`/config-canvas`** in the chat: Claude opens the Canvas token page, guides
+After installing the plugin, type **`/setup-canvas`** in the chat: Claude opens the Canvas token page, guides
 the connection and runs a test. The manual steps are:
 
-The connector runs only in the cloud. Nothing is installed on your computer ([ADR 0013](../../docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
+The connector runs only in the cloud. Nothing is installed on your computer ([ADR 0013](../../docs/adr/0013-remote-only-connector-via-marketplace.md)).
 
 1. In Claude (claude.ai, Cowork or Claude Code), **Add marketplace** → `temponi-bernardo/claude-connectors`.
 2. Install the **canvas-puc** plugin. It points to `https://canvas-puc-remote.bftemponi.workers.dev/mcp`.
@@ -31,20 +31,20 @@ Anyone with a valid Canvas token can use the server, but only reaches their own 
 
 ## Plugin commands
 
-- **`/config-canvas`** — guided setup (token, connection and test).
-- **`/resumo-semana`** — the week's due dates, overdue work, announcements and grades.
-- **`/preparar-entrega`** — instructions, rubric, checklist, plan and review; submits only after confirmation.
-- **`/estudar-disciplina`** — module summary, concepts, review questions and a plan up to the exam.
+- **`/setup-canvas`** — guided setup (token, connection and test).
+- **`/weekly-summary`** — the week's due dates, overdue work, announcements and grades.
+- **`/prepare-submission`** — instructions, rubric, checklist, plan and review; submits only after confirmation.
+- **`/study-course`** — module summary, concepts, review questions and a plan up to the exam.
 
 You can also ask in natural language ("what's due this week?"): Claude picks the right skill.
 
 ## Remote server (maintainer)
 
-The plugin uses the HTTP server with OAuth ([ADR 0009](../../docs/adr/0009-conector-remoto-http-oauth.md)),
-deployed on Cloudflare Workers ([ADR 0010](../../docs/adr/0010-conector-remoto-no-cloudflare-workers.md)).
+The plugin uses the HTTP server with OAuth ([ADR 0009](../../docs/adr/0009-remote-http-oauth-connector.md)),
+deployed on Cloudflare Workers ([ADR 0010](../../docs/adr/0010-remote-connector-on-cloudflare-workers.md)).
 You can also add it directly as a custom connector on claude.ai, with the same `/mcp` URL.
 
-**1. Deploy to Cloudflare Workers (free plan, [ADR 0010](../../docs/adr/0010-conector-remoto-no-cloudflare-workers.md)):**
+**1. Deploy to Cloudflare Workers (free plan, [ADR 0010](../../docs/adr/0010-remote-connector-on-cloudflare-workers.md)):**
 
 1. Authenticate `wrangler`: on your computer, `npx wrangler login`; in the Claude Code cloud, an API token from
    the **"Edit Cloudflare Workers"** template in the `CLOUDFLARE_API_TOKEN` variable of the environment settings.
@@ -119,4 +119,4 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes 
 | `reply_to_discussion`    | Replies to a forum (only with writes enabled; Claude confirms first)  |
 
 Internal flows: [PROCESSES.md](../../docs/PROCESSES.md). Architecture decision:
-[ADR 0013](../../docs/adr/0013-conector-so-remoto-pelo-marketplace.md).
+[ADR 0013](../../docs/adr/0013-remote-only-connector-via-marketplace.md).

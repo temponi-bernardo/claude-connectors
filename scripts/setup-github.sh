@@ -1,34 +1,34 @@
 #!/usr/bin/env bash
-# Configura o repositório no GitHub depois do primeiro push:
+# Configures the repository on GitHub after the first push:
 #   bash scripts/setup-github.sh <owner>/<repo> [--template]
-# - branch protection da main (sem force push/delete, histórico linear). Sem status checks obrigatórios:
-#   não há CI (ADR 0006); o portão é o `npm run pr:check` local.
-# - GitHub Actions desligado (nenhum custo de minutos)
-# - squash merge como único modo, apagar branch após merge
-# - alertas de vulnerabilidade, Dependabot security updates, relatório privado de vulnerabilidades
-# - --template marca o repositório como template
+# - branch protection for main (no force push/delete, linear history). No required status checks:
+#   there is no CI (ADR 0006); the gate is the local `npm run pr:check`.
+# - GitHub Actions disabled (no minutes cost)
+# - squash merge as the only mode, delete branch after merge
+# - vulnerability alerts, Dependabot security updates, private vulnerability reporting
+# - --template marks the repository as a template
 set -euo pipefail
 
-repo="${1:?uso: setup-github.sh <owner>/<repo> [--template]}"
+repo="${1:?usage: setup-github.sh <owner>/<repo> [--template]}"
 template_flag="${2:-}"
 
-echo "→ GitHub Actions: desligado (ADR 0006)"
+echo "→ GitHub Actions: disabled (ADR 0006)"
 gh api -X PUT "repos/$repo/actions/permissions" -F enabled=false >/dev/null
 
-echo "→ merges: só squash, apagar branch, atualizar branch sugerido"
+echo "→ merges: squash only, delete branch, suggest updating branch"
 gh repo edit "$repo" \
   --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false \
   --delete-branch-on-merge \
   --allow-update-branch >/dev/null
 
-echo "→ segurança: alertas, Dependabot security updates, relatório privado"
+echo "→ security: alerts, Dependabot security updates, private reporting"
 gh api -X PUT "repos/$repo/vulnerability-alerts" >/dev/null || true
 gh api -X PUT "repos/$repo/automated-security-fixes" >/dev/null || true
 gh api -X PUT "repos/$repo/private-vulnerability-reporting" >/dev/null || true
 
 echo "→ branch protection: main"
-# Em repositório privado no plano gratuito, a API devolve 403 ("Upgrade to GitHub Pro"): avisa e segue,
-# para não deixar o resto (ex.: --template) sem rodar.
+# On a private repository on the free plan, the API returns 403 ("Upgrade to GitHub Pro"): warn and go on,
+# so the rest (e.g. --template) still runs.
 if ! gh api -X PUT "repos/$repo/branches/main/protection" \
   -H "Accept: application/vnd.github+json" \
   --input - <<'JSON' >/dev/null
@@ -46,18 +46,18 @@ if ! gh api -X PUT "repos/$repo/branches/main/protection" \
 JSON
 then
   protection_failed=1
-  echo "⚠ branch protection não aplicada. Repositório privado exige GitHub Pro/Team; alternativas:" >&2
-  echo "  tornar o repositório público ou proteger a main à mão depois do upgrade." >&2
-  echo "  Sem ela, só os hooks locais (guard-bash, pre-push) impedem push direto na main." >&2
+  echo "⚠ branch protection not applied. A private repository needs GitHub Pro/Team; alternatives:" >&2
+  echo "  make the repository public or protect main by hand after upgrading." >&2
+  echo "  Without it, only the local hooks (guard-bash, pre-push) prevent direct pushes to main." >&2
 fi
 
 if [ "$template_flag" = "--template" ]; then
-  echo "→ marcando como template"
+  echo "→ marking as template"
   gh repo edit "$repo" --template >/dev/null
 fi
 
 if [ "${protection_failed:-0}" = "1" ]; then
-  echo "✔ GitHub configurado para $repo, MENOS a branch protection (ver aviso acima)"
+  echo "✔ GitHub configured for $repo, EXCEPT branch protection (see the warning above)"
   exit 1
 fi
-echo "✔ GitHub configurado para $repo"
+echo "✔ GitHub configured for $repo"

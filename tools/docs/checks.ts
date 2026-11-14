@@ -81,7 +81,7 @@ export function checkUniqueNames(functions: readonly FunctionInfo[]): Issue[] {
     }));
 }
 
-/** Bloco gerado (Arquivo, Assinatura, Usada por, Processos) diferente do calculado a partir do código. */
+/** Bloco gerado (File, Signature, Used by, Processes) diferente do calculado a partir do código. */
 export function checkGeneratedBlocks(
   inventory: Inventory,
   sections: readonly FunctionSection[],

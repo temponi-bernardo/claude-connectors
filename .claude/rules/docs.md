@@ -4,13 +4,13 @@ paths:
   - 'CHANGELOG.md'
 ---
 
-# Ao editar documentação
+# When editing documentation
 
-- Siga os modelos de `docs/DOCUMENTATION.md`; um fato vive em um lugar só, os outros linkam.
-- Nunca edite o conteúdo entre `<!-- generated:start -->` e `<!-- generated:end -->` — rode `npm run docs:generate`.
-- ADR aceito não se edita: crie um novo que substitui o antigo.
-- Ao terminar uma tarefa, atualize o estado em `docs/ROADMAP.md` e a "Próxima tarefa" no topo, e sobrescreva
-  `docs/STATE.md` com `/handoff` (arquivo local, fora do git).
-- Mudança visível ao usuário → entrada em `CHANGELOG.md`, seção "Unreleased".
+- Follow the templates in `docs/DOCUMENTATION.md`; a fact lives in one place only, the others link to it.
+- Never edit the content between `<!-- generated:start -->` and `<!-- generated:end -->` — run `npm run docs:generate`.
+- An accepted ADR is not edited: create a new one that supersedes it.
+- When finishing a task, update the status in `docs/ROADMAP.md` and the "Next task" at the top, and overwrite
+  `docs/STATE.md` with `/handoff` (a local file, outside git).
+- User-visible change → an entry in `CHANGELOG.md`, "Unreleased" section.
 - English (ADR 0021), short sentences, code identifiers in backticks. Existing Portuguese text is translated in
   roadmap phase F4.

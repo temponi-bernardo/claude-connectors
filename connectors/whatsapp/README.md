@@ -6,7 +6,7 @@ one message at a time, always with your explicit confirmation and with an hourly
 
 It is a **self-host template**: each person deploys it to **their own Cloudflare account** and pairs **their own
 number**. There is no central server or third-party hosted service. Decisions in
-[ADR 0015](../../docs/adr/0015-whatsapp-no-cloudflare-containers.md).
+[ADR 0015](../../docs/adr/0015-whatsapp-on-cloudflare-containers.md).
 
 > ⚠️ WhatsApp has no official API for personal accounts. This connector uses
 > [whatsmeow](https://github.com/tulir/whatsmeow), which connects as a "linked device" (like WhatsApp Web). This
@@ -51,15 +51,15 @@ message content is untrusted third-party data.
 
 ## Guided setup
 
-With the plugin installed, type **`/config-whatsapp`** in the chat. Claude checks whether your server answers,
+With the plugin installed, type **`/setup-whatsapp`** in the chat. Claude checks whether your server answers,
 guides the deploy (if missing), connects Claude to your `/mcp`, walks you through pairing at `/pair` and runs a
 test.
 
 Everyday commands, once set up:
 
-- **`/resumo-whatsapp`** — what happened in chats and groups over a period.
-- **`/pendencias-whatsapp`** — chats waiting for your reply.
-- **`/buscar-whatsapp`** — address, PIX key, link, document or media in the messages.
+- **`/whatsapp-summary`** — what happened in chats and groups over a period.
+- **`/whatsapp-pending`** — chats waiting for your reply.
+- **`/search-whatsapp`** — address, PIX key, link, document or media in the messages.
 
 ## Deploy (once)
 
@@ -127,8 +127,8 @@ backup gets corrupted).
   and in Claude Code (signed in to the same account).
 - **Claude Code without a claude.ai account:**
   `claude mcp add --transport http whatsapp https://whatsapp-remote.<your-account>.workers.dev/mcp`.
-- **Marketplace plugin** (optional): brings only the skills (`/config-whatsapp`, `/resumo-whatsapp` etc.),
-  **without** a bundled server, because each person has their own. Install it and run `/config-whatsapp`, which
+- **Marketplace plugin** (optional): brings only the skills (`/setup-whatsapp`, `/whatsapp-summary` etc.),
+  **without** a bundled server, because each person has their own. Install it and run `/setup-whatsapp`, which
   connects yours.
 
   ```text

@@ -1,31 +1,31 @@
-## O que muda
+## What changes
 
-<!-- Uma ou duas frases. Tarefa do roadmap: F?.? -->
+<!-- One or two sentences. Roadmap task: F?.? -->
 
-## Como testar
+## How to test
 
-<!-- Comandos e o que observar. -->
+<!-- Commands and what to look for. -->
 
-## Checklist de documentação (docs/DOCUMENTATION.md)
+## Documentation checklist (docs/DOCUMENTATION.md)
 
-Para cada item: marque se atualizou **ou** escreva "não se aplica: motivo".
+For each item: check it if you updated it **or** write "n/a: reason".
 
-- [ ] `docs/FUNCTIONS.md` — `npm run docs:generate` rodado e campos manuais preenchidos
-- [ ] `docs/PROCESSES.md` — fluxos novos/alterados citam as funções
-- [ ] `docs/STRUCTURE.md` — pastas novas
-- [ ] `docs/ROADMAP.md` — estado da tarefa e "Próxima tarefa"
-- [ ] `CHANGELOG.md` — seção "Unreleased" (se visível ao usuário)
-- [ ] `docs/ARCHITECTURE.md` — camadas, dependências, serviços externos
-- [ ] `docs/adr/` — decisão de arquitetura registrada
-- [ ] `docs/PRODUCT.md` — decisão de produto registrada com data
-- [ ] `docs/UI.md` — componentes novos (se houver interface)
-- [ ] `docs/WORKFLOW.md` / `CLAUDE.md` — comandos, regras, escopos de commit
-- [ ] `.claude/skills/` — skill criada/atualizada (regra 9)
-- [ ] `.env.example` — variáveis novas
+- [ ] `docs/FUNCTIONS.md` — `npm run docs:generate` run and manual fields filled in
+- [ ] `docs/PROCESSES.md` — new/changed flows cite the functions
+- [ ] `docs/STRUCTURE.md` — new folders
+- [ ] `docs/ROADMAP.md` — task status and "Next task"
+- [ ] `CHANGELOG.md` — "Unreleased" section (if user-visible)
+- [ ] `docs/ARCHITECTURE.md` — layers, dependencies, external services
+- [ ] `docs/adr/` — architecture decision recorded
+- [ ] `docs/PRODUCT.md` — product decision recorded with a date
+- [ ] `docs/UI.md` — new components (if there is an interface)
+- [ ] `docs/WORKFLOW.md` / `CLAUDE.md` — commands, rules, commit scopes
+- [ ] `.claude/skills/` — skill created/updated (rule 9)
+- [ ] `.env.example` — new variables
 
-## Checklist de qualidade
+## Quality checklist
 
-- [ ] `npm run check` verde localmente
-- [ ] Testes escritos antes do código (ou teste que reproduz o bug)
-- [ ] Nenhuma função nova sem teste (ou exceção justificada em `src/test-exceptions.ts`)
-- [ ] Título do PR no formato `tipo(escopo): descrição em português`
+- [ ] `npm run check` green locally
+- [ ] Tests written before the code (or a test that reproduces the bug)
+- [ ] No new function without a test (or a justified exception in `src/test-exceptions.ts`)
+- [ ] PR title in the format `type(scope): description in English`

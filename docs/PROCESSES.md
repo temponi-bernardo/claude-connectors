@@ -4,7 +4,7 @@ System flows, from trigger to result. Each step cites the functions involved as 
 `docs:check` uses these citations (plus everything they call) to fill in the **Processes** field
 of each function in [FUNCTIONS.md](FUNCTIONS.md). Citing a function that does not exist in the code is an error.
 
-Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#processo).
+Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
 
 ## P01 — Check the documentation (`npm run docs:check`)
 
@@ -62,7 +62,7 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 
 ## P04 — (removed) Browser login
 
-The local mode, with a browser session, was removed from the project ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)).
+The local mode, with a browser session, was removed from the project ([ADR 0013](adr/0013-remote-only-connector-via-marketplace.md)).
 Authentication is now only the OAuth of P08. The number stays reserved so the other processes are not renumbered.
 
 ## P05 — Connector build (`npm run build`)
@@ -88,7 +88,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
   3. Runs `npm run plugin:validate` (`scripts/plugin-validate.sh`): `claude plugin validate --strict` on the
      marketplace and on each `connectors/<name>/plugin`; any warning fails (needs the Claude Code CLI, ADR 0022).
   4. Runs commitlint on the branch commits since `origin/main` and on the PR title.
-- **Result:** `✔ pr:check verde`, the condition for Claude to squash merge.
+- **Result:** `✔ pr:check green`, the condition for Claude to squash merge.
 - **Failures:** any failing step stops the script with a non-zero exit code.
 
 ## P07 — Install a connector from the marketplace (Claude, Cowork and Claude Code)

@@ -1,4 +1,4 @@
-/** Tipos e escopos permitidos. Ver docs/WORKFLOW.md. */
+/** Allowed types and scopes. See docs/WORKFLOW.md. */
 export default {
   extends: ['@commitlint/config-conventional'],
   rules: {

@@ -1,0 +1,171 @@
+---
+layout: site
+title: Privacy policy
+description: What data the Claude Connectors connectors access, where it is kept and how to delete it.
+---
+
+<h1>Privacy policy</h1>
+<p class="meta">Updated on November 14, 2026.</p>
+
+<p>
+  This policy applies to the connectors of the Claude Connectors project, maintained by Bernardo
+  Temponi, currently the <strong>Canvas PUC Minas</strong>, <strong>Gmail</strong> and
+  <strong>WhatsApp</strong> connectors. They run only in the cloud and are used through the
+  marketplace plugin or as a custom connector in claude.ai, Cowork, the mobile app and Claude Code.
+  Canvas and Gmail run on the project's server; WhatsApp runs on a server that each person publishes
+  in their own account (see the WhatsApp section).
+</p>
+
+<h2>What data is accessed in Canvas</h2>
+<p>
+  Only the data of your own Canvas account, and only when you ask Claude for something: profile,
+  courses, assignments, submissions, grades, announcements, modules, pages, files, discussion forums
+  and calendar. The connector does not access any other system and does not see other people's data
+  beyond what your account can already see in Canvas.
+</p>
+
+<h2>Gmail</h2>
+<ul>
+  <li>
+    <strong>What is accessed:</strong> the Gmail accounts you link yourself, with the
+    <code>gmail.modify</code> scope, only when you ask Claude for something: search, threads,
+    messages, labels and attachment text; and, if you ask, sending, replying, forwarding, drafts,
+    labels, archiving and trash. The connector instructs Claude to show the recipients and content
+    and ask for your confirmation before sending, moving to the trash or deleting a draft. The
+    connector does not permanently delete email (that scope does not even allow it).
+  </li>
+  <li>
+    <strong>What is stored</strong> (in Cloudflare Workers KV), per person who uses the connector:
+    <ul>
+      <li>
+        the linked Gmail accounts: email address, Google refresh token, granted scope, link date and
+        whether access was revoked, in a single record encrypted with AES-256-GCM and stored under a
+        hash of the sign-in Google account identifier;
+      </li>
+      <li>
+        the authorization given to Claude: the sign-in Google account identifier and, encrypted, the
+        sign-in email address and a session identifier. The tokens granted to Claude are stored only
+        as a hash; access lasts 1 hour and renewal expires after 30 days without use;
+      </li>
+      <li>
+        while you link an account, a temporary encrypted request, deleted when you finish or within
+        15 minutes.
+      </li>
+    </ul>
+    The content of emails and attachments is not stored: it goes straight from Google to the
+    conversation.
+  </li>
+  <li><strong>Isolation:</strong> each person only sees the accounts they linked.</li>
+  <li>
+    <strong>Limited Use:</strong> the use and transfer of information received from Google APIs
+    adheres to the
+    <a href="https://developers.google.com/terms/api-services-user-data-policy"
+      >Google API Services User Data Policy</a
+    >, including the Limited Use requirements. Gmail data is used only to answer what you ask
+    Claude; it is not sold, not used for ads or model training and not read by people.
+  </li>
+</ul>
+
+<h2>WhatsApp</h2>
+<ul>
+  <li>
+    <strong>Self-host:</strong> there is no project server for WhatsApp. Each person publishes the
+    connector in their own Cloudflare account (a Worker and a Container) and pairs their own number.
+    Nothing from your WhatsApp, not even the credentials, reaches the project maintainer.
+  </li>
+  <li>
+    <strong>What is accessed:</strong> chats, messages, contacts and media of the paired number, and
+    sending text when you ask (one message at a time, with your confirmation and an hourly limit).
+  </li>
+  <li>
+    <strong>What is stored:</strong> the WhatsApp session and the message database stay on the
+    Container's disk and, when it sleeps, become an encrypted backup (AES-256-GCM, with the
+    <code>SNAPSHOT_KEY</code> that only you have) in the R2 bucket of your Cloudflare account.
+  </li>
+  <li>
+    <strong>Who gets in:</strong> Claude's access and the pairing page require a GitHub sign-in with
+    an email address from the list you configured (<code>ALLOWED_EMAILS</code>); only the owner gets
+    in.
+  </li>
+  <li>
+    <strong>How to delete:</strong> on the <code>/pair</code> page, unlink the device or start over
+    from scratch; or delete the Worker and the R2 bucket in your Cloudflare account. On your phone,
+    remove the device in WhatsApp → Linked devices.
+  </li>
+</ul>
+
+<h2>Canvas credentials</h2>
+<ul>
+  <li>
+    The token you paste on the authorization page is checked against Canvas and then travels only
+    encrypted (AES-256-GCM) inside the access tokens granted to Claude. The Canvas server has no
+    database and stores neither the token nor the Canvas responses.
+  </li>
+  <li>
+    So that you do not have to reconnect every month, the connector extends the validity of the
+    token itself in Canvas, at most once a day, when Claude renews access. No new token is created.
+    If the token was deleted or expired in Canvas, the renewal is refused and Claude asks you to
+    connect again.
+  </li>
+</ul>
+
+<h2>Who the data is shared with</h2>
+<ul>
+  <li>
+    <strong>Canvas (Instructure / PUC Minas):</strong> receives the calls made on your behalf, as on
+    the website.
+  </li>
+  <li>
+    <strong>Google (Gmail):</strong> receives the sign-in with your Google account and the calls
+    made on your behalf (reading and, when you ask, sending and organizing the mailbox).
+  </li>
+  <li>
+    <strong>WhatsApp (Meta) and GitHub:</strong> with self-hosted WhatsApp, your server talks to
+    WhatsApp as a linked device, and GitHub receives your owner sign-in.
+  </li>
+  <li>
+    <strong>Anthropic (Claude):</strong> receives the result of each tool you use in the
+    conversation, under Anthropic's privacy policy.
+  </li>
+  <li>
+    <strong>The connector's hosting provider</strong> (currently Cloudflare Workers): processes the
+    requests and may keep technical logs, such as IP address and time. The Gmail connector uses the
+    IP address only to rate-limit requests, without storing it.
+  </li>
+</ul>
+<p>The data is not sold, not used for ads and not used for any other purpose.</p>
+
+<h2>This website</h2>
+<p>This website does not use cookies, trackers, audience analytics or scripts.</p>
+
+<h2>Actions on your behalf</h2>
+<p>
+  Canvas: submitting an assignment and replying to a forum only exist with the submissions option
+  turned on, and Claude asks for your confirmation before each submission. Gmail: see above.
+</p>
+
+<h2>Security</h2>
+<p>
+  All traffic uses HTTPS. Authorization follows OAuth 2.1 with PKCE and only returns access to
+  allowed addresses, such as claude.ai and claude.com. The Canvas address is fixed on the server.
+</p>
+
+<h2>How to delete your data</h2>
+<p>
+  Canvas: remove the connector (or the plugin) in Claude and delete the token in Canvas → Account →
+  Settings. Without the token, the access kept by Claude stops working.
+</p>
+<p>
+  Gmail: ask Claude to unlink the account (the <code>unlink_account</code> tool), which deletes the
+  stored token and revokes access at Google; when you unlink the last account, the whole record is
+  deleted. You can also revoke at any time at
+  <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.
+</p>
+
+<h2>Changes and contact</h2>
+<p>
+  Changes to this policy appear on this page, with the date above updated. Questions and requests:
+  <a href="https://github.com/temponi-bernardo/claude-connectors/issues"
+    >github.com/temponi-bernardo/claude-connectors/issues</a
+  >.
+</p>

@@ -10,3 +10,10 @@ Nothing runs on your computer. The server code and the full guide live one folde
 ```
 /plugin install canvas-puc --marketplace temponi-bernardo/claude-connectors
 ```
+
+## Skills
+
+- `/setup-canvas` — guided setup (token, connection and test).
+- `/weekly-summary` — assignments due, overdue work, announcements and grades for the week.
+- `/prepare-submission` — description, rubric, checklist, plan and review; submits only with confirmation.
+- `/study-course` — module summaries, key concepts, review questions and a plan up to the exam.
