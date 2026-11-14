@@ -21900,6 +21900,34 @@ var EMPTY_COMPLETION_RESULT = {
   }
 };
 
+// src/core/bytes.ts
+function byteView(bytes) {
+  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+function concatBytes(parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let pos = 0;
+  for (const part of parts) {
+    out.set(part, pos);
+    pos += part.length;
+  }
+  return out;
+}
+function utf16leToString(bytes) {
+  const v = byteView(bytes);
+  let out = "";
+  for (let pos = 0; pos + 1 < bytes.length; pos += 2)
+    out += String.fromCharCode(v.getUint16(pos, true));
+  return out;
+}
+function bytesToBase64(bytes) {
+  let binary = "";
+  for (let pos = 0; pos < bytes.length; pos += 32768) {
+    binary += String.fromCharCode(...bytes.subarray(pos, pos + 32768));
+  }
+  return btoa(binary);
+}
+
 // src/mcp/tools.ts
 function defineTool(def) {
   const schema = external_exports.object(def.shape);
@@ -21944,6 +21972,12 @@ function registerToolSpecs(server, specs, ctx) {
     );
   }
 }
+function binaryContentBlock(mimeType, bytes, uri) {
+  const data = bytesToBase64(bytes);
+  if (mimeType.startsWith("image/")) return { type: "image", data, mimeType };
+  if (mimeType.startsWith("audio/")) return { type: "audio", data, mimeType };
+  return { type: "resource", resource: { uri, mimeType, blob: data } };
+}
 
 // src/core/html.ts
 var HTML_TEXT_REPLACEMENTS = [
@@ -21968,27 +22002,6 @@ function htmlToText(html) {
     html
   );
   return text.trim();
-}
-
-// src/core/bytes.ts
-function byteView(bytes) {
-  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-}
-function concatBytes(parts) {
-  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-  let pos = 0;
-  for (const part of parts) {
-    out.set(part, pos);
-    pos += part.length;
-  }
-  return out;
-}
-function utf16leToString(bytes) {
-  const v = byteView(bytes);
-  let out = "";
-  for (let pos = 0; pos + 1 < bytes.length; pos += 2)
-    out += String.fromCharCode(v.getUint16(pos, true));
-  return out;
 }
 
 // src/core/cfb.ts
@@ -22259,19 +22272,9 @@ function getAllOrEmpty(client, path, params) {
 // connectors/canvas-puc/src/files.ts
 var MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
 var MAX_TEXT_CHARS = 1e5;
-function bytesToBase64(bytes) {
-  let binary = "";
-  for (let pos = 0; pos < bytes.length; pos += 32768) {
-    binary += String.fromCharCode(...bytes.subarray(pos, pos + 32768));
-  }
-  return btoa(binary);
-}
 function fileContentBlock(file, bytes) {
   const mimeType = file["content-type"] ?? "application/octet-stream";
-  const data = bytesToBase64(bytes);
-  if (mimeType.startsWith("image/")) return { type: "image", data, mimeType };
-  const uri = file.url ?? `canvas-file:${String(file.id)}`;
-  return { type: "resource", resource: { uri, mimeType, blob: data } };
+  return binaryContentBlock(mimeType, bytes, file.url ?? `canvas-file:${String(file.id)}`);
 }
 function downloadedFileResult(file, bytes) {
   const kb = Math.round(bytes.length / 1024);

@@ -14486,6 +14486,7 @@ function readAccessSecret(authorization, settings, now) {
 }
 
 // src/remote/handler.ts
+var UPSTREAM_CALLBACK_PATH = "/oauth/callback";
 var CORS_HEADERS = {
   "access-control-allow-origin": "*",
   "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
@@ -14500,7 +14501,7 @@ function jsonResponse(data, status = 200) {
 }
 function pageSecurityPolicy(formTarget) {
   const formAction = formTarget ? `'self' ${formTarget}` : "'self'";
-  return `default-src 'none'; style-src 'unsafe-inline'; form-action ${formAction}; frame-ancestors 'none'`;
+  return `default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action ${formAction}; frame-ancestors 'none'`;
 }
 function htmlResponse(html, status = 200, formTarget = null) {
   return new Response(html, {
@@ -14524,9 +14525,10 @@ async function readJsonBody(request) {
   }
 }
 function loginPageFor(app, request, error2) {
+  if (app.connector.login.kind !== "secret") return htmlResponse("<p>N\xE3o encontrado.</p>", 404);
   return htmlResponse(
     renderLoginPage({
-      text: app.connector.loginText,
+      text: app.connector.login.text,
       pending: sealAuthorizeRequest(request, app.settings, app.now()),
       clientHost: new URL(request.redirectUri).host,
       error: error2
@@ -14547,19 +14549,50 @@ async function handleRegister(app, request) {
     return jsonResponse({ error: result.error, error_description: result.description }, 400);
   return jsonResponse(result.value, 201);
 }
+function redirectToUpstream(app, login, request) {
+  const state = sealAuthorizeRequest(request, app.settings, app.now());
+  const target = login.start(state, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
+  return new Response(null, { status: 302, headers: { location: target } });
+}
 function handleAuthorizePage(app, request) {
   const result = parseAuthorizeQuery(new URL(request.url).searchParams, app.settings, app.now());
   if (!result.ok) return Promise.resolve(htmlResponse(`<p>${result.description}</p>`, 400));
+  const login = app.connector.login;
+  if (login.kind === "upstream")
+    return Promise.resolve(redirectToUpstream(app, login, result.value));
   return Promise.resolve(loginPageFor(app, result.value, null));
+}
+async function handleUpstreamCallback(app, request) {
+  const login = app.connector.login;
+  if (login.kind !== "upstream") return htmlResponse("<p>N\xE3o encontrado.</p>", 404);
+  const query = new URL(request.url).searchParams;
+  const pending = openAuthorizeRequest(query.get("state") ?? "", app.settings, app.now());
+  if (!pending)
+    return htmlResponse("<p>O pedido expirou. Volte ao Claude e conecte de novo.</p>", 400);
+  let secret;
+  try {
+    secret = await login.finish(query, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
+  } catch (error2) {
+    return htmlResponse(
+      `<p>${escapeHtml(error2 instanceof Error ? error2.message : String(error2))}</p>`,
+      403
+    );
+  }
+  return redirectWithCode(
+    pending,
+    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now())
+  );
 }
 async function handleAuthorizeSubmit(app, request) {
   const form = await readForm(request);
+  const login = app.connector.login;
+  if (login.kind !== "secret") return htmlResponse("<p>N\xE3o encontrado.</p>", 404);
   const pending = openAuthorizeRequest(form.get("pending") ?? "", app.settings, app.now());
   if (!pending)
     return htmlResponse("<p>O pedido expirou. Volte ao Claude e conecte de novo.</p>", 400);
   const secret = (form.get("secret") ?? "").trim();
   try {
-    await app.connector.verifySecret(secret);
+    await login.verify(secret);
   } catch (error2) {
     return loginPageFor(app, pending, error2 instanceof Error ? error2.message : String(error2));
   }
@@ -14588,6 +14621,9 @@ async function handleToken(app, request) {
 function handleMcp(app, request) {
   const secret = readAccessSecret(request.headers.get("authorization"), app.settings, app.now());
   if (secret === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
+  if (app.connector.acceptsSecret?.(secret) === false) {
+    return Promise.resolve(jsonResponse({ error: "access_revoked" }, 403));
+  }
   return serveMcpRequest(app.connector.createServer(secret), request);
 }
 var REMOTE_ROUTES = {
@@ -14599,6 +14635,7 @@ var REMOTE_ROUTES = {
   "GET /authorize": handleAuthorizePage,
   "POST /authorize": handleAuthorizeSubmit,
   "POST /token": handleToken,
+  [`GET ${UPSTREAM_CALLBACK_PATH}`]: handleUpstreamCallback,
   "GET /mcp": handleMcp,
   "POST /mcp": handleMcp,
   "DELETE /mcp": handleMcp
@@ -22972,6 +23009,34 @@ var EMPTY_COMPLETION_RESULT = {
   }
 };
 
+// src/core/bytes.ts
+function byteView(bytes) {
+  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+function concatBytes(parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let pos = 0;
+  for (const part of parts) {
+    out.set(part, pos);
+    pos += part.length;
+  }
+  return out;
+}
+function utf16leToString(bytes) {
+  const v = byteView(bytes);
+  let out = "";
+  for (let pos = 0; pos + 1 < bytes.length; pos += 2)
+    out += String.fromCharCode(v.getUint16(pos, true));
+  return out;
+}
+function bytesToBase64(bytes) {
+  let binary = "";
+  for (let pos = 0; pos < bytes.length; pos += 32768) {
+    binary += String.fromCharCode(...bytes.subarray(pos, pos + 32768));
+  }
+  return btoa(binary);
+}
+
 // src/mcp/tools.ts
 function defineTool(def) {
   const schema = external_exports.object(def.shape);
@@ -23016,6 +23081,12 @@ function registerToolSpecs(server, specs, ctx) {
     );
   }
 }
+function binaryContentBlock(mimeType, bytes, uri) {
+  const data = bytesToBase64(bytes);
+  if (mimeType.startsWith("image/")) return { type: "image", data, mimeType };
+  if (mimeType.startsWith("audio/")) return { type: "audio", data, mimeType };
+  return { type: "resource", resource: { uri, mimeType, blob: data } };
+}
 
 // src/core/html.ts
 var HTML_TEXT_REPLACEMENTS = [
@@ -23040,27 +23111,6 @@ function htmlToText(html) {
     html
   );
   return text.trim();
-}
-
-// src/core/bytes.ts
-function byteView(bytes) {
-  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-}
-function concatBytes(parts) {
-  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-  let pos = 0;
-  for (const part of parts) {
-    out.set(part, pos);
-    pos += part.length;
-  }
-  return out;
-}
-function utf16leToString(bytes) {
-  const v = byteView(bytes);
-  let out = "";
-  for (let pos = 0; pos + 1 < bytes.length; pos += 2)
-    out += String.fromCharCode(v.getUint16(pos, true));
-  return out;
 }
 
 // src/core/cfb.ts
@@ -23331,19 +23381,9 @@ function getAllOrEmpty(client, path, params) {
 // connectors/canvas-puc/src/files.ts
 var MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
 var MAX_TEXT_CHARS = 1e5;
-function bytesToBase64(bytes) {
-  let binary = "";
-  for (let pos = 0; pos < bytes.length; pos += 32768) {
-    binary += String.fromCharCode(...bytes.subarray(pos, pos + 32768));
-  }
-  return btoa(binary);
-}
 function fileContentBlock(file, bytes) {
   const mimeType = file["content-type"] ?? "application/octet-stream";
-  const data = bytesToBase64(bytes);
-  if (mimeType.startsWith("image/")) return { type: "image", data, mimeType };
-  const uri = file.url ?? `canvas-file:${String(file.id)}`;
-  return { type: "resource", resource: { uri, mimeType, blob: data } };
+  return binaryContentBlock(mimeType, bytes, file.url ?? `canvas-file:${String(file.id)}`);
 }
 function downloadedFileResult(file, bytes) {
   const kb = Math.round(bytes.length / 1024);
@@ -23955,8 +23995,11 @@ async function renewCanvasToken(settings, token, now) {
 }
 function canvasRemoteConnector(settings) {
   return {
-    loginText: canvasLoginText(settings.baseUrl),
-    verifySecret: (secret) => verifyCanvasToken(settings, secret),
+    login: {
+      kind: "secret",
+      text: canvasLoginText(settings.baseUrl),
+      verify: (secret) => verifyCanvasToken(settings, secret)
+    },
     renewSecret: (secret) => renewCanvasToken(settings, secret, /* @__PURE__ */ new Date()),
     createServer: (secret) => {
       const auth = createTokenAuthProvider(secret);
