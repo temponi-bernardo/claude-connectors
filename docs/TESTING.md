@@ -7,7 +7,7 @@
 3. Escreva o código mínimo que faz passar.
 4. Refatore com os testes verdes.
 
-Para bug: primeiro o teste que reproduz o bug (falhando), depois a correção. A skill `/testes-primeiro`
+Para bug: primeiro o teste que reproduz o bug (falhando), depois a correção. A skill `/tests-first`
 conduz o ciclo.
 
 ## Regras

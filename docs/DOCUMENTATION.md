@@ -20,10 +20,10 @@ tipo de mudança, em que formato, e o que a máquina confere.
 | Camada, dependência ou serviço externo novo               | ARCHITECTURE.md                                   | Prosa + tabela de dependências                                              | PR                           |
 | Decisão de produto, plano, preço                          | PRODUCT.md                                        | Pergunta aberta → decisão com data                                          | PR                           |
 | Comando, hook, regra de fluxo                             | WORKFLOW.md, CLAUDE.md                            | Prosa curta                                                                 | PR                           |
-| Plugin alterado (`connectors/`, `.claude-plugin/`)        | README do conector, CHANGELOG.md e o que couber   | Skill `/atualizar-docs`                                                     | Hook `Stop` + PR             |
+| Plugin alterado (`connectors/`, `.claude-plugin/`)        | README do conector, CHANGELOG.md e o que couber   | Skill `/update-docs`                                                        | Hook `Stop` + PR             |
 | Regra de código nova                                      | CODING-STANDARDS.md e, se possível, regra de lint | Prosa + exemplo                                                             | PR                           |
 | Termo novo                                                | GLOSSARY.md                                       | `**Termo** — definição.`                                                    | PR                           |
-| Passo repetido com o Claude                               | `.claude/skills/<nome>/SKILL.md`, CLAUDE.md       | Ver `/melhorar-skills`                                                      | PR                           |
+| Passo repetido com o Claude                               | `.claude/skills/<nome>/SKILL.md`, CLAUDE.md       | Ver `/improve-skills`                                                       | PR                           |
 
 ## Formatos padrão
 

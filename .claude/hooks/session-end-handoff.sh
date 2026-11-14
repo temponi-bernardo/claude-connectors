@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# Hook SessionEnd: rede de segurança do /clear e do fim de sessão. Se a sessão fez trabalho
-# (edição de arquivo ou git commit/merge/push) depois do último docs/STATE.md, gera o handoff
-# via `claude -p`, como o PreCompact. Sessão só de conversa ou já com /handoff: não faz nada.
-# SessionEnd não bloqueia; toda saída é 0. Desative com CLAUDE_HANDOFF_AUTOGEN=0.
-# O orçamento padrão do SessionEnd é 1,5 s; o `timeout` deste hook no settings.json o eleva (máx. 60 s).
+# SessionEnd hook: safety net for /clear and the end of the session. If the session did work
+# (file edit or git commit/merge/push) after the last docs/STATE.md, generates the handoff
+# via `claude -p`, like PreCompact. Chat-only session or one that already ran /handoff: does nothing.
+# SessionEnd does not block; every exit is 0. Disable with CLAUDE_HANDOFF_AUTOGEN=0.
+# SessionEnd's default budget is 1.5 s; this hook's `timeout` in settings.json raises it (max. 60 s).
 set -uo pipefail
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 # shellcheck source=hook-lib.sh

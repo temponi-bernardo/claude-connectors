@@ -1,85 +1,85 @@
 # claude-connectors
 
-Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace de plugins, começando pelo Canvas da PUC Minas.
+MCP connectors for Claude that run in the cloud and install through the plugin marketplace, starting with PUC
+Minas's Canvas.
 
-Each connector lives in `connectors/<name>/` (server code) with its marketplace plugin in `connectors/<name>/plugin/`
-(ADR 0013, ADR 0020); código compartilhado fica em `src/`. Não há GitHub Actions: o portão de PR é `npm run pr:check` (ADR 0006).
+Each connector lives in `connectors/<name>/` and is a marketplace plugin that points to its remote server
+(ADR 0013); shared code lives in `src/`. There are no GitHub Actions: the PR gate is `npm run pr:check` (ADR 0006).
 
-A documentação em `docs/` é a fonte da verdade. **Antes de mexer em código, leia `docs/README.md`** e siga
-o "quero... → leia...". Não varra o código para descobrir o que existe: `docs/FUNCTIONS.md`,
-`docs/PROCESSES.md` e `docs/STRUCTURE.md` dizem. A próxima tarefa está no topo de `docs/ROADMAP.md`; o que a
-sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão).
+The documentation in `docs/` is the source of truth. **Before touching code, read `docs/README.md`** and follow
+its "I want... → read...". Don't sweep the code to find out what exists: `docs/FUNCTIONS.md`,
+`docs/PROCESSES.md` and `docs/STRUCTURE.md` tell you. The next task is at the top of `docs/ROADMAP.md`; what the
+previous session left is in `docs/STATE.md` (injected at session start).
 
-## Regras inegociáveis
+## Non-negotiable rules
 
-1. **Nada repetido** — lógica compartilhada vira função compartilhada (`npm run dup:check`, limite zero).
-2. **Funções pequenas, um só trabalho** — ≤ 25 linhas, ≤ 3 parâmetros, decidir (puro) separado de fazer
-   (efeitos). Detalhes em `docs/CODING-STANDARDS.md`.
-3. **Nomes de função únicos no repositório** (conferido por `docs:check`).
-4. **Testes primeiro.** Toda função tem teste; exceções só em `src/test-exceptions.ts` com motivo
+1. **Nothing repeated** — shared logic becomes a shared function (`npm run dup:check`, zero threshold).
+2. **Small functions, one job** — ≤ 25 lines, ≤ 3 parameters, deciding (pure) separate from doing
+   (effects). Details in `docs/CODING-STANDARDS.md`.
+3. **Function names unique across the repository** (checked by `docs:check`).
+4. **Tests first.** Every function has a test; exceptions only in `src/test-exceptions.ts` with a reason
    (`docs/TESTING.md`).
-5. **Documentação na mesma mudança.** Rode `npm run docs:generate`, preencha os campos manuais, siga a
-   tabela de `docs/DOCUMENTATION.md`. **Toda alteração em plugin** (`connectors/`, `.claude-plugin/`)
-   atualiza as docs afetadas e documenta tudo o que foi feito, via `/atualizar-docs` — o hook `Stop`
-   `stop-plugin-docs.sh` bloqueia se não houver.
-6. **Interface só com o design system** (`docs/UI.md`), quando houver.
-7. **Nada direto na `main`** — branch por tarefa, PR, `pr:check` verde, squash merge (`docs/WORKFLOW.md`).
-   O Claude mergeia sozinho com o `pr:check` verde, sem pedir confirmação.
-8. **Conventional Commits** with an English description: `feat(canvas): add grades tool` (ADR 0021).
-9. **Skills sempre atualizadas** — passo repetido, comando ou regra nova → skill no mesmo PR.
-10. **English everywhere** — docs, skills, user messages, tool names and identifiers (ADR 0021). Existing
-    Portuguese text is translated by roadmap phase F4; write all new text in English.
-11. **Contexto pequeno.** Uma tarefa por sessão. Exploração, pesquisa e verificações independentes vão para
-    subagents; só o resumo volta. Ao concluir uma tarefa ou passo grande: `/handoff` (sobrescreve
-    `docs/STATE.md`, local e fora do git) e avise o usuário para rodar `/clear`. Você não consegue rodar `/clear` —
-    só avisar.
+5. **Documentation in the same change.** Run `npm run docs:generate`, fill the manual fields, follow the
+   table in `docs/DOCUMENTATION.md`. **Every plugin change** (`connectors/`, `.claude-plugin/`) updates the
+   affected docs and documents everything that was done, via `/update-docs` — the `Stop` hook
+   `stop-plugin-docs.sh` blocks if it is missing.
+6. **UI only with the design system** (`docs/UI.md`), when there is one.
+7. **Nothing directly on `main`** — a branch per task, a PR, a green `pr:check`, squash merge (`docs/WORKFLOW.md`).
+   Claude merges on its own with a green `pr:check`, without asking for confirmation.
+8. **Conventional Commits** with an English description: `feat(canvas): add grades tool`.
+9. **Skills always up to date** — a repeated step, command or new rule → a skill in the same PR.
+10. **English everywhere** (ADR 0021): docs, skills, rules, hook messages, commits and identifiers. Existing
+    Portuguese text is translated in roadmap phase F4.
+11. **Small context.** One task per session. Exploration, research and independent checks go to subagents;
+    only the summary comes back. When finishing a task or a big step: `/handoff` (overwrites `docs/STATE.md`,
+    local and outside git) and tell the user to run `/clear`. You can't run `/clear` — only tell them.
 
-## Comandos
+## Commands
 
-| Comando                              | Faz                                                                               |
-| ------------------------------------ | --------------------------------------------------------------------------------- |
-| `npm run check`                      | Formato, lint, tipos, testes, docs, duplicação e segredos                         |
-| `npm run pr:check -- "<título>"`     | Portão de PR (não há CI): check, build, pacotes e commitlint                      |
-| `npm run docs:generate`              | Atualiza os blocos gerados de `docs/FUNCTIONS.md` e cria seções novas             |
-| `npm run docs:check`                 | Falha se docs e código divergirem                                                 |
-| `npm test` / `npm run test:coverage` | Testes / com cobertura mínima de 90%                                              |
-| `npm run lint` / `npm run lint:fix`  | ESLint                                                                            |
-| `npm run format:fix`                 | Prettier                                                                          |
-| `npm run typecheck`                  | `tsc --noEmit`                                                                    |
-| `npm run dup:check`                  | jscpd                                                                             |
-| `npm run build`                      | Valida o `.mcp.json` (só remoto) e gera `server/remote.js` de cada conector       |
-| `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)               |
-| `npm run gmail:deploy`               | Publica o Gmail remoto no Cloudflare Workers (`gmail:dev`: local)                 |
-| `npm run whatsapp:deploy`            | Publica o WhatsApp (Workers + Containers); `whatsapp:build`: só bundle e imagem   |
-| `npm run bridge:test`                | Ponte Go do WhatsApp: gofmt, vet e testes (Go 1.26+, parte do `pr:check`)         |
-| `npm run plugin:validate`            | `claude plugin validate --strict` on the marketplace and each plugin (`pr:check`) |
+| Command                              | Does                                                                                  |
+| ------------------------------------ | ------------------------------------------------------------------------------------- |
+| `npm run check`                      | Format, lint, types, tests, docs, duplication and secrets                             |
+| `npm run pr:check -- "<title>"`      | PR gate (there is no CI): check, build, packages and commitlint                       |
+| `npm run docs:generate`              | Updates the generated blocks of `docs/FUNCTIONS.md` and creates new sections          |
+| `npm run docs:check`                 | Fails if docs and code diverge                                                        |
+| `npm test` / `npm run test:coverage` | Tests / with a 90% minimum coverage                                                   |
+| `npm run lint` / `npm run lint:fix`  | ESLint                                                                                |
+| `npm run format:fix`                 | Prettier                                                                              |
+| `npm run typecheck`                  | `tsc --noEmit`                                                                        |
+| `npm run dup:check`                  | jscpd                                                                                 |
+| `npm run build`                      | Validates `.mcp.json` (remote only) and generates each connector's `server/remote.js` |
+| `npm run worker:deploy`              | Deploys the remote Canvas to Cloudflare Workers (`worker:dev`: local)                 |
+| `npm run gmail:deploy`               | Deploys the remote Gmail to Cloudflare Workers (`gmail:dev`: local)                   |
+| `npm run whatsapp:deploy`            | Deploys WhatsApp (Workers + Containers); `whatsapp:build`: bundle and image only      |
+| `npm run bridge:test`                | WhatsApp Go bridge: gofmt, vet and tests (Go 1.26+, part of `pr:check`)               |
 
 ## Skills
 
-| Skill               | Quando                                                                   |
-| ------------------- | ------------------------------------------------------------------------ |
-| `/tarefa`           | Pegar a próxima tarefa do roadmap e levá-la até o merge                  |
-| `/testes-primeiro`  | Qualquer código novo ou bug: o ciclo TDD                                 |
-| `/atualizar-docs`   | Depois de alterar código, antes de abrir o PR                            |
-| `/sincronizar-docs` | Auditoria completa docs × código (inclusive o que a máquina não confere) |
-| `/melhorar-skills`  | Ao fim de cada tarefa: revisar se alguma skill precisa mudar             |
-| `/lancar-versao`    | Preparar e acompanhar uma release                                        |
-| `/handoff`          | Ao concluir tarefa ou passo grande: salvar o estado em `docs/STATE.md`   |
+| Skill             | When                                                                   |
+| ----------------- | ---------------------------------------------------------------------- |
+| `/task`           | Take the next roadmap task and carry it through to the merge           |
+| `/tests-first`    | Any new code or bug: the TDD cycle                                     |
+| `/update-docs`    | After changing code, before opening the PR                             |
+| `/sync-docs`      | Full docs × code audit (including what the machine doesn't check)      |
+| `/improve-skills` | At the end of each task: review whether any skill needs to change      |
+| `/release`        | Prepare and follow a release                                           |
+| `/handoff`        | When finishing a task or a big step: save the state to `docs/STATE.md` |
 
-## Como o Claude Code está configurado aqui
+## How Claude Code is configured here
 
-- `.claude/settings.json`: comandos de checagem liberados; push na `main`, `--force`, `--no-verify` e
-  leitura de `.env`/segredos negados (também por hook `PreToolUse`).
-- Hook `Stop` (`stop-docs-check.sh`): roda `docs:check` ao fim de cada resposta que alterou código ou docs.
-- Hook `Stop` (`stop-handoff.sh`): se há commit seu novo sem `docs/STATE.md` atualizado, bloqueia e pede `/handoff`.
-- Hook `Stop` (`stop-plugin-docs.sh`): se a branch alterou plugin (`connectors/`, `.claude-plugin/`) sem
-  tocar documentação (`docs/`, `CHANGELOG.md`, READMEs), bloqueia e pede `/atualizar-docs`.
-- Hook `SessionStart`: injeta `docs/STATE.md` e a próxima tarefa do roadmap (também após `/clear`).
-- Hook `SessionStart` (`session-tools.sh`, só na nuvem): instala o gitleaks 8.28.0 pelo Go
-  (`scripts/install-gitleaks.sh`) e roda `npm install` se o lockfile mudou. O `secrets:check` usa o mesmo script
-  se o gitleaks faltar na nuvem (inclusive no pre-push).
-- Hook `PreCompact`: gera handoff automático em `docs/STATE.md` via `claude -p` antes de compactar.
-- Hook `SessionEnd` (`session-end-handoff.sh`): no `/clear` ou fim de sessão, se houve edição ou commit depois do
-  último `STATE.md`, gera o handoff do mesmo jeito (sessão só de conversa não gasta nada).
-- Ciclo completo em `docs/WORKFLOW.md` → "Ciclo de contexto do Claude Code".
-- `.claude/rules/`: regras carregadas por caminho (`codigo.md`, `testes.md`, `docs.md`).
+- `.claude/settings.json`: check commands allowed; push to `main`, `--force`, `--no-verify` and reading
+  `.env`/secrets denied (also by a `PreToolUse` hook).
+- `Stop` hook (`stop-docs-check.sh`): runs `docs:check` at the end of each reply that changed code or docs.
+- `Stop` hook (`stop-handoff.sh`): if you have a new commit without an updated `docs/STATE.md`, blocks and asks
+  for `/handoff`.
+- `Stop` hook (`stop-plugin-docs.sh`): if the branch changed a plugin (`connectors/`, `.claude-plugin/`) without
+  touching documentation (`docs/`, `CHANGELOG.md`, READMEs), blocks and asks for `/update-docs`.
+- `SessionStart` hook: injects `docs/STATE.md` and the roadmap's next task (also after `/clear`).
+- `SessionStart` hook (`session-tools.sh`, cloud only): installs gitleaks 8.28.0 through Go
+  (`scripts/install-gitleaks.sh`) and runs `npm install` if the lockfile changed. `secrets:check` uses the same
+  script if gitleaks is missing in the cloud (pre-push included).
+- `PreCompact` hook: generates an automatic handoff in `docs/STATE.md` via `claude -p` before compacting.
+- `SessionEnd` hook (`session-end-handoff.sh`): on `/clear` or session end, if there was an edit or commit after
+  the last `STATE.md`, generates the handoff the same way (a chat-only session costs nothing).
+- Full cycle in `docs/WORKFLOW.md` → "Claude Code context cycle".
+- `.claude/rules/`: rules loaded by path (`code.md`, `tests.md`, `docs.md`).

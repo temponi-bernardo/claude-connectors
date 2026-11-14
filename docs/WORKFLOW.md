@@ -81,7 +81,7 @@ O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, susten
    pede o handoff; commits trazidos por `git pull` não contam.
 4. Se a branch alterou plugin (`connectors/` ou `.claude-plugin/`) sem tocar documentação (`docs/`,
    `CHANGELOG.md`, `README.md` ou o README do conector), o hook `Stop` `stop-plugin-docs.sh` bloqueia o
-   encerramento e pede a skill `/atualizar-docs`: toda mudança em plugin documenta tudo o que foi feito.
+   encerramento e pede a skill `/update-docs`: toda mudança em plugin documenta tudo o que foi feito.
 5. O Claude avisa; o usuário roda `/clear`. Se o contexto estourar antes, `PreCompact` gera um handoff
    automático via `claude -p` (desligue com `CLAUDE_HANDOFF_AUTOGEN=0`).
 6. Se o `/clear` (ou o fim da sessão) vier sem handoff, `SessionEnd` (`session-end-handoff.sh`) gera um do
@@ -98,7 +98,7 @@ Each version lives in one place ([ADR 0022](adr/0022-version-per-plugin.md)). Th
 the `plugin.json` field through `extra-files` (`jsonpath: $.version`). The marketplace entry never carries a
 version. `.release-please-manifest.json` mirrors every package's current version. A plugin only shows an update
 to users after its version is bumped, so release any change to a connector (server or plugin) that users should
-get. O fluxo é da skill `/lancar-versao`:
+get. O fluxo é da skill `/release`:
 
 1. Commits convencionais chegam na `main` via PR.
 2. A CLI local abre/atualiza um **PR de release** com o bump de versão e o CHANGELOG gerado:
