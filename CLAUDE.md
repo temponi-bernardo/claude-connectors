@@ -70,6 +70,9 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 - Hook `Stop` (`stop-plugin-docs.sh`): se a branch alterou plugin (`connectors/`, `.claude-plugin/`) sem
   tocar documentação (`docs/`, `CHANGELOG.md`, READMEs), bloqueia e pede `/atualizar-docs`.
 - Hook `SessionStart`: injeta `docs/STATE.md` e a próxima tarefa do roadmap (também após `/clear`).
+- Hook `SessionStart` (`session-tools.sh`, só na nuvem): instala o gitleaks 8.28.0 pelo Go
+  (`scripts/install-gitleaks.sh`) e roda `npm install` se o lockfile mudou. O `secrets:check` usa o mesmo script
+  se o gitleaks faltar na nuvem (inclusive no pre-push).
 - Hook `PreCompact`: gera handoff automático em `docs/STATE.md` via `claude -p` antes de compactar.
 - Ciclo completo em `docs/WORKFLOW.md` → "Ciclo de contexto do Claude Code".
 - `.claude/rules/`: regras carregadas por caminho (`codigo.md`, `testes.md`, `docs.md`).

@@ -73,7 +73,8 @@ O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, susten
 `.claude/settings.json` (decisões em [ADR 0004](adr/0004-handoff-de-contexto-em-state-md-com-hooks.md) e
 [ADR 0005](adr/0005-state-md-local-por-clone.md)):
 
-1. `SessionStart` injeta `docs/STATE.md` (handoff) e a próxima tarefa do roadmap.
+1. `SessionStart` injeta `docs/STATE.md` (handoff) e a próxima tarefa do roadmap. Na nuvem, `session-tools.sh`
+   também instala o gitleaks e as dependências do npm.
 2. Durante a tarefa, trabalho que pode ser isolado vai para subagents; só o resumo volta ao contexto.
 3. Ao concluir, `/handoff` sobrescreve `docs/STATE.md`, que é local de cada clone (está no `.gitignore` e
    nunca vai para commit). Se houver commit seu novo sem handoff, o hook `Stop` bloqueia o encerramento e
@@ -104,7 +105,9 @@ O **conector remoto** (ADR 0010) não depende de release: depois de um merge que
 ## Segurança no fluxo
 
 - `gitleaks` roda no `secrets:check` (dentro do `check`, do `pre-push` e do `pr:check`). Sem CI, ele é a única
-  barreira: sem gitleaks instalado o `secrets:check` falha (`winget install Gitleaks.Gitleaks`).
+  barreira: sem gitleaks instalado o `secrets:check` falha (`winget install Gitleaks.Gitleaks`). Na nuvem do
+  Claude Code, ele instala sozinho a versão 8.28.0 pelo Go (`scripts/install-gitleaks.sh`): o download direto do
+  GitHub é bloqueado pelo proxy e o apt traz uma versão antiga, sem `gitleaks git`/`dir`.
 - Dependabot semanal para npm, agrupado (gratuito, não usa minutos de Actions). PR do Dependabot passa pelo
   mesmo `pr:check` antes do merge.
 - Sem CodeQL e sem `dependency-review` (exigiam Actions). Antes de adicionar dependência nova, confira
