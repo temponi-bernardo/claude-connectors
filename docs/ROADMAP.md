@@ -2,8 +2,7 @@
 
 ## Próxima tarefa
 
-**F2.12 — Publicar o Gmail com gerenciamento** (código no PR; falta o escopo `gmail.modify` na tela de
-consentimento do Google, `npm run gmail:deploy` e vincular as contas de novo). Ela fecha também a F2.11. Depois, F3.2.
+**F3.2 — WhatsApp: publicar na conta do dono e parear o número.**
 
 ## Como ler
 
@@ -46,8 +45,8 @@ O MVP é o conector do Canvas instalado pelo marketplace e usado no dia a dia, s
 | F2.8  | Renovação automática do token do Canvas no refresh do OAuth                          | ✅     | Refresh do OAuth estende a validade do token na PUC (ADR 0011)                                                     |
 | F2.9  | Site público no GitHub Pages: início, privacidade e termos (ADR 0012)                | ✅     | Páginas em `docs/` montadas pelo Jekyll, sem os `.md` internos; manifesto aponta o site                            |
 | F2.10 | Remover o modo local: plugin do marketplace aponta para o Worker                     | ✅     | Sem stdio, `.mcpb` e login pelo navegador; `.mcp.json` só `http` (ADR 0013)                                        |
-| F2.11 | Gmail remoto público, multiusuário e só leitura (ADR 0014, 0016)                     | 🟨     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai                             |
-| F2.12 | Gmail com gerenciamento completo: enviar, responder, rascunhos, organizar (ADR 0019) | 🟨     | Código, testes e docs no PR; escopo `gmail.modify` no Google, deploy e contas revinculadas enviando pelo claude.ai |
+| F2.11 | Gmail remoto público, multiusuário e só leitura (ADR 0014, 0016)                     | ✅     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai                             |
+| F2.12 | Gmail com gerenciamento completo: enviar, responder, rascunhos, organizar (ADR 0019) | ✅     | Código, testes e docs no PR; escopo `gmail.modify` no Google, deploy e contas revinculadas enviando pelo claude.ai |
 
 ## Fase 3 — WhatsApp pessoal (self-host)
 
