@@ -23914,7 +23914,7 @@ var plugin_default = {
   repository: "https://github.com/temponi-bernardo/claude-connectors",
   license: "MIT",
   keywords: ["canvas", "lms", "puc-minas", "education", "assignments", "grades"],
-  privacyPolicyUrl: "https://temponi-bernardo.github.io/claude-connectors/privacidade.html"
+  privacyPolicyUrl: "https://temponi-bernardo.github.io/claude-connectors/privacy.html"
 };
 
 // connectors/canvas-puc/src/tools.ts

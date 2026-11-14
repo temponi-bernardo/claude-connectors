@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -21,20 +21,18 @@
           <img src="{{ '/favicon.svg' | relative_url }}" alt="" width="28" height="28" />
           Claude Connectors
         </a>
-        <nav aria-label="Principal">
-          <a href="{{ '/' | relative_url }}">Início</a>
-          <a href="{{ '/privacidade.html' | relative_url }}">Privacidade</a>
-          <a href="{{ '/termos.html' | relative_url }}">Termos de uso</a>
+        <nav aria-label="Main">
+          <a href="{{ '/' | relative_url }}">Home</a>
+          <a href="{{ '/privacy.html' | relative_url }}">Privacy</a>
+          <a href="{{ '/terms.html' | relative_url }}">Terms of use</a>
         </nav>
       </div>
     </header>
     <main class="wrap">{{ content }}</main>
     <footer>
       <div class="wrap">
-        <span>© 2026 Bernardo Temponi · Licença MIT</span>
-        <span
-          >Projeto independente, sem vínculo com a PUC Minas, a Instructure ou a Anthropic.</span
-        >
+        <span>© 2026 Bernardo Temponi · MIT License</span>
+        <span>Independent project, not affiliated with PUC Minas, Instructure or Anthropic.</span>
       </div>
     </footer>
   </body>

@@ -1,47 +1,47 @@
 # claude-connectors
 
-Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace de plugins, começando pelo Canvas da PUC Minas.
+MCP connectors for Claude that run in the cloud and install from the plugin marketplace, starting with PUC Minas's Canvas.
 
-## Conectores
+## Connectors
 
-| Conector                                        | O que faz                                                                    |
+| Connector                                       | What it does                                                                 |
 | ----------------------------------------------- | ---------------------------------------------------------------------------- |
-| [`canvas-puc`](connectors/canvas-puc/README.md) | Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, arquivos          |
-| [`gmail`](connectors/gmail/README.md)           | Gmail multi-conta: ler, enviar, responder, encaminhar, rascunhos e organizar |
+| [`canvas-puc`](connectors/canvas-puc/README.md) | PUC Minas's Canvas LMS: due dates, assignments, grades, announcements, files |
+| [`gmail`](connectors/gmail/README.md)           | Multi-account Gmail: read, send, reply, forward, drafts and organize         |
 
-## Instalar no Claude
+## Install in Claude
 
-No Claude (claude.ai, Cowork ou Claude Code), **Adicionar marketplace** → `temponi-bernardo/claude-connectors`
-e instale o plugin desejado. Nada é instalado no computador: o plugin aponta para o servidor remoto do
-conector, e o login acontece na primeira vez, numa página de OAuth ([ADR 0013](docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
+In Claude (claude.ai, Cowork or Claude Code), **Add marketplace** → `temponi-bernardo/claude-connectors`
+and install the plugin you want. Nothing is installed on the computer: the plugin points to the connector's
+remote server, and login happens the first time, on an OAuth page ([ADR 0013](docs/adr/0013-remote-only-connector-via-marketplace.md)).
 
-## Desenvolver
+## Develop
 
 ```bash
 nvm use            # Node 22 (.nvmrc)
-npm install        # instala e ativa os git hooks
-npm run check      # formato, lint, tipos, testes, docs, segredos
-npm run build      # valida o plugin (só remoto) e gera server/remote.js
-npm run worker:deploy   # publica o servidor remoto no Cloudflare Workers
+npm install        # installs and enables the git hooks
+npm run check      # format, lint, types, tests, docs, secrets
+npm run build      # validates the plugin (remote only) and builds server/remote.js
+npm run worker:deploy   # publishes the remote server to Cloudflare Workers
 ```
 
-Requisitos: Node 22 e gitleaks (`winget install Gitleaks.Gitleaks`; na nuvem do Claude Code ele é instalado
-sozinho pelo Go, com `scripts/install-gitleaks.sh`).
+Requirements: Node 22 and gitleaks (`winget install Gitleaks.Gitleaks`; in the Claude Code cloud it is installed
+automatically through Go, with `scripts/install-gitleaks.sh`).
 
 ## Site
 
-Página pública do serviço, política de privacidade e termos: <https://temponi-bernardo.github.io/claude-connectors/>
-(GitHub Pages servido de `docs/`, ADR 0012).
+The service's public page, privacy policy and terms: <https://temponi-bernardo.github.io/claude-connectors/>
+(GitHub Pages served from `docs/`, ADR 0012).
 
-## Sem GitHub Actions
+## No GitHub Actions
 
-Nada roda no GitHub: o portão de PR é `npm run pr:check -- "<título do PR>"` e a release usa a CLI do
-release-please localmente ([ADR 0006](docs/adr/0006-sem-github-actions-checagens-locais.md)).
+Nothing runs on GitHub: the PR gate is `npm run pr:check -- "<PR title>"` and releases use the release-please
+CLI locally ([ADR 0006](docs/adr/0006-no-github-actions-local-checks.md)).
 
-## Documentação
+## Documentation
 
-Comece por [`docs/README.md`](docs/README.md). Regras de desenvolvimento em [`CLAUDE.md`](CLAUDE.md).
+Start at [`docs/README.md`](docs/README.md). Development rules in [`CLAUDE.md`](CLAUDE.md).
 
-## Licença
+## License
 
 [MIT](LICENSE).

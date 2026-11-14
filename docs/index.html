@@ -1,88 +1,88 @@
 ---
 layout: site
-title: Início
-description: Conectores MCP que ligam o Claude aos sistemas do dia a dia, como o Canvas da PUC Minas e o Gmail.
+title: Home
+description: MCP connectors that link Claude to everyday systems, such as the PUC Minas Canvas and Gmail.
 ---
 
 <h1>Claude Connectors</h1>
 <p class="lead">
-  Conectores MCP que ligam o Claude aos sistemas do dia a dia. O primeiro é o
-  <strong>Canvas PUC Minas</strong>: prazos, tarefas, notas, avisos e materiais das disciplinas
-  direto na conversa.
+  MCP connectors that link Claude to everyday systems. The first one is
+  <strong>Canvas PUC Minas</strong>: deadlines, assignments, grades, announcements and course
+  materials right in the conversation.
 </p>
 
 <section class="card" aria-labelledby="canvas">
   <h2 id="canvas">Canvas PUC Minas</h2>
   <p>
-    Pergunte ao Claude o que vence nesta semana, peça o enunciado de uma tarefa com a rubrica,
-    confira as notas ou leia o material de um módulo, sem abrir o site do Canvas.
+    Ask Claude what is due this week, get an assignment's description with its rubric, check your
+    grades or read a module's material, without opening the Canvas website.
   </p>
   <ul class="tools">
-    <li>Próximas entregas de todos os cursos</li>
-    <li>Tarefas com enunciado, rubrica e feedback</li>
-    <li>Notas por curso e por tarefa</li>
-    <li>Avisos recentes</li>
-    <li>Módulos, páginas e arquivos</li>
-    <li>Leitura de PDF, slides e documentos do Word</li>
-    <li>Fóruns e calendário</li>
-    <li>Busca em todo o conteúdo do curso</li>
+    <li>Upcoming deadlines across all courses</li>
+    <li>Assignments with description, rubric and feedback</li>
+    <li>Grades by course and by assignment</li>
+    <li>Recent announcements</li>
+    <li>Modules, pages and files</li>
+    <li>Reading PDFs, slides and Word documents</li>
+    <li>Discussion forums and calendar</li>
+    <li>Search across all course content</li>
   </ul>
   <p>
-    Entregar uma tarefa em texto ou responder a um fórum só acontece com a opção de envios ligada, e
-    o Claude sempre pede confirmação antes.
+    Submitting a text assignment or replying to a forum only happens with the submissions option
+    turned on, and Claude always asks for confirmation first.
   </p>
 </section>
 
 <section class="card" aria-labelledby="gmail">
-  <h2 id="gmail">Gmail (várias contas)</h2>
+  <h2 id="gmail">Gmail (multiple accounts)</h2>
   <p>
-    Busque, leia e cuide de e-mails de mais de uma conta Gmail na mesma conversa, por exemplo a
-    pessoal e a de recibos, inclusive o texto de anexos em PDF ou Word. O Claude pede confirmação
-    antes de enviar ou apagar, e não existe exclusão definitiva: o que vai para a lixeira pode
-    voltar.
+    Search, read and manage email from more than one Gmail account in the same conversation, for
+    example your personal one and your receipts one, including the text of PDF or Word attachments.
+    Claude asks for confirmation before sending or deleting, and there is no permanent deletion:
+    what goes to the trash can come back.
   </p>
   <ul class="tools">
-    <li>Busca com a sintaxe do Gmail, numa conta ou em todas</li>
-    <li>Conversas e mensagens em texto plano</li>
-    <li>Rótulos</li>
-    <li>Texto de anexos (PDF, Word, HTML e texto)</li>
-    <li>Enviar, responder, responder a todos e encaminhar com os anexos</li>
-    <li>Rascunhos: criar, editar, enviar e apagar</li>
-    <li>Marcar como lido, arquivar, estrela, marcadores, lixeira e restaurar</li>
-    <li>Vincular e desvincular contas pela própria conversa</li>
+    <li>Search with Gmail syntax, in one account or in all of them</li>
+    <li>Threads and messages as plain text</li>
+    <li>Labels</li>
+    <li>Attachment text (PDF, Word, HTML and text)</li>
+    <li>Send, reply, reply all and forward with attachments</li>
+    <li>Drafts: create, edit, send and delete</li>
+    <li>Mark as read, archive, star, labels, trash and restore</li>
+    <li>Link and unlink accounts from the conversation itself</li>
   </ul>
   <p>
-    Instale o plugin <code>gmail</code> e entre com o Google: essa conta já fica vinculada. Para
-    outra conta, peça ao Claude um link de vínculo.
+    Install the <code>gmail</code> plugin and sign in with Google: that account is linked right
+    away. For another account, ask Claude for a link to connect it.
   </p>
 </section>
 
-<section aria-labelledby="como-funciona">
-  <h2 id="como-funciona">Como funciona</h2>
+<section aria-labelledby="how-it-works">
+  <h2 id="how-it-works">How it works</h2>
   <ul>
     <li>
-      <strong>Instalação:</strong> no Claude, adicione o marketplace
-      <code>temponi-bernardo/claude-connectors</code> e instale o plugin <code>canvas-puc</code>.
-      Nada é instalado no seu computador: o conector roda na nuvem e funciona igual na web, no
-      Cowork, no celular e no Claude Code.
+      <strong>Installation:</strong> in Claude, add the
+      <code>temponi-bernardo/claude-connectors</code> marketplace and install the
+      <code>canvas-puc</code> plugin. Nothing is installed on your computer: the connector runs in
+      the cloud and works the same on the web, in Cowork, on mobile and in Claude Code.
     </li>
     <li>
-      <strong>Login:</strong> na primeira vez, você autoriza colando um token de acesso do Canvas. O
-      servidor não tem banco de dados e não grava o token; ele viaja cifrado dentro do acesso
-      entregue ao Claude.
+      <strong>Sign-in:</strong> the first time, you authorize by pasting a Canvas access token. The
+      server has no database and does not store the token; it travels encrypted inside the access
+      granted to Claude.
     </li>
   </ul>
   <p>
-    Cada pessoa só acessa a própria conta do Canvas, com as permissões que ela já tem. Detalhes na
-    <a href="{{ '/privacidade.html' | relative_url }}">política de privacidade</a>.
+    Each person only accesses their own Canvas account, with the permissions they already have.
+    Details in the <a href="{{ '/privacy.html' | relative_url }}">privacy policy</a>.
   </p>
 </section>
 
 <section aria-labelledby="links">
   <h2 id="links">Links</h2>
   <ul>
-    <li><a href="{{ '/privacidade.html' | relative_url }}">Política de privacidade</a></li>
-    <li><a href="{{ '/termos.html' | relative_url }}">Termos de uso</a></li>
-    <li><a href="https://github.com/temponi-bernardo">Autor no GitHub</a></li>
+    <li><a href="{{ '/privacy.html' | relative_url }}">Privacy policy</a></li>
+    <li><a href="{{ '/terms.html' | relative_url }}">Terms of use</a></li>
+    <li><a href="https://github.com/temponi-bernardo">Author on GitHub</a></li>
   </ul>
 </section>

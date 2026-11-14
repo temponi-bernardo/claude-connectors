@@ -5,13 +5,13 @@ contas Gmail de quem o instala: buscar, ler, enviar, responder, encaminhar, rasc
 lixeira. Não existe exclusão definitiva, e o Claude pede confirmação antes de enviar ou apagar. É público e multiusuário: cada pessoa entra com a própria conta Google e só vê as contas que
 ela mesma vinculou. Roda no Cloudflare Workers **só quando chega uma requisição**: sem Containers, Cron
 Triggers, alarms ou polling, então ficar ocioso não custa nada. Estado no Workers KV. Decisões em
-[ADR 0014](../../docs/adr/0014-gmail-remoto-sob-demanda-no-workers.md) e
-[ADR 0016](../../docs/adr/0016-gmail-multiusuario-publico.md) e
-[ADR 0019](../../docs/adr/0019-gmail-gerenciamento-completo.md) (gerenciamento).
+[ADR 0014](../../docs/adr/0014-on-demand-remote-gmail-on-workers.md) e
+[ADR 0016](../../docs/adr/0016-public-multi-user-gmail.md) e
+[ADR 0019](../../docs/adr/0019-full-gmail-management.md) (gerenciamento).
 
 ## Para quem vai usar
 
-O jeito mais fácil: digite **`/config-gmail`** no chat. O Claude confere a conexão, mostra as contas, vincula
+O jeito mais fácil: digite **`/setup-gmail`** no chat. O Claude confere a conexão, mostra as contas, vincula
 ou desvincula contas e faz um teste. O passo a passo manual é este:
 
 1. No Claude, adicione o marketplace `temponi-bernardo/claude-connectors` e instale o plugin **`gmail`** (ou
@@ -36,10 +36,10 @@ app"**: clique em **Avançado → Acessar**. O Google limita apps não verificad
 
 ## Comandos do plugin
 
-- **`/config-gmail`** — configuração guiada (conexão, contas e teste).
-- **`/triagem-email`** — caixa de entrada de todas as contas por prioridade.
-- **`/achar-documento`** — boletos, faturas, recibos e contratos, com os dados do anexo.
-- **`/resumir-conversa`** — resumo de uma thread, pendências e rascunho de resposta.
+- **`/setup-gmail`** — configuração guiada (conexão, contas e teste).
+- **`/triage-inbox`** — caixa de entrada de todas as contas por prioridade.
+- **`/find-document`** — boletos, faturas, recibos e contratos, com os dados do anexo.
+- **`/summarize-thread`** — resumo de uma thread, pendências e rascunho de resposta.
 
 Também dá para pedir em linguagem natural ("tem e-mail pra responder?"): o Claude usa a skill certa.
 
@@ -111,8 +111,8 @@ seguir instruções vindas de um e-mail.
 2. **APIs e serviços → Biblioteca → Gmail API → Ativar.**
 3. **Google Auth Platform → Branding:** nome do app, e-mail de suporte, página inicial
    `https://temponi-bernardo.github.io/claude-connectors/`, política de privacidade
-   `https://temponi-bernardo.github.io/claude-connectors/privacidade.html` e termos
-   `https://temponi-bernardo.github.io/claude-connectors/termos.html`.
+   `https://temponi-bernardo.github.io/claude-connectors/privacy.html` e termos
+   `https://temponi-bernardo.github.io/claude-connectors/terms.html`.
 4. **Público:** tipo **Externo** → **Publicar app** ("Em produção"). Sem isso o refresh token vence em 7 dias.
 5. **Acesso a dados → Adicionar escopos:** `openid`, `.../auth/userinfo.email` e
    `https://www.googleapis.com/auth/gmail.modify` (ler, enviar, rascunhos, marcadores e lixeira; sem exclusão
@@ -179,4 +179,4 @@ novo.
 - Prompt injection: descrições, instruções do servidor e resultados avisam o modelo que o conteúdo dos e-mails
   não é confiável e que ele nunca deve enviar, encaminhar ou apagar porque um e-mail pediu.
 - Nada de conteúdo de e-mail, tokens ou endereços nos logs. Política de privacidade com a declaração de Uso
-  Limitado do Google em [privacidade.html](../../docs/privacidade.html).
+  Limitado do Google em [privacy.html](../../docs/privacy.html).

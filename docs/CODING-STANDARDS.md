@@ -1,69 +1,70 @@
-# Padrões de código
+# Coding standards
 
-Regras inegociáveis do CLAUDE.md, explicadas. O que o ESLint confere está marcado com ⚙️; o resto é
-revisão humana (checklist do PR).
+The non-negotiable rules from CLAUDE.md, explained. What ESLint checks is marked with ⚙️; the rest is human review
+(the PR checklist).
 
-## 1. Nada repetido ⚙️ (jscpd, limite zero)
+## 1. Nothing repeated ⚙️ (jscpd, zero limit)
 
-Nenhuma função, constante, dado ou estilo duplicado. Dois trechos iguais ou quase iguais viram uma função
-compartilhada com nome claro. `npm run dup:check` falha com qualquer clone de 50+ tokens (testes e
-fixtures excluídos; `docs/FUNCTIONS.md` e `docs/adr/` também, porque seguem modelos fixos que repetem
-estrutura, não conteúdo). Lógica _parecida_ que o jscpd não pega é responsabilidade da revisão.
+No duplicated function, constant, data or style. Two identical or near-identical snippets become one shared
+function with a clear name. `npm run dup:check` fails on any clone of 50+ tokens (tests and fixtures excluded;
+`docs/FUNCTIONS.md` and `docs/adr/` too, because they follow fixed templates that repeat structure, not content).
+_Similar_ logic that jscpd misses is the review's job.
 
-## 2. Funções pequenas, com um único trabalho ⚙️
+## 2. Small functions with a single job ⚙️
 
-- Até **25 linhas** (sem contar brancos e comentários) — `max-lines-per-function`.
-- Até **3 parâmetros**; mais que isso vira um objeto tipado — `max-params`.
-- Complexidade ciclomática até **8**, aninhamento até **3** — `complexity`, `max-depth`.
-- Se a descrição da função precisa de "e", divida.
-- **Decidir separado de fazer:** funções puras (cálculo, validação, decisão) não tocam disco, rede, stdout
-  nem estado global; funções com efeito são finas e chamam as puras. O campo **Efeitos** do FUNCTIONS.md
-  deixa isso explícito.
+- Up to **25 lines** (not counting blank lines and comments) — `max-lines-per-function`.
+- Up to **3 parameters**; more than that becomes a typed object — `max-params`.
+- Cyclomatic complexity up to **8**, nesting up to **3** — `complexity`, `max-depth`.
+- If the function's description needs an "and", split it.
+- **Deciding apart from doing:** pure functions (calculation, validation, decision) do not touch disk, network,
+  stdout or global state; functions with effects are thin and call the pure ones. The **Efeitos** (effects) field
+  in FUNCTIONS.md makes this explicit.
 
-## 3. Nomes de função únicos no repositório inteiro ⚙️ (`docs:check`)
+## 3. Function names unique across the whole repository ⚙️ (`docs:check`)
 
-Um nome, uma função. Isso torna `FUNCTIONS.md` um índice sem ambiguidade e permite calcular "Usada por"
-sem confusão. Prefira nomes que carregam o contexto: `renderGeneratedBlock`, não `render`.
+One name, one function. This makes `FUNCTIONS.md` an unambiguous index and lets "Usada por" (used by) be computed
+without confusion. Prefer names that carry their context: `renderGeneratedBlock`, not `render`.
 
-Frameworks que exigem nomes fixos (`GET`, `loader`, `default`) ficam em arquivos de entrada e são
-registrados como exceção documentada em ARCHITECTURE.md quando a stack for escolhida.
+Frameworks that require fixed names (`GET`, `loader`, `default`) stay in entry files and are recorded as a
+documented exception in ARCHITECTURE.md when the stack is chosen.
 
-## 4. Declaração de funções ⚙️
+## 4. Function declarations ⚙️
 
-Funções de topo são declaradas com `function` (`func-style: declaration`), nunca com arrow atribuída a
-`const`. Arrow functions são para callbacks inline. Toda função exportada tem tipos explícitos nos limites
+Top-level functions are declared with `function` (`func-style: declaration`), never as an arrow assigned to a
+`const`. Arrow functions are for inline callbacks. Every exported function has explicit types at its boundaries
 (`explicit-module-boundary-types`).
 
-## 5. Tipos
+## 5. Types
 
-TypeScript estrito com `noUncheckedIndexedAccess` e `exactOptionalPropertyTypes`. Nada de `any`; use
-`unknown` e estreite. Sem `!` (non-null assertion) fora de testes. Dados de entrada externos são validados
-na borda e viram tipos do domínio.
+Strict TypeScript with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`. No `any`; use `unknown` and
+narrow it. No `!` (non-null assertion) outside tests. External input data is validated at the edge and becomes
+domain types.
 
-## 6. Erros
+## 6. Errors
 
-Lance `Error` com mensagem em português que diz **o que** falhou e **como corrigir**. Não engula erros
-silenciosamente; se um `catch` devolve um valor padrão, documente isso em **Erros** e **Saída**.
+Throw an `Error` whose message says **what** failed and **how to fix it**. Do not swallow errors silently; if a
+`catch` returns a default value, document it in **Erros** (errors) and **Saída** (output).
 
-## 7. Nomes
+## 7. Names
 
-- Identificadores em inglês, `camelCase` para funções/variáveis, `PascalCase` para tipos,
-  `UPPER_SNAKE_CASE` para constantes exportadas.
-- Booleanos como pergunta: `isAnalyzedSource`, `hasTests`.
-- Funções com verbo: `collectFunctions`, `renderNewSection`, `checkStructure`.
-- Arquivos em `kebab-case.ts`; teste ao lado: `arquivo.test.ts`.
+- Identifiers in English, `camelCase` for functions/variables, `PascalCase` for types, `UPPER_SNAKE_CASE` for
+  exported constants.
+- Booleans as questions: `isAnalyzedSource`, `hasTests`.
+- Functions with a verb: `collectFunctions`, `renderNewSection`, `checkStructure`.
+- Files in `kebab-case.ts`; the test sits next to them: `file.test.ts`.
 
-## 8. Comentários
+## 8. Comments
 
-JSDoc de uma linha em toda função (`/** O que faz. */`) — a mesma frase vai para o campo **Faz**.
-Comentários explicam o porquê, nunca o óbvio. Sem código comentado.
+A one-line JSDoc on every function (`/** What it does. */`) — the same sentence goes into the **Faz** (what it
+does) field. Comments explain the why, never the obvious. No commented-out code.
 
 ## 9. Imports
 
-ESM com extensão `.js` nos imports relativos (`moduleResolution: NodeNext`). `import type` para tipos
-(`consistent-type-imports`). Respeite a tabela de dependências de [ARCHITECTURE.md](ARCHITECTURE.md).
+ESM with the `.js` extension on relative imports (`moduleResolution: NodeNext`). `import type` for types
+(`consistent-type-imports`). Respect the dependency table in [ARCHITECTURE.md](ARCHITECTURE.md).
 
-## 10. Idioma
+## 10. Language
 
-Código, identificadores e mensagens de commit (tipo/escopo) em inglês; docs, comentários, mensagens ao
-usuário e descrição dos commits em português.
+Everything is in English ([ADR 0021](adr/0021-english-across-the-repository.md)): code, identifiers, commit
+messages (type, scope and description), docs, comments, error messages and user-facing messages. Text that is
+still Portuguese is being translated in the roadmap's F4 tasks.

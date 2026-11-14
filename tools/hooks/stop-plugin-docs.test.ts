@@ -30,13 +30,13 @@ describe('hook stop-plugin-docs (Stop)', () => {
     expect(isBlock(r.stdout)).toBe(false);
   });
 
-  it('a plugin change without docs blocks asking for /atualizar-docs', () => {
+  it('plugin changed without docs blocks asking for /update-docs', () => {
     write(dir, 'connectors/canvas-puc/manifest.json', '{}');
     const r = runHook(HOOK, dir, STOP);
     expect(r.status).toBe(0);
     expect(isBlock(r.stdout)).toBe(true);
     const parsed = JSON.parse(r.stdout.trim()) as { reason: string };
-    expect(parsed.reason).toContain('/atualizar-docs');
+    expect(parsed.reason).toContain('/update-docs');
     expect(parsed.reason).toContain('connectors/canvas-puc/manifest.json');
   });
 

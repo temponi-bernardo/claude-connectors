@@ -44,7 +44,7 @@ describe('hook session-end-handoff (SessionEnd)', () => {
     expect(r.status).toBe(0);
     const state = readFileSync(join(dir, 'docs/STATE.md'), 'utf8');
     expect(state.startsWith('# Estado atual')).toBe(true);
-    expect(state).toContain('Gerado automaticamente pelo hook SessionEnd');
+    expect(state).toContain('Generated automatically by the SessionEnd hook');
     expect(existsSync(join(dir, '.claude/.last-handoff'))).toBe(true);
   });
 

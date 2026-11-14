@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# Hook Stop: se a resposta alterou código ou docs, roda o docs:check e devolve os erros ao Claude (saída 2).
-# Na segunda passagem da mesma sessão deixa passar, para não travar o Claude em loop.
+# Stop hook: if the reply changed code or docs, runs docs:check and returns the errors to Claude (exit 2).
+# On the second pass in the same session it lets go, so Claude doesn't get stuck in a loop.
 set -u
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 
 input="$(cat)"
-session_id="$(printf '%s' "$input" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{process.stdout.write(String(JSON.parse(d).session_id||"sem-sessao"))}catch{process.stdout.write("sem-sessao")}})')"
+session_id="$(printf '%s' "$input" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{process.stdout.write(String(JSON.parse(d).session_id||"no-session"))}catch{process.stdout.write("no-session")}})')"
 marker="${TMPDIR:-/tmp}/claude-stop-docs-check-${session_id//[^a-zA-Z0-9_-]/_}"
 
 if [ -f "$marker" ]; then
@@ -13,7 +13,7 @@ if [ -f "$marker" ]; then
   exit 0
 fi
 
-# Só roda se houver mudança (staged, unstaged ou arquivo novo) nas pastas que o docs:check observa.
+# Only runs if there is a change (staged, unstaged or new file) in the folders docs:check watches.
 if [ -z "$(git status --porcelain -- src tools docs docs.config.json 2>/dev/null)" ]; then
   exit 0
 fi
@@ -23,7 +23,7 @@ status=$?
 if [ "$status" -ne 0 ]; then
   touch "$marker"
   {
-    echo "docs:check falhou. Corrija antes de encerrar (rode npm run docs:generate se forem blocos gerados):"
+    echo "docs:check failed. Fix it before ending (run npm run docs:generate for generated blocks):"
     echo "$output"
   } >&2
   exit 2

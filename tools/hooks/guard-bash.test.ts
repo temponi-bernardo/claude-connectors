@@ -14,20 +14,20 @@ function runGuard(command: string): { status: number | null; stderr: string } {
 
 describe('hook guard-bash (PreToolUse)', () => {
   it.each([
-    ['git push -u origin main', 'push direto na main'],
-    ['git push origin HEAD:main', 'push direto na main'],
-    ['git push origin feat/x --force', 'force push'],
-    ['git push -f origin feat/x', 'force push'],
-    ['git push --force-with-lease origin feat/x', 'force push'],
+    ['git push -u origin main', 'direct push to main'],
+    ['git push origin HEAD:main', 'direct push to main'],
+    ['git push origin feat/x --force', 'force push is forbidden'],
+    ['git push -f origin feat/x', 'force push is forbidden'],
+    ['git push --force-with-lease origin feat/x', 'force push is forbidden'],
     ['git commit -m "x" --no-verify', '--no-verify'],
     ['git commit -n -m x', '--no-verify'],
-    ['git branch -D main', 'não apague a main'],
-    ['cat .env', 'leitura de .env'],
-    ['grep KEY ./.env.local', 'leitura de .env'],
-    ["node -e \"require('fs').readFileSync('.env')\"", 'acesso a .env por script'],
-    ['rm -rf /', 'rm -rf'],
-    ['rm -rf ~', 'rm -rf'],
-    ['git config core.hooksPath /dev/null', 'git hooks'],
+    ['git branch -D main', 'do not delete main'],
+    ['cat .env', 'reading .env is forbidden'],
+    ['grep KEY ./.env.local', 'reading .env is forbidden'],
+    ["node -e \"require('fs').readFileSync('.env')\"", 'accessing .env from a script'],
+    ['rm -rf /', 'rm -rf on the root'],
+    ['rm -rf ~', 'rm -rf on the root'],
+    ['git config core.hooksPath /dev/null', 'disable the git hooks'],
   ])('blocks: %s', (command, reason) => {
     const { status, stderr } = runGuard(command);
     expect(status).toBe(2);

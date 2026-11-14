@@ -1,145 +1,148 @@
-# Guia de documentação
+# Documentation guide
 
-Todo PR que mexe em código atualiza a documentação **no mesmo PR**. Este guia diz qual doc muda para cada
-tipo de mudança, em que formato, e o que a máquina confere.
+Every PR that touches code updates the documentation **in the same PR**. This guide says which doc changes for
+each kind of change, in what format, and what the machine checks.
 
-## Mudança → qual doc atualizar → modelo
+## Change → which doc to update → template
 
-| Mudança                                                   | Doc(s)                                            | Modelo                                                                      | Conferido por                |
-| --------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------- |
-| Função nova, renomeada ou removida                        | FUNCTIONS.md                                      | [Função](#função) — `npm run docs:generate` (cria e poda seções) e preencha | `docs:check`                 |
-| Assinatura, chamadores ou processos de uma função mudaram | FUNCTIONS.md                                      | `npm run docs:generate`                                                     | `docs:check`                 |
-| Constante exportada nova                                  | FUNCTIONS.md, tabela "Dados e constantes"         | [Linha de constante](#linha-de-constante)                                   | `docs:check`                 |
-| Fluxo novo ou alterado                                    | PROCESSES.md                                      | [Processo](#processo)                                                       | `docs:check` (citações) + PR |
-| Pasta nova                                                | STRUCTURE.md (árvore + tabela)                    | [Linha de pasta](#linha-de-pasta)                                           | `docs:check`                 |
-| Componente de UI novo                                     | UI.md                                             | [Componente](#componente)                                                   | `docs:check`                 |
-| Tarefa do roadmap começou/terminou                        | ROADMAP.md                                        | [Estado de tarefa](#estado-de-tarefa)                                       | PR                           |
-| Tarefa ou passo grande concluído                          | STATE.md (sobrescrever; local, fora do git)       | Skill `/handoff`                                                            | Hook `Stop` + PR             |
-| Mudança visível ao usuário                                | CHANGELOG.md, seção "Não lançado"                 | [Entrada de changelog](#entrada-de-changelog)                               | PR                           |
-| Decisão de arquitetura                                    | docs/adr/NNNN-titulo.md + adr/README.md           | [ADR](#adr) (`adr/0000-modelo.md`)                                          | PR                           |
-| Camada, dependência ou serviço externo novo               | ARCHITECTURE.md                                   | Prosa + tabela de dependências                                              | PR                           |
-| Decisão de produto, plano, preço                          | PRODUCT.md                                        | Pergunta aberta → decisão com data                                          | PR                           |
-| Comando, hook, regra de fluxo                             | WORKFLOW.md, CLAUDE.md                            | Prosa curta                                                                 | PR                           |
-| Plugin alterado (`connectors/`, `.claude-plugin/`)        | README do conector, CHANGELOG.md e o que couber   | Skill `/atualizar-docs`                                                     | Hook `Stop` + PR             |
-| Regra de código nova                                      | CODING-STANDARDS.md e, se possível, regra de lint | Prosa + exemplo                                                             | PR                           |
-| Termo novo                                                | GLOSSARY.md                                       | `**Termo** — definição.`                                                    | PR                           |
-| Passo repetido com o Claude                               | `.claude/skills/<nome>/SKILL.md`, CLAUDE.md       | Ver `/melhorar-skills`                                                      | PR                           |
+| Change                                               | Doc(s)                                            | Template                                                                                    | Checked by                    |
+| ---------------------------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------- | ----------------------------- |
+| Function added, renamed or removed                   | FUNCTIONS.md                                      | [Function](#function) — `npm run docs:generate` (creates and prunes sections), then fill in | `docs:check`                  |
+| A function's signature, callers or processes changed | FUNCTIONS.md                                      | `npm run docs:generate`                                                                     | `docs:check`                  |
+| New exported constant                                | FUNCTIONS.md, "Dados e constantes" table          | [Constant row](#constant-row)                                                               | `docs:check`                  |
+| New or changed flow                                  | PROCESSES.md                                      | [Process](#process)                                                                         | `docs:check` (citations) + PR |
+| New folder                                           | STRUCTURE.md (tree + table)                       | [Folder row](#folder-row)                                                                   | `docs:check`                  |
+| New UI component                                     | UI.md                                             | [Component](#component)                                                                     | `docs:check`                  |
+| Roadmap task started/finished                        | ROADMAP.md                                        | [Task status](#task-status)                                                                 | PR                            |
+| Task or large step finished                          | STATE.md (overwrite; local, outside git)          | `/handoff` skill                                                                            | `Stop` hook + PR              |
+| User-visible change                                  | CHANGELOG.md, "Não lançado" section               | [Changelog entry](#changelog-entry)                                                         | PR                            |
+| Architecture decision                                | docs/adr/NNNN-title.md + adr/README.md            | [ADR](#adr) (`adr/0000-template.md`)                                                        | PR                            |
+| New layer, dependency or external service            | ARCHITECTURE.md                                   | Prose + dependency table                                                                    | PR                            |
+| Product decision, plan, pricing                      | PRODUCT.md                                        | Open question → dated decision                                                              | PR                            |
+| Command, hook, workflow rule                         | WORKFLOW.md, CLAUDE.md                            | Short prose                                                                                 | PR                            |
+| Plugin changed (`connectors/`, `.claude-plugin/`)    | Connector README, CHANGELOG.md and whatever fits  | `/update-docs` skill                                                                        | `Stop` hook + PR              |
+| New code rule                                        | CODING-STANDARDS.md and, if possible, a lint rule | Prose + example                                                                             | PR                            |
+| New term                                             | GLOSSARY.md                                       | `**Term** — definition.`                                                                    | PR                            |
+| Step repeated with Claude                            | `.claude/skills/<name>/SKILL.md`, CLAUDE.md       | See `/improve-skills`                                                                       | PR                            |
 
-## Formatos padrão
+## Standard formats
 
-### Função
+### Function
 
-Gerada por `npm run docs:generate`; só os cinco campos manuais são escritos à mão.
+Generated by `npm run docs:generate`; only the five manual fields are written by hand. The field labels and the
+`gerado` markers stay in Portuguese because the docs tooling parses them: **Faz** (what it does), **Entrada**
+(input), **Saída** (output), **Efeitos** (effects), **Erros** (errors); the generated **Arquivo** (file),
+**Assinatura** (signature), **Usada por** (used by) and **Processos** (processes).
 
 ```markdown
-### `nomeDaFuncao`
+### `functionName`
 
 <!-- gerado:inicio -->
 
-- **Arquivo:** `src/pasta/arquivo.ts`
-- **Assinatura:** `nomeDaFuncao(a: string, b: number): Resultado`
-- **Usada por:** `outraFuncao()`, `src/main.ts (módulo)`
+- **Arquivo:** `src/folder/file.ts`
+- **Assinatura:** `functionName(a: string, b: number): Result`
+- **Usada por:** `otherFunction()`, `src/main.ts (módulo)`
 - **Processos:** P01, P03
 
 <!-- gerado:fim -->
 
-- **Faz:** uma frase no presente, sem "e" (se precisar de "e", a função faz duas coisas).
-- **Entrada:** cada parâmetro, com o que é e restrições.
-- **Saída:** o que devolve, inclusive casos vazios/nulos.
-- **Efeitos:** `Nenhum (pura).` ou o que toca (disco, rede, stdout, estado).
-- **Erros:** `Nenhum.` ou cada erro lançado e quando.
+- **Faz:** one sentence in the present tense, without "and" (if it needs "and", the function does two things).
+- **Entrada:** each parameter, what it is and its constraints.
+- **Saída:** what it returns, including empty/null cases.
+- **Efeitos:** `Nenhum (pura).` or what it touches (disk, network, stdout, state).
+- **Erros:** `Nenhum.` or each error thrown and when.
 ```
 
-Regras: a seção fica sob o heading `` ## `caminho/do/arquivo.ts` ``; nunca escreva o marcador de
-preenchimento em um campo manual; nunca edite o bloco gerado.
+Rules: the section goes under the heading `` ## `path/to/file.ts` ``; never write the fill-in marker in a manual
+field; never edit the generated block.
 
-### Linha de constante
+### Constant row
 
 ```markdown
-| `NOME_DA_CONSTANTE` | `src/arquivo.ts` | O que é e para que serve. |
+| `CONSTANT_NAME` | `src/file.ts` | What it is and what it is for. |
 ```
 
-### Processo
+### Process
 
 ```markdown
-## P05 — Nome do fluxo (gatilho curto)
+## P05 — Flow name (short trigger)
 
-- **Gatilho:** o que dispara.
-- **Passos:**
-  1. `funcaoA()` faz X.
-  2. `funcaoB()` faz Y com o resultado.
-- **Resultado:** o que o usuário/sistema tem no fim.
-- **Falhas:** o que pode dar errado e o que acontece.
+- **Trigger:** what starts it.
+- **Steps:**
+  1. `functionA()` does X.
+  2. `functionB()` does Y with the result.
+- **Result:** what the user/system has at the end.
+- **Failures:** what can go wrong and what happens.
 ```
 
-Numere em sequência (P01, P02...). Cite funções sempre como `` `nome()` ``: é assim que o `docs:check`
-preenche o campo **Processos**.
+Number them in sequence (P01, P02...). Always cite functions as `` `name()` ``: that is how `docs:check` fills in
+the **Processos** field.
 
-### Linha de pasta
+### Folder row
 
 ```markdown
-| `src/pasta/` | O que tem, em uma linha | `arquivo-principal.ts`, `outro.ts` |
+| `src/folder/` | What it holds, in one line | `main-file.ts`, `other.ts` |
 ```
 
-Adicione também a pasta na árvore `text` do topo do STRUCTURE.md quando for de primeiro nível.
+Also add the folder to the `text` tree at the top of STRUCTURE.md when it is top-level.
 
-### Componente
+### Component
 
 ```markdown
-### `NomeDoComponente`
+### `ComponentName`
 
-- **Para que serve:** ...
-- **Props:** `nome: tipo` — significado.
-- **Variantes/estados:** padrão, hover, desabilitado, erro, carregando...
-- **Tokens usados:** `color.primary`, `space.2`...
-- **Acessibilidade:** papel, rótulo, foco, teclado.
+- **Purpose:** ...
+- **Props:** `name: type` — meaning.
+- **Variants/states:** default, hover, disabled, error, loading...
+- **Tokens used:** `color.primary`, `space.2`...
+- **Accessibility:** role, label, focus, keyboard.
 ```
 
-### Estado de tarefa
+### Task status
 
 ```markdown
-| F1.3 | Descrição curta | 🟨 | Pronto quando: critério verificável |
+| F1.3 | Short description | 🟨 | Done when: verifiable criterion |
 ```
 
-Estados: ⬜ não começou · 🟨 em andamento · ✅ pronto · ⏸️ pausado. Atualize também a seção "Próxima tarefa"
-do topo do ROADMAP.md.
+States: ⬜ not started · 🟨 in progress · ✅ done · ⏸️ paused. Also update the "Next task" section at the top of
+ROADMAP.md.
 
-### Entrada de changelog
+### Changelog entry
 
-Formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), na seção `## [Não lançado]`, sob
-`### Adicionado`, `### Alterado`, `### Corrigido`, `### Removido` ou `### Segurança`:
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format, in the `## [Não lançado]` (unreleased) section,
+under `### Adicionado` (added), `### Alterado` (changed), `### Corrigido` (fixed), `### Removido` (removed) or
+`### Segurança` (security). These headings stay in Portuguese while `release-please-config.json` uses them.
 
 ```markdown
-- Descrição voltada ao usuário, no passado, em português. (#123)
+- User-facing description, in the past tense, in English. (#123)
 ```
 
-O release-please gera as seções de versão a partir dos commits; a seção "Não lançado" é a visão humana do
-que está por sair.
+release-please generates the version sections from the commits; the "Não lançado" section is the human view of
+what is about to ship.
 
 ### ADR
 
-Copie `docs/adr/0000-modelo.md` para `docs/adr/NNNN-titulo-curto.md` (próximo número livre), preencha e
-adicione a linha na tabela de `docs/adr/README.md`. ADR aceito não se edita: decisão nova cria um ADR que
-marca o antigo como "Substituído por NNNN".
+Copy `docs/adr/0000-template.md` to `docs/adr/NNNN-short-title.md` (next free number), fill it in and add the row
+to the table in `docs/adr/README.md`. An accepted ADR is not edited: a new decision creates an ADR that marks the
+old one as "Superseded by NNNN".
 
-## Estilo de escrita
+## Writing style
 
-- Português do Brasil, frases curtas, voz ativa, presente do indicativo.
-- Identificadores de código sempre em crase e em inglês, como estão no código.
-- Explique o **porquê** nos docs de decisão (ADR, PRODUCT) e o **o quê** nos docs de referência
-  (FUNCTIONS, STRUCTURE).
-- Sem redundância entre docs: cada fato vive em um lugar; os outros linkam.
-- Sem documentação de código morto: removeu a função, removeu a seção.
+- English, short sentences, active voice, present tense.
+- Code identifiers always in backticks, exactly as they are in the code.
+- Explain the **why** in decision docs (ADR, PRODUCT) and the **what** in reference docs (FUNCTIONS, STRUCTURE).
+- No redundancy between docs: each fact lives in one place; the others link to it.
+- No documentation of dead code: removed the function, removed the section.
 
-## Automação
+## Automation
 
-| Comando                    | Faz                                                                                                   |
-| -------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `npm run docs:generate`    | Atualiza índice, blocos gerados e cria seções novas em FUNCTIONS.md                                   |
-| `npm run docs:check`       | Falha em qualquer divergência docs × código (ver tabela em [README.md](README.md#quem-confere-o-quê)) |
-| Hook `Stop` do Claude Code | Roda `docs:check` no fim de cada resposta que alterou código ou docs e devolve os erros ao Claude     |
-| Hook `Stop` (handoff)      | Bloqueia o encerramento se há commit seu novo sem `docs/STATE.md` atualizado                          |
-| Hook `SessionStart`        | Injeta `docs/STATE.md` e a próxima tarefa do roadmap no início de toda sessão                         |
-| Hook `PreCompact`          | Gera handoff automático em `docs/STATE.md` via `claude -p` antes de compactar a conversa              |
-| Hook `SessionEnd`          | No `/clear` ou fim de sessão, gera o handoff via `claude -p` se houve edição ou commit sem handoff    |
-| Hook `pre-push`/`pr:check` | Rodam `npm run check`, que inclui `docs:check`                                                        |
+| Command                      | Does                                                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `npm run docs:generate`      | Updates the index and generated blocks and creates new sections in FUNCTIONS.md                                    |
+| `npm run docs:check`         | Fails on any docs × code mismatch (see the table in [README.md](README.md#who-checks-what))                        |
+| Claude Code `Stop` hook      | Runs `docs:check` at the end of every response that changed code or docs and returns the errors to Claude          |
+| `Stop` hook (handoff)        | Blocks ending the turn if there is a new commit of yours without an updated `docs/STATE.md`                        |
+| `SessionStart` hook          | Injects `docs/STATE.md` and the roadmap's next task at the start of every session                                  |
+| `PreCompact` hook            | Generates an automatic handoff in `docs/STATE.md` via `claude -p` before compacting the conversation               |
+| `SessionEnd` hook            | On `/clear` or session end, generates the handoff via `claude -p` if there was an edit or commit without a handoff |
+| `pre-push` hook / `pr:check` | Run `npm run check`, which includes `docs:check`                                                                   |

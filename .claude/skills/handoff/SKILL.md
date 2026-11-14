@@ -1,36 +1,36 @@
 ---
 name: handoff
-description: Use ao concluir uma tarefa ou um passo grande, ou quando o hook Stop pedir. Sobrescreve docs/STATE.md com um resumo curto e concreto do que foi feito, do que está em andamento e dos próximos passos, para que a próxima sessão retome sem o excesso de contexto desta.
+description: Use when finishing a task or a big step, or when the Stop hook asks for it. Overwrites docs/STATE.md with a short, concrete summary of what was done, what is in progress and the next steps, so the next session resumes without this session's excess context.
 ---
 
-# Handoff de contexto
+# Context handoff
 
-Objetivo: a próxima sessão (após `/clear`) começa sabendo exatamente onde parou, lendo só `docs/STATE.md`.
+Goal: the next session (after `/clear`) starts knowing exactly where things stopped, reading only
+`docs/STATE.md`.
 
-## Passos
+## Steps
 
-1. Levante o que mudou nesta sessão: `git status --porcelain`, `git log --oneline main..HEAD` (ou os
-   últimos commits) e o que você lembra de decisões e erros abertos.
-2. **Sobrescreva** `docs/STATE.md` com exatamente estas seções, nesta ordem:
-   - `# Estado atual` — uma linha de contexto (branch, tarefa, data).
-   - `## Tarefa atual` — id do roadmap e critério "Pronto quando".
-   - `## Feito` — bullets concretos (arquivo, função, comando), no passado.
-   - `## Em andamento` — o que está pela metade e **em que ponto exato** parou.
-   - `## Próximos passos` — lista numerada, acionável, primeiro item = o que fazer ao retomar.
-   - `## Arquivos tocados` — caminhos, um por linha, com uma palavra do porquê.
-   - `## Decisões e pendências` — decisões tomadas (com link ao ADR se houver), dúvidas abertas, erros
-     ainda não resolvidos, comandos que falharam.
-3. Limite: **60 linhas**. Nada de narrativa, nada de histórico já commitado em versões anteriores do
-   STATE.md. Fato duplicado em ROADMAP/CHANGELOG/ADR → linke em vez de repetir.
-4. Se a tarefa fechou: atualize também `docs/ROADMAP.md` (estado e "Próxima tarefa"), conforme
-   `.claude/rules/docs.md`.
-5. **Não commite** o STATE.md: ele é local de cada clone e está no `.gitignore`
-   ([ADR 0005](../../../docs/adr/0005-state-md-local-por-clone.md)). Por isso pode ser escrito depois do merge,
-   já na `main`.
-6. Termine a resposta com: **"Handoff salvo em docs/STATE.md. Rode `/clear` para continuar com contexto
-   limpo."**
+1. Collect what changed in this session: `git status --porcelain`, `git log --oneline main..HEAD` (or the last
+   commits) and what you remember of decisions and open errors.
+2. **Overwrite** `docs/STATE.md` with exactly these sections, in this order:
+   - `# Current state` — one line of context (branch, task, date).
+   - `## Current task` — roadmap id and "Done when" criterion.
+   - `## Done` — concrete bullets (file, function, command), in the past tense.
+   - `## In progress` — what is half done and **at which exact point** it stopped.
+   - `## Next steps` — numbered, actionable list; first item = what to do when resuming.
+   - `## Files touched` — paths, one per line, with a word on why.
+   - `## Decisions and open items` — decisions made (with a link to the ADR if any), open questions, unresolved
+     errors, commands that failed.
+3. Limit: **60 lines**. No narrative, no history already committed in earlier versions of STATE.md. A fact
+   duplicated in ROADMAP/CHANGELOG/ADR → link instead of repeating.
+4. If the task is closed: also update `docs/ROADMAP.md` (status and "Next task"), as `.claude/rules/docs.md`
+   says.
+5. **Don't commit** STATE.md: it is local to each clone and is in `.gitignore`
+   ([ADR 0005](../../../docs/adr/0005-state-md-local-per-clone.md)). So it can be written after the merge,
+   already on `main`.
+6. End the reply with: **"Handoff saved to docs/STATE.md. Run `/clear` to continue with a clean context."**
 
-## Não faça
+## Don't
 
-Não colar diffs ou saídas de comando; não deixar `_preencher_`; não gravar segredos ou caminhos fora do
-repositório; não pular o aviso de `/clear`.
+Don't paste diffs or command output; don't leave `_preencher_`; don't record secrets or paths outside the
+repository; don't skip the `/clear` notice.

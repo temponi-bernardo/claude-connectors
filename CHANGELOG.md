@@ -14,6 +14,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
   descriptions and the Go bridge messages are translated. Gmail forwards use `---------- Forwarded message
   ----------` with `From:`/`Date:`/`Subject:`/`To:` and replies quote `On <date>, <sender> wrote:`; the WhatsApp
   bridge names the account's own messages `"You"` (was `"Você"`) and stores polls as `Poll: <name>`.
+- **BREAKING** — Plugins: the 12 plugin skills have English names and content, so their slash commands changed
+  (no aliases, ADR 0021). Canvas: `/config-canvas` → `/setup-canvas`, `/resumo-semana` → `/weekly-summary`,
+  `/preparar-entrega` → `/prepare-submission`, `/estudar-disciplina` → `/study-course`. Gmail: `/config-gmail` →
+  `/setup-gmail`, `/triagem-email` → `/triage-inbox`, `/achar-documento` → `/find-document`, `/resumir-conversa`
+  → `/summarize-thread`. WhatsApp: `/config-whatsapp` → `/setup-whatsapp`, `/resumo-whatsapp` →
+  `/whatsapp-summary`, `/pendencias-whatsapp` → `/whatsapp-pending`, `/buscar-whatsapp` → `/search-whatsapp`.
+  Canvas skills cite the English tool names (`whoami`, `upcoming_assignments`...); skills still answer in the
+  user's language and trigger on Portuguese requests.
 - **BREAKING** Canvas: the 18 tools are renamed to English, with no aliases: `quem_sou_eu` → `whoami`,
   `listar_cursos` → `list_courses`, `proximas_entregas` → `upcoming_assignments`, `listar_tarefas` →
   `list_assignments`, `ver_tarefa` → `get_assignment`, `notas` → `get_grades`, `avisos` → `list_announcements`,
@@ -28,6 +36,9 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
   tools that send, submit, overwrite or delete are `destructiveHint` (Canvas submit and reply, Gmail send, reply,
   forward, send/update/delete draft, trash and unlink, WhatsApp `send_message`). Tool descriptions and error
   messages are in English, and each MCP server announces the version of its `plugin.json`.
+- Site: the public GitHub Pages site is in English (ADR 0021). The privacy policy moves to `privacy.html` and the
+  terms to `terms.html`; the old `privacidade.html` and `termos.html` addresses redirect to them. The three plugins'
+  `privacyPolicyUrl` point to the new page.
 
 - Canvas: when the Canvas token behind a refresh token was deleted or expired in Canvas, the OAuth refresh now
   answers `invalid_grant` instead of new tokens that fail on every tool call, so Claude asks to connect again.

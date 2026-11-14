@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
-# Hook SessionStart: injeta o handoff (docs/STATE.md), a próxima tarefa do roadmap
-# e lembra do índice da documentação. Roda em startup, resume, clear e compact.
+# SessionStart hook: injects the handoff (docs/STATE.md), the roadmap's next task
+# and points to the documentation index. Runs on startup, resume, clear and compact.
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 
 if [ -s docs/STATE.md ]; then
-  echo "=== Handoff da sessão anterior (docs/STATE.md) ==="
+  echo "=== Handoff from the previous session (docs/STATE.md) ==="
   cat docs/STATE.md
-  echo "=== Fim do handoff ==="
+  echo "=== End of handoff ==="
 else
-  echo "Sem handoff salvo (docs/STATE.md ausente ou vazio)."
+  echo "No saved handoff (docs/STATE.md missing or empty)."
 fi
 
-next="$(awk '/^## Próxima tarefa/{flag=1; next} flag && NF {print; exit}' docs/ROADMAP.md 2>/dev/null)"
-echo "Próxima tarefa do roadmap: ${next:-ver docs/ROADMAP.md}"
-echo "Comece por docs/README.md (quero... → leia...). Regras em CLAUDE.md."
+# Accepts the English heading and the older Portuguese one ("Próxima tarefa").
+next="$(awk '/^## (Next task|Próxima tarefa)/{flag=1; next} flag && NF {print; exit}' docs/ROADMAP.md 2>/dev/null)"
+echo "Next roadmap task: ${next:-see docs/ROADMAP.md}"
+echo "Start with docs/README.md (I want... → read...). Rules in CLAUDE.md."

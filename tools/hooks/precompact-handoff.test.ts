@@ -34,11 +34,20 @@ describe('hook precompact-handoff (PreCompact)', () => {
     expect(r.status).toBe(0);
     const state = readFileSync(join(dir, 'docs/STATE.md'), 'utf8');
     expect(state.startsWith('# Estado atual')).toBe(true);
-    expect(state).toContain('Gerado automaticamente pelo hook PreCompact');
+    expect(state).toContain('Generated automatically by the PreCompact hook');
     expect(existsSync(join(dir, '.claude/.last-handoff'))).toBe(true);
   });
 
-  it('does not overwrite STATE.md if the answer does not start with "# Estado atual"', () => {
+  it('accepts a reply that starts with the English "# Current state" heading', () => {
+    const dir = createTempRepo();
+    const PATH = fakeClaude(dir, '# Current state\n\n## Current task\n\nF4.6\n');
+    const r = runHook(HOOK, dir, { input: withTranscript(dir), env: { PATH } });
+    expect(r.status).toBe(0);
+    const state = readFileSync(join(dir, 'docs/STATE.md'), 'utf8');
+    expect(state.startsWith('# Current state')).toBe(true);
+  });
+
+  it('does not overwrite STATE.md if the reply does not start with a state heading', () => {
     const dir = createTempRepo();
     writeFileSync(join(dir, 'docs/STATE.md'), 'original');
     const PATH = fakeClaude(dir, 'Sorry, I could not do it.');

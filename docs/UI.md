@@ -1,43 +1,43 @@
 # Interface
 
-**Este projeto não tem interface de aplicativo.** `docs.config.json` tem `"uiDir": null`, então o `docs:check`
-não cobra componentes. A única tela é a **página de autorização do conector remoto** (ADR 0009): HTML estático,
-sem script, gerado por `renderLoginPage()` em `src/remote/login-page.ts`, com o estilo em `LOGIN_PAGE_CSS` e os
-tokens abaixo (claro e escuro por `prefers-color-scheme`). O **site público** do GitHub Pages (ADR 0012:
-`docs/index.html`, `privacidade.html`, `termos.html`) usa os mesmos tokens em `docs/site.css`, sem script. As páginas do conector
-Gmail (consentimento e resultado do vínculo, `connectors/gmail/src/pages.ts`) usam o mesmo `LOGIN_PAGE_CSS`. A página `/pair` do
-WhatsApp (`renderPairPage()` em `connectors/whatsapp/src/pair-page.ts`, ADR 0015) usa `LOGIN_PAGE_CSS` mais
-`PAIR_PAGE_CSS` (código de pareamento em fonte mono grande, QR com fundo branco, botões `secondary` e `danger`).
-Estados: precisa parear (formulários de código e QR), conectando, conectado, sem resposta da ponte, erro
-(`role="alert"`) e mensagem (`role="status"`); com código ou QR na tela, recarrega a cada 20 s; a CSP libera só
-`img-src data:` para o QR.
+**This project has no application interface.** `docs.config.json` has `"uiDir": null`, so `docs:check` does not
+require components. The only screen is the **remote connector's authorization page** (ADR 0009): static HTML,
+no script, produced by `renderLoginPage()` in `src/remote/login-page.ts`, styled by `LOGIN_PAGE_CSS` and the
+tokens below (light and dark via `prefers-color-scheme`). The GitHub Pages **public site** (ADR 0012:
+`docs/index.html`, `privacy.html`, `terms.html`; `privacidade.html` and `termos.html` only redirect) uses the same tokens in `docs/site.css`, with no script. The Gmail
+connector's pages (consent and link result, `connectors/gmail/src/pages.ts`) use the same `LOGIN_PAGE_CSS`. WhatsApp's
+`/pair` page (`renderPairPage()` in `connectors/whatsapp/src/pair-page.ts`, ADR 0015) uses `LOGIN_PAGE_CSS` plus
+`PAIR_PAGE_CSS` (pairing code in a large mono font, QR on a white background, `secondary` and `danger` buttons).
+States: needs pairing (code and QR forms), connecting, connected, no response from the bridge, error
+(`role="alert"`) and message (`role="status"`); with a code or QR on screen, it reloads every 20 s; the CSP allows
+only `img-src data:` for the QR.
 
-## Quando houver interface
+## When there is an interface
 
-1. Crie o pacote de design system (ex.: `src/ui/`) com **tokens** (cores, tipografia, espaçamento, raio,
-   sombra) e **componentes** (botão, campo, cartão...). Nenhuma tela estiliza "na mão": só usa tokens e
-   componentes daqui.
-2. Aponte `"uiDir": "src/ui"` em `docs.config.json`. A partir daí todo arquivo `.tsx` da pasta precisa de
-   uma seção aqui (modelo em [DOCUMENTATION.md](DOCUMENTATION.md#componente)).
-3. Registre a decisão da stack de UI em um ADR e atualize ARCHITECTURE.md (camada `entrada`).
-4. Se houver diferença por sistema (web × desktop × mobile), crie `docs/PLATFORMS.md` e linke aqui.
-5. Design (ícones, ilustrações, imagens) é sempre original — nada copiado de bibliotecas de terceiros sem
-   licença compatível, nada que imite marca alheia.
+1. Create the design system package (e.g. `src/ui/`) with **tokens** (colors, typography, spacing, radius,
+   shadow) and **components** (button, field, card...). No screen is styled "by hand": it only uses tokens and
+   components from here.
+2. Set `"uiDir": "src/ui"` in `docs.config.json`. From then on every `.tsx` file in that folder needs a section
+   here (template in [DOCUMENTATION.md](DOCUMENTATION.md#component)).
+3. Record the UI stack decision in an ADR and update ARCHITECTURE.md (the connector entry).
+4. If platforms differ (web × desktop × mobile), create `docs/PLATFORMS.md` and link it here.
+5. Design (icons, illustrations, images) is always original — nothing copied from third-party libraries without a
+   compatible license, nothing that imitates someone else's brand.
 
 ## Tokens
 
-| Token       | Valor (claro / escuro) | Uso                                  |
-| ----------- | ---------------------- | ------------------------------------ |
-| `--bg`      | `#f6f7f9` / `#121417`  | Fundo da página e dos campos         |
-| `--surface` | `#fff` / `#1c1f24`     | Cartão central                       |
-| `--text`    | `#1d2129` / `#e8eaed`  | Texto principal                      |
-| `--muted`   | `#5b6270` / `#a3a9b3`  | Texto de apoio                       |
-| `--accent`  | `#2357d9` / `#7aa2ff`  | Botão e links                        |
-| `--danger`  | `#b42318` / `#ff8a80`  | Mensagem de erro (`role="alert"`)    |
-| `--line`    | `#d9dde3` / `#30343b`  | Bordas                               |
-| `--space`   | `16px`                 | Espaçamento base                     |
-| `--radius`  | `10px`                 | Raio do cartão (campos e botão: 8px) |
+| Token       | Value (light / dark)  | Use                                  |
+| ----------- | --------------------- | ------------------------------------ |
+| `--bg`      | `#f6f7f9` / `#121417` | Page and field background            |
+| `--surface` | `#fff` / `#1c1f24`    | Central card                         |
+| `--text`    | `#1d2129` / `#e8eaed` | Main text                            |
+| `--muted`   | `#5b6270` / `#a3a9b3` | Supporting text                      |
+| `--accent`  | `#2357d9` / `#7aa2ff` | Button and links                     |
+| `--danger`  | `#b42318` / `#ff8a80` | Error message (`role="alert"`)       |
+| `--line`    | `#d9dde3` / `#30343b` | Borders                              |
+| `--space`   | `16px`                | Base spacing                         |
+| `--radius`  | `10px`                | Card radius (fields and button: 8px) |
 
-## Componentes
+## Components
 
-_Nenhum ainda._
+_None yet._

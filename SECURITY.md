@@ -1,15 +1,15 @@
-# Segurança
+# Security
 
-## Reportar uma vulnerabilidade
+## Reporting a vulnerability
 
-Não abra issue pública. Em repositório público, use "Report a vulnerability" na aba Security (GitHub
-Private Vulnerability Reporting). Em repositório privado esse recurso não existe: escreva ao mantenedor.
-Resposta inicial em até 72 horas.
+Do not open a public issue. In a public repository, use "Report a vulnerability" in the Security tab (GitHub
+Private Vulnerability Reporting). Private repositories do not have that feature: write to the maintainer.
+Initial response within 72 hours.
 
-## Práticas deste repositório
+## Practices in this repository
 
-- Segredos só em variáveis de ambiente; `.env` nunca é versionado e o Claude Code não pode lê-lo.
-- `gitleaks` obrigatório localmente via `npm run secrets:check` (no `pre-push` e no `pr:check`); não há CI.
-- Dependabot semanal para npm.
-- `main` só recebe PR com `npm run pr:check` verde, sem force push.
-- Nenhuma dependência de produção até a stack ser escolhida (ADR); toda dependência nova passa por revisão.
+- Secrets only in environment variables; `.env` is never committed and Claude Code cannot read it.
+- `gitleaks` required locally via `npm run secrets:check` (in `pre-push` and in `pr:check`); there is no CI.
+- Weekly Dependabot for npm.
+- `main` only receives PRs with a green `npm run pr:check`, no force push.
+- No production dependency until the stack is chosen (ADR); every new dependency is reviewed.

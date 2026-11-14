@@ -16,9 +16,9 @@ updates:
       prefix: 'chore(deps)'
     open-pull-requests-limit: 5
     ignore:
-      # zod 4 muda a API dos esquemas das ferramentas: migração é tarefa própria (ROADMAP F2.4)
+      # zod 4 changes the tool schema API: the migration is its own task (ROADMAP F2.4)
       - dependency-name: zod
         update-types: ['version-update:semver-major']
-      # TypeScript 7 (compilador nativo) precisa de typescript-eslint e ts-morph compatíveis (ROADMAP F2.5)
+      # TypeScript 7 (native compiler) needs compatible typescript-eslint and ts-morph (ROADMAP F2.5)
       - dependency-name: typescript
         update-types: ['version-update:semver-major']

@@ -11,14 +11,14 @@ no single public URL to list.
 
 Shared fields for both connectors:
 
-| Field           | Value                                                                   |
-| --------------- | ----------------------------------------------------------------------- |
-| Publisher       | Bernardo Temponi                                                        |
-| Support contact | <https://github.com/temponi-bernardo/claude-connectors/issues>          |
-| Privacy policy  | <https://temponi-bernardo.github.io/claude-connectors/privacidade.html> |
-| Terms           | <https://temponi-bernardo.github.io/claude-connectors/termos.html>      |
-| Authentication  | OAuth 2.1 with PKCE (S256) and dynamic client registration              |
-| Transport       | Streamable HTTP, stateless, JSON responses                              |
+| Field           | Value                                                               |
+| --------------- | ------------------------------------------------------------------- |
+| Publisher       | Bernardo Temponi                                                    |
+| Support contact | <https://github.com/temponi-bernardo/claude-connectors/issues>      |
+| Privacy policy  | <https://temponi-bernardo.github.io/claude-connectors/privacy.html> |
+| Terms           | <https://temponi-bernardo.github.io/claude-connectors/terms.html>   |
+| Authentication  | OAuth 2.1 with PKCE (S256) and dynamic client registration          |
+| Transport       | Streamable HTTP, stateless, JSON responses                          |
 
 ### Canvas PUC Minas
 
@@ -150,6 +150,6 @@ login, and also try the UI (`npx @modelcontextprotocol/inspector`) for `tools/ca
    assessment) must be complete, or the consent screen shows "unverified app" and is limited to test users.
 5. Provide a test account for reviewers: a Canvas sandbox token (or a PUC Minas test account) and a Google test
    account; decide how to share the credentials privately.
-6. Consider translating the public site (`docs/index.html`, `privacidade.html`, `termos.html`) to English for
-   reviewers (ADR 0021); the privacy policy is accurate but still in Portuguese.
+6. ~~Translate the public site to English (ADR 0021)~~: done; the policy is at `privacy.html` and the terms at
+   `terms.html` (the old Portuguese addresses redirect).
 7. Fill in Anthropic's submission form with the drafts above and submit.

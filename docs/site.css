@@ -1,4 +1,4 @@
-/* Site público (GitHub Pages, ADR 0012). Tokens de docs/UI.md, os mesmos da página de autorização. */
+/* Public site (GitHub Pages, ADR 0012). Tokens from docs/UI.md, the same as the authorization page. */
 :root {
   --bg: #f6f7f9;
   --surface: #fff;
