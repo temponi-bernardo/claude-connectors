@@ -21,3 +21,4 @@ marca o antigo como "Substituído por NNNN". Modelo em [0000-modelo.md](0000-mod
 | [0014](0014-gmail-remoto-sob-demanda-no-workers.md)       | Gmail remoto multi-conta, só leitura, sob demanda no Workers     | Substituído em parte por 0016        | 2026-11-14 |
 | [0015](0015-whatsapp-no-cloudflare-containers.md)         | WhatsApp pessoal no Cloudflare Workers + Containers, sob demanda | Aceito                               | 2026-11-14 |
 | [0016](0016-gmail-multiusuario-publico.md)                | Gmail remoto público e multiusuário                              | Aceito                               | 2026-11-14 |
+| [0017](0017-handoff-automatico-no-session-end.md)         | Handoff automático no SessionEnd                                 | Aceito                               | 2026-11-14 |

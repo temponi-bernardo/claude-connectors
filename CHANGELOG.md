@@ -6,6 +6,11 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ## [Não lançado]
 
+### Adicionado
+
+- Hook `SessionEnd` (`session-end-handoff.sh`): no `/clear` ou fim de sessão sem handoff, gera o `docs/STATE.md`
+  via `claude -p` se houve edição ou commit depois do último handoff (ADR 0017).
+
 ## [0.1.0](https://github.com/temponi-bernardo/claude-connectors/releases/tag/v0.1.0) (2026-11-14)
 
 ### Alterado
