@@ -1,6 +1,6 @@
 # 0004 — Handoff de contexto em `docs/STATE.md` com hooks do Claude Code
 
-- **Estado:** Substituído em parte por [0005](0005-state-md-local-por-clone.md) (STATE.md local e critério do `Stop`)
+- **Estado:** Substituído em parte por [0005](0005-state-md-local-per-clone.md) (STATE.md local e critério do `Stop`)
 - **Data:** 2026-10-19
 - **Relacionado:** ADR 0002 (docs como fonte da verdade)
 

@@ -1,13 +1,13 @@
 # Arquitetura
 
 Repositório de **conectores MCP remotos** para o Claude. Cada conector é um servidor HTTP com OAuth hospedado na
-nuvem (Cloudflare Workers, [ADR 0010](adr/0010-conector-remoto-no-cloudflare-workers.md)) e publicado como plugin
+nuvem (Cloudflare Workers, [ADR 0010](adr/0010-remote-connector-on-cloudflare-workers.md)) e publicado como plugin
 do marketplace deste repositório: o plugin só aponta para a URL do servidor. Nada roda no computador de quem
-instala ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)). O conector **Gmail**
+instala ([ADR 0013](adr/0013-remote-only-connector-via-marketplace.md)). O conector **Gmail**
 (`connectors/gmail/`) segue o mesmo modelo, com OAuth da biblioteca `@cloudflare/workers-oauth-provider` e estado
-no Workers KV ([ADR 0014](adr/0014-gmail-remoto-sob-demanda-no-workers.md)). O conector **WhatsApp**
+no Workers KV ([ADR 0014](adr/0014-on-demand-remote-gmail-on-workers.md)). O conector **WhatsApp**
 (`connectors/whatsapp/`) é um template self-host: Worker + Durable Object + container com uma ponte em Go, sob
-demanda, com login do dono pelo GitHub ([ADR 0015](adr/0015-whatsapp-no-cloudflare-containers.md)).
+demanda, com login do dono pelo GitHub ([ADR 0015](adr/0015-whatsapp-on-cloudflare-containers.md)).
 
 ## Camadas
 

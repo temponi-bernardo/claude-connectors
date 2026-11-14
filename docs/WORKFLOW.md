@@ -3,7 +3,7 @@
 ## Branches
 
 - `main` só recebe código por PR com `npm run pr:check` verde; sem push direto, sem force push. Não há CI
-  no GitHub Actions ([ADR 0006](adr/0006-sem-github-actions-checagens-locais.md)): o portão é local.
+  no GitHub Actions ([ADR 0006](adr/0006-no-github-actions-local-checks.md)): o portão é local.
 - Uma branch por tarefa: `<tipo>/<id-roadmap>-<descricao-curta>`, ex.: `feat/f2-1-processo-principal`,
   `fix/canvas-paginacao`, `docs/arquitetura-camadas`.
 - Branch nasce da `main` atualizada e morre no merge (squash).
@@ -70,8 +70,8 @@ Versionados em `.githooks/` e ativados pelo `npm install` (script `prepare` → 
 ## Ciclo de contexto do Claude Code
 
 O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, sustentado pelos hooks de
-`.claude/settings.json` (decisões em [ADR 0004](adr/0004-handoff-de-contexto-em-state-md-com-hooks.md) e
-[ADR 0005](adr/0005-state-md-local-por-clone.md)):
+`.claude/settings.json` (decisões em [ADR 0004](adr/0004-context-handoff-in-state-md-with-hooks.md) e
+[ADR 0005](adr/0005-state-md-local-per-clone.md)):
 
 1. `SessionStart` injeta `docs/STATE.md` (handoff) e a próxima tarefa do roadmap. Na nuvem, `session-tools.sh`
    também instala o gitleaks e as dependências do npm.
@@ -87,7 +87,7 @@ O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, susten
 6. Se o `/clear` (ou o fim da sessão) vier sem handoff, `SessionEnd` (`session-end-handoff.sh`) gera um do
    mesmo jeito, mas só se o transcript tiver edição de arquivo ou `git commit`/`merge`/`push` depois da última
    modificação do `STATE.md`; conversa e leitura não disparam. O `timeout` de 60 s no `settings.json` eleva o
-   orçamento padrão de 1,5 s do SessionEnd ([ADR 0017](adr/0017-handoff-automatico-no-session-end.md)).
+   orçamento padrão de 1,5 s do SessionEnd ([ADR 0017](adr/0017-automatic-handoff-on-session-end.md)).
 
 ## Versão e release
 

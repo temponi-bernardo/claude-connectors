@@ -16,7 +16,7 @@ tipo de mudança, em que formato, e o que a máquina confere.
 | Tarefa do roadmap começou/terminou                        | ROADMAP.md                                        | [Estado de tarefa](#estado-de-tarefa)                                       | PR                           |
 | Tarefa ou passo grande concluído                          | STATE.md (sobrescrever; local, fora do git)       | Skill `/handoff`                                                            | Hook `Stop` + PR             |
 | Mudança visível ao usuário                                | CHANGELOG.md, seção "Não lançado"                 | [Entrada de changelog](#entrada-de-changelog)                               | PR                           |
-| Decisão de arquitetura                                    | docs/adr/NNNN-titulo.md + adr/README.md           | [ADR](#adr) (`adr/0000-modelo.md`)                                          | PR                           |
+| Decisão de arquitetura                                    | docs/adr/NNNN-titulo.md + adr/README.md           | [ADR](#adr) (`adr/0000-template.md`)                                        | PR                           |
 | Camada, dependência ou serviço externo novo               | ARCHITECTURE.md                                   | Prosa + tabela de dependências                                              | PR                           |
 | Decisão de produto, plano, preço                          | PRODUCT.md                                        | Pergunta aberta → decisão com data                                          | PR                           |
 | Comando, hook, regra de fluxo                             | WORKFLOW.md, CLAUDE.md                            | Prosa curta                                                                 | PR                           |
@@ -118,7 +118,7 @@ que está por sair.
 
 ### ADR
 
-Copie `docs/adr/0000-modelo.md` para `docs/adr/NNNN-titulo-curto.md` (próximo número livre), preencha e
+Copie `docs/adr/0000-template.md` para `docs/adr/NNNN-titulo-curto.md` (próximo número livre), preencha e
 adicione a linha na tabela de `docs/adr/README.md`. ADR aceito não se edita: decisão nova cria um ADR que
 marca o antigo como "Substituído por NNNN".
 

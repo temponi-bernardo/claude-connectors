@@ -25,7 +25,7 @@ Objetivo: a próxima sessão (após `/clear`) começa sabendo exatamente onde pa
 4. Se a tarefa fechou: atualize também `docs/ROADMAP.md` (estado e "Próxima tarefa"), conforme
    `.claude/rules/docs.md`.
 5. **Não commite** o STATE.md: ele é local de cada clone e está no `.gitignore`
-   ([ADR 0005](../../../docs/adr/0005-state-md-local-por-clone.md)). Por isso pode ser escrito depois do merge,
+   ([ADR 0005](../../../docs/adr/0005-state-md-local-per-clone.md)). Por isso pode ser escrito depois do merge,
    já na `main`.
 6. Termine a resposta com: **"Handoff salvo em docs/STATE.md. Rode `/clear` para continuar com contexto
    limpo."**

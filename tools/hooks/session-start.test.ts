@@ -9,10 +9,7 @@ describe('hook session-start (SessionStart)', () => {
   it('injeta o conteúdo de docs/STATE.md e a próxima tarefa', () => {
     const dir = createTempRepo();
     writeFileSync(join(dir, 'docs/STATE.md'), '# Estado atual\n\n## Feito\n\n- hooks criados\n');
-    writeFileSync(
-      join(dir, 'docs/ROADMAP.md'),
-      '# Roadmap\n\n## Próxima tarefa\n\n**F1.1 — Algo**\n',
-    );
+    writeFileSync(join(dir, 'docs/ROADMAP.md'), '# Roadmap\n\n## Next task\n\n**F1.1 — Algo**\n');
     const r = runHook(HOOK, dir, { input: '{}' });
     expect(r.status).toBe(0);
     expect(r.stdout).toContain('Handoff da sessão anterior');

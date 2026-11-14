@@ -11,6 +11,6 @@ else
   echo "Sem handoff salvo (docs/STATE.md ausente ou vazio)."
 fi
 
-next="$(awk '/^## Próxima tarefa/{flag=1; next} flag && NF {print; exit}' docs/ROADMAP.md 2>/dev/null)"
+next="$(awk '/^## Next task/{flag=1; next} flag && NF {print; exit}' docs/ROADMAP.md 2>/dev/null)"
 echo "Próxima tarefa do roadmap: ${next:-ver docs/ROADMAP.md}"
 echo "Comece por docs/README.md (quero... → leia...). Regras em CLAUDE.md."

@@ -13,7 +13,7 @@ Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace 
 
 No Claude (claude.ai, Cowork ou Claude Code), **Adicionar marketplace** → `temponi-bernardo/claude-connectors`
 e instale o plugin desejado. Nada é instalado no computador: o plugin aponta para o servidor remoto do
-conector, e o login acontece na primeira vez, numa página de OAuth ([ADR 0013](docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
+conector, e o login acontece na primeira vez, numa página de OAuth ([ADR 0013](docs/adr/0013-remote-only-connector-via-marketplace.md)).
 
 ## Desenvolver
 
@@ -36,7 +36,7 @@ Página pública do serviço, política de privacidade e termos: <https://tempon
 ## Sem GitHub Actions
 
 Nada roda no GitHub: o portão de PR é `npm run pr:check -- "<título do PR>"` e a release usa a CLI do
-release-please localmente ([ADR 0006](docs/adr/0006-sem-github-actions-checagens-locais.md)).
+release-please localmente ([ADR 0006](docs/adr/0006-no-github-actions-local-checks.md)).
 
 ## Documentação
 
