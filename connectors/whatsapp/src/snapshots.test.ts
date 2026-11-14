@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { memoryBucket, streamOf } from './fixtures/fakes.js';
+import { memoryBucket, streamOf, textOf } from './fixtures/fakes.js';
 import {
   acceptSnapshotPush,
   archiveSnapshot,
+  pumpInto,
   readUploadHeaders,
   sameSecret,
   SNAPSHOT_KEY_NAME,
@@ -134,5 +135,47 @@ describe('sameSecret e acceptSnapshotPush', () => {
       headers: { authorization: 'Bearer tok' },
     });
     expect((await acceptSnapshotPush(bucket, noMeta, options)).status).toBe(400);
+  });
+});
+
+describe('pumpInto', () => {
+  it('copia bloco a bloco e fecha o destino (sem pipeTo, que o Workers recusa entre fluxos internos)', async () => {
+    const source = streamOf('abc');
+    const pipeTo = vi.spyOn(source, 'pipeTo');
+    const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
+    const done = pumpInto(source, writable);
+    await expect(textOf(readable)).resolves.toBe('abc');
+    await done;
+    expect(pipeTo).not.toHaveBeenCalled();
+  });
+
+  it('erro na origem aborta o destino (quem grava no R2 falha em vez de travar)', async () => {
+    const source = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new TextEncoder().encode('a'));
+        controller.error(new Error('caiu'));
+      },
+    });
+    const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
+    const done = pumpInto(source, writable);
+    await expect(textOf(readable)).rejects.toThrow('caiu');
+    await expect(done).resolves.toBeUndefined();
+  });
+
+  it('destino que falha cancela a origem', async () => {
+    const cancel = vi.fn();
+    const source = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        controller.enqueue(new Uint8Array([1]));
+      },
+      cancel,
+    });
+    const writable = new WritableStream<Uint8Array>({
+      write() {
+        throw new Error('R2 recusou');
+      },
+    });
+    await pumpInto(source, writable);
+    expect(cancel).toHaveBeenCalled();
   });
 });

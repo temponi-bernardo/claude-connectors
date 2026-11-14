@@ -149,3 +149,30 @@ func TestResolveKeepsNonLID(t *testing.T) {
 }
 
 var waCommonKey = waCommon.MessageKey{ID: proto.String("M1")}
+
+func TestSessionEventsNotifySnapshot(t *testing.T) {
+	m, _ := newOfflineManager(t)
+	calls := make(chan struct{}, 8)
+	m.opts.OnSessionChange = func() { calls <- struct{}{} }
+	m.handleEvent(&events.PairSuccess{})
+	m.handleEvent(&events.Connected{})
+	m.handleEvent(&events.LoggedOut{})
+	for i := 0; i < 3; i++ {
+		select {
+		case <-calls:
+		case <-time.After(2 * time.Second):
+			t.Fatalf("esperava 3 avisos de sessão alterada, chegaram %d", i)
+		}
+	}
+	m.handleEvent(&events.Disconnected{})
+	select {
+	case <-calls:
+		t.Fatal("Disconnected não muda a sessão")
+	case <-time.After(50 * time.Millisecond):
+	}
+}
+
+func TestSessionChangedWithoutCallback(t *testing.T) {
+	m, _ := newOfflineManager(t)
+	m.sessionChanged() // sem callback: não faz nada nem entra em pânico
+}

@@ -8,7 +8,7 @@ import type { DurableObjectStateLike } from 'cloudflare:workers';
 import { toEnvVars } from '../../../src/core/env.js';
 import { containerEnvVars, readSendSettings, readSleepAfter } from './config.js';
 import { createBridgeLifecycle, type BridgeLifecycle } from './lifecycle.js';
-import { acceptSnapshotPush } from './snapshots.js';
+import { acceptSnapshotPush, pumpInto } from './snapshots.js';
 import type { WhatsAppEnv } from './worker-env.js';
 
 /** Fluxo de tamanho fixo do Workers para gravar no R2 sem carregar o arquivo na memória. */
@@ -17,7 +17,7 @@ export function workersFixedLength(
   length: number,
 ): ReadableStream<Uint8Array> {
   const { readable, writable } = new FixedLengthStream(length);
-  void body.pipeTo(writable);
+  void pumpInto(body, writable);
   return readable;
 }
 

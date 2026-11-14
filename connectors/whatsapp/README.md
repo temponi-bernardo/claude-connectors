@@ -25,7 +25,9 @@ Claude ──OAuth 2.1 + MCP (HTTPS)──▶ Worker ──▶ Durable Object "o
 - **Sob demanda:** o container só sobe quando chega uma chamada de ferramenta (ou você abre `/pair`) e dorme
   depois de `SLEEP_AFTER` (padrão **5 min**) sem uso. Sem keep-alive, polling, alarme próprio nem Cron Trigger.
 - **Persistência:** o disco do container some ao dormir. A sessão do WhatsApp e o banco de mensagens viram um
-  snapshot cifrado no R2 (no máximo um por minuto de uso, e sempre antes de dormir) e são restaurados no boot.
+  snapshot cifrado no R2 (no máximo um por minuto de uso, na hora em que a sessão muda — pareou, conectou ou
+  saiu —, e sempre antes de dormir ou ser encerrado) e são restaurados no boot. Assim o pareamento sobrevive a
+  deploys e reinícios.
 - **Sessão única:** um só Durable Object (nome fixo `owner`) e `max_instances = 1`: duas pontes nunca rodam o
   mesmo número ao mesmo tempo. Snapshots com geração menor que a gravada são descartados.
 - **Prazos:** toda ferramenta tem teto total (`TOOL_TIMEOUT_MS`, 25 s). Antes de ler, espera até `SYNC_WAIT_MS`
@@ -234,6 +236,7 @@ poucos MB por sessão. Para limitar gastos, use o _spending limit_ do Workers e 
 | ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
 | 500 "Configuração do Worker inválida"       | Falta um secret: a mensagem diz qual                                                           |
 | "WhatsApp is not paired"                    | Abra `/pair` e pareie                                                                          |
+| Pareamento some depois de deploy/reinício   | Confira no R2 o objeto `whatsapp/snapshot.was1`; sem ele, veja nos logs "Snapshot falhou"      |
 | "Tempo esgotado esperando o WhatsApp"       | Container acordando (primeira chamada após dormir): repita em alguns segundos                  |
 | "Não consegui abrir o backup criptografado" | `SNAPSHOT_KEY` mudou ou backup corrompido: volte a chave antiga ou use "Recomeçar do zero"     |
 | Login do GitHub recusado                    | O e-mail precisa estar verificado no GitHub e em `ALLOWED_EMAILS`                              |

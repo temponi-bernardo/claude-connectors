@@ -51,7 +51,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/whatsapp/src/lifecycle.ts`: [`withBridgeToken`](#withbridgetoken), [`fetchBridge`](#fetchbridge), [`readBridgePhase`](#readbridgephase), [`restoreRequestInit`](#restorerequestinit), [`ensureRestored`](#ensurerestored), [`snapshotBridge`](#snapshotbridge), [`planSend`](#plansend), [`guardSend`](#guardsend), [`forwardInit`](#forwardinit), [`createBridgeLifecycle`](#createbridgelifecycle), [`logSnapshotFailure`](#logsnapshotfailure), [`resetBridge`](#resetbridge), [`routeBridgeRequest`](#routebridgerequest)
 - `connectors/whatsapp/src/pair-page.ts`: [`describePairStatus`](#describepairstatus), [`pairForm`](#pairform), [`pairingSection`](#pairingsection), [`maintenanceSection`](#maintenancesection), [`alertHtml`](#alerthtml), [`renderPairPage`](#renderpairpage)
 - `connectors/whatsapp/src/pair.ts`: [`parseCookies`](#parsecookies), [`pairCookie`](#paircookie), [`redirectWithCookies`](#redirectwithcookies), [`readPairSession`](#readpairsession), [`issuePairCsrf`](#issuepaircsrf), [`isTrustedPost`](#istrustedpost), [`startPairLogin`](#startpairlogin), [`isValidPairLogin`](#isvalidpairlogin), [`openPairSession`](#openpairsession), [`handlePairCallback`](#handlepaircallback), [`pairDeadline`](#pairdeadline), [`fetchPairStatus`](#fetchpairstatus), [`pairPage`](#pairpage), [`pairActionError`](#pairactionerror), [`handlePairPost`](#handlepairpost), [`routePairPost`](#routepairpost), [`isPairPath`](#ispairpath), [`routePairRequest`](#routepairrequest)
-- `connectors/whatsapp/src/snapshots.ts`: [`storedGeneration`](#storedgeneration), [`readUploadHeaders`](#readuploadheaders), [`storeSnapshot`](#storesnapshot), [`storeSnapshotResponse`](#storesnapshotresponse), [`archiveSnapshot`](#archivesnapshot), [`sameSecret`](#samesecret), [`acceptSnapshotPush`](#acceptsnapshotpush)
+- `connectors/whatsapp/src/snapshots.ts`: [`pumpInto`](#pumpinto), [`storedGeneration`](#storedgeneration), [`readUploadHeaders`](#readuploadheaders), [`storeSnapshot`](#storesnapshot), [`storeSnapshotResponse`](#storesnapshotresponse), [`archiveSnapshot`](#archivesnapshot), [`sameSecret`](#samesecret), [`acceptSnapshotPush`](#acceptsnapshotpush)
 - `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
 - `connectors/whatsapp/src/worker-env.ts`: [`bridgeStub`](#bridgestub), [`bridgeFetchFor`](#bridgefetchfor)
 - `connectors/whatsapp/src/worker.ts`: [`unixNow`](#unixnow), [`githubSettingsFrom`](#githubsettingsfrom), [`whatsappRemoteConnector`](#whatsappremoteconnector), [`createWhatsAppApps`](#createwhatsappapps), [`handleWhatsAppFetch`](#handlewhatsappfetch), [`isSyncCronEnabled`](#issynccronenabled), [`runScheduledSync`](#runscheduledsync)
@@ -7020,7 +7020,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Faz:** Fluxo de tamanho fixo do Workers para gravar no R2 sem carregar o arquivo na memória.
 - **Entrada:** `body`: fluxo de bytes; `length`: tamanho total.
 - **Saída:** Fluxo legível do `FixedLengthStream`.
-- **Efeitos:** Encadeia `body` no `FixedLengthStream` (em segundo plano).
+- **Efeitos:** Copia `body` para o `FixedLengthStream` com `pumpInto()` (em segundo plano).
 - **Erros:** Nenhum (falha do encadeamento não é observada aqui).
 
 ## `connectors/whatsapp/src/format.ts`
@@ -7899,6 +7899,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** JSON `{ outcome }`; 403 sem token válido ou não PUT; 400 sem headers ou corpo.
 - **Efeitos:** Grava no R2.
 - **Erros:** Repassa a rejeição do R2.
+
+### `pumpInto`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
+- **Assinatura:** `async pumpInto(source: ReadableStream<Uint8Array>, writable: WritableStream<Uint8Array>): Promise<void>`
+- **Usada por:** `workersFixedLength()`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Copia um fluxo para outro bloco a bloco, sem `pipeTo` (que o Workers recusa entre fluxos internos, o que impedia o snapshot de chegar ao R2).
+- **Entrada:** `source`: fluxo de origem (corpo da ponte); `writable`: destino (lado de escrita do `FixedLengthStream`).
+- **Saída:** Promessa que resolve quando a cópia termina ou falha.
+- **Efeitos:** Lê `source` e escreve em `writable`; fecha o destino no fim.
+- **Erros:** Nunca rejeita: erro de um lado aborta o destino e cancela a origem, e quem lê o destino (o `put` do R2) recebe o erro.
 
 ## `connectors/whatsapp/src/tools.ts`
 

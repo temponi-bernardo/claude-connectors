@@ -35,6 +35,7 @@ func (m *Manager) handleConnectionEvent(evt any) {
 	case *events.Connected:
 		m.connected.Store(true)
 		go m.syncNames()
+		m.sessionChanged()
 	case *events.Disconnected, *events.StreamReplaced:
 		m.connected.Store(false)
 	case *events.OfflineSyncCompleted:
@@ -43,6 +44,7 @@ func (m *Manager) handleConnectionEvent(evt any) {
 		go m.importContacts()
 	case *events.PairSuccess:
 		m.opts.Log.Info("pareado com sucesso")
+		m.sessionChanged()
 	case *events.LoggedOut:
 		m.opts.Log.Warn("sessão encerrada pelo celular; é preciso parear de novo")
 		go m.onLoggedOut()
@@ -53,6 +55,14 @@ func (m *Manager) handleConnectionEvent(evt any) {
 func (m *Manager) onLoggedOut() {
 	m.current().Disconnect()
 	m.resetDevice()
+	m.sessionChanged()
+}
+
+// sessionChanged avisa, sem bloquear, que a sessão mudou (o dono tira um snapshot para ela sobreviver a reinícios).
+func (m *Manager) sessionChanged() {
+	if m.opts.OnSessionChange != nil {
+		go m.opts.OnSessionChange()
+	}
 }
 
 // resolve troca LID pelo número de telefone quando o mapeamento é conhecido; tira o sufixo de aparelho.

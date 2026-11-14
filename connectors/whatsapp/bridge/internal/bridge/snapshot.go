@@ -134,16 +134,40 @@ func (b *Bridge) Shutdown(ctx context.Context, client *http.Client, url, token s
 		w.Disconnect()
 	}
 	if url != "" && b.Phase() == PhaseReady {
-		pctx, cancel := context.WithTimeout(ctx, PushTimeout)
-		changed, err := b.Snapshot(pctx, Push(pctx, client, url, token))
-		cancel()
-		if err != nil {
-			b.opts.Log.Error("snapshot no encerramento falhou", "err", err.Error())
-		} else {
-			b.opts.Log.Info("snapshot no encerramento", "enviado", changed)
-		}
+		b.logPush("snapshot no encerramento")(b.PushSnapshot(ctx, client, url, token))
 	}
 	b.closeDatabases()
+}
+
+// PushSnapshot envia o snapshot para url (PUT, com PushTimeout) se ele mudou desde o último entregue.
+func (b *Bridge) PushSnapshot(ctx context.Context, client *http.Client, url, token string) (bool, error) {
+	pctx, cancel := context.WithTimeout(ctx, PushTimeout)
+	defer cancel()
+	return b.Snapshot(pctx, Push(pctx, client, url, token))
+}
+
+// SnapshotNotifier devolve o aviso de "sessão mudou": envia o snapshot em segundo plano, sem esperar o Worker
+// pedir, para que um pareamento novo sobreviva a um reinício do container. Sem url, não faz nada.
+func (b *Bridge) SnapshotNotifier(client *http.Client, url, token string) func() {
+	return func() {
+		if url == "" {
+			return
+		}
+		go func() {
+			b.logPush("snapshot após mudança de sessão")(b.PushSnapshot(context.Background(), client, url, token))
+		}()
+	}
+}
+
+// logPush registra o resultado de um envio de snapshot com o rótulo dado.
+func (b *Bridge) logPush(label string) func(bool, error) {
+	return func(changed bool, err error) {
+		if err != nil {
+			b.opts.Log.Error(label+" falhou", "err", err.Error())
+			return
+		}
+		b.opts.Log.Info(label, "enviado", changed)
+	}
 }
 
 // closeDatabases fecha os bancos abertos.
