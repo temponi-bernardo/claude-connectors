@@ -10,7 +10,7 @@ import (
 	waLog "go.mau.fi/whatsmeow/util/log"
 )
 
-// MaskPhone mascara um número para exibição: "+55 31 9****-**12" (Brasil) ou "+44 *******89" (demais).
+// MaskPhone masks a number for display: "+55 31 9****-**12" (Brazil) or "+44 *******89" (others).
 func MaskPhone(digits string) string {
 	if len(digits) < 6 {
 		return strings.Repeat("*", len(digits))
@@ -23,45 +23,45 @@ func MaskPhone(digits string) string {
 	return fmt.Sprintf("+%s %s%s", digits[:2], strings.Repeat("*", len(digits)-4), last)
 }
 
-// longDigits casa sequências que podem ser telefone ou identificador de usuário.
+// longDigits matches sequences that may be a phone number or a user identifier.
 var longDigits = regexp.MustCompile(`\d{6,}`)
 
-// Redact troca sequências longas de dígitos por versões mascaradas (logs nunca levam número completo).
+// Redact replaces long digit sequences with masked versions (logs never carry a full number).
 func Redact(s string) string {
 	return longDigits.ReplaceAllStringFunc(s, func(d string) string {
 		return d[:2] + strings.Repeat("*", len(d)-4) + d[len(d)-2:]
 	})
 }
 
-// slogLogger adapta o log do whatsmeow ao slog, com redação e sem nível debug.
+// slogLogger adapts the whatsmeow log to slog, with redaction and without the debug level.
 type slogLogger struct {
 	log    *slog.Logger
 	module string
 }
 
-// NewLogger cria o logger do whatsmeow a partir de um slog.Logger.
+// NewLogger creates the whatsmeow logger from a slog.Logger.
 func NewLogger(l *slog.Logger, module string) waLog.Logger {
 	return &slogLogger{log: l, module: module}
 }
 
-// emit formata, aplica a redação e grava no nível pedido.
+// emit formats, redacts and logs at the requested level.
 func (s *slogLogger) emit(level slog.Level, msg string, args ...any) {
 	s.log.Log(context.Background(), level, Redact(fmt.Sprintf(msg, args...)), "module", s.module)
 }
 
-// Errorf grava um erro.
+// Errorf logs an error.
 func (s *slogLogger) Errorf(msg string, args ...any) { s.emit(slog.LevelError, msg, args...) }
 
-// Warnf grava um aviso.
+// Warnf logs a warning.
 func (s *slogLogger) Warnf(msg string, args ...any) { s.emit(slog.LevelWarn, msg, args...) }
 
-// Infof grava uma informação.
+// Infof logs an info message.
 func (s *slogLogger) Infof(msg string, args ...any) { s.emit(slog.LevelInfo, msg, args...) }
 
-// Debugf é descartado: o debug do whatsmeow pode conter conteúdo de mensagens.
+// Debugf is discarded: whatsmeow debug output may contain message content.
 func (s *slogLogger) Debugf(string, ...any) {}
 
-// Sub cria um sublogger para um módulo.
+// Sub creates a sublogger for a module.
 func (s *slogLogger) Sub(module string) waLog.Logger {
 	return &slogLogger{log: s.log, module: s.module + "/" + module}
 }

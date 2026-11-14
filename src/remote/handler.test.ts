@@ -29,28 +29,28 @@ import {
 import { pkceChallenge } from './oauth.js';
 import { issueTokenSet } from './tokens.js';
 
-const ISSUER = 'https://canvas.exemplo.dev';
+const ISSUER = 'https://canvas.example.dev';
 const CALLBACK = 'https://claude.ai/api/mcp/auth_callback';
-const VERIFIER = 'verificador-de-teste-com-entropia-0123456789';
+const VERIFIER = 'test-verifier-with-entropy-0123456789';
 
 const connector: RemoteConnector = {
   login: {
     kind: 'secret',
     text: {
-      title: 'Conectar',
-      intro: 'Cole o token.',
+      title: 'Connect',
+      intro: 'Paste the token.',
       secretLabel: 'Token',
-      helpUrl: 'https://exemplo.dev/ajuda',
-      helpLabel: 'Ajuda',
-      submit: 'Conectar',
+      helpUrl: 'https://example.dev/help',
+      helpLabel: 'Help',
+      submit: 'Connect',
     },
     verify: (secret) =>
-      secret === 'bom' ? Promise.resolve() : Promise.reject(new Error('Token recusado.')),
+      secret === 'good' ? Promise.resolve() : Promise.reject(new Error('Token rejected.')),
   },
   createServer: (secret) => {
-    const server = new McpServer({ name: 'teste', version: '1.0.0' });
-    server.registerTool('quem', { description: 'Diz o segredo' }, () => ({
-      content: [{ type: 'text', text: `segredo=${secret}` }],
+    const server = new McpServer({ name: 'test', version: '1.0.0' });
+    server.registerTool('whoami', { description: 'Tells the secret' }, () => ({
+      content: [{ type: 'text', text: `secret=${secret}` }],
     }));
     return server;
   },
@@ -109,7 +109,7 @@ async function authorizePage(handle: (r: Request) => Promise<Response>, clientId
 async function accessToken(handle: (r: Request) => Promise<Response>): Promise<string> {
   const clientId = await register(handle);
   const { pending } = await authorizePage(handle, clientId);
-  const approved = await handle(form('/authorize', { pending, secret: 'bom' }));
+  const approved = await handle(form('/authorize', { pending, secret: 'good' }));
   const code = new URL(approved.headers.get('location') ?? '').searchParams.get('code') ?? '';
   const tokenRes = await handle(
     form('/token', {
@@ -123,8 +123,8 @@ async function accessToken(handle: (r: Request) => Promise<Response>): Promise<s
   return ((await tokenRes.json()) as { access_token: string }).access_token;
 }
 
-describe('createRemoteHandler — descoberta', () => {
-  it('publica os metadados OAuth e do recurso', async () => {
+describe('createRemoteHandler — discovery', () => {
+  it('publishes the OAuth and resource metadata', async () => {
     const handle = createRemoteHandler(makeApp());
     const as = await handle(new Request(`${ISSUER}/.well-known/oauth-authorization-server`));
     expect(((await as.json()) as { issuer: string }).issuer).toBe(ISSUER);
@@ -133,17 +133,17 @@ describe('createRemoteHandler — descoberta', () => {
     expect(pr.headers.get('access-control-allow-origin')).toBe('*');
   });
 
-  it('responde ao preflight CORS, à raiz e dá 404 no resto', async () => {
+  it('answers the CORS preflight and the root, and gives 404 for the rest', async () => {
     const handle = createRemoteHandler(makeApp());
     const pre = await handle(new Request(`${ISSUER}/token`, { method: 'OPTIONS' }));
     expect(pre.status).toBe(204);
     expect((await handle(new Request(`${ISSUER}/`))).status).toBe(200);
-    expect((await handle(new Request(`${ISSUER}/nada`))).status).toBe(404);
+    expect((await handle(new Request(`${ISSUER}/nothing`))).status).toBe(404);
   });
 });
 
-describe('createRemoteHandler — autorização', () => {
-  it('mostra a página de login com o pedido selado', async () => {
+describe('createRemoteHandler — authorization', () => {
+  it('shows the login page with the sealed request', async () => {
     const handle = createRemoteHandler(makeApp());
     const { res, html, pending } = await authorizePage(handle, await register(handle));
     expect(res.headers.get('content-type')).toContain('text/html');
@@ -151,9 +151,9 @@ describe('createRemoteHandler — autorização', () => {
     expect(pending).not.toBe('');
   });
 
-  it('recusa cliente inválido sem redirecionar e registro com retorno proibido', async () => {
+  it('rejects an invalid client without redirecting and a registration with a forbidden redirect', async () => {
     const handle = createRemoteHandler(makeApp());
-    const { res } = await authorizePage(handle, 'cliente-falso');
+    const { res } = await authorizePage(handle, 'fake-client');
     expect(res.status).toBe(400);
     const bad = await handle(
       post('/register', JSON.stringify({ redirect_uris: ['https://evil.com'] }), {
@@ -165,27 +165,27 @@ describe('createRemoteHandler — autorização', () => {
     expect(notJson.status).toBe(400);
   });
 
-  it('com segredo recusado, mostra a página de novo com o erro', async () => {
+  it('with a rejected secret, shows the page again with the error', async () => {
     const handle = createRemoteHandler(makeApp());
     const { pending } = await authorizePage(handle, await register(handle));
-    const res = await handle(form('/authorize', { pending, secret: 'ruim' }));
+    const res = await handle(form('/authorize', { pending, secret: 'bad' }));
     expect(res.status).toBe(200);
-    expect(await res.text()).toContain('Token recusado.');
+    expect(await res.text()).toContain('Token rejected.');
   });
 
-  it('com segredo aceito, redireciona com código e state; pedido vencido dá 400', async () => {
+  it('with an accepted secret, redirects with code and state; an expired request gives 400', async () => {
     const handle = createRemoteHandler(makeApp());
     const { pending } = await authorizePage(handle, await register(handle));
-    const res = await handle(form('/authorize', { pending, secret: 'bom' }));
+    const res = await handle(form('/authorize', { pending, secret: 'good' }));
     expect(res.status).toBe(302);
     const location = new URL(res.headers.get('location') ?? '');
     expect(`${location.origin}${location.pathname}`).toBe(CALLBACK);
     expect(location.searchParams.get('state')).toBe('st');
     expect(location.searchParams.get('code')).toBeTruthy();
-    expect((await handle(form('/authorize', { pending: 'x', secret: 'bom' }))).status).toBe(400);
+    expect((await handle(form('/authorize', { pending: 'x', secret: 'good' }))).status).toBe(400);
   });
 
-  it('o /token devolve erro OAuth para código inválido', async () => {
+  it('/token returns an OAuth error for an invalid code', async () => {
     const handle = createRemoteHandler(makeApp());
     const res = await handle(form('/token', { grant_type: 'authorization_code', code: 'x' }));
     expect(res.status).toBe(400);
@@ -194,7 +194,7 @@ describe('createRemoteHandler — autorização', () => {
 });
 
 describe('createRemoteHandler — /mcp', () => {
-  it('pede autenticação com o endereço dos metadados do recurso', async () => {
+  it('asks for authentication with the resource metadata address', async () => {
     const handle = createRemoteHandler(makeApp());
     const res = await handle(rpc(null, { jsonrpc: '2.0', id: 1, method: 'tools/list' }));
     expect(res.status).toBe(401);
@@ -203,7 +203,7 @@ describe('createRemoteHandler — /mcp', () => {
     );
   });
 
-  it('com o access token, as ferramentas recebem o segredo do usuário', async () => {
+  it('with the access token, the tools receive the user secret', async () => {
     const handle = createRemoteHandler(makeApp());
     const token = await accessToken(handle);
     const init = await handle(
@@ -224,10 +224,10 @@ describe('createRemoteHandler — /mcp', () => {
         jsonrpc: '2.0',
         id: 2,
         method: 'tools/call',
-        params: { name: 'quem', arguments: {} },
+        params: { name: 'whoami', arguments: {} },
       }),
     );
-    expect(JSON.stringify(await call.json())).toContain('segredo=bom');
+    expect(JSON.stringify(await call.json())).toContain('secret=good');
   });
 });
 
@@ -305,7 +305,7 @@ describe('Connectors Directory requirements (Canvas and every shared-handler con
     const app = makeApp();
     const handle = createRemoteHandler(app);
     expect(await accessToken(handle)).not.toBe('');
-    const expired = issueTokenSet('bom', app.settings, app.now() - 31 * 24 * 3600);
+    const expired = issueTokenSet('good', app.settings, app.now() - 31 * 24 * 3600);
     for (const refresh_token of ['garbage', expired.refresh_token]) {
       const res = await handle(form('/token', { grant_type: 'refresh_token', refresh_token }));
       expect(res.status).toBe(400);
@@ -339,11 +339,11 @@ describe('Connectors Directory requirements (Canvas and every shared-handler con
       error_description: expect.stringContaining('authorization_code') as unknown,
     });
     const page = await handle(new Request(authorizeQuery('fake-client', {})));
-    expect(await page.text()).toMatch(/registre o conector de novo|register the connector/i);
+    expect(await page.text()).toMatch(/register the connector/i);
   });
 });
 
-describe('auxiliares do roteador', () => {
+describe('router helpers', () => {
   const request = {
     clientId: 'c',
     redirectUri: 'https://claude.ai/cb?x=1',
@@ -351,7 +351,7 @@ describe('auxiliares do roteador', () => {
     state: null,
   };
 
-  it('REMOTE_ROUTES liga cada caminho à função que o atende', () => {
+  it('REMOTE_ROUTES maps each path to the function that serves it', () => {
     expect(REMOTE_ROUTES['POST /register']).toBe(handleRegister);
     expect(REMOTE_ROUTES['GET /authorize']).toBe(handleAuthorizePage);
     expect(REMOTE_ROUTES['POST /authorize']).toBe(handleAuthorizeSubmit);
@@ -359,7 +359,7 @@ describe('auxiliares do roteador', () => {
     expect(REMOTE_ROUTES['POST /mcp']).toBe(handleMcp);
   });
 
-  it('jsonResponse e htmlResponse definem tipo, status e proíbem cache', async () => {
+  it('jsonResponse and htmlResponse set type and status and forbid caching', async () => {
     const json = jsonResponse({ a: 1 }, 201);
     expect(json.status).toBe(201);
     expect(json.headers.get('cache-control')).toBe('no-store');
@@ -369,7 +369,7 @@ describe('auxiliares do roteador', () => {
     expect(html.headers.get('content-security-policy')).toContain("frame-ancestors 'none'");
   });
 
-  it('readForm e readJsonBody leem o corpo; JSON inválido vira nulo', async () => {
+  it('readForm and readJsonBody read the body; invalid JSON becomes null', async () => {
     expect((await readForm(new Request(ISSUER, { method: 'POST', body: 'a=1' }))).get('a')).toBe(
       '1',
     );
@@ -379,60 +379,60 @@ describe('auxiliares do roteador', () => {
     expect(await readJsonBody(new Request(ISSUER, { method: 'POST', body: '{' }))).toBeNull();
   });
 
-  it('redirectWithCode mantém a query do retorno e omite state nulo', () => {
+  it('redirectWithCode keeps the redirect query and omits a null state', () => {
     const location = new URL(redirectWithCode(request, 'k').headers.get('location') ?? '');
     expect(location.searchParams.get('x')).toBe('1');
     expect(location.searchParams.get('code')).toBe('k');
     expect(location.searchParams.has('state')).toBe(false);
   });
 
-  it('loginPageFor mostra o host do retorno e o erro', async () => {
+  it('loginPageFor shows the redirect host and the error', async () => {
     const html = await loginPageFor(makeApp(), request, 'ops').text();
     expect(html).toContain('claude.ai');
     expect(html).toContain('ops');
   });
 
-  it('loginPageFor libera no form-action a origem do retorno (o Chrome bloqueia o 302 sem isso)', () => {
+  it('loginPageFor allows the redirect origin in form-action (Chrome blocks the 302 without it)', () => {
     const csp = loginPageFor(makeApp(), request, null).headers.get('content-security-policy');
     expect(csp).toContain("form-action 'self' https://claude.ai;");
   });
 
-  it('pageSecurityPolicy só libera o próprio servidor quando não há retorno', () => {
+  it('pageSecurityPolicy only allows the server itself when there is no redirect', () => {
     expect(pageSecurityPolicy(null)).toContain("form-action 'self';");
     expect(pageSecurityPolicy('https://claude.ai')).toContain(
       "form-action 'self' https://claude.ai;",
     );
   });
 
-  it('withCors e routeRemoteRequest liberam qualquer origem', async () => {
+  it('withCors and routeRemoteRequest allow any origin', async () => {
     expect(withCors(new Response()).headers.get('access-control-allow-origin')).toBe('*');
     const res = await routeRemoteRequest(makeApp(), new Request(`${ISSUER}/authorize/`));
     expect(res.headers.get('access-control-allow-origin')).toBe('*');
   });
 });
 
-describe('handleToken — renovação da credencial', () => {
+describe('handleToken — credential renewal', () => {
   function refreshApp(renewSecret: (secret: string) => Promise<SecretRenewal>) {
     const app = makeApp();
     const withRenew: RemoteApp = { ...app, connector: { ...connector, renewSecret } };
-    const { refresh_token } = issueTokenSet('bom', app.settings, app.now());
+    const { refresh_token } = issueTokenSet('good', app.settings, app.now());
     return {
       app: withRenew,
       refresh: form('/token', { grant_type: 'refresh_token', refresh_token }),
     };
   }
 
-  it('no refresh, pede ao conector para renovar a credencial e devolve os tokens', async () => {
+  it('on refresh, asks the connector to renew the credential and returns the tokens', async () => {
     const renew = vi.fn(() => Promise.resolve<SecretRenewal>('kept'));
     const { app, refresh } = refreshApp(renew);
     const res = await handleToken(app, refresh);
     expect(res.status).toBe(200);
-    expect(renew).toHaveBeenCalledWith('bom');
+    expect(renew).toHaveBeenCalledWith('good');
     expect(((await res.json()) as { token_type: string }).token_type).toBe('Bearer');
   });
 
-  it('se a renovação falha, o refresh continua valendo', async () => {
-    const { app, refresh } = refreshApp(() => Promise.reject(new Error('Canvas fora')));
+  it('if renewal fails, the refresh still works', async () => {
+    const { app, refresh } = refreshApp(() => Promise.reject(new Error('Canvas down')));
     expect((await handleToken(app, refresh)).status).toBe(200);
   });
 
@@ -445,7 +445,7 @@ describe('handleToken — renovação da credencial', () => {
     expect(body.error_description).toMatch(/connect/i);
   });
 
-  it('a troca do código não renova a credencial', async () => {
+  it('the code exchange does not renew the credential', async () => {
     const renew = vi.fn(() => Promise.resolve<SecretRenewal>('kept'));
     const handle = createRemoteHandler({
       ...makeApp(),
@@ -457,12 +457,12 @@ describe('handleToken — renovação da credencial', () => {
 });
 
 describe('renewSecretQuietly', () => {
-  it('ignora conector sem renovação e engole a falha dela', async () => {
-    await expect(renewSecretQuietly(connector, 'bom')).resolves.toBe('kept');
+  it('ignores a connector without renewal and swallows its failure', async () => {
+    await expect(renewSecretQuietly(connector, 'good')).resolves.toBe('kept');
     const failing = { ...connector, renewSecret: () => Promise.reject(new Error('x')) };
-    await expect(renewSecretQuietly(failing, 'bom')).resolves.toBe('kept');
+    await expect(renewSecretQuietly(failing, 'good')).resolves.toBe('kept');
     const revoked = { ...connector, renewSecret: () => Promise.resolve<SecretRenewal>('revoked') };
-    await expect(renewSecretQuietly(revoked, 'bom')).resolves.toBe('revoked');
+    await expect(renewSecretQuietly(revoked, 'good')).resolves.toBe('revoked');
   });
 });
 
@@ -470,14 +470,14 @@ const upstreamConnector: RemoteConnector = {
   login: {
     kind: 'upstream',
     start: (state, callbackUrl) =>
-      `https://idp.exemplo/auth?state=${encodeURIComponent(state)}&cb=${encodeURIComponent(callbackUrl)}`,
+      `https://idp.example/auth?state=${encodeURIComponent(state)}&cb=${encodeURIComponent(callbackUrl)}`,
     finish: (query) =>
       query.get('code') === 'ok'
-        ? Promise.resolve('dono@exemplo.dev')
-        : Promise.reject(new Error('Conta <b>recusada</b>.')),
+        ? Promise.resolve('owner@example.dev')
+        : Promise.reject(new Error('Account <b>rejected</b>.')),
   },
   createServer: connector.createServer,
-  acceptsSecret: (secret) => secret === 'dono@exemplo.dev',
+  acceptsSecret: (secret) => secret === 'owner@example.dev',
 };
 
 function upstreamApp(): RemoteApp {
@@ -492,13 +492,13 @@ async function upstreamState(handle: (r: Request) => Promise<Response>): Promise
   return target.searchParams.get('state') ?? '';
 }
 
-describe('createRemoteHandler — login delegado (upstream)', () => {
-  it('o /authorize redireciona ao provedor com o pedido selado e o retorno do servidor', async () => {
+describe('createRemoteHandler — delegated login (upstream)', () => {
+  it('/authorize redirects to the provider with the sealed request and the server callback', async () => {
     const handle = createRemoteHandler(upstreamApp());
     expect(await upstreamState(handle)).not.toBe('');
   });
 
-  it('o retorno aceito devolve o código ao Claude e o token chega às ferramentas', async () => {
+  it('an accepted callback returns the code to Claude and the token reaches the tools', async () => {
     const handle = createRemoteHandler(upstreamApp());
     const state = await upstreamState(handle);
     const back = await handle(
@@ -510,19 +510,19 @@ describe('createRemoteHandler — login delegado (upstream)', () => {
     expect(location.searchParams.get('code')).toBeTruthy();
   });
 
-  it('o retorno recusado mostra o motivo escapado; state inválido dá 400', async () => {
+  it('a rejected callback shows the escaped reason; an invalid state gives 400', async () => {
     const handle = createRemoteHandler(upstreamApp());
     const state = await upstreamState(handle);
     const denied = await handle(
-      new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}?code=nao&state=${encodeURIComponent(state)}`),
+      new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}?code=no&state=${encodeURIComponent(state)}`),
     );
     expect(denied.status).toBe(403);
-    expect(await denied.text()).toContain('&lt;b&gt;recusada');
+    expect(await denied.text()).toContain('&lt;b&gt;rejected');
     const bad = await handle(new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}?code=ok&state=x`));
     expect(bad.status).toBe(400);
   });
 
-  it('com login delegado, o formulário de segredo não existe; sem ele, o retorno não existe', async () => {
+  it('with delegated login the secret form does not exist; without it the callback does not exist', async () => {
     expect((await handleAuthorizeSubmit(upstreamApp(), form('/authorize', {}))).status).toBe(404);
     const req = new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}`);
     expect((await handleUpstreamCallback(makeApp(), req)).status).toBe(404);
@@ -530,17 +530,17 @@ describe('createRemoteHandler — login delegado (upstream)', () => {
     expect(loginPageFor(upstreamApp(), request, null).status).toBe(404);
   });
 
-  it('redirectToUpstream manda o navegador ao endereço do provedor', () => {
+  it('redirectToUpstream sends the browser to the provider address', () => {
     const app = upstreamApp();
     const request = { clientId: 'c', redirectUri: CALLBACK, codeChallenge: 'd', state: null };
-    if (app.connector.login.kind !== 'upstream') throw new Error('esperava upstream');
+    if (app.connector.login.kind !== 'upstream') throw new Error('expected upstream');
     const res = redirectToUpstream(app, app.connector.login, request);
-    expect(res.headers.get('location')).toMatch(/^https:\/\/idp\.exemplo\/auth\?state=/);
+    expect(res.headers.get('location')).toMatch(/^https:\/\/idp\.example\/auth\?state=/);
   });
 
-  it('o /mcp recusa com 403 um segredo que o conector não aceita mais', async () => {
+  it('/mcp rejects with 403 a secret the connector no longer accepts', async () => {
     const app = upstreamApp();
-    const revoked = issueTokenSet('ex-dono@exemplo.dev', app.settings, app.now()).access_token;
+    const revoked = issueTokenSet('former-owner@example.dev', app.settings, app.now()).access_token;
     const res = await handleMcp(app, rpc(revoked, { jsonrpc: '2.0', id: 1, method: 'tools/list' }));
     expect(res.status).toBe(403);
   });

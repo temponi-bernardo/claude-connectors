@@ -1,7 +1,7 @@
 /**
- * Durable Object `WhatsAppBridge`: dono do container da ponte Go (`@cloudflare/containers`). Só despacha para o
- * ciclo de vida (`lifecycle.ts`); toda a decisão está lá, testada. O container dorme após `SLEEP_AFTER` sem uso,
- * depois de um último snapshot; não há alarme nem keep-alive próprio.
+ * `WhatsAppBridge` Durable Object: owner of the Go bridge container (`@cloudflare/containers`). It only dispatches
+ * to the lifecycle (`lifecycle.ts`); every decision lives there, tested. The container sleeps after `SLEEP_AFTER`
+ * of idleness, after a last snapshot; there is no alarm or keep-alive of its own.
  */
 import { Container } from '@cloudflare/containers';
 import type { DurableObjectStateLike } from 'cloudflare:workers';
@@ -11,7 +11,7 @@ import { createBridgeLifecycle, type BridgeLifecycle } from './lifecycle.js';
 import { acceptSnapshotPush, pumpInto } from './snapshots.js';
 import type { WhatsAppEnv } from './worker-env.js';
 
-/** Fluxo de tamanho fixo do Workers para gravar no R2 sem carregar o arquivo na memória. */
+/** Workers fixed-length stream to write to R2 without loading the file into memory. */
 export function workersFixedLength(
   body: ReadableStream<Uint8Array>,
   length: number,
@@ -21,13 +21,13 @@ export function workersFixedLength(
   return readable;
 }
 
-/** Durable Object que controla o container da ponte. */
+/** Durable Object that controls the bridge container. */
 export class WhatsAppBridge extends Container<WhatsAppEnv> {
   override defaultPort = 8080;
   override enableInternet = true;
   private readonly lifecycle: BridgeLifecycle;
 
-  /** Recebe o snapshot que a ponte manda no `SIGTERM` pelo endereço interno `snapshot.internal`. */
+  /** Receives the snapshot the bridge sends on `SIGTERM` through the internal address `snapshot.internal`. */
   static override outboundByHost = {
     'snapshot.internal': (req: Request, env: WhatsAppEnv): Promise<Response> =>
       acceptSnapshotPush(env.SNAPSHOTS, req, {
@@ -54,12 +54,12 @@ export class WhatsAppBridge extends Container<WhatsAppEnv> {
     });
   }
 
-  /** Atende o Worker pelo ciclo de vida (restore, repasse, snapshot, limite de envio). */
+  /** Serves the Worker through the lifecycle (restore, forwarding, snapshot, send limit). */
   override fetch(request: Request): Promise<Response> {
     return this.lifecycle.handle(request);
   }
 
-  /** Antes de dormir, guarda o último snapshot; depois para o container. */
+  /** Before sleeping, saves the last snapshot; then stops the container. */
   override async onActivityExpired(): Promise<void> {
     await this.lifecycle.snapshotQuietly();
     await super.onActivityExpired();

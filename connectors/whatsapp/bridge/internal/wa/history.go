@@ -9,17 +9,17 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/store"
 )
 
-// WebParser é a assinatura de Client.ParseWebMessage, injetável em testes.
+// WebParser is the Client.ParseWebMessage signature, injectable in tests.
 type WebParser func(chat types.JID, msg *waWeb.WebMessageInfo) (*events.Message, error)
 
-// historyInput agrupa o que buildHistoryBatch precisa além dos dados.
+// historyInput groups what buildHistoryBatch needs besides the data.
 type historyInput struct {
 	parse   WebParser
 	resolve Resolver
-	cutoff  int64 // mensagens com ts menor são descartadas (HISTORY_DAYS)
+	cutoff  int64 // messages with a smaller ts are dropped (HISTORY_DAYS)
 }
 
-// buildHistoryBatch converte um history sync em lote para o banco, respeitando o corte de dias.
+// buildHistoryBatch converts a history sync into a database batch, honoring the day cutoff.
 func buildHistoryBatch(data *waHistorySync.HistorySync, in historyInput) store.HistoryBatch {
 	var b store.HistoryBatch
 	for _, conv := range data.GetConversations() {
@@ -36,7 +36,7 @@ func buildHistoryBatch(data *waHistorySync.HistorySync, in historyInput) store.H
 	return b
 }
 
-// historyMessages converte as mensagens de uma conversa, ignorando as antigas e as sem conteúdo.
+// historyMessages converts a chat's messages, skipping old ones and those without content.
 func historyMessages(chat types.JID, msgs []*waHistorySync.HistorySyncMsg, in historyInput) []store.Message {
 	var out []store.Message
 	for _, hm := range msgs {
@@ -55,7 +55,7 @@ func historyMessages(chat types.JID, msgs []*waHistorySync.HistorySyncMsg, in hi
 	return out
 }
 
-// historyPushNames converte os push names do history sync em contatos.
+// historyPushNames converts the history sync push names into contacts.
 func historyPushNames(names []*waHistorySync.Pushname, resolve Resolver) []store.Contact {
 	var out []store.Contact
 	for _, p := range names {

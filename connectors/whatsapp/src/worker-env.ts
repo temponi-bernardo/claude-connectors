@@ -1,37 +1,37 @@
 /**
- * Ambiente do Worker do WhatsApp: bindings (Durable Object da ponte e bucket R2) e acesso ao stub único da ponte.
- * Um só Durable Object com nome fixo garante uma só sessão do WhatsApp rodando por vez.
+ * WhatsApp Worker environment: bindings (bridge Durable Object and R2 bucket) and access to the single bridge stub.
+ * A single Durable Object with a fixed name guarantees only one WhatsApp session runs at a time.
  */
 import type { BridgeFetch } from './bridge-client.js';
 import type { SnapshotBucket } from './snapshots.js';
 
-/** Stub de Durable Object (subconjunto). */
+/** Durable Object stub (subset). */
 export interface BridgeStub {
   fetch(request: Request): Promise<Response>;
 }
 
-/** Namespace do Durable Object (subconjunto). */
+/** Durable Object namespace (subset). */
 export interface BridgeNamespace {
   idFromName(name: string): unknown;
   get(id: unknown): BridgeStub;
 }
 
-/** Bindings do Worker; o resto do ambiente são variáveis e secrets de texto. */
+/** Worker bindings; the rest of the environment is text variables and secrets. */
 export interface WhatsAppEnv {
   readonly WHATSAPP_BRIDGE: BridgeNamespace;
   readonly SNAPSHOTS: SnapshotBucket;
   readonly [key: string]: unknown;
 }
 
-/** Nome fixo da única instância da ponte (instância única = sessão única). */
+/** Fixed name of the single bridge instance (single instance = single session). */
 export const BRIDGE_INSTANCE_NAME = 'owner';
 
-/** Devolve o stub da instância única da ponte. */
+/** Returns the stub of the single bridge instance. */
 export function bridgeStub(env: WhatsAppEnv): BridgeStub {
   return env.WHATSAPP_BRIDGE.get(env.WHATSAPP_BRIDGE.idFromName(BRIDGE_INSTANCE_NAME));
 }
 
-/** Função que fala com a ponte pelo stub, com caminhos relativos (`/status`, `/chats?...`). */
+/** Function that talks to the bridge through the stub, with relative paths (`/status`, `/chats?...`). */
 export function bridgeFetchFor(stub: BridgeStub): BridgeFetch {
   return (path, init) => stub.fetch(new Request(`http://bridge${path}`, init));
 }

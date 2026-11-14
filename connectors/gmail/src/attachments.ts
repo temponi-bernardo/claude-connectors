@@ -1,6 +1,7 @@
 /**
- * Leitura de anexos como texto: o tipo é detectado pelos próprios bytes (o Gmail não devolve o MIME no
- * download e o `attachmentId` muda a cada leitura). Aceita PDF, Word, HTML e texto; o resto é recusado.
+ * Reads attachments as text: the type is detected from the bytes themselves (Gmail does not return the MIME
+ * type on download and the `attachmentId` changes on every read). Accepts PDF, Word, HTML and text; the
+ * rest is refused.
  */
 import { htmlToText } from '../../../src/core/html.js';
 import { pdfToText, isPdf } from '../../../src/core/pdf.js';
@@ -10,16 +11,16 @@ import type { OwnerDeps } from './context.js';
 import { gmailGet, gmailUrl } from './gmail-api.js';
 import { base64UrlToBytes, truncateText } from './message-format.js';
 
-/** Maior anexo lido como texto (5 MB). */
+/** Largest attachment read as text (5 MB). */
 export const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
 
-/** Maior texto devolvido de um anexo, em caracteres. */
+/** Longest text returned from an attachment, in characters. */
 export const MAX_ATTACHMENT_CHARS = 50_000;
 
-/** Tipo de anexo reconhecido pelos bytes. */
+/** Attachment type recognized from the bytes. */
 export type AttachmentKind = 'pdf' | 'docx' | 'doc' | 'html' | 'text' | null;
 
-/** Diz se o texto parece texto de verdade (sem caracteres de controle além de espaços e quebras). */
+/** Tells whether the text looks like real text (no control characters besides spaces and line breaks). */
 export function looksLikeText(text: string): boolean {
   const sample = text.slice(0, 4096);
   let control = 0;
@@ -30,7 +31,7 @@ export function looksLikeText(text: string): boolean {
   return sample.length > 0 && control / sample.length < 0.01;
 }
 
-/** Detecta o tipo do anexo pelos primeiros bytes e, para texto, pelo conteúdo. */
+/** Detects the attachment type from the first bytes and, for text, from the content. */
 export function detectAttachmentKind(bytes: Uint8Array): AttachmentKind {
   if (isPdf(bytes)) return 'pdf';
   const magic = Array.from(bytes.subarray(0, 4), (b) => b.toString(16).padStart(2, '0')).join('');
@@ -41,7 +42,7 @@ export function detectAttachmentKind(bytes: Uint8Array): AttachmentKind {
   return /<html|<body|<div|<table/i.test(text) ? 'html' : 'text';
 }
 
-/** Converte os bytes do anexo em texto conforme o tipo; lança erro para tipos não suportados. */
+/** Converts the attachment bytes to text by type; throws for unsupported types. */
 export async function attachmentBytesToText(bytes: Uint8Array): Promise<string> {
   const kind = detectAttachmentKind(bytes);
   if (kind === 'pdf') return pdfToText(bytes);
@@ -53,13 +54,13 @@ export async function attachmentBytesToText(bytes: Uint8Array): Promise<string> 
   return kind === 'html' ? htmlToText(text) : text;
 }
 
-/** Ids de um anexo: a mensagem e o anexo dentro dela. */
+/** Ids of an attachment: the message and the attachment within it. */
 export interface AttachmentIds {
   readonly messageId: string;
   readonly attachmentId: string;
 }
 
-/** Baixa os bytes de um anexo com o tamanho informado pelo Gmail (ou o dos bytes, se faltar). */
+/** Downloads an attachment's bytes with the size Gmail reports (or the bytes' size, if missing). */
 export async function downloadAttachment(
   deps: OwnerDeps,
   ref: AccountRef,
@@ -71,7 +72,7 @@ export async function downloadAttachment(
   return { size: body.size ?? bytes.length, bytes };
 }
 
-/** Baixa um anexo e devolve o texto (limitado); recusa anexos acima de 5 MB. */
+/** Downloads an attachment and returns its (capped) text; refuses attachments above 5 MB. */
 export async function readAttachmentText(
   deps: OwnerDeps,
   ref: AccountRef,

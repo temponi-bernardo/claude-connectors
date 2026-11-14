@@ -1,45 +1,45 @@
 /**
- * Contas Gmail vinculadas por usuário do conector, num único registro do KV por usuário. O registro é selado
- * com AES-256-GCM (`TOKEN_ENC_KEY`) junto do id do usuário, conferido na leitura: o registro de um usuário
- * nunca abre para outro. A chave do KV guarda só o hash do id.
+ * Gmail accounts linked per connector user, in a single KV record per user. The record is sealed with
+ * AES-256-GCM (`TOKEN_ENC_KEY`) together with the user id, checked on read: one user's record never opens
+ * for another. The KV key holds only the hash of the id.
  */
 import { createHash } from 'node:crypto';
 import { openSealed, sealPayload } from '../../../src/remote/seal.js';
 import type { KvStore } from './context.js';
 
-/** Tipo do selo do registro de contas de um usuário. */
+/** Seal type of a user's account record. */
 export const OWNER_RECORD_TYP = 'gmail_owner';
 
-/** Validade técnica do selo (ano 2100): as contas valem até serem desvinculadas ou revogadas. */
+/** Technical seal expiry (year 2100): accounts stay valid until unlinked or revoked. */
 export const OWNER_RECORD_EXP = 4_102_444_800;
 
-/** Mais contas Gmail que um usuário pode vincular. */
+/** Maximum number of Gmail accounts a user can link. */
 export const MAX_LINKED_ACCOUNTS = 10;
 
-/** Estado do vínculo: ativo, ou revogado no Google (precisa vincular de novo). */
+/** Link status: active, or revoked at Google (needs relinking). */
 export type LinkStatus = 'active' | 'revoked';
 
-/** Conta Gmail vinculada a um usuário do conector. */
+/** Gmail account linked to a connector user. */
 export interface LinkedAccount {
   readonly email: string;
   readonly refreshToken: string;
   readonly scope: string;
-  /** Data do vínculo em ISO 8601. */
+  /** Link date in ISO 8601. */
   readonly linkedAt: string;
   readonly status: LinkStatus;
 }
 
-/** SHA-256 em hexadecimal (o KV só guarda hashes de ids, `state` e cookies). */
+/** SHA-256 in hex (KV only keeps hashes of ids, `state` and cookies). */
 export function sha256Hex(text: string): string {
   return createHash('sha256').update(text).digest('hex');
 }
 
-/** Chave do registro do usuário no KV (hash do id do Google, `sub`). */
+/** KV key of the user record (hash of the Google id, `sub`). */
 export function ownerKey(owner: string): string {
   return `owner:${sha256Hex(owner)}`;
 }
 
-/** Converte um item do selo em conta vinculada; nulo se faltar e-mail ou refresh token. */
+/** Converts a sealed item into a linked account; null if the email or refresh token is missing. */
 export function toLinkedAccount(value: unknown): LinkedAccount | null {
   const item = (typeof value === 'object' && value !== null ? value : {}) as Record<
     string,
@@ -55,7 +55,7 @@ export function toLinkedAccount(value: unknown): LinkedAccount | null {
   };
 }
 
-/** Sela as contas de um usuário para gravar no KV. */
+/** Seals a user's accounts for storing in KV. */
 export function sealOwnerAccounts(
   owner: string,
   accounts: readonly LinkedAccount[],
@@ -64,14 +64,14 @@ export function sealOwnerAccounts(
   return sealPayload({ typ: OWNER_RECORD_TYP, exp: OWNER_RECORD_EXP, owner, accounts }, key);
 }
 
-/** Abre o registro do usuário; lista vazia se a chave, o conteúdo ou o dono não conferem. */
+/** Opens the user record; empty list if the key, the content or the owner do not match. */
 export function openOwnerAccounts(sealed: string, key: Buffer, owner: string): LinkedAccount[] {
   const claims = openSealed(sealed, key, { typ: OWNER_RECORD_TYP, now: 0 });
   if (claims?.owner !== owner || !Array.isArray(claims.accounts)) return [];
   return claims.accounts.map(toLinkedAccount).filter((a): a is LinkedAccount => a !== null);
 }
 
-/** Lê as contas vinculadas do usuário (vazio se ele ainda não vinculou nenhuma). */
+/** Reads the user's linked accounts (empty if none linked yet). */
 export async function loadOwnerAccounts(
   kv: KvStore,
   key: Buffer,
@@ -81,7 +81,7 @@ export async function loadOwnerAccounts(
   return sealed === null ? [] : openOwnerAccounts(sealed, key, owner);
 }
 
-/** Grava as contas do usuário; sem contas, apaga o registro. */
+/** Stores the user's accounts; with no accounts, deletes the record. */
 export async function saveOwnerAccounts(
   kv: KvStore,
   key: Buffer,
@@ -92,7 +92,7 @@ export async function saveOwnerAccounts(
   else await kv.put(name, sealOwnerAccounts(record.owner, record.accounts, key));
 }
 
-/** Põe ou troca a conta (pelo e-mail) na lista; recusa passar do limite de contas. */
+/** Adds or replaces the account (by email) in the list; refuses to exceed the account limit. */
 export function upsertAccount(
   accounts: readonly LinkedAccount[],
   account: LinkedAccount,

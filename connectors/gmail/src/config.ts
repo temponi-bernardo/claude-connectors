@@ -1,43 +1,43 @@
 /**
- * Configuração do conector Gmail remoto, lida dos secrets do Worker. Pura: só valida e transforma texto.
- * O conector é público e multiusuário: `ALLOWED_EMAILS` é opcional e, quando definido, restringe quem entra.
+ * Remote Gmail connector settings, read from the Worker secrets. Pure: it only validates and transforms text.
+ * The connector is public and multi-user: `ALLOWED_EMAILS` is optional and, when set, restricts who signs in.
  */
 import { envValue, type EnvVars } from '../../../src/core/env.js';
 import { parseSealKey } from '../../../src/remote/seal.js';
 
 /**
- * Escopo de gerenciamento do Gmail (o único escopo de dados pedido): ler, enviar, rascunhos, marcadores e
- * lixeira. Não permite a exclusão definitiva (só `https://mail.google.com/` permitiria).
+ * Gmail management scope (the only data scope requested): read, send, drafts, labels and trash. It does not
+ * allow permanent deletion (only `https://mail.google.com/` would).
  */
 export const GMAIL_MODIFY_SCOPE = 'https://www.googleapis.com/auth/gmail.modify';
 
-/** Escopos pedidos ao Google no login e no vínculo de conta: identidade e gerenciamento do Gmail. */
+/** Scopes requested from Google at sign-in and account linking: identity and Gmail management. */
 export const GMAIL_SCOPES: readonly string[] = ['openid', 'email', GMAIL_MODIFY_SCOPE];
 
-/** Diz se os escopos concedidos (separados por espaço) incluem o gerenciamento do Gmail (`gmail.modify`). */
+/** Tells whether the granted scopes (space-separated) include Gmail management (`gmail.modify`). */
 export function hasModifyScope(scope: string): boolean {
   return scope.split(' ').includes(GMAIL_MODIFY_SCOPE);
 }
 
-/** Tamanho mínimo do segredo que assina o cookie de consentimento lembrado. */
+/** Minimum length of the secret that signs the remembered-consent cookie. */
 export const MIN_CONSENT_SECRET_CHARS = 32;
 
-/** Configuração validada do conector. */
+/** Validated connector settings. */
 export interface GmailSettings {
   readonly googleClientId: string;
   readonly googleClientSecret: string;
   readonly tokenKey: Buffer;
-  /** E-mails que podem entrar (modo privado), ou nulo para qualquer conta Google (modo público). */
+  /** Emails allowed to sign in (private mode), or null for any Google account (public mode). */
   readonly allowedEmails: readonly string[] | null;
   readonly consentSecret: string;
 }
 
-/** Diz se o texto parece um e-mail simples (`nome@dominio.tld`, sem espaços). */
+/** Tells whether the text looks like a simple email (`name@domain.tld`, no spaces). */
 export function isEmailAddress(text: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text);
 }
 
-/** Lê `ALLOWED_EMAILS` (opcional, separados por vírgula): nulo se ausente; lança erro se houver item inválido. */
+/** Reads `ALLOWED_EMAILS` (optional, comma-separated): null if absent; throws on an invalid item. */
 export function parseAllowedEmails(raw: string | null): string[] | null {
   const emails = (raw ?? '')
     .split(',')
@@ -45,29 +45,27 @@ export function parseAllowedEmails(raw: string | null): string[] | null {
     .filter(Boolean);
   if (emails.length === 0) return null;
   if (!emails.every(isEmailAddress))
-    throw new Error('ALLOWED_EMAILS tem um item que não é e-mail.');
+    throw new Error('ALLOWED_EMAILS has an item that is not an email.');
   return emails;
 }
 
-/** Lê uma variável obrigatória; lança erro dizendo como defini-la. */
+/** Reads a required variable; throws explaining how to set it. */
 export function requiredSecret(env: EnvVars, name: string): string {
   const value = envValue(env, name);
-  if (value === null) throw new Error(`Defina o secret ${name}: npx wrangler secret put ${name}`);
+  if (value === null) throw new Error(`Set the secret ${name}: npx wrangler secret put ${name}`);
   return value;
 }
 
-/** Lê o segredo do consentimento lembrado e exige o tamanho mínimo. */
+/** Reads the remembered-consent secret and enforces the minimum length. */
 export function readConsentSecret(env: EnvVars): string {
   const secret = requiredSecret(env, 'CONSENT_SECRET');
   if (secret.length < MIN_CONSENT_SECRET_CHARS) {
-    throw new Error(
-      `CONSENT_SECRET precisa ter pelo menos ${MIN_CONSENT_SECRET_CHARS} caracteres.`,
-    );
+    throw new Error(`CONSENT_SECRET must have at least ${MIN_CONSENT_SECRET_CHARS} characters.`);
   }
   return secret;
 }
 
-/** Monta a configuração a partir dos secrets do Worker. */
+/** Builds the settings from the Worker secrets. */
 export function readGmailSettings(env: EnvVars): GmailSettings {
   return {
     googleClientId: requiredSecret(env, 'GOOGLE_CLIENT_ID'),
@@ -78,7 +76,7 @@ export function readGmailSettings(env: EnvVars): GmailSettings {
   };
 }
 
-/** Diz se o e-mail pode entrar no conector: sempre no modo público; só os listados no modo privado. */
+/** Tells whether the email may sign in: always in public mode; only the listed ones in private mode. */
 export function isEmailAllowed(settings: GmailSettings, email: string): boolean {
   return settings.allowedEmails === null || settings.allowedEmails.includes(email.toLowerCase());
 }

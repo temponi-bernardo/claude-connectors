@@ -1,32 +1,32 @@
-/** Mensagens e conversas da Gmail API de exemplo para os testes. */
+/** Sample Gmail API messages and threads for tests. */
 import type { GmailMessage, GmailPart, GmailThread } from '../message-format.js';
 
-/** Codifica texto (ou bytes) em base64url, como a Gmail API devolve. */
+/** Encodes text (or bytes) in base64url, as the Gmail API returns it. */
 export function b64(content: string | Uint8Array): string {
   return Buffer.from(content).toString('base64url');
 }
 
-/** Cabeçalhos de uma mensagem de exemplo. */
+/** Headers of a sample message. */
 export function headers(subject: string, from: string): NonNullable<GmailPart['headers']> {
   return [
     { name: 'From', value: from },
-    { name: 'To', value: 'dono@example.com' },
+    { name: 'To', value: 'owner@example.com' },
     { name: 'Date', value: 'Tue, 10 Nov 2026 10:00:00 +0000' },
     { name: 'Subject', value: subject },
-    { name: 'subject', value: 'duplicado ignorado' },
+    { name: 'subject', value: 'ignored duplicate' },
   ];
 }
 
-/** Recibo multipart: texto, HTML e um PDF anexado. */
+/** Multipart receipt: text, HTML and an attached PDF. */
 export const RECEIPT: GmailMessage = {
   id: 'm1',
   threadId: 't1',
   labelIds: ['INBOX', 'CATEGORY_UPDATES'],
-  snippet: 'Obrigado pela compra',
+  snippet: 'Thanks for your purchase',
   internalDate: '1762768800000',
   payload: {
     mimeType: 'multipart/mixed',
-    headers: headers('Seu recibo FL Cloud', 'Image-Line <noreply@image-line.example>'),
+    headers: headers('Your FL Cloud receipt', 'Image-Line <noreply@image-line.example>'),
     parts: [
       {
         mimeType: 'multipart/alternative',
@@ -37,24 +37,24 @@ export const RECEIPT: GmailMessage = {
       },
       {
         mimeType: 'application/pdf',
-        filename: 'recibo.pdf',
+        filename: 'receipt.pdf',
         body: { size: 1234, attachmentId: 'att-1' },
       },
     ],
   },
 };
 
-/** Mensagem só com HTML, em ISO-8859-1. */
+/** HTML-only message, in ISO-8859-1. */
 export const HTML_ONLY: GmailMessage = {
   id: 'm2',
   threadId: 't1',
-  snippet: 'Resposta',
+  snippet: 'Reply',
   internalDate: '1762855200000',
   payload: {
     mimeType: 'text/html',
     headers: [
       { name: 'Content-Type', value: 'text/html; charset="ISO-8859-1"' },
-      { name: 'From', value: 'Suporte <help@image-line.example>' },
+      { name: 'From', value: 'Support <help@image-line.example>' },
     ],
     body: {
       size: 10,
@@ -63,5 +63,5 @@ export const HTML_ONLY: GmailMessage = {
   },
 };
 
-/** Conversa com as duas mensagens. */
+/** Thread with both messages. */
 export const THREAD: GmailThread = { id: 't1', messages: [RECEIPT, HTML_ONLY] };

@@ -1,5 +1,5 @@
 /**
- * Funções de apoio das ferramentas do Canvas: datas, filtros e buscas compostas.
+ * Helpers of the Canvas tools: dates, filters and composite lookups.
  */
 import type { CanvasClient } from './client.js';
 import type {
@@ -10,7 +10,7 @@ import type {
   Id,
 } from './canvas-types.js';
 
-/** Filtros de `list_assignments` → `bucket` da API do Canvas (`all` não filtra). */
+/** `list_assignments` filters → Canvas API `bucket` (`all` does not filter). */
 export const ASSIGNMENT_BUCKETS: Readonly<Record<string, string | undefined>> = {
   all: undefined,
   upcoming: 'upcoming',
@@ -19,32 +19,32 @@ export const ASSIGNMENT_BUCKETS: Readonly<Record<string, string | undefined>> = 
   overdue: 'overdue',
 };
 
-/** Data/hora ISO `days` dias depois (ou antes, se negativo) de `now`. */
+/** ISO date/time `days` days after (or before, if negative) `now`. */
 export function isoDaysFrom(now: Date, days: number): string {
   return new Date(now.getTime() + days * 86_400_000).toISOString();
 }
 
-/** Parte `AAAA-MM-DD` de uma data ISO. */
+/** The `YYYY-MM-DD` part of an ISO date. */
 export function dateOnly(iso: string): string {
   return iso.slice(0, 10);
 }
 
-/** Códigos de contexto (`course_<id>`) usados por avisos e calendário. */
+/** Context codes (`course_<id>`) used by announcements and the calendar. */
 export function courseContextCodes(ids: readonly Id[]): string[] {
   return ids.map((id) => `course_${String(id)}`);
 }
 
-/** Mapa id → nome dos cursos, para enriquecer outras listagens. */
+/** Course id → name map, to enrich other listings. */
 export function courseNameMap(courses: readonly CanvasCourse[]): Map<string, string> {
   return new Map(courses.map((c) => [String(c.id), c.name ?? '']));
 }
 
-/** Mapa id → nome dos participantes de um fórum. */
+/** Id → name map of a forum's participants. */
 export function participantNames(view: CanvasDiscussionView): Map<string, string> {
   return new Map((view.participants ?? []).map((p) => [String(p.id), p.display_name ?? '']));
 }
 
-/** Decide se um arquivo pode ser lido como texto, pelo tipo MIME ou pela extensão. */
+/** Decides whether a file can be read as text, by MIME type or by extension. */
 export function isTextFile(contentType: string, name: string): boolean {
   return (
     /^text\/|json|xml|javascript|csv/.test(contentType) ||
@@ -52,14 +52,14 @@ export function isTextFile(contentType: string, name: string): boolean {
   );
 }
 
-/** Item de módulo encontrado por `matchModuleItems`. */
+/** Module item found by `matchModuleItems`. */
 export interface ModuleMatch {
   readonly module: string | undefined;
   readonly title: string | undefined;
   readonly type: string | undefined;
 }
 
-/** Itens de módulo cujo título contém o termo (sem diferenciar maiúsculas). */
+/** Module items whose title contains the term (case-insensitive). */
 export function matchModuleItems(modules: readonly CanvasModule[], term: string): ModuleMatch[] {
   const q = term.toLowerCase();
   return modules.flatMap((m) =>
@@ -69,12 +69,12 @@ export function matchModuleItems(modules: readonly CanvasModule[], term: string)
   );
 }
 
-/** Cursos ativos do aluno. */
+/** The student's active courses. */
 export function activeCourses(client: CanvasClient): Promise<CanvasCourse[]> {
   return client.getAll<CanvasCourse>('/courses', { enrollment_state: 'active' });
 }
 
-/** Entrega do próprio aluno numa tarefa, com comentários e rubrica; `null` se não houver acesso. */
+/** The student's own submission to an assignment, with comments and rubric; `null` without access. */
 export async function fetchOwnSubmission(
   client: CanvasClient,
   courseId: Id,
@@ -90,7 +90,7 @@ export async function fetchOwnSubmission(
   }
 }
 
-/** Busca em paralelo; uma busca que falha vira lista vazia em vez de derrubar as outras. */
+/** Parallel lookup; a lookup that fails becomes an empty list instead of failing the others. */
 export function getAllOrEmpty<T>(
   client: CanvasClient,
   path: string,

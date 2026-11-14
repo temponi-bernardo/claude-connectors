@@ -25,7 +25,7 @@ func TestPairCode(t *testing.T) {
 	expect(t, e.postJSON("/pair/code", `{"phone":"5531999999999"}`), 409, "already_paired")
 	e.fake.pairErr = wa.ErrNotConnected
 	expect(t, e.postJSON("/pair/code", `{"phone":"5531999999999"}`), 503, "not_connected")
-	e.fake.pairErr = errors.New("400 do servidor")
+	e.fake.pairErr = errors.New("server returned 400")
 	expect(t, e.postJSON("/pair/code", `{"phone":"5531999999999"}`), 502, "pair_failed")
 }
 
@@ -89,7 +89,7 @@ func TestSendValidationAndRateLimit(t *testing.T) {
 
 func TestSendFailure(t *testing.T) {
 	e := newEnv(t, nil).ready()
-	e.fake.sendErr = errors.New("recusado")
+	e.fake.sendErr = errors.New("rejected")
 	expect(t, e.postJSON("/send", `{"recipient":"5531999990001","text":"oi"}`), 502, "send_failed")
 }
 

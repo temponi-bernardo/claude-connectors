@@ -42,7 +42,7 @@ corpo inválido), `500 internal`, `503 not_connected` (precisa do WhatsApp conec
 
 Textos devolvidos (mensagens, nomes, nomes de arquivo) vêm sem caracteres de controle (menos `\n` e `\t`) e sem
 overrides bidi (U+202A–U+202E, U+2066–U+2069). Buscas (`query`) ignoram maiúsculas e acentos (`joao` acha `João`).
-`sender_name` é `"Você"` nas mensagens enviadas pela própria conta; sem nome conhecido, vale o telefone
+`sender_name` é `"You"` nas mensagens enviadas pela própria conta; sem nome conhecido, vale o telefone
 (`+5531...`).
 
 ### `GET /health` (sem auth)

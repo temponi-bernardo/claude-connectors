@@ -39,7 +39,7 @@ generate a new one.
 - **Without the plugin:** Settings → Connectors → **Add custom connector** with
   `https://canvas-puc-remote.bftemponi.workers.dev/mcp`.
 
-Claude opens the connector's sign-in page ("Conectar o Canvas ao Claude"): paste the token and click the connect
+Claude opens the connector's sign-in page ("Connect Canvas to Claude"): paste the token and click the connect
 button. The page hands access back to Claude on its own. Ask the user to tell you when they are done and call
 `whoami` again.
 

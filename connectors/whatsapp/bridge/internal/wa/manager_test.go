@@ -20,7 +20,7 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/store"
 )
 
-// newOfflineManager cria um Manager real (sqlstore em modernc) sem nunca abrir conexão de rede.
+// newOfflineManager creates a real Manager (sqlstore on modernc) without ever opening a network connection.
 func newOfflineManager(t *testing.T) (*Manager, *store.Store) {
 	t.Helper()
 	dir := t.TempDir()
@@ -47,7 +47,7 @@ func TestNewManagerNeedsPairing(t *testing.T) {
 	m.Start()
 	st := m.State()
 	if !st.NeedsPairing || st.LoggedIn || st.Connected || st.Account != "" {
-		t.Fatalf("estado inicial: %+v", st)
+		t.Fatalf("initial state: %+v", st)
 	}
 	if _, err := m.QR(); !errors.Is(err, ErrNoQR) {
 		t.Fatalf("QR: %v", err)
@@ -56,7 +56,7 @@ func TestNewManagerNeedsPairing(t *testing.T) {
 	m.qr = QRCode{Code: "2@abc", ExpiresAt: time.Now().Add(time.Minute)}
 	m.mu.Unlock()
 	if qr, err := m.QR(); err != nil || qr.Code != "2@abc" {
-		t.Fatalf("QR guardado: %v %v", qr, err)
+		t.Fatalf("stored QR: %v %v", qr, err)
 	}
 }
 
@@ -72,13 +72,13 @@ func TestOperationsRequireLogin(t *testing.T) {
 	cctx, cancel := context.WithCancel(ctx)
 	cancel()
 	if _, err := m.PairCode(cctx, "5531999999999"); err == nil {
-		t.Fatal("PairCode sem QR deveria falhar")
+		t.Fatal("PairCode without a QR should fail")
 	}
 	if err := m.waitQR(ctx, 10*time.Millisecond); !errors.Is(err, ErrNotConnected) {
 		t.Fatal(err)
 	}
 	if err := m.Logout(ctx); err != nil || !m.State().NeedsPairing {
-		t.Fatal("Logout sem sessão deveria só recriar o device", err)
+		t.Fatal("Logout without a session should only recreate the device", err)
 	}
 }
 
@@ -89,26 +89,26 @@ func TestHandleEventsWriteToStore(t *testing.T) {
 	m.handleEvent(&events.PushName{JID: alice, NewPushName: "Alice P"})
 	m.handleEvent(&events.Contact{JID: alice, Action: &waSyncAction.ContactAction{FullName: proto.String("Alice Agenda")}})
 	m.handleEvent(&events.Contact{JID: alice})
-	m.handleEvent(&events.GroupInfo{JID: grp, Name: &types.GroupName{Name: "Grupo"}})
+	m.handleEvent(&events.GroupInfo{JID: grp, Name: &types.GroupName{Name: "Group"}})
 	m.handleEvent(&events.HistorySync{Data: &waHistorySync.HistorySync{Pushnames: []*waHistorySync.Pushname{{ID: proto.String(alice.String()), Pushname: proto.String("Ali")}}}})
 	msgs, _, err := st.ListMessages(ctx, alice.String(), 10, nil)
 	if err != nil || len(msgs) != 1 || msgs[0].Text != "olá" || msgs[0].SenderName != "Alice Agenda" {
 		t.Fatalf("%+v %v", msgs, err)
 	}
-	if c, err := st.GetChat(ctx, grp.String()); err != nil || c.Name != "Grupo" {
-		t.Fatalf("grupo: %+v %v", c, err)
+	if c, err := st.GetChat(ctx, grp.String()); err != nil || c.Name != "Group" {
+		t.Fatalf("group: %+v %v", c, err)
 	}
 	m.handleEvent(msgEvent(alice, "E", &waE2E.Message{ProtocolMessage: &waE2E.ProtocolMessage{Type: waE2E.ProtocolMessage_MESSAGE_EDIT.Enum(),
-		Key: &waCommonKey, EditedMessage: &waE2E.Message{Conversation: proto.String("editada")}}}))
-	if msgs, _, _ := st.ListMessages(ctx, alice.String(), 10, nil); msgs[0].Text != "editada" {
-		t.Fatal("edição não aplicada")
+		Key: &waCommonKey, EditedMessage: &waE2E.Message{Conversation: proto.String("edited")}}}))
+	if msgs, _, _ := st.ListMessages(ctx, alice.String(), 10, nil); msgs[0].Text != "edited" {
+		t.Fatal("edit not applied")
 	}
 	m.handleEvent(msgEvent(alice, "R", &waE2E.Message{ProtocolMessage: &waE2E.ProtocolMessage{Type: waE2E.ProtocolMessage_REVOKE.Enum(), Key: &waCommonKey}}))
 	if msgs, _, _ := st.ListMessages(ctx, alice.String(), 10, nil); len(msgs) != 0 {
-		t.Fatal("apagamento não aplicado")
+		t.Fatal("deletion not applied")
 	}
 	if m.State().LastEventAt.IsZero() {
-		t.Fatal("last_event_at não atualizado")
+		t.Fatal("last_event_at not updated")
 	}
 }
 
@@ -132,7 +132,7 @@ func TestConnectionEvents(t *testing.T) {
 		time.Sleep(10 * time.Millisecond)
 	}
 	if m.current() == old || m.State().OfflineSyncComplete {
-		t.Fatal("LoggedOut deveria trocar o cliente e zerar o estado")
+		t.Fatal("LoggedOut should replace the client and reset the state")
 	}
 }
 
@@ -161,18 +161,18 @@ func TestSessionEventsNotifySnapshot(t *testing.T) {
 		select {
 		case <-calls:
 		case <-time.After(2 * time.Second):
-			t.Fatalf("esperava 3 avisos de sessão alterada, chegaram %d", i)
+			t.Fatalf("expected 3 session change notices, got %d", i)
 		}
 	}
 	m.handleEvent(&events.Disconnected{})
 	select {
 	case <-calls:
-		t.Fatal("Disconnected não muda a sessão")
+		t.Fatal("Disconnected does not change the session")
 	case <-time.After(50 * time.Millisecond):
 	}
 }
 
 func TestSessionChangedWithoutCallback(t *testing.T) {
 	m, _ := newOfflineManager(t)
-	m.sessionChanged() // sem callback: não faz nada nem entra em pânico
+	m.sessionChanged() // no callback: does nothing and does not panic
 }

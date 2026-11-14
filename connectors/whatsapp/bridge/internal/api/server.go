@@ -1,4 +1,4 @@
-// Package api expõe a ponte por HTTP interno (contrato em API.md).
+// Package api exposes the bridge over internal HTTP (contract in API.md).
 package api
 
 import (
@@ -14,20 +14,20 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/store"
 )
 
-// Options configura a API.
+// Options configures the API.
 type Options struct {
 	Token          string
 	Location       *time.Location
 	MaxMediaBytes  int64
 	MaxRestore     int64
 	EnableSend     bool
-	Allowlist      []string // JIDs já normalizados
+	Allowlist      []string // already normalized JIDs
 	SendMaxPerHour int
 	Log            *slog.Logger
 	Now            func() time.Time
 }
 
-// Server liga as rotas à ponte.
+// Server wires the routes to the bridge.
 type Server struct {
 	opts      Options
 	b         *bridge.Bridge
@@ -35,10 +35,10 @@ type Server struct {
 	tokenHash [32]byte
 }
 
-// maxJSONBody é o limite dos corpos JSON (pareamento, envio).
+// maxJSONBody limits JSON bodies (pairing, sending).
 const maxJSONBody = 64 << 10
 
-// New cria o servidor da API.
+// New creates the API server.
 func New(b *bridge.Bridge, opts Options) *Server {
 	if opts.Now == nil {
 		opts.Now = time.Now
@@ -50,7 +50,7 @@ func New(b *bridge.Bridge, opts Options) *Server {
 	return s
 }
 
-// Handler monta o roteador com autenticação, fase e log de acesso.
+// Handler builds the router with authentication, phase check and access log.
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", s.handleHealth)
@@ -61,7 +61,7 @@ func (s *Server) Handler() http.Handler {
 	return s.logRequests(mux)
 }
 
-// readyRoutes lista as rotas que só funcionam na fase ready.
+// readyRoutes lists the routes that only work in the ready phase.
 func (s *Server) readyRoutes() map[string]http.HandlerFunc {
 	return map[string]http.HandlerFunc{
 		"GET /snapshot":   s.handleSnapshot,
@@ -79,13 +79,13 @@ func (s *Server) readyRoutes() map[string]http.HandlerFunc {
 	}
 }
 
-// NewHTTPServer cria o http.Server com timeouts (o /restore e o /snapshot podem ser grandes).
+// NewHTTPServer creates the http.Server with timeouts (/restore and /snapshot can be large).
 func NewHTTPServer(addr string, h http.Handler) *http.Server {
 	return &http.Server{Addr: addr, Handler: h, ReadHeaderTimeout: 10 * time.Second, ReadTimeout: 10 * time.Minute,
 		WriteTimeout: 10 * time.Minute, IdleTimeout: 2 * time.Minute, MaxHeaderBytes: 16 << 10}
 }
 
-// tokenMatches compara o token em tempo constante (hash antes, para não vazar o tamanho).
+// tokenMatches compares the token in constant time (hashed first, so the length does not leak).
 func (s *Server) tokenMatches(header string) bool {
 	token, ok := strings.CutPrefix(header, "Bearer ")
 	if !ok {
@@ -95,51 +95,51 @@ func (s *Server) tokenMatches(header string) bool {
 	return subtle.ConstantTimeCompare(got[:], s.tokenHash[:]) == 1
 }
 
-// auth exige o Bearer token do Worker.
+// auth requires the Worker's Bearer token.
 func (s *Server) auth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !s.tokenMatches(r.Header.Get("Authorization")) {
-			writeError(w, http.StatusUnauthorized, "unauthorized", "Token ausente ou inválido.")
+			writeError(w, http.StatusUnauthorized, "unauthorized", "Missing or invalid token.")
 			return
 		}
 		next.ServeHTTP(w, r)
 	})
 }
 
-// requireReady responde 503 com a fase enquanto a ponte não estiver pronta.
+// requireReady answers 503 with the phase while the bridge is not ready.
 func (s *Server) requireReady(next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if phase := s.b.Phase(); phase != bridge.PhaseReady {
 			writeJSON(w, http.StatusServiceUnavailable, map[string]any{"error": "not_ready", "phase": phase,
-				"message": "A ponte ainda está iniciando."})
+				"message": "The bridge is still starting."})
 			return
 		}
 		next(w, r)
 	})
 }
 
-// handleHealth devolve a fase (sem autenticação).
+// handleHealth returns the phase (no authentication).
 func (s *Server) handleHealth(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"phase": s.b.Phase()})
 }
 
-// st e client são atalhos para o banco e o cliente (válidos na fase ready).
+// st and client are shortcuts to the database and the client (valid in the ready phase).
 func (s *Server) st() *store.Store        { return s.b.Store() }
 func (s *Server) client() bridge.WhatsApp { return s.b.WhatsApp() }
 
-// statusRecorder guarda o status para o log de acesso.
+// statusRecorder keeps the status for the access log.
 type statusRecorder struct {
 	http.ResponseWriter
 	status int
 }
 
-// WriteHeader registra o status e repassa.
+// WriteHeader records the status and passes it on.
 func (r *statusRecorder) WriteHeader(code int) {
 	r.status = code
 	r.ResponseWriter.WriteHeader(code)
 }
 
-// logRequests registra método, caminho (sem query, que pode ter nomes e números), status e duração.
+// logRequests logs method, path (without the query, which may hold names and numbers), status and duration.
 func (s *Server) logRequests(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
@@ -149,25 +149,25 @@ func (s *Server) logRequests(next http.Handler) http.Handler {
 	})
 }
 
-// writeJSON grava v como JSON com o status dado.
+// writeJSON writes v as JSON with the given status.
 func writeJSON(w http.ResponseWriter, status int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)
 }
 
-// writeError grava o erro no formato {"error","message"}.
+// writeError writes the error as {"error","message"}.
 func writeError(w http.ResponseWriter, status int, code, message string) {
 	writeJSON(w, status, map[string]string{"error": code, "message": message})
 }
 
-// badRequest é o atalho para 400.
+// badRequest is the shortcut for 400.
 func badRequest(w http.ResponseWriter, message string) {
 	writeError(w, http.StatusBadRequest, "bad_request", message)
 }
 
-// internalError registra a falha e responde 500 sem detalhes.
+// internalError logs the failure and answers 500 without details.
 func (s *Server) internalError(w http.ResponseWriter, what string, err error) {
 	s.opts.Log.Error(what, "err", err.Error())
-	writeError(w, http.StatusInternalServerError, "internal", "Erro interno da ponte.")
+	writeError(w, http.StatusInternalServerError, "internal", "Internal bridge error.")
 }

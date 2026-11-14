@@ -1,19 +1,19 @@
 /**
- * OAuth do Google (servidor de autorização "de cima"): URL de autorização com `state`, PKCE S256 e `nonce`,
- * troca do código e renovação do access token pelo refresh token.
+ * Google OAuth (the upstream authorization server): authorization URL with `state`, PKCE S256 and `nonce`,
+ * code exchange and access token refresh with the refresh token.
  */
 import { UPSTREAM_USER_AGENT, type GmailDeps } from './context.js';
 
-/** Endpoint de autorização do Google. */
+/** Google authorization endpoint. */
 export const GOOGLE_AUTHORIZE_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 
-/** Endpoint de tokens do Google. */
+/** Google token endpoint. */
 export const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 
-/** Caminho do retorno do Google neste Worker (cadastrado no Google Cloud). */
+/** Google callback path on this Worker (registered in Google Cloud). */
 export const GOOGLE_CALLBACK_PATH = '/google/callback';
 
-/** Parâmetros da URL de autorização do Google. */
+/** Google authorization URL parameters. */
 export interface GoogleAuthorizeParams {
   readonly clientId: string;
   readonly redirectUri: string;
@@ -21,11 +21,11 @@ export interface GoogleAuthorizeParams {
   readonly state: string;
   readonly codeChallenge: string;
   readonly nonce: string;
-  /** Pede refresh token (`access_type=offline` + `prompt=consent`): só no vínculo de conta. */
+  /** Asks for a refresh token (`access_type=offline` + `prompt=consent`): only when linking an account. */
   readonly offline: boolean;
 }
 
-/** Resposta do endpoint de tokens do Google, já validada. */
+/** Google token endpoint response, already validated. */
 export interface GoogleTokens {
   readonly accessToken: string;
   readonly expiresIn: number;
@@ -34,23 +34,23 @@ export interface GoogleTokens {
   readonly scope: string;
 }
 
-/** Erro devolvido pelo Google no endpoint de tokens (`invalid_grant` = acesso revogado). */
+/** Error returned by the Google token endpoint (`invalid_grant` = access revoked). */
 export class GoogleTokenError extends Error {
   readonly code: string;
 
   constructor(code: string) {
-    super(`O Google recusou o token (${code}).`);
+    super(`Google rejected the token (${code}).`);
     this.name = 'GoogleTokenError';
     this.code = code;
   }
 }
 
-/** Endereço de retorno do Google para a origem do Worker. */
+/** Google callback address for the Worker origin. */
 export function googleRedirectUri(origin: string): string {
   return `${origin}${GOOGLE_CALLBACK_PATH}`;
 }
 
-/** Monta a URL de autorização do Google. */
+/** Builds the Google authorization URL. */
 export function googleAuthorizeUrl(params: GoogleAuthorizeParams): string {
   const url = new URL(GOOGLE_AUTHORIZE_URL);
   url.search = new URLSearchParams({
@@ -73,12 +73,12 @@ export function googleAuthorizeUrl(params: GoogleAuthorizeParams): string {
   return url.toString();
 }
 
-/** Texto aleatório em base64url com `bytes` bytes de entropia (state, nonce, verificador PKCE). */
+/** Random base64url text with `bytes` bytes of entropy (state, nonce, PKCE verifier). */
 export function randomToken(bytes = 32): string {
   return Buffer.from(crypto.getRandomValues(new Uint8Array(bytes))).toString('base64url');
 }
 
-/** Valida o JSON de sucesso do endpoint de tokens; lança erro se faltar o access token. */
+/** Validates the token endpoint success JSON; throws if the access token is missing. */
 export function parseGoogleTokens(body: unknown): GoogleTokens {
   const data = (typeof body === 'object' && body !== null ? body : {}) as Record<string, unknown>;
   if (typeof data.access_token !== 'string') throw new GoogleTokenError('invalid_response');
@@ -91,18 +91,18 @@ export function parseGoogleTokens(body: unknown): GoogleTokens {
   };
 }
 
-/** Código de erro OAuth de uma resposta de falha do Google (`error`), ou `http_<status>`. */
+/** OAuth error code of a Google failure response (`error`), or `http_<status>`. */
 export async function googleErrorCode(response: Response): Promise<string> {
   try {
     const body = (await response.json()) as { error?: unknown };
     if (typeof body.error === 'string') return body.error;
   } catch {
-    // corpo não é JSON: usa o status
+    // body is not JSON: use the status
   }
   return `http_${response.status}`;
 }
 
-/** Envia um formulário ao endpoint de tokens do Google com as credenciais do cliente. */
+/** Posts a form to the Google token endpoint with the client credentials. */
 export async function postGoogleToken(
   deps: GmailDeps,
   form: Readonly<Record<string, string>>,
@@ -124,7 +124,7 @@ export async function postGoogleToken(
   return parseGoogleTokens(await response.json());
 }
 
-/** Troca o código de autorização do Google (com o verificador PKCE) por tokens. */
+/** Exchanges the Google authorization code (with the PKCE verifier) for tokens. */
 export function exchangeGoogleCode(
   deps: GmailDeps,
   code: string,
@@ -138,15 +138,15 @@ export function exchangeGoogleCode(
   });
 }
 
-/** Renova o access token com o refresh token guardado. */
+/** Refreshes the access token with the stored refresh token. */
 export function refreshGoogleToken(deps: GmailDeps, refreshToken: string): Promise<GoogleTokens> {
   return postGoogleToken(deps, { grant_type: 'refresh_token', refresh_token: refreshToken });
 }
 
-/** Endpoint de revogação de tokens do Google. */
+/** Google token revocation endpoint. */
 export const GOOGLE_REVOKE_URL = 'https://oauth2.googleapis.com/revoke';
 
-/** Revoga o refresh token no Google (o app perde o acesso à conta); devolve se o Google confirmou. */
+/** Revokes the refresh token at Google (the app loses access to the account); returns whether Google confirmed. */
 export async function revokeGoogleToken(deps: GmailDeps, token: string): Promise<boolean> {
   try {
     const response = await deps.fetch(GOOGLE_REVOKE_URL, {

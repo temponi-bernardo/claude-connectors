@@ -261,7 +261,7 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
      limpos por `sanitizeText()` e `isHiddenChar()`) e embrulhada por `untrusted()`; `partialSyncWarning()` junta o
      aviso de resultado parcial. Mídia vira bloco MCP em `mediaResult()` (`binaryContentBlock()`, `bytesToBase64()`).
 - **Resultado:** resposta compacta, com datas ISO com fuso e o aviso de conteúdo não confiável.
-- **Falhas:** cold start lento → "Tempo esgotado…, tente de novo"; snapshot que não abre → erro `bad_snapshot`
+- **Falhas:** cold start lento → "Timed out waiting for WhatsApp…, try again"; snapshot que não abre → erro `bad_snapshot`
   (a ponte nunca recomeça do zero sozinha); e-mail removido da lista → 403.
 
 ## P15 — Parear o número (`/pair`)
@@ -299,7 +299,7 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
      `sameSecret()`). Assim um pareamento novo vai para o R2 na hora, sem esperar uso ou o container dormir.
   5. No próximo boot, `ensureRestored()` devolve o snapshot à ponte (P14, passo 4).
 - **Resultado:** sessão e mensagens sobrevivem ao container dormir, sem o Worker ver o conteúdo em claro.
-- **Falhas:** snapshot recusado pela ponte → erro até "Recomeçar do zero" no `/pair`; queda abrupta sem `SIGTERM`
+- **Falhas:** snapshot recusado pela ponte → erro até "Start over" no `/pair`; queda abrupta sem `SIGTERM`
   → perde só o que mudou desde o último snapshot (o WhatsApp reenvia as pendências); gravação no R2 que falha →
   o próximo snapshot é forçado (`?force=1`).
 

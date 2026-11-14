@@ -51,14 +51,14 @@ func readyBridge(t *testing.T) (*Bridge, *stubWA) {
 	select {
 	case <-b.Ready():
 	case <-time.After(5 * time.Second):
-		t.Fatal("não ficou pronta")
+		t.Fatal("did not become ready")
 	}
 	t.Cleanup(func() { b.closeDatabases() })
 	return b, stub
 }
 
-// settle espera a abertura em segundo plano terminar (pronta ou de volta a awaiting_restore) e fecha os bancos,
-// para que nada grave em DATA_DIR enquanto o t.TempDir é apagado.
+// settle waits for the background open to finish (ready or back to awaiting_restore) and closes the databases,
+// so nothing writes to DATA_DIR while t.TempDir is being deleted.
 func settle(t *testing.T, b *Bridge) {
 	t.Helper()
 	deadline := time.Now().Add(5 * time.Second)
@@ -66,7 +66,7 @@ func settle(t *testing.T, b *Bridge) {
 		time.Sleep(5 * time.Millisecond)
 	}
 	if b.Phase() == PhaseStarting {
-		t.Fatal("abertura não terminou")
+		t.Fatal("open did not finish")
 	}
 	b.closeDatabases()
 }
@@ -77,12 +77,12 @@ func TestSnapshotRequiresReady(t *testing.T) {
 		t.Fatal(err)
 	}
 	if b.Store() != nil || b.WhatsApp() != nil {
-		t.Fatal("sem bancos antes do restore")
+		t.Fatal("no databases before restore")
 	}
 }
 
 func TestOpenFailureReturnsToAwaiting(t *testing.T) {
-	b, _ := newTestBridge(t, func(context.Context, *sql.DB, *store.Store) (WhatsApp, error) { return nil, errors.New("falhou") })
+	b, _ := newTestBridge(t, func(context.Context, *sql.DB, *store.Store) (WhatsApp, error) { return nil, errors.New("failed") })
 	if _, _, err := b.Restore(nil, true); err != nil {
 		t.Fatal(err)
 	}
@@ -91,7 +91,7 @@ func TestOpenFailureReturnsToAwaiting(t *testing.T) {
 		time.Sleep(5 * time.Millisecond)
 	}
 	if b.Phase() != PhaseAwaitingRestore {
-		t.Fatalf("fase %s", b.Phase())
+		t.Fatalf("phase %s", b.Phase())
 	}
 }
 
@@ -99,13 +99,13 @@ func TestRestoreRemovesOldDatabases(t *testing.T) {
 	b, _ := newTestBridge(t, nil)
 	_ = os.MkdirAll(b.opts.DataDir, 0o700)
 	for _, n := range []string{"messages.db-wal", "session.db"} {
-		_ = os.WriteFile(b.path(n), []byte("velho"), 0o600)
+		_ = os.WriteFile(b.path(n), []byte("old"), 0o600)
 	}
 	if err := b.prepareDataDir(); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := os.Stat(b.path("messages.db-wal")); !os.IsNotExist(err) {
-		t.Fatal("arquivo antigo não apagado")
+		t.Fatal("old file not deleted")
 	}
 }
 
@@ -120,12 +120,12 @@ func TestRestoreRejectsArchiveWithExtraFile(t *testing.T) {
 	var enc bytes.Buffer
 	w, _ := snapshot.NewWriter(&enc, key, 5)
 	_, _ = w.Write(plain.Bytes())
-	_, _ = w.Write([]byte("lixo depois do tar"))
+	_, _ = w.Write([]byte("garbage after the tar"))
 	_ = w.Close()
 	restored, gen, err := b.Restore(&enc, false)
 	settle(t, b)
 	if err != nil || !restored || gen != 5 {
-		t.Fatalf("lixo após o tar é ignorado pelo tar mas entra no hash: %v %v %v", restored, gen, err)
+		t.Fatalf("garbage after the tar is ignored by tar but enters the hash: %v %v %v", restored, gen, err)
 	}
 }
 
@@ -151,32 +151,32 @@ func TestPushErrors(t *testing.T) {
 	defer srv.Close()
 	ctx := context.Background()
 	if err := Push(ctx, srv.Client(), srv.URL, "t")(1, 1, bytes.NewReader([]byte("x"))); err == nil {
-		t.Fatal("status 500 deveria falhar")
+		t.Fatal("status 500 should fail")
 	}
 	if err := Push(ctx, srv.Client(), "http://127.0.0.1:1", "t")(1, 1, bytes.NewReader([]byte("x"))); err == nil {
-		t.Fatal("conexão recusada deveria falhar")
+		t.Fatal("refused connection should fail")
 	}
 	if err := Push(ctx, srv.Client(), "::", "t")(1, 1, nil); err == nil {
-		t.Fatal("URL inválida deveria falhar")
+		t.Fatal("invalid URL should fail")
 	}
 	b, _ := readyBridge(t)
-	b.Shutdown(ctx, srv.Client(), srv.URL, "t") // falha só vai para o log
+	b.Shutdown(ctx, srv.Client(), srv.URL, "t") // the failure only goes to the log
 }
 
 func TestSnapshotEmitErrorDoesNotCommit(t *testing.T) {
 	b, _ := readyBridge(t)
 	ctx := context.Background()
-	if _, err := b.Snapshot(ctx, func(int64, uint64, io.Reader) error { return errors.New("cliente caiu") }); err == nil {
-		t.Fatal("erro do emit deveria voltar")
+	if _, err := b.Snapshot(ctx, func(int64, uint64, io.Reader) error { return errors.New("client dropped") }); err == nil {
+		t.Fatal("emit error should be returned")
 	}
 	var gen uint64
 	changed, err := b.Snapshot(ctx, func(_ int64, g uint64, _ io.Reader) error { gen = g; return nil })
 	if err != nil || !changed || gen != 1 {
-		t.Fatalf("geração não deveria ter avançado: %v %v %d", changed, err, gen)
+		t.Fatalf("generation should not have advanced: %v %v %d", changed, err, gen)
 	}
 	b.ForgetSnapshotHash()
 	if changed, _ := b.Snapshot(ctx, func(int64, uint64, io.Reader) error { return nil }); !changed {
-		t.Fatal("ForgetSnapshotHash deveria forçar a entrega")
+		t.Fatal("ForgetSnapshotHash should force delivery")
 	}
 }
 
@@ -191,44 +191,44 @@ func TestRestoreErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 	b2, _ := newTestBridge(t, nil)
-	for _, body := range [][]byte{nil, []byte("WAS1 curto")} {
+	for _, body := range [][]byte{nil, []byte("WAS1 short")} {
 		if _, _, err := b2.Restore(bytes.NewReader(body), false); !errors.Is(err, ErrBadSnapshot) {
-			t.Fatalf("esperava ErrBadSnapshot: %v", err)
+			t.Fatalf("expected ErrBadSnapshot: %v", err)
 		}
 	}
 	var enc bytes.Buffer
 	w, _ := snapshot.NewWriter(&enc, key, 1)
-	_, _ = w.Write([]byte("não é tar"))
+	_, _ = w.Write([]byte("not a tar"))
 	_ = w.Close()
 	if _, _, err := b2.Restore(&enc, false); !errors.Is(err, ErrBadSnapshot) {
-		t.Fatalf("tar inválido: %v", err)
+		t.Fatalf("invalid tar: %v", err)
 	}
-	file := filepath.Join(t.TempDir(), "arquivo")
+	file := filepath.Join(t.TempDir(), "file")
 	_ = os.WriteFile(file, nil, 0o600)
 	b3 := New(Options{DataDir: filepath.Join(file, "sub"), SnapshotKey: key, Log: b.opts.Log})
 	if _, _, err := b3.Restore(nil, true); err == nil {
-		t.Fatal("DATA_DIR inválido deveria falhar")
+		t.Fatal("invalid DATA_DIR should fail")
 	}
 }
 
 func TestSnapshotInternalErrors(t *testing.T) {
 	b, _ := readyBridge(t)
-	b.opts.SnapshotKey = []byte("curta")
+	b.opts.SnapshotKey = []byte("short")
 	if _, err := b.Snapshot(context.Background(), nil); err == nil {
-		t.Fatal("chave inválida deveria falhar")
+		t.Fatal("invalid key should fail")
 	}
 	b.opts.SnapshotKey = key
 	b.store.DB().Close()
 	if _, err := b.Snapshot(context.Background(), nil); err == nil {
-		t.Fatal("banco fechado deveria falhar")
+		t.Fatal("closed database should fail")
 	}
 	b.sessionDB.Close()
 	if _, err := b.Snapshot(context.Background(), nil); err == nil {
-		t.Fatal("sessão fechada deveria falhar")
+		t.Fatal("closed session should fail")
 	}
-	b.opts.DataDir = filepath.Join(b.opts.DataDir, "nao-existe")
+	b.opts.DataDir = filepath.Join(b.opts.DataDir, "does-not-exist")
 	if _, err := b.Snapshot(context.Background(), nil); err == nil {
-		t.Fatal("diretório ausente deveria falhar")
+		t.Fatal("missing directory should fail")
 	}
 }
 
@@ -244,24 +244,24 @@ func TestSnapshotNotifierPushesInBackground(t *testing.T) {
 	select {
 	case gen := <-got:
 		if gen != "1" {
-			t.Fatalf("geração: %s", gen)
+			t.Fatalf("generation: %s", gen)
 		}
 	case <-time.After(5 * time.Second):
-		t.Fatal("o snapshot não foi enviado depois da mudança de sessão")
+		t.Fatal("the snapshot was not pushed after the session change")
 	}
-	b.mu.Lock() // espera o push terminar de registrar a geração
+	b.mu.Lock() // waits for the push to finish recording the generation
 	b.mu.Unlock()
 	if changed, err := b.PushSnapshot(context.Background(), srv.Client(), srv.URL, "tok"); err != nil || changed {
-		t.Fatalf("sem mudança não deveria reenviar: %v %v", changed, err)
+		t.Fatalf("unchanged should not push again: %v %v", changed, err)
 	}
 }
 
 func TestSnapshotNotifierIgnoresMissingURLAndNotReady(t *testing.T) {
 	b, _ := newTestBridge(t, nil)
-	b.SnapshotNotifier(http.DefaultClient, "", "t")() // sem URL: nada a fazer
+	b.SnapshotNotifier(http.DefaultClient, "", "t")() // no URL: nothing to do
 	if _, err := b.PushSnapshot(context.Background(), http.DefaultClient, "http://127.0.0.1:1", "t"); !errors.Is(err, ErrNotReady) {
-		t.Fatalf("antes de ready: %v", err)
+		t.Fatalf("before ready: %v", err)
 	}
-	b.SnapshotNotifier(http.DefaultClient, "http://127.0.0.1:1", "t")() // falha só vai para o log
+	b.SnapshotNotifier(http.DefaultClient, "http://127.0.0.1:1", "t")() // the failure only goes to the log
 	time.Sleep(50 * time.Millisecond)
 }

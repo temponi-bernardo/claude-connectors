@@ -3,10 +3,10 @@ import { describe, expect, it } from 'vitest';
 import { mcpUnauthorizedResponse, serveMcpRequest } from './mcp-endpoint.js';
 
 describe('serveMcpRequest', () => {
-  it('responde em JSON sem sessão e fecha o servidor', async () => {
+  it('answers in JSON without a session and closes the server', async () => {
     const server = new McpServer({ name: 't', version: '1' });
-    server.registerTool('oi', { description: 'x' }, () => ({
-      content: [{ type: 'text', text: 'oi' }],
+    server.registerTool('hi', { description: 'x' }, () => ({
+      content: [{ type: 'text', text: 'hi' }],
     }));
     const res = await serveMcpRequest(
       server,
@@ -21,13 +21,13 @@ describe('serveMcpRequest', () => {
     );
     expect(res.headers.get('content-type')).toContain('application/json');
     expect(res.headers.get('mcp-session-id')).toBeNull();
-    expect(JSON.stringify(await res.json())).toContain('"oi"');
+    expect(JSON.stringify(await res.json())).toContain('"hi"');
     expect(server.isConnected()).toBe(false);
   });
 });
 
 describe('mcpUnauthorizedResponse', () => {
-  it('dá 401 com o endereço dos metadados do recurso', () => {
+  it('returns 401 with the resource metadata address', () => {
     const res = mcpUnauthorizedResponse('https://x.dev');
     expect(res.status).toBe(401);
     expect(res.headers.get('www-authenticate')).toBe(

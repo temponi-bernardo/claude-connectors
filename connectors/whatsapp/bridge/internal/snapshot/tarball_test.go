@@ -43,44 +43,44 @@ func rawTar(t *testing.T, entries []tar.Header, content string) []byte {
 
 func TestPackUnpackRoundTrip(t *testing.T) {
 	src, dst := t.TempDir(), t.TempDir()
-	writeFiles(t, src, map[string]string{SessionFile: "sessão", MessagesFile: "mensagens"})
+	writeFiles(t, src, map[string]string{SessionFile: "session", MessagesFile: "messages"})
 	var a, b bytes.Buffer
 	if err := Pack(&a, src); err != nil {
 		t.Fatal(err)
 	}
 	_ = Pack(&b, src)
 	if !bytes.Equal(a.Bytes(), b.Bytes()) {
-		t.Fatal("tar não é determinístico")
+		t.Fatal("tar is not deterministic")
 	}
 	if err := Unpack(&a, dst, 1<<20); err != nil {
 		t.Fatal(err)
 	}
 	got, _ := os.ReadFile(filepath.Join(dst, MessagesFile))
-	if string(got) != "mensagens" {
-		t.Fatalf("conteúdo extraído: %q", got)
+	if string(got) != "messages" {
+		t.Fatalf("extracted content: %q", got)
 	}
 }
 
 func TestPackMissingFile(t *testing.T) {
 	if err := Pack(&bytes.Buffer{}, t.TempDir()); err == nil {
-		t.Fatal("esperava erro com arquivo faltando")
+		t.Fatal("expected an error with a missing file")
 	}
 }
 
 func TestUnpackRejectsBadEntries(t *testing.T) {
 	cases := map[string][]tar.Header{
-		"traversal":  {{Name: "../session.db"}, {Name: MessagesFile}},
-		"absoluto":   {{Name: "/etc/passwd"}},
-		"diretório":  {{Name: SessionFile, Typeflag: tar.TypeDir}},
-		"symlink":    {{Name: SessionFile, Typeflag: tar.TypeSymlink, Linkname: "/etc/passwd"}},
-		"duplicado":  {{Name: SessionFile}, {Name: SessionFile}},
-		"faltando":   {{Name: SessionFile}},
-		"desconhec.": {{Name: "outro.db"}},
+		"traversal": {{Name: "../session.db"}, {Name: MessagesFile}},
+		"absolute":  {{Name: "/etc/passwd"}},
+		"directory": {{Name: SessionFile, Typeflag: tar.TypeDir}},
+		"symlink":   {{Name: SessionFile, Typeflag: tar.TypeSymlink, Linkname: "/etc/passwd"}},
+		"duplicate": {{Name: SessionFile}, {Name: SessionFile}},
+		"missing":   {{Name: SessionFile}},
+		"unknown":   {{Name: "other.db"}},
 	}
 	for name, entries := range cases {
 		err := Unpack(bytes.NewReader(rawTar(t, entries, "x")), t.TempDir(), 1<<20)
 		if !errors.Is(err, ErrBadArchive) {
-			t.Fatalf("%s: esperava ErrBadArchive, veio %v", name, err)
+			t.Fatalf("%s: expected ErrBadArchive, got %v", name, err)
 		}
 	}
 }
@@ -88,12 +88,12 @@ func TestUnpackRejectsBadEntries(t *testing.T) {
 func TestUnpackRejectsTooLarge(t *testing.T) {
 	data := rawTar(t, []tar.Header{{Name: SessionFile}, {Name: MessagesFile}}, "0123456789")
 	if err := Unpack(bytes.NewReader(data), t.TempDir(), 5); !errors.Is(err, ErrTooLarge) {
-		t.Fatalf("esperava ErrTooLarge, veio %v", err)
+		t.Fatalf("expected ErrTooLarge, got %v", err)
 	}
 }
 
 func TestUnpackGarbage(t *testing.T) {
 	if err := Unpack(bytes.NewReader(bytes.Repeat([]byte{7}, 1024)), t.TempDir(), 10); !errors.Is(err, ErrBadArchive) {
-		t.Fatalf("esperava ErrBadArchive, veio %v", err)
+		t.Fatalf("expected ErrBadArchive, got %v", err)
 	}
 }

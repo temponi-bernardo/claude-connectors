@@ -1,5 +1,5 @@
 /**
- * Conjunto de ferramentas do conector Canvas: leitura, e escrita quando permitida.
+ * Tool set of the Canvas connector: read tools, plus write tools when allowed.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { manifestVersion } from '../../../src/mcp/server-version.js';
@@ -15,12 +15,12 @@ export const CANVAS_SERVER_INFO = {
   version: manifestVersion(manifest),
 } as const;
 
-/** Seleciona as ferramentas: leitura sempre, e escrita com `allowWrite`. */
+/** Picks the tools: read tools always, write tools with `allowWrite`. */
 export function canvasTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[] {
   return [...CANVAS_READ_TOOLS, ...(allowWrite ? CANVAS_WRITE_TOOLS : [])];
 }
 
-/** Cria o servidor MCP do Canvas com as ferramentas dadas ligadas ao contexto. */
+/** Creates the Canvas MCP server with the given tools bound to the context. */
 export function createCanvasMcpServer(
   specs: readonly ToolSpec<CanvasContext>[],
   ctx: CanvasContext,

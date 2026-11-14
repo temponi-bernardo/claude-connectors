@@ -1,4 +1,4 @@
-// Package snapshot implementa o formato cifrado WAS1 (ver API.md) e o empacotamento tar dos bancos.
+// Package snapshot implements the encrypted WAS1 format (see API.md) and the tar packing of the databases.
 package snapshot
 
 import (
@@ -16,15 +16,15 @@ import (
 )
 
 const (
-	// Magic identifica o formato no início do arquivo.
+	// Magic identifies the format at the start of the file.
 	Magic = "WAS1"
-	// Version é a única versão de formato conhecida.
+	// Version is the only known format version.
 	Version = 1
-	// BlockSize é o tamanho em claro de cada bloco gravado.
+	// BlockSize is the plaintext size of each written block.
 	BlockSize = 64 * 1024
-	// HeaderSize é o tamanho fixo do cabeçalho (magic+versão+generation+bloco+salt+reservado).
+	// HeaderSize is the fixed header size (magic+version+generation+block+salt+reserved).
 	HeaderSize = 63
-	// KeySize é o tamanho exigido da chave mestra (AES-256).
+	// KeySize is the required master key size (AES-256).
 	KeySize = 32
 
 	hkdfInfo     = "whatsapp-snapshot-v1"
@@ -34,28 +34,28 @@ const (
 )
 
 var (
-	// ErrBadHeader indica magic, tamanho de bloco ou campo reservado inválidos.
-	ErrBadHeader = errors.New("snapshot: cabeçalho inválido")
-	// ErrVersion indica uma versão de formato desconhecida.
-	ErrVersion = errors.New("snapshot: versão desconhecida")
-	// ErrAuth indica falha de autenticação de um bloco (chave errada, byte alterado ou blocos reordenados).
-	ErrAuth = errors.New("snapshot: falha de autenticação")
-	// ErrTruncated indica que o arquivo terminou antes do último bloco.
-	ErrTruncated = errors.New("snapshot: arquivo truncado")
-	// ErrTrailing indica dados depois do último bloco.
-	ErrTrailing = errors.New("snapshot: dados após o último bloco")
-	// ErrKeySize indica chave mestra com tamanho diferente de 32 bytes.
-	ErrKeySize = errors.New("snapshot: a chave precisa ter 32 bytes")
+	// ErrBadHeader signals an invalid magic, block size or reserved field.
+	ErrBadHeader = errors.New("snapshot: invalid header")
+	// ErrVersion signals an unknown format version.
+	ErrVersion = errors.New("snapshot: unknown version")
+	// ErrAuth signals a block authentication failure (wrong key, altered byte or reordered blocks).
+	ErrAuth = errors.New("snapshot: authentication failed")
+	// ErrTruncated signals that the file ended before the last block.
+	ErrTruncated = errors.New("snapshot: truncated file")
+	// ErrTrailing signals data after the last block.
+	ErrTrailing = errors.New("snapshot: data after the last block")
+	// ErrKeySize signals a master key whose size is not 32 bytes.
+	ErrKeySize = errors.New("snapshot: the key must be 32 bytes")
 )
 
-// Header é o cabeçalho WAS1 já decodificado.
+// Header is the decoded WAS1 header.
 type Header struct {
 	Generation uint64
 	BlockSize  uint32
 	Salt       [saltSize]byte
 }
 
-// encodeHeader serializa o cabeçalho em 63 bytes (função pura).
+// encodeHeader serializes the header into 63 bytes (pure).
 func encodeHeader(h Header) []byte {
 	buf := make([]byte, HeaderSize)
 	copy(buf[0:4], Magic)
@@ -66,7 +66,7 @@ func encodeHeader(h Header) []byte {
 	return buf
 }
 
-// decodeHeader valida e decodifica os 63 bytes do cabeçalho (função pura).
+// decodeHeader validates and decodes the 63 header bytes (pure).
 func decodeHeader(buf []byte) (Header, error) {
 	var h Header
 	if len(buf) != HeaderSize || string(buf[0:4]) != Magic {
@@ -84,7 +84,7 @@ func decodeHeader(buf []byte) (Header, error) {
 	return h, nil
 }
 
-// newAEAD deriva a subchave HKDF-SHA256(chave, salt, info) e cria o AES-256-GCM.
+// newAEAD derives the HKDF-SHA256(key, salt, info) subkey and creates the AES-256-GCM.
 func newAEAD(key []byte, salt []byte) (cipher.AEAD, error) {
 	if len(key) != KeySize {
 		return nil, ErrKeySize
@@ -100,7 +100,7 @@ func newAEAD(key []byte, salt []byte) (cipher.AEAD, error) {
 	return cipher.NewGCM(block)
 }
 
-// blockNonce monta o nonce: 3 zeros + contador uint64 big-endian + flag de último bloco (função pura).
+// blockNonce builds the nonce: 3 zeros + big-endian uint64 counter + last-block flag (pure).
 func blockNonce(counter uint64, last bool) []byte {
 	nonce := make([]byte, 12)
 	binary.BigEndian.PutUint64(nonce[3:11], counter)
@@ -110,7 +110,7 @@ func blockNonce(counter uint64, last bool) []byte {
 	return nonce
 }
 
-// Writer cifra em streaming no formato WAS1. Close grava o último bloco e é obrigatório.
+// Writer encrypts in streaming in the WAS1 format. Close writes the last block and is mandatory.
 type Writer struct {
 	dst     io.Writer
 	aead    cipher.AEAD
@@ -120,7 +120,7 @@ type Writer struct {
 	closed  bool
 }
 
-// NewWriter grava o cabeçalho em dst e devolve um Writer pronto para receber o conteúdo em claro.
+// NewWriter writes the header to dst and returns a Writer ready to receive the plaintext.
 func NewWriter(dst io.Writer, key []byte, generation uint64) (*Writer, error) {
 	h := Header{Generation: generation, BlockSize: BlockSize}
 	if _, err := rand.Read(h.Salt[:]); err != nil {
@@ -137,10 +137,10 @@ func NewWriter(dst io.Writer, key []byte, generation uint64) (*Writer, error) {
 	return &Writer{dst: dst, aead: aead, aad: header, buf: make([]byte, 0, BlockSize)}, nil
 }
 
-// Write acumula o conteúdo e sela blocos cheios, sempre guardando o último para o Close.
+// Write buffers the content and seals full blocks, always keeping the last one for Close.
 func (w *Writer) Write(p []byte) (int, error) {
 	if w.closed {
-		return 0, errors.New("snapshot: escrita após Close")
+		return 0, errors.New("snapshot: write after Close")
 	}
 	n := len(p)
 	for len(p) > 0 {
@@ -156,7 +156,7 @@ func (w *Writer) Write(p []byte) (int, error) {
 	return n, nil
 }
 
-// Close sela o bloco final (flag 1), que pode estar vazio.
+// Close seals the final block (flag 1), which may be empty.
 func (w *Writer) Close() error {
 	if w.closed {
 		return nil
@@ -165,7 +165,7 @@ func (w *Writer) Close() error {
 	return w.seal(true)
 }
 
-// seal cifra o buffer atual como um bloco e o grava no destino.
+// seal encrypts the current buffer as one block and writes it to the destination.
 func (w *Writer) seal(last bool) error {
 	out := w.aead.Seal(nil, blockNonce(w.counter, last), w.buf, w.aad)
 	w.counter++
@@ -174,7 +174,7 @@ func (w *Writer) seal(last bool) error {
 	return err
 }
 
-// Reader decifra em streaming um arquivo WAS1, validando ordem, integridade e o bloco final.
+// Reader decrypts a WAS1 file in streaming, validating order, integrity and the final block.
 type Reader struct {
 	src     io.Reader
 	aead    cipher.AEAD
@@ -186,7 +186,7 @@ type Reader struct {
 	done    bool
 }
 
-// NewReader lê e valida o cabeçalho de src.
+// NewReader reads and validates the header of src.
 func NewReader(src io.Reader, key []byte) (*Reader, error) {
 	raw := make([]byte, HeaderSize)
 	if _, err := io.ReadFull(src, raw); err != nil {
@@ -203,10 +203,10 @@ func NewReader(src io.Reader, key []byte) (*Reader, error) {
 	return &Reader{src: src, aead: aead, aad: raw, header: h, chunk: make([]byte, int(h.BlockSize)+tagSize)}, nil
 }
 
-// Generation devolve a geração gravada no cabeçalho.
+// Generation returns the generation stored in the header.
 func (r *Reader) Generation() uint64 { return r.header.Generation }
 
-// Read entrega o conteúdo em claro; só devolve io.EOF depois de autenticar o bloco final.
+// Read returns the plaintext; it only returns io.EOF after authenticating the final block.
 func (r *Reader) Read(p []byte) (int, error) {
 	for len(r.plain) == 0 {
 		if r.done {
@@ -221,7 +221,7 @@ func (r *Reader) Read(p []byte) (int, error) {
 	return n, nil
 }
 
-// nextBlock lê e abre o próximo bloco cifrado.
+// nextBlock reads and opens the next encrypted block.
 func (r *Reader) nextBlock() error {
 	n, err := io.ReadFull(r.src, r.chunk)
 	switch {
@@ -240,7 +240,7 @@ func (r *Reader) nextBlock() error {
 	return r.openFinal(r.chunk)
 }
 
-// openFinal abre um bloco que precisa ser o último e confirma que nada vem depois.
+// openFinal opens a block that must be the last one and confirms nothing follows it.
 func (r *Reader) openFinal(ct []byte) error {
 	plain, err := r.open(ct, true)
 	if err != nil {
@@ -254,7 +254,7 @@ func (r *Reader) openFinal(ct []byte) error {
 	return nil
 }
 
-// open autentica e decifra um bloco com o contador atual.
+// open authenticates and decrypts a block with the current counter.
 func (r *Reader) open(ct []byte, last bool) ([]byte, error) {
 	if len(ct) < tagSize {
 		return nil, ErrTruncated

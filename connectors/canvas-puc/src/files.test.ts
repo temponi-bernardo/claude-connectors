@@ -19,7 +19,7 @@ function fixture(name: string): Uint8Array {
 }
 
 describe('fileContentBlock', () => {
-  it('usa bloco de imagem para image/* e recurso embutido para o resto', () => {
+  it('uses an image block for image/* and an embedded resource for the rest', () => {
     const bytes = new Uint8Array([1]);
     expect(fileContentBlock({ 'content-type': 'image/png' }, bytes)).toEqual({
       type: 'image',
@@ -37,7 +37,7 @@ describe('fileContentBlock', () => {
 });
 
 describe('downloadedFileResult', () => {
-  it('descreve o arquivo e anexa o conteúdo', () => {
+  it('describes the file and attaches the content', () => {
     const file = { display_name: 'a.pdf', url: 'u', 'content-type': 'application/pdf' };
     const result = toToolResult(downloadedFileResult(file, new Uint8Array(2048)));
     expect(result.content[0]).toEqual({
@@ -49,7 +49,7 @@ describe('downloadedFileResult', () => {
 });
 
 describe('downloadRefusal', () => {
-  it('recusa sem link ou acima do limite, e libera o resto', () => {
+  it('refuses without a link or above the limit, and allows the rest', () => {
     expect(downloadRefusal({ display_name: 'a' })).toContain('has no download link');
     const big = { display_name: 'v.mp4', url: 'u', size: MAX_DOWNLOAD_BYTES + 1 };
     expect(downloadRefusal(big)).toBe(
@@ -61,7 +61,7 @@ describe('downloadRefusal', () => {
 });
 
 describe('downloadCanvasFile', () => {
-  it('baixa os bytes quando pode e devolve o motivo quando não', async () => {
+  it('downloads the bytes when it can and returns the reason when it cannot', async () => {
     const { ctx, fetchBytes } = fakeContext({ u: new Uint8Array([1]) });
     const ok = await downloadCanvasFile(ctx.client, { url: 'u', 'content-type': 'image/png' });
     expect(fetchBytes).toHaveBeenCalledWith('u');
@@ -71,7 +71,7 @@ describe('downloadCanvasFile', () => {
 });
 
 describe('readCanvasFileText', () => {
-  it('lê .docx e .doc pelo conteúdo binário', async () => {
+  it('reads .docx and .doc from the binary content', async () => {
     const { ctx } = fakeContext({ x: fixture('exemplo.docx'), d: fixture('exemplo.doc') });
     const docx = await readCanvasFileText(ctx.client, { display_name: 'a.docx', url: 'x' });
     expect(docx).toBe('# a.docx\n\nOlá, mundo!\nSegunda linha com ação & <tag>.');
@@ -83,7 +83,7 @@ describe('readCanvasFileText', () => {
     expect(doc).toBe('# b\n\nOlá, mundo!\nSegunda linha com ação & <tag>.');
   });
 
-  it('converte HTML, corta textos enormes e devolve o link sem url ou para binários', async () => {
+  it('converts HTML, cuts huge texts and returns the link without a url or for binaries', async () => {
     const { ctx } = fakeContext({ h: '<p>x</p>', g: 'a'.repeat(MAX_TEXT_CHARS * 2) });
     const html = { display_name: 'a.html', url: 'h', 'content-type': 'text/html' };
     await expect(readCanvasFileText(ctx.client, html)).resolves.toBe('# a.html\n\nx');

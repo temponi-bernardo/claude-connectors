@@ -1,9 +1,9 @@
 /**
- * Página HTML do `/authorize`: o usuário cola a credencial do serviço (ex.: token do Canvas) para autorizar
- * o Claude. HTML estático, sem script, com os tokens visuais de `docs/UI.md`. Pura.
+ * HTML page of `/authorize`: the user pastes the service credential (e.g. the Canvas token) to authorize
+ * Claude. Static HTML, no script, with the visual tokens from `docs/UI.md`. Pure.
  */
 
-/** Textos da página, fornecidos pelo conector. */
+/** Page texts, supplied by the connector. */
 export interface LoginPageText {
   readonly title: string;
   readonly intro: string;
@@ -13,7 +13,7 @@ export interface LoginPageText {
   readonly submit: string;
 }
 
-/** O que a página mostra: textos, pedido selado, host que vai receber o acesso e erro (se houver). */
+/** What the page shows: texts, sealed request, host that will receive access and error (if any). */
 export interface LoginPageView {
   readonly text: LoginPageText;
   readonly pending: string;
@@ -21,7 +21,7 @@ export interface LoginPageView {
   readonly error: string | null;
 }
 
-/** Estilo da página: tokens de cor, espaço e raio (claro e escuro), documentados em `docs/UI.md`. */
+/** Page style: color, spacing and radius tokens (light and dark), documented in `docs/UI.md`. */
 export const LOGIN_PAGE_CSS = `:root{--bg:#f6f7f9;--surface:#fff;--text:#1d2129;--muted:#5b6270;--accent:#2357d9;--danger:#b42318;--line:#d9dde3;--space:16px;--radius:10px}
 @media (prefers-color-scheme:dark){:root{--bg:#121417;--surface:#1c1f24;--text:#e8eaed;--muted:#a3a9b3;--accent:#7aa2ff;--danger:#ff8a80;--line:#30343b}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;padding:var(--space)}
@@ -31,7 +31,7 @@ input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8p
 button{margin-top:var(--space);width:100%;padding:10px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;font-weight:600;cursor:pointer}
 a{color:var(--accent)}.error{color:var(--danger);font-weight:600}`;
 
-/** Escapa texto para HTML (conteúdo e atributos). */
+/** Escapes text for HTML (content and attributes). */
 export function escapeHtml(value: string): string {
   return value
     .replaceAll('&', '&amp;')
@@ -41,13 +41,13 @@ export function escapeHtml(value: string): string {
     .replaceAll("'", '&#39;');
 }
 
-/** Gera a página de login completa. */
+/** Renders the full login page. */
 export function renderLoginPage(view: LoginPageView): string {
   const { text } = view;
   const error = view.error ? `<p class="error" role="alert">${escapeHtml(view.error)}</p>` : '';
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escapeHtml(text.title)}</title><style>${LOGIN_PAGE_CSS}</style></head><body><main>
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escapeHtml(text.title)}</title><style>${LOGIN_PAGE_CSS}</style></head><body><main>
 <h1>${escapeHtml(text.title)}</h1>
-<p>${escapeHtml(text.intro)} O acesso vai para <strong>${escapeHtml(view.clientHost)}</strong>.</p>
+<p>${escapeHtml(text.intro)} Access will be granted to <strong>${escapeHtml(view.clientHost)}</strong>.</p>
 ${error}<form method="post" action="/authorize">
 <input type="hidden" name="pending" value="${escapeHtml(view.pending)}">
 <label for="secret">${escapeHtml(text.secretLabel)}</label>

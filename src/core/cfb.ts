@@ -1,16 +1,16 @@
 /**
- * Leitura mínima de arquivos OLE/CFB (Compound File Binary, o contêiner do .doc do Word 97-2003):
- * acha um stream pelo nome e devolve seus bytes. Pura: só lê o buffer.
+ * Minimal OLE/CFB reader (Compound File Binary, the container of Word 97-2003 .doc files):
+ * finds a stream by name and returns its bytes. Pure: only reads the buffer.
  */
 import { byteView, concatBytes, utf16leToString } from './bytes.js';
 
-/** Assinatura dos 8 primeiros bytes de todo arquivo CFB. */
+/** Signature in the first 8 bytes of every CFB file. */
 export const CFB_SIGNATURE: readonly number[] = [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1];
 
-/** Marca de fim de cadeia na FAT. */
+/** End-of-chain mark in the FAT. */
 const END_OF_CHAIN = 0xfffffffe;
 
-/** Campos do cabeçalho usados na leitura. */
+/** Header fields used for reading. */
 export interface CfbHeader {
   readonly sectorSize: number;
   readonly miniSectorSize: number;
@@ -21,14 +21,14 @@ export interface CfbHeader {
   readonly difatCount: number;
 }
 
-/** Entrada do diretório: nome, primeiro setor e tamanho do stream. */
+/** Directory entry: name, first sector and stream size. */
 export interface CfbEntry {
   readonly name: string;
   readonly start: number;
   readonly size: number;
 }
 
-/** Arquivo CFB já indexado (cabeçalho, FAT e diretório). */
+/** Indexed CFB file (header, FAT and directory). */
 export interface CfbFile {
   readonly bytes: Uint8Array;
   readonly header: CfbHeader;
@@ -36,14 +36,14 @@ export interface CfbFile {
   readonly entries: readonly CfbEntry[];
 }
 
-/** Diz se os bytes começam com a assinatura CFB. */
+/** Says whether the bytes start with the CFB signature. */
 export function isCfb(bytes: Uint8Array): boolean {
   return CFB_SIGNATURE.every((b, i) => bytes[i] === b);
 }
 
-/** Lê o cabeçalho de 512 bytes. */
+/** Reads the 512-byte header. */
 export function readCfbHeader(bytes: Uint8Array): CfbHeader {
-  if (!isCfb(bytes)) throw new Error('Arquivo não é um documento do Office (OLE).');
+  if (!isCfb(bytes)) throw new Error('File is not an Office (OLE) document.');
   const v = byteView(bytes);
   return {
     sectorSize: 1 << v.getUint16(0x1e, true),
@@ -56,19 +56,19 @@ export function readCfbHeader(bytes: Uint8Array): CfbHeader {
   };
 }
 
-/** Bytes de um setor regular (o setor 0 começa logo após o cabeçalho). */
+/** Bytes of a regular sector (sector 0 starts right after the header). */
 export function cfbSector(bytes: Uint8Array, header: CfbHeader, id: number): Uint8Array {
   const start = (id + 1) * header.sectorSize;
   return bytes.subarray(start, start + header.sectorSize);
 }
 
-/** Lê um setor como lista de números de 32 bits. */
+/** Reads a sector as a list of 32-bit numbers. */
 export function sectorWords(sector: Uint8Array): number[] {
   const v = byteView(sector);
   return Array.from({ length: sector.length >> 2 }, (_, i) => v.getUint32(i * 4, true));
 }
 
-/** Ids dos setores da FAT: 109 no cabeçalho e o resto na cadeia DIFAT. */
+/** FAT sector ids: 109 in the header and the rest in the DIFAT chain. */
 export function fatSectorIds(bytes: Uint8Array, header: CfbHeader): number[] {
   const ids = sectorWords(bytes.subarray(0x4c, 0x200));
   let next = header.firstDifatSector;
@@ -80,7 +80,7 @@ export function fatSectorIds(bytes: Uint8Array, header: CfbHeader): number[] {
   return ids.filter((id) => id < END_OF_CHAIN);
 }
 
-/** Segue uma cadeia de setores a partir de `start`, parando em fim de cadeia ou laço. */
+/** Follows a sector chain from `start`, stopping at end of chain or on a loop. */
 export function followChain(table: readonly number[], start: number): number[] {
   const chain: number[] = [];
   let id: number | undefined = start;
@@ -91,14 +91,14 @@ export function followChain(table: readonly number[], start: number): number[] {
   return chain;
 }
 
-/** Bytes de uma cadeia de setores regulares. */
+/** Bytes of a chain of regular sectors. */
 export function readRegularChain(file: Omit<CfbFile, 'entries'>, start: number): Uint8Array {
   return concatBytes(
     followChain(file.fat, start).map((id) => cfbSector(file.bytes, file.header, id)),
   );
 }
 
-/** Lê as entradas de 128 bytes do diretório (nome em UTF-16, primeiro setor e tamanho). */
+/** Reads the 128-byte directory entries (UTF-16 name, first sector and size). */
 export function parseDirectory(dir: Uint8Array): CfbEntry[] {
   const v = byteView(dir);
   const entries: CfbEntry[] = [];
@@ -113,7 +113,7 @@ export function parseDirectory(dir: Uint8Array): CfbEntry[] {
   return entries;
 }
 
-/** Abre um arquivo CFB: cabeçalho, FAT e diretório. */
+/** Opens a CFB file: header, FAT and directory. */
 export function openCfb(bytes: Uint8Array): CfbFile {
   const header = readCfbHeader(bytes);
   const fat = fatSectorIds(bytes, header).flatMap((id) =>
@@ -123,7 +123,7 @@ export function openCfb(bytes: Uint8Array): CfbFile {
   return { bytes, header, fat, entries };
 }
 
-/** Bytes de um stream pequeno, guardado no mini stream (setores de 64 bytes). */
+/** Bytes of a small stream, stored in the mini stream (64-byte sectors). */
 export function readMiniStream(file: CfbFile, entry: CfbEntry): Uint8Array {
   const root = file.entries[0];
   const container = root ? readRegularChain(file, root.start) : new Uint8Array();
@@ -135,7 +135,7 @@ export function readMiniStream(file: CfbFile, entry: CfbEntry): Uint8Array {
   return concatBytes(parts);
 }
 
-/** Bytes do stream `name`, ou `null` se ele não existir. */
+/** Bytes of the `name` stream, or `null` if it does not exist. */
 export function readCfbStream(file: CfbFile, name: string): Uint8Array | null {
   const entry = file.entries.find((e, i) => i > 0 && e.name === name);
   if (!entry) return null;

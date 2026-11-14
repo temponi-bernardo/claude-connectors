@@ -1,6 +1,6 @@
 /**
- * Rotas do `/pair`: login do dono pelo GitHub (mesma lista `ALLOWED_EMAILS` do OAuth), sessão em cookie selado,
- * token anti-CSRF e checagem de origem nos POSTs, e as ações de pareamento repassadas à ponte.
+ * `/pair` routes: owner login via GitHub (same `ALLOWED_EMAILS` list as OAuth), session in a sealed cookie,
+ * anti-CSRF token and origin check on POSTs, and the pairing actions forwarded to the bridge.
  */
 import {
   finishGithubLogin,
@@ -16,28 +16,28 @@ import { normalizePhone } from './config.js';
 import type { BridgeStatus } from './format.js';
 import { renderPairPage, type PairPageView } from './pair-page.js';
 
-/** Dependências do `/pair`. */
+/** `/pair` dependencies. */
 export interface PairApp {
   readonly settings: OAuthSettings;
   readonly github: GithubLoginSettings;
   readonly bridge: BridgeFetch;
-  /** Relógio em segundos Unix. */
+  /** Clock in Unix seconds. */
   readonly now: () => number;
   readonly timeoutMs: number;
 }
 
-/** Nomes dos cookies (prefixo `__Host-`: só https, sem domínio, caminho `/`). */
+/** Cookie names (`__Host-` prefix: https only, no domain, path `/`). */
 export const PAIR_SESSION_COOKIE = '__Host-wa_pair';
 export const PAIR_NONCE_COOKIE = '__Host-wa_pair_nonce';
 
-/** Validade da sessão do `/pair` e do login em andamento, em segundos. */
+/** Lifetime of the `/pair` session and of a login in progress, in seconds. */
 export const PAIR_SESSION_TTL_SECONDS = 30 * 60;
 export const PAIR_LOGIN_TTL_SECONDS = 10 * 60;
 
-/** Caminho do retorno do GitHub para o `/pair` (subcaminho do retorno cadastrado no OAuth App). */
+/** GitHub callback path for `/pair` (subpath of the callback registered in the OAuth App). */
 export const PAIR_CALLBACK_PATH = '/oauth/callback/pair';
 
-/** Lê os cookies de um header `Cookie`. */
+/** Reads the cookies from a `Cookie` header. */
 export function parseCookies(header: string | null): Record<string, string> {
   const cookies: Record<string, string> = {};
   for (const part of (header ?? '').split(';').map((item) => item.trim())) {
@@ -47,19 +47,19 @@ export function parseCookies(header: string | null): Record<string, string> {
   return cookies;
 }
 
-/** Monta um `Set-Cookie` seguro (HttpOnly, Secure, SameSite=Lax); `maxAge` 0 apaga. */
+/** Builds a secure `Set-Cookie` (HttpOnly, Secure, SameSite=Lax); `maxAge` 0 deletes it. */
 export function pairCookie(name: string, value: string, maxAge: number): string {
   return `${name}=${value}; Path=/; Max-Age=${maxAge}; HttpOnly; Secure; SameSite=Lax`;
 }
 
-/** Redirecionamento com cookies. */
+/** Redirect with cookies. */
 export function redirectWithCookies(location: string, cookies: readonly string[]): Response {
   const headers = new Headers({ location, 'cache-control': 'no-store' });
   for (const cookie of cookies) headers.append('set-cookie', cookie);
   return new Response(null, { status: 302, headers });
 }
 
-/** E-mail da sessão do `/pair` no cookie; nulo se ausente, vencida ou de quem saiu da lista. */
+/** Email of the `/pair` session in the cookie; null if missing, expired or no longer on the list. */
 export function readPairSession(app: PairApp, request: Request): string | null {
   const sealed = parseCookies(request.headers.get('cookie'))[PAIR_SESSION_COOKIE] ?? '';
   const claims = openSealed(sealed, app.settings.key, { typ: 'pair_session', now: app.now() });
@@ -67,7 +67,7 @@ export function readPairSession(app: PairApp, request: Request): string | null {
   return email && app.github.allowedEmails.includes(email) ? email : null;
 }
 
-/** Token anti-CSRF amarrado ao e-mail da sessão. */
+/** Anti-CSRF token bound to the session email. */
 export function issuePairCsrf(app: PairApp, email: string): string {
   return sealPayload(
     { typ: 'pair_csrf', exp: app.now() + PAIR_SESSION_TTL_SECONDS, email },
@@ -75,7 +75,7 @@ export function issuePairCsrf(app: PairApp, email: string): string {
   );
 }
 
-/** Confere o token anti-CSRF do formulário e a origem da requisição. */
+/** Checks the form's anti-CSRF token and the request origin. */
 export function isTrustedPost(
   app: PairApp,
   request: Request,
@@ -86,7 +86,7 @@ export function isTrustedPost(
   return claims?.email === input.email && origin === new URL(app.settings.issuer).origin;
 }
 
-/** Começa o login do `/pair`: manda ao GitHub com `state` selado e amarra o navegador por um nonce em cookie. */
+/** Starts the `/pair` login: sends to GitHub with a sealed `state` and binds the browser with a nonce cookie. */
 export function startPairLogin(app: PairApp): Response {
   const nonce = crypto.randomUUID();
   const state = sealPayload(
@@ -103,8 +103,7 @@ export function startPairLogin(app: PairApp): Response {
   ]);
 }
 
-/** Retorno do GitHub no `/pair`: confere `state` e nonce, conclui o login e abre a sessão. */
-/** Confere o `state` do retorno do GitHub e o nonce do cookie deste navegador. */
+/** Checks the `state` of the GitHub callback and this browser's nonce cookie. */
 export function isValidPairLogin(app: PairApp, request: Request): boolean {
   const query = new URL(request.url).searchParams;
   const claims = openSealed(query.get('state') ?? '', app.settings.key, {
@@ -115,7 +114,7 @@ export function isValidPairLogin(app: PairApp, request: Request): boolean {
   return claims !== null && nonce !== undefined && claims.nonce === nonce;
 }
 
-/** Abre a sessão do `/pair` para o e-mail aceito e volta à página. */
+/** Opens the `/pair` session for the accepted email and returns to the page. */
 export function openPairSession(app: PairApp, email: string): Response {
   const session = sealPayload(
     { typ: 'pair_session', exp: app.now() + PAIR_SESSION_TTL_SECONDS, email },
@@ -127,11 +126,11 @@ export function openPairSession(app: PairApp, email: string): Response {
   ]);
 }
 
-/** Retorno do GitHub no `/pair`: confere `state` e nonce, conclui o login e abre a sessão. */
+/** GitHub callback for `/pair`: checks `state` and nonce, finishes the login and opens the session. */
 export async function handlePairCallback(app: PairApp, request: Request): Promise<Response> {
   if (!isValidPairLogin(app, request)) {
     return htmlResponse(
-      '<p>Login expirado ou de outro navegador. <a href="/pair">Tente de novo</a>.</p>',
+      '<p>Login expired or from another browser. <a href="/pair">Try again</a>.</p>',
       400,
     );
   }
@@ -147,12 +146,12 @@ export async function handlePairCallback(app: PairApp, request: Request): Promis
   }
 }
 
-/** Prazo (ms Unix) de uma chamada do `/pair` à ponte. */
+/** Deadline (Unix ms) of a `/pair` call to the bridge. */
 export function pairDeadline(app: PairApp): number {
   return Date.now() + app.timeoutMs;
 }
 
-/** Lê o status da ponte; nulo se ela não responder a tempo. */
+/** Reads the bridge status; null if it does not answer in time. */
 export async function fetchPairStatus(app: PairApp): Promise<BridgeStatus | null> {
   try {
     return await bridgeJson<BridgeStatus>(app.bridge, '/status', { deadline: pairDeadline(app) });
@@ -161,7 +160,7 @@ export async function fetchPairStatus(app: PairApp): Promise<BridgeStatus | null
   }
 }
 
-/** Mostra a página com o status atual e o resultado de uma ação (código, QR, mensagem ou erro). */
+/** Shows the page with the current status and the result of an action (code, QR, message or error). */
 export async function pairPage(
   app: PairApp,
   email: string,
@@ -176,19 +175,20 @@ export async function pairPage(
   return htmlResponse(renderPairPage(view));
 }
 
-/** Uma ação do `/pair`: recebe o formulário e devolve o que mostrar na página. */
+/** A `/pair` action: takes the form and returns what to show on the page. */
 export type PairAction = (app: PairApp, form: URLSearchParams) => Promise<Partial<PairPageView>>;
 
-/** Mensagem de erro de uma ação. */
+/** Error message of an action. */
 export function pairActionError(error: unknown): Partial<PairPageView> {
   return { error: error instanceof Error ? error.message : String(error) };
 }
 
-/** Ações do `/pair` por caminho. */
+/** `/pair` actions by path. */
 export const PAIR_ACTIONS: Readonly<Record<string, PairAction>> = {
   '/pair/code': async (app, form) => {
     const phone = normalizePhone(form.get('phone') ?? '');
-    if (!phone) return { error: 'Número inválido: use DDI + DDD + número, só dígitos.' };
+    if (!phone)
+      return { error: 'Invalid number: use country code + area code + number, digits only.' };
     const init = jsonPost({ phone });
     const res = await bridgeJson<{ code: string }>(app.bridge, '/pair/code', {
       init,
@@ -207,19 +207,19 @@ export const PAIR_ACTIONS: Readonly<Record<string, PairAction>> = {
       init: { method: 'POST' },
       deadline: pairDeadline(app),
     });
-    return { message: 'Aparelho desvinculado. Pareie de novo quando quiser.' };
+    return { message: 'Device unlinked. Pair again whenever you want.' };
   },
   '/pair/reset': async (app, form) => {
-    if (form.get('confirm') !== 'APAGAR') return { error: 'Digite APAGAR para confirmar.' };
+    if (form.get('confirm') !== 'ERASE') return { error: 'Type ERASE to confirm.' };
     await bridgeJson(app.bridge, '/__reset', {
       init: { method: 'POST' },
       deadline: pairDeadline(app),
     });
-    return { message: 'Backup arquivado. O WhatsApp vai pedir pareamento de novo.' };
+    return { message: 'Backup archived. WhatsApp will ask for pairing again.' };
   },
 };
 
-/** Atende um POST do `/pair` já autenticado: sair, ou executar a ação e mostrar a página. */
+/** Handles an authenticated `/pair` POST: sign out, or run the action and show the page. */
 export async function handlePairPost(
   app: PairApp,
   request: Request,
@@ -227,22 +227,18 @@ export async function handlePairPost(
 ): Promise<Response> {
   const form = await readForm(request);
   if (!isTrustedPost(app, request, { csrf: form.get('csrf') ?? '', email })) {
-    return htmlResponse(
-      '<p>Formulário expirado. <a href="/pair">Recarregue a página</a>.</p>',
-      403,
-    );
+    return htmlResponse('<p>Form expired. <a href="/pair">Reload the page</a>.</p>', 403);
   }
   const path = new URL(request.url).pathname;
   if (path === '/pair/signout')
     return redirectWithCookies('/', [pairCookie(PAIR_SESSION_COOKIE, '', 0)]);
   const action = PAIR_ACTIONS[path];
-  if (!action) return htmlResponse('<p>Não encontrado.</p>', 404);
+  if (!action) return htmlResponse('<p>Not found.</p>', 404);
   const extra = await action(app, form).catch(pairActionError);
   return pairPage(app, email, extra);
 }
 
-/** Roteia as requisições do `/pair`; nulo se o caminho não é do `/pair`. */
-/** Roteia um POST do `/pair`: sem sessão volta ao login; com sessão, executa a ação. */
+/** Routes a `/pair` POST: without a session goes back to login; with a session, runs the action. */
 export function routePairPost(
   app: PairApp,
   request: Request,
@@ -252,12 +248,12 @@ export function routePairPost(
   return handlePairPost(app, request, email);
 }
 
-/** Diz se o caminho pertence ao `/pair`. */
+/** Tells whether the path belongs to `/pair`. */
 export function isPairPath(path: string): boolean {
   return path === '/pair' || path.startsWith('/pair/') || path === PAIR_CALLBACK_PATH;
 }
 
-/** Roteia as requisições do `/pair`; nulo se o caminho não é do `/pair`. */
+/** Routes `/pair` requests; null if the path is not under `/pair`. */
 export async function routePairRequest(app: PairApp, request: Request): Promise<Response | null> {
   const path = new URL(request.url).pathname.replace(/(.)\/+$/, '$1');
   if (!isPairPath(path)) return null;
@@ -266,5 +262,5 @@ export async function routePairRequest(app: PairApp, request: Request): Promise<
   if (route === `GET ${PAIR_CALLBACK_PATH}`) return handlePairCallback(app, request);
   if (route === 'GET /pair') return email ? pairPage(app, email) : startPairLogin(app);
   if (route === 'POST /pair/*') return routePairPost(app, request, email);
-  return htmlResponse('<p>Não encontrado.</p>', 404);
+  return htmlResponse('<p>Not found.</p>', 404);
 }

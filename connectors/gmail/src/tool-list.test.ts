@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { GMAIL_TOOLS } from './tool-list.js';
 
 describe('GMAIL_TOOLS', () => {
-  it('tem as 23 ferramentas, sem exclusão definitiva', () => {
+  it('has the 23 tools, with no permanent deletion', () => {
     expect(GMAIL_TOOLS.map((t) => t.name)).toEqual([
       'list_accounts',
       'link_account',

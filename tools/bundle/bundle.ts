@@ -1,12 +1,12 @@
 /**
- * Build dos conectores: decisões puras sobre o bundle do servidor remoto e a configuração do plugin.
- * Os conectores rodam só na nuvem (ADR 0013): o plugin do marketplace aponta para o servidor HTTP remoto.
+ * Connector build: pure decisions about the remote server bundle and the plugin configuration.
+ * The connectors only run in the cloud (ADR 0013): the marketplace plugin points to the remote HTTP server.
  */
 import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import type { BuildOptions } from 'esbuild';
 
-/** Pasta dos conectores, relativa à raiz do repositório. */
+/** Connectors folder, relative to the repository root. */
 export const CONNECTORS_DIR = 'connectors';
 
 /** Plugin subfolder of each connector: only plugin content, no server code (ADR 0020). */
@@ -18,11 +18,11 @@ export const PLUGIN_MANIFEST_PATH = join(PLUGIN_DIR, '.claude-plugin', 'plugin.j
 /** Plugin MCP config (the remote server address), relative to the connector folder. */
 export const PLUGIN_MCP_CONFIG_PATH = join(PLUGIN_DIR, '.mcp.json');
 
-/** Entrada do servidor remoto em Node (HTTP + OAuth, ADR 0009) e caminho do bundle gerado. */
+/** Entry of the remote Node server (HTTP + OAuth, ADR 0009) and path of the generated bundle. */
 export const REMOTE_ENTRY = join('src', 'remote-main.ts');
 export const REMOTE_BUNDLE_PATH = join('server', 'remote.js');
 
-/** Lista os conectores: subpastas de `connectors/` com manifesto de plugin, em ordem alfabética. */
+/** Lists the connectors: subfolders of `connectors/` with a plugin manifest, in alphabetical order. */
 export function listConnectors(rootDir: string): string[] {
   const dir = join(rootDir, CONNECTORS_DIR);
   if (!existsSync(dir)) return [];
@@ -34,31 +34,31 @@ export function listConnectors(rootDir: string): string[] {
     .sort();
 }
 
-/** Diz se a URL é remota e fixa (`https://`); `${user_config.*}` é recusado porque quebra o Vincular (ADR 0018). */
+/** Says whether the URL is remote and fixed (`https://`); `${user_config.*}` is rejected because it breaks Connect (ADR 0018). */
 export function isRemoteMcpUrl(url: unknown): boolean {
   return typeof url === 'string' && url.startsWith('https://') && !url.includes('${');
 }
 
-/** Problemas de um servidor do `.mcp.json`: precisa ser `http`, com URL `https://`, e sem comando local. */
+/** Problems of a `.mcp.json` server: it must be `http`, with an `https://` URL, and no local command. */
 export function mcpServerProblems(name: string, server: unknown): string[] {
   const entry = (server ?? {}) as Record<string, unknown>;
   const problems: string[] = [];
-  if (entry.type !== 'http') problems.push(`${name}: "type" deve ser "http".`);
+  if (entry.type !== 'http') problems.push(`${name}: "type" must be "http".`);
   if (!isRemoteMcpUrl(entry.url)) {
-    problems.push(`${name}: "url" deve ser um endereço https:// fixo (sem \${user_config.*}).`);
+    problems.push(`${name}: "url" must be a fixed https:// address (no \${user_config.*}).`);
   }
-  if ('command' in entry) problems.push(`${name}: não pode ter "command" (nada roda localmente).`);
+  if ('command' in entry) problems.push(`${name}: must not have "command" (nothing runs locally).`);
   return problems;
 }
 
-/** Problemas da configuração MCP de um plugin: ao menos um servidor, todos remotos. */
+/** Problems of a plugin MCP configuration: at least one server, all of them remote. */
 export function pluginMcpProblems(config: unknown): string[] {
   const servers = (config as { mcpServers?: Record<string, unknown> } | null)?.mcpServers;
-  if (!servers || Object.keys(servers).length === 0) return ['"mcpServers" está vazio.'];
+  if (!servers || Object.keys(servers).length === 0) return ['"mcpServers" is empty.'];
   return Object.entries(servers).flatMap(([name, server]) => mcpServerProblems(name, server));
 }
 
-/** Opções do esbuild para unir o servidor remoto num ESM para Node 22 (com `require` para deps CommonJS). */
+/** esbuild options to bundle the remote server into an ESM for Node 22 (with `require` for CommonJS deps). */
 export function bundleOptions(entry: string, outfile: string): BuildOptions {
   return {
     entryPoints: [entry],

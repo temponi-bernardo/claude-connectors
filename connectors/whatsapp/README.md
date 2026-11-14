@@ -105,13 +105,13 @@ Pré-requisitos: conta Cloudflare com **Workers Paid** (US$ 5/mês, inclui Conta
 
 1. Abra `https://whatsapp-remote.<sua-conta>.workers.dev/pair` e entre com o GitHub (só e-mails de
    `ALLOWED_EMAILS` passam). O primeiro acesso acorda o container (alguns segundos).
-2. Digite seu número com DDI (ex.: `5531999999999`) e clique em **Gerar código de pareamento**.
+2. Digite seu número com DDI (ex.: `5531999999999`) e clique em **Generate pairing code**.
 3. No celular: WhatsApp → **Aparelhos conectados** → **Conectar aparelho** → **Conectar com número de telefone**
-   e digite o código. Alternativa: **Mostrar QR** e ler o QR.
-4. A página atualiza sozinha; quando mostrar "Conectado", o histórico recente começa a chegar (até
+   e digite o código. Alternativa: **Show QR** e ler o QR.
+4. A página atualiza sozinha; quando mostrar "Connected", o histórico recente começa a chegar (até
    `HISTORY_DAYS`, 90 dias).
 
-Na mesma página: **Desvincular este aparelho** (logout) e **Recomeçar do zero** (arquiva o backup no R2 e pede
+Na mesma página: **Unlink this device** (logout) e **Start over** (arquiva o backup no R2 e pede
 pareamento de novo; use se trocar a `SNAPSHOT_KEY` ou o backup corromper).
 
 ## Conectar ao Claude
@@ -219,7 +219,7 @@ poucos MB por sessão. Para limitar gastos, use o _spending limit_ do Workers e 
 - **Backup:** cifrado na ponte com AES-256-GCM em blocos (HKDF por snapshot, cabeçalho autenticado): truncar,
   reordenar ou alterar qualquer byte faz a restauração falhar. A chave nunca vai para o R2.
 - **Limitações:** quem controla sua conta Cloudflare controla o conector (secrets e container). O backup antigo
-  arquivado no "Recomeçar do zero" continua no R2 até você apagar.
+  arquivado no "Start over" continua no R2 até você apagar.
 
 ## Desenvolvimento
 
@@ -232,12 +232,12 @@ poucos MB por sessão. Para limitar gastos, use o _spending limit_ do Workers e 
 
 ## Problemas comuns
 
-| Sintoma                                     | O que fazer                                                                                    |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 500 "Configuração do Worker inválida"       | Falta um secret: a mensagem diz qual                                                           |
-| "WhatsApp is not paired"                    | Abra `/pair` e pareie                                                                          |
-| Pareamento some depois de deploy/reinício   | Confira no R2 o objeto `whatsapp/snapshot.was1`; sem ele, veja nos logs "Snapshot falhou"      |
-| "Tempo esgotado esperando o WhatsApp"       | Container acordando (primeira chamada após dormir): repita em alguns segundos                  |
-| "Não consegui abrir o backup criptografado" | `SNAPSHOT_KEY` mudou ou backup corrompido: volte a chave antiga ou use "Recomeçar do zero"     |
-| Login do GitHub recusado                    | O e-mail precisa estar verificado no GitHub e em `ALLOWED_EMAILS`                              |
-| Callback do GitHub dá erro de redirect      | O OAuth App precisa das duas URIs exatas: `<url>/oauth/callback` e `<url>/oauth/callback/pair` |
+| Sintoma                                   | O que fazer                                                                                    |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| 500 "Invalid Worker configuration"        | Falta um secret: a mensagem diz qual                                                           |
+| "WhatsApp is not paired"                  | Abra `/pair` e pareie                                                                          |
+| Pareamento some depois de deploy/reinício | Confira no R2 o objeto `whatsapp/snapshot.was1`; sem ele, veja nos logs "Snapshot failed"      |
+| "Timed out waiting for WhatsApp"          | Container acordando (primeira chamada após dormir): repita em alguns segundos                  |
+| "Could not open the encrypted backup"     | `SNAPSHOT_KEY` mudou ou backup corrompido: volte a chave antiga ou use "Start over"            |
+| Login do GitHub recusado                  | O e-mail precisa estar verificado no GitHub e em `ALLOWED_EMAILS`                              |
+| Callback do GitHub dá erro de redirect    | O OAuth App precisa das duas URIs exatas: `<url>/oauth/callback` e `<url>/oauth/callback/pair` |

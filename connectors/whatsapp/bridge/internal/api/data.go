@@ -13,7 +13,7 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/wa"
 )
 
-// statusJSON é o corpo de /status e /sync/wait.
+// statusJSON is the body of /status and /sync/wait.
 type statusJSON struct {
 	Phase               string  `json:"phase"`
 	Connected           bool    `json:"connected"`
@@ -28,7 +28,7 @@ type statusJSON struct {
 	Partial             bool    `json:"partial,omitempty"`
 }
 
-// buildStatus junta fase, estado do cliente e contagens do banco.
+// buildStatus combines phase, client state and database counts.
 func (s *Server) buildStatus(ctx context.Context) (statusJSON, error) {
 	st := s.client().State()
 	chats, msgs, err := s.st().Counts(ctx)
@@ -42,7 +42,7 @@ func (s *Server) buildStatus(ctx context.Context) (statusJSON, error) {
 	return out, err
 }
 
-// handleStatus responde GET /status.
+// handleStatus answers GET /status.
 func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	out, err := s.buildStatus(r.Context())
 	if err != nil {
@@ -52,14 +52,14 @@ func (s *Server) handleStatus(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, out)
 }
 
-// Limites de POST /sync/wait.
+// Limits of POST /sync/wait.
 const (
 	defaultSyncWait = 10 * time.Second
 	maxSyncWait     = 20 * time.Second
 	syncPoll        = 250 * time.Millisecond
 )
 
-// parseWait lê timeout_ms (padrão 10000, teto 20000).
+// parseWait reads timeout_ms (default 10000, cap 20000).
 func parseWait(v string) (time.Duration, bool) {
 	if v == "" {
 		return defaultSyncWait, true
@@ -71,16 +71,16 @@ func parseWait(v string) (time.Duration, bool) {
 	return min(time.Duration(n)*time.Millisecond, maxSyncWait), true
 }
 
-// syncDone decide se a espera acabou: sincronizado ou precisando parear (função pura).
+// syncDone decides whether the wait is over: synced or needing pairing (pure).
 func syncDone(st wa.State) bool {
 	return st.NeedsPairing || (st.Connected && st.OfflineSyncComplete)
 }
 
-// handleSyncWait espera a sincronização offline terminar (ou o tempo acabar).
+// handleSyncWait waits for the offline sync to finish (or the time to run out).
 func (s *Server) handleSyncWait(w http.ResponseWriter, r *http.Request) {
 	wait, ok := parseWait(r.URL.Query().Get("timeout_ms"))
 	if !ok {
-		badRequest(w, "timeout_ms precisa ser um inteiro não negativo.")
+		badRequest(w, "timeout_ms must be a non-negative integer.")
 		return
 	}
 	partial := !s.waitSync(r.Context(), wait)
@@ -93,7 +93,7 @@ func (s *Server) handleSyncWait(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, out)
 }
 
-// waitSync faz polling do estado até syncDone ou o prazo; devolve se terminou.
+// waitSync polls the state until syncDone or the deadline; reports whether it finished.
 func (s *Server) waitSync(ctx context.Context, wait time.Duration) bool {
 	deadline := time.Now().Add(wait)
 	for {
@@ -111,13 +111,13 @@ func (s *Server) waitSync(ctx context.Context, wait time.Duration) bool {
 	}
 }
 
-// handleChats responde GET /chats.
+// handleChats answers GET /chats.
 func (s *Server) handleChats(w http.ResponseWriter, r *http.Request) {
 	limit, okL := parseLimit(r, 20)
 	query, okQ := parseQuery(r, false)
 	cursor, err := store.DecodeCursor(r.URL.Query().Get("cursor"))
 	if !okL || !okQ || err != nil {
-		badRequest(w, "Parâmetros inválidos (limit 1–100, query até 200 caracteres, cursor da página anterior).")
+		badRequest(w, "Invalid parameters (limit 1–100, query up to 200 characters, cursor from the previous page).")
 		return
 	}
 	chats, next, err := s.st().ListChats(r.Context(), query, limit, cursor)
@@ -132,18 +132,18 @@ func (s *Server) handleChats(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"chats": out, "next_cursor": encodeNext(next)})
 }
 
-// handleMessages responde GET /messages.
+// handleMessages answers GET /messages.
 func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
 	jid := r.URL.Query().Get("chat_jid")
 	limit, okL := parseLimit(r, 30)
 	before, err := store.DecodeCursor(r.URL.Query().Get("before"))
 	if !validJID(jid) || !okL || err != nil {
-		badRequest(w, "Parâmetros inválidos (chat_jid obrigatório, limit 1–100, before da página anterior).")
+		badRequest(w, "Invalid parameters (chat_jid required, limit 1–100, before from the previous page).")
 		return
 	}
 	chat, err := s.st().GetChat(r.Context(), jid)
 	if errors.Is(err, store.ErrNotFound) {
-		writeError(w, http.StatusNotFound, "chat_not_found", "Conversa não encontrada.")
+		writeError(w, http.StatusNotFound, "chat_not_found", "Chat not found.")
 		return
 	}
 	msgs, next, err2 := s.st().ListMessages(r.Context(), jid, limit, before)
@@ -155,13 +155,13 @@ func (s *Server) handleMessages(w http.ResponseWriter, r *http.Request) {
 		"messages": s.toMessagesJSON(msgs, false), "next_before": encodeNext(next)})
 }
 
-// handleSearch responde GET /search.
+// handleSearch answers GET /search.
 func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	query, okQ := parseQuery(r, true)
 	limit, okL := parseLimit(r, 20)
 	jid := r.URL.Query().Get("chat_jid")
 	if !okQ || !okL || (jid != "" && !validJID(jid)) {
-		badRequest(w, "Parâmetros inválidos (query de 1 a 200 caracteres, limit 1–100).")
+		badRequest(w, "Invalid parameters (query of 1 to 200 characters, limit 1–100).")
 		return
 	}
 	msgs, err := s.st().SearchMessages(r.Context(), query, jid, limit)
@@ -172,7 +172,7 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"messages": s.toMessagesJSON(msgs, true)})
 }
 
-// contactJSON é um contato em /contacts.
+// contactJSON is a contact in /contacts.
 type contactJSON struct {
 	JID      string  `json:"jid"`
 	Name     *string `json:"name"`
@@ -180,12 +180,12 @@ type contactJSON struct {
 	Phone    *string `json:"phone"`
 }
 
-// handleContacts responde GET /contacts.
+// handleContacts answers GET /contacts.
 func (s *Server) handleContacts(w http.ResponseWriter, r *http.Request) {
 	query, okQ := parseQuery(r, true)
 	limit, okL := parseLimit(r, 20)
 	if !okQ || !okL {
-		badRequest(w, "Parâmetros inválidos (query de 1 a 200 caracteres, limit 1–100).")
+		badRequest(w, "Invalid parameters (query of 1 to 200 characters, limit 1–100).")
 		return
 	}
 	cs, err := s.st().SearchContacts(r.Context(), query, limit)
@@ -200,51 +200,51 @@ func (s *Server) handleContacts(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]any{"contacts": out})
 }
 
-// handleMedia responde GET /media com os bytes da mídia.
+// handleMedia answers GET /media with the media bytes.
 func (s *Server) handleMedia(w http.ResponseWriter, r *http.Request) {
 	jid, id := r.URL.Query().Get("chat_jid"), r.URL.Query().Get("message_id")
 	if !validJID(jid) || id == "" || len(id) > 128 {
-		badRequest(w, "chat_jid e message_id são obrigatórios.")
+		badRequest(w, "chat_jid and message_id are required.")
 		return
 	}
 	md, err := s.st().GetMedia(r.Context(), jid, id)
 	if errors.Is(err, store.ErrNotFound) {
-		writeError(w, http.StatusNotFound, "not_found", "Mensagem não encontrada ou sem mídia.")
+		writeError(w, http.StatusNotFound, "not_found", "Message not found or has no media.")
 		return
 	} else if err != nil {
 		s.internalError(w, "media", err)
 		return
 	}
 	if md.Size > s.opts.MaxMediaBytes {
-		writeError(w, http.StatusRequestEntityTooLarge, "too_large", "A mídia passa do limite configurado.")
+		writeError(w, http.StatusRequestEntityTooLarge, "too_large", "The media exceeds the configured limit.")
 		return
 	}
 	s.sendMedia(w, r, md)
 }
 
-// sendMedia baixa a mídia e grava a resposta.
+// sendMedia downloads the media and writes the response.
 func (s *Server) sendMedia(w http.ResponseWriter, r *http.Request, md store.Media) {
 	data, err := s.client().Download(r.Context(), md)
 	switch {
 	case errors.Is(err, wa.ErrMediaExpired):
-		writeError(w, http.StatusGone, "media_expired", "O WhatsApp não tem mais este arquivo.")
+		writeError(w, http.StatusGone, "media_expired", "WhatsApp no longer has this file.")
 		return
 	case errors.Is(err, wa.ErrNotConnected):
-		writeError(w, http.StatusServiceUnavailable, "not_connected", "O WhatsApp não está conectado.")
+		writeError(w, http.StatusServiceUnavailable, "not_connected", "WhatsApp is not connected.")
 		return
 	case err != nil:
-		s.opts.Log.Warn("download de mídia falhou", "err", wa.Redact(err.Error()))
-		writeError(w, http.StatusBadGateway, "download_failed", "Não foi possível baixar a mídia.")
+		s.opts.Log.Warn("media download failed", "err", wa.Redact(err.Error()))
+		writeError(w, http.StatusBadGateway, "download_failed", "Could not download the media.")
 		return
 	case int64(len(data)) > s.opts.MaxMediaBytes:
-		writeError(w, http.StatusRequestEntityTooLarge, "too_large", "A mídia passa do limite configurado.")
+		writeError(w, http.StatusRequestEntityTooLarge, "too_large", "The media exceeds the configured limit.")
 		return
 	}
 	writeMediaHeaders(w.Header(), md, len(data))
 	_, _ = w.Write(data)
 }
 
-// writeMediaHeaders define tipo, tamanho e nome do arquivo (percent-encoded em UTF-8).
+// writeMediaHeaders sets type, size and file name (UTF-8 percent-encoded).
 func writeMediaHeaders(h http.Header, md store.Media, size int) {
 	h.Set("Content-Type", safeMime(md.Mime))
 	h.Set("Content-Length", strconv.Itoa(size))
@@ -254,7 +254,7 @@ func writeMediaHeaders(h http.Header, md store.Media, size int) {
 	}
 }
 
-// safeMime aceita só tipos MIME bem formados; o resto vira application/octet-stream.
+// safeMime accepts only well-formed MIME types; anything else becomes application/octet-stream.
 func safeMime(v string) string {
 	if t, params, err := mime.ParseMediaType(v); err == nil {
 		return mime.FormatMediaType(t, params)

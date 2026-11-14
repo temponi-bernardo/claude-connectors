@@ -1,28 +1,28 @@
 /**
- * Regras do servidor de autorização OAuth 2.1 sem estado: metadados, PKCE, registro dinâmico de cliente
- * e validação do pedido de autorização. Os clientes ficam selados no próprio `client_id`.
+ * Rules of the stateless OAuth 2.1 authorization server: metadata, PKCE, dynamic client registration
+ * and authorization request validation. Clients are sealed into the `client_id` itself.
  */
 import { createHash } from 'node:crypto';
 import { envValue, type EnvVars } from '../core/env.js';
 import { openSealed, parseSealKey, sealPayload } from './seal.js';
 
-/** Validade do `client_id` registrado (10 anos, em segundos). */
+/** Lifetime of a registered `client_id` (10 years, in seconds). */
 export const CLIENT_TTL_SECONDS = 10 * 365 * 24 * 3600;
 
-/** Hosts de retorno OAuth aceitos por padrão: Claude na web e Claude Code (localhost). */
+/** OAuth redirect hosts accepted by default: Claude on the web and Claude Code (localhost). */
 export const DEFAULT_REDIRECT_HOSTS: readonly string[] = ['claude.ai', 'claude.com', 'localhost'];
 
-/** Configuração do servidor de autorização. */
+/** Authorization server configuration. */
 export interface OAuthSettings {
-  /** URL pública do servidor, sem barra final (ex.: `https://canvas.exemplo.dev`). */
+  /** Public URL of the server, without a trailing slash (e.g. `https://canvas.example.dev`). */
   readonly issuer: string;
-  /** Chave do selo (`SEAL_KEY`). */
+  /** Seal key (`SEAL_KEY`). */
   readonly key: Buffer;
-  /** Hosts aceitos como retorno do OAuth (`localhost` libera também `127.0.0.1` em http). */
+  /** Hosts accepted as OAuth redirect (`localhost` also allows `127.0.0.1` over http). */
   readonly redirectHosts: readonly string[];
 }
 
-/** Monta a configuração OAuth do ambiente (`SEAL_KEY`, `OAUTH_REDIRECT_HOSTS`) com o emissor dado. */
+/** Builds the OAuth configuration from the environment (`SEAL_KEY`, `OAUTH_REDIRECT_HOSTS`) with the given issuer. */
 export function readOAuthSettings(env: EnvVars, issuer: string): OAuthSettings {
   const hosts = envValue(env, 'OAUTH_REDIRECT_HOSTS')
     ?.split(',')
@@ -35,17 +35,17 @@ export function readOAuthSettings(env: EnvVars, issuer: string): OAuthSettings {
   };
 }
 
-/** Emissor OAuth: `PUBLIC_URL` sem barra final ou, sem ela, a origem da requisição (ex.: `*.workers.dev`). */
+/** OAuth issuer: `PUBLIC_URL` without a trailing slash or, without it, the request origin (e.g. `*.workers.dev`). */
 export function resolveIssuer(env: EnvVars, origin: string): string {
   return envValue(env, 'PUBLIC_URL')?.replace(/\/+$/, '') ?? origin;
 }
 
-/** Resultado de uma validação: valor, ou erro OAuth (`error` + `error_description`). */
+/** Result of a validation: a value, or an OAuth error (`error` + `error_description`). */
 export type OAuthResult<T> =
   | { readonly ok: true; readonly value: T }
   | { readonly ok: false; readonly error: string; readonly description: string };
 
-/** Pedido de autorização já validado. */
+/** Validated authorization request. */
 export interface AuthorizeRequest {
   readonly clientId: string;
   readonly redirectUri: string;
@@ -53,7 +53,7 @@ export interface AuthorizeRequest {
   readonly state: string | null;
 }
 
-/** Resposta do registro dinâmico (RFC 7591). */
+/** Dynamic registration response (RFC 7591). */
 export interface ClientRegistration {
   readonly client_id: string;
   readonly redirect_uris: readonly string[];
@@ -62,12 +62,12 @@ export interface ClientRegistration {
   readonly response_types: readonly string[];
 }
 
-/** Monta um erro OAuth. */
+/** Builds an OAuth error. */
 export function oauthError<T>(error: string, description: string): OAuthResult<T> {
   return { ok: false, error, description };
 }
 
-/** Metadados do servidor de autorização (RFC 8414). */
+/** Authorization server metadata (RFC 8414). */
 export function authorizationServerMetadata(issuer: string): Record<string, unknown> {
   return {
     issuer,
@@ -81,7 +81,7 @@ export function authorizationServerMetadata(issuer: string): Record<string, unkn
   };
 }
 
-/** Metadados do recurso protegido `/mcp` (RFC 9728). */
+/** Metadata of the protected `/mcp` resource (RFC 9728). */
 export function protectedResourceMetadata(issuer: string): Record<string, unknown> {
   return {
     resource: `${issuer}/mcp`,
@@ -90,7 +90,7 @@ export function protectedResourceMetadata(issuer: string): Record<string, unknow
   };
 }
 
-/** Diz se um endereço de retorno é aceito: https num host listado (ou subdomínio), ou localhost em http. */
+/** Says whether a redirect address is accepted: https on a listed host (or subdomain), or localhost over http. */
 export function isAllowedRedirect(uri: string, hosts: readonly string[]): boolean {
   if (!URL.canParse(uri)) return false;
   const { protocol, hostname } = new URL(uri);
@@ -103,12 +103,12 @@ export function isAllowedRedirect(uri: string, hosts: readonly string[]): boolea
   );
 }
 
-/** Desafio PKCE S256 de um verificador: SHA-256 em base64url. */
+/** PKCE S256 challenge of a verifier: SHA-256 in base64url. */
 export function pkceChallenge(verifier: string): string {
   return createHash('sha256').update(verifier).digest('base64url');
 }
 
-/** Extrai `redirect_uris` (lista de textos) do corpo do registro; nulo se ausente ou malformado. */
+/** Extracts `redirect_uris` (a list of strings) from the registration body; null if missing or malformed. */
 export function readRedirectUris(body: unknown): string[] | null {
   if (typeof body !== 'object' || body === null) return null;
   const uris = (body as { redirect_uris?: unknown }).redirect_uris;
@@ -116,7 +116,7 @@ export function readRedirectUris(body: unknown): string[] | null {
   return uris.every((uri): uri is string => typeof uri === 'string') ? uris : null;
 }
 
-/** Registra um cliente: valida os endereços de retorno e sela-os no `client_id`. */
+/** Registers a client: validates the redirect addresses and seals them into the `client_id`. */
 export function registerClient(
   body: unknown,
   settings: OAuthSettings,
@@ -124,7 +124,7 @@ export function registerClient(
 ): OAuthResult<ClientRegistration> {
   const uris = readRedirectUris(body);
   if (!uris?.every((uri) => isAllowedRedirect(uri, settings.redirectHosts))) {
-    return oauthError('invalid_redirect_uri', 'Endereço de retorno ausente ou não permitido.');
+    return oauthError('invalid_redirect_uri', 'Missing or disallowed redirect address.');
   }
   const clientId = sealPayload(
     { typ: 'client', exp: now + CLIENT_TTL_SECONDS, redirect_uris: uris },
@@ -142,7 +142,7 @@ export function registerClient(
   };
 }
 
-/** Endereços de retorno registrados num `client_id`; nulo se o cliente não é deste servidor. */
+/** Redirect addresses registered in a `client_id`; null if the client is not from this server. */
 export function clientRedirectUris(
   clientId: string,
   settings: OAuthSettings,
@@ -152,7 +152,7 @@ export function clientRedirectUris(
   return claims ? readRedirectUris(claims) : null;
 }
 
-/** Valida a query do `/authorize`: cliente, retorno registrado, `response_type=code` e PKCE S256. */
+/** Validates the `/authorize` query: client, registered redirect, `response_type=code` and PKCE S256. */
 export function parseAuthorizeQuery(
   query: URLSearchParams,
   settings: OAuthSettings,
@@ -160,25 +160,24 @@ export function parseAuthorizeQuery(
 ): OAuthResult<AuthorizeRequest> {
   const clientId = query.get('client_id') ?? '';
   const uris = clientRedirectUris(clientId, settings, now);
-  if (!uris)
-    return oauthError('invalid_client', 'Cliente desconhecido: registre o conector de novo.');
+  if (!uris) return oauthError('invalid_client', 'Unknown client: register the connector again.');
   const redirectUri = query.get('redirect_uri') ?? '';
   if (!uris.includes(redirectUri))
-    return oauthError('invalid_request', 'redirect_uri não registrado.');
+    return oauthError('invalid_request', 'redirect_uri is not registered.');
   const challenge = readCodeChallenge(query);
   if (!challenge.ok) return challenge;
   const codeChallenge = challenge.value;
   return { ok: true, value: { clientId, redirectUri, codeChallenge, state: query.get('state') } };
 }
 
-/** Confere `response_type=code` e PKCE S256; devolve o `code_challenge`. */
+/** Checks `response_type=code` and PKCE S256; returns the `code_challenge`. */
 export function readCodeChallenge(query: URLSearchParams): OAuthResult<string> {
   if (query.get('response_type') !== 'code') {
-    return oauthError('unsupported_response_type', 'Só response_type=code é aceito.');
+    return oauthError('unsupported_response_type', 'Only response_type=code is accepted.');
   }
   const codeChallenge = query.get('code_challenge') ?? '';
   if (!codeChallenge || query.get('code_challenge_method') !== 'S256') {
-    return oauthError('invalid_request', 'PKCE com code_challenge_method=S256 é obrigatório.');
+    return oauthError('invalid_request', 'PKCE with code_challenge_method=S256 is required.');
   }
   return { ok: true, value: codeChallenge };
 }

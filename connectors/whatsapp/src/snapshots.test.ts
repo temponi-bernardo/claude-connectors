@@ -22,14 +22,14 @@ function snapshotResponse(text: string, generation: number): Response {
   });
 }
 
-describe('storedGeneration e readUploadHeaders', () => {
-  it('lê a geração dos metadados, 0 se ausente ou inválida', () => {
+describe('storedGeneration and readUploadHeaders', () => {
+  it('reads the generation from metadata, 0 if missing or invalid', () => {
     expect(storedGeneration({ customMetadata: { generation: '7' } })).toBe(7);
     expect(storedGeneration({ customMetadata: { generation: 'x' } })).toBe(0);
     expect(storedGeneration(null)).toBe(0);
   });
 
-  it('exige tamanho e geração positivos', () => {
+  it('requires positive length and generation', () => {
     expect(readUploadHeaders(snapshotResponse('abc', 2).headers)).toEqual({
       length: 3,
       generation: 2,
@@ -39,7 +39,7 @@ describe('storedGeneration e readUploadHeaders', () => {
 });
 
 describe('storeSnapshot', () => {
-  it('grava geração mais nova e recusa a velha ou igual', async () => {
+  it('writes a newer generation and rejects an older or equal one', async () => {
     const bucket = memoryBucket();
     function save(text: string, generation: number): Promise<string> {
       return storeSnapshot(
@@ -57,7 +57,7 @@ describe('storeSnapshot', () => {
     });
   });
 
-  it('passa o fluxo pelo conversor de tamanho fixo', async () => {
+  it('passes the stream through the fixed-length converter', async () => {
     const fixed = vi.fn(identity);
     await storeSnapshot(memoryBucket(), { body: streamOf('abc'), length: 3, generation: 1 }, fixed);
     expect(fixed).toHaveBeenCalledWith(expect.any(ReadableStream), 3);
@@ -65,7 +65,7 @@ describe('storeSnapshot', () => {
 });
 
 describe('storeSnapshotResponse', () => {
-  it('204 é unchanged; 200 grava', async () => {
+  it('204 is unchanged; 200 writes', async () => {
     const bucket = memoryBucket();
     expect(await storeSnapshotResponse(bucket, new Response(null, { status: 204 }), identity)).toBe(
       'unchanged',
@@ -73,15 +73,15 @@ describe('storeSnapshotResponse', () => {
     expect(await storeSnapshotResponse(bucket, snapshotResponse('abc', 1), identity)).toBe('saved');
   });
 
-  it('ponte ainda iniciando (503) não é falha: nada a salvar', async () => {
+  it('a bridge still starting (503) is not a failure: nothing to save', async () => {
     const starting = Response.json({ error: 'not_ready' }, { status: 503 });
     expect(await storeSnapshotResponse(memoryBucket(), starting, identity)).toBe('unchanged');
   });
 
-  it('recusa resposta sem headers ou com erro', async () => {
+  it('rejects a response without headers or with an error', async () => {
     const bucket = memoryBucket();
     await expect(storeSnapshotResponse(bucket, new Response('x'), identity)).rejects.toThrow(
-      'Snapshot inválido',
+      'Invalid snapshot',
     );
     const failed = new Response('x', { status: 500 });
     await expect(storeSnapshotResponse(bucket, failed, identity)).rejects.toThrow('500');
@@ -89,7 +89,7 @@ describe('storeSnapshotResponse', () => {
 });
 
 describe('archiveSnapshot', () => {
-  it('copia para o arquivo com data e apaga o atual; sem snapshot, não faz nada', async () => {
+  it('copies to the dated archive and deletes the current one; without a snapshot, does nothing', async () => {
     const bucket = memoryBucket();
     expect(await archiveSnapshot(bucket, new Date(0), identity)).toBe(false);
     await storeSnapshot(bucket, { body: streamOf('abc'), length: 3, generation: 4 }, identity);
@@ -102,8 +102,8 @@ describe('archiveSnapshot', () => {
   });
 });
 
-describe('sameSecret e acceptSnapshotPush', () => {
-  it('compara segredos sem atalhos e recusa vazio', () => {
+describe('sameSecret and acceptSnapshotPush', () => {
+  it('compares secrets without shortcuts and rejects empty', () => {
     expect(sameSecret('abc', 'abc')).toBe(true);
     expect(sameSecret('abd', 'abc')).toBe(false);
     expect(sameSecret('ab', 'abc')).toBe(false);
@@ -119,7 +119,7 @@ describe('sameSecret e acceptSnapshotPush', () => {
     });
   }
 
-  it('grava o push com o token certo e recusa o resto', async () => {
+  it('writes the push with the right token and rejects the rest', async () => {
     const bucket = memoryBucket();
     const options = { token: 'tok', fixedLength: identity };
     const ok = await acceptSnapshotPush(bucket, push('Bearer tok'), options);
@@ -139,7 +139,7 @@ describe('sameSecret e acceptSnapshotPush', () => {
 });
 
 describe('pumpInto', () => {
-  it('copia bloco a bloco e fecha o destino (sem pipeTo, que o Workers recusa entre fluxos internos)', async () => {
+  it('copies chunk by chunk and closes the destination (no pipeTo, which Workers rejects between internal streams)', async () => {
     const source = streamOf('abc');
     const pipeTo = vi.spyOn(source, 'pipeTo');
     const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
@@ -149,20 +149,20 @@ describe('pumpInto', () => {
     expect(pipeTo).not.toHaveBeenCalled();
   });
 
-  it('erro na origem aborta o destino (quem grava no R2 falha em vez de travar)', async () => {
+  it('an error in the source aborts the destination (the R2 writer fails instead of hanging)', async () => {
     const source = new ReadableStream<Uint8Array>({
       start(controller) {
         controller.enqueue(new TextEncoder().encode('a'));
-        controller.error(new Error('caiu'));
+        controller.error(new Error('down'));
       },
     });
     const { readable, writable } = new TransformStream<Uint8Array, Uint8Array>();
     const done = pumpInto(source, writable);
-    await expect(textOf(readable)).rejects.toThrow('caiu');
+    await expect(textOf(readable)).rejects.toThrow('down');
     await expect(done).resolves.toBeUndefined();
   });
 
-  it('destino que falha cancela a origem', async () => {
+  it('a failing destination cancels the source', async () => {
     const cancel = vi.fn();
     const source = new ReadableStream<Uint8Array>({
       pull(controller) {
@@ -172,7 +172,7 @@ describe('pumpInto', () => {
     });
     const writable = new WritableStream<Uint8Array>({
       write() {
-        throw new Error('R2 recusou');
+        throw new Error('R2 refused');
       },
     });
     await pumpInto(source, writable);

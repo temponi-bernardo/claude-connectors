@@ -1,8 +1,8 @@
 /**
- * Vínculo de mais uma conta Gmail a um usuário do conector. A ferramenta `link_account` gera um link com um
- * ticket selado (usuário + validade de 10 minutos, uso único); `/accounts/link` resgata o ticket e manda ao
- * Google com `gmail.modify` e acesso offline, `state` de uso único preso ao navegador por cookie `__Host-`,
- * PKCE S256 e `nonce`. Na volta, o refresh token é gravado (selado) nas contas desse usuário.
+ * Links one more Gmail account to a connector user. The `link_account` tool issues a link with a sealed
+ * ticket (user + 10-minute validity, single use); `/accounts/link` redeems the ticket and sends the browser to
+ * Google with `gmail.modify` and offline access, a single-use `state` bound to the browser by a `__Host-`
+ * cookie, PKCE S256 and `nonce`. On return, the refresh token is stored (sealed) in that user's accounts.
  */
 import { openSealed, sealPayload } from '../../../src/remote/seal.js';
 import { pkceChallenge } from '../../../src/remote/oauth.js';
@@ -20,34 +20,34 @@ import { verifyGoogleIdToken } from './id-token.js';
 import { messagePage, redirectWith } from './pages.js';
 import { loadOwnerAccounts, saveOwnerAccounts, sha256Hex, upsertAccount } from './token-store.js';
 
-/** Prefixo do `state` do vínculo (o `state` da biblioteca OAuth nunca tem ponto). */
+/** Prefix of the linking `state` (the OAuth library `state` never has a dot). */
 export const LINK_STATE_PREFIX = 'link.';
 
-/** Cookie que prende o `state` ao navegador que iniciou o vínculo. */
+/** Cookie that binds the `state` to the browser that started the linking. */
 export const LINK_COOKIE = '__Host-gmail-link';
 
-/** Validade do ticket e do pedido de vínculo, em segundos. */
+/** Validity of the ticket and of the link request, in seconds. */
 export const LINK_TTL_SECONDS = 600;
 
-/** Tipo do selo do pedido de vínculo (entre a ida ao Google e a volta). */
+/** Seal type of the link request (between the trip to Google and the return). */
 export const LINK_REQUEST_TYP = 'gmail_link';
 
-/** Tipo do selo do ticket de vínculo emitido por `link_account`. */
+/** Seal type of the link ticket issued by `link_account`. */
 export const LINK_TICKET_TYP = 'gmail_link_ticket';
 
-/** Pedido de vínculo guardado no KV entre a ida ao Google e a volta. */
+/** Link request kept in KV between the trip to Google and the return. */
 export interface LinkRequest {
   readonly owner: string;
   readonly verifier: string;
   readonly nonce: string;
 }
 
-/** Segundos Unix do relógio das dependências. */
+/** Unix seconds from the dependencies' clock. */
 export function nowSeconds(deps: GmailDeps): number {
   return Math.floor(deps.now() / 1000);
 }
 
-/** Link de vínculo de uso único para o usuário (vale 10 minutos). */
+/** Single-use linking link for the user (valid for 10 minutes). */
 export function issueLinkUrl(deps: OwnerDeps): string {
   const exp = nowSeconds(deps) + LINK_TTL_SECONDS;
   const ticket = sealPayload(
@@ -57,7 +57,7 @@ export function issueLinkUrl(deps: OwnerDeps): string {
   return `${deps.origin}/accounts/link?ticket=${ticket}`;
 }
 
-/** Resgata o ticket (uso único, marcado no KV até vencer); devolve o usuário, ou nulo se inválido ou já usado. */
+/** Redeems the ticket (single use, marked in KV until it expires); returns the user, or null if invalid or used. */
 export async function redeemLinkTicket(deps: GmailDeps, ticket: string): Promise<string | null> {
   const claims = openSealed(ticket, deps.settings.tokenKey, {
     typ: LINK_TICKET_TYP,
@@ -70,12 +70,12 @@ export async function redeemLinkTicket(deps: GmailDeps, ticket: string): Promise
   return claims.owner;
 }
 
-/** Chave do pedido de vínculo no KV. */
+/** KV key of the link request. */
 export function linkRequestKey(state: string): string {
   return `link:${sha256Hex(state)}`;
 }
 
-/** Valor de um cookie do header `Cookie`, ou nulo. */
+/** Value of a cookie from the `Cookie` header, or null. */
 export function readCookie(header: string | null, name: string): string | null {
   for (const part of (header ?? '').split(';')) {
     const [key, ...rest] = part.trim().split('=');
@@ -84,22 +84,22 @@ export function readCookie(header: string | null, name: string): string | null {
   return null;
 }
 
-/** Header `Set-Cookie` do vínculo (vazio e vencido quando `value` é nulo, para apagar). */
+/** Linking `Set-Cookie` header (empty and expired when `value` is null, to delete it). */
 export function linkCookie(value: string | null): string {
   const age = value === null ? 0 : LINK_TTL_SECONDS;
   return `${LINK_COOKIE}=${value ?? ''}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=${age}`;
 }
 
-/** Página de link inválido, vencido ou já usado. */
+/** Page for an invalid, expired or already used link. */
 export function invalidTicketPage(): Response {
   return messagePage(
-    'Link inválido ou vencido',
-    'Peça ao Claude um novo link de vínculo (ferramenta link_account). Cada link vale 10 minutos e uma vez.',
+    'Invalid or expired link',
+    'Ask Claude for a new linking link (link_account tool). Each link works once, for 10 minutes.',
     400,
   );
 }
 
-/** `GET /accounts/link?ticket=...`: resgata o ticket, grava o pedido (selado) e manda o navegador ao Google. */
+/** `GET /accounts/link?ticket=...`: redeems the ticket, stores the request (sealed) and sends the browser to Google. */
 export async function startAccountLink(deps: GmailDeps, request: Request): Promise<Response> {
   const owner = await redeemLinkTicket(deps, new URL(request.url).searchParams.get('ticket') ?? '');
   if (owner === null) return invalidTicketPage();
@@ -124,7 +124,7 @@ export async function startAccountLink(deps: GmailDeps, request: Request): Promi
   return redirectWith(location, new Headers({ 'set-cookie': linkCookie(binding) }));
 }
 
-/** Recupera e apaga (uso único) o pedido de vínculo; nulo se não existir, vencer ou o cookie não conferir. */
+/** Fetches and deletes (single use) the link request; null if missing, expired or the cookie does not match. */
 export async function takeLinkRequest(
   deps: GmailDeps,
   request: Request,
@@ -146,16 +146,16 @@ export async function takeLinkRequest(
   };
 }
 
-/** Motivo para não gravar a conta (sem permissão do Gmail ou sem refresh token), ou nulo se pode. */
+/** Reason not to store the account (no Gmail permission or no refresh token), or null if it can be stored. */
 export function linkRefusalReason(tokens: GoogleTokens): string | null {
   if (!hasModifyScope(tokens.scope)) {
-    return 'Marque a permissão de gerenciar o Gmail (ler, enviar e organizar e-mails) na tela do Google e tente de novo.';
+    return 'Check the permission to manage Gmail (read, send and organize emails) on the Google screen and try again.';
   }
-  if (tokens.refreshToken === null) return 'O Google não devolveu o refresh token. Tente de novo.';
+  if (tokens.refreshToken === null) return 'Google did not return the refresh token. Try again.';
   return null;
 }
 
-/** Grava (ou troca) a conta nas contas do usuário e descarta o access token antigo dela. */
+/** Stores (or replaces) the account in the user's accounts and drops its old access token. */
 export async function storeGoogleAccount(
   deps: OwnerDeps,
   email: string,
@@ -176,7 +176,7 @@ export async function storeGoogleAccount(
   forgetAccessToken(deps.owner, email);
 }
 
-/** Troca o código, valida o `id_token` e grava a conta no usuário do ticket; devolve a página do resultado. */
+/** Exchanges the code, validates the `id_token` and stores the account for the ticket user; returns the result page. */
 export async function linkFromCode(
   deps: GmailDeps,
   code: string,
@@ -184,15 +184,15 @@ export async function linkFromCode(
 ): Promise<Response> {
   const tokens = await exchangeGoogleCode(deps, code, link.verifier);
   if (tokens.idToken === null)
-    return messagePage('Falha no vínculo', 'Sem id_token do Google.', 400);
+    return messagePage('Linking failed', 'No id_token from Google.', 400);
   const { email } = await verifyGoogleIdToken(deps, tokens.idToken, link.nonce);
   const refusal = linkRefusalReason(tokens);
-  if (refusal !== null) return messagePage('Permissão faltando', refusal, 400);
+  if (refusal !== null) return messagePage('Missing permission', refusal, 400);
   await storeGoogleAccount({ ...deps, owner: link.owner }, email, tokens);
-  return messagePage('Conta vinculada', `A conta ${email} foi vinculada. Pode fechar esta página.`);
+  return messagePage('Account linked', `The account ${email} was linked. You can close this page.`);
 }
 
-/** Roda `linkFromCode` convertendo falhas (Google fora, `id_token` inválido) em página 400 sem gravar nada. */
+/** Runs `linkFromCode`, turning failures (Google down, invalid `id_token`) into a 400 page without storing anything. */
 export async function linkSafely(
   deps: GmailDeps,
   code: string,
@@ -202,11 +202,11 @@ export async function linkSafely(
     return await linkFromCode(deps, code, link);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return messagePage('Falha no vínculo', `${message} Nada foi gravado; tente de novo.`, 400);
+    return messagePage('Linking failed', `${message} Nothing was stored; try again.`, 400);
   }
 }
 
-/** Volta do Google no vínculo: confere o pedido, trata recusa e erros e apaga o cookie. */
+/** Return from Google when linking: checks the request, handles refusal and errors and deletes the cookie. */
 export async function finishAccountLink(deps: GmailDeps, request: Request): Promise<Response> {
   const params = new URL(request.url).searchParams;
   const link = await takeLinkRequest(deps, request);
@@ -215,8 +215,8 @@ export async function finishAccountLink(deps: GmailDeps, request: Request): Prom
     response = invalidTicketPage();
   } else if (params.get('error') !== null || !params.get('code')) {
     response = messagePage(
-      'Vínculo cancelado',
-      'O Google não autorizou o acesso. Nada foi gravado.',
+      'Linking canceled',
+      'Google did not authorize the access. Nothing was stored.',
       400,
     );
   } else {

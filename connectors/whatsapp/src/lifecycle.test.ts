@@ -31,8 +31,8 @@ function snapshotReply(): Response {
   return new Response('snap', { headers: { 'content-length': '4', 'x-snapshot-generation': '1' } });
 }
 
-describe('withBridgeToken e fetchBridge', () => {
-  it('acrescenta o Authorization sem perder os outros headers', () => {
+describe('withBridgeToken and fetchBridge', () => {
+  it('adds the Authorization without losing the other headers', () => {
     const init = withBridgeToken('t', { method: 'POST', headers: { 'x-a': '1' } });
     const headers = new Headers(init.headers);
     expect([init.method, headers.get('authorization'), headers.get('x-a')]).toEqual([
@@ -42,18 +42,18 @@ describe('withBridgeToken e fetchBridge', () => {
     ]);
   });
 
-  it('fala com a ponte no endereço interno, autenticado', async () => {
+  it('talks to the bridge at the internal address, authenticated', async () => {
     const host = fakeHost(() => Response.json({}));
     await fetchBridge(host, '/status');
     expect(host.calls[0]?.path).toBe('/status');
     expect(new Headers(host.calls[0]?.init.headers).get('authorization')).toBe(
-      'Bearer token-da-ponte',
+      'Bearer bridge-token',
     );
   });
 });
 
-describe('readBridgePhase e ensureRestored', () => {
-  it('lê a fase e não restaura uma ponte pronta', async () => {
+describe('readBridgePhase and ensureRestored', () => {
+  it('reads the phase and does not restore a ready bridge', async () => {
     const host = fakeHost(readyRoute());
     expect(await readBridgePhase(host)).toBe('ready');
     await ensureRestored(host);
@@ -62,7 +62,7 @@ describe('readBridgePhase e ensureRestored', () => {
     expect(await readBridgePhase(odd)).toBe('unknown');
   });
 
-  it('sem snapshot no bucket, restaura com X-Snapshot: none', async () => {
+  it('without a snapshot in the bucket, restores with X-Snapshot: none', async () => {
     const host = fakeHost((path) =>
       path === '/health' ? Response.json({ phase: 'awaiting_restore' }) : Response.json({}),
     );
@@ -72,19 +72,19 @@ describe('readBridgePhase e ensureRestored', () => {
     expect(new Headers(restore?.init.headers).get('x-snapshot')).toBe('none');
   });
 
-  it('com snapshot, manda o arquivo em fluxo com o tamanho', async () => {
+  it('with a snapshot, streams the file with its size', async () => {
     const host = fakeHost(() => Response.json({}));
     await storeSnapshot(
       host.bucket,
-      { body: streamOf('cifrado'), length: 7, generation: 3 },
+      { body: streamOf('encrypted'), length: 9, generation: 3 },
       (b) => b,
     );
     const init = await restoreRequestInit(host);
-    expect(new Headers(init.headers).get('content-length')).toBe('7');
-    expect(await textOf(init.body as ReadableStream<Uint8Array>)).toBe('cifrado');
+    expect(new Headers(init.headers).get('content-length')).toBe('9');
+    expect(await textOf(init.body as ReadableStream<Uint8Array>)).toBe('encrypted');
   });
 
-  it('aceita 409 (outra requisição restaurou) e lança se o snapshot for recusado', async () => {
+  it('accepts 409 (another request restored) and throws if the snapshot is rejected', async () => {
     const conflict = fakeHost((path) =>
       path === '/health'
         ? Response.json({ phase: 'awaiting_restore' })
@@ -100,14 +100,14 @@ describe('readBridgePhase e ensureRestored', () => {
   });
 });
 
-describe('snapshotBridge e SnapshotScheduler', () => {
-  it('guarda o snapshot que a ponte devolve', async () => {
+describe('snapshotBridge and SnapshotScheduler', () => {
+  it('saves the snapshot the bridge returns', async () => {
     const host = fakeHost(() => snapshotReply());
     expect(await snapshotBridge(host)).toBe('saved');
     await expect(host.bucket.head(SNAPSHOT_KEY_NAME)).resolves.not.toBeNull();
   });
 
-  it('agenda snapshot só depois das rotas certas e no máximo uma vez por intervalo', async () => {
+  it('schedules a snapshot only after the right routes and at most once per interval', async () => {
     let clock = 0;
     const host = fakeHost(() => new Response(null, { status: 204 }), { now: () => clock });
     const scheduler = new SnapshotScheduler(host);
@@ -124,7 +124,7 @@ describe('snapshotBridge e SnapshotScheduler', () => {
     expect(SNAPSHOT_AFTER_PATHS.has('/pair/code')).toBe(true);
   });
 
-  it('enfileira snapshots e segue a fila mesmo depois de uma falha', async () => {
+  it('queues snapshots and keeps the queue going even after a failure', async () => {
     let fail = true;
     const host = fakeHost(() => {
       if (fail) {
@@ -136,11 +136,11 @@ describe('snapshotBridge e SnapshotScheduler', () => {
     const scheduler = new SnapshotScheduler(host);
     const first = scheduler.snapshotNow();
     const second = scheduler.snapshotNow();
-    await expect(first).rejects.toThrow('Snapshot inválido');
+    await expect(first).rejects.toThrow('Invalid snapshot');
     await expect(second).resolves.toBe('unchanged');
   });
 
-  it('depois de uma falha, o próximo snapshot é forçado (a ponte não pode devolver 204)', async () => {
+  it('after a failure, the next snapshot is forced (the bridge cannot return 204)', async () => {
     let fail = true;
     const host = fakeHost(() => {
       if (fail) {
@@ -149,9 +149,9 @@ describe('snapshotBridge e SnapshotScheduler', () => {
       }
       return new Response(null, { status: 204 });
     });
-    host.bucket.put = () => Promise.reject(new Error('R2 fora'));
+    host.bucket.put = () => Promise.reject(new Error('R2 down'));
     const scheduler = new SnapshotScheduler(host);
-    await expect(scheduler.snapshotNow()).rejects.toThrow('R2 fora');
+    await expect(scheduler.snapshotNow()).rejects.toThrow('R2 down');
     await expect(scheduler.snapshotNow()).resolves.toBe('unchanged');
     await expect(scheduler.snapshotNow()).resolves.toBe('unchanged');
     expect(host.calls.map((call) => call.path)).toEqual([
@@ -161,19 +161,19 @@ describe('snapshotBridge e SnapshotScheduler', () => {
     ]);
   });
 
-  it('snapshotQuietly e logSnapshotFailure só registram a falha', async () => {
+  it('snapshotQuietly and logSnapshotFailure only log the failure', async () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
-    await logSnapshotFailure(Promise.reject(new Error('caiu')));
-    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- testa motivo que não é Error
-    await logSnapshotFailure(Promise.reject('texto'));
+    await logSnapshotFailure(Promise.reject(new Error('down')));
+    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors -- tests a reason that is not an Error
+    await logSnapshotFailure(Promise.reject('text'));
     await new SnapshotScheduler(fakeHost(() => new Response('x'))).snapshotQuietly();
     expect(warn).toHaveBeenCalledTimes(3);
     warn.mockRestore();
   });
 });
 
-describe('planSend e guardSend', () => {
-  it('permite até o limite na última hora e diz quanto esperar', () => {
+describe('planSend and guardSend', () => {
+  it('allows up to the limit in the last hour and says how long to wait', () => {
     const now = 10_000_000;
     expect(planSend([now - 3_700_000], now, 1)).toEqual({
       allowed: true,
@@ -185,7 +185,7 @@ describe('planSend e guardSend', () => {
     expect(full.retryAfterSeconds).toBe(3000);
   });
 
-  it('registra os envios no armazenamento e responde 429 ao estourar', async () => {
+  it('records sends in storage and answers 429 when exceeded', async () => {
     const host = fakeHost(() => Response.json({}));
     expect(await guardSend(host)).toBeNull();
     expect(await guardSend(host)).toBeNull();
@@ -197,7 +197,7 @@ describe('planSend e guardSend', () => {
 });
 
 describe('forwardInit', () => {
-  it('repassa método, tipo e corpo; GET vai sem corpo', async () => {
+  it('forwards method, type and body; GET goes without a body', async () => {
     const post = new Request('http://bridge/send', {
       method: 'POST',
       body: '{"a":1}',
@@ -210,8 +210,8 @@ describe('forwardInit', () => {
   });
 });
 
-describe('routeBridgeRequest e createBridgeLifecycle', () => {
-  it('restaura, repassa e agenda snapshot depois do sync', async () => {
+describe('routeBridgeRequest and createBridgeLifecycle', () => {
+  it('restores, forwards and schedules a snapshot after the sync', async () => {
     const host = fakeHost(
       readyRoute((path) => (path === '/snapshot' ? snapshotReply() : Response.json({ ok: 1 }))),
     );
@@ -228,7 +228,7 @@ describe('routeBridgeRequest e createBridgeLifecycle', () => {
     ]);
   });
 
-  it('atende as rotas internas de snapshot e reset sem acordar a ponte', async () => {
+  it('handles the internal snapshot and reset routes without waking the bridge', async () => {
     const stop = vi.fn(() => Promise.resolve());
     const host = fakeHost(() => new Response(null, { status: 204 }), { stop });
     const lifecycle = createBridgeLifecycle(host);
@@ -243,7 +243,7 @@ describe('routeBridgeRequest e createBridgeLifecycle', () => {
     await expect(lifecycle.snapshotQuietly()).resolves.toBeUndefined();
   });
 
-  it('aplica o limite de envio antes de repassar o /send', async () => {
+  it('enforces the send limit before forwarding /send', async () => {
     const host = fakeHost(readyRoute(), { sendMaxPerHour: 1 });
     const scheduler = new SnapshotScheduler(host);
     function send(): Request {
@@ -254,7 +254,7 @@ describe('routeBridgeRequest e createBridgeLifecycle', () => {
     expect(host.calls.filter((call) => call.path === '/send')).toHaveLength(1);
   });
 
-  it('resetBridge arquiva o snapshot e para o container', async () => {
+  it('resetBridge archives the snapshot and stops the container', async () => {
     const stop = vi.fn(() => Promise.resolve());
     const host = fakeHost(() => Response.json({}), { stop });
     await storeSnapshot(host.bucket, { body: streamOf('x'), length: 1, generation: 1 }, (b) => b);

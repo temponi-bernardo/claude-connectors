@@ -20,7 +20,7 @@ import (
 	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/store"
 )
 
-// State é o retrato do cliente para o /status.
+// State is the client snapshot for /status.
 type State struct {
 	Connected           bool
 	LoggedIn            bool
@@ -30,40 +30,40 @@ type State struct {
 	LastEventAt         time.Time
 }
 
-// QRCode é o QR de pareamento atual.
+// QRCode is the current pairing QR.
 type QRCode struct {
 	Code      string
 	ExpiresAt time.Time
 }
 
-// Sent é o resultado de um envio.
+// Sent is the result of a send.
 type Sent struct {
 	ID        string
 	Timestamp time.Time
 }
 
 var (
-	// ErrAlreadyPaired indica que já existe sessão.
-	ErrAlreadyPaired = errors.New("já existe uma sessão do WhatsApp")
-	// ErrNoQR indica que o QR ainda não chegou.
-	ErrNoQR = errors.New("o QR de pareamento ainda não está disponível")
-	// ErrMediaExpired indica que o WhatsApp não tem mais o arquivo.
-	ErrMediaExpired = errors.New("a mídia expirou no WhatsApp")
-	// ErrNotConnected indica cliente sem login ou sem conexão.
-	ErrNotConnected = errors.New("o WhatsApp não está conectado")
+	// ErrAlreadyPaired signals that a session already exists.
+	ErrAlreadyPaired = errors.New("a WhatsApp session already exists")
+	// ErrNoQR signals that the QR has not arrived yet.
+	ErrNoQR = errors.New("the pairing QR is not available yet")
+	// ErrMediaExpired signals that WhatsApp no longer has the file.
+	ErrMediaExpired = errors.New("the media expired on WhatsApp")
+	// ErrNotConnected signals a client that is not logged in or not connected.
+	ErrNotConnected = errors.New("WhatsApp is not connected")
 )
 
-// Options configura o Manager.
+// Options configures the Manager.
 type Options struct {
 	SessionDB   *sql.DB
 	Store       *store.Store
 	HistoryDays int
 	Log         *slog.Logger
-	// OnSessionChange é chamado (em segundo plano) quando a sessão do aparelho muda: pareou, conectou ou saiu.
+	// OnSessionChange is called (in the background) when the device session changes: paired, connected or logged out.
 	OnSessionChange func()
 }
 
-// Manager é dono do *whatsmeow.Client e traduz eventos em gravações no banco.
+// Manager owns the *whatsmeow.Client and turns events into database writes.
 type Manager struct {
 	opts      Options
 	container *sqlstore.Container
@@ -73,17 +73,17 @@ type Manager struct {
 	connectMu sync.Mutex
 	client    *whatsmeow.Client
 	qr        QRCode
-	dial      func() error // conecta; trocado por no-op nos testes para não usar rede
+	dial      func() error // connects; replaced by a no-op in tests to avoid the network
 
 	connected   atomic.Bool
 	offlineSync atomic.Bool
 	lastEvent   atomic.Int64
 }
 
-// pairDisplayName é o nome do cliente exigido pelo PairPhone ("Navegador (SO)").
+// pairDisplayName is the client name required by PairPhone ("Browser (OS)").
 const pairDisplayName = "Chrome (Linux)"
 
-// ConfigureDevice ajusta o nome do aparelho vinculado e o limite de dias do histórico pedido ao celular.
+// ConfigureDevice sets the linked device name and the history day limit requested from the phone.
 func ConfigureDevice(historyDays int) {
 	wastore.SetOSInfo("Claude", [3]uint32{1, 0, 0})
 	wastore.DeviceProps.RequireFullSync = proto.Bool(false)
@@ -91,7 +91,7 @@ func ConfigureDevice(historyDays int) {
 	wastore.DeviceProps.HistorySyncConfig.RecentSyncDaysLimit = proto.Uint32(uint32(historyDays))
 }
 
-// New prepara o sqlstore do whatsmeow em session.db e cria o cliente (sem conectar).
+// New prepares the whatsmeow sqlstore in session.db and creates the client (without connecting).
 func New(ctx context.Context, opts Options) (*Manager, error) {
 	ConfigureDevice(opts.HistoryDays)
 	c := sqlstore.NewWithDB(opts.SessionDB, store.DriverName, NewLogger(opts.Log, "store"))
@@ -109,12 +109,12 @@ func New(ctx context.Context, opts Options) (*Manager, error) {
 	return m, nil
 }
 
-// Start conecta em segundo plano (com QR se não houver sessão).
+// Start connects in the background (with a QR if there is no session).
 func (m *Manager) Start() {
 	go m.logConnect()
 }
 
-// setClient troca o cliente atual por um novo, ligado ao device dado.
+// setClient replaces the current client with a new one bound to the given device.
 func (m *Manager) setClient(device *wastore.Device) {
 	cli := whatsmeow.NewClient(device, NewLogger(m.opts.Log, "client"))
 	cli.AddEventHandler(m.handleEvent)
@@ -123,21 +123,21 @@ func (m *Manager) setClient(device *wastore.Device) {
 	m.mu.Unlock()
 }
 
-// current devolve o cliente atual.
+// current returns the current client.
 func (m *Manager) current() *whatsmeow.Client {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	return m.client
 }
 
-// logConnect conecta e só registra falhas (uso em goroutine).
+// logConnect connects and only logs failures (for use in a goroutine).
 func (m *Manager) logConnect() {
 	if err := m.dial(); err != nil {
-		m.opts.Log.Warn("falha ao conectar ao WhatsApp", "err", Redact(err.Error()))
+		m.opts.Log.Warn("failed to connect to WhatsApp", "err", Redact(err.Error()))
 	}
 }
 
-// connect abre o websocket; sem sessão, liga antes o canal de QR.
+// connect opens the websocket; without a session it first sets up the QR channel.
 func (m *Manager) connect() error {
 	m.connectMu.Lock()
 	defer m.connectMu.Unlock()
@@ -155,7 +155,7 @@ func (m *Manager) connect() error {
 	return cli.Connect()
 }
 
-// consumeQR guarda o QR mais recente enquanto o canal durar.
+// consumeQR keeps the most recent QR while the channel lasts.
 func (m *Manager) consumeQR(cli *whatsmeow.Client, ch <-chan whatsmeow.QRChannelItem) {
 	for item := range ch {
 		m.mu.Lock()
@@ -164,12 +164,12 @@ func (m *Manager) consumeQR(cli *whatsmeow.Client, ch <-chan whatsmeow.QRChannel
 		}
 		m.mu.Unlock()
 		if item.Event != whatsmeow.QRChannelEventCode {
-			m.opts.Log.Info("pareamento", "evento", item.Event)
+			m.opts.Log.Info("pairing", "event", item.Event)
 		}
 	}
 }
 
-// qrFromItem decide o QR guardado a partir de um item do canal (função pura).
+// qrFromItem decides the stored QR from a channel item (pure).
 func qrFromItem(item whatsmeow.QRChannelItem, now time.Time) QRCode {
 	if item.Event != whatsmeow.QRChannelEventCode {
 		return QRCode{}
@@ -177,7 +177,7 @@ func qrFromItem(item whatsmeow.QRChannelItem, now time.Time) QRCode {
 	return QRCode{Code: item.Code, ExpiresAt: now.Add(item.Timeout)}
 }
 
-// State devolve o estado atual do cliente.
+// State returns the current client state.
 func (m *Manager) State() State {
 	cli := m.current()
 	st := State{Connected: m.connected.Load() && cli.IsConnected(), LoggedIn: cli.IsLoggedIn(),
@@ -191,7 +191,7 @@ func (m *Manager) State() State {
 	return st
 }
 
-// QR devolve o QR vigente; sem QR válido, reabre a conexão de pareamento e devolve ErrNoQR.
+// QR returns the current QR; without a valid QR it reopens the pairing connection and returns ErrNoQR.
 func (m *Manager) QR() (QRCode, error) {
 	cli := m.current()
 	if cli.Store.ID != nil {
@@ -207,7 +207,7 @@ func (m *Manager) QR() (QRCode, error) {
 	return qr, nil
 }
 
-// PairCode pede ao WhatsApp um código de pareamento por número de telefone.
+// PairCode asks WhatsApp for a pairing code by phone number.
 func (m *Manager) PairCode(ctx context.Context, phone string) (string, error) {
 	cli := m.current()
 	if cli.Store.ID != nil {
@@ -222,7 +222,7 @@ func (m *Manager) PairCode(ctx context.Context, phone string) (string, error) {
 	return cli.PairPhone(ctx, phone, true, whatsmeow.PairClientChrome, pairDisplayName)
 }
 
-// waitQR espera o primeiro QR (sinal de websocket pronto para parear).
+// waitQR waits for the first QR (a sign that the websocket is ready to pair).
 func (m *Manager) waitQR(ctx context.Context, limit time.Duration) error {
 	deadline := time.Now().Add(limit)
 	for time.Now().Before(deadline) {
@@ -241,12 +241,12 @@ func (m *Manager) waitQR(ctx context.Context, limit time.Duration) error {
 	return ErrNotConnected
 }
 
-// Logout desloga no servidor (ou só localmente, se offline) e prepara um device novo para parear.
+// Logout logs out on the server (or only locally, if offline) and prepares a new device for pairing.
 func (m *Manager) Logout(ctx context.Context) error {
 	cli := m.current()
 	if cli.Store.ID != nil {
 		if err := cli.Logout(ctx); err != nil {
-			m.opts.Log.Warn("logout remoto falhou; apagando a sessão local", "err", Redact(err.Error()))
+			m.opts.Log.Warn("remote logout failed; deleting the local session", "err", Redact(err.Error()))
 			if derr := cli.Store.Delete(ctx); derr != nil {
 				return derr
 			}
@@ -257,7 +257,7 @@ func (m *Manager) Logout(ctx context.Context) error {
 	return nil
 }
 
-// resetDevice zera o estado e cria um cliente novo, já esperando pareamento.
+// resetDevice resets the state and creates a new client, already waiting for pairing.
 func (m *Manager) resetDevice() {
 	m.connected.Store(false)
 	m.offlineSync.Store(false)
@@ -265,14 +265,14 @@ func (m *Manager) resetDevice() {
 	go m.logConnect()
 }
 
-// Outgoing é uma mensagem de texto a enviar: destinatário (JID), texto e, opcionalmente, a mensagem citada.
+// Outgoing is a text message to send: recipient (JID), text and, optionally, the quoted message.
 type Outgoing struct {
 	To    string
 	Text  string
 	Quote *store.Quoted
 }
 
-// buildOutgoing monta o protobuf do texto (função pura); com citação, usa ExtendedTextMessage + ContextInfo.
+// buildOutgoing builds the text protobuf (pure); with a quote it uses ExtendedTextMessage + ContextInfo.
 func buildOutgoing(text string, q *store.Quoted, own string) *waE2E.Message {
 	if q == nil {
 		return &waE2E.Message{Conversation: proto.String(text)}
@@ -286,7 +286,7 @@ func buildOutgoing(text string, q *store.Quoted, own string) *waE2E.Message {
 			QuotedMessage: &waE2E.Message{Conversation: proto.String(q.Text)}}}}
 }
 
-// SendText envia texto (opcionalmente citando outra mensagem) e grava a mensagem enviada no banco.
+// SendText sends text (optionally quoting another message) and stores the sent message in the database.
 func (m *Manager) SendText(ctx context.Context, out Outgoing) (Sent, error) {
 	cli := m.current()
 	if !cli.IsLoggedIn() {
@@ -303,17 +303,17 @@ func (m *Manager) SendText(ctx context.Context, out Outgoing) (Sent, error) {
 	}
 	saveErr := m.opts.Store.SaveMessage(ctx, store.Message{ChatJID: jid.ToNonAD().String(), ID: resp.ID, SenderJID: own,
 		FromMe: true, Timestamp: resp.Timestamp.Unix(), Type: "text", Text: out.Text})
-	m.logErr("gravar mensagem enviada", saveErr)
+	m.logErr("store sent message", saveErr)
 	return Sent{ID: resp.ID, Timestamp: resp.Timestamp}, nil
 }
 
-// mediaTypes mapeia o tipo guardado para o tipo de chave do whatsmeow.
+// mediaTypes maps the stored type to the whatsmeow key type.
 var mediaTypes = map[string]whatsmeow.MediaType{
 	"image": whatsmeow.MediaImage, "sticker": whatsmeow.MediaImage, "video": whatsmeow.MediaVideo,
 	"audio": whatsmeow.MediaAudio, "document": whatsmeow.MediaDocument,
 }
 
-// Download baixa e decifra uma mídia a partir dos metadados guardados.
+// Download downloads and decrypts a media file from the stored metadata.
 func (m *Manager) Download(ctx context.Context, md store.Media) ([]byte, error) {
 	cli := m.current()
 	if !cli.IsLoggedIn() {
@@ -327,21 +327,21 @@ func (m *Manager) Download(ctx context.Context, md store.Media) ([]byte, error) 
 	return data, err
 }
 
-// isExpired decide se o erro de download significa mídia indisponível no servidor.
+// isExpired decides whether the download error means the media is gone from the server.
 func isExpired(err error) bool {
 	return errors.Is(err, whatsmeow.ErrMediaDownloadFailedWith404) || errors.Is(err, whatsmeow.ErrMediaDownloadFailedWith410) ||
 		errors.Is(err, whatsmeow.ErrMediaDownloadFailedWith403)
 }
 
-// Disconnect encerra a conexão (usado no SIGTERM).
+// Disconnect closes the connection (used on SIGTERM).
 func (m *Manager) Disconnect() {
 	m.current().Disconnect()
 	m.cancel()
 }
 
-// logErr registra falhas internas sem conteúdo de mensagem.
+// logErr logs internal failures without message content.
 func (m *Manager) logErr(what string, err error) {
 	if err != nil {
-		m.opts.Log.Error("falha ao "+what, "err", Redact(err.Error()))
+		m.opts.Log.Error("failed to "+what, "err", Redact(err.Error()))
 	}
 }

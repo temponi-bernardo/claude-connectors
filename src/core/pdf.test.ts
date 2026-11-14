@@ -45,12 +45,12 @@ import {
   type PdfTextState,
 } from './pdf.js';
 
-/** Texto latin1 em bytes (um byte por caractere). */
+/** Latin1 text as bytes (one byte per character). */
 function latin1(text: string): Uint8Array {
   return Uint8Array.from(text, (c) => c.charCodeAt(0));
 }
 
-/** Monta um PDF a partir de objetos `[número, corpo]`; corpos com `stream` levam os bytes dados. */
+/** Builds a PDF from `[number, body]` objects; bodies with `stream` carry the given bytes. */
 function buildPdf(objects: readonly [number, string, Uint8Array?][], trailer = ''): Uint8Array {
   const parts: Uint8Array[] = [latin1('%PDF-1.7\n')];
   for (const [num, body, stream] of objects) {
@@ -74,10 +74,10 @@ begincmap
 1 beginbfrange <0020> <0021> [<0031> <0032>] endbfrange
 endcmap`;
 
-/** Recibo de duas páginas: a página 2 tem número de objeto menor que a 1 (ordem vem da árvore). */
+/** Two-page receipt: page 2 has a lower object number than page 1 (order comes from the tree). */
 function receiptPdf(): Uint8Array {
   const page1 = deflateSync(
-    latin1('BT /F1 12 Tf 72 700 Td (Recibo FL Cloud) Tj 0 -14 Td [(Total) -400 (R$ 10,00)] TJ ET'),
+    latin1('BT /F1 12 Tf 72 700 Td (Receipt FL Cloud) Tj 0 -14 Td [(Total) -400 (R$ 10,00)] TJ ET'),
   );
   const page2 = latin1('BT /F2 10 Tf <0001000200100011> Tj T* <0020 0021> Tj ET');
   const font7 = '<< /Type /Font /Subtype /Type1 >> ';
@@ -102,52 +102,52 @@ function receiptPdf(): Uint8Array {
 }
 
 describe('pdfToText', () => {
-  it('extrai o texto das páginas na ordem da árvore, com fontes simples e ToUnicode', async () => {
-    expect(await pdfToText(receiptPdf())).toBe('Recibo FL Cloud\nTotal R$ 10,00\n\nRéab\n12');
+  it('extracts the page text in tree order, with simple and ToUnicode fonts', async () => {
+    expect(await pdfToText(receiptPdf())).toBe('Receipt FL Cloud\nTotal R$ 10,00\n\nRéab\n12');
   });
 
-  it('recusa PDF cifrado', async () => {
+  it('rejects an encrypted PDF', async () => {
     const pdf = buildPdf([[1, '<< /Type /Catalog >>']], '/Encrypt 5 0 R');
     await expect(pdfToText(pdf)).rejects.toThrow(/password/);
   });
 
-  it('devolve vazio quando não há páginas', async () => {
+  it('returns empty when there are no pages', async () => {
     expect(await pdfToText(buildPdf([[1, '<< /Type /Catalog >>']]))).toBe('');
   });
 });
 
-describe('bytesToLatin1 e isPdf', () => {
-  it('mapeia cada byte para um caractere', () => {
+describe('bytesToLatin1 and isPdf', () => {
+  it('maps each byte to a character', () => {
     expect(bytesToLatin1(Uint8Array.of(0x50, 0xe9, 0xff))).toBe('Péÿ');
     expect(bytesToLatin1(new Uint8Array(70000)).length).toBe(70000);
   });
 
-  it('reconhece o cabeçalho %PDF-', () => {
+  it('recognizes the %PDF- header', () => {
     expect(isPdf(latin1('%PDF-1.4'))).toBe(true);
     expect(isPdf(latin1('PK\u0003\u0004'))).toBe(false);
   });
 });
 
-describe('leitura de objetos', () => {
-  it('streamDataStart pula CRLF, LF, CR ou nada', () => {
+describe('object reading', () => {
+  it('streamDataStart skips CRLF, LF, CR or nothing', () => {
     expect(streamDataStart('stream\r\nX', 0)).toBe(8);
     expect(streamDataStart('stream\nX', 0)).toBe(7);
     expect(streamDataStart('stream\rX', 0)).toBe(7);
     expect(streamDataStart('streamX', 0)).toBe(6);
   });
 
-  it('trimStreamEol tira CRLF, LF ou CR do fim, sem passar do início', () => {
+  it('trimStreamEol strips CRLF, LF or CR from the end, without passing the start', () => {
     expect(trimStreamEol('ab\r\n', 0, 4)).toBe(2);
     expect(trimStreamEol('ab\n', 0, 3)).toBe(2);
     expect(trimStreamEol('ab\r', 0, 3)).toBe(2);
     expect(trimStreamEol('\n', 1, 1)).toBe(1);
   });
 
-  it('readRawObject separa dicionário e fluxo, e tolera arquivo truncado', () => {
-    const text = '<< /A 1 >> stream\nDADOS\nendstream endobj';
+  it('readRawObject splits dictionary and stream, and tolerates a truncated file', () => {
+    const text = '<< /A 1 >> stream\nDATA\nendstream endobj';
     const raw = readRawObject(text, latin1(text), 0);
     expect(raw.dict).toBe('<< /A 1 >> ');
-    expect(bytesToLatin1(raw.stream!)).toBe('DADOS');
+    expect(bytesToLatin1(raw.stream!)).toBe('DATA');
     expect(readRawObject('<< /A 1 >>', latin1('<< /A 1 >>'), 0)).toMatchObject({
       stream: null,
       end: 10,
@@ -156,28 +156,28 @@ describe('leitura de objetos', () => {
     expect(bytesToLatin1(readRawObject(cut, latin1(cut), 0).stream!)).toBe('ABC');
   });
 
-  it('listRawObjects acha todos os objetos', () => {
+  it('listRawObjects finds every object', () => {
     expect(listRawObjects(receiptPdf()).map((o) => o.num)).toEqual([1, 2, 3, 4, 5, 6, 11, 9, 10]);
   });
 
-  it('decodePdfStream: sem filtro, Flate, filtro desconhecido e dado corrompido', async () => {
+  it('decodePdfStream: no filter, Flate, unknown filter and corrupt data', async () => {
     expect(await decodePdfStream('<< >>', latin1('abc'))).toEqual(latin1('abc'));
-    const inflated = await decodePdfStream('<< /Filter [/FlateDecode] >>', deflateSync('oi'));
-    expect(bytesToLatin1(inflated!)).toBe('oi');
+    const inflated = await decodePdfStream('<< /Filter [/FlateDecode] >>', deflateSync('hi'));
+    expect(bytesToLatin1(inflated!)).toBe('hi');
     expect(await decodePdfStream('<< /Filter /DCTDecode >>', latin1('x'))).toBeNull();
-    expect(await decodePdfStream('<< /Filter /FlateDecode >>', latin1('lixo'))).toBeNull();
+    expect(await decodePdfStream('<< /Filter /FlateDecode >>', latin1('junk'))).toBeNull();
   });
 
-  it('splitObjectStream lê os objetos internos e ignora fluxo sem /First', () => {
-    const data = latin1('3 0 4 5 (um) (dois)');
+  it('splitObjectStream reads the inner objects and ignores a stream without /First', () => {
+    const data = latin1('3 0 4 5 (hi) (two)');
     expect(splitObjectStream('<< /First 8 >>', data)).toEqual([
-      [3, { dict: '(um) ', data: null }],
-      [4, { dict: '(dois)', data: null }],
+      [3, { dict: '(hi) ', data: null }],
+      [4, { dict: '(two)', data: null }],
     ]);
     expect(splitObjectStream('<< >>', data)).toEqual([]);
   });
 
-  it('storePdfObject não sobrescreve objeto já lido com um de fluxo de objetos', () => {
+  it('storePdfObject does not overwrite an already-read object with one from an object stream', () => {
     const objects = new Map<number, PdfObject>([[3, { dict: 'original', data: null }]]);
     storePdfObject(objects, 9, { dict: '<< /Type /ObjStm /First 4 >>', data: latin1('3 0 x') });
     expect(objects.get(3)?.dict).toBe('original');
@@ -185,21 +185,21 @@ describe('leitura de objetos', () => {
     expect(objects.get(5)?.dict).toBe('y');
   });
 
-  it('readPdfObjects inclui os objetos de dentro do fluxo de objetos', async () => {
+  it('readPdfObjects includes the objects inside the object stream', async () => {
     const objects = await readPdfObjects(receiptPdf());
     expect(objects.get(8)?.dict).toContain('/ToUnicode 9 0 R');
   });
 });
 
-describe('referências e páginas', () => {
-  it('pdfRefs e dictRefs leem referências únicas e listas', () => {
+describe('references and pages', () => {
+  it('pdfRefs and dictRefs read single references and lists', () => {
     expect(pdfRefs('[1 0 R 22 0 R]')).toEqual([1, 22]);
     expect(dictRefs('/Contents 4 0 R', 'Contents')).toEqual([4]);
     expect(dictRefs('/Kids [5 0 R 3 0 R]', 'Kids')).toEqual([5, 3]);
-    expect(dictRefs('/Outro 1 0 R', 'Kids')).toEqual([]);
+    expect(dictRefs('/Other 1 0 R', 'Kids')).toEqual([]);
   });
 
-  it('orderedPages e collectPdfPages seguem /Kids', async () => {
+  it('orderedPages and collectPdfPages follow /Kids', async () => {
     const objects = await readPdfObjects(receiptPdf());
     expect(orderedPages(objects)).toEqual([5, 3]);
     const pages: number[] = [];
@@ -208,14 +208,14 @@ describe('referências e páginas', () => {
   });
 });
 
-describe('mapas ToUnicode', () => {
-  it('utf16beHexToString decodifica 1 byte, UTF-16 e vazio', () => {
+describe('ToUnicode maps', () => {
+  it('utf16beHexToString decodes 1 byte, UTF-16 and empty', () => {
     expect(utf16beHexToString('41')).toBe('A');
     expect(utf16beHexToString('00E90041')).toBe('éA');
     expect(utf16beHexToString('')).toBe('');
   });
 
-  it('readBfChars e readBfRanges preenchem o mapa', () => {
+  it('readBfChars and readBfRanges fill the map', () => {
     const map = new Map<number, string>();
     readBfChars(CMAP, map);
     readBfRanges(CMAP, map);
@@ -230,18 +230,18 @@ describe('mapas ToUnicode', () => {
     ]);
   });
 
-  it('rangeTarget usa a lista ou incrementa o último caractere', () => {
+  it('rangeTarget uses the list or increments the last character', () => {
     expect(rangeTarget(['0041'], 2)).toBe('C');
     expect(rangeTarget(['0041', '0042'], 1)).toBe('B');
     expect(rangeTarget([''], 1)).toBe('');
   });
 
-  it('parseToUnicodeCMap detecta códigos de 1 ou 2 bytes', () => {
+  it('parseToUnicodeCMap detects 1- or 2-byte codes', () => {
     expect(parseToUnicodeCMap(CMAP).bytes).toBe(2);
     expect(parseToUnicodeCMap('begincodespacerange <00> <FF>').bytes).toBe(1);
   });
 
-  it('fontResourceRefs junta /Font inline e por referência; fontCMaps só fontes com ToUnicode', async () => {
+  it('fontResourceRefs merges inline and referenced /Font; fontCMaps only fonts with ToUnicode', async () => {
     const objects = await readPdfObjects(receiptPdf());
     expect([...fontResourceRefs(objects)]).toEqual([
       ['F1', 7],
@@ -257,25 +257,25 @@ describe('mapas ToUnicode', () => {
   });
 });
 
-describe('strings e itens do conteúdo', () => {
-  it('readLiteralString trata escapes, parênteses aninhados e octal', () => {
+describe('content strings and items', () => {
+  it('readLiteralString handles escapes, nested parentheses and octal', () => {
     expect(readLiteralString('(a\\(b\\) (c) \\101\\n\\\nz)', 0)).toEqual(['a(b) (c) A\nz', 22]);
-    expect(readLiteralString('(sem fim', 0)[0]).toBe('sem fim');
+    expect(readLiteralString('(no end', 0)[0]).toBe('no end');
   });
 
-  it('readEscape cobre octal, letras, quebra CRLF e caractere literal', () => {
+  it('readEscape covers octal, letters, CRLF break and literal character', () => {
     expect(readEscape('351', 0)).toEqual(['é', 3]);
     expect(readEscape('t', 0)).toEqual(['\t', 1]);
     expect(readEscape('\r\nx', 0)).toEqual(['', 2]);
     expect(readEscape('\\', 0)).toEqual(['\\', 1]);
   });
 
-  it('readHexString completa dígito ímpar e tolera falta de >', () => {
+  it('readHexString pads an odd digit and tolerates a missing >', () => {
     expect(readHexString('<48 69>', 0)).toEqual(['Hi', 7]);
     expect(readHexString('<4', 0)).toEqual(['@', 3]);
   });
 
-  it('nextPdfToken, readPdfWord, classifyWord e skipPdfSpace', () => {
+  it('nextPdfToken, readPdfWord, classifyWord and skipPdfSpace', () => {
     expect(nextPdfToken('  /F1 ', 0)).toEqual([{ kind: 'name', value: 'F1' }, 5]);
     expect(nextPdfToken('[', 0)?.[0].kind).toBe('open');
     expect(nextPdfToken(']', 0)?.[0].kind).toBe('close');
@@ -289,18 +289,18 @@ describe('strings e itens do conteúdo', () => {
   });
 });
 
-describe('intérprete de texto', () => {
+describe('text interpreter', () => {
   const cmap: PdfCMap = { map: new Map([[0x41, 'Z']]), bytes: 1 };
   function fresh(): PdfTextState {
     return { font: undefined, operands: [], array: null, out: [] };
   }
 
-  it('decodePdfText usa o mapa da fonte ou latin1', () => {
+  it('decodePdfText uses the font map or latin1', () => {
     expect(decodePdfText('AB', cmap)).toBe('Z');
     expect(decodePdfText('AB', undefined)).toBe('AB');
   });
 
-  it('operadores \', ", TJ, Td, T*, Tf e desconhecido', () => {
+  it('operators \', ", TJ, Td, T*, Tf and unknown', () => {
     const state = fresh();
     state.operands = [{ kind: 'string', value: 'x' }];
     applyTextOperator(state, "'", new Map());
@@ -313,7 +313,7 @@ describe('intérprete de texto', () => {
     expect(state.out).toEqual(['\nx', '\nx', '']);
   });
 
-  it('lastOperandText e moveText', () => {
+  it('lastOperandText and moveText', () => {
     const state = fresh();
     expect(lastOperandText(state)).toBe('');
     state.operands = [
@@ -328,7 +328,7 @@ describe('intérprete de texto', () => {
     expect(moveText(state)).toBe('\n');
   });
 
-  it('showArrayText insere espaço só em ajustes grandes', () => {
+  it('showArrayText inserts a space only for large adjustments', () => {
     const items = [
       { kind: 'string', value: 'a' },
       { kind: 'number', value: -50 },
@@ -339,7 +339,7 @@ describe('intérprete de texto', () => {
     expect(showArrayText(items, undefined)).toBe('ab c');
   });
 
-  it('feedPdfToken acumula listas e limpa operandos no operador', () => {
+  it('feedPdfToken accumulates lists and clears operands on the operator', () => {
     const state = fresh();
     feedPdfToken(state, { kind: 'open', value: '[' }, new Map());
     feedPdfToken(state, { kind: 'string', value: 'q' }, new Map());
@@ -348,8 +348,8 @@ describe('intérprete de texto', () => {
     expect(state).toMatchObject({ out: ['q'], operands: [], array: null });
   });
 
-  it('contentStreamText e tidyPdfText', () => {
-    expect(contentStreamText('BT (Olá) Tj ET % fim', new Map())).toBe('Olá\n');
+  it('contentStreamText and tidyPdfText', () => {
+    expect(contentStreamText('BT (Olá) Tj ET % end', new Map())).toBe('Olá\n');
     expect(tidyPdfText('  a   b \n\n\n\n c  ')).toBe('a b\n\nc');
   });
 });

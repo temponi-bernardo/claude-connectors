@@ -1,12 +1,12 @@
 /**
- * Cliente da ponte WhatsApp do lado do Worker: chama o Durable Object `WhatsAppBridge` (que acorda o container e
- * repassa à API interna, `bridge/API.md`) sempre dentro de um prazo, e traduz erros para mensagens ao usuário.
+ * Worker-side WhatsApp bridge client: calls the `WhatsAppBridge` Durable Object (which wakes the container and
+ * forwards to the internal API, `bridge/API.md`) always within a deadline, and turns errors into user messages.
  */
 
-/** Função que entrega uma requisição ao Durable Object da ponte (o `fetch` do stub). */
+/** Function that delivers a request to the bridge Durable Object (the stub's `fetch`). */
 export type BridgeFetch = (path: string, init?: RequestInit) => Promise<Response>;
 
-/** Erro da ponte com o status HTTP e o código (`error`) devolvido por ela. */
+/** Bridge error with the HTTP status and the code (`error`) it returned. */
 export class BridgeError extends Error {
   constructor(
     message: string,
@@ -49,7 +49,7 @@ export function bridgeErrorFrom(status: number, body: unknown): BridgeError {
   return new BridgeError(BRIDGE_ERROR_MESSAGES[code] ?? fallback, status, code);
 }
 
-/** Espera uma promessa até o instante `deadline` (ms Unix); depois disso rejeita com a mensagem dada. */
+/** Waits for a promise until `deadline` (Unix ms); after that rejects with the given message. */
 export function withDeadline<T>(
   promise: Promise<T>,
   deadline: number,
@@ -68,21 +68,21 @@ export function withDeadline<T>(
   });
 }
 
-/** Mensagem de tempo esgotado de uma chamada à ponte. */
+/** Timeout message of a bridge call. */
 export function bridgeTimeoutMessage(path: string): string {
   const route = path.split('?')[0] ?? path;
-  return `Tempo esgotado esperando o WhatsApp (${route}). O container pode estar acordando: tente de novo em instantes.`;
+  return `Timed out waiting for WhatsApp (${route}). The container may be waking up: try again in a moment.`;
 }
 
-/** Espera entre tentativas enquanto a ponte acorda (ms). */
+/** Wait between attempts while the bridge wakes up (ms). */
 export const BRIDGE_RETRY_MS = 750;
 
-/** Diz se vale tentar de novo: a ponte ainda está iniciando e sobra prazo para mais uma tentativa. */
+/** Tells whether to retry: the bridge is still starting and there is time left for another attempt. */
 export function shouldRetryBridge(error: BridgeError, deadline: number, now: number): boolean {
   return error.code === 'not_ready' && now + BRIDGE_RETRY_MS < deadline;
 }
 
-/** Faz uma tentativa: resposta 2xx, ou `BridgeError` com o código da ponte. */
+/** Makes one attempt: a 2xx response, or a `BridgeError` with the bridge code. */
 export async function attemptBridge(
   bridge: BridgeFetch,
   path: string,
@@ -98,7 +98,7 @@ export async function attemptBridge(
   throw bridgeErrorFrom(res.status, body);
 }
 
-/** Chama a ponte dentro do prazo, esperando-a acordar (`not_ready`); 2xx devolve a resposta, o resto lança. */
+/** Calls the bridge within the deadline, waiting for it to wake up (`not_ready`); 2xx returns the response, the rest throws. */
 export async function callBridge(
   bridge: BridgeFetch,
   path: string,
@@ -118,7 +118,7 @@ export async function callBridge(
   }
 }
 
-/** Chama a ponte e lê o JSON da resposta. */
+/** Calls the bridge and reads the response JSON. */
 export async function bridgeJson<T>(
   bridge: BridgeFetch,
   path: string,
@@ -128,7 +128,7 @@ export async function bridgeJson<T>(
   return (await res.json()) as T;
 }
 
-/** Monta `caminho?query` só com os parâmetros definidos. */
+/** Builds `path?query` with only the defined parameters. */
 export function bridgePath(
   path: string,
   params: Readonly<Record<string, string | number | undefined>>,
@@ -141,7 +141,7 @@ export function bridgePath(
   return text ? `${path}?${text}` : path;
 }
 
-/** Corpo JSON de um POST para a ponte. */
+/** JSON body of a POST to the bridge. */
 export function jsonPost(body: unknown): RequestInit {
   return {
     method: 'POST',

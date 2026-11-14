@@ -14,8 +14,8 @@ import {
   participantNames,
 } from './helpers.js';
 
-describe('isoDaysFrom e dateOnly', () => {
-  it('soma e subtrai dias e extrai a data', () => {
+describe('isoDaysFrom and dateOnly', () => {
+  it('adds and subtracts days and extracts the date', () => {
     const now = new Date('2026-11-05T12:00:00Z');
     expect(isoDaysFrom(now, 2)).toBe('2026-11-07T12:00:00.000Z');
     expect(isoDaysFrom(now, -5)).toBe('2026-10-31T12:00:00.000Z');
@@ -30,8 +30,8 @@ describe('ASSIGNMENT_BUCKETS', () => {
   });
 });
 
-describe('courseContextCodes, courseNameMap e participantNames', () => {
-  it('monta códigos e mapas por id', () => {
+describe('courseContextCodes, courseNameMap and participantNames', () => {
+  it('builds codes and maps by id', () => {
     expect(courseContextCodes([1, '2'])).toEqual(['course_1', 'course_2']);
     expect(courseNameMap([{ id: 1, name: 'A' }, { id: 2 }]).get('2')).toBe('');
     expect(
@@ -42,7 +42,7 @@ describe('courseContextCodes, courseNameMap e participantNames', () => {
 });
 
 describe('isTextFile', () => {
-  it('aceita por tipo ou extensão e recusa binários', () => {
+  it('accepts by type or extension and refuses binaries', () => {
     expect(isTextFile('text/plain', 'a')).toBe(true);
     expect(isTextFile('application/octet-stream', 'main.py')).toBe(true);
     expect(isTextFile('application/pdf', 'a.pdf')).toBe(false);
@@ -50,19 +50,19 @@ describe('isTextFile', () => {
 });
 
 describe('matchModuleItems', () => {
-  it('encontra itens pelo título sem diferenciar maiúsculas', () => {
+  it('finds items by title, case-insensitively', () => {
     const modules = [
-      { id: 1, name: 'M1', items: [{ id: 1, title: 'Aula de Grafos', type: 'Page' }, { id: 2 }] },
+      { id: 1, name: 'M1', items: [{ id: 1, title: 'Graphs Lecture', type: 'Page' }, { id: 2 }] },
       { id: 2 },
     ];
-    expect(matchModuleItems(modules, 'grafos')).toEqual([
-      { module: 'M1', title: 'Aula de Grafos', type: 'Page' },
+    expect(matchModuleItems(modules, 'graphs')).toEqual([
+      { module: 'M1', title: 'Graphs Lecture', type: 'Page' },
     ]);
   });
 });
 
 describe('activeCourses', () => {
-  it('pede só cursos ativos', async () => {
+  it('asks for active courses only', async () => {
     const { ctx, getAll } = fakeContext({ '/courses': [{ id: 1 }] });
     await expect(activeCourses(ctx.client)).resolves.toEqual([{ id: 1 }]);
     expect(getAll).toHaveBeenCalledWith('/courses', { enrollment_state: 'active' });
@@ -70,7 +70,7 @@ describe('activeCourses', () => {
 });
 
 describe('fetchOwnSubmission', () => {
-  it('devolve a entrega ou null em erro', async () => {
+  it('returns the submission, or null on error', async () => {
     const path = '/courses/1/assignments/2/submissions/self';
     await expect(
       fetchOwnSubmission(fakeContext({ [path]: { score: 1 } }).ctx.client, 1, 2),
@@ -82,9 +82,9 @@ describe('fetchOwnSubmission', () => {
 });
 
 describe('getAllOrEmpty', () => {
-  it('troca falha por lista vazia', async () => {
-    const { ctx } = fakeContext({ '/ok': [1], '/ruim': new Error('x') });
+  it('turns a failure into an empty list', async () => {
+    const { ctx } = fakeContext({ '/ok': [1], '/bad': new Error('x') });
     await expect(getAllOrEmpty(ctx.client, '/ok', {})).resolves.toEqual([1]);
-    await expect(getAllOrEmpty(ctx.client, '/ruim', {})).resolves.toEqual([]);
+    await expect(getAllOrEmpty(ctx.client, '/bad', {})).resolves.toEqual([]);
   });
 });

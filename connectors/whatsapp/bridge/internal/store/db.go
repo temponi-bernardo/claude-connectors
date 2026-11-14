@@ -1,4 +1,4 @@
-// Package store guarda conversas, mensagens, contatos e envios em messages.db (SQLite, driver Go puro).
+// Package store keeps chats, messages, contacts and sends in messages.db (SQLite, pure Go driver).
 package store
 
 import (
@@ -16,14 +16,14 @@ import (
 	"modernc.org/sqlite"
 )
 
-// DriverName é o nome do driver modernc.org/sqlite no database/sql.
+// DriverName is the name of the modernc.org/sqlite driver in database/sql.
 const DriverName = "sqlite"
 
 const foldFunc = "wa_fold"
 
 var registerOnce sync.Once
 
-// registerFold registra a função SQL wa_fold(texto) uma única vez no driver.
+// registerFold registers the SQL function wa_fold(text) once in the driver.
 func registerFold() {
 	registerOnce.Do(func() {
 		err := sqlite.RegisterDeterministicScalarFunction(foldFunc, 1, func(_ *sqlite.FunctionContext, args []driver.Value) (driver.Value, error) {
@@ -36,7 +36,7 @@ func registerFold() {
 	})
 }
 
-// DSN monta a string de conexão com WAL, busy timeout, chaves estrangeiras e cache pequeno (256 MiB de RAM).
+// DSN builds the connection string with WAL, busy timeout, foreign keys and a small cache (256 MiB of RAM).
 func DSN(path string) string {
 	q := url.Values{}
 	for _, p := range []string{"busy_timeout(10000)", "journal_mode(WAL)", "foreign_keys(1)", "synchronous(NORMAL)", "cache_size(-2000)", "temp_store(FILE)"} {
@@ -45,7 +45,7 @@ func DSN(path string) string {
 	return "file:" + path + "?" + q.Encode()
 }
 
-// OpenDB abre um banco SQLite em path com as pragmas padrão da ponte.
+// OpenDB opens a SQLite database at path with the bridge's default pragmas.
 func OpenDB(path string) (*sql.DB, error) {
 	registerFold()
 	db, err := sql.Open(DriverName, DSN(path))
@@ -61,7 +61,7 @@ func OpenDB(path string) (*sql.DB, error) {
 	return db, nil
 }
 
-// VacuumInto grava em dst uma cópia consistente e compacta do banco, com o cabeçalho normalizado.
+// VacuumInto writes to dst a consistent, compact copy of the database, with a normalized header.
 func VacuumInto(ctx context.Context, db *sql.DB, dst string) error {
 	if _, err := db.ExecContext(ctx, "VACUUM INTO ?", dst); err != nil {
 		return fmt.Errorf("vacuum into: %w", err)
@@ -69,15 +69,15 @@ func VacuumInto(ctx context.Context, db *sql.DB, dst string) error {
 	return normalizeHeaderFile(dst)
 }
 
-// sqliteMagic abre todo arquivo SQLite.
+// sqliteMagic starts every SQLite file.
 const sqliteMagic = "SQLite format 3\x00"
 
-// normalizeHeader zera no cabeçalho de 100 bytes o que muda sem mudar o conteúdo: versão de formato
-// (WAL/legado, bytes 18–19), contador de mudanças (24 e 92) e schema cookie (40, que o VACUUM INTO
-// incrementa). Assim o mesmo conteúdo gera os mesmos bytes, mesmo depois de restaurar (função pura).
+// normalizeHeader resets, in the 100-byte header, what changes without changing the content: format version
+// (WAL/legacy, bytes 18–19), change counter (24 and 92) and schema cookie (40, which VACUUM INTO
+// increments). This way the same content yields the same bytes, even after a restore (pure).
 func normalizeHeader(h []byte) error {
 	if len(h) < 100 || string(h[:16]) != sqliteMagic {
-		return errors.New("cabeçalho SQLite inválido")
+		return errors.New("invalid SQLite header")
 	}
 	h[18], h[19] = 1, 1
 	for _, off := range []int{24, 40, 92} {
@@ -86,7 +86,7 @@ func normalizeHeader(h []byte) error {
 	return nil
 }
 
-// normalizeHeaderFile aplica normalizeHeader no arquivo (o banco copiado ainda não está aberto por ninguém).
+// normalizeHeaderFile applies normalizeHeader to the file (nobody has the copied database open yet).
 func normalizeHeaderFile(path string) error {
 	f, err := os.OpenFile(path, os.O_RDWR, 0)
 	if err != nil {
@@ -104,13 +104,13 @@ func normalizeHeaderFile(path string) error {
 	return err
 }
 
-// Store é o acesso a messages.db.
+// Store is the access to messages.db.
 type Store struct {
 	db     *sql.DB
 	sendMu sync.Mutex
 }
 
-// Open abre (criando se preciso) messages.db e aplica o esquema.
+// Open opens (creating if needed) messages.db and applies the schema.
 func Open(ctx context.Context, path string) (*Store, error) {
 	db, err := OpenDB(path)
 	if err != nil {
@@ -118,15 +118,15 @@ func Open(ctx context.Context, path string) (*Store, error) {
 	}
 	if _, err := db.ExecContext(ctx, schema); err != nil {
 		db.Close()
-		return nil, fmt.Errorf("esquema: %w", err)
+		return nil, fmt.Errorf("schema: %w", err)
 	}
 	return &Store{db: db}, nil
 }
 
-// DB expõe o *sql.DB (usado pelo snapshot).
+// DB exposes the *sql.DB (used by the snapshot).
 func (s *Store) DB() *sql.DB { return s.db }
 
-// Close fecha o banco.
+// Close closes the database.
 func (s *Store) Close() error { return s.db.Close() }
 
 const schema = `
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS messages (
 	ts INTEGER NOT NULL,
 	type TEXT NOT NULL,
 	text TEXT NOT NULL DEFAULT '',
-	text_fold TEXT NOT NULL DEFAULT '', -- Fold(text): busca sem caixa/acento com LIKE nativo (8x mais rápido que função Go)
+	text_fold TEXT NOT NULL DEFAULT '', -- Fold(text): case/accent-insensitive search with native LIKE (8x faster than a Go function)
 	media_kind TEXT,
 	media_mime TEXT,
 	media_size INTEGER,

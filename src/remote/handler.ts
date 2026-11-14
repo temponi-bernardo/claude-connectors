@@ -1,6 +1,6 @@
 /**
- * Roteador HTTP do conector remoto sobre `Request`/`Response` (Web padrão): descoberta OAuth, registro,
- * autorização com a página de login, troca de tokens e o endpoint `/mcp` protegido.
+ * HTTP router of the remote connector over standard Web `Request`/`Response`: OAuth discovery, registration,
+ * authorization with the login page, token exchange and the protected `/mcp` endpoint.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { escapeHtml, renderLoginPage, type LoginPageText } from './login-page.js';
@@ -21,51 +21,51 @@ import {
   sealAuthorizeRequest,
 } from './tokens.js';
 
-/** Login em que o usuário cola a credencial do serviço na página do `/authorize` (ex.: token do Canvas). */
+/** Login where the user pastes the service credential on the `/authorize` page (e.g. the Canvas token). */
 export interface SecretLogin {
   readonly kind: 'secret';
   readonly text: LoginPageText;
-  /** Confere a credencial no serviço; rejeita com mensagem para o usuário se ela não servir. */
+  /** Checks the credential against the service; rejects with a user-facing message if it does not work. */
   readonly verify: (secret: string) => Promise<void>;
 }
 
-/** Login delegado a um provedor de identidade (ex.: GitHub); o segredo selado é a identidade aceita. */
+/** Login delegated to an identity provider (e.g. GitHub); the sealed secret is the accepted identity. */
 export interface UpstreamLogin {
   readonly kind: 'upstream';
-  /** Endereço do provedor para onde o navegador vai, levando o pedido selado em `state`. */
+  /** Provider address the browser is sent to, carrying the sealed request in `state`. */
   readonly start: (state: string, callbackUrl: string) => string;
-  /** Conclui o login com a query do retorno; devolve o segredo ou rejeita com mensagem ao usuário. */
+  /** Finishes the login with the callback query; returns the secret or rejects with a user-facing message. */
   readonly finish: (query: URLSearchParams, callbackUrl: string) => Promise<string>;
 }
 
 /** Outcome of renewing the credential: `revoked` when the service refused it (the refresh becomes `invalid_grant`). */
 export type SecretRenewal = 'kept' | 'revoked';
 
-/** O que um conector entrega ao servidor remoto. */
+/** What a connector hands to the remote server. */
 export interface RemoteConnector {
   readonly login: SecretLogin | UpstreamLogin;
-  /** Cria o servidor MCP com as ferramentas ligadas à credencial do usuário. */
+  /** Creates the MCP server with the tools bound to the user's credential. */
   readonly createServer: (secret: string) => McpServer;
-  /** Opcional: estende a validade da credencial no serviço a cada refresh do OAuth. */
+  /** Optional: extends the credential lifetime at the service on each OAuth refresh. */
   readonly renewSecret?: (secret: string) => Promise<SecretRenewal>;
-  /** Opcional: confere a cada `/mcp` se o segredo ainda vale (ex.: e-mail ainda na lista do dono). */
+  /** Optional: checks on each `/mcp` whether the secret is still valid (e.g. email still on the owner's list). */
   readonly acceptsSecret?: (secret: string) => boolean;
 }
 
-/** Caminho do retorno do login delegado (cadastre `<emissor>/oauth/callback` no provedor). */
+/** Callback path of the delegated login (register `<issuer>/oauth/callback` with the provider). */
 export const UPSTREAM_CALLBACK_PATH = '/oauth/callback';
 
-/** Dependências do roteador: configuração OAuth, conector e relógio em segundos Unix. */
+/** Router dependencies: OAuth configuration, connector and a clock in Unix seconds. */
 export interface RemoteApp {
   readonly settings: OAuthSettings;
   readonly connector: RemoteConnector;
   readonly now: () => number;
 }
 
-/** Função que atende uma requisição. */
+/** Function that serves a request. */
 export type RemoteRoute = (app: RemoteApp, request: Request) => Promise<Response>;
 
-/** Headers CORS: os endpoints não usam cookies, então qualquer origem pode chamá-los. */
+/** CORS headers: the endpoints use no cookies, so any origin may call them. */
 export const CORS_HEADERS: Readonly<Record<string, string>> = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
@@ -74,7 +74,7 @@ export const CORS_HEADERS: Readonly<Record<string, string>> = {
   'access-control-expose-headers': 'www-authenticate, mcp-session-id',
 };
 
-/** Resposta JSON com status. */
+/** JSON response with a status. */
 export function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -82,13 +82,13 @@ export function jsonResponse(data: unknown, status = 200): Response {
   });
 }
 
-/** CSP das páginas; o `form-action` inclui a origem do retorno, senão o navegador barra o 302 do envio. */
+/** Page CSP; `form-action` includes the redirect origin, otherwise the browser blocks the 302 after submit. */
 export function pageSecurityPolicy(formTarget: string | null): string {
   const formAction = formTarget ? `'self' ${formTarget}` : "'self'";
   return `default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action ${formAction}; frame-ancestors 'none'`;
 }
 
-/** Resposta HTML com status, sem cache e sem ser exibida em frames de outros sites. */
+/** HTML response with a status, no cache and not framed by other sites. */
 export function htmlResponse(
   html: string,
   status = 200,
@@ -104,12 +104,12 @@ export function htmlResponse(
   });
 }
 
-/** Lê o corpo de um formulário (`application/x-www-form-urlencoded`). */
+/** Reads a form body (`application/x-www-form-urlencoded`). */
 export async function readForm(request: Request): Promise<URLSearchParams> {
   return new URLSearchParams(await request.text());
 }
 
-/** Lê um corpo JSON; nulo se não for JSON válido. */
+/** Reads a JSON body; null if it is not valid JSON. */
 export async function readJsonBody(request: Request): Promise<unknown> {
   try {
     const body: unknown = await request.json();
@@ -119,13 +119,13 @@ export async function readJsonBody(request: Request): Promise<unknown> {
   }
 }
 
-/** Monta a página de login de um pedido validado (com erro opcional). */
+/** Builds the login page of a validated request (with an optional error). */
 export function loginPageFor(
   app: RemoteApp,
   request: AuthorizeRequest,
   error: string | null,
 ): Response {
-  if (app.connector.login.kind !== 'secret') return htmlResponse('<p>Não encontrado.</p>', 404);
+  if (app.connector.login.kind !== 'secret') return htmlResponse('<p>Not found.</p>', 404);
   return htmlResponse(
     renderLoginPage({
       text: app.connector.login.text,
@@ -138,7 +138,7 @@ export function loginPageFor(
   );
 }
 
-/** Redireciona de volta ao cliente com o código e o `state`. */
+/** Redirects back to the client with the code and the `state`. */
 export function redirectWithCode(request: AuthorizeRequest, code: string): Response {
   const target = new URL(request.redirectUri);
   target.searchParams.set('code', code);
@@ -146,7 +146,7 @@ export function redirectWithCode(request: AuthorizeRequest, code: string): Respo
   return new Response(null, { status: 302, headers: { location: target.toString() } });
 }
 
-/** `POST /register`: registro dinâmico de cliente. */
+/** `POST /register`: dynamic client registration. */
 export async function handleRegister(app: RemoteApp, request: Request): Promise<Response> {
   const result = registerClient(await readJsonBody(request), app.settings, app.now());
   if (!result.ok)
@@ -154,7 +154,7 @@ export async function handleRegister(app: RemoteApp, request: Request): Promise<
   return jsonResponse(result.value, 201);
 }
 
-/** Redireciona o navegador ao provedor de identidade com o pedido selado no `state`. */
+/** Redirects the browser to the identity provider with the sealed request in `state`. */
 export function redirectToUpstream(
   app: RemoteApp,
   login: UpstreamLogin,
@@ -165,7 +165,7 @@ export function redirectToUpstream(
   return new Response(null, { status: 302, headers: { location: target } });
 }
 
-/** `GET /authorize`: valida o pedido e mostra a página de login ou vai ao provedor (erros não redirecionam). */
+/** `GET /authorize`: validates the request and shows the login page or goes to the provider (errors do not redirect). */
 export function handleAuthorizePage(app: RemoteApp, request: Request): Promise<Response> {
   const result = parseAuthorizeQuery(new URL(request.url).searchParams, app.settings, app.now());
   if (!result.ok) return Promise.resolve(htmlResponse(`<p>${result.description}</p>`, 400));
@@ -175,14 +175,14 @@ export function handleAuthorizePage(app: RemoteApp, request: Request): Promise<R
   return Promise.resolve(loginPageFor(app, result.value, null));
 }
 
-/** `GET /oauth/callback`: conclui o login delegado e devolve o código ao cliente, ou explica a recusa. */
+/** `GET /oauth/callback`: finishes the delegated login and returns the code to the client, or explains the refusal. */
 export async function handleUpstreamCallback(app: RemoteApp, request: Request): Promise<Response> {
   const login = app.connector.login;
-  if (login.kind !== 'upstream') return htmlResponse('<p>Não encontrado.</p>', 404);
+  if (login.kind !== 'upstream') return htmlResponse('<p>Not found.</p>', 404);
   const query = new URL(request.url).searchParams;
   const pending = openAuthorizeRequest(query.get('state') ?? '', app.settings, app.now());
   if (!pending)
-    return htmlResponse('<p>O pedido expirou. Volte ao Claude e conecte de novo.</p>', 400);
+    return htmlResponse('<p>The request expired. Go back to Claude and connect again.</p>', 400);
   let secret: string;
   try {
     secret = await login.finish(query, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
@@ -198,14 +198,14 @@ export async function handleUpstreamCallback(app: RemoteApp, request: Request): 
   );
 }
 
-/** `POST /authorize`: confere a credencial e devolve o código ao cliente, ou a página com o erro. */
+/** `POST /authorize`: checks the credential and returns the code to the client, or the page with the error. */
 export async function handleAuthorizeSubmit(app: RemoteApp, request: Request): Promise<Response> {
   const form = await readForm(request);
   const login = app.connector.login;
-  if (login.kind !== 'secret') return htmlResponse('<p>Não encontrado.</p>', 404);
+  if (login.kind !== 'secret') return htmlResponse('<p>Not found.</p>', 404);
   const pending = openAuthorizeRequest(form.get('pending') ?? '', app.settings, app.now());
   if (!pending)
-    return htmlResponse('<p>O pedido expirou. Volte ao Claude e conecte de novo.</p>', 400);
+    return htmlResponse('<p>The request expired. Go back to Claude and connect again.</p>', 400);
   const secret = (form.get('secret') ?? '').trim();
   try {
     await login.verify(secret);
@@ -218,7 +218,7 @@ export async function handleAuthorizeSubmit(app: RemoteApp, request: Request): P
   );
 }
 
-/** Renova a credencial pelo conector, se ele souber; falha só vira aviso no log (o refresh segue). */
+/** Renews the credential through the connector, if it can; a failure only logs a warning (the refresh goes on). */
 export async function renewSecretQuietly(
   connector: RemoteConnector,
   secret: string,
@@ -226,10 +226,7 @@ export async function renewSecretQuietly(
   try {
     return (await connector.renewSecret?.(secret)) ?? 'kept';
   } catch (error) {
-    console.warn(
-      'Não consegui renovar a credencial:',
-      error instanceof Error ? error.message : error,
-    );
+    console.warn('Could not renew the credential:', error instanceof Error ? error.message : error);
     return 'kept';
   }
 }
@@ -238,7 +235,7 @@ export async function renewSecretQuietly(
 export const REVOKED_SECRET_DESCRIPTION =
   'The service no longer accepts the credential behind this refresh token (revoked or expired): connect the connector again.';
 
-/** `POST /token`: troca código ou refresh token por tokens; no refresh, renova a credencial. */
+/** `POST /token`: exchanges a code or refresh token for tokens; on refresh, renews the credential. */
 export async function handleToken(app: RemoteApp, request: Request): Promise<Response> {
   const result = redeemTokenRequest(await readForm(request), app.settings, app.now());
   if (!result.ok)
@@ -254,7 +251,7 @@ export async function handleToken(app: RemoteApp, request: Request): Promise<Res
   return jsonResponse(result.value.tokens);
 }
 
-/** `/mcp`: exige o access token e atende com o servidor MCP do usuário. */
+/** `/mcp`: requires the access token and serves with the user's MCP server. */
 export function handleMcp(app: RemoteApp, request: Request): Promise<Response> {
   const secret = readAccessSecret(request.headers.get('authorization'), app.settings, app.now());
   if (secret === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
@@ -264,7 +261,7 @@ export function handleMcp(app: RemoteApp, request: Request): Promise<Response> {
   return serveMcpRequest(app.connector.createServer(secret), request);
 }
 
-/** Tabela de rotas: `MÉTODO caminho` → função. */
+/** Route table: `METHOD path` → function. */
 export const REMOTE_ROUTES: Readonly<Record<string, RemoteRoute>> = {
   'GET /': () => Promise.resolve(new Response('ok')),
   'GET /.well-known/oauth-authorization-server': (app) =>
@@ -283,22 +280,22 @@ export const REMOTE_ROUTES: Readonly<Record<string, RemoteRoute>> = {
   'DELETE /mcp': handleMcp,
 };
 
-/** Acrescenta os headers CORS a uma resposta. */
+/** Adds the CORS headers to a response. */
 export function withCors(response: Response): Response {
   for (const [name, value] of Object.entries(CORS_HEADERS)) response.headers.set(name, value);
   return response;
 }
 
-/** Escolhe a rota pelo método e caminho; preflight CORS dá 204 e caminho desconhecido dá 404. */
+/** Picks the route by method and path; a CORS preflight gives 204 and an unknown path gives 404. */
 export async function routeRemoteRequest(app: RemoteApp, request: Request): Promise<Response> {
   if (request.method === 'OPTIONS') return withCors(new Response(null, { status: 204 }));
   const path = new URL(request.url).pathname.replace(/(.)\/+$/, '$1');
   const route = REMOTE_ROUTES[`${request.method} ${path}`];
-  if (!route) return new Response('Não encontrado', { status: 404 });
+  if (!route) return new Response('Not found', { status: 404 });
   return withCors(await route(app, request));
 }
 
-/** Cria o handler `(Request) => Promise<Response>` do conector remoto. */
+/** Creates the `(Request) => Promise<Response>` handler of the remote connector. */
 export function createRemoteHandler(app: RemoteApp): (request: Request) => Promise<Response> {
   return (request) => routeRemoteRequest(app, request);
 }

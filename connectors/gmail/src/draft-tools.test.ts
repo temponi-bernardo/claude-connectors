@@ -27,7 +27,7 @@ beforeEach(() => {
 });
 
 describe('draftArgs', () => {
-  it('converte os argumentos da ferramenta', () => {
+  it('converts the tool arguments', () => {
     expect(
       draftArgs({ to: ['a@x.com'], cc: [], bcc: [], subject: 's', body: 'b', reply_all: false }),
     ).toEqual({
@@ -52,8 +52,8 @@ describe('draftArgs', () => {
   });
 });
 
-describe('ferramentas de rascunho', () => {
-  it('anotações: listar lê, criar cria, editar e apagar destroem, enviar envia', () => {
+describe('draft tools', () => {
+  it('annotations: list reads, create creates, update and delete destroy, send sends', () => {
     expect(listDraftsTool.annotations).toMatchObject(READ_ONLY_HINTS);
     expect(createDraftTool.annotations).toMatchObject(CREATE_HINTS);
     expect(updateDraftTool.annotations).toMatchObject(DESTRUCTIVE_HINTS);
@@ -61,37 +61,37 @@ describe('ferramentas de rascunho', () => {
     expect(sendDraftTool.annotations).toMatchObject(SEND_HINTS);
   });
 
-  it('list_drafts lista os rascunhos', async () => {
+  it('list_drafts lists the drafts', async () => {
     const deps = await linkedTestDeps([
       gmailRoute({
         drafts: { drafts: [{ id: 'd1' }] },
         'drafts/d1': { id: 'd1', message: RECEIPT },
       }),
     ]);
-    expect(await listDraftsTool.run(deps, { account: 'dono' })).toMatchObject({
-      drafts: [{ draft_id: 'd1', subject: 'Seu recibo FL Cloud' }],
+    expect(await listDraftsTool.run(deps, { account: 'owner' })).toMatchObject({
+      drafts: [{ draft_id: 'd1', subject: 'Your FL Cloud receipt' }],
     });
   });
 
-  it('create, update, send e delete', async () => {
+  it('create, update, send and delete', async () => {
     const writes: GmailWrite[] = [];
     const route = gmailWriteRoute(writes, (w) => (w.method === 'DELETE' ? null : { id: 'd1' }));
     const deps = await linkedTestDeps([route, gmailRoute({ 'messages/m1': RECEIPT })]);
     const created = await createDraftTool.run(deps, {
-      account: 'dono',
+      account: 'owner',
       to: ['a@x.com'],
-      subject: 'Oi',
-      body: 'Texto',
+      subject: 'Hi',
+      body: 'Text',
     });
-    expect(created).toMatchObject({ account: 'dono', draft_id: 'd1' });
+    expect(created).toMatchObject({ account: 'owner', draft_id: 'd1' });
     await updateDraftTool.run(deps, {
-      account: 'dono',
+      account: 'owner',
       draft_id: 'd1',
-      body: 'Nova versão',
+      body: 'New version',
       reply_to_message_id: 'm1',
     });
-    await sendDraftTool.run(deps, { account: 'dono', draft_id: 'd1' });
-    await deleteDraftTool.run(deps, { account: 'dono', draft_id: 'd1' });
+    await sendDraftTool.run(deps, { account: 'owner', draft_id: 'd1' });
+    await deleteDraftTool.run(deps, { account: 'owner', draft_id: 'd1' });
     expect(writes.map((w) => `${w.method} ${w.path}`)).toEqual([
       'POST drafts',
       'PUT drafts/d1',
@@ -101,9 +101,9 @@ describe('ferramentas de rascunho', () => {
     expect(writes[1]?.body).toMatchObject({ message: { threadId: 't1' } });
   });
 
-  it('rascunho novo sem destinatário é recusado', async () => {
+  it('a new draft without a recipient is refused', async () => {
     const deps = await linkedTestDeps([]);
-    await expect(createDraftTool.run(deps, { account: 'dono', body: 'x' })).rejects.toThrow(
+    await expect(createDraftTool.run(deps, { account: 'owner', body: 'x' })).rejects.toThrow(
       /at least one/,
     );
   });

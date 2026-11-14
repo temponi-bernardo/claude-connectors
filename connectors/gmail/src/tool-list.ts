@@ -1,6 +1,6 @@
 /**
- * Lista das ferramentas do conector Gmail, na ordem em que aparecem para o Claude: contas, leitura, envio,
- * rascunhos e organização da caixa.
+ * List of the Gmail connector tools, in the order Claude sees them: accounts, reading, sending, drafts and
+ * mailbox organization.
  */
 import type { ToolSpec } from '../../../src/mcp/tools.js';
 import type { OwnerDeps } from './context.js';
@@ -36,7 +36,7 @@ import {
   unlinkAccountTool,
 } from './tools.js';
 
-/** Todas as ferramentas do conector Gmail, na ordem em que aparecem para o Claude. */
+/** All Gmail connector tools, in the order Claude sees them. */
 export const GMAIL_TOOLS: readonly ToolSpec<OwnerDeps>[] = [
   listAccountsTool,
   linkAccountTool,

@@ -21,7 +21,7 @@ const doc = new Uint8Array(
   readFileSync(new URL('../../../src/core/fixtures/exemplo.doc', import.meta.url)),
 );
 
-/** PDF mínimo de uma página com o texto dado. */
+/** Minimal one-page PDF with the given text. */
 function tinyPdf(text: string): Uint8Array {
   const content = deflateSync(`BT /F1 12 Tf (${text}) Tj ET`);
   return Buffer.concat([
@@ -37,33 +37,33 @@ beforeEach(() => {
   clearAccessTokenCache();
 });
 
-describe('detecção do tipo', () => {
-  it('looksLikeText aceita texto e recusa binário ou vazio', () => {
-    expect(looksLikeText('linha 1\r\n\tlinha 2')).toBe(true);
+describe('type detection', () => {
+  it('looksLikeText accepts text and rejects binary or empty input', () => {
+    expect(looksLikeText('line 1\r\n\tline 2')).toBe(true);
     expect(looksLikeText('\u0000\u0001\u0002abc')).toBe(false);
     expect(looksLikeText('')).toBe(false);
   });
 
-  it('detectAttachmentKind reconhece PDF, Word, HTML, texto e binário', () => {
+  it('detectAttachmentKind recognizes PDF, Word, HTML, text and binary', () => {
     expect(detectAttachmentKind(tinyPdf('x'))).toBe('pdf');
     expect(detectAttachmentKind(docx)).toBe('docx');
     expect(detectAttachmentKind(doc)).toBe('doc');
-    expect(detectAttachmentKind(Buffer.from('<html><body>oi</body></html>'))).toBe('html');
+    expect(detectAttachmentKind(Buffer.from('<html><body>hi</body></html>'))).toBe('html');
     expect(detectAttachmentKind(Buffer.from('a,b\n1,2'))).toBe('text');
     expect(detectAttachmentKind(Uint8Array.of(0xff, 0xd8, 0xff, 0xe0, 0, 1, 2))).toBeNull();
   });
 });
 
 describe('attachmentBytesToText', () => {
-  it('converte cada tipo suportado', async () => {
-    expect(await attachmentBytesToText(tinyPdf('Recibo 42'))).toBe('Recibo 42');
+  it('converts every supported type', async () => {
+    expect(await attachmentBytesToText(tinyPdf('Receipt 42'))).toBe('Receipt 42');
     expect(await attachmentBytesToText(docx)).toContain('Olá, mundo!');
     expect(await attachmentBytesToText(doc)).toContain('Olá, mundo!');
     expect(await attachmentBytesToText(Buffer.from('<html><p>Olá</p></html>'))).toBe('Olá');
-    expect(await attachmentBytesToText(Buffer.from('só texto'))).toBe('só texto');
+    expect(await attachmentBytesToText(Buffer.from('plain text'))).toBe('plain text');
   });
 
-  it('recusa tipos não suportados', async () => {
+  it('rejects unsupported types', async () => {
     await expect(attachmentBytesToText(Uint8Array.of(0xff, 0xd8, 0, 1))).rejects.toThrow(
       /Unsupported/,
     );
@@ -73,28 +73,28 @@ describe('attachmentBytesToText', () => {
 describe('readAttachmentText', () => {
   const ids = { messageId: 'm1', attachmentId: 'a1' };
 
-  it('baixa, converte e limita o texto', async () => {
+  it('downloads, converts and caps the text', async () => {
     const pdf = tinyPdf('Total US$ 9,99');
     const route = gmailRoute({
       'messages/m1/attachments/a1': { size: pdf.length, data: b64(pdf) },
     });
     const deps = await linkedTestDeps([route]);
     expect(await readAttachmentText(deps, OWNER, ids)).toEqual({
-      account: 'dono',
+      account: 'owner',
       message_id: 'm1',
       size: pdf.length,
       text: 'Total US$ 9,99',
     });
   });
 
-  it('avisa quando não há texto extraível', async () => {
+  it('warns when there is no extractable text', async () => {
     const pdf = tinyPdf('');
     const route = gmailRoute({ 'messages/m1/attachments/a1': { data: b64(pdf) } });
     const deps = await linkedTestDeps([route]);
     expect((await readAttachmentText(deps, OWNER, ids)).text).toMatch(/scanned/);
   });
 
-  it('recusa anexos acima de 5 MB', async () => {
+  it('rejects attachments above 5 MB', async () => {
     const route = gmailRoute({
       'messages/m1/attachments/a1': { size: MAX_ATTACHMENT_BYTES + 1, data: '' },
     });
@@ -104,15 +104,15 @@ describe('readAttachmentText', () => {
 });
 
 describe('downloadAttachment', () => {
-  it('devolve tamanho e bytes; sem size usa o tamanho dos bytes', async () => {
+  it('returns size and bytes; without size uses the byte length', async () => {
     const route = gmailRoute({
-      'messages/m1/attachments/a1': { size: 2, data: b64('oi') },
+      'messages/m1/attachments/a1': { size: 2, data: b64('hi') },
       'messages/m1/attachments/a2': { data: b64('abc') },
     });
     const deps = await linkedTestDeps([route]);
     const first = await downloadAttachment(deps, OWNER, { messageId: 'm1', attachmentId: 'a1' });
     expect(first.size).toBe(2);
-    expect(Buffer.from(first.bytes).toString()).toBe('oi');
+    expect(Buffer.from(first.bytes).toString()).toBe('hi');
     const second = await downloadAttachment(deps, OWNER, { messageId: 'm1', attachmentId: 'a2' });
     expect(second.size).toBe(3);
   });

@@ -1,30 +1,30 @@
 /**
- * Login do dono pelo GitHub (OAuth App): o servidor remoto manda o navegador ao GitHub, troca o código por um
- * token de uso único, lê os e-mails verificados e só aceita quem está na lista (`ALLOWED_EMAILS`). O token do
- * GitHub não é guardado; o "segredo" que segue selado nos tokens do conector é o e-mail aceito.
+ * Owner login through GitHub (OAuth App): the remote server sends the browser to GitHub, exchanges the code for a
+ * single-use token, reads the verified emails and only accepts someone on the list (`ALLOWED_EMAILS`). The GitHub
+ * token is not stored; the "secret" sealed into the connector tokens is the accepted email.
  */
 import type { UpstreamLogin } from './handler.js';
 
-/** Configuração do login pelo GitHub. */
+/** GitHub login configuration. */
 export interface GithubLoginSettings {
   readonly clientId: string;
   readonly clientSecret: string;
-  /** E-mails aceitos, já em minúsculas. */
+  /** Accepted emails, already lowercase. */
   readonly allowedEmails: readonly string[];
   readonly fetchFn: typeof fetch;
 }
 
-/** Um item de `GET /user/emails` da API do GitHub (só os campos usados). */
+/** An item of the GitHub API `GET /user/emails` (only the fields used). */
 export interface GithubEmail {
   readonly email: string;
   readonly verified: boolean;
 }
 
-/** User-Agent das chamadas ao GitHub: a API recusa requisições sem ele (e o fetch do Workers não manda um). */
+/** User-Agent of the GitHub calls: the API rejects requests without one (and the Workers fetch sends none). */
 export const GITHUB_USER_AGENT =
   'claude-connectors (+https://github.com/temponi-bernardo/claude-connectors)';
 
-/** Endereço da tela de autorização do GitHub, pedindo só a leitura dos e-mails. */
+/** Address of the GitHub authorization screen, asking only to read the emails. */
 export function githubAuthorizeUrl(
   settings: GithubLoginSettings,
   state: string,
@@ -39,7 +39,7 @@ export function githubAuthorizeUrl(
   return url.toString();
 }
 
-/** Lê uma lista de e-mails separada por vírgula, em minúsculas e sem vazios. */
+/** Reads a comma-separated email list, lowercased and without empty items. */
 export function parseEmailList(raw: string | null): string[] {
   return (raw ?? '')
     .split(',')
@@ -47,7 +47,7 @@ export function parseEmailList(raw: string | null): string[] {
     .filter((email) => email.includes('@'));
 }
 
-/** Escolhe o primeiro e-mail verificado que está na lista; nulo se nenhum serve. */
+/** Picks the first verified email on the list; null if none fits. */
 export function pickAllowedEmail(
   emails: readonly GithubEmail[],
   allowed: readonly string[],
@@ -56,7 +56,7 @@ export function pickAllowedEmail(
   return match ? match.email.toLowerCase() : null;
 }
 
-/** Troca o código do GitHub por um token de acesso; rejeita com mensagem ao usuário se falhar. */
+/** Exchanges the GitHub code for an access token; rejects with a user-facing message if it fails. */
 export async function exchangeGithubCode(
   settings: GithubLoginSettings,
   code: string,
@@ -78,12 +78,12 @@ export async function exchangeGithubCode(
   });
   const body = (await res.json().catch(() => null)) as { access_token?: unknown } | null;
   if (!res.ok || typeof body?.access_token !== 'string') {
-    throw new Error('O GitHub não confirmou o login. Tente entrar de novo.');
+    throw new Error('GitHub did not confirm the login. Try signing in again.');
   }
   return body.access_token;
 }
 
-/** Lê os e-mails da conta do GitHub com o token de acesso. */
+/** Reads the GitHub account emails with the access token. */
 export async function fetchGithubEmails(
   settings: GithubLoginSettings,
   token: string,
@@ -95,30 +95,30 @@ export async function fetchGithubEmails(
       'user-agent': GITHUB_USER_AGENT,
     },
   });
-  if (!res.ok) throw new Error(`O GitHub respondeu ${res.status} ao ler os e-mails da conta.`);
+  if (!res.ok) throw new Error(`GitHub answered ${res.status} when reading the account emails.`);
   const body: unknown = await res.json();
   return Array.isArray(body) ? (body as GithubEmail[]) : [];
 }
 
-/** Conclui o login: confere o retorno do GitHub e devolve o e-mail aceito, ou rejeita explicando. */
+/** Finishes the login: checks the GitHub callback and returns the accepted email, or rejects explaining why. */
 export async function finishGithubLogin(
   settings: GithubLoginSettings,
   query: URLSearchParams,
   callbackUrl: string,
 ): Promise<string> {
   const code = query.get('code');
-  if (!code) throw new Error('Login no GitHub cancelado ou recusado.');
+  if (!code) throw new Error('GitHub login was cancelled or denied.');
   const token = await exchangeGithubCode(settings, code, callbackUrl);
   const email = pickAllowedEmail(await fetchGithubEmails(settings, token), settings.allowedEmails);
   if (!email) {
     throw new Error(
-      'Esta conta do GitHub não tem um e-mail verificado em ALLOWED_EMAILS. Só o dono do servidor pode entrar.',
+      'This GitHub account has no verified email in ALLOWED_EMAILS. Only the server owner can sign in.',
     );
   }
   return email;
 }
 
-/** Login do conector remoto pelo GitHub, no formato que o servidor remoto espera. */
+/** GitHub login for the remote connector, in the shape the remote server expects. */
 export function githubUpstreamLogin(settings: GithubLoginSettings): UpstreamLogin {
   return {
     kind: 'upstream',

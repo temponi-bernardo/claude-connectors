@@ -2,11 +2,11 @@ import { describe, expect, it } from 'vitest';
 import { envValue, parseFlag, toEnvVars } from './env.js';
 
 describe('envValue', () => {
-  it('devolve o valor sem espaços', () => {
+  it('returns the trimmed value', () => {
     expect(envValue({ A: '  x ' }, 'A')).toBe('x');
   });
 
-  it('trata ausente, vazio e placeholder não resolvido como nulo', () => {
+  it('treats missing, empty and unresolved placeholder as null', () => {
     expect(envValue({}, 'A')).toBeNull();
     expect(envValue({ A: '' }, 'A')).toBeNull();
     expect(envValue({ A: '${user_config.api_token}' }, 'A')).toBeNull();
@@ -14,18 +14,18 @@ describe('envValue', () => {
 });
 
 describe('parseFlag', () => {
-  it('liga com 1, true, sim e yes, sem diferenciar maiúsculas', () => {
+  it('turns on with 1, true, sim and yes, case-insensitively', () => {
     expect(['1', 'TRUE', 'sim', 'Yes'].map(parseFlag)).toEqual([true, true, true, true]);
   });
 
-  it('desliga com o resto e com nulo', () => {
+  it('turns off with anything else and with null', () => {
     expect(['0', 'false', 'x'].map(parseFlag)).toEqual([false, false, false]);
     expect(parseFlag(null)).toBe(false);
   });
 });
 
 describe('toEnvVars', () => {
-  it('mantém só os valores de texto do ambiente do Worker', () => {
+  it('keeps only the text values of the Worker environment', () => {
     expect(toEnvVars({ A: 'x', B: 1, C: { binding: true } })).toEqual({ A: 'x' });
   });
 });

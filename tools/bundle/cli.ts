@@ -1,6 +1,6 @@
 /**
- * CLI de build: `npm run build`. Para cada conector, confere que o plugin aponta para um servidor remoto e
- * gera o bundle versionado `server/remote.js` (usado pelo Dockerfile; o Worker compila direto do `src/`).
+ * Build CLI: `npm run build`. For each connector, checks that the plugin points to a remote server and
+ * generates the versioned bundle `server/remote.js` (used by the Dockerfile; the Worker compiles straight from `src/`).
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -15,7 +15,7 @@ import {
   pluginMcpProblems,
 } from './bundle.js';
 
-/** Confere o `.mcp.json` (se houver; self-host não tem) e gera o bundle remoto, se o conector tiver um. */
+/** Checks the `.mcp.json` (if any; self-hosted has none) and builds the remote bundle, if the connector has one. */
 async function buildConnector(root: string, name: string): Promise<void> {
   const dir = join(root, CONNECTORS_DIR, name);
   const configFile = join(dir, PLUGIN_MCP_CONFIG_PATH);
@@ -30,7 +30,7 @@ async function buildConnector(root: string, name: string): Promise<void> {
   }
 }
 
-/** Ponto de entrada: faz o build de todos os conectores. */
+/** Entry point: builds every connector. */
 export async function runBuildCli(): Promise<void> {
   const root = resolve(import.meta.dirname, '..', '..');
   for (const name of listConnectors(root)) {

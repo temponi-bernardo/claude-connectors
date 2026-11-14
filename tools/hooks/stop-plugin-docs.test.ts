@@ -23,8 +23,8 @@ describe('hook stop-plugin-docs (Stop)', () => {
     git(dir, ['switch', '-q', '-c', 'feat/plugin']);
   });
 
-  it('sem mudança em plugin não bloqueia', () => {
-    write(dir, 'src/qualquer.ts');
+  it('no plugin change does not block', () => {
+    write(dir, 'src/anything.ts');
     const r = runHook(HOOK, dir, STOP);
     expect(r.status).toBe(0);
     expect(isBlock(r.stdout)).toBe(false);
@@ -40,46 +40,46 @@ describe('hook stop-plugin-docs (Stop)', () => {
     expect(parsed.reason).toContain('connectors/canvas-puc/manifest.json');
   });
 
-  it('marketplace alterado sem docs também bloqueia', () => {
+  it('a marketplace change without docs also blocks', () => {
     write(dir, '.claude-plugin/marketplace.json', '{}');
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(true);
   });
 
-  it('plugin alterado com docs na mesma mudança não bloqueia', () => {
+  it('a plugin change with docs in the same change does not block', () => {
     write(dir, 'connectors/canvas-puc/manifest.json', '{}');
     write(dir, 'CHANGELOG.md', '# Changelog');
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(false);
   });
 
-  it('README do conector conta como documentação', () => {
+  it('the connector README counts as documentation', () => {
     write(dir, 'connectors/canvas-puc/src/tool.ts');
     write(dir, 'connectors/canvas-puc/README.md', '# Canvas');
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(false);
   });
 
-  it('considera commits da branch desde a main, não só o working tree', () => {
+  it('considers the branch commits since main, not only the working tree', () => {
     commitFile(dir, 'plugin.txt', 'x');
     write(dir, 'connectors/canvas-puc/package.json', '{}');
     git(dir, ['add', '.']);
     git(dir, ['commit', '-q', '-m', 'feat(canvas): x']);
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(true);
-    write(dir, 'docs/PROCESSES.md', '# Processos');
+    write(dir, 'docs/PROCESSES.md', '# Processes');
     git(dir, ['add', '.']);
-    git(dir, ['commit', '-q', '-m', 'docs: processos']);
+    git(dir, ['commit', '-q', '-m', 'docs: processes']);
     expect(isBlock(runHook(HOOK, dir, STOP).stdout)).toBe(false);
   });
 
-  it('não bloqueia duas vezes seguidas (stop_hook_active)', () => {
+  it('does not block twice in a row (stop_hook_active)', () => {
     write(dir, 'connectors/canvas-puc/manifest.json', '{}');
     const again = { input: JSON.stringify({ session_id: 's1', stop_hook_active: true }) };
     expect(isBlock(runHook(HOOK, dir, again).stdout)).toBe(false);
   });
 
-  it('fora de um repositório git não quebra nem bloqueia', () => {
+  it('outside a git repository neither breaks nor blocks', () => {
     git(dir, ['switch', '-q', 'main']);
     const r = runHook(HOOK, join(dir, 'docs'), {
       ...STOP,
-      env: { GIT_DIR: join(dir, 'nao-existe') },
+      env: { GIT_DIR: join(dir, 'does-not-exist') },
     });
     expect(r.status).toBe(0);
     expect(isBlock(r.stdout)).toBe(false);

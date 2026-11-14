@@ -25,7 +25,7 @@ func TestPhoneFromJID(t *testing.T) {
 		"123@g.us":                        "",
 		"123@lid":                         "",
 		"abc@s.whatsapp.net":              "",
-		"semarroba":                       "",
+		"noat":                            "",
 	}
 	for in, want := range cases {
 		if got := PhoneFromJID(in); got != want {
@@ -41,13 +41,13 @@ func TestCursorRoundTripAndValidation(t *testing.T) {
 		t.Fatal(got, err)
 	}
 	if got, err := DecodeCursor(""); got != nil || err != nil {
-		t.Fatal("vazio deveria ser nil")
+		t.Fatal("empty should be nil")
 	}
 	bad := []string{"!!!", "e30", "eyJ0IjotMSwiayI6ImEifQ", "eyJ0IjoxLCJrIjoiYSIsIngiOjF9", "eyJ0IjoxLCJrIjoiIn0",
 		string(make([]byte, 600)), "eyJ0IjoxLCJrIjoiYSJ9e30"}
 	for _, b := range bad {
 		if _, err := DecodeCursor(b); err == nil {
-			t.Errorf("cursor %q deveria falhar", b)
+			t.Errorf("cursor %q should fail", b)
 		}
 	}
 }

@@ -8,6 +8,12 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Alterado
 
+- Source code is English (ADR 0021): comments, JSDoc, test names, logs and every user-facing string of the three
+  connectors. The Canvas login page ("Connect Canvas to Claude"), the Gmail consent and link pages, the WhatsApp
+  `/pair` page (start over now asks to type `ERASE` instead of `APAGAR`), Worker configuration errors, OAuth error
+  descriptions and the Go bridge messages are translated. Gmail forwards use `---------- Forwarded message
+  ----------` with `From:`/`Date:`/`Subject:`/`To:` and replies quote `On <date>, <sender> wrote:`; the WhatsApp
+  bridge names the account's own messages `"You"` (was `"Você"`) and stores polls as `Poll: <name>`.
 - **BREAKING** — Plugins: the 12 plugin skills have English names and content, so their slash commands changed
   (no aliases, ADR 0021). Canvas: `/config-canvas` → `/setup-canvas`, `/resumo-semana` → `/weekly-summary`,
   `/preparar-entrega` → `/prepare-submission`, `/estudar-disciplina` → `/study-course`. Gmail: `/config-gmail` →
