@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="referrer" content="no-referrer" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <meta http-equiv="refresh" content="0; url={{ page.target | relative_url }}" />
+    <link rel="canonical" href="{{ page.target | absolute_url }}" />
+    <title>{{ page.title | escape }} · Claude Connectors</title>
+  </head>
+  <body>
+    <p>
+      This page moved to
+      <a href="{{ page.target | relative_url }}">{{ page.target | absolute_url }}</a>.
+    </p>
+  </body>
+</html>
