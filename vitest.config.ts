@@ -8,7 +8,7 @@ for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_PREFIX', 
 }
 
 export default defineConfig({
-  // `cloudflare:workers` só existe no runtime do Workers; nos testes em Node vira um substituto (ADR 0012).
+  // `cloudflare:workers` só existe no runtime do Workers; nos testes em Node vira um substituto (ADR 0014).
   resolve: {
     alias: {
       'cloudflare:workers': fileURLToPath(
@@ -29,10 +29,8 @@ export default defineConfig({
         'tools/**/fixtures/**',
         'connectors/*/src/fixtures/**',
         '**/*.d.ts',
-        // Pontos de entrada e automação de navegador: exceções em src/test-exceptions.ts
-        'connectors/*/src/main.ts',
+        // Ponto de entrada do servidor Node: exceção em src/test-exceptions.ts
         'connectors/*/src/remote-main.ts',
-        'connectors/*/src/browser-login.ts',
       ],
       thresholds: { lines: 90, functions: 90, branches: 90, statements: 90 },
       reporter: ['text', 'lcov'],

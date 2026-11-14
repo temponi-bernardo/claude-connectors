@@ -1,8 +1,8 @@
-# 0012 — Gmail remoto multi-conta, só leitura, sob demanda no Cloudflare Workers
+# 0014 — Gmail remoto multi-conta, só leitura, sob demanda no Cloudflare Workers
 
 - **Estado:** Aceito
 - **Data:** 2026-11-14
-- **Relacionado:** ADR 0009, ADR 0010
+- **Relacionado:** ADR 0009, ADR 0010, ADR 0013
 
 ## Contexto
 
@@ -14,7 +14,7 @@ guardada no servidor: o refresh token do Google de cada conta, vinculado uma vez
 
 ## Decisão
 
-1. **Worker sob demanda, MCP sem estado.** `connectors/gmail/` é só remoto (sem `.mcpb`). Cada requisição monta
+1. **Worker sob demanda, MCP sem estado.** `connectors/gmail/` é remoto e vira plugin do marketplace como o Canvas (ADR 0013). Cada requisição monta
    um `McpServer` novo e responde em JSON (`serveMcpRequest()`, o mesmo do Canvas); sem Durable Object. Estado só
    no **Workers KV**. O módulo principal (`src/index.ts`) exporta só o `default`: o runtime trata cada export
    nomeado como entrypoint e recusa constantes (achado no teste com `wrangler dev`).

@@ -11,8 +11,8 @@ por `npm run docs:generate` a partir do código.
 **Check** — `npm run check`: formato, lint, tipos, testes com cobertura, docs, duplicação e segredos. O
 portão completo de PR é o `pr:check` (não há CI, ADR 0006).
 
-**Conector** — Servidor MCP de um serviço externo (ex.: Canvas), numa pasta de `connectors/`, com
-manifesto `.mcpb` e ferramentas para o Claude.
+**Conector** — Servidor MCP remoto de um serviço externo (ex.: Canvas), numa pasta de `connectors/`, com
+o plugin do marketplace que aponta para ele e as ferramentas para o Claude.
 
 **Core** — Camada de lógica pura (`src/core/`): decide, não faz.
 
@@ -21,9 +21,6 @@ manifesto `.mcpb` e ferramentas para o Claude.
 **Decidir vs. fazer** — Separação entre funções puras (decidir) e funções com efeito (fazer).
 
 **docs:check** — Verificador que falha quando documentação e código divergem.
-
-**Extensão `.mcpb`** — Pacote instalável no Claude Desktop (Configurações → Extensões) com o servidor MCP
-de um conector, gerado por `npm run pack`.
 
 **Exceção de teste** — Entrada em `src/test-exceptions.ts` que isenta uma função de teste automatizado,
 com motivo e teste manual.
@@ -44,8 +41,8 @@ com motivo e teste manual.
 **Marketplace de plugins** — Repositório com `.claude-plugin/marketplace.json` de onde o Claude instala
 plugins; aqui, cada conector é um plugin.
 
-**pr:check** — `npm run pr:check -- "<título>"`: o portão local de PR que substitui o CI (check, build,
-pacotes `.mcpb`, commitlint dos commits e do título).
+**pr:check** — `npm run pr:check -- "<título>"`: o portão local de PR que substitui o CI (check, build
+dos conectores, commitlint dos commits e do título).
 
 **Release-please** — Ferramenta que gera PR de release, versão e changelog a partir dos commits; aqui roda pela CLI local.
 
@@ -59,8 +56,5 @@ conector personalizado; autoriza por OAuth e funciona na web, no Cowork e no cel
 
 **Selo** — Texto cifrado e autenticado (AES-256-GCM, chave `SEAL_KEY`) que carrega `client_id`, código e tokens
 do OAuth sem estado; só o servidor abre e ninguém altera.
-
-**Sessão do Canvas** — Cookies do login feito pelo navegador, salvos em `~/.canvas-puc/session.json` e
-renovados sozinhos quando expiram.
 
 **Template** — `template-new-project`, repositório de origem desta estrutura (docs, checagens, skills).

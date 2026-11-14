@@ -1,6 +1,6 @@
 ---
 name: lancar-versao
-description: Use quando a pessoa pedir para preparar, revisar ou publicar uma release (nova versão, tag, changelog, pacotes .mcpb), para conduzir o release-please pela CLI local descrito em docs/WORKFLOW.md sem criar tag sem confirmação humana.
+description: Use quando a pessoa pedir para preparar, revisar ou publicar uma release (nova versão, tag, changelog), para conduzir o release-please pela CLI local descrito em docs/WORKFLOW.md sem criar tag sem confirmação humana.
 disable-model-invocation: true
 ---
 
@@ -24,9 +24,10 @@ Fluxo completo em `docs/WORKFLOW.md` (seção "Versão e release") e decisões e
 5. **Mergeie** o PR de release sem pedir confirmação (`gh pr merge --squash`), como qualquer PR com
    `pr:check` verde (`docs/WORKFLOW.md`). Nunca crie tag à mão.
 6. **Tag e rascunho:** depois do merge, `npx release-please github-release --draft --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`
-   cria a tag `vX.Y.Z` e o rascunho. Gere os pacotes (`npm run pack:all`) e anexe:
-   `gh release upload vX.Y.Z dist/connectors/*.mcpb`. Publicar é decisão da pessoa
-   (`gh release edit vX.Y.Z --draft=false`).
-7. **Depois:** confirme que `package.json` e `.release-please-manifest.json` têm a mesma versão na `main`;
+   cria a tag `vX.Y.Z` e o rascunho com as notas. Não há anexo: o plugin aponta para o servidor remoto
+   (ADR 0013). Publicar é decisão da pessoa (`gh release edit vX.Y.Z --draft=false`).
+7. **Servidor remoto:** se a release mexeu no conector, rode `npm run worker:deploy` na `main` (precisa de
+   `CLOUDFLARE_API_TOKEN`); sem isso, quem instalou pelo marketplace continua na versão antiga do Worker.
+8. **Depois:** confirme que `package.json` e `.release-please-manifest.json` têm a mesma versão na `main`;
    abra nova seção "Não lançado" vazia no CHANGELOG se o release-please não o fez; ROADMAP: marque a tarefa
    de release como ✅.

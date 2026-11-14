@@ -1,5 +1,5 @@
 /**
- * Entrada do conector Gmail remoto no Cloudflare Workers (ADR 0012): `@cloudflare/workers-oauth-provider`
+ * Entrada do conector Gmail remoto no Cloudflare Workers (ADR 0014): `@cloudflare/workers-oauth-provider`
  * é o servidor OAuth 2.1 do Claude (DCR, PKCE, tokens no KV) e protege o `/mcp`; as rotas próprias fazem o
  * consentimento, o login no Google e o vínculo das contas. Só roda quando chega uma requisição.
  */

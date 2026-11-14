@@ -1,7 +1,7 @@
 /**
  * Tipos mínimos do runtime do Cloudflare Workers usados pelas declarações de
  * `@cloudflare/workers-oauth-provider`. Declarados aqui (e não com `@cloudflare/workers-types`) porque os
- * tipos completos do Workers colidem com `@types/node` no `tsconfig` único do repositório (ADR 0012).
+ * tipos completos do Workers colidem com `@types/node` no `tsconfig` único do repositório (ADR 0014).
  */
 declare module 'cloudflare:workers' {
   export abstract class WorkerEntrypoint<Env = unknown, Props = unknown> {

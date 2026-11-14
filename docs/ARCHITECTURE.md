@@ -1,32 +1,31 @@
 # Arquitetura
 
-Repositório de **conectores MCP** para o Claude. Cada conector é um servidor MCP (stdio) independente,
-empacotado como extensão `.mcpb` e instalado no Claude Desktop (Configurações → Extensões). Decisão em
-[ADR 0007](adr/0007-conectores-como-extensoes-mcpb.md). Um conector pode ter também um **modo remoto**: servidor
-HTTP com OAuth para o claude.ai, o Cowork e o celular ([ADR 0009](adr/0009-conector-remoto-http-oauth.md)). O
-conector **Gmail** (`connectors/gmail/`) é só remoto: um Worker sob demanda com OAuth da biblioteca
-`@cloudflare/workers-oauth-provider` e estado no Workers KV ([ADR 0012](adr/0012-gmail-remoto-sob-demanda-no-workers.md)).
+Repositório de **conectores MCP remotos** para o Claude. Cada conector é um servidor HTTP com OAuth hospedado na
+nuvem (Cloudflare Workers, [ADR 0010](adr/0010-conector-remoto-no-cloudflare-workers.md)) e publicado como plugin
+do marketplace deste repositório: o plugin só aponta para a URL do servidor. Nada roda no computador de quem
+instala ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)). O conector **Gmail**
+(`connectors/gmail/`) segue o mesmo modelo, com OAuth da biblioteca `@cloudflare/workers-oauth-provider` e estado
+no Workers KV ([ADR 0014](adr/0014-gmail-remoto-sob-demanda-no-workers.md)).
 
 ## Camadas
 
 ```text
 ┌───────────────────────────────────────────────┐
-│  conector  (connectors/<nome>/src/)            │  entrada (main.ts), tools, cliente da API,
-│                                                │  autenticação, formatação das respostas
+│  conector  (connectors/<nome>/src/)            │  entrada (worker.ts), tools, cliente da API,
+│                                                │  OAuth do serviço, formatação das respostas
 ├───────────────────────────────────────────────┤
 │  remote  (src/remote/)                         │  servidor HTTP: OAuth sem estado, página de login,
-│                                                │  /mcp sem sessão (só o modo remoto usa)
+│                                                │  /mcp sem sessão
 ├───────────────────────────────────────────────┤
 │  mcp  (src/mcp/)                               │  definição/registro de ferramentas, resultados
 ├───────────────────────────────────────────────┤
 │  core  (src/core/)                             │  lógica pura compartilhada: decide, não faz
 └───────────────────────────────────────────────┘
-        tools/  (docs, hooks, pack) — ferramentas do repositório, fora dos pacotes
+        tools/  (bundle, docs, hooks) — ferramentas do repositório, fora do servidor
 ```
 
-Dentro de um conector, a mesma regra vale em escala menor: funções puras (`config`, `format`, `helpers`,
-partes de `session`/`auth`) separadas das que fazem efeito (`client` → rede, `session` → disco,
-`browser-login` → navegador, `main` → stdio, `remote-main` → HTTP).
+Dentro de um conector, a mesma regra vale em escala menor: funções puras (`format`, `helpers`, partes de
+`remote`) separadas das que fazem efeito (`client` → rede, `worker` → Workers, `remote-main` → HTTP no Node).
 
 ## Regras de dependência (quem pode importar quem)
 
@@ -50,54 +49,48 @@ O Claude chama uma ferramenta → `src/mcp` valida os argumentos (zod) → a fer
 da API → o cliente autentica e pagina → as respostas são reduzidas a objetos enxutos em português → o
 resultado volta como texto JSON. Detalhe em [PROCESSES.md](PROCESSES.md) (P03–P05).
 
-## Empacotamento e instalação
+## Instalação e deploy
 
-`npm run pack:all` (P05) une o código de cada conector num único `connectors/<nome>/server/index.js` com o
-esbuild e grava ao lado um `package.json`/`package-lock.json` só com o que não pode ser unido
-(`RUNTIME_EXTERNALS`, hoje `playwright-core`). Esse runtime é versionado e serve a dois formatos:
+| Peça                         | Como chega ao usuário                                                       | Decisão  |
+| ---------------------------- | --------------------------------------------------------------------------- | -------- |
+| Plugin do marketplace        | Claude → Adicionar marketplace `temponi-bernardo/claude-connectors`         | ADR 0013 |
+| Servidor (Cloudflare Worker) | `npm run worker:deploy` compila `src/worker.ts` e publica                   | ADR 0010 |
+| Servidor em Node (Docker)    | Alternativa: `npm run build` gera `server/remote.js`, usado pelo Dockerfile | ADR 0009 |
 
-| Formato                  | Como instala                                                         | Decisão  |
-| ------------------------ | -------------------------------------------------------------------- | -------- |
-| Plugin do marketplace    | Claude → Adicionar marketplace `temponi-bernardo/claude-connectors`  | ADR 0008 |
-| Extensão `.mcpb` (~3 MB) | Claude Desktop → Configurações → Extensões → Instalar extensão       | ADR 0007 |
-| Conector remoto (HTTP)   | `npm run worker:deploy` (Cloudflare Workers) e adicionar a URL       | ADR 0010 |
-| Gmail remoto (HTTP)      | `npm run gmail:deploy` e adicionar a URL (`connectors/gmail/README`) | ADR 0012 |
-
-O `playwright-core` só é carregado quando o login pelo navegador é necessário (`loadPlaywright()`).
+O plugin tem só `.claude-plugin/plugin.json` e `.mcp.json` (servidor `http` com a URL do Worker). `npm run build`
+(P05) recusa qualquer `.mcp.json` com servidor local.
 
 ## Serviços externos
 
-| Serviço                   | Usado para                        | Onde está o adaptador                                  | Segredo                                                          |
-| ------------------------- | --------------------------------- | ------------------------------------------------------ | ---------------------------------------------------------------- |
-| API REST do Canvas LMS    | Cursos, tarefas, notas, avisos... | `connectors/canvas-puc/src/client.ts`                  | Sessão em `~/.canvas-puc/session.json` (fora do repo)            |
-| Login SSO da instituição  | Obter a sessão do Canvas          | `connectors/canvas-puc/src/browser-login.ts`           | Perfil do navegador em `~/.canvas-puc/browser-profile`           |
-| Token de acesso do Canvas | Reserva se o login falhar         | `connectors/canvas-puc/src/auth.ts`                    | `CANVAS_API_TOKEN` (campo sensível da extensão)                  |
-| Token de acesso (remoto)  | Única credencial do modo remoto   | `connectors/canvas-puc/src/remote.ts`                  | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)              |
-| Cloudflare Workers        | Rodar o conector remoto           | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (secret do Worker); deploy com `CLOUDFLARE_API_TOKEN` |
-| Google OAuth / OIDC       | Login do dono e vínculo de contas | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`  | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (secrets do Worker)   |
-| Gmail API (só leitura)    | Buscar e ler e-mails e anexos     | `connectors/gmail/src/gmail-api.ts`                    | Refresh token selado no KV com `TOKEN_ENC_KEY`                   |
-| Workers KV / rate limit   | Grants OAuth, contas e limite     | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`, `ALLOWED_EMAILS` (secrets do Worker)           |
+| Serviço                   | Usado para                                 | Onde está o adaptador                                  | Segredo                                                          |
+| ------------------------- | ------------------------------------------ | ------------------------------------------------------ | ---------------------------------------------------------------- |
+| API REST do Canvas LMS    | Cursos, tarefas, notas, avisos...          | `connectors/canvas-puc/src/client.ts`                  | Token do usuário, só selado nos tokens OAuth                     |
+| Token de acesso do Canvas | Única credencial do conector               | `connectors/canvas-puc/src/remote.ts`                  | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)              |
+| Cloudflare Workers        | Rodar o conector remoto                    | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (secret do Worker); deploy com `CLOUDFLARE_API_TOKEN` |
+| GitHub Pages              | Site público (início, privacidade, termos) | `docs/_config.yml`, `docs/_layouts/site.html`          | Nenhum (ADR 0012)                                                |
+| Google OAuth / OIDC       | Login do dono e vínculo de contas          | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`  | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (secrets do Worker)   |
+| Gmail API (só leitura)    | Buscar e ler e-mails e anexos              | `connectors/gmail/src/gmail-api.ts`                    | Refresh token selado no KV com `TOKEN_ENC_KEY`                   |
+| Workers KV / rate limit   | Grants OAuth, contas e limite (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`, `ALLOWED_EMAILS` (secrets do Worker)           |
 
-Nada de credencial no repositório: a configuração vem do formulário da extensão (variáveis de ambiente) e a
-sessão fica na pasta do usuário.
+Nada de credencial no repositório nem no servidor: o token do Canvas só existe selado (AES-GCM com a `SEAL_KEY`)
+dentro dos tokens OAuth que o Claude guarda.
 
 ## Dependências de runtime
 
-| Pacote                               | Para quê                                                          |
-| ------------------------------------ | ----------------------------------------------------------------- |
-| `@modelcontextprotocol/sdk`          | Servidor MCP em stdio e em Streamable HTTP (modo remoto)          |
-| `zod` (v3)                           | Esquemas de entrada das ferramentas                               |
-| `playwright-core`                    | Controlar o Chrome/Edge instalado no login (sem baixar navegador) |
-| `@cloudflare/workers-oauth-provider` | OAuth 2.1 do conector Gmail (DCR, PKCE, consentimento, KV)        |
+| Pacote                               | Para quê                                                   |
+| ------------------------------------ | ---------------------------------------------------------- |
+| `@modelcontextprotocol/sdk`          | Servidor MCP em Streamable HTTP                            |
+| `zod` (v3)                           | Esquemas de entrada das ferramentas                        |
+| `@cloudflare/workers-oauth-provider` | OAuth 2.1 do conector Gmail (DCR, PKCE, consentimento, KV) |
 
-Dev: `esbuild` (bundle), `@anthropic-ai/mcpb` (gera o `.mcpb`) e `wrangler` (Worker remoto, ADR 0010), além
+Dev: `esbuild` (bundle do Dockerfile) e `wrangler` (Worker, ADR 0010), além
 das ferramentas do template.
 
 ## Ferramentas internas (`tools/`)
 
 `tools/docs/` é o verificador/gerador de documentação, `tools/hooks/` testa os hooks do Claude Code e
-`tools/pack/` empacota os conectores. Seguem as mesmas regras do código de produto (documentação, testes,
-lint), mas não entram nos pacotes.
+`tools/bundle/` confere os plugins e gera o bundle do servidor. Seguem as mesmas regras do código de produto (documentação, testes,
+lint), mas não entram no servidor.
 
 ## Decisões
 

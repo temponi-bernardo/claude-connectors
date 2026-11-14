@@ -5,14 +5,9 @@ import type { CanvasContext } from './context.js';
 import { fakeContext, type Routes } from './fixtures/fake-context.js';
 import { CANVAS_READ_TOOLS } from './tools-read.js';
 import { CANVAS_WRITE_TOOLS, submissionPayload } from './tools-write.js';
-import {
-  CANVAS_ACCOUNT_TOOLS,
-  canvasServiceTools,
-  canvasTools,
-  createCanvasMcpServer,
-} from './tools.js';
+import { canvasTools, createCanvasMcpServer } from './tools.js';
 
-const ALL = [...CANVAS_ACCOUNT_TOOLS, ...CANVAS_READ_TOOLS, ...CANVAS_WRITE_TOOLS];
+const ALL = [...CANVAS_READ_TOOLS, ...CANVAS_WRITE_TOOLS];
 
 function tool(name: string): ToolSpec<CanvasContext> {
   const spec = ALL.find((t) => t.name === name);
@@ -36,41 +31,18 @@ describe('canvasTools', () => {
     expect(toolNames(true)).toContain('responder_discussao');
     expect(new Set(toolNames(true)).size).toBe(toolNames(true).length);
   });
-});
 
-describe('canvasServiceTools', () => {
-  it('traz leitura e escrita, sem as ferramentas de conexão', () => {
-    const names = canvasServiceTools(true).map((t) => t.name);
-    expect(names).toContain('proximas_entregas');
-    expect(names).toContain('entregar_tarefa_texto');
-    expect(names).not.toContain('conectar_canvas');
-    expect(canvasServiceTools(false).map((t) => t.name)).not.toContain('entregar_tarefa_texto');
+  it('não tem ferramentas de login local', () => {
+    expect(toolNames(true)).toContain('proximas_entregas');
+    expect(toolNames(true)).not.toContain('conectar_canvas');
   });
 });
 
 describe('createCanvasMcpServer', () => {
   it('cria o servidor MCP com as ferramentas registradas', () => {
-    const server = createCanvasMcpServer(canvasServiceTools(false), fakeContext({}).ctx);
+    const server = createCanvasMcpServer(canvasTools(false), fakeContext({}).ctx);
     expect(server).toBeInstanceOf(McpServer);
     expect(server.isConnected()).toBe(false);
-  });
-});
-
-describe('ferramentas de conexão', () => {
-  it('conectar_canvas abre o login e confirma com o nome do perfil', async () => {
-    const { result, auth } = await run(
-      'conectar_canvas',
-      {},
-      { '/users/self/profile': { id: 1, name: 'Ana' } },
-    );
-    expect(auth.connect).toHaveBeenCalled();
-    expect(result).toBe('Conectado ao Canvas como Ana (1 cookies salvos).');
-  });
-
-  it('desconectar_canvas apaga a sessão', async () => {
-    const { result, auth } = await run('desconectar_canvas', {});
-    expect(auth.disconnect).toHaveBeenCalled();
-    expect(result).toContain('apagada');
   });
 });
 

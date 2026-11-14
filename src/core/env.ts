@@ -1,5 +1,5 @@
 /**
- * Leitura de variáveis de ambiente, compartilhada pelos conectores (stdio e remoto). Pura.
+ * Leitura de variáveis de ambiente, compartilhada pelos conectores. Pura.
  */
 
 /** Variáveis de ambiente (subconjunto de `process.env`). */

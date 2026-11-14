@@ -17,7 +17,7 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
 2. **Marque a tarefa como 🟨** no ROADMAP.
 3. **Branch** a partir da `main` atualizada: `git switch -c <tipo>/<id>-<descricao>` (ver
    `docs/WORKFLOW.md`). Num worktree novo (`.claude/worktrees/...`), rode `npm ci` antes: sem `node_modules`
-   próprio, o teste de `PLAYWRIGHT_VERSION` falha e o `check` não fica verde.
+   próprio, o `check` e o `build` não rodam.
 4. **Implemente com `/testes-primeiro`**: teste → falhar → código mínimo → refatorar, uma função por vez,
    respeitando `docs/CODING-STANDARDS.md`. Antes de criar função, procure equivalente em FUNCTIONS.md.
 5. **Documente com `/atualizar-docs`** no mesmo conjunto de mudanças.
@@ -29,7 +29,7 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
 9. **Merge:** o Claude mergeia com `pr:check` verde (`docs/WORKFLOW.md`). Rode o `pr:check` de novo na
    branch final e então `gh pr merge --squash --delete-branch`. Se o PR mexeu no conector Canvas, publique
    o remoto na `main` atualizada: `npm run worker:deploy` (precisa de `CLOUDFLARE_API_TOKEN`, ADR 0010). Se
-   mexeu no conector Gmail, `npm run gmail:deploy` (ADR 0012); sem token na sessão, passe o comando ao usuário.
+   mexeu no conector Gmail, `npm run gmail:deploy` (ADR 0014); sem token na sessão, passe o comando ao usuário.
    Antes de entregar um Worker, rode `npm run gmail:dev` (ou `worker:dev`) e faça um `curl` em `/`: o runtime
    real recusa o que os testes em Node aceitam (ex.: export nomeado não-função no módulo principal).
 10. **Feche a tarefa:** ✅ no ROADMAP, "Próxima tarefa" atualizada, entrada no CHANGELOG se visível ao

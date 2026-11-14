@@ -1,4 +1,4 @@
-# Conector Gmail remoto (multi-conta, só leitura) no Cloudflare Workers (ADR 0012).
+# Conector Gmail remoto (multi-conta, só leitura) no Cloudflare Workers (ADR 0014).
 # Sob demanda: sem Containers, Cron Triggers, alarms de Durable Object ou polling. Estado só no Workers KV.
 # Passo a passo do deploy e dos secrets em connectors/gmail/README.md.
 name = "gmail-remote"

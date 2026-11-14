@@ -5,53 +5,32 @@ rubrica, notas, avisos, módulos, páginas, arquivos, fóruns e calendário.
 
 ## Instalar
 
-**Como plugin (recomendado):**
+O conector roda só na nuvem. Nada é instalado no computador ([ADR 0013](../../docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
 
-1. No Claude, **Adicionar marketplace** → `temponi-bernardo/claude-connectors`.
-2. Instale o plugin **canvas-puc** e preencha o formulário: endereço (já vem preenchido), "Permitir envios" e
-   token (pode ficar em branco).
-3. O Claude instala o `playwright-core` sozinho; as atualizações chegam quando o marketplace é atualizado.
+1. No Claude (claude.ai, Cowork ou Claude Code), **Adicionar marketplace** → `temponi-bernardo/claude-connectors`.
+2. Instale o plugin **canvas-puc**. Ele aponta para `https://canvas-puc-remote.bftemponi.workers.dev/mcp`.
+3. Na primeira vez, o Claude abre a página **"Conectar o Canvas ao Claude"**. No Canvas, vá em **Conta →
+   Configurações → Novo token de acesso**, copie o token, cole na página e clique em **Conectar**.
+4. Pronto: o conector funciona na web, no Cowork, no app do celular e no Claude Code.
 
-**Como extensão `.mcpb`:** `npm run pack -- canvas-puc` e instale `dist/connectors/canvas-puc-<versão>.mcpb`
-em **Configurações → Extensões → Instalar extensão**.
+No Claude Code, os passos 1 e 2 cabem num comando só:
 
-Use só um dos dois para não ter as ferramentas duplicadas.
+```text
+/plugin install canvas-puc --marketplace temponi-bernardo/claude-connectors
+```
 
-## Login
+O token da PUC vale no máximo 30 dias, mas o conector estende a validade dele sozinho a cada renovação do
+acesso (ADR 0011). Só se você ficar mais de 30 dias sem usar o conector (ou revogar o token) as ferramentas
+avisam: gere outro token e reconecte o conector nas configurações do Claude.
 
-Na primeira vez, peça ao Claude para usar `conectar_canvas` (ou qualquer ferramenta: sem sessão ela abre a
-janela sozinha). Uma janela do Chrome abre, num perfil só do conector:
+Segurança: o token do Canvas nunca é gravado no servidor; ele só viaja cifrado dentro dos tokens OAuth.
+Qualquer pessoa com um token válido do Canvas pode usar o servidor, mas só acessa a própria conta.
 
-1. O botão **"Aluno / Professor (@pucminas.edu.br)"** é clicado sozinho.
-2. Entre com a conta **`<matrícula>@pucminas.edu.br`** (não o e-mail `@sga.pucminas.br`, que dá erro
-   AADSTS50020) e marque **"Manter conectado"**.
-3. A janela fecha sozinha. A sessão fica em `~/.canvas-puc/` e é renovada em segundo plano quando expira.
+## Servidor remoto (mantenedor)
 
-## Configuração (variáveis de ambiente)
-
-| Variável              | Padrão                             | Para quê                                                        |
-| --------------------- | ---------------------------------- | --------------------------------------------------------------- |
-| `CANVAS_BASE_URL`     | `https://pucminas.instructure.com` | Endereço do Canvas                                              |
-| `CANVAS_ALLOW_WRITE`  | desligado                          | `true` registra `entregar_tarefa_texto` e `responder_discussao` |
-| `CANVAS_API_TOKEN`    | —                                  | Reserva caso o login pelo navegador falhe                       |
-| `CANVAS_LOGIN_BUTTON` | `pucminas.edu.br`                  | Texto do botão da instituição na tela de login                  |
-| `CANVAS_DATA_DIR`     | `~/.canvas-puc`                    | Onde ficam a sessão e o perfil do navegador                     |
-
-O manifesto também define `NODE_USE_ENV_PROXY=1`: com ele, o Node usa o `HTTPS_PROXY` do ambiente. Sem proxy
-configurado, nada muda.
-
-### Plugin numa sessão do Claude Code na nuvem
-
-A nuvem não tem navegador, então o login pela janela não funciona. Se o ambiente da nuvem tiver um segredo
-de rede para `pucminas.instructure.com` (header `Authorization`), preencha o campo **"Token de acesso"** do
-plugin com qualquer texto, por exemplo `proxy`. O proxy troca esse texto pelo token real a cada chamada. Não
-cole o token verdadeiro no plugin.
-
-## Conector remoto (claude.ai, Cowork e celular)
-
-O plugin e a `.mcpb` rodam no seu computador. Para usar o Canvas nas sessões na nuvem, publique o servidor
-remoto ([ADR 0009](../../docs/adr/0009-conector-remoto-http-oauth.md)) e adicione-o como conector
-personalizado. Ele não usa o navegador: você autoriza colando um **token de acesso** do Canvas.
+O plugin usa o servidor HTTP com OAuth ([ADR 0009](../../docs/adr/0009-conector-remoto-http-oauth.md)),
+publicado no Cloudflare Workers ([ADR 0010](../../docs/adr/0010-conector-remoto-no-cloudflare-workers.md)).
+Também dá para adicioná-lo direto como conector personalizado no claude.ai, com a mesma URL `/mcp`.
 
 **1. Publicar no Cloudflare Workers (plano grátis, [ADR 0010](../../docs/adr/0010-conector-remoto-no-cloudflare-workers.md)):**
 
@@ -74,18 +53,8 @@ personalizado. Ele não usa o navegador: você autoriza colando um **token de ac
 `wrangler.toml` já liga os envios (`CANVAS_ALLOW_WRITE=true`). O Worker não dorme: responde na hora.
 Para testar local antes: `npm run worker:dev` (precisa de `SEAL_KEY`, ex.: `--var SEAL_KEY:<chave>`).
 
-**2. Conectar no Claude:**
-
-1. No claude.ai: **Personalizar → Conectores → Adicionar → Adicionar conector personalizado**, com a URL
-   `https://<seu-endereço>/mcp` (deixe a autenticação OAuth e o registro automático detectados).
-2. Clique em **Vincular**. Abre a página "Conectar o Canvas ao Claude".
-3. No Canvas, **Conta → Configurações → Novo token de acesso**, copie o token, cole na página e clique em
-   **Conectar**. A aba volta para o claude.ai com o conector vinculado.
-4. O conector fica disponível na web, no Cowork e no app do celular.
-
-O token da PUC vale no máximo 30 dias, mas o conector estende a validade dele sozinho a cada renovação do
-acesso (ADR 0011). Só se você ficar mais de 30 dias sem usar o conector (ou revogar o token) as ferramentas
-avisam: gere outro e reconecte o conector.
+**2. Atualizar o plugin:** se o endereço do Worker mudar, troque a `url` em `.mcp.json` e rode `npm run build`
+(ele recusa servidor que não seja `http` com `https://`).
 
 **Outros hosts (Docker):**
 
@@ -106,10 +75,6 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://seu-dominio -e SEAL_KEY=<32 bytes 
 | `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | Canvas fixo do servidor                                         |
 | `CANVAS_ALLOW_WRITE`   | desligado                          | `true` registra `entregar_tarefa_texto` e `responder_discussao` |
 
-Segurança: o token do Canvas nunca é gravado no servidor; ele só viaja cifrado dentro dos tokens OAuth.
-Qualquer pessoa com um token válido do Canvas pode usar o seu servidor, mas só acessa a própria conta.
-No modo remoto não existem `conectar_canvas` nem `desconectar_canvas`.
-
 **Problemas comuns:**
 
 | Sintoma                                     | Causa e solução                                                                                       |
@@ -122,8 +87,6 @@ No modo remoto não existem `conectar_canvas` nem `desconectar_canvas`.
 
 | Ferramenta              | Faz                                                                    |
 | ----------------------- | ---------------------------------------------------------------------- |
-| `conectar_canvas`       | Login pela janela do navegador                                         |
-| `desconectar_canvas`    | Apaga a sessão salva                                                   |
 | `quem_sou_eu`           | Perfil (teste de conexão)                                              |
 | `listar_cursos`         | Cursos com nota atual                                                  |
 | `proximas_entregas`     | O que vence nos próximos dias, em todos os cursos                      |
@@ -143,5 +106,5 @@ No modo remoto não existem `conectar_canvas` nem `desconectar_canvas`.
 | `entregar_tarefa_texto` | Entrega texto/link (só com envios permitidos; o Claude confirma antes) |
 | `responder_discussao`   | Responde fórum (só com envios permitidos; o Claude confirma antes)     |
 
-Fluxos internos: [P03, P04 e P05 em PROCESSES.md](../../docs/PROCESSES.md). Decisão de arquitetura:
-[ADR 0007](../../docs/adr/0007-conectores-como-extensoes-mcpb.md).
+Fluxos internos: [PROCESSES.md](../../docs/PROCESSES.md). Decisão de arquitetura:
+[ADR 0013](../../docs/adr/0013-conector-so-remoto-pelo-marketplace.md).

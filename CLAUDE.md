@@ -1,9 +1,9 @@
 # claude-connectors
 
-Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo Canvas da PUC Minas.
+Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace de plugins, começando pelo Canvas da PUC Minas.
 
-Cada conector vive em `connectors/<nome>/` e vira uma extensão `.mcpb` (ADR 0007); código compartilhado
-fica em `src/`. Não há GitHub Actions: o portão de PR é `npm run pr:check` (ADR 0006).
+Cada conector vive em `connectors/<nome>/` e é um plugin do marketplace que aponta para o servidor remoto dele
+(ADR 0013); código compartilhado fica em `src/`. Não há GitHub Actions: o portão de PR é `npm run pr:check` (ADR 0006).
 
 A documentação em `docs/` é a fonte da verdade. **Antes de mexer em código, leia `docs/README.md`** e siga
 o "quero... → leia...". Não varra o código para descobrir o que existe: `docs/FUNCTIONS.md`,
@@ -19,7 +19,9 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 4. **Testes primeiro.** Toda função tem teste; exceções só em `src/test-exceptions.ts` com motivo
    (`docs/TESTING.md`).
 5. **Documentação na mesma mudança.** Rode `npm run docs:generate`, preencha os campos manuais, siga a
-   tabela de `docs/DOCUMENTATION.md`.
+   tabela de `docs/DOCUMENTATION.md`. **Toda alteração em plugin** (`connectors/`, `.claude-plugin/`)
+   atualiza as docs afetadas e documenta tudo o que foi feito, via `/atualizar-docs` — o hook `Stop`
+   `stop-plugin-docs.sh` bloqueia se não houver.
 6. **Interface só com o design system** (`docs/UI.md`), quando houver.
 7. **Nada direto na `main`** — branch por tarefa, PR, `pr:check` verde, squash merge (`docs/WORKFLOW.md`).
    O Claude mergeia sozinho com o `pr:check` verde, sem pedir confirmação.
@@ -33,20 +35,20 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 
 ## Comandos
 
-| Comando                              | Faz                                                                   |
-| ------------------------------------ | --------------------------------------------------------------------- |
-| `npm run check`                      | Formato, lint, tipos, testes, docs, duplicação e segredos             |
-| `npm run pr:check -- "<título>"`     | Portão de PR (não há CI): check, build, pacotes e commitlint          |
-| `npm run docs:generate`              | Atualiza os blocos gerados de `docs/FUNCTIONS.md` e cria seções novas |
-| `npm run docs:check`                 | Falha se docs e código divergirem                                     |
-| `npm test` / `npm run test:coverage` | Testes / com cobertura mínima de 90%                                  |
-| `npm run lint` / `npm run lint:fix`  | ESLint                                                                |
-| `npm run format:fix`                 | Prettier                                                              |
-| `npm run typecheck`                  | `tsc --noEmit`                                                        |
-| `npm run dup:check`                  | jscpd                                                                 |
-| `npm run pack -- <conector>`         | Gera `dist/connectors/<conector>-<versão>.mcpb` (`pack:all`: todos)   |
-| `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)   |
-| `npm run gmail:deploy`               | Publica o Gmail remoto no Cloudflare Workers (`gmail:dev`: local)     |
+| Comando                              | Faz                                                                         |
+| ------------------------------------ | --------------------------------------------------------------------------- |
+| `npm run check`                      | Formato, lint, tipos, testes, docs, duplicação e segredos                   |
+| `npm run pr:check -- "<título>"`     | Portão de PR (não há CI): check, build, pacotes e commitlint                |
+| `npm run docs:generate`              | Atualiza os blocos gerados de `docs/FUNCTIONS.md` e cria seções novas       |
+| `npm run docs:check`                 | Falha se docs e código divergirem                                           |
+| `npm test` / `npm run test:coverage` | Testes / com cobertura mínima de 90%                                        |
+| `npm run lint` / `npm run lint:fix`  | ESLint                                                                      |
+| `npm run format:fix`                 | Prettier                                                                    |
+| `npm run typecheck`                  | `tsc --noEmit`                                                              |
+| `npm run dup:check`                  | jscpd                                                                       |
+| `npm run build`                      | Valida o `.mcp.json` (só remoto) e gera `server/remote.js` de cada conector |
+| `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)         |
+| `npm run gmail:deploy`               | Publica o Gmail remoto no Cloudflare Workers (`gmail:dev`: local)           |
 
 ## Skills
 
@@ -66,6 +68,8 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
   leitura de `.env`/segredos negados (também por hook `PreToolUse`).
 - Hook `Stop` (`stop-docs-check.sh`): roda `docs:check` ao fim de cada resposta que alterou código ou docs.
 - Hook `Stop` (`stop-handoff.sh`): se há commit seu novo sem `docs/STATE.md` atualizado, bloqueia e pede `/handoff`.
+- Hook `Stop` (`stop-plugin-docs.sh`): se a branch alterou plugin (`connectors/`, `.claude-plugin/`) sem
+  tocar documentação (`docs/`, `CHANGELOG.md`, READMEs), bloqueia e pede `/atualizar-docs`.
 - Hook `SessionStart`: injeta `docs/STATE.md` e a próxima tarefa do roadmap (também após `/clear`).
 - Hook `PreCompact`: gera handoff automático em `docs/STATE.md` via `claude -p` antes de compactar.
 - Ciclo completo em `docs/WORKFLOW.md` → "Ciclo de contexto do Claude Code".

@@ -11,20 +11,14 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- indice:inicio -->
 
-- `connectors/canvas-puc/src/auth.ts`: [`pickAuth`](#pickauth), [`authHeaders`](#authheaders), [`loginAndStore`](#loginandstore), [`renewAuth`](#renewauth), [`renewOnce`](#renewonce), [`createAuthProvider`](#createauthprovider)
-- `connectors/canvas-puc/src/browser-login.ts`: [`isLoginChooserUrl`](#isloginchooserurl), [`launchLoginBrowser`](#launchloginbrowser), [`pageHasCanvasSession`](#pagehascanvassession), [`clickInstitutionButton`](#clickinstitutionbutton), [`waitForCanvasLogin`](#waitforcanvaslogin), [`browserLogin`](#browserlogin)
-- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`unauthorizedError`](#unauthorizederror), [`requestWithRenewal`](#requestwithrenewal), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`createCanvasClient`](#createcanvasclient)
-- `connectors/canvas-puc/src/config.ts`: [`readCanvasConfig`](#readcanvasconfig)
+- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`requestCanvas`](#requestcanvas), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`createCanvasClient`](#createcanvasclient)
 - `connectors/canvas-puc/src/files.ts`: [`bytesToBase64`](#bytestobase64), [`fileContentBlock`](#filecontentblock), [`downloadedFileResult`](#downloadedfileresult), [`downloadRefusal`](#downloadrefusal), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
-- `connectors/canvas-puc/src/main.ts`: [`startCanvasServer`](#startcanvasserver)
-- `connectors/canvas-puc/src/playwright-runtime.ts`: [`runtimeDir`](#runtimedir), [`npmInstallArgs`](#npminstallargs), [`resolveFrom`](#resolvefrom), [`installPlaywright`](#installplaywright), [`loadPlaywright`](#loadplaywright)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
-- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`remoteUnauthorizedMessage`](#remoteunauthorizedmessage), [`createTokenAuthProvider`](#createtokenauthprovider), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
-- `connectors/canvas-puc/src/session.ts`: [`sessionFilePath`](#sessionfilepath), [`cookieHeader`](#cookieheader), [`csrfToken`](#csrftoken), [`isCanvasSession`](#iscanvassession), [`loadSession`](#loadsession), [`saveSession`](#savesession), [`clearSession`](#clearsession)
+- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
-- `connectors/canvas-puc/src/tools.ts`: [`canvasServiceTools`](#canvasservicetools), [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
+- `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
 - `connectors/canvas-puc/src/worker.ts`: [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
 - `connectors/gmail/src/access-token.ts`: [`forgetAccessToken`](#forgetaccesstoken), [`clearAccessTokenCache`](#clearaccesstokencache), [`linkUrl`](#linkurl), [`relinkError`](#relinkerror), [`requireLinkedAccount`](#requirelinkedaccount), [`renewAccessToken`](#renewaccesstoken), [`getAccessToken`](#getaccesstoken)
 - `connectors/gmail/src/attachments.ts`: [`looksLikeText`](#looksliketext), [`detectAttachmentKind`](#detectattachmentkind), [`attachmentBytesToText`](#attachmentbytestotext), [`readAttachmentText`](#readattachmenttext)
@@ -57,6 +51,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
 - `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed)
 - `src/remote/tokens.ts`: [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessSecret`](#readaccesssecret)
+- `tools/bundle/bundle.ts`: [`listConnectors`](#listconnectors), [`mcpServerProblems`](#mcpserverproblems), [`pluginMcpProblems`](#pluginmcpproblems), [`bundleOptions`](#bundleoptions)
+- `tools/bundle/cli.ts`: [`buildConnector`](#buildconnector), [`runBuildCli`](#runbuildcli)
 - `tools/docs/ast.ts`: [`toPosixRelative`](#toposixrelative), [`globToRegExp`](#globtoregexp), [`isAnalyzedSource`](#isanalyzedsource), [`openProject`](#openproject), [`signatureOf`](#signatureof), [`collectFileFunctions`](#collectfilefunctions), [`collectFunctions`](#collectfunctions), [`isDataDeclaration`](#isdatadeclaration), [`collectFileConstants`](#collectfileconstants), [`collectConstants`](#collectconstants), [`isIgnoredReference`](#isignoredreference), [`ownerLabelOf`](#ownerlabelof), [`findDeclaration`](#finddeclaration), [`buildReferenceIndex`](#buildreferenceindex), [`buildCallGraph`](#buildcallgraph)
 - `tools/docs/checks.ts`: [`checkFunctionsDocumented`](#checkfunctionsdocumented), [`checkSectionModules`](#checksectionmodules), [`checkUniqueNames`](#checkuniquenames), [`checkGeneratedBlocks`](#checkgeneratedblocks), [`checkManualFields`](#checkmanualfields), [`checkProcessCitations`](#checkprocesscitations), [`checkStructure`](#checkstructure), [`checkUiComponents`](#checkuicomponents), [`checkTests`](#checktests), [`checkConstants`](#checkconstants), [`runAllChecks`](#runallchecks)
 - `tools/docs/cli.ts`: [`runDocsCli`](#rundocscli)
@@ -65,8 +61,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `tools/docs/markdown.ts`: [`firstGroup`](#firstgroup), [`stripCodeBlocks`](#stripcodeblocks), [`extractCalledNames`](#extractcallednames), [`sliceBetween`](#slicebetween), [`replaceBetween`](#replacebetween), [`extractFunctionSections`](#extractfunctionsections), [`buildSection`](#buildsection), [`extractProcessCitations`](#extractprocesscitations), [`extractDocumentedDirs`](#extractdocumenteddirs), [`extractBacktickedNames`](#extractbacktickednames)
 - `tools/docs/render.ts`: [`formatList`](#formatlist), [`renderGeneratedBlock`](#rendergeneratedblock), [`renderNewSection`](#rendernewsection), [`renderModuleIndex`](#rendermoduleindex), [`computeGeneratedData`](#computegenerateddata), [`closureOf`](#closureof), [`processesByFunction`](#processesbyfunction), [`replaceSectionBlock`](#replacesectionblock), [`appendSection`](#appendsection), [`insertBeforeDataTable`](#insertbeforedatatable), [`removeSection`](#removesection), [`removeEmptyModules`](#removeemptymodules), [`pruneOrphanSections`](#pruneorphansections), [`applyGenerated`](#applygenerated)
 - `tools/docs/run.ts`: [`readOptional`](#readoptional), [`readDocsTexts`](#readdocstexts), [`formatIssues`](#formatissues), [`runCheck`](#runcheck), [`generateFunctionsDoc`](#generatefunctionsdoc), [`runGenerate`](#rungenerate)
-- `tools/pack/cli.ts`: [`installedExternalVersions`](#installedexternalversions), [`runNodeBin`](#runnodebin), [`writeJson`](#writejson), [`buildConnectorRuntime`](#buildconnectorruntime), [`packMcpb`](#packmcpb), [`runPackCli`](#runpackcli)
-- `tools/pack/pack.ts`: [`listConnectors`](#listconnectors), [`pluginManifest`](#pluginmanifest), [`pluginMcpConfig`](#pluginmcpconfig), [`readManifestIdentity`](#readmanifestidentity), [`runtimePackageJson`](#runtimepackagejson), [`bundleOptions`](#bundleoptions)
 
 <!-- indice:fim -->
 
@@ -1225,214 +1219,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Lê e grava `docs/FUNCTIONS.md`.
 - **Erros:** Propaga erros de configuração e de escrita.
 
-## `connectors/canvas-puc/src/auth.ts`
-
-### `pickAuth`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `pickAuth(session: CanvasSession | null, token: string | null): CanvasAuth | null`
-- **Usada por:** `createAuthProvider()`, `renewAuth()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Escolhe a credencial atual: sessão se houver, senão token, senão nenhuma.
-- **Entrada:** `session`: sessão salva ou `null`; `token`: token de acesso ou `null`.
-- **Saída:** `CanvasAuth` do tipo `session` ou `token`; `null` se não houver nenhuma credencial.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `authHeaders`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `authHeaders(auth: CanvasAuth, method: string): Record<string, string>`
-- **Usada por:** `sendCanvasRequest()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta os headers de autenticação de uma requisição ao Canvas.
-- **Entrada:** `auth`: credencial (sessão ou token); `method`: método HTTP (`GET`, `POST`...).
-- **Saída:** `Authorization: Bearer` para token; `Cookie` (mais `X-CSRF-Token` fora de GET, se houver) para sessão.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `loginAndStore`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `async loginAndStore(deps: AuthDeps, state: AuthState, mode: LoginMode): Promise<CanvasSession>`
-- **Usada por:** `createAuthProvider()`, `renewAuth()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Faz login no navegador no modo pedido, guardando a sessão em disco e no estado.
-- **Entrada:** `deps`: dependências (arquivo da sessão, função de login); `state`: estado mutável; `mode`: `silent` ou `window`.
-- **Saída:** Promise com a `CanvasSession` obtida.
-- **Efeitos:** Abre navegador (via `deps.login`), grava o arquivo da sessão, altera `state.session`.
-- **Erros:** Propaga a rejeição de `deps.login` e erros de escrita do arquivo.
-
-### `renewAuth`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `async renewAuth(deps: AuthDeps, state: AuthState): Promise<CanvasAuth | null>`
-- **Usada por:** `renewOnce()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Renova a credencial: login silencioso, depois token, depois janela de login.
-- **Entrada:** `deps`: dependências do provedor; `state`: estado mutável.
-- **Saída:** Promise com a nova `CanvasAuth`; `null` se nenhum caminho funcionar.
-- **Efeitos:** Abre navegador (oculto e, se preciso, com janela), grava a sessão em disco, altera `state.session`.
-- **Erros:** Nenhum (falhas de login viram `null`).
-
-### `renewOnce`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `renewOnce(deps: AuthDeps, state: AuthState): Promise<CanvasAuth | null>`
-- **Usada por:** `createAuthProvider()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Garante uma só renovação por vez, compartilhando a promessa entre chamadas simultâneas.
-- **Entrada:** `deps`: dependências do provedor; `state`: estado mutável (usa `state.pending`).
-- **Saída:** A promessa de `renewAuth()` em andamento (nova ou já existente).
-- **Efeitos:** Altera `state.pending` (definido no início, limpo ao terminar); efeitos de `renewAuth()`.
-- **Erros:** Nenhum.
-
-### `createAuthProvider`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `createAuthProvider(deps: AuthDeps): AuthProvider`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Cria o provedor de autenticação a partir da sessão salva em disco.
-- **Entrada:** `deps`: token opcional, caminho do arquivo da sessão e função de login no navegador.
-- **Saída:** `AuthProvider` com `current`, `renew`, `connect` e `disconnect`.
-- **Efeitos:** Lê o arquivo da sessão; os métodos devolvidos abrem navegador, gravam ou apagam a sessão.
-- **Erros:** Nenhum.
-
-## `connectors/canvas-puc/src/browser-login.ts`
-
-### `isLoginChooserUrl`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `isLoginChooserUrl(url: string): boolean`
-- **Usada por:** `clickInstitutionButton()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Decide se a URL é a tela de escolha de login do Canvas.
-- **Entrada:** `url`: endereço atual de uma aba.
-- **Saída:** `true` para `login.instructure.com/discovery` ou caminhos `/login`; senão `false`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `launchLoginBrowser`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async launchLoginBrowser(dataDir: string, headless: boolean): Promise<BrowserContext>`
-- **Usada por:** `browserLogin()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Abre o perfil do conector no primeiro navegador disponível (Chrome, depois Edge).
-- **Entrada:** `dataDir`: pasta de dados (perfil em `browser-profile`); `headless`: `true` para navegador oculto.
-- **Saída:** Promise com o `BrowserContext` persistente aberto.
-- **Efeitos:** Abre um processo de navegador; cria/usa a pasta do perfil em disco.
-- **Erros:** Rejeita com "Não consegui abrir o Chrome nem o Edge" se nenhum canal abrir.
-
-### `pageHasCanvasSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async pageHasCanvasSession(page: Page, baseUrl: string): Promise<boolean>`
-- **Usada por:** `waitForCanvasLogin()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Confere se uma aba no domínio do Canvas já tem sessão válida na API.
-- **Entrada:** `page`: aba do navegador; `baseUrl`: URL base do Canvas.
-- **Saída:** Promise com `true` se `/api/v1/users/self` responde ok; `false` fora do domínio ou em erro.
-- **Efeitos:** Rede: faz `fetch` de dentro da aba.
-- **Erros:** Nenhum (erros viram `false`).
-
-### `clickInstitutionButton`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async clickInstitutionButton(pages: readonly Page[], text: string): Promise<void>`
-- **Usada por:** `waitForCanvasLogin()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Clica no botão da instituição nas abas que estão na tela de escolha de login.
-- **Entrada:** `pages`: abas abertas; `text`: trecho do texto do botão.
-- **Saída:** Promise vazia.
-- **Efeitos:** Navegador: clica no botão visível de cada aba elegível.
-- **Erros:** Nenhum (falhas de clique são ignoradas).
-
-### `waitForCanvasLogin`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async waitForCanvasLogin(context: BrowserContext, opts: BrowserLoginOptions, mode: LoginMode): Promise<void>`
-- **Usada por:** `browserLogin()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Espera até alguma aba ter sessão no Canvas, clicando no botão da instituição pelo caminho.
-- **Entrada:** `context`: navegador aberto; `opts`: URL base e texto do botão; `mode`: define o tempo máximo (`LOGIN_TIMEOUT_MS`).
-- **Saída:** Promise vazia, resolvida quando há sessão.
-- **Efeitos:** Navegador: consulta e clica nas abas; espera 1,5 s entre tentativas.
-- **Erros:** Rejeita se todas as abas forem fechadas ou se o prazo acabar sem login.
-
-### `browserLogin`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async browserLogin(opts: BrowserLoginOptions, mode: LoginMode): Promise<CanvasSession>`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Faz o login no navegador e devolve a sessão com os cookies do domínio do Canvas.
-- **Entrada:** `opts`: URL base, pasta de dados e texto do botão; `mode`: `silent` (oculto) ou `window`.
-- **Saída:** Promise com `CanvasSession` (URL base, data e cookies `name`/`value`).
-- **Efeitos:** Abre e fecha o navegador; rede (navegação ao Canvas e login).
-- **Erros:** Propaga as rejeições de `launchLoginBrowser()` e `waitForCanvasLogin()`.
-
 ## `connectors/canvas-puc/src/client.ts`
 
 ### `unauthorizedMessage`
@@ -1440,15 +1226,15 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
-- **Assinatura:** `unauthorizedMessage(auth: CanvasAuth | null, baseUrl: string): string`
-- **Usada por:** `unauthorizedError()`
-- **Processos:** P03, P04, P08, P09
+- **Assinatura:** `unauthorizedMessage(baseUrl: string): string`
+- **Usada por:** `requestCanvas()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
-- **Faz:** Escolhe a mensagem de erro para 401 ou ausência de credencial.
-- **Entrada:** `auth`: credencial usada ou `null`; `baseUrl`: URL base do Canvas (para o link de gerar token).
-- **Saída:** Texto pedindo `conectar_canvas`, adaptado a sem credencial, sessão expirada ou token inválido.
+- **Faz:** Monta a mensagem de erro para 401: o token venceu ou foi revogado.
+- **Entrada:** `baseUrl`: URL base do Canvas (para o link de gerar token).
+- **Saída:** Texto pedindo para gerar outro token e reconectar o conector nas configurações do Claude.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -1457,34 +1243,17 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
-- **Assinatura:** `sendCanvasRequest(deps: ClientDeps, req: CanvasRequest, auth: CanvasAuth): Promise<Response>`
-- **Usada por:** `requestWithRenewal()`
-- **Processos:** P03, P04, P08, P09
+- **Assinatura:** `sendCanvasRequest(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
+- **Usada por:** `requestCanvas()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
-- **Faz:** Envia uma requisição à API do Canvas com a credencial dada, sem tratar o status.
-- **Entrada:** `deps`: URL base e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional; `auth`: credencial.
+- **Faz:** Envia uma requisição à API do Canvas com o token (`Authorization: Bearer`), sem tratar o status.
+- **Entrada:** `deps`: URL base, token e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional.
 - **Saída:** Promise com a `Response` crua.
 - **Efeitos:** Rede (via `deps.fetchFn`).
 - **Erros:** Propaga a rejeição de `fetchFn`.
-
-### `requestWithRenewal`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/client.ts`
-- **Assinatura:** `async requestWithRenewal(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
-- **Usada por:** `collectPages()`, `createCanvasClient()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Envia a requisição e, em 401 ou sem credencial, renova uma vez e repete.
-- **Entrada:** `deps`: dependências do cliente; `req`: requisição.
-- **Saída:** Promise com a `Response` de status ok.
-- **Efeitos:** Rede; pode renovar a autenticação (navegador, disco).
-- **Erros:** Rejeita com `unauthorizedMessage()` se continuar 401/sem credencial; com `Canvas <status> em ...` para outro status não ok.
 
 ### `collectPages`
 
@@ -1501,7 +1270,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Entrada:** `deps`: dependências do cliente; `first`: primeira requisição; `max`: limite de itens.
 - **Saída:** Promise com até `max` itens (resposta não-lista vira um item); lista vazia se não houver.
 - **Efeitos:** Rede (uma requisição por página).
-- **Erros:** Propaga erros de `requestWithRenewal()` e de JSON inválido.
+- **Erros:** Propaga erros de `requestCanvas()` e de JSON inválido.
 
 ### `fetchPlainText`
 
@@ -1526,33 +1295,16 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
 - **Assinatura:** `createCanvasClient(deps: ClientDeps): CanvasClient`
-- **Usada por:** `canvasRemoteConnector()`, `startCanvasServer()`
+- **Usada por:** `canvasRemoteConnector()`
 - **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
 - **Faz:** Cria o cliente do Canvas usado pelas ferramentas.
-- **Entrada:** `deps`: URL base, provedor de autenticação e `fetchFn`.
+- **Entrada:** `deps`: URL base, token e `fetchFn`.
 - **Saída:** `CanvasClient` com `get`, `getAll` (página de `CANVAS_PAGE_SIZE`, limite `DEFAULT_MAX_ITEMS`), `post` e `fetchText`.
 - **Efeitos:** Nenhum na criação; os métodos fazem rede.
 - **Erros:** Nenhum na criação; os métodos propagam erros das requisições.
-
-### `unauthorizedError`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/client.ts`
-- **Assinatura:** `unauthorizedError(deps: ClientDeps, auth: CanvasAuth | null): Error`
-- **Usada por:** `requestWithRenewal()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Cria o erro de 401 com a mensagem injetada (`describeUnauthorized`) ou a padrão.
-- **Entrada:** `deps`: dependências do cliente; `auth`: credencial usada (ou nula).
-- **Saída:** `Error` com a orientação ao usuário.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
 
 ### `fetchDownload`
 
@@ -1588,24 +1340,22 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Rede.
 - **Erros:** Repassa o erro de `fetchDownload`.
 
-## `connectors/canvas-puc/src/config.ts`
-
-### `readCanvasConfig`
+### `requestCanvas`
 
 <!-- gerado:inicio -->
 
-- **Arquivo:** `connectors/canvas-puc/src/config.ts`
-- **Assinatura:** `readCanvasConfig(env: EnvVars, homeDir: string): CanvasConfig`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `async requestCanvas(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
+- **Usada por:** `collectPages()`, `createCanvasClient()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
-- **Faz:** Monta a configuração do conector a partir do ambiente.
-- **Entrada:** `env`: variáveis de ambiente (`CANVAS_*`); `homeDir`: pasta do usuário (base da pasta de dados padrão).
-- **Saída:** `CanvasConfig` com URL base sem `/` final, token, `allowWrite`, texto do botão e pasta de dados (padrões quando ausentes).
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
+- **Faz:** Envia uma requisição à API do Canvas com o token e confere o status.
+- **Entrada:** `deps`: URL base, token e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional.
+- **Saída:** Promise com a `Response` 2xx.
+- **Efeitos:** Rede (via `deps.fetchFn`).
+- **Erros:** Rejeita com `unauthorizedMessage()` em 401 e com "Canvas <status> em <método> <caminho>: <corpo>" em outro status fora de 2xx.
 
 ## `connectors/canvas-puc/src/format.ts`
 
@@ -2087,146 +1837,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Rede.
 - **Erros:** Nenhum (falhas viram `[]`).
 
-## `connectors/canvas-puc/src/main.ts`
-
-### `startCanvasServer`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/main.ts`
-- **Assinatura:** `async startCanvasServer(): Promise<void>`
-- **Usada por:** `connectors/canvas-puc/src/main.ts (módulo)`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Sobe o servidor MCP do Canvas em stdio.
-- **Entrada:** Nenhuma (lê `process.env` e a pasta do usuário).
-- **Saída:** Promise vazia, resolvida quando o transporte conecta.
-- **Efeitos:** Lê ambiente e sessão em disco; registra ferramentas; abre o transporte stdio.
-- **Erros:** Propaga erros de conexão do servidor MCP.
-
-## `connectors/canvas-puc/src/session.ts`
-
-### `sessionFilePath`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `sessionFilePath(dataDir: string): string`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Calcula o caminho do arquivo da sessão dentro da pasta de dados.
-- **Entrada:** `dataDir`: pasta de dados do conector.
-- **Saída:** `<dataDir>/session.json`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `cookieHeader`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `cookieHeader(session: CanvasSession): string`
-- **Usada por:** `authHeaders()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta o valor do header `Cookie` com todos os cookies da sessão.
-- **Entrada:** `session`: sessão salva.
-- **Saída:** Texto `nome=valor; ...`; `''` sem cookies.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `csrfToken`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `csrfToken(session: CanvasSession): string | null`
-- **Usada por:** `authHeaders()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Extrai o token CSRF (cookie `_csrf_token`, decodificado) da sessão.
-- **Entrada:** `session`: sessão salva.
-- **Saída:** Token decodificado; `null` se o cookie não existe.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `isCanvasSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `isCanvasSession(value: unknown): value is CanvasSession`
-- **Usada por:** `loadSession()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Confere se um valor lido do disco tem a forma de uma sessão válida.
-- **Entrada:** `value`: qualquer valor (JSON já interpretado).
-- **Saída:** `true` se tem `baseUrl` texto e `cookies` lista de `{ name, value }` texto; senão `false`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `loadSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `loadSession(file: string): CanvasSession | null`
-- **Usada por:** `createAuthProvider()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê a sessão salva em disco.
-- **Entrada:** `file`: caminho do arquivo da sessão.
-- **Saída:** `CanvasSession`; `null` se o arquivo não existe, está corrompido ou tem forma inválida.
-- **Efeitos:** Lê um arquivo.
-- **Erros:** Nenhum (falhas viram `null`).
-
-### `saveSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `saveSession(file: string, session: CanvasSession): void`
-- **Usada por:** `loginAndStore()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Grava a sessão em disco, criando a pasta se preciso.
-- **Entrada:** `file`: caminho do arquivo; `session`: sessão a salvar.
-- **Saída:** Nada.
-- **Efeitos:** Cria pasta e grava o arquivo JSON.
-- **Erros:** Propaga erros de escrita.
-
-### `clearSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `clearSession(file: string): void`
-- **Usada por:** `createAuthProvider()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Apaga o arquivo da sessão salva, se existir.
-- **Entrada:** `file`: caminho do arquivo da sessão.
-- **Saída:** Nada.
-- **Efeitos:** Apaga o arquivo em disco.
-- **Erros:** Propaga erros de remoção.
-
 ## `connectors/canvas-puc/src/tools-write.ts`
 
 ### `submissionPayload`
@@ -2254,31 +1864,14 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/tools.ts`
 - **Assinatura:** `canvasTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[]`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03
+- **Usada por:** `canvasRemoteConnector()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
 - **Faz:** Seleciona as ferramentas do Canvas a registrar.
 - **Entrada:** `allowWrite`: se as ferramentas de escrita entram.
-- **Saída:** Lista com conexão e leitura, mais `CANVAS_WRITE_TOOLS` quando `allowWrite` é `true`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `canvasServiceTools`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/tools.ts`
-- **Assinatura:** `canvasServiceTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[]`
-- **Usada por:** `canvasRemoteConnector()`, `canvasTools()`
-- **Processos:** P03, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Lista as ferramentas do serviço (leitura, e escrita se permitida), sem as de conexão.
-- **Entrada:** `allowWrite`: libera `entregar_tarefa_texto` e `responder_discussao`.
-- **Saída:** Lista de `ToolSpec`.
+- **Saída:** `CANVAS_READ_TOOLS`, mais `CANVAS_WRITE_TOOLS` quando `allowWrite` é `true`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -2288,13 +1881,13 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/tools.ts`
 - **Assinatura:** `createCanvasMcpServer(specs: readonly ToolSpec<CanvasContext>[], ctx: CanvasContext): McpServer`
-- **Usada por:** `canvasRemoteConnector()`, `startCanvasServer()`
+- **Usada por:** `canvasRemoteConnector()`
 - **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
 - **Faz:** Cria o `McpServer` do Canvas com as ferramentas ligadas ao contexto.
-- **Entrada:** `specs`: ferramentas; `ctx`: cliente, autenticação e relógio.
+- **Entrada:** `specs`: ferramentas; `ctx`: cliente e relógio.
 - **Saída:** Servidor MCP ainda não conectado.
 - **Efeitos:** Nenhum além de criar o objeto.
 - **Erros:** Nenhum.
@@ -2307,8 +1900,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/env.ts`
 - **Assinatura:** `envValue(env: EnvVars, key: string): string | null`
-- **Usada por:** `createWorkerApp()`, `publicOrigin()`, `readCanvasConfig()`, `readCanvasRemoteSettings()`, `readGmailSettings()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `requiredSecret()`
-- **Processos:** P03, P08, P10, P12
+- **Usada por:** `createWorkerApp()`, `publicOrigin()`, `readCanvasRemoteSettings()`, `readGmailSettings()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `requiredSecret()`
+- **Processos:** P08, P10, P12
 
 <!-- gerado:fim -->
 
@@ -2324,8 +1917,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/env.ts`
 - **Assinatura:** `parseFlag(value: string | null): boolean`
-- **Usada por:** `readCanvasConfig()`, `readCanvasRemoteSettings()`
-- **Processos:** P03, P08
+- **Usada por:** `readCanvasRemoteSettings()`
+- **Processos:** P08
 
 <!-- gerado:fim -->
 
@@ -2380,7 +1973,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/http.ts`
 - **Assinatura:** `buildUrl(base: string, path: string, params: QueryParams = {}): URL`
 - **Usada por:** `sendCanvasRequest()`
-- **Processos:** P03, P04, P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2415,7 +2008,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `defineTool(def: ToolDefinition<C, S>): ToolSpec<C>`
-- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/canvas-puc/src/tools.ts (módulo)`, `connectors/gmail/src/tools.ts (módulo)`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/gmail/src/tools.ts (módulo)`
 - **Processos:** P03
 
 <!-- gerado:fim -->
@@ -2528,301 +2121,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
-## `tools/pack/cli.ts`
-
-### `installedExternalVersions`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `installedExternalVersions(root: string): Record<string, string>`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê as versões instaladas das dependências externas em `node_modules`.
-- **Entrada:** `root`: raiz do repositório.
-- **Saída:** Mapa dependência → versão para cada item de `RUNTIME_EXTERNALS`.
-- **Efeitos:** Lê `package.json` em `node_modules`.
-- **Erros:** Propaga erro se a dependência não estiver instalada ou o JSON for inválido.
-
-### `runNodeBin`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `runNodeBin(bin: 'npm' | 'npx', args: readonly string[], cwd: string): void`
-- **Usada por:** `buildConnectorRuntime()`, `packMcpb()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Roda `npm` ou `npx` de forma portátil entre Windows e Unix.
-- **Entrada:** `bin`: `npm` ou `npx`; `args`: argumentos; `cwd`: pasta de trabalho.
-- **Saída:** Nada.
-- **Efeitos:** Executa processo filho com saída herdada (stdout/stderr).
-- **Erros:** Lança se o comando sair com código diferente de zero.
-
-### `runPackCli`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `async runPackCli(argv: readonly string[]): Promise<void>`
-- **Usada por:** `tools/pack/cli.ts (módulo)`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Empacota o conector pedido, ou todos com `--all`.
-- **Entrada:** `argv`: argumentos da linha de comando (nomes de conector ou `--all`).
-- **Saída:** Promise vazia.
-- **Efeitos:** Gera pacotes em disco; imprime o caminho de cada um no stdout.
-- **Erros:** Rejeita com a mensagem de uso se nenhum conector for informado; propaga erros de `packConnector()`.
-
-### `buildConnectorRuntime`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `async buildConnectorRuntime(root: string, name: string): Promise<void>`
-- **Usada por:** `runPackCli()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Gera na pasta do conector o runtime usado pelo plugin: bundle `server/index.js`, `package.json` e `package-lock.json`.
-- **Entrada:** `root`: raiz do repositório; `name`: nome da pasta do conector em `connectors/`.
-- **Saída:** Promise vazia quando termina.
-- **Efeitos:** Escreve arquivos na pasta do conector; roda o esbuild e `npm install --package-lock-only` (rede).
-- **Erros:** Rejeita se o manifesto não tiver nome/versão, se o esbuild falhar ou se o npm sair com erro.
-
-### `packMcpb`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `packMcpb(root: string, name: string): string`
-- **Usada por:** `runPackCli()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta o staging com `RUNTIME_FILES` do conector, instala as externas e gera o `.mcpb`.
-- **Entrada:** `root`: raiz do repositório; `name`: nome da pasta do conector.
-- **Saída:** Caminho do `.mcpb` gerado em `dist/connectors/<nome>-<versão>.mcpb`.
-- **Efeitos:** Apaga e recria `dist/stage/<nome>`; roda `npm ci` (rede) e `mcpb pack`; escreve em `dist/connectors/`.
-- **Erros:** Lança se faltar um arquivo de runtime (rode `buildConnectorRuntime` antes) ou se npm/mcpb falharem.
-
-### `writeJson`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `writeJson(file: string, data: unknown): void`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Grava um valor como JSON indentado com quebra de linha final.
-- **Entrada:** `file`: caminho do arquivo; `data`: valor serializável.
-- **Saída:** Nada.
-- **Efeitos:** Escreve o arquivo no disco (sobrescreve).
-- **Erros:** Lança se o disco recusar a escrita.
-
-## `tools/pack/pack.ts`
-
-### `listConnectors`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `listConnectors(rootDir: string): string[]`
-- **Usada por:** `runPackCli()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Lista os conectores com `manifest.json` em `connectors/`.
-- **Entrada:** `rootDir`: raiz do repositório.
-- **Saída:** Nomes das subpastas em ordem alfabética; vazia se `connectors/` não existe.
-- **Efeitos:** Lê o disco.
-- **Erros:** Propaga erros de leitura da pasta.
-
-### `readManifestIdentity`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `readManifestIdentity(manifestPath: string): { name: string; version: string }`
-- **Usada por:** `buildConnectorRuntime()`, `packMcpb()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê `name` e `version` do manifesto de um conector.
-- **Entrada:** `manifestPath`: caminho do `manifest.json`.
-- **Saída:** `{ name, version }`.
-- **Efeitos:** Lê um arquivo.
-- **Erros:** Lança se faltar `name` ou `version` (texto); propaga erros de leitura e JSON inválido.
-
-### `runtimePackageJson`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `runtimePackageJson(identity: { name: string; version: string }, installedVersions: Readonly<Record<string, string>>): RuntimePackageJson`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta o `package.json` do pacote com as versões exatas das dependências externas.
-- **Entrada:** `identity`: nome e versão do conector; `installedVersions`: mapa dependência → versão instalada.
-- **Saída:** `RuntimePackageJson` privado, ESM, com `dependencies` de `RUNTIME_EXTERNALS`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Lança se alguma dependência externa não estiver em `installedVersions`.
-
-### `bundleOptions`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `bundleOptions(entry: string, outfile: string): BuildOptions`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta as opções do esbuild para unir o conector num ESM para Node 18+.
-- **Entrada:** `entry`: arquivo de entrada; `outfile`: arquivo de saída.
-- **Saída:** `BuildOptions` com bundle, `node18`, externos de `RUNTIME_EXTERNALS` e banner que define `require`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `pluginManifest`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `pluginManifest(manifest: McpbManifest): Record<string, unknown>`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Gera o `plugin.json` do plugin a partir do manifesto `.mcpb`, fonte única de nome, descrição e configuração.
-- **Entrada:** `manifest`: manifesto `.mcpb` do conector.
-- **Saída:** Objeto com `name`, `description`, `author`, `repository` (URL) e `userConfig` (= `user_config` do manifesto).
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `pluginMcpConfig`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `pluginMcpConfig(manifest: McpbManifest): Record<string, unknown>`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Gera o `.mcp.json` do plugin com o comando do `.mcpb`, trocando `${__dirname}` por `${CLAUDE_PLUGIN_ROOT}`.
-- **Entrada:** `manifest`: manifesto `.mcpb` do conector.
-- **Saída:** `{ mcpServers: { <nome>: { command, args, env } } }`; `env` vazio se o manifesto não tiver.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-## `connectors/canvas-puc/src/playwright-runtime.ts`
-
-### `runtimeDir`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `runtimeDir(dataDir: string): string`
-- **Usada por:** `loadPlaywright()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Devolve a pasta onde o playwright-core é instalado sob demanda.
-- **Entrada:** `dataDir`: pasta de dados do conector (padrão `~/.canvas-puc`).
-- **Saída:** `<dataDir>/runtime`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `npmInstallArgs`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `npmInstallArgs(version: string): string[]`
-- **Usada por:** `installPlaywright()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta os argumentos do `npm install` que instala uma versão fixa do playwright-core.
-- **Entrada:** `version`: versão exata do playwright-core.
-- **Saída:** Lista de argumentos para o npm (sem dependências de desenvolvimento, sem audit/fund, silencioso).
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `resolveFrom`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `resolveFrom(dir: string, pkg: string): string | null`
-- **Usada por:** `loadPlaywright()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Resolve o arquivo de entrada de um pacote instalado numa pasta.
-- **Entrada:** `dir`: pasta que contém (ou não) `node_modules`; `pkg`: nome do pacote.
-- **Saída:** Caminho absoluto do arquivo de entrada; `null` se o pacote não estiver instalado ali.
-- **Efeitos:** Lê o disco (resolução de módulos do Node).
-- **Erros:** Nenhum (falhas viram `null`).
-
-### `installPlaywright`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `installPlaywright(dir: string): void`
-- **Usada por:** `loadPlaywright()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Instala o playwright-core na pasta de runtime com o npm do sistema.
-- **Entrada:** `dir`: pasta de runtime (criada se não existir).
-- **Saída:** Nada.
-- **Efeitos:** Cria a pasta e um `package.json` mínimo; roda `npm install` (rede, disco).
-- **Erros:** Lança se o npm não estiver no PATH ou sair com erro.
-
-### `loadPlaywright`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `async loadPlaywright(dataDir: string): Promise<PlaywrightModule>`
-- **Usada por:** `launchLoginBrowser()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Carrega o playwright-core do node_modules normal, da pasta de runtime ou instalando nela.
-- **Entrada:** `dataDir`: pasta de dados do conector.
-- **Saída:** Promise com o módulo do playwright-core.
-- **Efeitos:** Importa módulos dinamicamente; na primeira vez sem o pacote, instala com `installPlaywright()` (rede).
-- **Erros:** Rejeita com "Não consegui instalar o playwright-core" se a instalação não deixar o pacote resolvível.
-
 ## `connectors/canvas-puc/src/remote-main.ts`
 
 ### `startCanvasRemoteServer`
@@ -2868,7 +2166,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `canvasLoginText(baseUrl: string): LoginPageText`
 - **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2878,40 +2176,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
-### `remoteUnauthorizedMessage`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
-- **Assinatura:** `remoteUnauthorizedMessage(_auth: CanvasAuth | null, baseUrl: string): string`
-- **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Escreve a mensagem de 401 do modo remoto (gerar outro token e reconectar no Claude).
-- **Entrada:** `_auth`: ignorada; `baseUrl`: endereço do Canvas.
-- **Saída:** Texto da mensagem.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `createTokenAuthProvider`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
-- **Assinatura:** `createTokenAuthProvider(token: string): AuthProvider`
-- **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Cria um `AuthProvider` que usa só o token, sem renovação nem login.
-- **Entrada:** `token`: token de acesso do Canvas.
-- **Saída:** Provedor: `current` dá o token, `renew` dá nulo, `disconnect` não faz nada.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** `connect` rejeita orientando a reconectar pelas configurações do Claude.
-
 ### `verifyCanvasToken`
 
 <!-- gerado:inicio -->
@@ -2919,7 +2183,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `async verifyCanvasToken(settings: CanvasRemoteSettings, token: string): Promise<void>`
 - **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2936,7 +2200,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector`
 - **Usada por:** `createWorkerApp()`, `startCanvasRemoteServer()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2970,7 +2234,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `matchesVisibleToken(visible: string, token: string): boolean`
 - **Usada por:** `planTokenRenewal()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2987,7 +2251,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `planTokenRenewal(list: readonly CanvasTokenInfo[], token: string, now: Date): { readonly id: number; readonly expiresAt: string } | null`
 - **Usada por:** `renewCanvasToken()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -3004,7 +2268,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `async canvasTokenApi(settings: CanvasRemoteSettings, token: string, request: CanvasTokenRequest): Promise<unknown>`
 - **Usada por:** `renewCanvasToken()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -3021,7 +2285,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `async renewCanvasToken(settings: CanvasRemoteSettings, token: string, now: Date): Promise<void>`
 - **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -4536,6 +3800,112 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+## `tools/bundle/bundle.ts`
+
+### `listConnectors`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `listConnectors(rootDir: string): string[]`
+- **Usada por:** `runBuildCli()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os conectores com manifesto de plugin (`.claude-plugin/plugin.json`) em `connectors/`.
+- **Entrada:** `rootDir`: raiz do repositório.
+- **Saída:** Nomes das subpastas em ordem alfabética; vazia se `connectors/` não existe.
+- **Efeitos:** Lê o disco.
+- **Erros:** Propaga erros de leitura da pasta.
+
+### `bundleOptions`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `bundleOptions(entry: string, outfile: string): BuildOptions`
+- **Usada por:** `buildConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta as opções do esbuild para unir o servidor remoto num ESM para Node 22.
+- **Entrada:** `entry`: arquivo de entrada; `outfile`: arquivo de saída.
+- **Saída:** `BuildOptions` com bundle, `node22`, sem dependências externas, e banner que define `require`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `mcpServerProblems`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `mcpServerProblems(name: string, server: unknown): string[]`
+- **Usada por:** `pluginMcpProblems()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere um servidor do `.mcp.json` do plugin: tem de ser remoto (`type: "http"`, URL `https://`, sem `command`).
+- **Entrada:** `name`: nome do servidor; `server`: valor lido do JSON.
+- **Saída:** Lista de problemas em português; vazia se o servidor está certo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pluginMcpProblems`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `pluginMcpProblems(config: unknown): string[]`
+- **Usada por:** `buildConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere o `.mcp.json` inteiro de um plugin: ao menos um servidor, todos remotos.
+- **Entrada:** `config`: conteúdo do `.mcp.json` já lido como JSON.
+- **Saída:** Lista de problemas; vazia se a configuração está certa.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `tools/bundle/cli.ts`
+
+### `buildConnector`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/cli.ts`
+- **Assinatura:** `async buildConnector(root: string, name: string): Promise<void>`
+- **Usada por:** `runBuildCli()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida o `.mcp.json` do conector e gera o bundle `server/remote.js`, se houver `src/remote-main.ts`.
+- **Entrada:** `root`: raiz do repositório; `name`: pasta do conector.
+- **Saída:** Promise vazia.
+- **Efeitos:** Lê o `.mcp.json`; roda o esbuild e grava `server/remote.js`.
+- **Erros:** Rejeita listando os problemas de `pluginMcpProblems()`; propaga erros de leitura e do esbuild.
+
+### `runBuildCli`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/cli.ts`
+- **Assinatura:** `async runBuildCli(): Promise<void>`
+- **Usada por:** `tools/bundle/cli.ts (módulo)`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Ponto de entrada de `npm run build`: faz o build de todos os conectores.
+- **Entrada:** Nenhuma.
+- **Saída:** Promise vazia; imprime "✔ <conector>" por conector.
+- **Efeitos:** Os de `buildConnector()`; escreve no terminal.
+- **Erros:** Propaga erros de `buildConnector()`.
+
 ## `connectors/gmail/src/access-token.ts`
 
 ### `forgetAccessToken`
@@ -5366,23 +4736,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Rede (troca do código no Google, chaves públicas do Google); grava a conta no KV quando permitida.
 - **Erros:** Propaga o erro da troca do código (`GoogleTokenError`) e da validação do `id_token` (malformado, assinatura ou claims inválidos, chaves indisponíveis).
 
-### `finishAccountLink`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/link-flow.ts`
-- **Assinatura:** `async finishAccountLink(deps: GmailDeps, request: Request): Promise<Response>`
-- **Usada por:** `connectors/gmail/src/worker.ts (módulo)`
-- **Processos:** P11
-
-<!-- gerado:fim -->
-
-- **Faz:** Atende a volta do Google no vínculo de conta.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `request`: requisição da volta, com `state`, `code` ou `error` e o cookie de vínculo.
-- **Saída:** Página 400 se o pedido expirou ou o Google recusou; senão a página de `linkFromCode`; sempre com o cookie de vínculo apagado.
-- **Efeitos:** Lê e apaga o pedido no KV; rede (Google); grava a conta no KV quando permitida; apaga o cookie `__Host-gmail-link`.
-- **Erros:** Nenhum: falhas da troca do código ou do `id_token` viram página 400 por `linkSafely()`.
-
 ### `linkSafely`
 
 <!-- gerado:inicio -->
@@ -5399,6 +4752,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** A página de `linkFromCode()`, ou página 400 com a mensagem do erro.
 - **Efeitos:** Os de `linkFromCode()` (rede com o Google; grava a conta no KV quando permitida).
 - **Erros:** Nenhum: qualquer falha vira página 400 e nada é gravado.
+
+### `finishAccountLink`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async finishAccountLink(deps: GmailDeps, request: Request): Promise<Response>`
+- **Usada por:** `connectors/gmail/src/worker.ts (módulo)`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende a volta do Google no vínculo de conta.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `request`: requisição da volta, com `state`, `code` ou `error` e o cookie de vínculo.
+- **Saída:** Página 400 se o pedido expirou ou o Google recusou; senão a página de `linkFromCode`; sempre com o cookie de vínculo apagado.
+- **Efeitos:** Lê e apaga o pedido no KV; rede (Google); grava a conta no KV quando permitida; apaga o cookie `__Host-gmail-link`.
+- **Erros:** Nenhum: falhas da troca do código ou do `id_token` viram página 400 por `linkSafely()`.
 
 ## `connectors/gmail/src/message-format.ts`
 
@@ -7018,100 +6388,92 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 ## Dados e constantes
 
-| Nome                        | Arquivo                                           | O que é                                                                                                                     |
-| --------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `CANVAS_USER_AGENT`         | `connectors/canvas-puc/src/remote.ts`             | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                                     |
-| `TOKEN_RENEWAL_SECONDS`     | `connectors/canvas-puc/src/remote.ts`             | Quanto cada renovação estende o token do Canvas: 30 dias menos 1 hora (o Canvas recusa mais de 30 dias à frente).           |
-| `TEST_EXCEPTIONS`           | `src/test-exceptions.ts`                          | Lista única de funções sem teste automatizado, com motivo e teste manual.                                                   |
-| `DEFAULT_DOCS_CONFIG`       | `tools/docs/config.ts`                            | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                                        |
-| `MODULE_SCOPE_SUFFIX`       | `tools/docs/ast.ts`                               | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                                   |
-| `WALK_IGNORED_DIRS`         | `tools/docs/inventory.ts`                         | Pastas puladas ao percorrer o disco sem git.                                                                                |
-| `GENERATED_START`           | `tools/docs/markdown.ts`                          | Marcador de início do bloco gerado em FUNCTIONS.md.                                                                         |
-| `GENERATED_END`             | `tools/docs/markdown.ts`                          | Marcador de fim do bloco gerado.                                                                                            |
-| `INDEX_START`               | `tools/docs/markdown.ts`                          | Marcador de início do índice por módulo.                                                                                    |
-| `INDEX_END`                 | `tools/docs/markdown.ts`                          | Marcador de fim do índice por módulo.                                                                                       |
-| `PLACEHOLDER`               | `tools/docs/markdown.ts`                          | Texto `_preencher_` deixado nos campos manuais novos.                                                                       |
-| `MANUAL_FIELDS`             | `tools/docs/render.ts`                            | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                                        |
-| `HTML_TEXT_REPLACEMENTS`    | `src/core/html.ts`                                | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                          |
-| `CFB_SIGNATURE`             | `src/core/cfb.ts`                                 | Os 8 bytes iniciais de todo arquivo OLE/CFB (o contêiner do .doc).                                                          |
-| `CP1252_HIGH`               | `src/core/word.ts`                                | Caracteres de 0x80 a 0x9F do Windows-1252, usados ao decodificar o texto de 8 bits do .doc.                                 |
-| `WORD_TEXT_REPLACEMENTS`    | `src/core/word.ts`                                | Substituições (regex → texto) aplicadas em ordem por `cleanWordText` às marcas do Word.                                     |
-| `MAX_DOWNLOAD_BYTES`        | `connectors/canvas-puc/src/files.ts`              | Maior arquivo que `baixar_arquivo` traz para a conversa (10 MB).                                                            |
-| `MAX_TEXT_CHARS`            | `connectors/canvas-puc/src/files.ts`              | Maior texto devolvido por `ler_arquivo_texto` (100 000 caracteres).                                                         |
-| `CONNECTORS_DIR`            | `tools/pack/pack.ts`                              | Pasta dos conectores relativa à raiz (`connectors`).                                                                        |
-| `PACK_OUT_DIR`              | `tools/pack/pack.ts`                              | Pasta de saída dos pacotes `.mcpb` (`dist/connectors`).                                                                     |
-| `RUNTIME_EXTERNALS`         | `tools/pack/pack.ts`                              | Dependências que o esbuild não une e vão para `node_modules` do pacote.                                                     |
-| `PLAYWRIGHT_VERSION`        | `connectors/canvas-puc/src/playwright-runtime.ts` | Versão do playwright-core instalada sob demanda; um teste garante que é a mesma do `package.json`.                          |
-| `RUNTIME_FILES`             | `tools/pack/pack.ts`                              | Arquivos de runtime de cada conector (manifesto, `package.json`, lockfile e bundle), versionados e copiados para o `.mcpb`. |
-| `CONNECTOR_ENTRY`           | `tools/pack/pack.ts`                              | Arquivo de entrada de cada conector (`src/main.ts`).                                                                        |
-| `BUNDLE_PATH`               | `tools/pack/pack.ts`                              | Caminho do bundle dentro do pacote (`server/index.js`).                                                                     |
-| `LOGIN_TIMEOUT_MS`          | `connectors/canvas-puc/src/browser-login.ts`      | Tempo máximo de espera do login por modo (`silent` 25 s, `window` 5 min).                                                   |
-| `BROWSER_CHANNELS`          | `connectors/canvas-puc/src/browser-login.ts`      | Navegadores tentados em ordem no login (`chrome`, `msedge`).                                                                |
-| `CANVAS_PAGE_SIZE`          | `connectors/canvas-puc/src/client.ts`             | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                             |
-| `DEFAULT_MAX_ITEMS`         | `connectors/canvas-puc/src/client.ts`             | Limite padrão de itens somados entre páginas em `getAll`.                                                                   |
-| `DEFAULT_CANVAS_URL`        | `connectors/canvas-puc/src/config.ts`             | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                                    |
-| `DEFAULT_LOGIN_BUTTON`      | `connectors/canvas-puc/src/config.ts`             | Trecho do texto do botão da instituição na tela de login, usado sem `CANVAS_LOGIN_BUTTON`.                                  |
-| `MAX_TEXT_LENGTH`           | `connectors/canvas-puc/src/format.ts`             | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                                                       |
-| `ASSIGNMENT_BUCKETS`        | `connectors/canvas-puc/src/helpers.ts`            | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                                               |
-| `CANVAS_READ_TOOLS`         | `connectors/canvas-puc/src/tools-read.ts`         | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                                 |
-| `CANVAS_WRITE_TOOLS`        | `connectors/canvas-puc/src/tools-write.ts`        | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`.                             |
-| `CANVAS_ACCOUNT_TOOLS`      | `connectors/canvas-puc/src/tools.ts`              | Ferramentas MCP de conexão: `conectar_canvas` e `desconectar_canvas`.                                                       |
-| `CANVAS_SERVER_INFO`        | `connectors/canvas-puc/src/tools.ts`              | Nome e versão anunciados pelo servidor MCP do Canvas (stdio e remoto).                                                      |
-| `REMOTE_ENTRY`              | `tools/pack/pack.ts`                              | Entrada opcional do servidor remoto de um conector (`src/remote-main.ts`).                                                  |
-| `REMOTE_BUNDLE_PATH`        | `tools/pack/pack.ts`                              | Bundle do servidor remoto (`server/remote.js`), usado pelo Dockerfile.                                                      |
-| `SEAL_KEY_BYTES`            | `src/remote/seal.ts`                              | Tamanho da `SEAL_KEY` (32 bytes, AES-256).                                                                                  |
-| `CLIENT_TTL_SECONDS`        | `src/remote/oauth.ts`                             | Validade do `client_id` registrado (10 anos).                                                                               |
-| `PENDING_TTL_SECONDS`       | `src/remote/tokens.ts`                            | Validade do pedido selado no formulário de login (15 minutos).                                                              |
-| `CODE_TTL_SECONDS`          | `src/remote/tokens.ts`                            | Validade do código de autorização (5 minutos).                                                                              |
-| `ACCESS_TTL_SECONDS`        | `src/remote/tokens.ts`                            | Validade do access token (1 hora).                                                                                          |
-| `REFRESH_TTL_SECONDS`       | `src/remote/tokens.ts`                            | Validade do refresh token (30 dias, como o token da PUC).                                                                   |
-| `LOGIN_PAGE_CSS`            | `src/remote/login-page.ts`                        | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                             |
-| `CORS_HEADERS`              | `src/remote/handler.ts`                           | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                                       |
-| `REMOTE_ROUTES`             | `src/remote/handler.ts`                           | Tabela `MÉTODO caminho` → função do servidor remoto.                                                                        |
-| `DEFAULT_REDIRECT_HOSTS`    | `src/remote/oauth.ts`                             | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                                         |
-| `MAX_BODY_BYTES`            | `src/remote/node-server.ts`                       | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                               |
-| `PDF_ESCAPES`               | `src/core/pdf.ts`                                 | Escapes de letra das strings literais do PDF (`\n`, `\t`...).                                                               |
-| `TJ_SPACE_THRESHOLD`        | `src/core/pdf.ts`                                 | Ajuste do `TJ` a partir do qual conta como espaço entre palavras.                                                           |
-| `PDF_TEXT_OPERATORS`        | `src/core/pdf.ts`                                 | Operador de texto do PDF → texto que ele produz.                                                                            |
-| `ACCESS_TOKEN_MARGIN_MS`    | `connectors/gmail/src/access-token.ts`            | Margem antes do vencimento em que o access token do Google é renovado.                                                      |
-| `MAX_ATTACHMENT_BYTES`      | `connectors/gmail/src/attachments.ts`             | Maior anexo lido como texto (5 MB).                                                                                         |
-| `MAX_ATTACHMENT_CHARS`      | `connectors/gmail/src/attachments.ts`             | Maior texto devolvido de um anexo.                                                                                          |
-| `GMAIL_READONLY_SCOPE`      | `connectors/gmail/src/config.ts`                  | Escopo `gmail.readonly`, o único escopo de dados pedido.                                                                    |
-| `GMAIL_LINK_SCOPES`         | `connectors/gmail/src/config.ts`                  | Escopos do vínculo de conta (`openid email` + Gmail só leitura).                                                            |
-| `SIGN_IN_SCOPES`            | `connectors/gmail/src/config.ts`                  | Escopos do login do dono (`openid email`).                                                                                  |
-| `MIN_CONSENT_SECRET_CHARS`  | `connectors/gmail/src/config.ts`                  | Tamanho mínimo de `CONSENT_SECRET`.                                                                                         |
-| `UPSTREAM_USER_AGENT`       | `connectors/gmail/src/context.ts`                 | User-Agent enviado ao Google e à Gmail API.                                                                                 |
-| `GMAIL_API_BASE`            | `connectors/gmail/src/gmail-api.ts`               | Base da Gmail API para a conta do token.                                                                                    |
-| `GMAIL_STATUS_MESSAGES`     | `connectors/gmail/src/gmail-api.ts`               | Mensagem acionável por status HTTP da Gmail API.                                                                            |
-| `GOOGLE_AUTHORIZE_URL`      | `connectors/gmail/src/google-oauth.ts`            | Endpoint de autorização do Google.                                                                                          |
-| `GOOGLE_TOKEN_URL`          | `connectors/gmail/src/google-oauth.ts`            | Endpoint de tokens do Google.                                                                                               |
-| `GOOGLE_CALLBACK_PATH`      | `connectors/gmail/src/google-oauth.ts`            | Caminho do retorno do Google (`/google/callback`).                                                                          |
-| `GOOGLE_JWKS_URL`           | `connectors/gmail/src/id-token.ts`                | Chaves públicas que assinam os `id_token` do Google.                                                                        |
-| `GOOGLE_ISSUERS`            | `connectors/gmail/src/id-token.ts`                | Emissores aceitos no `id_token`.                                                                                            |
-| `CLOCK_SKEW_SECONDS`        | `connectors/gmail/src/id-token.ts`                | Folga de relógio aceita na validade do `id_token`.                                                                          |
-| `LINK_STATE_PREFIX`         | `connectors/gmail/src/link-flow.ts`               | Prefixo do `state` do vínculo de conta (`link.`).                                                                           |
-| `LINK_COOKIE`               | `connectors/gmail/src/link-flow.ts`               | Cookie `__Host-` que prende o vínculo ao navegador.                                                                         |
-| `LINK_TTL_SECONDS`          | `connectors/gmail/src/link-flow.ts`               | Validade do pedido de vínculo (10 minutos).                                                                                 |
-| `LINK_REQUEST_TYP`          | `connectors/gmail/src/link-flow.ts`               | Tipo do selo do pedido de vínculo.                                                                                          |
-| `MAX_MESSAGE_CHARS`         | `connectors/gmail/src/message-format.ts`          | Maior corpo de mensagem devolvido.                                                                                          |
-| `MAX_THREAD_CHARS`          | `connectors/gmail/src/message-format.ts`          | Maior soma dos corpos de uma conversa.                                                                                      |
-| `MIN_MESSAGE_CHARS`         | `connectors/gmail/src/message-format.ts`          | Menor fatia por mensagem numa conversa longa.                                                                               |
-| `MESSAGE_HEADERS`           | `connectors/gmail/src/message-format.ts`          | Cabeçalhos devolvidos de cada mensagem.                                                                                     |
-| `UNTRUSTED_NOTICE`          | `connectors/gmail/src/message-format.ts`          | Aviso de conteúdo de e-mail não confiável (prompt injection).                                                               |
-| `GOOGLE_ACCOUNTS_ORIGIN`    | `connectors/gmail/src/pages.ts`                   | Origem do Google liberada no `form-action` do consentimento.                                                                |
-| `RATE_LIMIT_RETRY_SECONDS`  | `connectors/gmail/src/rate-limit.ts`              | Segundos do `Retry-After` na resposta 429.                                                                                  |
-| `LINKED_ACCOUNT_TYP`        | `connectors/gmail/src/token-store.ts`             | Tipo do selo da conta vinculada.                                                                                            |
-| `LINKED_ACCOUNT_EXP`        | `connectors/gmail/src/token-store.ts`             | Validade técnica do selo da conta (ano 2100).                                                                               |
-| `GMAIL_ID`                  | `connectors/gmail/src/tools.ts`                   | Esquema zod de id da Gmail API (só caracteres seguros na URL).                                                              |
-| `listAccountsTool`          | `connectors/gmail/src/tools.ts`                   | Ferramenta `list_accounts`.                                                                                                 |
-| `searchThreadsTool`         | `connectors/gmail/src/tools.ts`                   | Ferramenta `search_threads`.                                                                                                |
-| `getThreadTool`             | `connectors/gmail/src/tools.ts`                   | Ferramenta `get_thread`.                                                                                                    |
-| `getMessageTool`            | `connectors/gmail/src/tools.ts`                   | Ferramenta `get_message`.                                                                                                   |
-| `listLabelsTool`            | `connectors/gmail/src/tools.ts`                   | Ferramenta `list_labels`.                                                                                                   |
-| `getAttachmentTextTool`     | `connectors/gmail/src/tools.ts`                   | Ferramenta `get_attachment_text`.                                                                                           |
-| `GMAIL_TOOLS`               | `connectors/gmail/src/tools.ts`                   | Todas as ferramentas do Gmail, na ordem mostrada ao Claude.                                                                 |
-| `GMAIL_SERVER_INFO`         | `connectors/gmail/src/worker.ts`                  | Nome e versão do servidor MCP do Gmail.                                                                                     |
-| `GMAIL_SERVER_INSTRUCTIONS` | `connectors/gmail/src/worker.ts`                  | Instruções do servidor MCP (contas e conteúdo não confiável).                                                               |
-| `ACCESS_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`                  | Validade do access token emitido ao Claude (1 hora).                                                                        |
-| `REFRESH_TOKEN_TTL_SECONDS` | `connectors/gmail/src/worker.ts`                  | Validade do refresh token emitido ao Claude (30 dias).                                                                      |
-| `GMAIL_ROUTES`              | `connectors/gmail/src/worker.ts`                  | Rotas próprias do Worker: `MÉTODO caminho` → atendimento.                                                                   |
+| Nome                        | Arquivo                                    | O que é                                                                                                           |
+| --------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `CANVAS_USER_AGENT`         | `connectors/canvas-puc/src/remote.ts`      | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                           |
+| `TOKEN_RENEWAL_SECONDS`     | `connectors/canvas-puc/src/remote.ts`      | Quanto cada renovação estende o token do Canvas: 30 dias menos 1 hora (o Canvas recusa mais de 30 dias à frente). |
+| `TEST_EXCEPTIONS`           | `src/test-exceptions.ts`                   | Lista única de funções sem teste automatizado, com motivo e teste manual.                                         |
+| `DEFAULT_DOCS_CONFIG`       | `tools/docs/config.ts`                     | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                              |
+| `MODULE_SCOPE_SUFFIX`       | `tools/docs/ast.ts`                        | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                         |
+| `WALK_IGNORED_DIRS`         | `tools/docs/inventory.ts`                  | Pastas puladas ao percorrer o disco sem git.                                                                      |
+| `GENERATED_START`           | `tools/docs/markdown.ts`                   | Marcador de início do bloco gerado em FUNCTIONS.md.                                                               |
+| `GENERATED_END`             | `tools/docs/markdown.ts`                   | Marcador de fim do bloco gerado.                                                                                  |
+| `INDEX_START`               | `tools/docs/markdown.ts`                   | Marcador de início do índice por módulo.                                                                          |
+| `INDEX_END`                 | `tools/docs/markdown.ts`                   | Marcador de fim do índice por módulo.                                                                             |
+| `PLACEHOLDER`               | `tools/docs/markdown.ts`                   | Texto `_preencher_` deixado nos campos manuais novos.                                                             |
+| `MANUAL_FIELDS`             | `tools/docs/render.ts`                     | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                              |
+| `HTML_TEXT_REPLACEMENTS`    | `src/core/html.ts`                         | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                |
+| `CFB_SIGNATURE`             | `src/core/cfb.ts`                          | Os 8 bytes iniciais de todo arquivo OLE/CFB (o contêiner do .doc).                                                |
+| `CP1252_HIGH`               | `src/core/word.ts`                         | Caracteres de 0x80 a 0x9F do Windows-1252, usados ao decodificar o texto de 8 bits do .doc.                       |
+| `WORD_TEXT_REPLACEMENTS`    | `src/core/word.ts`                         | Substituições (regex → texto) aplicadas em ordem por `cleanWordText` às marcas do Word.                           |
+| `MAX_DOWNLOAD_BYTES`        | `connectors/canvas-puc/src/files.ts`       | Maior arquivo que `baixar_arquivo` traz para a conversa (10 MB).                                                  |
+| `MAX_TEXT_CHARS`            | `connectors/canvas-puc/src/files.ts`       | Maior texto devolvido por `ler_arquivo_texto` (100 000 caracteres).                                               |
+| `CONNECTORS_DIR`            | `tools/bundle/bundle.ts`                   | Pasta dos conectores relativa à raiz (`connectors`).                                                              |
+| `PLUGIN_MANIFEST_PATH`      | `tools/bundle/bundle.ts`                   | Manifesto do plugin em cada conector (`.claude-plugin/plugin.json`); marca a pasta como conector.                 |
+| `PLUGIN_MCP_CONFIG_PATH`    | `tools/bundle/bundle.ts`                   | Configuração MCP do plugin (`.mcp.json`), com a URL do servidor remoto.                                           |
+| `CANVAS_PAGE_SIZE`          | `connectors/canvas-puc/src/client.ts`      | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                   |
+| `DEFAULT_MAX_ITEMS`         | `connectors/canvas-puc/src/client.ts`      | Limite padrão de itens somados entre páginas em `getAll`.                                                         |
+| `DEFAULT_CANVAS_URL`        | `connectors/canvas-puc/src/remote.ts`      | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                          |
+| `MAX_TEXT_LENGTH`           | `connectors/canvas-puc/src/format.ts`      | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                                             |
+| `ASSIGNMENT_BUCKETS`        | `connectors/canvas-puc/src/helpers.ts`     | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                                     |
+| `CANVAS_READ_TOOLS`         | `connectors/canvas-puc/src/tools-read.ts`  | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                       |
+| `CANVAS_WRITE_TOOLS`        | `connectors/canvas-puc/src/tools-write.ts` | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`.                   |
+| `CANVAS_SERVER_INFO`        | `connectors/canvas-puc/src/tools.ts`       | Nome e versão anunciados pelo servidor MCP do Canvas.                                                             |
+| `REMOTE_ENTRY`              | `tools/bundle/bundle.ts`                   | Entrada do servidor remoto em Node de um conector (`src/remote-main.ts`).                                         |
+| `REMOTE_BUNDLE_PATH`        | `tools/bundle/bundle.ts`                   | Bundle do servidor remoto (`server/remote.js`), usado pelo Dockerfile.                                            |
+| `SEAL_KEY_BYTES`            | `src/remote/seal.ts`                       | Tamanho da `SEAL_KEY` (32 bytes, AES-256).                                                                        |
+| `CLIENT_TTL_SECONDS`        | `src/remote/oauth.ts`                      | Validade do `client_id` registrado (10 anos).                                                                     |
+| `PENDING_TTL_SECONDS`       | `src/remote/tokens.ts`                     | Validade do pedido selado no formulário de login (15 minutos).                                                    |
+| `CODE_TTL_SECONDS`          | `src/remote/tokens.ts`                     | Validade do código de autorização (5 minutos).                                                                    |
+| `ACCESS_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Validade do access token (1 hora).                                                                                |
+| `REFRESH_TTL_SECONDS`       | `src/remote/tokens.ts`                     | Validade do refresh token (30 dias, como o token da PUC).                                                         |
+| `LOGIN_PAGE_CSS`            | `src/remote/login-page.ts`                 | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                   |
+| `CORS_HEADERS`              | `src/remote/handler.ts`                    | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                             |
+| `REMOTE_ROUTES`             | `src/remote/handler.ts`                    | Tabela `MÉTODO caminho` → função do servidor remoto.                                                              |
+| `DEFAULT_REDIRECT_HOSTS`    | `src/remote/oauth.ts`                      | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                               |
+| `MAX_BODY_BYTES`            | `src/remote/node-server.ts`                | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                     |
+| `PDF_ESCAPES`               | `src/core/pdf.ts`                          | Escapes de letra das strings literais do PDF (`\n`, `\t`...).                                                     |
+| `TJ_SPACE_THRESHOLD`        | `src/core/pdf.ts`                          | Ajuste do `TJ` a partir do qual conta como espaço entre palavras.                                                 |
+| `PDF_TEXT_OPERATORS`        | `src/core/pdf.ts`                          | Operador de texto do PDF → texto que ele produz.                                                                  |
+| `ACCESS_TOKEN_MARGIN_MS`    | `connectors/gmail/src/access-token.ts`     | Margem antes do vencimento em que o access token do Google é renovado.                                            |
+| `MAX_ATTACHMENT_BYTES`      | `connectors/gmail/src/attachments.ts`      | Maior anexo lido como texto (5 MB).                                                                               |
+| `MAX_ATTACHMENT_CHARS`      | `connectors/gmail/src/attachments.ts`      | Maior texto devolvido de um anexo.                                                                                |
+| `GMAIL_READONLY_SCOPE`      | `connectors/gmail/src/config.ts`           | Escopo `gmail.readonly`, o único escopo de dados pedido.                                                          |
+| `GMAIL_LINK_SCOPES`         | `connectors/gmail/src/config.ts`           | Escopos do vínculo de conta (`openid email` + Gmail só leitura).                                                  |
+| `SIGN_IN_SCOPES`            | `connectors/gmail/src/config.ts`           | Escopos do login do dono (`openid email`).                                                                        |
+| `MIN_CONSENT_SECRET_CHARS`  | `connectors/gmail/src/config.ts`           | Tamanho mínimo de `CONSENT_SECRET`.                                                                               |
+| `UPSTREAM_USER_AGENT`       | `connectors/gmail/src/context.ts`          | User-Agent enviado ao Google e à Gmail API.                                                                       |
+| `GMAIL_API_BASE`            | `connectors/gmail/src/gmail-api.ts`        | Base da Gmail API para a conta do token.                                                                          |
+| `GMAIL_STATUS_MESSAGES`     | `connectors/gmail/src/gmail-api.ts`        | Mensagem acionável por status HTTP da Gmail API.                                                                  |
+| `GOOGLE_AUTHORIZE_URL`      | `connectors/gmail/src/google-oauth.ts`     | Endpoint de autorização do Google.                                                                                |
+| `GOOGLE_TOKEN_URL`          | `connectors/gmail/src/google-oauth.ts`     | Endpoint de tokens do Google.                                                                                     |
+| `GOOGLE_CALLBACK_PATH`      | `connectors/gmail/src/google-oauth.ts`     | Caminho do retorno do Google (`/google/callback`).                                                                |
+| `GOOGLE_JWKS_URL`           | `connectors/gmail/src/id-token.ts`         | Chaves públicas que assinam os `id_token` do Google.                                                              |
+| `GOOGLE_ISSUERS`            | `connectors/gmail/src/id-token.ts`         | Emissores aceitos no `id_token`.                                                                                  |
+| `CLOCK_SKEW_SECONDS`        | `connectors/gmail/src/id-token.ts`         | Folga de relógio aceita na validade do `id_token`.                                                                |
+| `LINK_STATE_PREFIX`         | `connectors/gmail/src/link-flow.ts`        | Prefixo do `state` do vínculo de conta (`link.`).                                                                 |
+| `LINK_COOKIE`               | `connectors/gmail/src/link-flow.ts`        | Cookie `__Host-` que prende o vínculo ao navegador.                                                               |
+| `LINK_TTL_SECONDS`          | `connectors/gmail/src/link-flow.ts`        | Validade do pedido de vínculo (10 minutos).                                                                       |
+| `LINK_REQUEST_TYP`          | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do pedido de vínculo.                                                                                |
+| `MAX_MESSAGE_CHARS`         | `connectors/gmail/src/message-format.ts`   | Maior corpo de mensagem devolvido.                                                                                |
+| `MAX_THREAD_CHARS`          | `connectors/gmail/src/message-format.ts`   | Maior soma dos corpos de uma conversa.                                                                            |
+| `MIN_MESSAGE_CHARS`         | `connectors/gmail/src/message-format.ts`   | Menor fatia por mensagem numa conversa longa.                                                                     |
+| `MESSAGE_HEADERS`           | `connectors/gmail/src/message-format.ts`   | Cabeçalhos devolvidos de cada mensagem.                                                                           |
+| `UNTRUSTED_NOTICE`          | `connectors/gmail/src/message-format.ts`   | Aviso de conteúdo de e-mail não confiável (prompt injection).                                                     |
+| `GOOGLE_ACCOUNTS_ORIGIN`    | `connectors/gmail/src/pages.ts`            | Origem do Google liberada no `form-action` do consentimento.                                                      |
+| `RATE_LIMIT_RETRY_SECONDS`  | `connectors/gmail/src/rate-limit.ts`       | Segundos do `Retry-After` na resposta 429.                                                                        |
+| `LINKED_ACCOUNT_TYP`        | `connectors/gmail/src/token-store.ts`      | Tipo do selo da conta vinculada.                                                                                  |
+| `LINKED_ACCOUNT_EXP`        | `connectors/gmail/src/token-store.ts`      | Validade técnica do selo da conta (ano 2100).                                                                     |
+| `GMAIL_ID`                  | `connectors/gmail/src/tools.ts`            | Esquema zod de id da Gmail API (só caracteres seguros na URL).                                                    |
+| `listAccountsTool`          | `connectors/gmail/src/tools.ts`            | Ferramenta `list_accounts`.                                                                                       |
+| `searchThreadsTool`         | `connectors/gmail/src/tools.ts`            | Ferramenta `search_threads`.                                                                                      |
+| `getThreadTool`             | `connectors/gmail/src/tools.ts`            | Ferramenta `get_thread`.                                                                                          |
+| `getMessageTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `get_message`.                                                                                         |
+| `listLabelsTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `list_labels`.                                                                                         |
+| `getAttachmentTextTool`     | `connectors/gmail/src/tools.ts`            | Ferramenta `get_attachment_text`.                                                                                 |
+| `GMAIL_TOOLS`               | `connectors/gmail/src/tools.ts`            | Todas as ferramentas do Gmail, na ordem mostrada ao Claude.                                                       |
+| `GMAIL_SERVER_INFO`         | `connectors/gmail/src/worker.ts`           | Nome e versão do servidor MCP do Gmail.                                                                           |
+| `GMAIL_SERVER_INSTRUCTIONS` | `connectors/gmail/src/worker.ts`           | Instruções do servidor MCP (contas e conteúdo não confiável).                                                     |
+| `ACCESS_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`           | Validade do access token emitido ao Claude (1 hora).                                                              |
+| `REFRESH_TOKEN_TTL_SECONDS` | `connectors/gmail/src/worker.ts`           | Validade do refresh token emitido ao Claude (30 dias).                                                            |
+| `GMAIL_ROUTES`              | `connectors/gmail/src/worker.ts`           | Rotas próprias do Worker: `MÉTODO caminho` → atendimento.                                                         |

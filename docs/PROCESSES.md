@@ -39,12 +39,12 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 
 - **Gatilho:** o Claude chama uma ferramenta do conector `canvas-puc` (ex.: `proximas_entregas`).
 - **Passos:**
-  1. Na subida, `startCanvasServer()` lê a configuração com `readCanvasConfig()`, cria a autenticação com
-     `createAuthProvider()` e o cliente com `createCanvasClient()`, escolhe as ferramentas com `canvasTools()`
-     e as registra com `registerToolSpecs()` dentro de `createCanvasMcpServer()`.
+  1. A cada requisição em `/mcp` (P09), `canvasRemoteConnector()` cria o cliente com `createCanvasClient()` e o
+     token do usuário, escolhe as ferramentas com `canvasTools()` e as registra com `registerToolSpecs()` dentro de
+     `createCanvasMcpServer()`.
   2. A chamada passa por `runToolSafely()`; a `ToolSpec` criada por `defineTool()` valida os argumentos.
-  3. A ferramenta usa o cliente: `requestWithRenewal()` monta a requisição com `sendCanvasRequest()`
-     (`buildUrl()` + `authHeaders()`); listagens seguem as páginas com `collectPages()` e `parseNextLink()`.
+  3. A ferramenta usa o cliente: `requestCanvas()` envia a requisição com `sendCanvasRequest()`
+     (`buildUrl()` + `Authorization: Bearer`); listagens seguem as páginas com `collectPages()` e `parseNextLink()`.
      Apoios como `activeCourses()`, `fetchOwnSubmission()` e `getAllOrEmpty()` compõem buscas.
   4. As respostas viram objetos enxutos em português (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
      etc.), com HTML convertido por `htmlToText()`.
@@ -56,70 +56,56 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
   6. `toToolResult()` devolve o JSON (via `textResult()`) ou o resultado pronto ao Claude; qualquer erro vira
      `errorResult()` com a mensagem.
 - **Resultado:** o Claude recebe só os campos úteis, com links absolutos e textos limpos.
-- **Falhas:** status ≠ 2xx vira erro com status e corpo; argumentos inválidos são recusados pelo zod.
+- **Falhas:** 401 vira `unauthorizedMessage()` (gerar outro token e reconectar); outro status ≠ 2xx vira erro com
+  status e corpo; argumentos inválidos são recusados pelo zod.
 
-## P04 — Conectar e renovar a sessão do Canvas (login pelo navegador)
+## P04 — (removido) Login pelo navegador
 
-- **Gatilho:** ferramenta `conectar_canvas`, ou um 401 (ou ausência de credencial) em qualquer requisição.
+O modo local, com sessão do navegador, saiu do projeto ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)).
+A autenticação agora é só o OAuth do P08. O número fica reservado para não renumerar os outros processos.
+
+## P05 — Build dos conectores (`npm run build`)
+
+- **Gatilho:** `npm run build` ou o `pr:check`.
 - **Passos:**
-  1. Ao subir, `createAuthProvider()` carrega a sessão salva com `loadSession()` (`isCanvasSession()` valida
-     a forma) e `pickAuth()` escolhe sessão, token ou nenhuma.
-  2. Em 401, `requestWithRenewal()` chama `renewOnce()`, que roda uma única `renewAuth()` por vez.
-  3. `renewAuth()` tenta `loginAndStore()` em modo silencioso: `browserLogin()` abre o perfil com
-     `launchLoginBrowser()` oculto (carregando o navegador por `loadPlaywright()`) e `waitForCanvasLogin()` espera `pageHasCanvasSession()`, clicando o botão
-     da instituição com `clickInstitutionButton()` quando `isLoginChooserUrl()` reconhece a tela de escolha.
-  4. Se o silencioso falhar, usa o token reserva (se houver) ou repete o login com janela visível.
-  5. `saveSession()` grava os cookies; `cookieHeader()` e `csrfToken()` montam os headers das próximas chamadas.
-  6. `desconectar_canvas` apaga a sessão com `clearSession()`.
-- **Resultado:** a requisição original é repetida com a sessão nova, sem o usuário ver janela na maioria dos casos.
-- **Falhas:** janela fechada ou tempo esgotado → `unauthorizedMessage()` orienta a usar `conectar_canvas`.
-
-## P05 — Empacotar conectores (`npm run pack` / `npm run pack:all`)
-
-- **Gatilho:** `npm run pack -- <conector>`, `npm run pack:all` ou o `pr:check`.
-- **Passos:**
-  1. `runPackCli()` escolhe os conectores; com `--all`, `listConnectors()` acha as pastas com `manifest.json`.
-  2. `buildConnectorRuntime()` lê nome e versão com `readManifestIdentity()`, une o código com o esbuild usando
-     `bundleOptions()` em `connectors/<nome>/server/index.js` (e, se houver `src/remote-main.ts`, também em
-     `server/remote.js`, P08) e grava o `package.json` de runtime com
-     `runtimePackageJson()` (versões de `installedExternalVersions()`) e o lockfile, via `runNodeBin()`; gera
-     também o `plugin.json` (`pluginManifest()`) e o `.mcp.json` (`pluginMcpConfig()`) a partir do `manifest.json`,
-     gravados por `writeJson()`.
-  3. `packMcpb()` copia `RUNTIME_FILES` para o staging, roda `npm ci` e `mcpb pack`.
-- **Resultado:** runtime versionado na pasta do conector (usado pelo plugin do Claude Code, P07) e
-  `dist/connectors/<nome>-<versão>.mcpb` (Claude Desktop → Extensões).
-- **Falhas:** manifesto sem nome/versão ou dependência externa não instalada interrompem com erro.
+  1. `runBuildCli()` acha os conectores com `listConnectors()` (pastas com `.claude-plugin/plugin.json`).
+  2. `buildConnector()` lê o `.mcp.json` do plugin e falha se `pluginMcpProblems()` (com `mcpServerProblems()`)
+     achar servidor que não seja `http` com URL `https://`, ou com `command` local.
+  3. Se houver `src/remote-main.ts`, une o servidor remoto com o esbuild (`bundleOptions()`) em
+     `connectors/<nome>/server/remote.js`, usado pelo Dockerfile (P08). O Worker compila direto do `src/`.
+- **Resultado:** plugin conferido e bundle remoto atualizado na pasta do conector.
+- **Falhas:** `.mcp.json` com servidor local ou URL insegura, ou erro de compilação, interrompem com a lista dos
+  problemas.
 
 ## P06 — Portão de PR local (`npm run pr:check`)
 
 - **Gatilho:** antes de abrir e antes de mergear um PR (não há CI, ADR 0006).
 - **Passos:**
   1. `scripts/pr-check.sh` exige o título do PR e roda `npm run check` (inclui o P01 via `runDocsCli()`).
-  2. Roda o P05 (`npm run pack:all`) e falha se o runtime versionado dos conectores mudar sem commit.
+  2. Roda o P05 (`npm run build`) e falha se o bundle versionado dos conectores mudar sem commit.
   3. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
 - **Resultado:** `✔ pr:check verde`, condição para o Claude mergear com squash.
 - **Falhas:** qualquer etapa com erro para o script com código ≠ 0.
 
-## P07 — Instalar um conector como plugin (marketplace do Claude Code)
+## P07 — Instalar um conector pelo marketplace (Claude, Cowork e Claude Code)
 
 - **Gatilho:** no Claude, "Adicionar marketplace" com `temponi-bernardo/claude-connectors` e instalar o plugin.
 - **Passos:**
-  1. O Claude clona o repositório (credenciais git do PC; repo privado) e lê `.claude-plugin/marketplace.json`.
-  2. Ao instalar, copia `connectors/<nome>/`, pede os campos de `userConfig` do `plugin.json` e roda
-     `npm install` porque a pasta tem `package.json` e `package-lock.json` (só o playwright-core).
-  3. O `.mcp.json` sobe `node ${CLAUDE_PLUGIN_ROOT}/server/index.js` com os campos como variáveis de ambiente
-     (P03 a partir daí).
-  4. Se o `npm install` automático não tiver rodado, `loadPlaywright()` instala o playwright-core em
-     `runtimeDir()` na primeira vez que o login pelo navegador for necessário (`resolveFrom()`,
-     `installPlaywright()`).
-- **Resultado:** as ferramentas do conector aparecem como `mcp__plugin_<nome>_<servidor>__<ferramenta>`.
-- **Falhas:** sem acesso ao repo privado, o "Adicionar marketplace" falha; sem npm no PATH, o login pelo
-  navegador falha (a leitura com sessão salva continua funcionando).
+  1. O Claude lê `.claude-plugin/marketplace.json` e copia `connectors/<nome>/`, que só tem `plugin.json` e o
+     `.mcp.json` (P05 garante que ele aponta para um servidor remoto).
+  2. O `.mcp.json` registra o servidor `http` do Worker (`https://canvas-puc-remote.bftemponi.workers.dev/mcp`).
+     Nada é instalado nem roda no computador.
+  3. Na primeira chamada, o servidor responde 401 e o Claude abre o OAuth do P08 (Gmail: P10); a partir daí, P09
+     (Gmail: P12).
+- **Resultado:** as ferramentas aparecem como `mcp__plugin_<nome>_<servidor>__<ferramenta>`.
+- **Falhas:** sem acesso ao repositório, o "Adicionar marketplace" falha; Worker fora do ar → o conector aparece
+  como falha de conexão.
 
 ## P08 — Conectar o Canvas remoto (OAuth no claude.ai)
 
-- **Gatilho:** no claude.ai, Configurações → Conectores → Adicionar conector personalizado com
-  `https://<servidor>/mcp` (ADR 0009); ou um token vencido que obriga a reconectar.
+- **Gatilho:** a primeira chamada do plugin instalado (P07), ou no claude.ai: Configurações → Conectores →
+  Adicionar conector personalizado com `https://<servidor>/mcp` (ADR 0009); ou um token vencido que obriga a
+  reconectar.
 - **Passos:**
   1. Na subida, `startCanvasRemoteServer()` lê `readRemoteServerConfig()` (`readPublicUrl()`, `parseSealKey()`) e
      `readCanvasRemoteSettings()`, monta `canvasRemoteConnector()` e sobe `startRemoteHttpServer()` com
@@ -150,19 +136,19 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 - **Gatilho:** o Claude chama uma ferramenta em `POST /mcp` com o access token.
 - **Passos:**
   1. `handleMcp()` lê o token do Canvas com `readAccessSecret()` (`openSealed()` confere tipo e validade).
-  2. O `createServer` de `canvasRemoteConnector()` monta `createTokenAuthProvider()` e o cliente com
-     `remoteUnauthorizedMessage()`, e `createCanvasMcpServer()` registra `canvasServiceTools()` (sem as de conexão).
+  2. O `createServer` de `canvasRemoteConnector()` monta o cliente com o token, e `createCanvasMcpServer()` registra
+     `canvasTools()`.
   3. `serveMcpRequest()` atende a requisição sem sessão, em JSON, e fecha o servidor; a ferramenta segue o P03
      a partir do passo 2.
-- **Resultado:** a mesma resposta do conector local, sem navegador nem arquivo no servidor.
+- **Resultado:** a resposta da ferramenta, sem nada guardado no servidor.
 - **Falhas:** access token vencido → 401 e o Claude usa o refresh token (e o P08 passo 7 estende o token do
-  Canvas); token do Canvas vencido (mais de 30 dias sem uso, ou revogado) → `unauthorizedError()` devolve a
+  Canvas); token do Canvas vencido (mais de 30 dias sem uso, ou revogado) → `unauthorizedMessage()` devolve a
   orientação de gerar outro token e reconectar (P08).
 
 ## P10 — Conectar o Gmail remoto (OAuth do Claude com login no Google)
 
 - **Gatilho:** no claude.ai, Configurações → Conectores → Adicionar conector personalizado com
-  `https://<worker>/mcp` (ADR 0012).
+  `https://<worker>/mcp` (ADR 0014).
 - **Passos:**
   1. `handleGmailWorkerFetch()` (entrada `src/index.ts`) cria o provedor com `createGmailProvider()` para a origem
      de `publicOrigin()`; a biblioteca atende metadados, `/register` (filtrado por `checkClientRegistration()`) e

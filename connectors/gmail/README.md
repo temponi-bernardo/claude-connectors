@@ -2,7 +2,7 @@
 
 Conector MCP remoto que deixa o Claude (claude.ai, app e Cowork) **ler** duas ou mais contas Gmail. Roda no
 Cloudflare Workers **só quando chega uma requisição**: sem Containers, Cron Triggers, alarms ou polling. Estado
-no Workers KV. Decisão e alternativas em [ADR 0012](../../docs/adr/0012-gmail-remoto-sob-demanda-no-workers.md).
+no Workers KV. Decisão e alternativas em [ADR 0014](../../docs/adr/0014-gmail-remoto-sob-demanda-no-workers.md).
 
 ## Como funciona
 
@@ -80,6 +80,12 @@ Teste: `curl https://gmail-remote.<sua-conta>.workers.dev/` responde `ok`.
 
 ## 3. Adicionar no Claude
 
+**Pelo marketplace (recomendado):** no Claude, "Adicionar marketplace" com `temponi-bernardo/claude-connectors`
+e instale o plugin `gmail`. O `.mcp.json` dele aponta para `https://gmail-remote.bftemponi.workers.dev/mcp`; se o
+seu subdomínio `workers.dev` for outro, use o conector personalizado abaixo.
+
+**Como conector personalizado:**
+
 1. claude.ai → **Configurações → Conectores → Adicionar conector personalizado**.
 2. Nome: `Gmail (multi-conta)`; URL: `https://gmail-remote.<sua-conta>.workers.dev/mcp`.
 3. **Conectar** → página "Conectar Claude ao Gmail?" → **Permitir** → entre com uma conta da allowlist.
@@ -100,7 +106,7 @@ myaccount.google.com/permissions), repita o passo 4 para ela.
 
 - `npm run gmail:dev` sobe o Worker localmente (secrets em `connectors/gmail/.dev.vars`, ignorado pelo git;
   nomes em `.env.example`).
-- Testes: `npm test` (Node + Vitest, com a Gmail API e o Google simulados; ver ADR 0012 sobre o
+- Testes: `npm test` (Node + Vitest, com a Gmail API e o Google simulados; ver ADR 0014 sobre o
   `vitest-pool-workers`).
 - Fluxos detalhados: [PROCESSES.md](../../docs/PROCESSES.md) P10–P12.
 
