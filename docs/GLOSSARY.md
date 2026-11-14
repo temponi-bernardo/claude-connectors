@@ -34,6 +34,10 @@ com motivo e teste manual.
 
 **MVP** — Conjunto mínimo de fases que entrega valor real; definido no ROADMAP.md.
 
+**Tool annotations** — MCP metadata every tool must carry: a `title` and the behaviour hints (`readOnlyHint`,
+or `destructiveHint` when it writes). Built with `toolAnnotations()` and the presets of `src/mcp/annotations.ts`;
+clients ask for confirmation before destructive tools, and the Connectors Directory requires them.
+
 **Processo (P01)** — Fluxo de ponta a ponta descrito em PROCESSES.md.
 
 **Registro de funções** — Lista de funções de topo (`function nome`) encontradas no código.

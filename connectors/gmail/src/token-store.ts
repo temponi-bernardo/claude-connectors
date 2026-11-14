@@ -99,7 +99,7 @@ export function upsertAccount(
 ): LinkedAccount[] {
   const others = accounts.filter((a) => a.email !== account.email);
   if (others.length >= MAX_LINKED_ACCOUNTS) {
-    throw new Error(`Limite de ${MAX_LINKED_ACCOUNTS} contas vinculadas; desvincule uma antes.`);
+    throw new Error(`Limit of ${MAX_LINKED_ACCOUNTS} linked accounts reached; unlink one first.`);
   }
   return [...others, account];
 }

@@ -3,6 +3,11 @@
  * em mensagens (`message_ids`) ou conversas inteiras (`thread_ids`). Não existe exclusão definitiva.
  */
 import { z } from 'zod';
+import {
+  DESTRUCTIVE_HINTS,
+  ORGANIZE_HINTS,
+  toolAnnotations,
+} from '../../../src/mcp/annotations.js';
 import { defineTool } from '../../../src/mcp/tools.js';
 import type { AccountRef } from './accounts.js';
 import type { OwnerDeps } from './context.js';
@@ -19,14 +24,7 @@ import {
   type MailboxAction,
   type MailTargets,
 } from './mailbox.js';
-import {
-  CONFIRM_HINT,
-  DESTRUCTIVE_HINTS,
-  GMAIL_ID,
-  ONE_ACCOUNT,
-  ORGANIZE_HINTS,
-  resolveWritableAccount,
-} from './tools.js';
+import { CONFIRM_HINT, GMAIL_ID, ONE_ACCOUNT, resolveWritableAccount } from './tools.js';
 
 /** Alvos: mensagens e/ou conversas inteiras (ao menos um id). */
 export const TARGET_SHAPE = {
@@ -83,7 +81,7 @@ export const markReadTool = defineTool({
   name: 'mark_read',
   description: 'Mark messages or threads as read (read: false marks them unread).',
   shape: { ...TARGET_SHAPE, read: z.boolean().default(true).describe(TOGGLE_HELP) },
-  annotations: ORGANIZE_HINTS,
+  annotations: toolAnnotations('Mark as read or unread', ORGANIZE_HINTS),
   run: (deps: OwnerDeps, args) =>
     runMailboxAction(deps, args, toggleAction(args.read, 'mark_read', 'mark_unread')),
 });
@@ -94,7 +92,7 @@ export const archiveTool = defineTool({
   description:
     'Archive messages or threads: remove them from the inbox (archived: false moves them back).',
   shape: { ...TARGET_SHAPE, archived: z.boolean().default(true).describe(TOGGLE_HELP) },
-  annotations: ORGANIZE_HINTS,
+  annotations: toolAnnotations('Archive', ORGANIZE_HINTS),
   run: (deps: OwnerDeps, args) =>
     runMailboxAction(deps, args, toggleAction(args.archived, 'archive', 'unarchive')),
 });
@@ -104,7 +102,7 @@ export const starTool = defineTool({
   name: 'star',
   description: 'Star messages or threads (starred: false removes the star).',
   shape: { ...TARGET_SHAPE, starred: z.boolean().default(true).describe(TOGGLE_HELP) },
-  annotations: ORGANIZE_HINTS,
+  annotations: toolAnnotations('Star', ORGANIZE_HINTS),
   run: (deps: OwnerDeps, args) =>
     runMailboxAction(deps, args, toggleAction(args.starred, 'star', 'unstar')),
 });
@@ -118,7 +116,7 @@ export const updateLabelsTool = defineTool({
   description:
     'Add and/or remove labels (ids or names from list_labels, including system ones like IMPORTANT) on messages or threads.',
   shape: { ...TARGET_SHAPE, add_labels: LABEL_LIST, remove_labels: LABEL_LIST },
-  annotations: ORGANIZE_HINTS,
+  annotations: toolAnnotations('Update labels', ORGANIZE_HINTS),
   run: async (deps: OwnerDeps, args) => {
     const { ref, targets } = await writableTargets(deps, args);
     checkLabelChange({ add: args.add_labels, remove: args.remove_labels });
@@ -137,7 +135,7 @@ export const trashTool = defineTool({
   name: 'trash',
   description: `Move messages or threads to the trash (restorable with untrash for 30 days; there is no permanent delete). ${CONFIRM_HINT}`,
   shape: TARGET_SHAPE,
-  annotations: DESTRUCTIVE_HINTS,
+  annotations: toolAnnotations('Move to trash', DESTRUCTIVE_HINTS),
   run: async (deps: OwnerDeps, args) => {
     const { ref, targets } = await writableTargets(deps, args);
     return moveToTrash(deps, ref, { targets, restore: false });
@@ -149,7 +147,7 @@ export const untrashTool = defineTool({
   name: 'untrash',
   description: 'Restore messages or threads from the trash.',
   shape: TARGET_SHAPE,
-  annotations: ORGANIZE_HINTS,
+  annotations: toolAnnotations('Restore from trash', ORGANIZE_HINTS),
   run: async (deps: OwnerDeps, args) => {
     const { ref, targets } = await writableTargets(deps, args);
     return moveToTrash(deps, ref, { targets, restore: true });

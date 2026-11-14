@@ -78,7 +78,8 @@ Ferramentas de escrita (todas com `account` de uma conta só; nenhuma aceita `al
 
 Até 50 mensagens ou 20 conversas por chamada de organização. As ferramentas levam as **anotações MCP**:
 envio, lixeira, editar ou apagar rascunho e desvincular conta têm `destructiveHint: true` (o cliente pede
-confirmação); organizar é reversível (`destructiveHint: false`); leitura tem `readOnlyHint: true`. Respostas e
+confirmação); organizar é reversível (`destructiveHint: false`); leitura tem `readOnlyHint: true`. Toda ferramenta
+tem também um `title` em inglês (presets em `src/mcp/annotations.ts`). Respostas e
 encaminhamentos saem em texto plano (o HTML do original vira texto).
 
 `account` é o apelido (parte antes do `@`; o e-mail inteiro se duas contas repetirem) ou o próprio e-mail. O

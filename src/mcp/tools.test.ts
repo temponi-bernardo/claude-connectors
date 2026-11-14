@@ -11,11 +11,15 @@ import {
   toToolResult,
   binaryContentBlock,
 } from './tools.js';
+import { READ_ONLY_HINTS, SEND_HINTS, toolAnnotations } from './annotations.js';
+
+const echoAnnotations = toolAnnotations('Echo', READ_ONLY_HINTS);
 
 const echo = defineTool({
   name: 'eco',
   description: 'devolve o texto',
   shape: { texto: z.string() },
+  annotations: echoAnnotations,
   run: (ctx: { prefix: string }, args) => Promise.resolve(`${ctx.prefix}${args.texto}`),
 });
 
@@ -30,6 +34,7 @@ describe('defineTool', () => {
       name: 'n',
       description: 'd',
       shape: {},
+      annotations: echoAnnotations,
       run: () => Promise.resolve('ok'),
     });
     await expect(none.run(undefined, undefined)).resolves.toBe('ok');
@@ -81,12 +86,17 @@ describe('toToolResult', () => {
 });
 
 describe('registerToolSpecs', () => {
-  it('registra cada ferramenta com o shape e um handler que executa a spec', async () => {
+  it('registers each tool with its title, shape, annotations and a handler that runs the spec', async () => {
     const registerTool = vi.fn();
     registerToolSpecs({ registerTool } as unknown as McpServer, [echo], { prefix: '' });
     expect(registerTool).toHaveBeenCalledWith(
       'eco',
-      { description: 'devolve o texto', inputSchema: echo.shape },
+      {
+        title: 'Echo',
+        description: 'devolve o texto',
+        inputSchema: echo.shape,
+        annotations: echoAnnotations,
+      },
       expect.any(Function),
     );
     const handler = registerTool.mock.calls[0]![2] as (
@@ -95,15 +105,15 @@ describe('registerToolSpecs', () => {
     expect((await handler({ texto: 'z' })).content).toEqual([{ type: 'text', text: 'z' }]);
   });
 
-  it('repassa as anotações MCP quando a ferramenta tem', () => {
+  it('passes the destructive hints of a write tool through', () => {
     const registerTool = vi.fn();
-    const annotations = { readOnlyHint: false, destructiveHint: true };
+    const annotations = toolAnnotations('Send echo', SEND_HINTS);
     const send = defineTool({ ...echoDefinition(), annotations });
     expect(send.annotations).toEqual(annotations);
     registerToolSpecs({ registerTool } as unknown as McpServer, [send], { prefix: '' });
     expect(registerTool).toHaveBeenCalledWith(
       'eco',
-      { description: 'devolve o texto', inputSchema: send.shape, annotations },
+      expect.objectContaining({ title: 'Send echo', annotations }),
       expect.any(Function),
     );
   });

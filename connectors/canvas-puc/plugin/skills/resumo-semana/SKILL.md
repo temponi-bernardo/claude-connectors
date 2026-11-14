@@ -9,11 +9,11 @@ Monte um panorama curto e acionável. Só leitura: nada aqui envia ou altera alg
 
 ## Coleta
 
-1. `proximas_entregas` com `dias: 7` (ou o período que a pessoa pedir).
-2. `avisos` com `dias: 7`, de todos os cursos ativos.
-3. `notas` para ver o que foi corrigido recentemente.
-4. Se houver indício de atraso (entrega com prazo vencido e sem envio), confirme com `listar_tarefas`
-   (`filtro: "atrasadas"`) só nos cursos envolvidos.
+1. `upcoming_assignments` com `days: 7` (ou o período que a pessoa pedir).
+2. `list_announcements` com `days: 7`, de todos os cursos ativos.
+3. `get_grades` para ver o que foi corrigido recentemente.
+4. Se houver indício de atraso (entrega com prazo vencido e sem envio), confirme com `list_assignments`
+   (`filter: "overdue"`) só nos cursos envolvidos.
 
 Se a ferramenta disser que o token venceu ou não estiver conectada, sugira `/config-canvas` e pare.
 

@@ -1,5 +1,6 @@
 {
   "name": "canvas-puc",
+  "version": "3.0.0",
   "description": "Tarefas, prazos, notas, avisos, módulos e arquivos do Canvas da PUC Minas, direto da nuvem: entre com um token de acesso do Canvas na primeira vez.",
   "author": {
     "name": "Bernardo Temponi"

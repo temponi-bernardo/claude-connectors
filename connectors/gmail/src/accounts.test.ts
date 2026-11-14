@@ -36,7 +36,7 @@ describe('resolveAccounts', () => {
   it('explica os válidos ou pede link_account sem contas', () => {
     expect(() => resolveAccounts(REFS, 'x')).toThrow(/"dono", "musica", "all"/);
     expect(() => resolveAccounts([], 'all')).toThrow(/link_account/);
-    expect(noAccountsError().message).toMatch(/Nenhuma conta/);
+    expect(noAccountsError().message).toMatch(/No Gmail account/);
   });
 });
 
@@ -53,6 +53,6 @@ describe('acesso de escrita', () => {
     expect(() => {
       requireWriteAccess(old!);
     }).toThrow(writeAccessError('antiga'));
-    expect(writeAccessError('antiga').message).toMatch(/"antiga".*só para leitura.*link_account/s);
+    expect(writeAccessError('antiga').message).toMatch(/"antiga".*read-only.*link_account/s);
   });
 });

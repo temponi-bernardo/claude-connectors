@@ -10,13 +10,13 @@ import type {
   Id,
 } from './canvas-types.js';
 
-/** Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra). */
+/** Filtros de `list_assignments` → `bucket` da API do Canvas (`all` não filtra). */
 export const ASSIGNMENT_BUCKETS: Readonly<Record<string, string | undefined>> = {
-  todas: undefined,
-  futuras: 'upcoming',
-  passadas: 'past',
-  sem_entrega: 'unsubmitted',
-  atrasadas: 'overdue',
+  all: undefined,
+  upcoming: 'upcoming',
+  past: 'past',
+  unsubmitted: 'unsubmitted',
+  overdue: 'overdue',
 };
 
 /** Data/hora ISO `days` dias depois (ou antes, se negativo) de `now`. */
@@ -54,9 +54,9 @@ export function isTextFile(contentType: string, name: string): boolean {
 
 /** Item de módulo encontrado por `matchModuleItems`. */
 export interface ModuleMatch {
-  readonly modulo: string | undefined;
-  readonly titulo: string | undefined;
-  readonly tipo: string | undefined;
+  readonly module: string | undefined;
+  readonly title: string | undefined;
+  readonly type: string | undefined;
 }
 
 /** Itens de módulo cujo título contém o termo (sem diferenciar maiúsculas). */
@@ -65,7 +65,7 @@ export function matchModuleItems(modules: readonly CanvasModule[], term: string)
   return modules.flatMap((m) =>
     (m.items ?? [])
       .filter((i) => i.title?.toLowerCase().includes(q))
-      .map((i) => ({ modulo: m.name, titulo: i.title, tipo: i.type })),
+      .map((i) => ({ module: m.name, title: i.title, type: i.type })),
   );
 }
 

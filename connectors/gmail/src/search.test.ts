@@ -55,9 +55,9 @@ describe('page_token de várias contas', () => {
   });
 
   it('recusa token que não é desta busca', () => {
-    expect(() => decodeMultiPageToken('lixo')).toThrow(/page_token inválido/);
+    expect(() => decodeMultiPageToken('lixo')).toThrow(/Invalid page_token/);
     const list = Buffer.from('[1]').toString('base64url');
-    expect(() => decodeMultiPageToken(list)).toThrow(/page_token inválido/);
+    expect(() => decodeMultiPageToken(list)).toThrow(/Invalid page_token/);
   });
 
   it('pagesToFetch consulta todas na primeira página e só as pendentes depois', () => {

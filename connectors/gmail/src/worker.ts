@@ -11,6 +11,7 @@ import {
   type OAuthHelpers,
 } from '@cloudflare/workers-oauth-provider';
 import { envValue, toEnvVars } from '../../../src/core/env.js';
+import { manifestVersion } from '../../../src/mcp/server-version.js';
 import { registerToolSpecs } from '../../../src/mcp/tools.js';
 import { serveMcpRequest } from '../../../src/remote/mcp-endpoint.js';
 import {
@@ -26,6 +27,7 @@ import { messagePage } from './pages.js';
 import { isRateLimited, rateLimitedResponse, type RateLimiter } from './rate-limit.js';
 import { finishSignIn, showAuthorize, submitAuthorize, type GrantProps } from './sign-in.js';
 import { GMAIL_TOOLS } from './tool-list.js';
+import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
 
 /** Bindings e secrets do Worker (ver `wrangler.toml` e o README do conector). */
 export interface GmailWorkerEnv {
@@ -39,8 +41,11 @@ export interface GmailWorkerEnv {
   readonly [name: string]: unknown;
 }
 
-/** Nome e versão do servidor MCP. */
-export const GMAIL_SERVER_INFO = { name: 'gmail-multi', version: '0.1.0' } as const;
+/** MCP server name and version (the version comes from the plugin manifest). */
+export const GMAIL_SERVER_INFO = {
+  name: 'gmail-multi',
+  version: manifestVersion(manifest),
+} as const;
 
 /** Instruções do servidor MCP para o modelo. */
 export const GMAIL_SERVER_INSTRUCTIONS =

@@ -456,7 +456,7 @@ export function tidyPdfText(text: string): string {
 /** Extrai o texto de um PDF, página por página; lança erro se ele for cifrado. */
 export async function pdfToText(bytes: Uint8Array): Promise<string> {
   if (/\/Encrypt\b/.test(bytesToLatin1(bytes.subarray(Math.max(0, bytes.length - 4096))))) {
-    throw new Error('O PDF é protegido por senha (cifrado); não consigo ler o texto.');
+    throw new Error('The PDF is password-protected (encrypted); its text cannot be read.');
   }
   const objects = await readPdfObjects(bytes);
   const cmaps = fontCMaps(objects);

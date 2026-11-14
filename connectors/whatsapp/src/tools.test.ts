@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
+import { FALLBACK_SERVER_VERSION } from '../../../src/mcp/server-version.js';
 import { toToolResult, type ToolSpec } from '../../../src/mcp/tools.js';
+import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
 import { readWhatsAppSettings, type WhatsAppSettings } from './config.js';
 import { fakeBridge, READY_STATUS } from './fixtures/fakes.js';
 import { UNTRUSTED_NOTICE } from './format.js';
@@ -15,6 +17,7 @@ import {
   syncWaitBudget,
   toolDeadline,
   WHATSAPP_INSTRUCTIONS,
+  WHATSAPP_SERVER_INFO,
   whatsappTools,
   type WhatsAppToolContext,
 } from './tools.js';
@@ -200,6 +203,17 @@ describe('compactContact e mediaResult', () => {
   });
 });
 
+describe('annotations', () => {
+  it('gives every tool a unique title; only send_message writes, and it is destructive', () => {
+    const tools = whatsappTools({ ...SETTINGS, enableSend: true });
+    const titles = tools.map((t) => t.annotations.title);
+    expect(new Set(titles).size).toBe(tools.length);
+    const writers = tools.filter((t) => !t.annotations.readOnlyHint);
+    expect(writers.map((t) => t.name)).toEqual(['send_message']);
+    expect(writers[0]?.annotations).toMatchObject({ destructiveHint: true });
+  });
+});
+
 describe('send_message e whatsappTools', () => {
   it('só existe com ENABLE_SEND', () => {
     expect(whatsappTools(SETTINGS).map((t) => t.name)).toEqual(READ_TOOLS.map((t) => t.name));
@@ -268,7 +282,7 @@ describe('send_message e whatsappTools', () => {
       reply_to_message_id: 'X',
       confirmed_by_user: true,
     };
-    await expect(run('send_message', ctx, args)).rejects.toThrow('citada');
+    await expect(run('send_message', ctx, args)).rejects.toThrow('Quoted');
   });
 });
 
@@ -277,5 +291,12 @@ describe('createWhatsAppMcpServer', () => {
     const server = createWhatsAppMcpServer(context({}));
     expect(server.server).toBeDefined();
     expect(WHATSAPP_INSTRUCTIONS).toContain('untrusted');
+  });
+});
+
+describe('WHATSAPP_SERVER_INFO', () => {
+  it('announces the version of the plugin manifest', () => {
+    expect(WHATSAPP_SERVER_INFO.version).toBe(manifest.version);
+    expect(WHATSAPP_SERVER_INFO.version).not.toBe(FALLBACK_SERVER_VERSION);
   });
 });

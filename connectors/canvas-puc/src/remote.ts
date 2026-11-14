@@ -127,7 +127,7 @@ export async function canvasTokenApi(
     },
     ...(hasBody ? { body: JSON.stringify(request.body) } : {}),
   });
-  if (!res.ok) throw new Error(`O Canvas respondeu ${res.status} em ${request.path}.`);
+  if (!res.ok) throw new Error(`Canvas answered ${res.status} on ${request.path}.`);
   return res.json();
 }
 

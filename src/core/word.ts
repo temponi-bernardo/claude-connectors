@@ -29,7 +29,7 @@ export function docxXmlToText(xml: string): string {
 /** Extrai o texto de um .docx. */
 export async function docxToText(bytes: Uint8Array): Promise<string> {
   const xml = await readZipEntry(bytes, 'word/document.xml');
-  if (!xml) throw new Error('Arquivo .docx sem word/document.xml.');
+  if (!xml) throw new Error('.docx file without word/document.xml.');
   return docxXmlToText(new TextDecoder().decode(xml));
 }
 
@@ -54,7 +54,7 @@ export function parsePieceTable(table: Uint8Array, fcClx: number): DocPiece[] {
   const v = byteView(table);
   let pos = fcClx;
   while (table[pos] === 0x01) pos += 3 + v.getUint16(pos + 1, true);
-  if (table[pos] !== 0x02) throw new Error('Documento .doc com tabela de texto inválida.');
+  if (table[pos] !== 0x02) throw new Error('.doc document with an invalid text table.');
   const lcb = v.getUint32(pos + 1, true);
   const plc = pos + 5;
   const count = (lcb - 4) / 12;

@@ -4,6 +4,7 @@
  * conta precisa do escopo `gmail.modify` (contas antigas recebem o pedido de novo vínculo).
  */
 import { z } from 'zod';
+import { SEND_HINTS, toolAnnotations } from '../../../src/mcp/annotations.js';
 import { defineTool, type ToolSpec } from '../../../src/mcp/tools.js';
 import type { OwnerDeps } from './context.js';
 import {
@@ -13,13 +14,7 @@ import {
   prepareReply,
   sendPrepared,
 } from './send.js';
-import {
-  CONFIRM_HINT,
-  GMAIL_ID,
-  ONE_ACCOUNT,
-  resolveWritableAccount,
-  SEND_HINTS,
-} from './tools.js';
+import { CONFIRM_HINT, GMAIL_ID, ONE_ACCOUNT, resolveWritableAccount } from './tools.js';
 
 /** Maior corpo de e-mail aceito, em caracteres. */
 export const MAX_BODY_CHARS = 100_000;
@@ -48,16 +43,17 @@ export const sendEmailTool = defineTool({
     subject: SUBJECT,
     body: BODY,
   },
-  annotations: SEND_HINTS,
+  annotations: toolAnnotations('Send email', SEND_HINTS),
   run: async (deps: OwnerDeps, args) => {
     const ref = await resolveWritableAccount(deps, args.account);
     return sendPrepared(deps, ref, composeEmail(args));
   },
 });
 
-/** Variante de resposta: nome da ferramenta, se é para todos e a descrição. */
+/** Variante de resposta: nome e título da ferramenta, se é para todos e a descrição. */
 export interface ReplyToolOptions {
   readonly name: string;
+  readonly title: string;
   readonly replyAll: boolean;
   readonly description: string;
 }
@@ -72,7 +68,7 @@ export function replyTool(options: ReplyToolOptions): ToolSpec<OwnerDeps> {
       message_id: GMAIL_ID.describe('Message id to reply to (from get_thread).'),
       body: BODY,
     },
-    annotations: SEND_HINTS,
+    annotations: toolAnnotations(options.title, SEND_HINTS),
     run: async (deps: OwnerDeps, args) => {
       const ref = await resolveWritableAccount(deps, args.account);
       const request = { messageId: args.message_id, body: args.body, replyAll: options.replyAll };
@@ -84,6 +80,7 @@ export function replyTool(options: ReplyToolOptions): ToolSpec<OwnerDeps> {
 /** `reply_email`: responde ao remetente (ou ao `Reply-To`). */
 export const replyEmailTool = replyTool({
   name: 'reply_email',
+  title: 'Reply to email',
   replyAll: false,
   description: 'Reply to the sender of a message.',
 });
@@ -91,6 +88,7 @@ export const replyEmailTool = replyTool({
 /** `reply_all_email`: responde ao remetente e a todos em To e Cc, menos a própria conta. */
 export const replyAllEmailTool = replyTool({
   name: 'reply_all_email',
+  title: 'Reply to all',
   replyAll: true,
   description: 'Reply to the sender and everyone in To and Cc (except this account).',
 });
@@ -107,7 +105,7 @@ export const forwardEmailTool = defineTool({
     bcc: RECIPIENTS.default([]),
     note: BODY.default('').describe('Optional plain-text note above the forwarded message.'),
   },
-  annotations: SEND_HINTS,
+  annotations: toolAnnotations('Forward email', SEND_HINTS),
   run: async (deps: OwnerDeps, args) => {
     const ref = await resolveWritableAccount(deps, args.account);
     const request = { ...args, messageId: args.message_id };

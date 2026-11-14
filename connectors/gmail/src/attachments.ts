@@ -47,7 +47,7 @@ export async function attachmentBytesToText(bytes: Uint8Array): Promise<string> 
   if (kind === 'pdf') return pdfToText(bytes);
   if (kind === 'docx' || kind === 'doc') return wordToText(kind, bytes);
   if (kind === null) {
-    throw new Error('Tipo de anexo não suportado: só PDF, Word (.doc/.docx), HTML e texto.');
+    throw new Error('Unsupported attachment type: only PDF, Word (.doc/.docx), HTML and text.');
   }
   const text = new TextDecoder().decode(bytes);
   return kind === 'html' ? htmlToText(text) : text;
@@ -80,7 +80,7 @@ export async function readAttachmentText(
   const { size, bytes } = await downloadAttachment(deps, ref, ids);
   if (size > MAX_ATTACHMENT_BYTES) {
     throw new Error(
-      `Anexo de ${(size / 1024 / 1024).toFixed(1)} MB, acima do limite de 5 MB para leitura.`,
+      `Attachment is ${(size / 1024 / 1024).toFixed(1)} MB, above the 5 MB reading limit.`,
     );
   }
   const text = await attachmentBytesToText(bytes);
@@ -88,9 +88,6 @@ export async function readAttachmentText(
     account: ref.alias,
     message_id: ids.messageId,
     size,
-    text: truncateText(
-      text || '(sem texto extraível: talvez seja um PDF escaneado)',
-      MAX_ATTACHMENT_CHARS,
-    ),
+    text: truncateText(text || '(no extractable text: maybe a scanned PDF)', MAX_ATTACHMENT_CHARS),
   };
 }

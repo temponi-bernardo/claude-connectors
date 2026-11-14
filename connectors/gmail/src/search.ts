@@ -35,14 +35,14 @@ export function decodeMultiPageToken(token: string): MultiPageToken {
   try {
     const value: unknown = JSON.parse(Buffer.from(token, 'base64url').toString('utf8'));
     if (typeof value !== 'object' || value === null || Array.isArray(value))
-      throw new Error('formato');
+      throw new Error('format');
     const entries = Object.entries(value).filter(
       (entry): entry is [string, string] => typeof entry[1] === 'string',
     );
     return Object.fromEntries(entries);
   } catch {
     throw new Error(
-      'page_token inválido: use o next_page_token devolvido pela busca anterior com account "all".',
+      'Invalid page_token: use the next_page_token returned by the previous search with account "all".',
     );
   }
 }

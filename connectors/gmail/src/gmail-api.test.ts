@@ -54,7 +54,7 @@ describe('gmailUrl', () => {
 describe('gmailHttpError', () => {
   it('traduz status conhecidos e genéricos', () => {
     expect(gmailHttpError(404, 'dono').message).toBe(
-      'Conta "dono": não encontrado (id errado ou de outra conta).',
+      'Account "dono": not found (wrong id or from another account).',
     );
     expect(gmailHttpError(500, 'dono').message).toMatch(/HTTP 500/);
     expect(gmailHttpError(403, 'dono').message).toMatch(/link_account/);
@@ -62,7 +62,7 @@ describe('gmailHttpError', () => {
 
   it('acrescenta o detalhe do Gmail quando houver', () => {
     expect(gmailHttpError(400, 'dono', 'Invalid To header').message).toBe(
-      'Conta "dono": o Gmail recusou o pedido (confira ids, busca e destinatários): Invalid To header.',
+      'Account "dono": Gmail rejected the request (check ids, query and recipients): Invalid To header.',
     );
   });
 });
@@ -113,7 +113,7 @@ describe('gmailGet', () => {
 
   it('falha HTTP vira erro acionável', async () => {
     const deps = await linkedDeps([gmailRoute({})]);
-    await expect(gmailGet(deps, OWNER, gmailUrl('messages/zz'))).rejects.toThrow(/não encontrado/);
+    await expect(gmailGet(deps, OWNER, gmailUrl('messages/zz'))).rejects.toThrow(/not found/);
   });
 
   it('sendGmailRequest usa o token dado', async () => {
@@ -149,7 +149,7 @@ describe('gmailCall e gmailWrite', () => {
     const deps = await linkedDeps([], calls);
     const old = { ...OWNER, account: { ...OWNER.account, scope: READONLY_SCOPE } };
     const request = { url: gmailUrl('messages/send'), method: 'POST' as const, body: {} };
-    await expect(gmailWrite(deps, old, request)).rejects.toThrow(/só para leitura/);
+    await expect(gmailWrite(deps, old, request)).rejects.toThrow(/read-only/);
     expect(calls).toHaveLength(0);
   });
 });

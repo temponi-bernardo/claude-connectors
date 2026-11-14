@@ -108,7 +108,7 @@ describe('pdfToText', () => {
 
   it('recusa PDF cifrado', async () => {
     const pdf = buildPdf([[1, '<< /Type /Catalog >>']], '/Encrypt 5 0 R');
-    await expect(pdfToText(pdf)).rejects.toThrow(/senha/);
+    await expect(pdfToText(pdf)).rejects.toThrow(/password/);
   });
 
   it('devolve vazio quando não há páginas', async () => {

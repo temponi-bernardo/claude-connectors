@@ -1,5 +1,6 @@
 {
   "name": "whatsapp",
+  "version": "1.0.0",
   "description": "WhatsApp pessoal no Claude: skills de configuração e uso. Cada pessoa conecta o próprio servidor no Cloudflare (self-host) como conector personalizado.",
   "author": {
     "name": "Bernardo Temponi"

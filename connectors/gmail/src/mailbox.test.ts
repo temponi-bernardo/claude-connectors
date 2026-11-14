@@ -42,7 +42,7 @@ describe('decisões puras', () => {
   it('mailTargets exige ao menos um id', () => {
     expect(mailTargets(['m1'], undefined)).toEqual({ messageIds: ['m1'], threadIds: [] });
     expect(mailTargets(undefined, ['t1'])).toEqual({ messageIds: [], threadIds: ['t1'] });
-    expect(() => mailTargets([], undefined)).toThrow(/message_ids ou thread_ids/);
+    expect(() => mailTargets([], undefined)).toThrow(/message_ids or thread_ids/);
   });
 
   it('checkLabelChange exige algum marcador e recusa o mesmo nos dois lados', () => {
@@ -51,7 +51,7 @@ describe('decisões puras', () => {
     }).not.toThrow();
     expect(() => {
       checkLabelChange({ add: [], remove: [] });
-    }).toThrow(/ao menos um/);
+    }).toThrow(/at least one/);
     expect(() => {
       checkLabelChange({ add: ['A'], remove: ['A'] });
     }).toThrow(/"A"/);
@@ -146,9 +146,7 @@ describe('efeitos', () => {
     const deps = await linkedTestDeps([gmailWriteRoute(writes)]);
     const old = { ...OWNER, account: { ...OWNER.account, scope: READONLY_SCOPE } };
     const targets = { messageIds: ['m1'], threadIds: [] };
-    await expect(moveToTrash(deps, old, { targets, restore: false })).rejects.toThrow(
-      /só para leitura/,
-    );
+    await expect(moveToTrash(deps, old, { targets, restore: false })).rejects.toThrow(/read-only/);
     expect(writes).toHaveLength(0);
   });
 });

@@ -2,13 +2,18 @@
  * Conjunto de ferramentas do conector Canvas: leitura, e escrita quando permitida.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { manifestVersion } from '../../../src/mcp/server-version.js';
 import { registerToolSpecs, type ToolSpec } from '../../../src/mcp/tools.js';
 import type { CanvasContext } from './context.js';
 import { CANVAS_READ_TOOLS } from './tools-read.js';
 import { CANVAS_WRITE_TOOLS } from './tools-write.js';
+import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
 
-/** Nome e versão anunciados pelo servidor MCP do Canvas. */
-export const CANVAS_SERVER_INFO = { name: 'canvas-puc', version: '2.0.0' } as const;
+/** MCP server name and version (the version comes from the plugin manifest). */
+export const CANVAS_SERVER_INFO = {
+  name: 'canvas-puc',
+  version: manifestVersion(manifest),
+} as const;
 
 /** Seleciona as ferramentas: leitura sempre, e escrita com `allowWrite`. */
 export function canvasTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[] {

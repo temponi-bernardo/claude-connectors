@@ -71,7 +71,7 @@ export function parseAddressList(text: string): MailAddress[] {
 export function parseRecipients(items: readonly string[], field: string): MailAddress[] {
   return items.flatMap(splitAddressList).map((item) => {
     const address = parseMailAddress(item);
-    if (!address) throw new Error(`Endereço inválido em ${field}: "${item}".`);
+    if (!address) throw new Error(`Invalid address in ${field}: "${item}".`);
     return address;
   });
 }
