@@ -23905,12 +23905,16 @@ var CANVAS_WRITE_TOOLS = [
 var plugin_default = {
   name: "canvas-puc",
   version: "3.0.0",
-  description: "Tarefas, prazos, notas, avisos, m\xF3dulos e arquivos do Canvas da PUC Minas, direto da nuvem: entre com um token de acesso do Canvas na primeira vez.",
+  description: "Assignments, deadlines, grades, announcements, modules and files from PUC Minas Canvas, straight from the cloud: sign in with a Canvas access token the first time.",
   author: {
-    name: "Bernardo Temponi"
+    name: "Bernardo Temponi",
+    url: "https://github.com/temponi-bernardo"
   },
   homepage: "https://temponi-bernardo.github.io/claude-connectors/",
-  repository: "https://github.com/temponi-bernardo/claude-connectors"
+  repository: "https://github.com/temponi-bernardo/claude-connectors",
+  license: "MIT",
+  keywords: ["canvas", "lms", "puc-minas", "education", "assignments", "grades"],
+  privacyPolicyUrl: "https://temponi-bernardo.github.io/claude-connectors/privacidade.html"
 };
 
 // connectors/canvas-puc/src/tools.ts
