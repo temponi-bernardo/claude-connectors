@@ -14703,58 +14703,27 @@ function parseNextLink(linkHeader) {
   return next?.match(/<([^>]+)>/)?.[1] ?? null;
 }
 
-// connectors/canvas-puc/src/session.ts
-function cookieHeader(session) {
-  return session.cookies.map((c) => `${c.name}=${c.value}`).join("; ");
-}
-function csrfToken(session) {
-  const cookie = session.cookies.find((c) => c.name === "_csrf_token");
-  return cookie ? decodeURIComponent(cookie.value) : null;
-}
-
-// connectors/canvas-puc/src/auth.ts
-function authHeaders(auth, method) {
-  if (auth.kind === "token") return { Authorization: `Bearer ${auth.token}` };
-  const headers = { Cookie: cookieHeader(auth.session) };
-  const csrf = csrfToken(auth.session);
-  if (method !== "GET" && csrf) headers["X-CSRF-Token"] = csrf;
-  return headers;
-}
-
 // connectors/canvas-puc/src/client.ts
 var CANVAS_PAGE_SIZE = 100;
 var DEFAULT_MAX_ITEMS = 200;
-function unauthorizedMessage(auth, baseUrl) {
-  if (!auth)
-    return "O Canvas n\xE3o est\xE1 conectado. Use a ferramenta `conectar_canvas` para fazer login.";
-  if (auth.kind === "session") {
-    return "A sess\xE3o do Canvas expirou e o login n\xE3o foi conclu\xEDdo. Use `conectar_canvas` para entrar de novo.";
-  }
-  return `O token do Canvas expirou ou \xE9 inv\xE1lido. Use \`conectar_canvas\` para entrar pelo navegador, ou gere outro token em ${baseUrl}/profile/settings.`;
+function unauthorizedMessage(baseUrl) {
+  return `O Canvas recusou o token (vencido ou revogado). Gere outro em ${baseUrl}/profile/settings e reconecte o conector nas configura\xE7\xF5es do Claude.`;
 }
-function sendCanvasRequest(deps, req, auth) {
+function sendCanvasRequest(deps, req) {
   const hasBody = req.body !== void 0;
   return deps.fetchFn(buildUrl(`${deps.baseUrl}/api/v1`, req.path, req.params), {
     method: req.method,
     headers: {
-      ...authHeaders(auth, req.method),
+      Authorization: `Bearer ${deps.token}`,
       Accept: "application/json",
       ...hasBody ? { "Content-Type": "application/json" } : {}
     },
     ...hasBody ? { body: JSON.stringify(req.body) } : {}
   });
 }
-function unauthorizedError(deps, auth) {
-  return new Error((deps.describeUnauthorized ?? unauthorizedMessage)(auth, deps.baseUrl));
-}
-async function requestWithRenewal(deps, req) {
-  let auth = deps.auth.current();
-  let res = auth ? await sendCanvasRequest(deps, req, auth) : null;
-  if (!res || res.status === 401) {
-    auth = await deps.auth.renew();
-    res = auth ? await sendCanvasRequest(deps, req, auth) : null;
-  }
-  if (!res || res.status === 401) throw unauthorizedError(deps, auth);
+async function requestCanvas(deps, req) {
+  const res = await sendCanvasRequest(deps, req);
+  if (res.status === 401) throw new Error(unauthorizedMessage(deps.baseUrl));
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Canvas ${res.status} em ${req.method} ${req.path}: ${text.slice(0, 300)}`);
@@ -14765,7 +14734,7 @@ async function collectPages(deps, first, max) {
   const items = [];
   let req = first;
   while (req && items.length < max) {
-    const res = await requestWithRenewal(deps, req);
+    const res = await requestCanvas(deps, req);
     const data = await res.json();
     items.push(...Array.isArray(data) ? data : [data]);
     const next = parseNextLink(res.headers.get("link"));
@@ -14787,20 +14756,17 @@ async function fetchFileBytes(fetchFn, url) {
 function createCanvasClient(deps) {
   return {
     baseUrl: deps.baseUrl,
-    get: async (path, params = {}) => await (await requestWithRenewal(deps, { method: "GET", path, params })).json(),
+    get: async (path, params = {}) => await (await requestCanvas(deps, { method: "GET", path, params })).json(),
     getAll: (path, params = {}, max = DEFAULT_MAX_ITEMS) => collectPages(
       deps,
       { method: "GET", path, params: { per_page: CANVAS_PAGE_SIZE, ...params } },
       max
     ),
-    post: async (path, body) => await (await requestWithRenewal(deps, { method: "POST", path, body })).json(),
+    post: async (path, body) => await (await requestCanvas(deps, { method: "POST", path, body })).json(),
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url)
   };
 }
-
-// connectors/canvas-puc/src/config.ts
-var DEFAULT_CANVAS_URL = "https://pucminas.instructure.com";
 
 // node_modules/zod/v3/external.js
 var external_exports = {};
@@ -23831,31 +23797,8 @@ var CANVAS_WRITE_TOOLS = [
 ];
 
 // connectors/canvas-puc/src/tools.ts
-var CANVAS_ACCOUNT_TOOLS = [
-  defineTool({
-    name: "conectar_canvas",
-    description: "Abre uma janela do navegador para o usu\xE1rio fazer login no Canvas. A sess\xE3o fica salva e \xE9 renovada sozinha. Use se o Canvas n\xE3o estiver conectado ou a sess\xE3o tiver expirado.",
-    shape: {},
-    run: async ({ client, auth }) => {
-      const session = await auth.connect();
-      const profile = await client.get("/users/self/profile");
-      return `Conectado ao Canvas como ${String(profile.name)} (${String(session.cookies.length)} cookies salvos).`;
-    }
-  }),
-  defineTool({
-    name: "desconectar_canvas",
-    description: "Apaga a sess\xE3o do Canvas salva neste computador.",
-    shape: {},
-    run: ({ auth }) => {
-      auth.disconnect();
-      return Promise.resolve(
-        "Sess\xE3o do Canvas apagada. Use `conectar_canvas` para entrar de novo."
-      );
-    }
-  })
-];
-var CANVAS_SERVER_INFO = { name: "canvas-puc", version: "1.3.0" };
-function canvasServiceTools(allowWrite) {
+var CANVAS_SERVER_INFO = { name: "canvas-puc", version: "2.0.0" };
+function canvasTools(allowWrite) {
   return [...CANVAS_READ_TOOLS, ...allowWrite ? CANVAS_WRITE_TOOLS : []];
 }
 function createCanvasMcpServer(specs, ctx) {
@@ -23865,6 +23808,7 @@ function createCanvasMcpServer(specs, ctx) {
 }
 
 // connectors/canvas-puc/src/remote.ts
+var DEFAULT_CANVAS_URL = "https://pucminas.instructure.com";
 var CANVAS_USER_AGENT = "claude-connectors-canvas-puc (+https://github.com/temponi-bernardo/claude-connectors)";
 function withCanvasUserAgent(init) {
   const headers = Object.fromEntries(new Headers(init?.headers).entries());
@@ -23887,17 +23831,6 @@ function canvasLoginText(baseUrl) {
     helpUrl: `${baseUrl}/profile/settings`,
     helpLabel: "Abrir a p\xE1gina de tokens do Canvas",
     submit: "Conectar"
-  };
-}
-function remoteUnauthorizedMessage(_auth, baseUrl) {
-  return `O Canvas recusou o token (vencido ou revogado). Gere outro em ${baseUrl}/profile/settings e reconecte o conector nas configura\xE7\xF5es do Claude.`;
-}
-function createTokenAuthProvider(token) {
-  return {
-    current: () => ({ kind: "token", token }),
-    renew: () => Promise.resolve(null),
-    connect: () => Promise.reject(new Error("No conector remoto, reconecte pelas configura\xE7\xF5es do Claude.")),
-    disconnect: () => void 0
   };
 }
 async function verifyCanvasToken(settings, token) {
@@ -23959,16 +23892,13 @@ function canvasRemoteConnector(settings) {
     verifySecret: (secret) => verifyCanvasToken(settings, secret),
     renewSecret: (secret) => renewCanvasToken(settings, secret, /* @__PURE__ */ new Date()),
     createServer: (secret) => {
-      const auth = createTokenAuthProvider(secret);
       const client = createCanvasClient({
         baseUrl: settings.baseUrl,
-        auth,
-        fetchFn: settings.fetchFn,
-        describeUnauthorized: remoteUnauthorizedMessage
+        token: secret,
+        fetchFn: settings.fetchFn
       });
-      return createCanvasMcpServer(canvasServiceTools(settings.allowWrite), {
+      return createCanvasMcpServer(canvasTools(settings.allowWrite), {
         client,
-        auth,
         now: () => /* @__PURE__ */ new Date()
       });
     }

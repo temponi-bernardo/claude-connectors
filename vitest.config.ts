@@ -17,10 +17,8 @@ export default defineConfig({
         '**/*.test.ts',
         'tools/**/cli.ts',
         'tools/**/fixtures/**',
-        // Pontos de entrada e automação de navegador: exceções em src/test-exceptions.ts
-        'connectors/*/src/main.ts',
+        // Ponto de entrada do servidor Node: exceção em src/test-exceptions.ts
         'connectors/*/src/remote-main.ts',
-        'connectors/*/src/browser-login.ts',
       ],
       thresholds: { lines: 90, functions: 90, branches: 90, statements: 90 },
       reporter: ['text', 'lcov'],

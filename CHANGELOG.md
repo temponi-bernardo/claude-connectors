@@ -6,6 +6,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ## [Não lançado]
 
+### Alterado
+
+- Canvas (v2.0.0): o conector roda só na nuvem. O plugin do marketplace aponta para o servidor remoto
+  (`https://canvas-puc-remote.bftemponi.workers.dev/mcp`) e o login é pela página de OAuth, colando o token
+  do Canvas uma vez. Funciona igual no claude.ai, no Cowork, no celular e no Claude Code (ADR 0012).
+- `npm run pack`/`pack:all` viraram `npm run build`: valida que o `.mcp.json` de cada conector é remoto
+  (`http` com `https://`) e gera o `server/remote.js` usado pelo Dockerfile.
+
 ### Adicionado
 
 - Canvas: o plugin agora funciona nas sessões do Claude Code na nuvem. O `.mcp.json` liga
@@ -39,4 +47,7 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Removido
 
+- Canvas: toda a parte local. Saíram o servidor stdio (`server/index.js`), a extensão `.mcpb`, o login pelo
+  navegador (`playwright-core`, sessão em `~/.canvas-puc/`) e as ferramentas `conectar_canvas` e
+  `desconectar_canvas`. Também saiu o formulário de configuração do plugin.
 - GitHub Actions (CI, CodeQL, release-please em workflow): checagens e release rodam localmente, sem custo.

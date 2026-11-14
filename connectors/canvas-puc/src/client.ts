@@ -1,8 +1,7 @@
 /**
- * Cliente HTTP da API REST do Canvas: autenticação, renovação automática em 401 e paginação.
+ * Cliente HTTP da API REST do Canvas: autenticação por token (Bearer) e paginação.
  */
 import { buildUrl, parseNextLink, type QueryParams } from '../../../src/core/http.js';
-import { authHeaders, type AuthProvider, type CanvasAuth } from './auth.js';
 
 /** Itens por página pedidos ao Canvas (máximo aceito pela API). */
 export const CANVAS_PAGE_SIZE = 100;
@@ -21,10 +20,9 @@ export interface CanvasRequest {
 /** Dependências do cliente. */
 export interface ClientDeps {
   readonly baseUrl: string;
-  readonly auth: AuthProvider;
+  /** Token de acesso do Canvas que o usuário colou na página do OAuth. */
+  readonly token: string;
   readonly fetchFn: typeof fetch;
-  /** Mensagem de 401 (padrão: `unauthorizedMessage`); o modo remoto troca para orientar a reconexão. */
-  readonly describeUnauthorized?: (auth: CanvasAuth | null, baseUrl: string) => string;
 }
 
 /** Operações usadas pelas ferramentas. */
@@ -37,27 +35,18 @@ export interface CanvasClient {
   readonly fetchBytes: (url: string) => Promise<Uint8Array>;
 }
 
-/** Mensagem para 401 (ou sem credencial), conforme a credencial usada. */
-export function unauthorizedMessage(auth: CanvasAuth | null, baseUrl: string): string {
-  if (!auth)
-    return 'O Canvas não está conectado. Use a ferramenta `conectar_canvas` para fazer login.';
-  if (auth.kind === 'session') {
-    return 'A sessão do Canvas expirou e o login não foi concluído. Use `conectar_canvas` para entrar de novo.';
-  }
-  return `O token do Canvas expirou ou é inválido. Use \`conectar_canvas\` para entrar pelo navegador, ou gere outro token em ${baseUrl}/profile/settings.`;
+/** Mensagem de 401: o token venceu ou foi revogado; orienta a gerar outro e reconectar. */
+export function unauthorizedMessage(baseUrl: string): string {
+  return `O Canvas recusou o token (vencido ou revogado). Gere outro em ${baseUrl}/profile/settings e reconecte o conector nas configurações do Claude.`;
 }
 
-/** Envia uma requisição com a credencial dada (sem tratar o status). */
-export function sendCanvasRequest(
-  deps: ClientDeps,
-  req: CanvasRequest,
-  auth: CanvasAuth,
-): Promise<Response> {
+/** Envia uma requisição com o token (sem tratar o status). */
+export function sendCanvasRequest(deps: ClientDeps, req: CanvasRequest): Promise<Response> {
   const hasBody = req.body !== undefined;
   return deps.fetchFn(buildUrl(`${deps.baseUrl}/api/v1`, req.path, req.params), {
     method: req.method,
     headers: {
-      ...authHeaders(auth, req.method),
+      Authorization: `Bearer ${deps.token}`,
       Accept: 'application/json',
       ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
     },
@@ -65,20 +54,10 @@ export function sendCanvasRequest(
   });
 }
 
-/** Erro de 401 com a mensagem injetada nas dependências, ou a padrão (`unauthorizedMessage`). */
-export function unauthorizedError(deps: ClientDeps, auth: CanvasAuth | null): Error {
-  return new Error((deps.describeUnauthorized ?? unauthorizedMessage)(auth, deps.baseUrl));
-}
-
-/** Envia a requisição; em 401 (ou sem credencial) renova uma vez e repete. Lança erro se não der certo. */
-export async function requestWithRenewal(deps: ClientDeps, req: CanvasRequest): Promise<Response> {
-  let auth = deps.auth.current();
-  let res = auth ? await sendCanvasRequest(deps, req, auth) : null;
-  if (!res || res.status === 401) {
-    auth = await deps.auth.renew();
-    res = auth ? await sendCanvasRequest(deps, req, auth) : null;
-  }
-  if (!res || res.status === 401) throw unauthorizedError(deps, auth);
+/** Envia a requisição e lança erro em 401 (token recusado) ou em qualquer status fora de 2xx. */
+export async function requestCanvas(deps: ClientDeps, req: CanvasRequest): Promise<Response> {
+  const res = await sendCanvasRequest(deps, req);
+  if (res.status === 401) throw new Error(unauthorizedMessage(deps.baseUrl));
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(`Canvas ${res.status} em ${req.method} ${req.path}: ${text.slice(0, 300)}`);
@@ -95,7 +74,7 @@ export async function collectPages<T>(
   const items: T[] = [];
   let req: CanvasRequest | null = first;
   while (req && items.length < max) {
-    const res = await requestWithRenewal(deps, req);
+    const res = await requestCanvas(deps, req);
     const data = (await res.json()) as T | T[];
     items.push(...(Array.isArray(data) ? data : [data]));
     const next = parseNextLink(res.headers.get('link'));
@@ -126,7 +105,7 @@ export function createCanvasClient(deps: ClientDeps): CanvasClient {
   return {
     baseUrl: deps.baseUrl,
     get: async <T>(path: string, params: QueryParams = {}) =>
-      (await (await requestWithRenewal(deps, { method: 'GET', path, params })).json()) as T,
+      (await (await requestCanvas(deps, { method: 'GET', path, params })).json()) as T,
     getAll: <T>(path: string, params: QueryParams = {}, max = DEFAULT_MAX_ITEMS) =>
       collectPages<T>(
         deps,
@@ -134,7 +113,7 @@ export function createCanvasClient(deps: ClientDeps): CanvasClient {
         max,
       ),
     post: async <T>(path: string, body: unknown) =>
-      (await (await requestWithRenewal(deps, { method: 'POST', path, body })).json()) as T,
+      (await (await requestCanvas(deps, { method: 'POST', path, body })).json()) as T,
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
   };

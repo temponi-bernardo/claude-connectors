@@ -1,5 +1,5 @@
 # Conector Canvas remoto (ADR 0009): servidor HTTP com OAuth e endpoint /mcp.
-# Usa só o bundle versionado server/remote.js (gerado por `npm run pack`); nenhuma dependência a instalar.
+# Usa só o bundle versionado server/remote.js (gerado por `npm run build`); nenhuma dependência a instalar.
 # Build a partir desta pasta: docker build -t canvas-puc-remote connectors/canvas-puc
 FROM node:22-alpine
 WORKDIR /app
