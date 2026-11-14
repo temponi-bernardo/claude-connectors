@@ -1,6 +1,6 @@
 {
   "name": "gmail",
-  "description": "Gmail de várias contas, só leitura, direto da nuvem: busca, conversas, rótulos e texto de anexos. Entre com o Google na primeira vez; peça ao Claude um link para vincular mais contas.",
+  "description": "Gmail de várias contas, direto da nuvem: busca, leitura, texto de anexos, envio, respostas, encaminhamento, rascunhos, marcadores, arquivo e lixeira (sem exclusão definitiva). O Claude pede confirmação antes de enviar ou apagar. Entre com o Google na primeira vez; peça ao Claude um link para vincular mais contas.",
   "author": {
     "name": "Bernardo Temponi"
   },

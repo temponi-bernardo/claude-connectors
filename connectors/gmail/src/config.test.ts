@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  GMAIL_SCOPES,
+  hasModifyScope,
   isEmailAddress,
   isEmailAllowed,
   parseAllowedEmails,
@@ -69,5 +71,22 @@ describe('isEmailAllowed', () => {
     const restricted = { ...TEST_SETTINGS, allowedEmails: ['dono@example.com'] };
     expect(isEmailAllowed(restricted, 'DONO@example.com')).toBe(true);
     expect(isEmailAllowed(restricted, 'outro@example.com')).toBe(false);
+  });
+});
+
+describe('escopos', () => {
+  it('pede só identidade e gmail.modify (sem readonly nem exclusão definitiva)', () => {
+    expect(GMAIL_SCOPES).toEqual([
+      'openid',
+      'email',
+      'https://www.googleapis.com/auth/gmail.modify',
+    ]);
+  });
+
+  it('hasModifyScope reconhece gmail.modify e recusa os outros', () => {
+    expect(hasModifyScope('openid email https://www.googleapis.com/auth/gmail.modify')).toBe(true);
+    expect(hasModifyScope('openid https://www.googleapis.com/auth/gmail.readonly')).toBe(false);
+    expect(hasModifyScope('https://www.googleapis.com/auth/gmail.modify.extra')).toBe(false);
+    expect(hasModifyScope('')).toBe(false);
   });
 });

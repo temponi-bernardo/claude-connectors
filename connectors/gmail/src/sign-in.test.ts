@@ -34,7 +34,7 @@ const AUTH: AuthRequest = {
   state: 'claude-state',
 };
 const EXP = { exp: 1_700_000_000 + 600 };
-const GMAIL_SCOPE = 'openid email https://www.googleapis.com/auth/gmail.readonly';
+const GMAIL_SCOPE = 'openid email https://www.googleapis.com/auth/gmail.modify';
 const PRIVATE = { ...TEST_SETTINGS, allowedEmails: ['dono@example.com'] };
 
 /** `OAuthHelpers` falso que registra o que recebe e devolve valores fixos. */
@@ -109,7 +109,7 @@ describe('authorizationErrorResponse', () => {
 });
 
 describe('beginGoogleSignIn', () => {
-  it('guarda verificador e nonce na transação e pede Gmail só leitura com acesso offline', async () => {
+  it('guarda verificador e nonce na transação e pede gerenciar o Gmail com acesso offline', async () => {
     const { oauth, seen } = fakeOAuth();
     const response = await beginGoogleSignIn(testDeps(fakeFetch([])), oauth, {
       request: AUTH,

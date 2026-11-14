@@ -6,7 +6,7 @@ description: Configura o conector Gmail passo a passo — confere a conexão, mo
 # Configurar o Gmail
 
 Conduza a pessoa por estes passos, em português, um de cada vez, esperando a resposta dela antes de seguir.
-O conector é só leitura: nada aqui envia, apaga ou altera e-mails.
+Nada aqui envia, apaga ou altera e-mails: a configuração só mexe nos vínculos e faz um teste de leitura.
 
 Todo endereço vai como link clicável. Rodando no computador da pessoa (Claude Code, por exemplo), pergunte se
 ela quer que você abra a página no navegador e, com o "sim", use `open`, `start` ou `xdg-open` conforme o
@@ -22,7 +22,7 @@ Chame a ferramenta `list_accounts` do conector `gmail`.
   2. Entre com a conta Google principal.
   3. Se aparecer **"O Google não verificou este app"**, clique em **Avançado → continuar**. É esperado: o app
      ainda não passou pela verificação do Google.
-  4. Autorize a leitura do Gmail e volte aqui.
+  4. Autorize o acesso ao Gmail (ler, enviar e organizar e-mails) e volte aqui.
 
   Peça para avisar quando terminar e chame `list_accounts` de novo. Não siga sem a conexão funcionando.
 
@@ -30,8 +30,11 @@ Chame a ferramenta `list_accounts` do conector `gmail`.
 
 ## 2. Contas vinculadas
 
-Mostre as contas que `list_accounts` devolveu numa lista curta (endereço e se o acesso está funcionando). Se
-alguma conta estiver com o acesso quebrado, diga que dá para desvincular e vincular de novo.
+Mostre as contas que `list_accounts` devolveu numa lista curta (endereço, se o acesso está funcionando e se pode
+enviar e organizar). Se alguma conta estiver com o acesso quebrado, diga que dá para desvincular e vincular de
+novo. Se alguma tiver `write_access: false`, ela foi vinculada quando o conector só lia: explique que ela continua
+lendo, mas para enviar, responder ou organizar é preciso vinculá-la de novo (passo 3, entrando com a mesma conta).
+Vincular de novo substitui o acesso antigo; não precisa desvincular antes.
 
 Pergunte o que a pessoa quer fazer:
 

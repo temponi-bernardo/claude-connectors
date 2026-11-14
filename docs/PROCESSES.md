@@ -160,7 +160,7 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
      lembrado, vai direto a `beginGoogleSignIn()`.
   3. `POST /authorize`: `submitAuthorize()` nega (volta ao Claude com `access_denied`) ou aprova e chama
      `beginGoogleSignIn()`, que guarda verificador PKCE e `nonce` na transação e redireciona com
-     `googleAuthorizeUrl()` (`openid email gmail.readonly`, acesso offline).
+     `googleAuthorizeUrl()` (`openid email gmail.modify`, acesso offline).
   4. `GET /google/callback` sem prefixo `link.`: `finishSignIn()` recupera a transação; `completeSignIn()` troca o
      código com `exchangeGoogleCode()`, valida o `id_token` com `verifyGoogleIdToken()`, confere
      `isEmailAllowed()` (só barra no modo privado) e `linkSignedInAccount()` já vincula a conta do login
@@ -185,7 +185,7 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
   3. Na volta, `finishAccountLink()` pega o pedido com `takeLinkRequest()` (uso único, cookie conferido por
      `readCookie()` e `sha256Hex()`).
   4. `linkSafely()` roda `linkFromCode()`, que troca o código, valida o `id_token`, confere `linkRefusalReason()`
-     (escopo do Gmail e refresh token) e grava com `storeGoogleAccount()` (`upsertAccount()`,
+     (escopo `gmail.modify` com `hasModifyScope()` e refresh token) e grava com `storeGoogleAccount()` (`upsertAccount()`,
      `saveOwnerAccounts()`, selo de `sealOwnerAccounts()`) no usuário do ticket.
 - **Resultado:** página "Conta vinculada"; o cookie é apagado com `linkCookie()`.
 - **Falhas:** link vencido, já usado ou de outro navegador → `invalidTicketPage()`; recusa no Google → "Vínculo
@@ -200,17 +200,20 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
      responde sem sessão.
   2. A ferramenta lê as contas do usuário com `ownerRefs()` (`loadOwnerAccounts()`, `openOwnerAccounts()`,
      `aliasAccounts()`) e resolve `account` com `resolveOwnerAccounts()` ou `resolveSingleAccount()`.
-  3. `gmailGet()` pega o access token com `getAccessToken()` (memória por `accessTokenKey()` ou
-     `renewAccessToken()`), chama a Gmail API com `gmailUrl()` e, depois de 401, tenta de novo uma vez.
+  3. `gmailGet()` → `gmailCall()` pega o access token com `getAccessToken()` (memória por `accessTokenKey()` ou
+     `renewAccessToken()`), chama a Gmail API com `gmailUrl()` e `sendGmailRequest()`, lê com `readGmailJson()`
+     e, depois de 401, tenta de novo uma vez.
   4. As respostas viram objetos enxutos: `searchThreads()` (`searchAccount()`, `summarizeThread()`, página
      combinada com `encodeMultiPageToken()`), `formatThread()`/`formatMessage()` (`messageBodyText()`,
-     `truncateText()`), `accountLabels()`, `accountStatus()` ou `readAttachmentText()`
-     (`attachmentBytesToText()` → `pdfToText()`, `wordToText()` ou `htmlToText()`); `withUntrustedNotice()` põe o
+     `truncateText()`), `accountLabels()` (`fetchLabels()`), `accountStatus()` (`accountBase()` mostra `write_access`) ou
+     `readAttachmentText()` (`downloadAttachment()`,
+     `attachmentBytesToText()` → `pdfToText()`, `wordToText()` ou `htmlToText()`); `withUntrustedNotice()` põe o
      aviso de conteúdo não confiável. `unlink_account` usa `revokeGoogleToken()` e `saveOwnerAccounts()`.
 - **Resultado:** texto JSON enxuto, limitado em tamanho, com o apelido da conta em cada item; só as contas do
   próprio usuário.
 - **Falhas:** nenhuma conta → `noAccountsError()`; conta revogada → `relinkError()` (pede `link_account`);
-  `invalid_grant` marca a conta com `markAccountRevoked()`; erro HTTP do Gmail → `gmailHttpError()`; mais de 120
+  `invalid_grant` marca a conta com `markAccountRevoked()`; erro HTTP do Gmail → `gmailHttpError()` (com
+  `gmailErrorDetail()`); mais de 120
   req/min → 429 (`rateLimitedResponse()`); anexo acima de 5 MB ou tipo não suportado → erro explicando o limite.
 
 ## P13 — Conectar o WhatsApp remoto (OAuth com login do dono pelo GitHub)
@@ -307,3 +310,36 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
   allowlist, se definida), cada um confirmado pelo dono; com cron, histórico em dia mesmo sem uso.
 - **Falhas:** destinatário inválido ou fora da lista → recusa sem chamar a ponte; mensagem citada desconhecida →
   `quoted_not_found` sem gastar a cota; limite estourado → 429 com espera em segundos.
+- **Resultado:** no máximo `SEND_MAX_PER_HOUR` envios por hora, só para a allowlist; com cron, histórico em dia
+  mesmo sem uso.
+- **Falhas:** destinatário fora da lista → recusa sem chamar a ponte; limite estourado → 429 com espera em segundos.
+
+## P18 — Gerenciar o Gmail: enviar, responder, encaminhar, rascunhos e organizar
+
+- **Gatilho:** o Claude chama uma ferramenta de escrita (`send_email`, `reply_email`, `reply_all_email`,
+  `forward_email`, `create_draft`, `update_draft`, `send_draft`, `delete_draft`, `mark_read`, `archive`, `star`,
+  `update_labels`, `trash`, `untrash`) em `POST /mcp`, depois de mostrar o conteúdo ao usuário e receber a
+  confirmação (as anotações MCP de envio e de exclusão têm `destructiveHint`; ADR 0019).
+- **Passos:**
+  1. Os passos 1 e 2 de P12; a conta vem de `resolveWritableAccount()`, que exige o escopo com
+     `requireWriteAccess()` (`hasModifyScope()`) antes de qualquer chamada ao Gmail.
+  2. E-mail novo: `composeEmail()` valida os destinatários (`parseRecipients()`, `splitAddressList()`,
+     `parseMailAddress()`) e o limite (`checkRecipientLimit()`). Resposta: `prepareReply()` lê o original com
+     `fetchFullMessage()` e `replyEmail()` calcula `replyRecipients()` (`replyToList()`, `uniqueAddresses()`),
+     `prefixSubject()`, `threadingHeaders()` e `quotedText()`. Encaminhamento: `prepareForward()` baixa os anexos
+     com `forwardAttachments()` e monta `forwardEmail()` (`forwardedText()`).
+  3. `gmailMessageResource()` monta o MIME com `buildMimeMessage()` (`mimeHeaderLines()`, `formatMailAddress()`,
+     `encodeHeaderWord()`, `cleanHeaderText()`, `textPart()`, `attachmentPart()`, fronteira de `mimeBoundary()`)
+     e `toRawMessage()`; `sendPrepared()` envia em `messages/send` mantendo o `threadId` (`sentResult()`).
+  4. Rascunhos: `prepareDraftEmail()` (novo ou resposta, via `draftArgs()`), `createDraft()`, `updateDraft()`,
+     `sendDraft()`, `deleteDraft()` e `listDrafts()` (`draftSummary()`, `draftIds()`).
+  5. Organização: `writableTargets()` (`mailTargets()`) e `runMailboxAction()` aplicam `MAILBOX_ACTIONS` com
+     `applyLabelChange()` (`batchModify` nas mensagens, `modify` nas conversas); `update_labels` usa
+     `fetchLabels()`, `resolveLabelIds()` e `checkLabelChange()`; `moveToTrash()` faz `trash`/`untrash`.
+     Toda escrita passa por `gmailWrite()`.
+- **Resultado:** e-mail enviado ou rascunho/marcadores alterados na conta pedida; o resultado traz os ids.
+  Exclusão definitiva não existe (nem o escopo `gmail.modify` permite).
+- **Falhas:** conta vinculada só com `gmail.readonly` → `writeAccessError()` (pede `link_account`), sem chamar o
+  Gmail; endereço inválido ou sem destinatário → erro dizendo o campo; anexos acima de 18 MB → erro antes de
+  baixar; marcador desconhecido → erro sugerindo `list_labels`; recusa do Gmail → `gmailHttpError()` com o
+  detalhe.

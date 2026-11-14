@@ -11,6 +11,10 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 - WhatsApp: **envio ligado** (`ENABLE_SEND = "true"` no `wrangler.toml`) para qualquer contato ou grupo;
   `SEND_ALLOWLIST` virou opcional (vazia = qualquer destinatário). Continuam a confirmação explícita a cada
   mensagem (`confirmed_by_user`) e o limite por hora (`SEND_MAX_PER_HOUR`). Envio de mídia fica de fora (ADR 0015).
+- Gmail: o conector pede o escopo `gmail.modify` no lugar de `gmail.readonly`. Contas vinculadas antes continuam
+  lendo; para enviar ou organizar, `list_accounts` mostra `write_access: false` e as ferramentas pedem para
+  vincular a conta de novo com `link_account`. O dono precisa adicionar o escopo na tela de consentimento do
+  Google Cloud antes do deploy.
 
 ### Corrigido
 
@@ -24,7 +28,13 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 - WhatsApp: `send_message` aceita JID de grupo (`@g.us`) e responde citando uma mensagem da mesma conversa
   (`reply_to_message_id`).
-
+- Gmail: **gerenciamento completo** pelo Claude, em qualquer conta vinculada (`account`): enviar
+  (`send_email`), responder mantendo a conversa (`reply_email`), responder a todos (`reply_all_email`),
+  encaminhar com os anexos originais (`forward_email`), rascunhos (`list_drafts`, `create_draft`, `update_draft`,
+  `send_draft`, `delete_draft`), marcar como lido/não lido (`mark_read`), arquivar (`archive`), estrela (`star`),
+  marcadores (`update_labels`), lixeira e restaurar (`trash`, `untrash`). Sem exclusão definitiva. As ferramentas
+  levam anotações MCP (`destructiveHint` em envio e exclusão) para o Claude pedir confirmação (ADR 0019).
+- Ferramentas MCP compartilhadas (`src/mcp/tools.ts`) aceitam `annotations`.
 - Comandos **`/config-canvas`**, **`/config-gmail`** e **`/config-whatsapp`** (skills dos plugins): configuração
   guiada de cada conector no chat, com conexão, login pelo navegador, vínculo de contas ou pareamento e um teste.
 - Skills de uso nos plugins: Canvas (`/resumo-semana`, `/preparar-entrega`, `/estudar-disciplina`), Gmail

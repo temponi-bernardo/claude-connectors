@@ -1,13 +1,13 @@
 /**
  * Vínculo de mais uma conta Gmail a um usuário do conector. A ferramenta `link_account` gera um link com um
  * ticket selado (usuário + validade de 10 minutos, uso único); `/accounts/link` resgata o ticket e manda ao
- * Google com `gmail.readonly` e acesso offline, `state` de uso único preso ao navegador por cookie `__Host-`,
+ * Google com `gmail.modify` e acesso offline, `state` de uso único preso ao navegador por cookie `__Host-`,
  * PKCE S256 e `nonce`. Na volta, o refresh token é gravado (selado) nas contas desse usuário.
  */
 import { openSealed, sealPayload } from '../../../src/remote/seal.js';
 import { pkceChallenge } from '../../../src/remote/oauth.js';
 import { forgetAccessToken } from './access-token.js';
-import { GMAIL_READONLY_SCOPE, GMAIL_SCOPES } from './config.js';
+import { GMAIL_SCOPES, hasModifyScope } from './config.js';
 import type { GmailDeps, OwnerDeps } from './context.js';
 import {
   exchangeGoogleCode,
@@ -148,8 +148,8 @@ export async function takeLinkRequest(
 
 /** Motivo para não gravar a conta (sem permissão do Gmail ou sem refresh token), ou nulo se pode. */
 export function linkRefusalReason(tokens: GoogleTokens): string | null {
-  if (!tokens.scope.split(' ').includes(GMAIL_READONLY_SCOPE)) {
-    return 'Marque a permissão de ler o Gmail na tela do Google e tente de novo.';
+  if (!hasModifyScope(tokens.scope)) {
+    return 'Marque a permissão de gerenciar o Gmail (ler, enviar e organizar e-mails) na tela do Google e tente de novo.';
   }
   if (tokens.refreshToken === null) return 'O Google não devolveu o refresh token. Tente de novo.';
   return null;

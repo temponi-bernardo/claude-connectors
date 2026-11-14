@@ -1,6 +1,6 @@
 # 0014 — Gmail remoto multi-conta, só leitura, sob demanda no Cloudflare Workers
 
-- **Estado:** Aceito
+- **Estado:** Substituído em parte por 0016 e 0019 (escopo e ferramentas só de leitura: ver ADR 0019)
 - **Data:** 2026-11-14
 - **Relacionado:** ADR 0009, ADR 0010, ADR 0013
 

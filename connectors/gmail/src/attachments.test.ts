@@ -5,6 +5,7 @@ import { clearAccessTokenCache } from './access-token.js';
 import {
   attachmentBytesToText,
   detectAttachmentKind,
+  downloadAttachment,
   looksLikeText,
   MAX_ATTACHMENT_BYTES,
   readAttachmentText,
@@ -99,5 +100,20 @@ describe('readAttachmentText', () => {
     });
     const deps = await linkedTestDeps([route]);
     await expect(readAttachmentText(deps, OWNER, ids)).rejects.toThrow(/acima do limite de 5 MB/);
+  });
+});
+
+describe('downloadAttachment', () => {
+  it('devolve tamanho e bytes; sem size usa o tamanho dos bytes', async () => {
+    const route = gmailRoute({
+      'messages/m1/attachments/a1': { size: 2, data: b64('oi') },
+      'messages/m1/attachments/a2': { data: b64('abc') },
+    });
+    const deps = await linkedTestDeps([route]);
+    const first = await downloadAttachment(deps, OWNER, { messageId: 'm1', attachmentId: 'a1' });
+    expect(first.size).toBe(2);
+    expect(Buffer.from(first.bytes).toString()).toBe('oi');
+    const second = await downloadAttachment(deps, OWNER, { messageId: 'm1', attachmentId: 'a2' });
+    expect(second.size).toBe(3);
   });
 });

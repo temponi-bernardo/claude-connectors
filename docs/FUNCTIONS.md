@@ -21,20 +21,28 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
 - `connectors/canvas-puc/src/worker.ts`: [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
 - `connectors/gmail/src/access-token.ts`: [`accessTokenKey`](#accesstokenkey), [`forgetAccessToken`](#forgetaccesstoken), [`clearAccessTokenCache`](#clearaccesstokencache), [`relinkError`](#relinkerror), [`markAccountRevoked`](#markaccountrevoked), [`renewAccessToken`](#renewaccesstoken), [`getAccessToken`](#getaccesstoken)
-- `connectors/gmail/src/accounts.ts`: [`accountAlias`](#accountalias), [`aliasAccounts`](#aliasaccounts), [`noAccountsError`](#noaccountserror), [`resolveAccounts`](#resolveaccounts)
-- `connectors/gmail/src/attachments.ts`: [`looksLikeText`](#looksliketext), [`detectAttachmentKind`](#detectattachmentkind), [`attachmentBytesToText`](#attachmentbytestotext), [`readAttachmentText`](#readattachmenttext)
-- `connectors/gmail/src/config.ts`: [`isEmailAddress`](#isemailaddress), [`parseAllowedEmails`](#parseallowedemails), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`readGmailSettings`](#readgmailsettings), [`isEmailAllowed`](#isemailallowed)
-- `connectors/gmail/src/gmail-api.ts`: [`gmailUrl`](#gmailurl), [`gmailHttpError`](#gmailhttperror), [`sendGmailGet`](#sendgmailget), [`gmailGet`](#gmailget)
+- `connectors/gmail/src/accounts.ts`: [`accountAlias`](#accountalias), [`aliasAccounts`](#aliasaccounts), [`noAccountsError`](#noaccountserror), [`resolveAccounts`](#resolveaccounts), [`writeAccessError`](#writeaccesserror), [`requireWriteAccess`](#requirewriteaccess)
+- `connectors/gmail/src/attachments.ts`: [`looksLikeText`](#looksliketext), [`detectAttachmentKind`](#detectattachmentkind), [`attachmentBytesToText`](#attachmentbytestotext), [`downloadAttachment`](#downloadattachment), [`readAttachmentText`](#readattachmenttext)
+- `connectors/gmail/src/compose.ts`: [`prefixSubject`](#prefixsubject), [`threadingHeaders`](#threadingheaders), [`uniqueAddresses`](#uniqueaddresses), [`replyToList`](#replytolist), [`replyRecipients`](#replyrecipients), [`quotedText`](#quotedtext), [`forwardedText`](#forwardedtext), [`replyEmail`](#replyemail), [`forwardEmail`](#forwardemail)
+- `connectors/gmail/src/config.ts`: [`hasModifyScope`](#hasmodifyscope), [`isEmailAddress`](#isemailaddress), [`parseAllowedEmails`](#parseallowedemails), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`readGmailSettings`](#readgmailsettings), [`isEmailAllowed`](#isemailallowed)
+- `connectors/gmail/src/draft-tools.ts`: [`draftArgs`](#draftargs)
+- `connectors/gmail/src/drafts.ts`: [`draftSummary`](#draftsummary), [`listDrafts`](#listdrafts), [`prepareDraftEmail`](#preparedraftemail), [`draftIds`](#draftids), [`createDraft`](#createdraft), [`updateDraft`](#updatedraft), [`sendDraft`](#senddraft), [`deleteDraft`](#deletedraft)
+- `connectors/gmail/src/gmail-api.ts`: [`gmailUrl`](#gmailurl), [`gmailHttpError`](#gmailhttperror), [`gmailErrorDetail`](#gmailerrordetail), [`sendGmailRequest`](#sendgmailrequest), [`readGmailJson`](#readgmailjson), [`gmailCall`](#gmailcall), [`gmailGet`](#gmailget), [`gmailWrite`](#gmailwrite)
 - `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`randomToken`](#randomtoken), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken), [`revokeGoogleToken`](#revokegoogletoken)
 - `connectors/gmail/src/id-token.ts`: [`decodeJwtJson`](#decodejwtjson), [`decodeJwt`](#decodejwt), [`idTokenProblems`](#idtokenproblems), [`checkIdTokenClaims`](#checkidtokenclaims), [`fetchGoogleKey`](#fetchgooglekey), [`verifyRs256`](#verifyrs256), [`verifyGoogleIdToken`](#verifygoogleidtoken)
 - `connectors/gmail/src/link-flow.ts`: [`nowSeconds`](#nowseconds), [`issueLinkUrl`](#issuelinkurl), [`redeemLinkTicket`](#redeemlinkticket), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`invalidTicketPage`](#invalidticketpage), [`startAccountLink`](#startaccountlink), [`takeLinkRequest`](#takelinkrequest), [`linkRefusalReason`](#linkrefusalreason), [`storeGoogleAccount`](#storegoogleaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
+- `connectors/gmail/src/mailbox-tools.ts`: [`toggleAction`](#toggleaction), [`writableTargets`](#writabletargets), [`runMailboxAction`](#runmailboxaction)
+- `connectors/gmail/src/mailbox.ts`: [`mailTargets`](#mailtargets), [`checkLabelChange`](#checklabelchange), [`resolveLabelIds`](#resolvelabelids), [`fetchLabels`](#fetchlabels), [`applyLabelChange`](#applylabelchange), [`targetCounts`](#targetcounts), [`moveToTrash`](#movetotrash)
 - `connectors/gmail/src/message-format.ts`: [`base64UrlToBytes`](#base64urltobytes), [`partCharset`](#partcharset), [`decodePartBody`](#decodepartbody), [`headerValues`](#headervalues), [`flattenParts`](#flattenparts), [`isBodyPart`](#isbodypart), [`messageBodyText`](#messagebodytext), [`messageAttachments`](#messageattachments), [`truncateText`](#truncatetext), [`internalDateIso`](#internaldateiso), [`pickHeaders`](#pickheaders), [`formatMessage`](#formatmessage), [`perMessageLimit`](#permessagelimit), [`formatThread`](#formatthread), [`summarizeThread`](#summarizethread)
+- `connectors/gmail/src/mime.ts`: [`splitAddressList`](#splitaddresslist), [`parseMailAddress`](#parsemailaddress), [`parseAddressList`](#parseaddresslist), [`parseRecipients`](#parserecipients), [`cleanHeaderText`](#cleanheadertext), [`isPrintableAscii`](#isprintableascii), [`encodeHeaderWord`](#encodeheaderword), [`formatMailAddress`](#formatmailaddress), [`addressHeader`](#addressheader), [`messageIdList`](#messageidlist), [`mimeHeaderLines`](#mimeheaderlines), [`wrapBase64`](#wrapbase64), [`textPart`](#textpart), [`safeMimeType`](#safemimetype), [`attachmentPart`](#attachmentpart), [`buildMimeMessage`](#buildmimemessage), [`toRawMessage`](#torawmessage)
 - `connectors/gmail/src/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`consentPageBody`](#consentpagebody), [`copyConsentHeaders`](#copyconsentheaders), [`consentPage`](#consentpage), [`redirectWith`](#redirectwith)
 - `connectors/gmail/src/rate-limit.ts`: [`isRateLimited`](#isratelimited), [`rateLimitedResponse`](#ratelimitedresponse)
 - `connectors/gmail/src/search.ts`: [`encodeMultiPageToken`](#encodemultipagetoken), [`decodeMultiPageToken`](#decodemultipagetoken), [`fetchThreadMetadata`](#fetchthreadmetadata), [`searchAccount`](#searchaccount), [`threadDate`](#threaddate), [`sortByDateDesc`](#sortbydatedesc), [`pagesToFetch`](#pagestofetch), [`searchThreads`](#searchthreads)
+- `connectors/gmail/src/send-tools.ts`: [`replyTool`](#replytool)
+- `connectors/gmail/src/send.ts`: [`checkRecipientLimit`](#checkrecipientlimit), [`composeEmail`](#composeemail), [`mimeBoundary`](#mimeboundary), [`gmailMessageResource`](#gmailmessageresource), [`fetchFullMessage`](#fetchfullmessage), [`prepareReply`](#preparereply), [`forwardAttachments`](#forwardattachments), [`prepareForward`](#prepareforward), [`sendPrepared`](#sendprepared), [`sentResult`](#sentresult)
 - `connectors/gmail/src/sign-in.ts`: [`accessDeniedPage`](#accessdeniedpage), [`authorizationErrorResponse`](#authorizationerrorresponse), [`beginGoogleSignIn`](#begingooglesignin), [`showAuthorize`](#showauthorize), [`submitAuthorize`](#submitauthorize), [`linkSignedInAccount`](#linksignedinaccount), [`completeSignIn`](#completesignin), [`finishSignIn`](#finishsignin)
 - `connectors/gmail/src/token-store.ts`: [`sha256Hex`](#sha256hex), [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
-- `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
+- `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`resolveWritableAccount`](#resolvewritableaccount), [`accountBase`](#accountbase), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
 - `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
 - `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
 - `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`normalizeRecipient`](#normalizerecipient), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
@@ -1967,7 +1975,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/html.ts`
 - **Assinatura:** `htmlToText(html: string | null | undefined): string`
 - **Usada por:** `attachmentBytesToText()`, `connectors/canvas-puc/src/tools-read.ts (módulo)`, `docxXmlToText()`, `flattenDiscussion()`, `messageBodyText()`, `readCanvasFileText()`, `shortText()`, `toAssignmentDetail()`
-- **Processos:** P03, P12
+- **Processos:** P03, P12, P18
 
 <!-- gerado:fim -->
 
@@ -2021,7 +2029,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `defineTool(def: ToolDefinition<C, S>): ToolSpec<C>`
-- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/gmail/src/tools.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/gmail/src/draft-tools.ts (módulo)`, `connectors/gmail/src/mailbox-tools.ts (módulo)`, `connectors/gmail/src/send-tools.ts (módulo)`, `connectors/gmail/src/tools.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`, `replyTool()`
 - **Processos:** P03
 
 <!-- gerado:fim -->
@@ -3058,7 +3066,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `sealPayload(payload: unknown, key: Buffer): string`
 - **Usada por:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `startAccountLink()`, `startPairLogin()`
-- **Processos:** P08, P10, P11, P12, P13, P15
+- **Processos:** P08, P10, P11, P12, P13, P15, P18
 
 <!-- gerado:fim -->
 
@@ -3075,7 +3083,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `unsealPayload(sealed: string, key: Buffer): Record<string, unknown> | null`
 - **Usada por:** `openSealed()`
-- **Processos:** P08, P09, P10, P11, P12, P13, P14, P15
+- **Processos:** P08, P09, P10, P11, P12, P13, P14, P15, P18
 
 <!-- gerado:fim -->
 
@@ -3092,7 +3100,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `openSealed(sealed: string, key: Buffer, expected: SealExpectation): SealedClaims | null`
 - **Usada por:** `clientRedirectUris()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openOwnerAccounts()`, `readAccessSecret()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemLinkTicket()`, `redeemRefreshToken()`, `takeLinkRequest()`
-- **Processos:** P08, P09, P10, P11, P12, P13, P14, P15
+- **Processos:** P08, P09, P10, P11, P12, P13, P14, P15, P18
 
 <!-- gerado:fim -->
 
@@ -3595,7 +3603,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `cp1252ToString(bytes: Uint8Array): string`
 - **Usada por:** `decodePartBody()`, `pieceText()`
-- **Processos:** P03, P12
+- **Processos:** P03, P12, P18
 
 <!-- gerado:fim -->
 
@@ -4012,8 +4020,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
 - **Assinatura:** `forgetAccessToken(owner: string, email: string): void`
-- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `gmailGet()`, `storeGoogleAccount()`
-- **Processos:** P10, P11, P12
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `gmailCall()`, `storeGoogleAccount()`
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -4047,7 +4055,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
 - **Assinatura:** `relinkError(alias: string): Error`
 - **Usada por:** `getAccessToken()`, `renewAccessToken()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4064,7 +4072,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
 - **Assinatura:** `async renewAccessToken(deps: OwnerDeps, ref: AccountRef): Promise<string>`
 - **Usada por:** `getAccessToken()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4080,8 +4088,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
 - **Assinatura:** `async getAccessToken(deps: OwnerDeps, ref: AccountRef): Promise<string>`
-- **Usada por:** `accountStatus()`, `gmailGet()`
-- **Processos:** P12
+- **Usada por:** `accountStatus()`, `gmailCall()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4098,7 +4106,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
 - **Assinatura:** `accessTokenKey(owner: string, email: string): string`
 - **Usada por:** `forgetAccessToken()`, `getAccessToken()`, `renewAccessToken()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -4115,7 +4123,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
 - **Assinatura:** `async markAccountRevoked(deps: OwnerDeps, email: string): Promise<void>`
 - **Usada por:** `renewAccessToken()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4183,7 +4191,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/attachments.ts`
-- **Assinatura:** `async readAttachmentText(deps: OwnerDeps, ref: AccountRef, ids: { readonly messageId: string; readonly attachmentId: string }): Promise<Record<string, unknown>>`
+- **Assinatura:** `async readAttachmentText(deps: OwnerDeps, ref: AccountRef, ids: AttachmentIds): Promise<Record<string, unknown>>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
 - **Processos:** P12
 
@@ -4195,6 +4203,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
 - **Erros:** Lança erro se o anexo passar de 5 MB. Propaga os erros de `gmailGet()` e `attachmentBytesToText()`.
 
+### `downloadAttachment`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/attachments.ts`
+- **Assinatura:** `async downloadAttachment(deps: OwnerDeps, ref: AccountRef, ids: AttachmentIds): Promise<{ size: number; bytes: Uint8Array }>`
+- **Usada por:** `forwardAttachments()`, `readAttachmentText()`
+- **Processos:** P12, P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Baixa os bytes de um anexo com o tamanho informado pelo Gmail.
+- **Entrada:** `deps`, `ref`: conta; `ids`: mensagem e anexo.
+- **Saída:** `{ size, bytes }` (size é o do Gmail ou o dos bytes).
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Propaga os erros de `gmailGet()`.
+
 ## `connectors/gmail/src/config.ts`
 
 ### `isEmailAddress`
@@ -4203,8 +4228,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/config.ts`
 - **Assinatura:** `isEmailAddress(text: string): boolean`
-- **Usada por:** `parseAllowedEmails()`
-- **Processos:** P10, P12
+- **Usada por:** `parseAllowedEmails()`, `parseMailAddress()`
+- **Processos:** P10, P12, P18
 
 <!-- gerado:fim -->
 
@@ -4299,6 +4324,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+### `hasModifyScope`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `hasModifyScope(scope: string): boolean`
+- **Usada por:** `accountBase()`, `linkRefusalReason()`, `requireWriteAccess()`
+- **Processos:** P10, P11, P12, P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se os escopos concedidos incluem `gmail.modify`.
+- **Entrada:** `scope`: escopos separados por espaço.
+- **Saída:** `true` se tiver `gmail.modify` exato.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
 ## `connectors/gmail/src/gmail-api.ts`
 
 ### `gmailUrl`
@@ -4307,8 +4349,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/gmail-api.ts`
 - **Assinatura:** `gmailUrl(path: string, params: Readonly<Record<string, GmailQueryValue>> = {}): string`
-- **Usada por:** `accountLabels()`, `connectors/gmail/src/tools.ts (módulo)`, `fetchThreadMetadata()`, `readAttachmentText()`, `searchAccount()`
-- **Processos:** P12
+- **Usada por:** `applyLabelChange()`, `connectors/gmail/src/tools.ts (módulo)`, `createDraft()`, `deleteDraft()`, `downloadAttachment()`, `fetchFullMessage()`, `fetchLabels()`, `fetchThreadMetadata()`, `listDrafts()`, `moveToTrash()`, `searchAccount()`, `sendDraft()`, `sendPrepared()`, `updateDraft()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4323,9 +4365,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/gmail-api.ts`
-- **Assinatura:** `gmailHttpError(status: number, alias: string): Error`
-- **Usada por:** `gmailGet()`
-- **Processos:** P12
+- **Assinatura:** `gmailHttpError(status: number, alias: string, detail: string | null = null): Error`
+- **Usada por:** `gmailCall()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4335,31 +4377,14 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
-### `sendGmailGet`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
-- **Assinatura:** `sendGmailGet(deps: GmailDeps, url: string, token: string): Promise<Response>`
-- **Usada por:** `gmailGet()`
-- **Processos:** P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Envia um GET autenticado à Gmail API com o access token dado.
-- **Entrada:** `deps`: dependências do conector (rede). `url`: URL completa da Gmail API. `token`: access token da conta.
-- **Saída:** A resposta HTTP, sem conferir o status.
-- **Efeitos:** Rede: Gmail API.
-- **Erros:** Propaga as falhas de rede de `deps.fetch`.
-
 ### `gmailGet`
 
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/gmail-api.ts`
-- **Assinatura:** `async gmailGet(deps: OwnerDeps, ref: AccountRef, url: string): Promise<T>`
-- **Usada por:** `accountLabels()`, `connectors/gmail/src/tools.ts (módulo)`, `fetchThreadMetadata()`, `readAttachmentText()`, `searchAccount()`
-- **Processos:** P12
+- **Assinatura:** `gmailGet(deps: OwnerDeps, ref: AccountRef, url: string): Promise<T>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `downloadAttachment()`, `fetchFullMessage()`, `fetchLabels()`, `fetchThreadMetadata()`, `listDrafts()`, `searchAccount()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4368,6 +4393,91 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** O corpo JSON.
 - **Efeitos:** Rede: Gmail API e, se renovar, Google. Memória do isolate: esquece o token depois de 401.
 - **Erros:** Lança `gmailHttpError()` se a resposta final falhar; propaga os de `getAccessToken()`.
+
+### `gmailErrorDetail`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `async gmailErrorDetail(response: Response): Promise<string | null>`
+- **Usada por:** `gmailCall()`
+- **Processos:** P12, P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê `error.message` de uma resposta de erro da Gmail API, limitado a 200 caracteres.
+- **Entrada:** `response`: resposta de falha.
+- **Saída:** O detalhe, ou nulo.
+- **Efeitos:** Consome o corpo da resposta.
+- **Erros:** Nenhum: corpo inválido vira nulo.
+
+### `sendGmailRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `sendGmailRequest(deps: GmailDeps, request: GmailRequest, token: string): Promise<Response>`
+- **Usada por:** `gmailCall()`
+- **Processos:** P12, P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Envia um pedido autenticado à Gmail API (método, corpo JSON, token, User-Agent).
+- **Entrada:** `deps`; `request`: URL, método e corpo; `token`: access token.
+- **Saída:** A `Response`.
+- **Efeitos:** Rede: Gmail API.
+- **Erros:** Propaga falhas de rede.
+
+### `readGmailJson`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `async readGmailJson(response: Response): Promise<T>`
+- **Usada por:** `gmailCall()`
+- **Processos:** P12, P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o JSON de uma resposta de sucesso; corpo vazio vira objeto vazio.
+- **Entrada:** `response`: resposta 2xx.
+- **Saída:** O JSON tipado, ou `{}`.
+- **Efeitos:** Consome o corpo da resposta.
+- **Erros:** Lança erro se o corpo não for JSON.
+
+### `gmailCall`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `async gmailCall(deps: OwnerDeps, ref: AccountRef, request: GmailRequest): Promise<T>`
+- **Usada por:** `gmailGet()`, `gmailWrite()`
+- **Processos:** P12, P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Faz um pedido à Gmail API e lê o JSON; depois de 401 renova o token e tenta mais uma vez.
+- **Entrada:** `deps`, `ref`: conta; `request`: URL, método e corpo.
+- **Saída:** O JSON da resposta.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança `gmailHttpError()` (com o detalhe do Gmail) em falha HTTP; propaga os de `getAccessToken()`.
+
+### `gmailWrite`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `async gmailWrite(deps: OwnerDeps, ref: AccountRef, request: GmailRequest): Promise<T>`
+- **Usada por:** `applyLabelChange()`, `createDraft()`, `deleteDraft()`, `moveToTrash()`, `sendDraft()`, `sendPrepared()`, `updateDraft()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Escreve na Gmail API exigindo antes o escopo `gmail.modify` da conta.
+- **Entrada:** `deps`, `ref`: conta; `request`: pedido de escrita.
+- **Saída:** O JSON da resposta.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
 
 ## `connectors/gmail/src/google-oauth.ts`
 
@@ -4411,8 +4521,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/google-oauth.ts`
 - **Assinatura:** `randomToken(bytes = 32): string`
-- **Usada por:** `beginGoogleSignIn()`, `completeSignIn()`, `issueLinkUrl()`, `startAccountLink()`
-- **Processos:** P10, P11
+- **Usada por:** `beginGoogleSignIn()`, `completeSignIn()`, `issueLinkUrl()`, `mimeBoundary()`, `startAccountLink()`
+- **Processos:** P10, P11, P18
 
 <!-- gerado:fim -->
 
@@ -4429,7 +4539,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/google-oauth.ts`
 - **Assinatura:** `parseGoogleTokens(body: unknown): GoogleTokens`
 - **Usada por:** `postGoogleToken()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -4446,7 +4556,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/google-oauth.ts`
 - **Assinatura:** `async googleErrorCode(response: Response): Promise<string>`
 - **Usada por:** `postGoogleToken()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -4463,7 +4573,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/google-oauth.ts`
 - **Assinatura:** `async postGoogleToken(deps: GmailDeps, form: Readonly<Record<string, string>>): Promise<GoogleTokens>`
 - **Usada por:** `exchangeGoogleCode()`, `refreshGoogleToken()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -4497,7 +4607,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/google-oauth.ts`
 - **Assinatura:** `refreshGoogleToken(deps: GmailDeps, refreshToken: string): Promise<GoogleTokens>`
 - **Usada por:** `renewAccessToken()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4893,8 +5003,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `base64UrlToBytes(data: string): Uint8Array`
-- **Usada por:** `decodePartBody()`, `readAttachmentText()`
-- **Processos:** P12
+- **Usada por:** `decodePartBody()`, `downloadAttachment()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4911,7 +5021,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `partCharset(part: GmailPart): string`
 - **Usada por:** `decodePartBody()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4928,7 +5038,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `decodePartBody(part: GmailPart): string`
 - **Usada por:** `messageBodyText()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4944,8 +5054,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `headerValues(headers: readonly { readonly name: string; readonly value: string }[]): Map<string, string>`
-- **Usada por:** `partCharset()`, `pickHeaders()`
-- **Processos:** P12
+- **Usada por:** `forwardedText()`, `forwardEmail()`, `partCharset()`, `pickHeaders()`, `quotedText()`, `replyEmail()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4962,7 +5072,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `flattenParts(part: GmailPart | undefined, depth = 0): GmailPart[]`
 - **Usada por:** `flattenParts()`, `messageAttachments()`, `messageBodyText()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4979,7 +5089,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `isBodyPart(part: GmailPart, mimeType: string): boolean`
 - **Usada por:** `messageBodyText()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -4995,8 +5105,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `messageBodyText(payload: GmailPart | undefined): string`
-- **Usada por:** `formatMessage()`
-- **Processos:** P12
+- **Usada por:** `formatMessage()`, `forwardedText()`, `quotedText()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -5012,8 +5122,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `messageAttachments(payload: GmailPart | undefined): AttachmentInfo[]`
-- **Usada por:** `formatMessage()`
-- **Processos:** P12
+- **Usada por:** `formatMessage()`, `forwardAttachments()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -5029,8 +5139,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `truncateText(text: string, max: number): string`
-- **Usada por:** `formatMessage()`, `readAttachmentText()`
-- **Processos:** P12
+- **Usada por:** `formatMessage()`, `quotedText()`, `readAttachmentText()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -5046,8 +5156,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `internalDateIso(internalDate: string | undefined): string | null`
-- **Usada por:** `formatMessage()`, `summarizeThread()`
-- **Processos:** P12
+- **Usada por:** `draftSummary()`, `formatMessage()`, `summarizeThread()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -5063,8 +5173,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/message-format.ts`
 - **Assinatura:** `pickHeaders(payload: GmailPart | undefined): Record<string, string>`
-- **Usada por:** `formatMessage()`, `summarizeThread()`
-- **Processos:** P12
+- **Usada por:** `draftSummary()`, `formatMessage()`, `summarizeThread()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -5566,8 +5676,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/tools.ts`
 - **Assinatura:** `async resolveSingleAccount(deps: OwnerDeps, requested: string): Promise<AccountRef>`
-- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
-- **Processos:** P12
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`, `connectors/gmail/src/tools.ts (módulo)`, `resolveWritableAccount()`
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -5635,7 +5745,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/tools.ts`
 - **Assinatura:** `async ownerRefs(deps: OwnerDeps): Promise<AccountRef[]>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `resolveOwnerAccounts()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -5652,7 +5762,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/tools.ts`
 - **Assinatura:** `async resolveOwnerAccounts(deps: OwnerDeps, requested: string): Promise<AccountRef[]>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `resolveSingleAccount()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -5661,6 +5771,40 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** As contas pedidas.
 - **Efeitos:** KV: uma leitura.
 - **Erros:** Os de `resolveAccounts()`.
+
+### `resolveWritableAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/tools.ts`
+- **Assinatura:** `async resolveWritableAccount(deps: OwnerDeps, requested: string): Promise<AccountRef>`
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`, `connectors/gmail/src/send-tools.ts (módulo)`, `replyTool()`, `writableTargets()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Resolve `account` numa conta só e exige o escopo de escrita antes de tocar o Gmail.
+- **Entrada:** `deps`; `requested`: apelido ou e-mail.
+- **Saída:** A conta.
+- **Efeitos:** KV: uma leitura.
+- **Erros:** Os de `resolveSingleAccount()` e `requireWriteAccess()`.
+
+### `accountBase`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/tools.ts`
+- **Assinatura:** `accountBase(ref: AccountRef): Record<string, unknown>`
+- **Usada por:** `accountStatus()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Dados fixos de uma conta em `list_accounts`, com `write_access` e a dica de novo vínculo.
+- **Entrada:** `ref`: conta.
+- **Saída:** Objeto com apelido, e-mail, data, `write_access` e `hint` quando só leitura.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
 
 ## `connectors/gmail/src/worker.ts`
 
@@ -8215,7 +8359,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/accounts.ts`
 - **Assinatura:** `aliasAccounts(accounts: readonly LinkedAccount[]): AccountRef[]`
 - **Usada por:** `ownerRefs()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -8232,7 +8376,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/accounts.ts`
 - **Assinatura:** `noAccountsError(): Error`
 - **Usada por:** `resolveAccounts()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -8249,7 +8393,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/accounts.ts`
 - **Assinatura:** `accountAlias(email: string): string`
 - **Usada por:** `aliasAccounts()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -8266,7 +8410,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/accounts.ts`
 - **Assinatura:** `resolveAccounts(refs: readonly AccountRef[], requested: string): AccountRef[]`
 - **Usada por:** `resolveOwnerAccounts()`
-- **Processos:** P12
+- **Processos:** P12, P18
 
 <!-- gerado:fim -->
 
@@ -8275,6 +8419,40 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Todas as contas para `all`; senão a lista com a conta encontrada.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Lança `noAccountsError()` sem contas; lança erro com os apelidos válidos se nenhuma conta casar.
+
+### `writeAccessError`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/accounts.ts`
+- **Assinatura:** `writeAccessError(alias: string): Error`
+- **Usada por:** `requireWriteAccess()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o erro de conta vinculada só para leitura, pedindo novo vínculo por `link_account`.
+- **Entrada:** `alias`: apelido da conta.
+- **Saída:** `Error` acionável.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `requireWriteAccess`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/accounts.ts`
+- **Assinatura:** `requireWriteAccess(ref: AccountRef): void`
+- **Usada por:** `gmailWrite()`, `resolveWritableAccount()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Exige o escopo `gmail.modify` no token da conta.
+- **Entrada:** `ref`: conta vinculada.
+- **Saída:** Nada.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `writeAccessError()` se a conta foi vinculada só para leitura.
 
 ## `connectors/gmail/src/token-store.ts`
 
@@ -8285,7 +8463,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/token-store.ts`
 - **Assinatura:** `ownerKey(owner: string): string`
 - **Usada por:** `loadOwnerAccounts()`, `saveOwnerAccounts()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -8302,7 +8480,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/token-store.ts`
 - **Assinatura:** `toLinkedAccount(value: unknown): LinkedAccount | null`
 - **Usada por:** `openOwnerAccounts()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -8319,7 +8497,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/token-store.ts`
 - **Assinatura:** `sealOwnerAccounts(owner: string, accounts: readonly LinkedAccount[], key: Buffer): string`
 - **Usada por:** `saveOwnerAccounts()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -8336,7 +8514,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/token-store.ts`
 - **Assinatura:** `openOwnerAccounts(sealed: string, key: Buffer, owner: string): LinkedAccount[]`
 - **Usada por:** `loadOwnerAccounts()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -8353,7 +8531,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/token-store.ts`
 - **Assinatura:** `async loadOwnerAccounts(kv: KvStore, key: Buffer, owner: string): Promise<LinkedAccount[]>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `markAccountRevoked()`, `ownerRefs()`, `storeGoogleAccount()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -8370,7 +8548,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/token-store.ts`
 - **Assinatura:** `async saveOwnerAccounts(kv: KvStore, key: Buffer, record: { readonly owner: string; readonly accounts: readonly LinkedAccount[] }): Promise<void>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `markAccountRevoked()`, `storeGoogleAccount()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
@@ -8404,13 +8582,981 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/gmail/src/token-store.ts`
 - **Assinatura:** `sha256Hex(text: string): string`
 - **Usada por:** `linkRequestKey()`, `ownerKey()`, `redeemLinkTicket()`, `startAccountLink()`, `takeLinkRequest()`
-- **Processos:** P10, P11, P12
+- **Processos:** P10, P11, P12, P18
 
 <!-- gerado:fim -->
 
 - **Faz:** Calcula o SHA-256 em hexadecimal.
 - **Entrada:** `text`: texto a resumir.
 - **Saída:** 64 caracteres hexadecimais.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/gmail/src/compose.ts`
+
+### `prefixSubject`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `prefixSubject(subject: string, prefix: 'Re' | 'Fwd'): string`
+- **Usada por:** `forwardEmail()`, `replyEmail()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Põe `Re:` ou `Fwd:` no assunto sem repetir o prefixo.
+- **Entrada:** `subject`; `prefix`: `Re` ou `Fwd`.
+- **Saída:** O assunto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `threadingHeaders`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `threadingHeaders(headers: ReadonlyMap<string, string>): ThreadingHeaders`
+- **Usada por:** `replyEmail()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula `In-Reply-To` e `References` da resposta a partir do original.
+- **Entrada:** `headers`: cabeçalhos do original em minúsculas.
+- **Saída:** `{ inReplyTo, references }` (nulos se não houver).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `uniqueAddresses`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `uniqueAddresses(addresses: readonly MailAddress[], exclude: ReadonlySet<string>): MailAddress[]`
+- **Usada por:** `replyRecipients()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Tira endereços repetidos e os excluídos, sem diferenciar maiúsculas.
+- **Entrada:** `addresses`; `exclude`: e-mails em minúsculas.
+- **Saída:** Lista sem repetidos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `replyToList`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `replyToList(headers: ReadonlyMap<string, string>, self: string, replyAll: boolean): MailAddress[]`
+- **Usada por:** `replyRecipients()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Candidatos a `To` da resposta: remetente (ou `Reply-To`), mais o `To` com `replyAll`, ou os destinatários se a original foi enviada pela conta.
+- **Entrada:** `headers`; `self`: e-mail da conta em minúsculas; `replyAll`.
+- **Saída:** Lista de endereços.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `replyRecipients`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `replyRecipients(headers: ReadonlyMap<string, string>, selfEmail: string, replyAll: boolean): { to: MailAddress[]; cc: MailAddress[] }`
+- **Usada por:** `replyEmail()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula `To` e `Cc` da resposta, sem a própria conta e sem repetir.
+- **Entrada:** `headers`; `selfEmail`; `replyAll`.
+- **Saída:** `{ to, cc }`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se não sobrar destinatário.
+
+### `quotedText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `quotedText(message: GmailMessage): string`
+- **Usada por:** `replyEmail()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Cita o original com `> ` depois de "Em <data>, <remetente> escreveu:".
+- **Entrada:** `message`: original no formato `full`.
+- **Saída:** Texto citado (até 20 mil caracteres do original).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `forwardedText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `forwardedText(message: GmailMessage): string`
+- **Usada por:** `forwardEmail()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Bloco do e-mail encaminhado: separador, cabeçalhos e corpo do original.
+- **Entrada:** `message`: original.
+- **Saída:** Texto do bloco.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `replyEmail`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `replyEmail(message: GmailMessage, options: ReplyOptions): PreparedEmail`
+- **Usada por:** `prepareReply()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a resposta: destinatários, `Re:`, conversa mantida e original citado.
+- **Entrada:** `message`: original; `options`: texto, `replyAll` e e-mail da conta.
+- **Saída:** `PreparedEmail` com o `threadId` do original.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Os de `replyRecipients()`.
+
+### `forwardEmail`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/compose.ts`
+- **Assinatura:** `forwardEmail(message: GmailMessage, options: ForwardOptions): PreparedEmail`
+- **Usada por:** `prepareForward()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o encaminhamento: `Fwd:`, nota, bloco do original e anexos, em conversa nova.
+- **Entrada:** `message`: original; `options`: destinatários, nota e anexos.
+- **Saída:** `PreparedEmail` sem `threadId`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/gmail/src/draft-tools.ts`
+
+### `draftArgs`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/draft-tools.ts`
+- **Assinatura:** `draftArgs(args: DraftToolArgs): DraftArgs`
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte os parâmetros das ferramentas de rascunho no formato interno.
+- **Entrada:** `args`: parâmetros validados.
+- **Saída:** `DraftArgs`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/gmail/src/drafts.ts`
+
+### `draftSummary`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/drafts.ts`
+- **Assinatura:** `draftSummary(draft: GmailDraft): Record<string, unknown>`
+- **Usada por:** `listDrafts()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Resume um rascunho para `list_drafts`.
+- **Entrada:** `draft`: rascunho da Gmail API.
+- **Saída:** Ids, to, cc, assunto, data e trecho.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `listDrafts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/drafts.ts`
+- **Assinatura:** `async listDrafts(deps: OwnerDeps, ref: AccountRef, maxResults: number): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os rascunhos da conta e lê os cabeçalhos de cada um.
+- **Entrada:** `deps`, `ref`; `maxResults`.
+- **Saída:** `{ account, drafts }`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Propaga os de `gmailGet()`.
+
+### `prepareDraftEmail`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/drafts.ts`
+- **Assinatura:** `prepareDraftEmail(deps: OwnerDeps, ref: AccountRef, args: DraftArgs): Promise<PreparedEmail>`
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o e-mail do rascunho: resposta ao original ou e-mail novo.
+- **Entrada:** `deps`, `ref`; `args`: conteúdo e `replyToMessageId`.
+- **Saída:** `PreparedEmail`.
+- **Efeitos:** Rede só quando é resposta (lê o original).
+- **Erros:** Os de `composeEmail()` ou `prepareReply()`.
+
+### `draftIds`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/drafts.ts`
+- **Assinatura:** `draftIds(draft: GmailDraft): Record<string, unknown>`
+- **Usada por:** `createDraft()`, `draftSummary()`, `updateDraft()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Ids devolvidos por uma operação de rascunho.
+- **Entrada:** `draft`.
+- **Saída:** `{ draft_id, message_id, thread_id }` (nulos se faltarem).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `createDraft`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/drafts.ts`
+- **Assinatura:** `async createDraft(deps: OwnerDeps, ref: AccountRef, prepared: PreparedEmail): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria um rascunho com o e-mail pronto.
+- **Entrada:** `deps`, `ref`; `prepared`.
+- **Saída:** `{ account, draft_id, message_id, thread_id }`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+
+### `updateDraft`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/drafts.ts`
+- **Assinatura:** `async updateDraft(deps: OwnerDeps, ref: AccountRef, change: { readonly draftId: string; readonly prepared: PreparedEmail }): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Substitui todo o conteúdo de um rascunho.
+- **Entrada:** `deps`, `ref`; `change`: id do rascunho e e-mail pronto.
+- **Saída:** Ids do rascunho.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+
+### `sendDraft`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/drafts.ts`
+- **Assinatura:** `async sendDraft(deps: OwnerDeps, ref: AccountRef, draftId: string): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Envia um rascunho existente.
+- **Entrada:** `deps`, `ref`; `draftId`.
+- **Saída:** Resultado de `sentResult()`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token. O e-mail sai da conta.
+- **Erros:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+
+### `deleteDraft`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/drafts.ts`
+- **Assinatura:** `async deleteDraft(deps: OwnerDeps, ref: AccountRef, draftId: string): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/draft-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Apaga um rascunho (mensagens enviadas não são tocadas).
+- **Entrada:** `deps`, `ref`; `draftId`.
+- **Saída:** `{ account, deleted_draft }`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+
+## `connectors/gmail/src/mailbox-tools.ts`
+
+### `toggleAction`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox-tools.ts`
+- **Assinatura:** `toggleAction(on: boolean, onAction: MailboxAction, offAction: MailboxAction): MailboxAction`
+- **Usada por:** `connectors/gmail/src/mailbox-tools.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Escolhe a ação ligada ou desligada pelo parâmetro booleano.
+- **Entrada:** `on`; `onAction`; `offAction`.
+- **Saída:** A ação.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `writableTargets`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox-tools.ts`
+- **Assinatura:** `async writableTargets(deps: OwnerDeps, args: TargetArgs): Promise<{ ref: AccountRef; targets: MailTargets }>`
+- **Usada por:** `connectors/gmail/src/mailbox-tools.ts (módulo)`, `runMailboxAction()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Resolve a conta com escrita e os alvos: começo comum das ferramentas de organização.
+- **Entrada:** `deps`; `args`: account, message_ids e thread_ids.
+- **Saída:** `{ ref, targets }`.
+- **Efeitos:** KV: uma leitura.
+- **Erros:** Os de `resolveWritableAccount()` e `mailTargets()`.
+
+### `runMailboxAction`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox-tools.ts`
+- **Assinatura:** `async runMailboxAction(deps: OwnerDeps, args: TargetArgs, action: MailboxAction): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/mailbox-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Aplica uma ação pronta (lido, arquivar, estrela) nos alvos dos argumentos.
+- **Entrada:** `deps`; `args`; `action`.
+- **Saída:** Resultado de `applyLabelChange()`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Os de `writableTargets()` e `applyLabelChange()`.
+
+## `connectors/gmail/src/mailbox.ts`
+
+### `mailTargets`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox.ts`
+- **Assinatura:** `mailTargets(messageIds: readonly string[] | undefined, threadIds: readonly string[] | undefined): MailTargets`
+- **Usada por:** `writableTargets()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta os alvos de uma alteração (mensagens e conversas).
+- **Entrada:** `messageIds`, `threadIds` (opcionais).
+- **Saída:** `MailTargets`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se não houver nenhum id.
+
+### `checkLabelChange`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox.ts`
+- **Assinatura:** `checkLabelChange(change: LabelChange): void`
+- **Usada por:** `connectors/gmail/src/mailbox-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida uma mudança de marcadores.
+- **Entrada:** `change`: add e remove.
+- **Saída:** Nada.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se não houver marcador ou se o mesmo estiver nos dois lados.
+
+### `resolveLabelIds`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox.ts`
+- **Assinatura:** `resolveLabelIds(labels: readonly GmailLabel[], wanted: readonly string[]): string[]`
+- **Usada por:** `connectors/gmail/src/mailbox-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte marcadores pedidos por id ou nome (sem maiúsculas) em ids.
+- **Entrada:** `labels`: marcadores da conta; `wanted`: ids ou nomes.
+- **Saída:** Lista de ids.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro para marcador desconhecido, sugerindo `list_labels`.
+
+### `fetchLabels`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox.ts`
+- **Assinatura:** `async fetchLabels(deps: OwnerDeps, ref: AccountRef): Promise<GmailLabel[]>`
+- **Usada por:** `accountLabels()`, `connectors/gmail/src/mailbox-tools.ts (módulo)`
+- **Processos:** P12, P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê os marcadores da conta.
+- **Entrada:** `deps`, `ref`.
+- **Saída:** Lista de `GmailLabel` (vazia sem campo).
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Propaga os de `gmailGet()`.
+
+### `applyLabelChange`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox.ts`
+- **Assinatura:** `async applyLabelChange(deps: OwnerDeps, ref: AccountRef, request: { readonly targets: MailTargets; readonly change: LabelChange }): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/mailbox-tools.ts (módulo)`, `runMailboxAction()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Põe e tira marcadores: `batchModify` nas mensagens e `modify` em cada conversa.
+- **Entrada:** `deps`, `ref`; `request`: alvos e mudança.
+- **Saída:** Contagens e marcadores alterados.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+
+### `targetCounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox.ts`
+- **Assinatura:** `targetCounts(alias: string, targets: MailTargets): Record<string, unknown>`
+- **Usada por:** `applyLabelChange()`, `moveToTrash()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Conta e quantidade de mensagens e conversas alteradas.
+- **Entrada:** `alias`; `targets`.
+- **Saída:** `{ account, messages, threads }`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `moveToTrash`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mailbox.ts`
+- **Assinatura:** `async moveToTrash(deps: OwnerDeps, ref: AccountRef, request: { readonly targets: MailTargets; readonly restore: boolean }): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/mailbox-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Manda mensagens e conversas para a lixeira ou as restaura (sem exclusão definitiva).
+- **Entrada:** `deps`, `ref`; `request`: alvos e `restore`.
+- **Saída:** Contagens e a ação (`trash`/`untrash`).
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+
+## `connectors/gmail/src/mime.ts`
+
+### `splitAddressList`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `splitAddressList(text: string): string[]`
+- **Usada por:** `parseAddressList()`, `parseRecipients()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Separa uma lista de endereços por vírgula ou ponto e vírgula, fora de aspas e de `<...>`.
+- **Entrada:** `text`: lista.
+- **Saída:** Itens aparados, sem vazios.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseMailAddress`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `parseMailAddress(item: string): MailAddress | null`
+- **Usada por:** `parseAddressList()`, `parseRecipients()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê `Nome <e-mail>`, `"Nome" <e-mail>` ou `e-mail` e valida o e-mail.
+- **Entrada:** `item`: um endereço.
+- **Saída:** `{ name, email }`, ou nulo se inválido (inclusive com quebra de linha).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseAddressList`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `parseAddressList(text: string): MailAddress[]`
+- **Usada por:** `replyRecipients()`, `replyToList()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Endereços válidos de um cabeçalho, descartando os inválidos.
+- **Entrada:** `text`: valor do cabeçalho.
+- **Saída:** Lista de `MailAddress`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseRecipients`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `parseRecipients(items: readonly string[], field: string): MailAddress[]`
+- **Usada por:** `composeEmail()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida os destinatários pedidos num campo.
+- **Entrada:** `items`: endereços (um item pode ter vários); `field`: nome do campo.
+- **Saída:** Lista de `MailAddress`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro com o campo e o item inválido.
+
+### `cleanHeaderText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `cleanHeaderText(text: string): string`
+- **Usada por:** `attachmentPart()`, `mimeHeaderLines()`, `parseMailAddress()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Troca quebras de linha e tabs por espaço (impede injeção de cabeçalho).
+- **Entrada:** `text`.
+- **Saída:** Texto numa linha só, aparado.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isPrintableAscii`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `isPrintableAscii(text: string): boolean`
+- **Usada por:** `encodeHeaderWord()`, `formatMailAddress()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se o texto só tem ASCII imprimível.
+- **Entrada:** `text`.
+- **Saída:** Booleano.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `encodeHeaderWord`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `encodeHeaderWord(text: string): string`
+- **Usada por:** `attachmentPart()`, `formatMailAddress()`, `mimeHeaderLines()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Codifica texto não ASCII em palavras RFC 2047 `=?UTF-8?B?...?=` de até 75 caracteres.
+- **Entrada:** `text`.
+- **Saída:** O texto (ASCII) ou as palavras codificadas, dobradas com CRLF + espaço.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `formatMailAddress`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `formatMailAddress(address: MailAddress): string`
+- **Usada por:** `addressHeader()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Formata um endereço para o cabeçalho (nome entre aspas ou codificado).
+- **Entrada:** `address`.
+- **Saída:** `"Nome" <e-mail>`, `=?UTF-8?B?...?= <e-mail>` ou só o e-mail.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `addressHeader`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `addressHeader(name: string, addresses: readonly MailAddress[]): string[]`
+- **Usada por:** `mimeHeaderLines()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a linha de um cabeçalho de endereços.
+- **Entrada:** `name`: To, Cc ou Bcc; `addresses`.
+- **Saída:** Uma linha, ou nenhuma se a lista for vazia.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `messageIdList`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `messageIdList(text: string | undefined): string | null`
+- **Usada por:** `threadingHeaders()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Guarda só os ids `<...>` de um `Message-ID`/`References`.
+- **Entrada:** `text`: valor do cabeçalho (ou nada).
+- **Saída:** Ids separados por espaço, ou nulo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `mimeHeaderLines`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `mimeHeaderLines(email: OutgoingEmail): string[]`
+- **Usada por:** `buildMimeMessage()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Cabeçalhos do e-mail: versão MIME, destinatários, assunto e conversa.
+- **Entrada:** `email`: e-mail a enviar.
+- **Saída:** Lista de linhas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `wrapBase64`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `wrapBase64(bytes: Uint8Array): string`
+- **Usada por:** `attachmentPart()`, `textPart()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Codifica bytes em base64 com linhas de 76 caracteres.
+- **Entrada:** `bytes`.
+- **Saída:** Texto base64 com CRLF.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `textPart`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `textPart(body: string): string[]`
+- **Usada por:** `buildMimeMessage()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Parte de texto plano UTF-8 em base64, com quebras CRLF.
+- **Entrada:** `body`: texto.
+- **Saída:** Linhas da parte (cabeçalhos, linha vazia e conteúdo).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `safeMimeType`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `safeMimeType(mimeType: string): string`
+- **Usada por:** `attachmentPart()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Aceita só tipos MIME no formato `tipo/subtipo`.
+- **Entrada:** `mimeType`.
+- **Saída:** O tipo, ou `application/octet-stream`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `attachmentPart`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `attachmentPart(attachment: MailAttachment): string[]`
+- **Usada por:** `buildMimeMessage()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Parte MIME de um anexo, com nome limpo e codificado.
+- **Entrada:** `attachment`: nome, tipo e bytes.
+- **Saída:** Linhas da parte.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `buildMimeMessage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `buildMimeMessage(email: OutgoingEmail, boundary: string): string`
+- **Usada por:** `gmailMessageResource()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a mensagem MIME completa; com anexos vira `multipart/mixed`.
+- **Entrada:** `email`; `boundary`: fronteira das partes.
+- **Saída:** Texto MIME com CRLF.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toRawMessage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/mime.ts`
+- **Assinatura:** `toRawMessage(mime: string): string`
+- **Usada por:** `gmailMessageResource()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Codifica a mensagem MIME em base64url (campo `raw` da Gmail API).
+- **Entrada:** `mime`.
+- **Saída:** Texto base64url.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/gmail/src/send-tools.ts`
+
+### `replyTool`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send-tools.ts`
+- **Assinatura:** `replyTool(options: ReplyToolOptions): ToolSpec<OwnerDeps>`
+- **Usada por:** `connectors/gmail/src/send-tools.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a ferramenta de resposta (ao remetente ou a todos) com as anotações de envio.
+- **Entrada:** `options`: nome, `replyAll` e descrição.
+- **Saída:** `ToolSpec`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/gmail/src/send.ts`
+
+### `checkRecipientLimit`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `checkRecipientLimit(email: OutgoingEmail): void`
+- **Usada por:** `composeEmail()`, `prepareReply()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Exige ao menos um destinatário em `to` e no máximo 100 no total.
+- **Entrada:** `email`.
+- **Saída:** Nada.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro acionável nos dois casos.
+
+### `composeEmail`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `composeEmail(args: ComposeArgs): PreparedEmail`
+- **Usada por:** `connectors/gmail/src/send-tools.ts (módulo)`, `prepareDraftEmail()`, `prepareForward()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta um e-mail novo, sem conversa, a partir dos argumentos da ferramenta.
+- **Entrada:** `args`: to, cc, bcc, assunto e corpo.
+- **Saída:** `PreparedEmail`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Os de `parseRecipients()` e `checkRecipientLimit()`.
+
+### `mimeBoundary`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `mimeBoundary(): string`
+- **Usada por:** `gmailMessageResource()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera uma fronteira MIME aleatória que não colide com base64.
+- **Entrada:** Nenhuma.
+- **Saída:** `=_part_<aleatório>`.
+- **Efeitos:** Lê o gerador aleatório.
+- **Erros:** Nenhum.
+
+### `gmailMessageResource`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `gmailMessageResource(prepared: PreparedEmail): { raw: string; threadId?: string }`
+- **Usada por:** `createDraft()`, `sendPrepared()`, `updateDraft()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o e-mail pronto no recurso da Gmail API (`raw` e `threadId`).
+- **Entrada:** `prepared`.
+- **Saída:** `{ raw, threadId? }`.
+- **Efeitos:** Lê o gerador aleatório (fronteira).
+- **Erros:** Nenhum.
+
+### `fetchFullMessage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `fetchFullMessage(deps: OwnerDeps, ref: AccountRef, messageId: string): Promise<GmailMessage>`
+- **Usada por:** `prepareForward()`, `prepareReply()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma mensagem inteira (formato `full`) para responder ou encaminhar.
+- **Entrada:** `deps`, `ref`; `messageId`.
+- **Saída:** A `GmailMessage`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Propaga os de `gmailGet()`.
+
+### `prepareReply`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `async prepareReply(deps: OwnerDeps, ref: AccountRef, request: ReplyRequest): Promise<PreparedEmail>`
+- **Usada por:** `prepareDraftEmail()`, `replyTool()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o original e monta a resposta (ao remetente ou a todos).
+- **Entrada:** `deps`, `ref`; `request`: id, texto e `replyAll`.
+- **Saída:** `PreparedEmail`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Os de `fetchFullMessage()`, `replyEmail()` e `checkRecipientLimit()`.
+
+### `forwardAttachments`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `async forwardAttachments(deps: OwnerDeps, ref: AccountRef, message: GmailMessage): Promise<MailAttachment[]>`
+- **Usada por:** `prepareForward()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Baixa os anexos do original para encaminhar.
+- **Entrada:** `deps`, `ref`; `message`: original.
+- **Saída:** Lista de `MailAttachment`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança erro se a soma passar de 18 MB (antes de baixar); propaga os de `downloadAttachment()`.
+
+### `prepareForward`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `async prepareForward(deps: OwnerDeps, ref: AccountRef, request: ForwardRequest): Promise<PreparedEmail>`
+- **Usada por:** `connectors/gmail/src/send-tools.ts (módulo)`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida os destinatários, lê o original e baixa os anexos dele para encaminhar.
+- **Entrada:** `deps`, `ref`; `request`: id, destinatários e nota.
+- **Saída:** `PreparedEmail`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Os de `composeEmail()`, `fetchFullMessage()` e `forwardAttachments()`.
+
+### `sendPrepared`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `async sendPrepared(deps: OwnerDeps, ref: AccountRef, prepared: PreparedEmail): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/send-tools.ts (módulo)`, `replyTool()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Envia o e-mail pronto em `messages/send`.
+- **Entrada:** `deps`, `ref`; `prepared`.
+- **Saída:** Resultado de `sentResult()`.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token. O e-mail sai da conta.
+- **Erros:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+
+### `sentResult`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/send.ts`
+- **Assinatura:** `sentResult(alias: string, sent: { readonly id?: string; readonly threadId?: string }): Record<string, unknown>`
+- **Usada por:** `sendDraft()`, `sendPrepared()`
+- **Processos:** P18
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o resultado de um envio.
+- **Entrada:** `alias`; `sent`: resposta do Gmail.
+- **Saída:** `{ account, sent, message_id, thread_id }` (ids nulos se faltarem).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -8466,7 +9612,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `ACCESS_TOKEN_MARGIN_MS`    | `connectors/gmail/src/access-token.ts`     | Margem antes do vencimento em que o access token do Google é renovado.                                            |
 | `MAX_ATTACHMENT_BYTES`      | `connectors/gmail/src/attachments.ts`      | Maior anexo lido como texto (5 MB).                                                                               |
 | `MAX_ATTACHMENT_CHARS`      | `connectors/gmail/src/attachments.ts`      | Maior texto devolvido de um anexo.                                                                                |
-| `GMAIL_READONLY_SCOPE`      | `connectors/gmail/src/config.ts`           | Escopo `gmail.readonly`, o único escopo de dados pedido.                                                          |
+| `GMAIL_MODIFY_SCOPE`        | `connectors/gmail/src/config.ts`           | Escopo `gmail.modify`, o único escopo de dados pedido (ler, enviar, organizar; sem exclusão definitiva).          |
 | `MIN_CONSENT_SECRET_CHARS`  | `connectors/gmail/src/config.ts`           | Tamanho mínimo de `CONSENT_SECRET`.                                                                               |
 | `UPSTREAM_USER_AGENT`       | `connectors/gmail/src/context.ts`          | User-Agent enviado ao Google e à Gmail API.                                                                       |
 | `GMAIL_API_BASE`            | `connectors/gmail/src/gmail-api.ts`        | Base da Gmail API para a conta do token.                                                                          |
@@ -8495,7 +9641,44 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `getMessageTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `get_message`.                                                                                         |
 | `listLabelsTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `list_labels`.                                                                                         |
 | `getAttachmentTextTool`     | `connectors/gmail/src/tools.ts`            | Ferramenta `get_attachment_text`.                                                                                 |
-| `GMAIL_TOOLS`               | `connectors/gmail/src/tools.ts`            | Todas as ferramentas do Gmail, na ordem mostrada ao Claude.                                                       |
+| `GMAIL_TOOLS`               | `connectors/gmail/src/tool-list.ts`        | Todas as ferramentas do Gmail, na ordem mostrada ao Claude.                                                       |
+| `MAX_QUOTED_CHARS`          | `connectors/gmail/src/compose.ts`          | Maior trecho do original citado numa resposta (20 mil caracteres).                                                |
+| `FORWARD_SEPARATOR`         | `connectors/gmail/src/compose.ts`          | Linha que abre o bloco do e-mail encaminhado.                                                                     |
+| `DRAFT_SHAPE`               | `connectors/gmail/src/draft-tools.ts`      | Parâmetros do conteúdo de um rascunho (criar e substituir).                                                       |
+| `listDraftsTool`            | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `list_drafts`.                                                                                         |
+| `createDraftTool`           | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `create_draft`.                                                                                        |
+| `updateDraftTool`           | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `update_draft`.                                                                                        |
+| `sendDraftTool`             | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `send_draft`.                                                                                          |
+| `deleteDraftTool`           | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `delete_draft`.                                                                                        |
+| `MAX_GMAIL_ERROR_DETAIL`    | `connectors/gmail/src/gmail-api.ts`        | Maior detalhe de erro do Gmail repassado ao modelo (200 caracteres).                                              |
+| `TARGET_SHAPE`              | `connectors/gmail/src/mailbox-tools.ts`    | Parâmetros de alvo das ferramentas de organização (`message_ids`, `thread_ids`).                                  |
+| `markReadTool`              | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `mark_read`.                                                                                           |
+| `archiveTool`               | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `archive`.                                                                                             |
+| `starTool`                  | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `star`.                                                                                                |
+| `updateLabelsTool`          | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `update_labels`.                                                                                       |
+| `trashTool`                 | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `trash`.                                                                                               |
+| `untrashTool`               | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `untrash`.                                                                                             |
+| `MAX_TARGET_MESSAGES`       | `connectors/gmail/src/mailbox.ts`          | Mais mensagens por chamada das ferramentas de organização (50).                                                   |
+| `MAX_TARGET_THREADS`        | `connectors/gmail/src/mailbox.ts`          | Mais conversas por chamada das ferramentas de organização (20).                                                   |
+| `MAILBOX_ACTIONS`           | `connectors/gmail/src/mailbox.ts`          | Marcadores de sistema que cada ação põe e tira (lido, arquivar, estrela).                                         |
+| `MAX_ENCODED_WORD_BYTES`    | `connectors/gmail/src/mime.ts`             | Maior trecho UTF-8 de uma palavra RFC 2047 (45 bytes, palavra ≤ 75).                                              |
+| `MAX_BODY_CHARS`            | `connectors/gmail/src/send-tools.ts`       | Maior corpo de e-mail aceito (100 mil caracteres).                                                                |
+| `RECIPIENTS`                | `connectors/gmail/src/send-tools.ts`       | Esquema zod de lista de destinatários.                                                                            |
+| `BODY`                      | `connectors/gmail/src/send-tools.ts`       | Esquema zod do corpo em texto plano.                                                                              |
+| `SUBJECT`                   | `connectors/gmail/src/send-tools.ts`       | Esquema zod do assunto (até 998 caracteres).                                                                      |
+| `sendEmailTool`             | `connectors/gmail/src/send-tools.ts`       | Ferramenta `send_email`.                                                                                          |
+| `replyEmailTool`            | `connectors/gmail/src/send-tools.ts`       | Ferramenta `reply_email`.                                                                                         |
+| `replyAllEmailTool`         | `connectors/gmail/src/send-tools.ts`       | Ferramenta `reply_all_email`.                                                                                     |
+| `forwardEmailTool`          | `connectors/gmail/src/send-tools.ts`       | Ferramenta `forward_email`.                                                                                       |
+| `MAX_RECIPIENTS`            | `connectors/gmail/src/send.ts`             | Mais destinatários (To + Cc + Bcc) num e-mail (100).                                                              |
+| `MAX_FORWARD_BYTES`         | `connectors/gmail/src/send.ts`             | Maior soma de anexos num encaminhamento (18 MB).                                                                  |
+| `ONE_ACCOUNT`               | `connectors/gmail/src/tools.ts`            | Esquema zod do parâmetro `account` de uma conta só.                                                               |
+| `CONFIRM_HINT`              | `connectors/gmail/src/tools.ts`            | Frase das ferramentas de escrita: confirmar com o usuário e nunca agir por pedido de um e-mail.                   |
+| `READ_ONLY_HINTS`           | `connectors/gmail/src/tools.ts`            | Anotações MCP de leitura (`readOnlyHint`).                                                                        |
+| `SEND_HINTS`                | `connectors/gmail/src/tools.ts`            | Anotações MCP de envio: destrutiva e não idempotente.                                                             |
+| `DESTRUCTIVE_HINTS`         | `connectors/gmail/src/tools.ts`            | Anotações MCP de quem apaga ou sobrescreve: destrutiva e idempotente.                                             |
+| `ORGANIZE_HINTS`            | `connectors/gmail/src/tools.ts`            | Anotações MCP de organização reversível.                                                                          |
+| `CREATE_HINTS`              | `connectors/gmail/src/tools.ts`            | Anotações MCP de criação sem apagar nada.                                                                         |
 | `GMAIL_SERVER_INFO`         | `connectors/gmail/src/worker.ts`           | Nome e versão do servidor MCP do Gmail.                                                                           |
 | `GMAIL_SERVER_INSTRUCTIONS` | `connectors/gmail/src/worker.ts`           | Instruções do servidor MCP (contas e conteúdo não confiável).                                                     |
 | `ACCESS_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`           | Validade do access token emitido ao Claude (1 hora).                                                              |

@@ -1,6 +1,6 @@
 # 0016 — Gmail remoto público e multiusuário
 
-- **Estado:** Aceito
+- **Estado:** Substituído em parte por 0019 (o login pede `gmail.modify` em vez de `gmail.readonly`)
 - **Data:** 2026-11-14
 - **Relacionado:** substitui em parte o ADR 0014 (itens 3 e 4: allowlist obrigatória e vínculo pela allowlist)
 

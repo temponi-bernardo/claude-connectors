@@ -25,9 +25,11 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
 <h2>Gmail</h2>
 <ul>
   <li>
-    <strong>O que é lido:</strong> só leitura (escopo <code>gmail.readonly</code>) das contas Gmail
-    que você mesmo vincula: busca, conversas, mensagens, rótulos e o texto de anexos, só quando você
-    pede algo ao Claude. O conector não envia, apaga nem altera e-mails.
+    <strong>O que é acessado:</strong> as contas Gmail que você mesmo vincula, com o escopo
+    <code>gmail.modify</code>, só quando você pede algo ao Claude: busca, conversas, mensagens,
+    rótulos e texto de anexos; e, se você pedir, envio, resposta, encaminhamento, rascunhos,
+    marcadores, arquivar e lixeira. O Claude pede sua confirmação antes de enviar ou apagar. O
+    conector não faz exclusão definitiva (esse escopo nem permite).
   </li>
   <li>
     <strong>O que é guardado:</strong> por pessoa que usa o conector, o identificador da conta

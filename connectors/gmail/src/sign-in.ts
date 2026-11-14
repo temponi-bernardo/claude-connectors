@@ -1,6 +1,6 @@
 /**
  * Login de quem instalou o conector (OAuth 2.1 do Claude → Worker): consentimento por cliente, ida ao Google
- * com `openid email` e `gmail.readonly` (acesso offline), volta validada pela biblioteca (`state` de uso único
+ * com `openid email` e `gmail.modify` (acesso offline), volta validada pela biblioteca (`state` de uso único
  * preso ao navegador) e checagem do `id_token`. A conta que entrou já fica vinculada ao usuário. Qualquer
  * conta Google entra, a menos que `ALLOWED_EMAILS` restrinja (modo privado).
  */

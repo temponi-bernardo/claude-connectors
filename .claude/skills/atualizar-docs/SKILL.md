@@ -28,5 +28,8 @@ Guia e modelos: `docs/DOCUMENTATION.md`. Índice do que existe: `docs/README.md`
    5. ROADMAP.md (estado e "Próxima tarefa") e CHANGELOG.md ("Não lançado").
    6. `.env.example` se surgiu variável nova; GLOSSARY.md se surgiu termo novo.
 4. **`npm run docs:check`** até `✔`. Leia cada mensagem: ela diz exatamente o que falta ou sobra.
+   `BLOCO_GERADO_DESATUALIZADO` que volta depois do Prettier costuma ser assinatura com tipo de objeto inline
+   em várias linhas (parâmetro ou retorno): o Prettier reindenta o bloco e o gerador não. Dê nome ao tipo
+   (`interface`) e rode `docs:generate` de novo.
 5. **Relate** no corpo do PR usando o checklist do template: para cada doc, "atualizado" ou "não se aplica:
    motivo".
