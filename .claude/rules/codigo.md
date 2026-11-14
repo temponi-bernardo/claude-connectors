@@ -10,7 +10,7 @@ paths:
 - Antes de criar uma função, procure em `docs/FUNCTIONS.md` se já existe algo equivalente. Nada repetido.
 - Função nova: nome único no repositório, `function` no topo, ≤ 25 linhas, ≤ 3 parâmetros, JSDoc de uma
   linha. Pura sempre que possível; efeito em função fina separada.
-- Depois de criar/renomear/remover função: `npm run docs:generate`, preencha Faz/Entrada/Saída/Efeitos/Erros
+- Depois de criar/renomear/remover função: `npm run docs:generate`, preencha Does/Input/Output/Effects/Errors
   em `docs/FUNCTIONS.md` e cite a função no processo certo em `docs/PROCESSES.md`.
 - Constante exportada nova → linha na tabela "Data and constants".
 - Pasta nova → linha em `docs/STRUCTURE.md`.

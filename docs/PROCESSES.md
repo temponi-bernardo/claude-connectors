@@ -1,354 +1,354 @@
-# Processos
+# Processes
 
-Fluxos do sistema, do gatilho ao resultado. Cada passo cita as funções envolvidas como `` `nome()` ``;
-o `docs:check` usa essas citações (mais tudo o que elas chamam) para preencher o campo **Processos**
-de cada função em [FUNCTIONS.md](FUNCTIONS.md). Função citada que não existe no código é erro.
+System flows, from trigger to result. Each step cites the functions involved as `` `nome()` ``;
+`docs:check` uses these citations (plus everything they call) to fill in the **Processes** field
+of each function in [FUNCTIONS.md](FUNCTIONS.md). Citing a function that does not exist in the code is an error.
 
-Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
+Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 
-## P01 — Checar a documentação (`npm run docs:check`)
+## P01 — Check the documentation (`npm run docs:check`)
 
-- **Gatilho:** `npm run docs:check`, o `npm run check`, o hook `pre-push`, o `pr:check` e o hook `Stop` do Claude Code.
-- **Passos:**
-  1. `runDocsCli()` lê o comando (`check` por padrão) e chama `runCheck()`.
-  2. `runCheck()` carrega a configuração com `loadDocsConfig()`, monta o inventário com `buildInventory()`
-     (código analisado por AST, pastas versionadas, testes, componentes de UI e exceções de teste) e lê os
-     documentos com `readDocsTexts()`.
-  3. As citações de PROCESSES.md são extraídas com `extractProcessCitations()`.
-  4. `runAllChecks()` roda cada checagem pura e junta os problemas.
-  5. `formatIssues()` imprime o resultado; o processo sai com código 1 se houver qualquer problema.
-- **Resultado:** lista numerada de problemas com código (`FUNCTION_UNDOCUMENTED`, `DIR_UNDOCUMENTED`...) e a
-  correção esperada, ou `✔` quando tudo está em dia.
-- **Falhas:** `docs.config.json` inválido ou `TEST_EXCEPTIONS` fora do formato interrompem a execução com erro.
+- **Trigger:** `npm run docs:check`, `npm run check`, the `pre-push` hook, `pr:check` and the Claude Code `Stop` hook.
+- **Steps:**
+  1. `runDocsCli()` reads the command (`check` by default) and calls `runCheck()`.
+  2. `runCheck()` loads the configuration with `loadDocsConfig()`, builds the inventory with `buildInventory()`
+     (code parsed via AST, versioned folders, tests, UI components and test exceptions) and reads the
+     documents with `readDocsTexts()`.
+  3. The PROCESSES.md citations are extracted with `extractProcessCitations()`.
+  4. `runAllChecks()` runs each pure check and collects the issues.
+  5. `formatIssues()` prints the result; the process exits with code 1 if there is any issue.
+- **Result:** numbered list of issues with a code (`FUNCTION_UNDOCUMENTED`, `DIR_UNDOCUMENTED`...) and the
+  expected fix, or `✔` when everything is up to date.
+- **Failures:** an invalid `docs.config.json` or a malformed `TEST_EXCEPTIONS` aborts the run with an error.
 
-## P02 — Gerar os blocos da documentação (`npm run docs:generate`)
+## P02 — Generate the documentation blocks (`npm run docs:generate`)
 
-- **Gatilho:** `npm run docs:generate`, normalmente logo depois de criar ou alterar funções.
-- **Passos:**
-  1. `runDocsCli()` recebe `generate` e chama `runGenerate()`.
-  2. `runGenerate()` monta o inventário e lê os documentos como no P01, e chama `generateFunctionsDoc()`.
-  3. `generateFunctionsDoc()` calcula "Processos" por função com `processesByFunction()` e aplica
-     `applyGenerated()`: atualiza o índice por módulo, substitui os blocos gerados existentes e acrescenta
-     seções novas com os campos manuais marcados como `_fill_in_`.
-  4. O arquivo só é regravado se houver mudança.
-- **Resultado:** `docs/FUNCTIONS.md` com blocos gerados em dia; os campos manuais novos ficam para a pessoa
-  (ou o Claude) preencher — o P01 cobra isso.
-- **Falhas:** as mesmas do P01.
+- **Trigger:** `npm run docs:generate`, usually right after creating or changing functions.
+- **Steps:**
+  1. `runDocsCli()` receives `generate` and calls `runGenerate()`.
+  2. `runGenerate()` builds the inventory and reads the documents as in P01, and calls `generateFunctionsDoc()`.
+  3. `generateFunctionsDoc()` computes "Processes" per function with `processesByFunction()` and applies
+     `applyGenerated()`: updates the per-module index, replaces the existing generated blocks and appends
+     new sections with the manual fields marked as `_fill_in_`.
+  4. The file is rewritten only if something changed.
+- **Result:** `docs/FUNCTIONS.md` with up-to-date generated blocks; the new manual fields are left for the person
+  (or Claude) to fill in — P01 enforces this.
+- **Failures:** the same as P01.
 
-## P03 — Responder a uma ferramenta do Canvas (chamada do Claude)
+## P03 — Answer a Canvas tool (Claude call)
 
-- **Gatilho:** o Claude chama uma ferramenta do conector `canvas-puc` (ex.: `upcoming_assignments`).
-- **Passos:**
-  1. A cada requisição em `/mcp` (P09), `canvasRemoteConnector()` cria o cliente com `createCanvasClient()` e o
-     token do usuário, escolhe as ferramentas com `canvasTools()` e as registra com `registerToolSpecs()` dentro de
-     `createCanvasMcpServer()`, que anuncia a versão de `plugin.json` (`manifestVersion()`). Cada ferramenta leva
-     `title` e dicas de `toolAnnotations()`: as de leitura são `readOnlyHint`, as de escrita `destructiveHint`.
-  2. A chamada passa por `runToolSafely()`; a `ToolSpec` criada por `defineTool()` valida os argumentos.
-  3. A ferramenta usa o cliente: `requestCanvas()` envia a requisição com `sendCanvasRequest()`
-     (`buildUrl()` + `Authorization: Bearer`); listagens seguem as páginas com `collectPages()` e `parseNextLink()`.
-     Apoios como `activeCourses()`, `fetchOwnSubmission()` e `getAllOrEmpty()` compõem buscas.
-  4. As respostas viram objetos enxutos com chaves em inglês (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
-     etc.), com HTML convertido por `htmlToText()`.
-  5. Arquivos: `read_file_text` usa `readCanvasFileText()`, que baixa texto com `fetchPlainText()` ou, para
-     Word (`wordKind()`), os bytes com `fetchFileBytes()` e extrai o texto com `wordToText()` (`docxToText()`
-     sobre `readZipEntry()`; `docToText()` sobre `openCfb()`/`readCfbStream()` e `parsePieceTable()`).
-     `download_file` usa `downloadCanvasFile()`: `downloadRefusal()` recusa arquivo sem link ou acima de 10 MB;
-     senão `downloadedFileResult()` embute o conteúdo com `fileContentBlock()` e o marca com `rawToolResult()`.
-  6. `toToolResult()` devolve o JSON (via `textResult()`) ou o resultado pronto ao Claude; qualquer erro vira
-     `errorResult()` com a mensagem.
-- **Resultado:** o Claude recebe só os campos úteis, com links absolutos e textos limpos.
-- **Falhas:** 401 vira `unauthorizedMessage()` (gerar outro token e reconectar); outro status ≠ 2xx vira erro com
-  status e corpo; argumentos inválidos são recusados pelo zod.
+- **Trigger:** Claude calls a tool of the `canvas-puc` connector (e.g. `upcoming_assignments`).
+- **Steps:**
+  1. On each request to `/mcp` (P09), `canvasRemoteConnector()` creates the client with `createCanvasClient()` and the
+     user's token, picks the tools with `canvasTools()` and registers them with `registerToolSpecs()` inside
+     `createCanvasMcpServer()`, which announces the version from `plugin.json` (`manifestVersion()`). Each tool carries
+     a `title` and hints from `toolAnnotations()`: read tools are `readOnlyHint`, write tools `destructiveHint`.
+  2. The call goes through `runToolSafely()`; the `ToolSpec` created by `defineTool()` validates the arguments.
+  3. The tool uses the client: `requestCanvas()` sends the request with `sendCanvasRequest()`
+     (`buildUrl()` + `Authorization: Bearer`); listings follow the pages with `collectPages()` and `parseNextLink()`.
+     Helpers such as `activeCourses()`, `fetchOwnSubmission()` and `getAllOrEmpty()` compose lookups.
+  4. Responses become lean objects with English keys (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
+     etc.), with HTML converted by `htmlToText()`.
+  5. Files: `read_file_text` uses `readCanvasFileText()`, which downloads text with `fetchPlainText()` or, for
+     Word (`wordKind()`), the bytes with `fetchFileBytes()` and extracts the text with `wordToText()` (`docxToText()`
+     over `readZipEntry()`; `docToText()` over `openCfb()`/`readCfbStream()` and `parsePieceTable()`).
+     `download_file` uses `downloadCanvasFile()`: `downloadRefusal()` refuses a file without a link or above 10 MB;
+     otherwise `downloadedFileResult()` embeds the content with `fileContentBlock()` and marks it with `rawToolResult()`.
+  6. `toToolResult()` returns the JSON (via `textResult()`) or the ready-made result to Claude; any error becomes
+     `errorResult()` with the message.
+- **Result:** Claude receives only the useful fields, with absolute links and clean text.
+- **Failures:** 401 becomes `unauthorizedMessage()` (generate another token and reconnect); any other non-2xx status
+  becomes an error with status and body; invalid arguments are rejected by zod.
 
-## P04 — (removido) Login pelo navegador
+## P04 — (removed) Browser login
 
-O modo local, com sessão do navegador, saiu do projeto ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)).
-A autenticação agora é só o OAuth do P08. O número fica reservado para não renumerar os outros processos.
+The local mode, with a browser session, was removed from the project ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)).
+Authentication is now only the OAuth of P08. The number stays reserved so the other processes are not renumbered.
 
-## P05 — Build dos conectores (`npm run build`)
+## P05 — Connector build (`npm run build`)
 
-- **Gatilho:** `npm run build` ou o `pr:check`.
-- **Passos:**
-  1. `runBuildCli()` acha os conectores com `listConnectors()` (folders with `plugin/.claude-plugin/plugin.json`).
-  2. `buildConnector()` lê o `.mcp.json` do plugin, se houver (o WhatsApp self-host não tem), e falha se
-     `pluginMcpProblems()` (com `mcpServerProblems()` e `isRemoteMcpUrl()`) achar servidor que não seja `http` com
-     URL `https://` fixa (sem `${user_config.*}`), ou com `command` local.
-  3. Se houver `src/remote-main.ts`, une o servidor remoto com o esbuild (`bundleOptions()`) em
-     `connectors/<nome>/server/remote.js`, usado pelo Dockerfile (P08). O Worker compila direto do `src/`.
-- **Resultado:** plugin conferido e bundle remoto atualizado na pasta do conector.
-- **Falhas:** `.mcp.json` com servidor local ou URL insegura, ou erro de compilação, interrompem com a lista dos
-  problemas.
+- **Trigger:** `npm run build` or `pr:check`.
+- **Steps:**
+  1. `runBuildCli()` finds the connectors with `listConnectors()` (folders with `plugin/.claude-plugin/plugin.json`).
+  2. `buildConnector()` reads the plugin's `.mcp.json`, if any (the self-hosted WhatsApp has none), and fails if
+     `pluginMcpProblems()` (with `mcpServerProblems()` and `isRemoteMcpUrl()`) finds a server that is not `http` with
+     a fixed `https://` URL (no `${user_config.*}`), or one with a local `command`.
+  3. If there is a `src/remote-main.ts`, bundles the remote server with esbuild (`bundleOptions()`) into
+     `connectors/<nome>/server/remote.js`, used by the Dockerfile (P08). The Worker compiles straight from `src/`.
+- **Result:** plugin checked and remote bundle updated in the connector folder.
+- **Failures:** a `.mcp.json` with a local server or an insecure URL, or a compile error, aborts with the list of
+  problems.
 
-## P06 — Portão de PR local (`npm run pr:check`)
+## P06 — Local PR gate (`npm run pr:check`)
 
-- **Gatilho:** antes de abrir e antes de mergear um PR (não há CI, ADR 0006).
-- **Passos:**
-  1. `scripts/pr-check.sh` exige o título do PR e roda `npm run check` (inclui o P01 via `runDocsCli()`).
-  2. Roda o P05 (`npm run build`) e falha se o bundle versionado dos conectores mudar sem commit.
+- **Trigger:** before opening and before merging a PR (there is no CI, ADR 0006).
+- **Steps:**
+  1. `scripts/pr-check.sh` requires the PR title and runs `npm run check` (includes P01 via `runDocsCli()`).
+  2. Runs P05 (`npm run build`) and fails if the connectors' versioned bundle changes without a commit.
   3. Runs `npm run plugin:validate` (`scripts/plugin-validate.sh`): `claude plugin validate --strict` on the
      marketplace and on each `connectors/<name>/plugin`; any warning fails (needs the Claude Code CLI, ADR 0022).
-  4. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
-- **Resultado:** `✔ pr:check verde`, condição para o Claude mergear com squash.
-- **Falhas:** qualquer etapa com erro para o script com código ≠ 0.
+  4. Runs commitlint on the branch commits since `origin/main` and on the PR title.
+- **Result:** `✔ pr:check verde`, the condition for Claude to squash merge.
+- **Failures:** any failing step stops the script with a non-zero exit code.
 
-## P07 — Instalar um conector pelo marketplace (Claude, Cowork e Claude Code)
+## P07 — Install a connector from the marketplace (Claude, Cowork and Claude Code)
 
-- **Gatilho:** no Claude, "Adicionar marketplace" com `temponi-bernardo/claude-connectors` e instalar o plugin.
-- **Passos:**
-  1. O Claude lê `.claude-plugin/marketplace.json` e copia `connectors/<nome>/plugin/` (ADR 0020), que só tem `plugin.json`, skills e o
-     `.mcp.json` (P05 garante que ele aponta para um servidor remoto). O WhatsApp não tem `.mcp.json`: o plugin
-     traz só as skills e a pessoa conecta o próprio servidor como conector personalizado (P13–P17, ADR 0018).
-  2. O `.mcp.json` registra o servidor `http` do Worker (`https://canvas-puc-remote.bftemponi.workers.dev/mcp`).
-     Nada é instalado nem roda no computador.
-  3. Na primeira chamada, o servidor responde 401 e o Claude abre o OAuth do P08 (Gmail: P10); a partir daí, P09
+- **Trigger:** in Claude, "Add marketplace" with `temponi-bernardo/claude-connectors` and install the plugin.
+- **Steps:**
+  1. Claude reads `.claude-plugin/marketplace.json` and copies `connectors/<nome>/plugin/` (ADR 0020), which only has `plugin.json`, skills and the
+     `.mcp.json` (P05 ensures it points to a remote server). WhatsApp has no `.mcp.json`: the plugin
+     ships only the skills and the person connects their own server as a custom connector (P13–P17, ADR 0018).
+  2. The `.mcp.json` registers the Worker's `http` server (`https://canvas-puc-remote.bftemponi.workers.dev/mcp`).
+     Nothing is installed or runs on the computer.
+  3. On the first call, the server answers 401 and Claude opens the OAuth of P08 (Gmail: P10); from then on, P09
      (Gmail: P12).
-- **Resultado:** as ferramentas aparecem como `mcp__plugin_<nome>_<servidor>__<ferramenta>`.
-- **Falhas:** sem acesso ao repositório, o "Adicionar marketplace" falha; Worker fora do ar → o conector aparece
-  como falha de conexão.
+- **Result:** the tools show up as `mcp__plugin_<nome>_<servidor>__<ferramenta>`.
+- **Failures:** without access to the repository, "Add marketplace" fails; Worker down → the connector shows up
+  as a connection failure.
 
-## P08 — Conectar o Canvas remoto (OAuth no claude.ai)
+## P08 — Connect the remote Canvas (OAuth on claude.ai)
 
-- **Gatilho:** a primeira chamada do plugin instalado (P07), ou no claude.ai: Configurações → Conectores →
-  Adicionar conector personalizado com `https://<servidor>/mcp` (ADR 0009); ou um token vencido que obriga a
-  reconectar.
-- **Passos:**
-  1. Na subida, `startCanvasRemoteServer()` lê `readRemoteServerConfig()` (`readPublicUrl()`, `parseSealKey()`) e
-     `readCanvasRemoteSettings()`, monta `canvasRemoteConnector()` e sobe `startRemoteHttpServer()` com
-     `createRemoteHandler()`; cada requisição passa por `serveNodeRequest()` (`readNodeBody()`, `toWebRequest()`,
-     `writeWebResponse()`) e `routeRemoteRequest()`. No Cloudflare Workers (ADR 0010), `handleWorkerFetch()`
-     converte o ambiente com `toEnvVars()` e monta o app com `createWorkerApp()` (`readOAuthSettings()`), usando a
-     origem da requisição como emissor.
-  2. O Claude chama `/mcp` sem token e recebe `mcpUnauthorizedResponse()`; lê os metadados de
-     `protectedResourceMetadata()` e `authorizationServerMetadata()`.
-  3. `handleRegister()` registra o cliente com `registerClient()`: `isAllowedRedirect()` confere o retorno e o
-     `client_id` é um selo de `sealPayload()`.
-  4. `handleAuthorizePage()` valida a query com `parseAuthorizeQuery()` (`clientRedirectUris()`,
-     `readCodeChallenge()`) e mostra `renderLoginPage()` via `loginPageFor()`, com o pedido selado por
+- **Trigger:** the first call of the installed plugin (P07), or on claude.ai: Settings → Connectors →
+  Add custom connector with `https://<servidor>/mcp` (ADR 0009); or an expired token that forces a
+  reconnect.
+- **Steps:**
+  1. On startup, `startCanvasRemoteServer()` reads `readRemoteServerConfig()` (`readPublicUrl()`, `parseSealKey()`) and
+     `readCanvasRemoteSettings()`, builds `canvasRemoteConnector()` and starts `startRemoteHttpServer()` with
+     `createRemoteHandler()`; each request goes through `serveNodeRequest()` (`readNodeBody()`, `toWebRequest()`,
+     `writeWebResponse()`) and `routeRemoteRequest()`. On Cloudflare Workers (ADR 0010), `handleWorkerFetch()`
+     converts the environment with `toEnvVars()` and builds the app with `createWorkerApp()` (`readOAuthSettings()`), using the
+     request origin as issuer.
+  2. Claude calls `/mcp` without a token and receives `mcpUnauthorizedResponse()`; it reads the metadata from
+     `protectedResourceMetadata()` and `authorizationServerMetadata()`.
+  3. `handleRegister()` registers the client with `registerClient()`: `isAllowedRedirect()` checks the redirect and the
+     `client_id` is a seal from `sealPayload()`.
+  4. `handleAuthorizePage()` validates the query with `parseAuthorizeQuery()` (`clientRedirectUris()`,
+     `readCodeChallenge()`) and shows `renderLoginPage()` via `loginPageFor()`, with the request sealed by
      `sealAuthorizeRequest()`.
-  5. O usuário cola o token; `handleAuthorizeSubmit()` abre o pedido com `openAuthorizeRequest()`, confere o token
-     com `verifyCanvasToken()` e devolve o código de `issueAuthorizationCode()` por `redirectWithCode()`.
-  6. `handleToken()` troca o código em `redeemTokenRequest()` (`redeemAuthorizationCode()` confere PKCE com
-     `pkceChallenge()`) e responde com `issueTokenSet()`; depois, o refresh passa por `redeemRefreshToken()`.
-  7. A cada refresh, `handleToken()` chama `renewSecretQuietly()`: no Canvas, `renewCanvasSecret()` first asks
+  5. The user pastes the token; `handleAuthorizeSubmit()` opens the request with `openAuthorizeRequest()`, checks the token
+     with `verifyCanvasToken()` and returns the code from `issueAuthorizationCode()` via `redirectWithCode()`.
+  6. `handleToken()` exchanges the code in `redeemTokenRequest()` (`redeemAuthorizationCode()` checks PKCE with
+     `pkceChallenge()`) and answers with `issueTokenSet()`; afterwards, the refresh goes through `redeemRefreshToken()`.
+  7. On each refresh, `handleToken()` calls `renewSecretQuietly()`: for Canvas, `renewCanvasSecret()` first asks
      `isCanvasTokenAlive()` (`fetchCanvasSelf()`); a 401 answers `revoked` and the refresh returns `invalid_grant`,
-     so Claude asks the user to connect again. Otherwise `renewCanvasToken()` lista os tokens
-     com `canvasTokenApi()`, acha o próprio com `matchesVisibleToken()` e, se `planTokenRenewal()` mandar, estende a
-     validade para agora + 30 dias (o máximo que a PUC aceita). Falha na renovação só vira aviso no log.
-- **Resultado:** o conector aparece conectado no Claude (web, Cowork e celular); o servidor não guardou nada.
-- **Falhas:** token recusado → a página volta com o erro; Canvas token deleted or expired → the next refresh
-  gives `invalid_grant`; pedido com mais de 15 minutos → 400; retorno fora de
-  `OAUTH_REDIRECT_HOSTS` → registro recusado; troca da `SEAL_KEY` → todos reconectam.
+     so Claude asks the user to connect again. Otherwise `renewCanvasToken()` lists the tokens
+     with `canvasTokenApi()`, finds its own with `matchesVisibleToken()` and, if `planTokenRenewal()` says so, extends the
+     expiry to now + 30 days (the maximum PUC accepts). A failed renewal only becomes a log warning.
+- **Result:** the connector shows up as connected in Claude (web, Cowork and mobile); the server stored nothing.
+- **Failures:** token rejected → the page comes back with the error; Canvas token deleted or expired → the next refresh
+  gives `invalid_grant`; request older than 15 minutes → 400; redirect outside
+  `OAUTH_REDIRECT_HOSTS` → registration rejected; changing the `SEAL_KEY` → everyone reconnects.
 
-## P09 — Responder a uma ferramenta pelo conector remoto
+## P09 — Answer a tool through the remote connector
 
-- **Gatilho:** o Claude chama uma ferramenta em `POST /mcp` com o access token.
-- **Passos:**
-  1. `handleMcp()` lê o token do Canvas com `readAccessSecret()` (`openSealed()` confere tipo e validade).
-  2. O `createServer` de `canvasRemoteConnector()` monta o cliente com o token, e `createCanvasMcpServer()` registra
+- **Trigger:** Claude calls a tool at `POST /mcp` with the access token.
+- **Steps:**
+  1. `handleMcp()` reads the Canvas token with `readAccessSecret()` (`openSealed()` checks type and expiry).
+  2. The `createServer` of `canvasRemoteConnector()` builds the client with the token, and `createCanvasMcpServer()` registers
      `canvasTools()`.
-  3. `serveMcpRequest()` atende a requisição sem sessão, em JSON, e fecha o servidor; a ferramenta segue o P03
-     a partir do passo 2.
-- **Resultado:** a resposta da ferramenta, sem nada guardado no servidor.
-- **Falhas:** access token vencido → 401 e o Claude usa o refresh token (e o P08 passo 7 estende o token do
-  Canvas); token do Canvas vencido (mais de 30 dias sem uso, ou revogado) → `unauthorizedMessage()` devolve a
-  orientação de gerar outro token e reconectar (P08).
+  3. `serveMcpRequest()` handles the request sessionless, in JSON, and closes the server; the tool follows P03
+     from step 2.
+- **Result:** the tool's response, with nothing stored on the server.
+- **Failures:** expired access token → 401 and Claude uses the refresh token (and P08 step 7 extends the
+  Canvas token); expired Canvas token (more than 30 days unused, or revoked) → `unauthorizedMessage()` returns the
+  instruction to generate another token and reconnect (P08).
 
-## P10 — Conectar o Gmail remoto (instalar e entrar com o Google)
+## P10 — Connect the remote Gmail (install and sign in with Google)
 
-- **Gatilho:** qualquer pessoa instala o plugin `gmail` do marketplace ou adiciona `https://<worker>/mcp` como
-  conector personalizado no Claude (ADR 0014, ADR 0016).
-- **Passos:**
-  1. `handleGmailWorkerFetch()` (entrada `src/index.ts`) aplica `isRateLimited()` por IP (`clientIpKey()`) fora do
-     `/mcp` (`isMcpPath()`) e cria o provedor com `createGmailProvider()` para a origem de `publicOrigin()`; a
-     biblioteca atende metadados, `/register` (filtrado por `checkClientRegistration()`) e `/token`, e manda o
-     resto para `handleDefaultRequest()`, que monta `createGmailDeps()` (`readGmailSettings()`).
-  2. `GET /authorize`: `showAuthorize()` valida o pedido e mostra `consentPage()`; se o consentimento já foi
-     lembrado, vai direto a `beginGoogleSignIn()`.
-  3. `POST /authorize`: `submitAuthorize()` nega (volta ao Claude com `access_denied`) ou aprova e chama
-     `beginGoogleSignIn()`, que guarda verificador PKCE e `nonce` na transação e redireciona com
-     `googleAuthorizeUrl()` (`openid email gmail.modify`, acesso offline).
-  4. `GET /google/callback` sem prefixo `link.`: `finishSignIn()` recupera a transação; `completeSignIn()` troca o
-     código com `exchangeGoogleCode()`, valida o `id_token` com `verifyGoogleIdToken()`, confere
-     `isEmailAllowed()` (só barra no modo privado) e `linkSignedInAccount()` já vincula a conta do login
-     (`storeGoogleAccount()`); a biblioteca conclui a autorização com o `sub` como usuário (props: usuário,
-     e-mail e id de sessão).
-- **Resultado:** o Claude recebe o código e troca por tokens no KV `OAUTH_KV`; a conta do login já aparece em
+- **Trigger:** anyone installs the `gmail` plugin from the marketplace or adds `https://<worker>/mcp` as a
+  custom connector in Claude (ADR 0014, ADR 0016).
+- **Steps:**
+  1. `handleGmailWorkerFetch()` (entry `src/index.ts`) applies `isRateLimited()` per IP (`clientIpKey()`) outside
+     `/mcp` (`isMcpPath()`) and creates the provider with `createGmailProvider()` for the origin from `publicOrigin()`; the
+     library serves metadata, `/register` (filtered by `checkClientRegistration()`) and `/token`, and sends the
+     rest to `handleDefaultRequest()`, which builds `createGmailDeps()` (`readGmailSettings()`).
+  2. `GET /authorize`: `showAuthorize()` validates the request and shows `consentPage()`; if consent was already
+     remembered, it goes straight to `beginGoogleSignIn()`.
+  3. `POST /authorize`: `submitAuthorize()` denies (back to Claude with `access_denied`) or approves and calls
+     `beginGoogleSignIn()`, which stores the PKCE verifier and `nonce` in the transaction and redirects with
+     `googleAuthorizeUrl()` (`openid email gmail.modify`, offline access).
+  4. `GET /google/callback` without the `link.` prefix: `finishSignIn()` recovers the transaction; `completeSignIn()` exchanges the
+     code with `exchangeGoogleCode()`, validates the `id_token` with `verifyGoogleIdToken()`, checks
+     `isEmailAllowed()` (only blocks in private mode) and `linkSignedInAccount()` links the sign-in account right away
+     (`storeGoogleAccount()`); the library completes the authorization with the `sub` as user (props: user,
+     email and session id).
+- **Result:** Claude receives the code and exchanges it for tokens in the `OAUTH_KV` KV; the sign-in account already shows up in
   `list_accounts`.
-- **Falhas:** no modo privado, e-mail fora de `ALLOWED_EMAILS` → 403 (`accessDeniedPage()`); recusa no Google →
-  `access_denied` ao Claude; Gmail desmarcado → entra sem conta vinculada; pedido inválido ou cookie ausente →
-  `authorizationErrorResponse()`; mais de 30 req/min do mesmo IP → 429; secret faltando → 500
+- **Failures:** in private mode, an email outside `ALLOWED_EMAILS` → 403 (`accessDeniedPage()`); refusal at Google →
+  `access_denied` to Claude; Gmail unchecked → signs in with no linked account; invalid request or missing cookie →
+  `authorizationErrorResponse()`; more than 30 req/min from the same IP → 429; missing secret → 500
   (`configErrorResponse()`).
 
-## P11 — Vincular mais uma conta Gmail (`link_account` → `/accounts/link`)
+## P11 — Link another Gmail account (`link_account` → `/accounts/link`)
 
-- **Gatilho:** o usuário pede ao Claude para vincular outra conta, ou uma ferramenta diz que a conta perdeu o
-  acesso.
-- **Passos:**
-  1. A ferramenta `link_account` chama `issueLinkUrl()`: ticket selado com o usuário e 10 minutos de validade.
-  2. O usuário abre o link; `startAccountLink()` resgata o ticket com `redeemLinkTicket()` (uso único, marca no
-     KV), cria `state` (`link.` + aleatório), verificador, `nonce` e cookie de vínculo, grava o pedido selado pela
-     chave de `linkRequestKey()` e redireciona com `googleAuthorizeUrl()`.
-  3. Na volta, `finishAccountLink()` pega o pedido com `takeLinkRequest()` (uso único, cookie conferido por
-     `readCookie()` e `sha256Hex()`).
-  4. `linkSafely()` roda `linkFromCode()`, que troca o código, valida o `id_token`, confere `linkRefusalReason()`
-     (escopo `gmail.modify` com `hasModifyScope()` e refresh token) e grava com `storeGoogleAccount()` (`upsertAccount()`,
-     `saveOwnerAccounts()`, selo de `sealOwnerAccounts()`) no usuário do ticket.
-- **Resultado:** página "Conta vinculada"; o cookie é apagado com `linkCookie()`.
-- **Falhas:** link vencido, já usado ou de outro navegador → `invalidTicketPage()`; recusa no Google → "Vínculo
-  cancelado"; permissão do Gmail desmarcada → "Permissão faltando"; mais de 10 contas → erro de limite.
+- **Trigger:** the user asks Claude to link another account, or a tool says the account lost
+  access.
+- **Steps:**
+  1. The `link_account` tool calls `issueLinkUrl()`: a sealed ticket with the user and 10 minutes of validity.
+  2. The user opens the link; `startAccountLink()` redeems the ticket with `redeemLinkTicket()` (single use, marked in
+     KV), creates the `state` (`link.` + random), verifier, `nonce` and link cookie, stores the sealed request under
+     the key from `linkRequestKey()` and redirects with `googleAuthorizeUrl()`.
+  3. On return, `finishAccountLink()` takes the request with `takeLinkRequest()` (single use, cookie checked by
+     `readCookie()` and `sha256Hex()`).
+  4. `linkSafely()` runs `linkFromCode()`, which exchanges the code, validates the `id_token`, checks `linkRefusalReason()`
+     (`gmail.modify` scope with `hasModifyScope()` and refresh token) and stores with `storeGoogleAccount()` (`upsertAccount()`,
+     `saveOwnerAccounts()`, seal from `sealOwnerAccounts()`) under the ticket's user.
+- **Result:** "Account linked" page; the cookie is cleared with `linkCookie()`.
+- **Failures:** expired link, already used or from another browser → `invalidTicketPage()`; refusal at Google → "Link
+  cancelled"; Gmail permission unchecked → "Missing permission"; more than 10 accounts → limit error.
 
-## P12 — Responder a uma ferramenta do Gmail
+## P12 — Answer a Gmail tool
 
-- **Gatilho:** o Claude chama uma ferramenta em `POST /mcp` com o access token.
-- **Passos:**
-  1. A biblioteca valida o token e chama `handleMcpApi()`, que aplica `isRateLimited()` pela sessão, monta as
-     dependências com o usuário dos `props` e cria `createGmailServer()` com `GMAIL_TOOLS`; `serveMcpRequest()`
-     responde sem sessão.
-  2. A ferramenta lê as contas do usuário com `ownerRefs()` (`loadOwnerAccounts()`, `openOwnerAccounts()`,
-     `aliasAccounts()`) e resolve `account` com `resolveOwnerAccounts()` ou `resolveSingleAccount()`.
-  3. `gmailGet()` → `gmailCall()` pega o access token com `getAccessToken()` (memória por `accessTokenKey()` ou
-     `renewAccessToken()`), chama a Gmail API com `gmailUrl()` e `sendGmailRequest()`, lê com `readGmailJson()`
-     e, depois de 401, tenta de novo uma vez.
-  4. As respostas viram objetos enxutos: `searchThreads()` (`searchAccount()`, `summarizeThread()`, página
-     combinada com `encodeMultiPageToken()`), `formatThread()`/`formatMessage()` (`messageBodyText()`,
-     `truncateText()`), `accountLabels()` (`fetchLabels()`), `accountStatus()` (`accountBase()` mostra `write_access`) ou
+- **Trigger:** Claude calls a tool at `POST /mcp` with the access token.
+- **Steps:**
+  1. The library validates the token and calls `handleMcpApi()`, which applies `isRateLimited()` per session, builds the
+     dependencies with the user from `props` and creates `createGmailServer()` with `GMAIL_TOOLS`; `serveMcpRequest()`
+     answers sessionless.
+  2. The tool reads the user's accounts with `ownerRefs()` (`loadOwnerAccounts()`, `openOwnerAccounts()`,
+     `aliasAccounts()`) and resolves `account` with `resolveOwnerAccounts()` or `resolveSingleAccount()`.
+  3. `gmailGet()` → `gmailCall()` gets the access token with `getAccessToken()` (in memory by `accessTokenKey()` or
+     `renewAccessToken()`), calls the Gmail API with `gmailUrl()` and `sendGmailRequest()`, reads with `readGmailJson()`
+     and, after a 401, retries once.
+  4. Responses become lean objects: `searchThreads()` (`searchAccount()`, `summarizeThread()`, combined
+     page with `encodeMultiPageToken()`), `formatThread()`/`formatMessage()` (`messageBodyText()`,
+     `truncateText()`), `accountLabels()` (`fetchLabels()`), `accountStatus()` (`accountBase()` shows `write_access`) or
      `readAttachmentText()` (`downloadAttachment()`,
-     `attachmentBytesToText()` → `pdfToText()`, `wordToText()` ou `htmlToText()`); `withUntrustedNotice()` põe o
-     aviso de conteúdo não confiável. `unlink_account` usa `revokeGoogleToken()` e `saveOwnerAccounts()`.
-- **Resultado:** texto JSON enxuto, limitado em tamanho, com o apelido da conta em cada item; só as contas do
-  próprio usuário.
-- **Falhas:** nenhuma conta → `noAccountsError()`; conta revogada → `relinkError()` (pede `link_account`);
-  `invalid_grant` marca a conta com `markAccountRevoked()`; erro HTTP do Gmail → `gmailHttpError()` (com
-  `gmailErrorDetail()`); mais de 120
-  req/min → 429 (`rateLimitedResponse()`); anexo acima de 5 MB ou tipo não suportado → erro explicando o limite.
+     `attachmentBytesToText()` → `pdfToText()`, `wordToText()` or `htmlToText()`); `withUntrustedNotice()` adds the
+     untrusted-content notice. `unlink_account` uses `revokeGoogleToken()` and `saveOwnerAccounts()`.
+- **Result:** lean JSON text, size-limited, with the account alias on each item; only the user's
+  own accounts.
+- **Failures:** no account → `noAccountsError()`; revoked account → `relinkError()` (asks for `link_account`);
+  `invalid_grant` marks the account with `markAccountRevoked()`; Gmail HTTP error → `gmailHttpError()` (with
+  `gmailErrorDetail()`); more than 120
+  req/min → 429 (`rateLimitedResponse()`); attachment above 5 MB or unsupported type → error explaining the limit.
 
-## P13 — Conectar o WhatsApp remoto (OAuth com login do dono pelo GitHub)
+## P13 — Connect the remote WhatsApp (OAuth with owner login via GitHub)
 
-- **Gatilho:** no Claude, adicionar o conector personalizado `https://<worker>/mcp` do WhatsApp (ADR 0015).
-- **Passos:**
-  1. `handleWhatsAppFetch()` monta os apps com `createWhatsAppApps()` (`readWhatsAppSettings()`: `readAllowedEmails()`,
-     `requireEnv()`, `readTimingSettings()`, `readSendSettings()`; `resolveIssuer()`, `readOAuthSettings()`) e,
-     como o caminho não é do `/pair`, passa a requisição a `routeRemoteRequest()`.
-  2. Descoberta e registro seguem o P08 (passos 2 e 3). O conector vem de `whatsappRemoteConnector()`, com o login
-     de `githubUpstreamLogin()` (`githubSettingsFrom()`).
-  3. `handleAuthorizePage()` valida o pedido e, por ser login delegado, `redirectToUpstream()` manda o navegador a
-     `githubAuthorizeUrl()` com o pedido selado no `state`.
-  4. No retorno, `handleUpstreamCallback()` abre o `state` com `openAuthorizeRequest()` e chama `finishGithubLogin()`:
-     `exchangeGithubCode()` troca o código, `fetchGithubEmails()` lê os e-mails e `pickAllowedEmail()` exige um
-     verificado de `ALLOWED_EMAILS` (lista de `parseEmailList()`). O token do GitHub é descartado.
-  5. O e-mail aceito vira o segredo do código (`issueAuthorizationCode()`, `redirectWithCode()`); a troca de tokens
-     segue o P08 (passo 6).
-- **Resultado:** o conector aparece conectado; o segredo selado nos tokens é só o e-mail do dono.
-- **Falhas:** login cancelado ou conta fora da lista → página 403 com o motivo (`escapeHtml()`); `state` vencido →
-  400; secret faltando → 500 explicando qual.
+- **Trigger:** in Claude, add the WhatsApp custom connector `https://<worker>/mcp` (ADR 0015).
+- **Steps:**
+  1. `handleWhatsAppFetch()` builds the apps with `createWhatsAppApps()` (`readWhatsAppSettings()`: `readAllowedEmails()`,
+     `requireEnv()`, `readTimingSettings()`, `readSendSettings()`; `resolveIssuer()`, `readOAuthSettings()`) and,
+     since the path is not under `/pair`, passes the request to `routeRemoteRequest()`.
+  2. Discovery and registration follow P08 (steps 2 and 3). The connector comes from `whatsappRemoteConnector()`, with the login
+     from `githubUpstreamLogin()` (`githubSettingsFrom()`).
+  3. `handleAuthorizePage()` validates the request and, since it is a delegated login, `redirectToUpstream()` sends the browser to
+     `githubAuthorizeUrl()` with the request sealed in the `state`.
+  4. On return, `handleUpstreamCallback()` opens the `state` with `openAuthorizeRequest()` and calls `finishGithubLogin()`:
+     `exchangeGithubCode()` exchanges the code, `fetchGithubEmails()` reads the emails and `pickAllowedEmail()` requires a
+     verified one from `ALLOWED_EMAILS` (list from `parseEmailList()`). The GitHub token is discarded.
+  5. The accepted email becomes the code's secret (`issueAuthorizationCode()`, `redirectWithCode()`); the token exchange
+     follows P08 (step 6).
+- **Result:** the connector shows up as connected; the secret sealed in the tokens is only the owner's email.
+- **Failures:** login cancelled or account outside the list → 403 page with the reason (`escapeHtml()`); expired `state` →
+  400; missing secret → 500 explaining which one.
 
-## P14 — Responder a uma ferramenta do WhatsApp (sob demanda)
+## P14 — Answer a WhatsApp tool (on demand)
 
-- **Gatilho:** o Claude chama uma ferramenta em `POST /mcp` (ex.: `list_chats`).
-- **Passos:**
-  1. `handleMcp()` abre o access token e confere com `acceptsSecret` se o e-mail ainda está na lista; o
-     `createServer` monta `createWhatsAppMcpServer()` com `whatsappTools()` (leitura; envio só com `ENABLE_SEND`).
-  2. A ferramenta roda em `runRead()` com prazo de `toolDeadline()`: `prepareRead()` pede `POST /sync/wait` com o
-     orçamento de `syncWaitBudget()` e, se precisa parear, devolve o endereço do `/pair`. `withDeadline()` corta o
-     que passar do teto.
-  3. As chamadas à ponte passam por `bridgeJson()`/`callBridge()` (`bridgePath()`, `jsonPost()`), que usam
-     `bridgeFetchFor()` sobre o stub único de `bridgeStub()`. Erros viram texto com `bridgeErrorFrom()`;
-     estouro de prazo, `bridgeTimeoutMessage()`.
-  4. No Durable Object, `routeBridgeRequest()` (montado por `createBridgeLifecycle()`) chama `ensureRestored()`:
-     `readBridgePhase()` e, se a ponte acabou de acordar, `restoreRequestInit()` manda o snapshot do R2. Depois
-     `fetchBridge()` repassa com `withBridgeToken()` e `forwardInit()`.
-  5. A resposta é reduzida por `compactChat()`, `compactMessage()`, `compactContact()` ou `compactStatus()` (textos
-     limpos por `sanitizeText()` e `isHiddenChar()`) e embrulhada por `untrusted()`; `partialSyncWarning()` junta o
-     aviso de resultado parcial. Mídia vira bloco MCP em `mediaResult()` (`binaryContentBlock()`, `bytesToBase64()`).
-- **Resultado:** resposta compacta, com datas ISO com fuso e o aviso de conteúdo não confiável.
-- **Falhas:** cold start lento → "Tempo esgotado…, tente de novo"; snapshot que não abre → erro `bad_snapshot`
-  (a ponte nunca recomeça do zero sozinha); e-mail removido da lista → 403.
+- **Trigger:** Claude calls a tool at `POST /mcp` (e.g. `list_chats`).
+- **Steps:**
+  1. `handleMcp()` opens the access token and checks with `acceptsSecret` whether the email is still on the list; the
+     `createServer` builds `createWhatsAppMcpServer()` with `whatsappTools()` (read; sending only with `ENABLE_SEND`).
+  2. The tool runs in `runRead()` with the deadline from `toolDeadline()`: `prepareRead()` requests `POST /sync/wait` with the
+     budget from `syncWaitBudget()` and, if pairing is needed, returns the `/pair` address. `withDeadline()` cuts off
+     anything past the ceiling.
+  3. Bridge calls go through `bridgeJson()`/`callBridge()` (`bridgePath()`, `jsonPost()`), which use
+     `bridgeFetchFor()` over the single stub from `bridgeStub()`. Errors become text with `bridgeErrorFrom()`;
+     deadline overruns, `bridgeTimeoutMessage()`.
+  4. In the Durable Object, `routeBridgeRequest()` (built by `createBridgeLifecycle()`) calls `ensureRestored()`:
+     `readBridgePhase()` and, if the bridge just woke up, `restoreRequestInit()` sends the R2 snapshot. Then
+     `fetchBridge()` forwards with `withBridgeToken()` and `forwardInit()`.
+  5. The response is reduced by `compactChat()`, `compactMessage()`, `compactContact()` or `compactStatus()` (text
+     cleaned by `sanitizeText()` and `isHiddenChar()`) and wrapped by `untrusted()`; `partialSyncWarning()` adds the
+     partial-result notice. Media becomes an MCP block in `mediaResult()` (`binaryContentBlock()`, `bytesToBase64()`).
+- **Result:** compact response, with ISO dates with time zone and the untrusted-content notice.
+- **Failures:** slow cold start → `Tempo esgotado…, tente de novo` (timed out, try again); a snapshot that does not open → `bad_snapshot` error
+  (the bridge never restarts from scratch on its own); email removed from the list → 403.
 
-## P15 — Parear o número (`/pair`)
+## P15 — Pair the number (`/pair`)
 
-- **Gatilho:** o dono abre `https://<worker>/pair`.
-- **Passos:**
-  1. `routePairRequest()` reconhece o caminho com `isPairPath()` e lê a sessão com `readPairSession()`
+- **Trigger:** the owner opens `https://<worker>/pair`.
+- **Steps:**
+  1. `routePairRequest()` recognizes the path with `isPairPath()` and reads the session with `readPairSession()`
      (`parseCookies()`, `openSealed()`).
-  2. Sem sessão, `startPairLogin()` manda ao GitHub com `state` selado e um nonce em cookie (`pairCookie()`,
-     `redirectWithCookies()`). No retorno, `handlePairCallback()` confere com `isValidPairLogin()`, conclui com
-     `finishGithubLogin()` e `openPairSession()` grava a sessão.
-  3. `pairPage()` mostra `renderPairPage()` com o status de `fetchPairStatus()` (`describePairStatus()`,
-     `pairingSection()`, `maintenanceSection()`, `pairForm()`, `alertHtml()`) e um token de `issuePairCsrf()`.
-  4. Cada POST passa por `routePairPost()` e `handlePairPost()`: `isTrustedPost()` confere token e `Origin`, e a
-     ação de `PAIR_ACTIONS` chama a ponte (`/pair/code` com `normalizePhone()`, `/pair/qr`, `/logout`, ou
-     `/__reset`, que chega a `resetBridge()` e `archiveSnapshot()`), com prazo de `pairDeadline()`; falha vira
+  2. Without a session, `startPairLogin()` sends to GitHub with a sealed `state` and a nonce in a cookie (`pairCookie()`,
+     `redirectWithCookies()`). On return, `handlePairCallback()` checks with `isValidPairLogin()`, completes with
+     `finishGithubLogin()` and `openPairSession()` stores the session.
+  3. `pairPage()` shows `renderPairPage()` with the status from `fetchPairStatus()` (`describePairStatus()`,
+     `pairingSection()`, `maintenanceSection()`, `pairForm()`, `alertHtml()`) and a token from `issuePairCsrf()`.
+  4. Each POST goes through `routePairPost()` and `handlePairPost()`: `isTrustedPost()` checks the token and `Origin`, and the
+     `PAIR_ACTIONS` action calls the bridge (`/pair/code` with `normalizePhone()`, `/pair/qr`, `/logout`, or
+     `/__reset`, which reaches `resetBridge()` and `archiveSnapshot()`), with the deadline from `pairDeadline()`; a failure becomes
      `pairActionError()`.
-- **Resultado:** código de pareamento (ou QR) na tela; depois de digitado no celular, a ponte fica conectada.
-- **Falhas:** formulário velho ou de outra origem → 403; número inválido → aviso na página; ponte sem resposta →
-  "Não consegui ler o status".
+- **Result:** pairing code (or QR) on screen; once typed on the phone, the bridge stays connected.
+- **Failures:** stale form or from another origin → 403; invalid number → notice on the page; bridge not responding →
+  `Não consegui ler o status` (could not read the status).
 
-## P16 — Guardar e restaurar a sessão (snapshots no R2)
+## P16 — Save and restore the session (snapshots in R2)
 
-- **Gatilho:** rotas que podem mudar o banco (`SNAPSHOT_AFTER_PATHS`), o fim do `SLEEP_AFTER` e, no melhor
-  esforço, o `SIGTERM` da ponte.
-- **Passos:**
-  1. Depois do repasse, `SnapshotScheduler` agenda um snapshot se o último tem mais de `SNAPSHOT_INTERVAL_MS`;
-     os snapshots rodam em fila e falhas só vão ao log (`logSnapshotFailure()`).
-  2. `snapshotBridge()` pede `GET /snapshot` à ponte (já cifrado) e `storeSnapshotResponse()` lê
-     `readUploadHeaders()`; `storeSnapshot()` compara com `storedGeneration()` e grava em fluxo de tamanho fixo
-     (`workersFixedLength()`, que copia com `pumpInto()`), descartando geração velha.
-  3. Antes de dormir, o `onActivityExpired` do `WhatsAppBridge` tira o último snapshot e para o container.
-  4. No `SIGTERM` e sempre que a sessão do aparelho muda (pareou, conectou ou saiu), a ponte envia o snapshot
-     sozinha a `snapshot.internal`, interceptado pelo Worker em `acceptSnapshotPush()` (token conferido por
-     `sameSecret()`). Assim um pareamento novo vai para o R2 na hora, sem esperar uso ou o container dormir.
-  5. No próximo boot, `ensureRestored()` devolve o snapshot à ponte (P14, passo 4).
-- **Resultado:** sessão e mensagens sobrevivem ao container dormir, sem o Worker ver o conteúdo em claro.
-- **Falhas:** snapshot recusado pela ponte → erro até "Recomeçar do zero" no `/pair`; queda abrupta sem `SIGTERM`
-  → perde só o que mudou desde o último snapshot (o WhatsApp reenvia as pendências); gravação no R2 que falha →
-  o próximo snapshot é forçado (`?force=1`).
+- **Trigger:** routes that may change the database (`SNAPSHOT_AFTER_PATHS`), the end of `SLEEP_AFTER` and, best
+  effort, the bridge's `SIGTERM`.
+- **Steps:**
+  1. After forwarding, `SnapshotScheduler` schedules a snapshot if the last one is older than `SNAPSHOT_INTERVAL_MS`;
+     snapshots run in a queue and failures only go to the log (`logSnapshotFailure()`).
+  2. `snapshotBridge()` requests `GET /snapshot` from the bridge (already encrypted) and `storeSnapshotResponse()` reads
+     `readUploadHeaders()`; `storeSnapshot()` compares with `storedGeneration()` and writes as a fixed-length stream
+     (`workersFixedLength()`, which copies with `pumpInto()`), discarding an old generation.
+  3. Before sleeping, the `onActivityExpired` of `WhatsAppBridge` takes the last snapshot and stops the container.
+  4. On `SIGTERM` and whenever the device session changes (paired, connected or logged out), the bridge pushes the snapshot
+     on its own to `snapshot.internal`, intercepted by the Worker in `acceptSnapshotPush()` (token checked by
+     `sameSecret()`). So a new pairing goes to R2 right away, without waiting for use or for the container to sleep.
+  5. On the next boot, `ensureRestored()` hands the snapshot back to the bridge (P14, step 4).
+- **Result:** session and messages survive the container sleeping, without the Worker seeing the content in clear text.
+- **Failures:** snapshot rejected by the bridge → error until `Recomeçar do zero` (start over) on `/pair`; abrupt crash without `SIGTERM`
+  → loses only what changed since the last snapshot (WhatsApp resends pending items); a failed R2 write →
+  the next snapshot is forced (`?force=1`).
 
-## P17 — Enviar uma mensagem (`ENABLE_SEND`) e sync periódico opcional
+## P17 — Send a message (`ENABLE_SEND`) and optional periodic sync
 
-- **Gatilho:** `send_message` com `confirmed_by_user: true`; ou um Cron Trigger igual a `SYNC_CRON`.
-- **Passos:**
-  1. Envio: `allowedRecipient()` normaliza o destinatário com `normalizeRecipient()` (número, contato, LID ou
-     grupo) e, se a `SEND_ALLOWLIST` tiver itens, exige que ele esteja nela; `reply_to_message_id` vira `reply_to`.
-     No Durable Object, `guardSend()` aplica `planSend()` com o histórico do armazenamento antes de repassar o
-     `/send`. A ponte confere destinatário, allowlist, busca a mensagem citada (`GetQuoted`) e aplica o limite de
-     novo antes de enviar.
-  2. Cron: `runScheduledSync()` só age se `isSyncCronEnabled()`; acorda a ponte com `/sync/wait`, pede
-     `/__snapshot` e deixa o container dormir após `SLEEP_AFTER`.
-- **Resultado:** no máximo `SEND_MAX_PER_HOUR` envios por hora, para qualquer contato ou grupo (ou só a
-  allowlist, se definida), cada um confirmado pelo dono; com cron, histórico em dia mesmo sem uso.
-- **Falhas:** destinatário inválido ou fora da lista → recusa sem chamar a ponte; mensagem citada desconhecida →
-  `quoted_not_found` sem gastar a cota; limite estourado → 429 com espera em segundos.
-- **Resultado:** no máximo `SEND_MAX_PER_HOUR` envios por hora, só para a allowlist; com cron, histórico em dia
-  mesmo sem uso.
-- **Falhas:** destinatário fora da lista → recusa sem chamar a ponte; limite estourado → 429 com espera em segundos.
+- **Trigger:** `send_message` with `confirmed_by_user: true`; or a Cron Trigger equal to `SYNC_CRON`.
+- **Steps:**
+  1. Sending: `allowedRecipient()` normalizes the recipient with `normalizeRecipient()` (number, contact, LID or
+     group) and, if `SEND_ALLOWLIST` has items, requires it to be on it; `reply_to_message_id` becomes `reply_to`.
+     In the Durable Object, `guardSend()` applies `planSend()` with the stored history before forwarding
+     `/send`. The bridge checks recipient and allowlist, looks up the quoted message (`GetQuoted`) and applies the limit
+     again before sending.
+  2. Cron: `runScheduledSync()` only acts if `isSyncCronEnabled()`; wakes the bridge with `/sync/wait`, requests
+     `/__snapshot` and lets the container sleep after `SLEEP_AFTER`.
+- **Result:** at most `SEND_MAX_PER_HOUR` sends per hour, to any contact or group (or only the
+  allowlist, if set), each confirmed by the owner; with cron, history stays up to date even without use.
+- **Failures:** invalid recipient or outside the list → refused without calling the bridge; unknown quoted message →
+  `quoted_not_found` without using the quota; limit exceeded → 429 with the wait in seconds.
+- **Result:** at most `SEND_MAX_PER_HOUR` sends per hour, only to the allowlist; with cron, history stays up to date
+  even without use.
+- **Failures:** recipient outside the list → refused without calling the bridge; limit exceeded → 429 with the wait in seconds.
 
-## P18 — Gerenciar o Gmail: enviar, responder, encaminhar, rascunhos e organizar
+## P18 — Manage Gmail: send, reply, forward, drafts and organize
 
-- **Gatilho:** o Claude chama uma ferramenta de escrita (`send_email`, `reply_email`, `reply_all_email`,
+- **Trigger:** Claude calls a write tool (`send_email`, `reply_email`, `reply_all_email`,
   `forward_email`, `create_draft`, `update_draft`, `send_draft`, `delete_draft`, `mark_read`, `archive`, `star`,
-  `update_labels`, `trash`, `untrash`) em `POST /mcp`, depois de mostrar o conteúdo ao usuário e receber a
-  confirmação (as anotações MCP de envio e de exclusão têm `destructiveHint`; ADR 0019). Toda ferramenta dos três
-  conectores tem `title` e dicas obrigatórias (`toolAnnotations()` em `src/mcp/annotations.ts`; o typecheck falha sem elas).
-- **Passos:**
-  1. Os passos 1 e 2 de P12; a conta vem de `resolveWritableAccount()`, que exige o escopo com
-     `requireWriteAccess()` (`hasModifyScope()`) antes de qualquer chamada ao Gmail.
-  2. E-mail novo: `composeEmail()` valida os destinatários (`parseRecipients()`, `splitAddressList()`,
-     `parseMailAddress()`) e o limite (`checkRecipientLimit()`). Resposta: `prepareReply()` lê o original com
-     `fetchFullMessage()` e `replyEmail()` calcula `replyRecipients()` (`replyToList()`, `uniqueAddresses()`),
-     `prefixSubject()`, `threadingHeaders()` e `quotedText()`. Encaminhamento: `prepareForward()` baixa os anexos
-     com `forwardAttachments()` e monta `forwardEmail()` (`forwardedText()`).
-  3. `gmailMessageResource()` monta o MIME com `buildMimeMessage()` (`mimeHeaderLines()`, `formatMailAddress()`,
-     `encodeHeaderWord()`, `cleanHeaderText()`, `textPart()`, `attachmentPart()`, fronteira de `mimeBoundary()`)
-     e `toRawMessage()`; `sendPrepared()` envia em `messages/send` mantendo o `threadId` (`sentResult()`).
-  4. Rascunhos: `prepareDraftEmail()` (novo ou resposta, via `draftArgs()`), `createDraft()`, `updateDraft()`,
-     `sendDraft()`, `deleteDraft()` e `listDrafts()` (`draftSummary()`, `draftIds()`).
-  5. Organização: `writableTargets()` (`mailTargets()`) e `runMailboxAction()` aplicam `MAILBOX_ACTIONS` com
-     `applyLabelChange()` (`batchModify` nas mensagens, `modify` nas conversas); `update_labels` usa
-     `fetchLabels()`, `resolveLabelIds()` e `checkLabelChange()`; `moveToTrash()` faz `trash`/`untrash`.
-     Toda escrita passa por `gmailWrite()`.
-- **Resultado:** e-mail enviado ou rascunho/marcadores alterados na conta pedida; o resultado traz os ids.
-  Exclusão definitiva não existe (nem o escopo `gmail.modify` permite).
-- **Falhas:** conta vinculada só com `gmail.readonly` → `writeAccessError()` (pede `link_account`), sem chamar o
-  Gmail; endereço inválido ou sem destinatário → erro dizendo o campo; anexos acima de 18 MB → erro antes de
-  baixar; marcador desconhecido → erro sugerindo `list_labels`; recusa do Gmail → `gmailHttpError()` com o
-  detalhe.
+  `update_labels`, `trash`, `untrash`) at `POST /mcp`, after showing the content to the user and receiving
+  confirmation (the MCP annotations for sending and deleting have `destructiveHint`; ADR 0019). Every tool of the three
+  connectors has a `title` and mandatory hints (`toolAnnotations()` in `src/mcp/annotations.ts`; typecheck fails without them).
+- **Steps:**
+  1. Steps 1 and 2 of P12; the account comes from `resolveWritableAccount()`, which requires the scope with
+     `requireWriteAccess()` (`hasModifyScope()`) before any Gmail call.
+  2. New email: `composeEmail()` validates the recipients (`parseRecipients()`, `splitAddressList()`,
+     `parseMailAddress()`) and the limit (`checkRecipientLimit()`). Reply: `prepareReply()` reads the original with
+     `fetchFullMessage()` and `replyEmail()` computes `replyRecipients()` (`replyToList()`, `uniqueAddresses()`),
+     `prefixSubject()`, `threadingHeaders()` and `quotedText()`. Forward: `prepareForward()` downloads the attachments
+     with `forwardAttachments()` and builds `forwardEmail()` (`forwardedText()`).
+  3. `gmailMessageResource()` builds the MIME with `buildMimeMessage()` (`mimeHeaderLines()`, `formatMailAddress()`,
+     `encodeHeaderWord()`, `cleanHeaderText()`, `textPart()`, `attachmentPart()`, boundary from `mimeBoundary()`)
+     and `toRawMessage()`; `sendPrepared()` sends via `messages/send` keeping the `threadId` (`sentResult()`).
+  4. Drafts: `prepareDraftEmail()` (new or reply, via `draftArgs()`), `createDraft()`, `updateDraft()`,
+     `sendDraft()`, `deleteDraft()` and `listDrafts()` (`draftSummary()`, `draftIds()`).
+  5. Organization: `writableTargets()` (`mailTargets()`) and `runMailboxAction()` apply `MAILBOX_ACTIONS` with
+     `applyLabelChange()` (`batchModify` on messages, `modify` on threads); `update_labels` uses
+     `fetchLabels()`, `resolveLabelIds()` and `checkLabelChange()`; `moveToTrash()` does `trash`/`untrash`.
+     Every write goes through `gmailWrite()`.
+- **Result:** email sent or draft/labels changed in the requested account; the result includes the ids.
+  Permanent deletion does not exist (not even the `gmail.modify` scope allows it).
+- **Failures:** account linked with only `gmail.readonly` → `writeAccessError()` (asks for `link_account`), without calling
+  Gmail; invalid address or no recipient → error naming the field; attachments above 18 MB → error before
+  downloading; unknown label → error suggesting `list_labels`; refusal from Gmail → `gmailHttpError()` with the
+  detail.

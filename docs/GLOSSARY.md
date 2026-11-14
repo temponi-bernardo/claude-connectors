@@ -1,76 +1,76 @@
-# Glossário
+# Glossary
 
-**ADR** — Architecture Decision Record; registro curto de uma decisão de arquitetura, seu contexto e
-consequências. Vive em `docs/adr/`.
+**ADR** — Architecture Decision Record; a short record of an architecture decision, its context and
+consequences. Lives in `docs/adr/`.
 
-**Bloco gerado** — Trecho de FUNCTIONS.md entre `<!-- generated:start -->` e `<!-- generated:end -->`, escrito
-por `npm run docs:generate` a partir do código.
+**Generated block** — Part of FUNCTIONS.md between `<!-- generated:start -->` and `<!-- generated:end -->`, written
+by `npm run docs:generate` from the code.
 
-**Campos manuais** — Faz, Entrada, Saída, Efeitos e Erros de cada função em FUNCTIONS.md; escritos à mão.
+**Manual fields** — Does, Input, Output, Effects and Errors of each function in FUNCTIONS.md; written by hand.
 
-**Check** — `npm run check`: formato, lint, tipos, testes com cobertura, docs, duplicação e segredos. O
-portão completo de PR é o `pr:check` (não há CI, ADR 0006).
+**Check** — `npm run check`: format, lint, types, tests with coverage, docs, duplication and secrets. The
+full PR gate is `pr:check` (there is no CI, ADR 0006).
 
-**Conector** — Servidor MCP remoto de um serviço externo (ex.: Canvas), numa pasta de `connectors/`, com
-o plugin do marketplace que aponta para ele e as ferramentas para o Claude.
+**Connector** — Remote MCP server for an external service (e.g. Canvas), in a folder of `connectors/`, with
+the marketplace plugin that points to it and the tools for Claude.
 
-**Core** — Camada de lógica pura (`src/core/`): decide, não faz.
+**Core** — Pure logic layer (`src/core/`): it decides, it does not do.
 
-**Conventional Commits** — Formato `tipo(escopo): descrição` das mensagens de commit e títulos de PR.
+**Conventional Commits** — The `type(scope): description` format of commit messages and PR titles.
 
-**Decidir vs. fazer** — Separação entre funções puras (decidir) e funções com efeito (fazer).
+**Decide vs. do** — Separation between pure functions (decide) and functions with effects (do).
 
-**docs:check** — Verificador que falha quando documentação e código divergem.
+**docs:check** — Checker that fails when docs and code diverge.
 
-**Exceção de teste** — Entrada em `src/test-exceptions.ts` que isenta uma função de teste automatizado,
-com motivo e teste manual.
+**Test exception** — Entry in `src/test-exceptions.ts` that exempts a function from an automated test,
+with a reason and a manual test.
 
-**Fase / Tarefa (F1.2)** — Unidades do ROADMAP.md: fase agrupa tarefas; `F<fase>.<n>` identifica uma.
+**Phase / Task (F1.2)** — Units of ROADMAP.md: a phase groups tasks; `F<phase>.<n>` identifies one.
 
-**Índice de referências** — Mapa função → quem a chama ou passa como valor, calculado por AST; vira o campo
-"Usada por".
+**Reference index** — Map function → who calls it or passes it as a value, computed from the AST; becomes the
+"Used by" field.
 
-**Inventário** — Tudo o que o `docs:check` extrai do repositório antes de comparar com os docs.
+**Inventory** — Everything `docs:check` extracts from the repository before comparing it with the docs.
 
-**MVP** — Conjunto mínimo de fases que entrega valor real; definido no ROADMAP.md.
+**MVP** — Minimum set of phases that delivers real value; defined in ROADMAP.md.
 
 **Tool annotations** — MCP metadata every tool must carry: a `title` and the behaviour hints (`readOnlyHint`,
 or `destructiveHint` when it writes). Built with `toolAnnotations()` and the presets of `src/mcp/annotations.ts`;
 clients ask for confirmation before destructive tools, and the Connectors Directory requires them.
 
-**Processo (P01)** — Fluxo de ponta a ponta descrito em PROCESSES.md.
+**Process (P01)** — End-to-end flow described in PROCESSES.md.
 
-**Registro de funções** — Lista de funções de topo (`function nome`) encontradas no código.
+**Function registry** — List of top-level functions (`function name`) found in the code.
 
-**Marketplace de plugins** — Repositório com `.claude-plugin/marketplace.json` de onde o Claude instala
-plugins; aqui, cada conector é um plugin.
+**Plugin marketplace** — Repository with `.claude-plugin/marketplace.json` from which Claude installs
+plugins; here, each connector is a plugin.
 
-**pr:check** — `npm run pr:check -- "<título>"`: o portão local de PR que substitui o CI (check, build
-dos conectores, commitlint dos commits e do título).
+**pr:check** — `npm run pr:check -- "<title>"`: the local PR gate that replaces CI (check, connector build,
+commitlint of the commits and the title).
 
-**Release-please** — Ferramenta que gera PR de release, versão e changelog a partir dos commits; aqui roda pela CLI local.
+**Release-please** — Tool that generates the release PR, version and changelog from the commits; here it runs through the local CLI.
 
-**Skill** — Procedimento reutilizável do Claude Code em `.claude/skills/<nome>/SKILL.md`, invocado como
-`/nome`.
+**Skill** — Reusable Claude Code procedure in `.claude/skills/<name>/SKILL.md`, invoked as
+`/name`.
 
-**Squash merge** — Merge que condensa a branch em um commit na `main`; o título do PR vira a mensagem.
+**Squash merge** — Merge that condenses the branch into one commit on `main`; the PR title becomes the message.
 
-**Conector remoto** — Modo de um conector servido por HTTP (`server/remote.js`) e adicionado no claude.ai como
-conector personalizado; autoriza por OAuth e funciona na web, no Cowork e no celular (ADR 0009).
+**Remote connector** — Mode of a connector served over HTTP (`server/remote.js`) and added in claude.ai as a
+custom connector; it authorizes through OAuth and works on the web, in Cowork and on mobile (ADR 0009).
 
-**Ponte (WhatsApp)** — Servidor Go com whatsmeow dentro do container (`connectors/whatsapp/bridge/`), com API HTTP
-interna protegida por `BRIDGE_TOKEN`; o Worker fala com ela pelo Durable Object `WhatsAppBridge`.
+**Bridge (WhatsApp)** — Go server with whatsmeow inside the container (`connectors/whatsapp/bridge/`), with an
+internal HTTP API protected by `BRIDGE_TOKEN`; the Worker talks to it through the `WhatsAppBridge` Durable Object.
 
-**Pareamento** — Vincular o número ao conector como "aparelho conectado" do WhatsApp, por código (PairPhone) ou
-QR, na página `/pair`.
+**Pairing** — Linking the number to the connector as a WhatsApp "linked device", by code (PairPhone) or
+QR, on the `/pair` page.
 
-**Login delegado (upstream)** — Variante do OAuth do conector remoto em que o `/authorize` manda o navegador a um
-provedor de identidade (GitHub) e o segredo selado é o e-mail aceito em `ALLOWED_EMAILS`.
+**Delegated (upstream) login** — Variant of the remote connector's OAuth in which `/authorize` sends the browser to
+an identity provider (GitHub) and the sealed secret is the email accepted in `ALLOWED_EMAILS`.
 
-**Snapshot (WhatsApp)** — Cópia cifrada (formato `WAS1`, AES-256-GCM) da sessão e do banco de mensagens da ponte,
-guardada no R2 e restaurada quando o container acorda.
+**Snapshot (WhatsApp)** — Encrypted copy (`WAS1` format, AES-256-GCM) of the bridge's session and message
+database, stored in R2 and restored when the container wakes up.
 
-**Selo** — Texto cifrado e autenticado (AES-256-GCM, chave `SEAL_KEY`) que carrega `client_id`, código e tokens
-do OAuth sem estado; só o servidor abre e ninguém altera.
+**Seal** — Encrypted, authenticated text (AES-256-GCM, key `SEAL_KEY`) that carries the `client_id`, code and
+tokens of the stateless OAuth; only the server opens it and nobody can alter it.
 
-**Template** — `template-new-project`, repositório de origem desta estrutura (docs, checagens, skills).
+**Template** — `template-new-project`, the source repository of this structure (docs, checks, skills).

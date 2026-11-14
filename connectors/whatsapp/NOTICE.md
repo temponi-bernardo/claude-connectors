@@ -1,30 +1,30 @@
-# Avisos de terceiros — conector WhatsApp
+# Third-party notices — WhatsApp connector
 
-A ponte em `bridge/` (Go) é código deste repositório (licença MIT, ver `LICENSE` na raiz). O binário e a
-imagem do container incluem as bibliotecas abaixo, todas usadas **sem modificação**, nas versões fixadas em
+The bridge in `bridge/` (Go) is code from this repository (MIT license, see `LICENSE` at the root). The binary and
+the container image include the libraries below, all used **unmodified**, at the versions pinned in
 `bridge/go.mod`/`bridge/go.sum`.
 
-## Bibliotecas principais
+## Main libraries
 
-| Biblioteca                                                                       | Licença      | Uso                                          |
-| -------------------------------------------------------------------------------- | ------------ | -------------------------------------------- |
-| [go.mau.fi/whatsmeow](https://github.com/tulir/whatsmeow)                        | MPL-2.0      | Cliente do WhatsApp (protocolo multi-device) |
-| [go.mau.fi/util](https://github.com/mautrix/go-util)                             | MPL-2.0      | Dependência do whatsmeow (`dbutil` etc.)     |
-| [go.mau.fi/libsignal](https://github.com/tulir/libsignal-protocol-go)            | **GPL-3.0**  | Dependência do whatsmeow (protocolo Signal)  |
-| [modernc.org/sqlite](https://gitlab.com/cznic/sqlite) (+ libc, mathutil, memory) | BSD-3-Clause | Driver SQLite em Go puro                     |
-| [github.com/skip2/go-qrcode](https://github.com/skip2/go-qrcode)                 | MIT          | PNG do QR de pareamento                      |
-| [golang.org/x/crypto](https://pkg.go.dev/golang.org/x/crypto) (HKDF)             | BSD-3-Clause | Derivação da subchave dos snapshots          |
+| Library                                                                          | License      | Use                                     |
+| -------------------------------------------------------------------------------- | ------------ | --------------------------------------- |
+| [go.mau.fi/whatsmeow](https://github.com/tulir/whatsmeow)                        | MPL-2.0      | WhatsApp client (multi-device protocol) |
+| [go.mau.fi/util](https://github.com/mautrix/go-util)                             | MPL-2.0      | whatsmeow dependency (`dbutil` etc.)    |
+| [go.mau.fi/libsignal](https://github.com/tulir/libsignal-protocol-go)            | **GPL-3.0**  | whatsmeow dependency (Signal protocol)  |
+| [modernc.org/sqlite](https://gitlab.com/cznic/sqlite) (+ libc, mathutil, memory) | BSD-3-Clause | Pure Go SQLite driver                   |
+| [github.com/skip2/go-qrcode](https://github.com/skip2/go-qrcode)                 | MIT          | Pairing QR code PNG                     |
+| [golang.org/x/crypto](https://pkg.go.dev/golang.org/x/crypto) (HKDF)             | BSD-3-Clause | Derivation of the snapshot subkey       |
 
-### Atenção: GPL-3.0
+### Note: GPL-3.0
 
-O `go.mau.fi/libsignal` é GPL-3.0 e entra no binário por dependência obrigatória do whatsmeow. Quem
-**distribuir** o binário ou a imagem precisa cumprir a GPL-3.0 para o conjunto (oferecer o código-fonte
-correspondente, que é este repositório mais os módulos em `go.sum`). O código próprio continua MIT, que é
-compatível com a GPL-3.0. Rodar a imagem só na própria conta do Cloudflare não é distribuição.
+`go.mau.fi/libsignal` is GPL-3.0 and ends up in the binary as a mandatory dependency of whatsmeow. Anyone who
+**distributes** the binary or the image must comply with GPL-3.0 for the whole (offer the corresponding source
+code, which is this repository plus the modules in `go.sum`). The project's own code remains MIT, which is
+compatible with GPL-3.0. Running the image only on your own Cloudflare account is not distribution.
 
-## Demais dependências transitivas
+## Other transitive dependencies
 
-| Biblioteca                                                                                 | Licença      |
+| Library                                                                                    | License      |
 | ------------------------------------------------------------------------------------------ | ------------ |
 | filippo.io/edwards25519                                                                    | BSD-3-Clause |
 | github.com/beeper/argo-go                                                                  | MIT          |
@@ -40,13 +40,13 @@ compatível com a GPL-3.0. Rodar a imagem só na própria conta do Cloudflare n�
 | golang.org/x/exp, golang.org/x/net, golang.org/x/sync, golang.org/x/sys, golang.org/x/text | BSD-3-Clause |
 | google.golang.org/protobuf                                                                 | BSD-3-Clause |
 
-## Inspiração
+## Inspiration
 
-O esquema de `messages.db` e o tratamento de eventos seguem a ideia geral de
-[lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp) (MIT), mas nenhum código foi copiado: o
-esquema, as consultas e os handlers foram escritos do zero para este conector.
+The `messages.db` schema and the event handling follow the general idea of
+[lharries/whatsapp-mcp](https://github.com/lharries/whatsapp-mcp) (MIT), but no code was copied: the schema,
+queries and handlers were written from scratch for this connector.
 
-## Imagem base
+## Base image
 
-`gcr.io/distroless/static-debian12:nonroot` (Google, Apache-2.0; inclui certificados CA e tzdata do Debian
-com as licenças deles).
+`gcr.io/distroless/static-debian12:nonroot` (Google, Apache-2.0; includes Debian's CA certificates and tzdata
+under their own licenses).

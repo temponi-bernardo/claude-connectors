@@ -1,6 +1,6 @@
 ---
 name: sincronizar-docs
-description: Use para auditar a documentação inteira contra o código quando houver suspeita de divergência que a máquina não pega (campos Faz/Entrada/Saída/Efeitos/Erros desatualizados, processos que não refletem o fluxo real, ROADMAP ou ARCHITECTURE defasados), por exemplo a cada fase concluída ou antes de uma release.
+description: Use para auditar a documentação inteira contra o código quando houver suspeita de divergência que a máquina não pega (campos Does/Input/Output/Effects/Errors desatualizados, processos que não refletem o fluxo real, ROADMAP ou ARCHITECTURE defasados), por exemplo a cada fase concluída ou antes de uma release.
 context: fork
 agent: general-purpose
 ---
@@ -15,7 +15,7 @@ não lê. Trabalhe em um subagente e devolva só o relatório e as correções.
 1. Rode `npm run docs:check` e `npm run docs:generate`; se algo mudou, isso já é uma divergência a reportar.
 2. **FUNCTIONS.md, função por função:** abra o arquivo indicado e confira os cinco campos manuais contra o
    código. Preste atenção em: efeitos não declarados (console, disco, rede), erros lançados que não estão em
-   "Erros", parâmetros que mudaram de significado, "Faz" com "e" (função que faz duas coisas → anote como
+   "Errors", parâmetros que mudaram de significado, "Does" com "e" (função que faz duas coisas → anote como
    dívida).
 3. **PROCESSES.md:** para cada processo, siga o fluxo real a partir do gatilho e confira se os passos, a
    ordem, o resultado e as falhas batem. Processos sem gatilho real ou fluxos reais sem processo → corrija.

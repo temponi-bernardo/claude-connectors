@@ -29,8 +29,8 @@ deve encontrar tudo aqui, sem varrer o código. Quando docs e código divergem, 
 | Regra                                                                     | Máquina (comando)                        | Checklist do PR                                 |
 | ------------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------- |
 | Toda função documentada em FUNCTIONS.md, no módulo certo                  | `docs:check`                             | —                                               |
-| Blocos gerados (Arquivo, Assinatura, Usada por, Processos) em dia         | `docs:check` (`docs:generate` corrige)   | —                                               |
-| Campos manuais preenchidos (Faz, Entrada, Saída, Efeitos, Erros)          | `docs:check` (detecta só o marcador)     | Conteúdo correto e útil                         |
+| Blocos gerados (File, Signature, Used by, Processes) em dia               | `docs:check` (`docs:generate` corrige)   | —                                               |
+| Campos manuais preenchidos (Does, Input, Output, Effects, Errors)         | `docs:check` (detecta só o marcador)     | Conteúdo correto e útil                         |
 | Nomes de função únicos no repositório                                     | `docs:check`                             | —                                               |
 | Função citada em PROCESSES.md existe                                      | `docs:check`                             | Passos do processo refletem o código            |
 | Toda pasta versionada em STRUCTURE.md                                     | `docs:check`                             | Descrição da pasta faz sentido                  |

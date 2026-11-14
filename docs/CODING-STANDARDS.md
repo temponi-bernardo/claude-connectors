@@ -17,12 +17,12 @@ estrutura, não conteúdo). Lógica _parecida_ que o jscpd não pega é responsa
 - Complexidade ciclomática até **8**, aninhamento até **3** — `complexity`, `max-depth`.
 - Se a descrição da função precisa de "e", divida.
 - **Decidir separado de fazer:** funções puras (cálculo, validação, decisão) não tocam disco, rede, stdout
-  nem estado global; funções com efeito são finas e chamam as puras. O campo **Efeitos** do FUNCTIONS.md
+  nem estado global; funções com efeito são finas e chamam as puras. O campo **Effects** do FUNCTIONS.md
   deixa isso explícito.
 
 ## 3. Nomes de função únicos no repositório inteiro ⚙️ (`docs:check`)
 
-Um nome, uma função. Isso torna `FUNCTIONS.md` um índice sem ambiguidade e permite calcular "Usada por"
+Um nome, uma função. Isso torna `FUNCTIONS.md` um índice sem ambiguidade e permite calcular "Used by"
 sem confusão. Prefira nomes que carregam o contexto: `renderGeneratedBlock`, não `render`.
 
 Frameworks que exigem nomes fixos (`GET`, `loader`, `default`) ficam em arquivos de entrada e são
@@ -43,7 +43,7 @@ na borda e viram tipos do domínio.
 ## 6. Erros
 
 Lance `Error` com mensagem em português que diz **o que** falhou e **como corrigir**. Não engula erros
-silenciosamente; se um `catch` devolve um valor padrão, documente isso em **Erros** e **Saída**.
+silenciosamente; se um `catch` devolve um valor padrão, documente isso em **Errors** e **Output**.
 
 ## 7. Nomes
 
@@ -55,7 +55,7 @@ silenciosamente; se um `catch` devolve um valor padrão, documente isso em **Err
 
 ## 8. Comentários
 
-JSDoc de uma linha em toda função (`/** O que faz. */`) — a mesma frase vai para o campo **Faz**.
+JSDoc de uma linha em toda função (`/** O que faz. */`) — a mesma frase vai para o campo **Does**.
 Comentários explicam o porquê, nunca o óbvio. Sem código comentado.
 
 ## 9. Imports

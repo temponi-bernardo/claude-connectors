@@ -1,50 +1,51 @@
-# Produto
+# Product
 
-## Em uma frase
+## In one sentence
 
-Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace de plugins, começando pelo Canvas da PUC Minas.
+MCP connectors for Claude that run in the cloud and install through the plugin marketplace, starting with PUC Minas Canvas.
 
-## Para quem
+## For whom
 
-- **Público principal:** o próprio dono do repositório (estudante de Ciência da Computação da PUC Minas), que
-  usa o Claude e quer acesso direto aos sistemas do dia a dia.
-- **Plataformas:** claude.ai, Cowork, app do celular e Claude Code, todos pelo mesmo servidor remoto. Instala
-  pelo marketplace de plugins; nada roda no computador (ADR 0013). Sem interface gráfica própria.
+- **Main audience:** the repository owner (a Computer Science student at PUC Minas), who uses Claude and wants
+  direct access to everyday systems.
+- **Platforms:** claude.ai, Cowork, the mobile app and Claude Code, all through the same remote server. It installs
+  through the plugin marketplace; nothing runs on the computer (ADR 0013). No graphical interface of its own.
 
-## Conectores
+## Connectors
 
-| Conector     | O que dá ao Claude                                                           | Estado    |
-| ------------ | ---------------------------------------------------------------------------- | --------- |
-| `canvas-puc` | Agenda de entregas, tarefas, notas, avisos, módulos, arquivos e fóruns       | ✅ v2.0.0 |
-| `whatsapp`   | WhatsApp pessoal: conversas, mensagens, busca, contatos e mídias (self-host) | 🟨 v0.1.0 |
+| Connector    | What it gives Claude                                                        | Status    |
+| ------------ | --------------------------------------------------------------------------- | --------- |
+| `canvas-puc` | Due-date agenda, assignments, grades, announcements, modules, files, forums | ✅ v3.0.0 |
+| `gmail`      | Several Gmail accounts: search, read, send, drafts, labels, archive, trash  | ✅ v1.0.0 |
+| `whatsapp`   | Personal WhatsApp: chats, messages, search, contacts and media (self-host)  | ✅ v1.0.0 |
 
-Guia de uso de cada um em `connectors/<nome>/README.md`.
+Usage guide for each one in `connectors/<name>/README.md`.
 
-## Modelo de negócio
+## Business model
 
-Nenhum: uso pessoal, repositório privado, custo zero (sem hospedagem e sem GitHub Actions).
+None: personal use, private repository, zero cost (no hosting and no GitHub Actions).
 
-## Perguntas abertas → decisões
+## Open questions → decisions
 
-Registre a pergunta quando surgir; ao decidir, mova para a tabela de decisões com a data. Decisão de
-arquitetura vai para um ADR; decisão de produto fica aqui.
+Record the question when it comes up; once decided, move it to the decisions table with the date. An
+architecture decision goes to an ADR; a product decision stays here.
 
-### Abertas
+### Open
 
-| #   | Pergunta                                            | Opções em consideração                           |
-| --- | --------------------------------------------------- | ------------------------------------------------ |
-| Q5  | Vale ter acesso pelo celular/web (conector remoto)? | Hospedar com OAuth próprio × ficar só no Desktop |
+| #   | Question                                          | Options under consideration                    |
+| --- | ------------------------------------------------- | ---------------------------------------------- |
+| Q5  | Is mobile/web access (remote connector) worth it? | Host with its own OAuth × stay on Desktop only |
 
-### Decididas
+### Decided
 
-| #   | Decisão                                                                                                                   | Data       | Motivo                                                |
-| --- | ------------------------------------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------- |
-| Q1  | Público: uso pessoal do dono; primeira dor: acompanhar o Canvas da PUC sem abrir o site                                   | 2026-11-05 | Pedido do dono                                        |
-| Q2  | Sem interface própria; a interface é o Claude (web, Cowork, celular e Code)                                               | 2026-11-05 | Conectores MCP                                        |
-| Q3  | Sem receita; custo zero, inclusive sem GitHub Actions                                                                     | 2026-11-05 | Pedido do dono (ADR 0006)                             |
-| Q6  | Login por token do Canvas na página de OAuth, com validade renovada sozinha (substitui o login pelo navegador)            | 2026-11-14 | Conector só na nuvem (ADR 0011, ADR 0013)             |
-| Q7  | Envios (entregar tarefa, responder fórum) liberados, sempre com confirmação no chat                                       | 2026-11-05 | Escolha do dono (`CANVAS_ALLOW_WRITE=true` no Worker) |
-| Q8  | Conector só na nuvem, instalado pelo marketplace; nada roda no computador                                                 | 2026-11-14 | Pedido do dono (ADR 0013)                             |
-| Q4  | Próximo conector: WhatsApp pessoal, como template self-host (cada pessoa na própria conta Cloudflare, nunca multi-tenant) | 2026-11-14 | Pedido do dono (ADR 0015)                             |
-| Q9  | WhatsApp: envio ligado para qualquer contato ou grupo, com confirmação a cada mensagem e limite por hora (F3.4)           | 2026-11-14 | Pedido do dono; reduz abuso e risco de bloqueio       |
-| Q10 | WhatsApp sob demanda: nada ligado sem uso (sem cron por padrão); uso típico dentro da franquia do Workers Paid            | 2026-11-14 | Pedido do dono (custo no README do conector)          |
+| #   | Decision                                                                                                                     | Date       | Reason                                               |
+| --- | ---------------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------- |
+| Q1  | Audience: the owner's personal use; first pain: following PUC Canvas without opening the site                                | 2026-11-05 | Owner's request                                      |
+| Q2  | No interface of its own; the interface is Claude (web, Cowork, mobile and Code)                                              | 2026-11-05 | MCP connectors                                       |
+| Q3  | No revenue; zero cost, including no GitHub Actions                                                                           | 2026-11-05 | Owner's request (ADR 0006)                           |
+| Q6  | Sign-in with a Canvas token on the OAuth page, with its expiry renewed automatically (replaces browser sign-in)              | 2026-11-14 | Cloud-only connector (ADR 0011, ADR 0013)            |
+| Q7  | Writes (submit an assignment, reply in a forum) enabled, always with confirmation in the chat                                | 2026-11-05 | Owner's choice (`CANVAS_ALLOW_WRITE=true` in Worker) |
+| Q8  | Cloud-only connector, installed through the marketplace; nothing runs on the computer                                        | 2026-11-14 | Owner's request (ADR 0013)                           |
+| Q4  | Next connector: personal WhatsApp, as a self-host template (each person on their own Cloudflare account, never multi-tenant) | 2026-11-14 | Owner's request (ADR 0015)                           |
+| Q9  | WhatsApp: sending enabled to any contact or group, with confirmation for each message and an hourly limit (F3.4)             | 2026-11-14 | Owner's request; reduces abuse and ban risk          |
+| Q10 | On-demand WhatsApp: nothing running without use (no cron by default); typical use within the Workers Paid allowance          | 2026-11-14 | Owner's request (cost in the connector README)       |

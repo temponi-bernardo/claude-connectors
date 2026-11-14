@@ -15,7 +15,7 @@ tipo de mudança, em que formato, e o que a máquina confere.
 | Componente de UI novo                                     | UI.md                                             | [Componente](#componente)                                                   | `docs:check`                 |
 | Tarefa do roadmap começou/terminou                        | ROADMAP.md                                        | [Estado de tarefa](#estado-de-tarefa)                                       | PR                           |
 | Tarefa ou passo grande concluído                          | STATE.md (sobrescrever; local, fora do git)       | Skill `/handoff`                                                            | Hook `Stop` + PR             |
-| Mudança visível ao usuário                                | CHANGELOG.md, seção "Não lançado"                 | [Entrada de changelog](#entrada-de-changelog)                               | PR                           |
+| Mudança visível ao usuário                                | CHANGELOG.md, seção "Unreleased"                  | [Entrada de changelog](#entrada-de-changelog)                               | PR                           |
 | Decisão de arquitetura                                    | docs/adr/NNNN-titulo.md + adr/README.md           | [ADR](#adr) (`adr/0000-modelo.md`)                                          | PR                           |
 | Camada, dependência ou serviço externo novo               | ARCHITECTURE.md                                   | Prosa + tabela de dependências                                              | PR                           |
 | Decisão de produto, plano, preço                          | PRODUCT.md                                        | Pergunta aberta → decisão com data                                          | PR                           |
@@ -106,14 +106,14 @@ do topo do ROADMAP.md.
 
 ### Entrada de changelog
 
-Formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), na seção `## [Não lançado]`, sob
+Formato [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/), na seção `## [Unreleased]`, sob
 `### Adicionado`, `### Alterado`, `### Corrigido`, `### Removido` ou `### Segurança`:
 
 ```markdown
 - Descrição voltada ao usuário, no passado, em português. (#123)
 ```
 
-O release-please gera as seções de versão a partir dos commits; a seção "Não lançado" é a visão humana do
+O release-please gera as seções de versão a partir dos commits; a seção "Unreleased" é a visão humana do
 que está por sair.
 
 ### ADR

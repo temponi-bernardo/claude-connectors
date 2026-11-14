@@ -13,7 +13,7 @@ Fluxo completo em `docs/WORKFLOW.md` (seção "Versão e release") e decisões e
 
 1. **Confira a `main`:** `git fetch && git switch main && git pull`, `git log --oneline -20` (todos
    convencionais?) e `npm run check` verde na `main`.
-2. **Changelog humano:** leia a seção "Não lançado" de `CHANGELOG.md`. Falta algo que os commits `feat`/`fix`
+2. **Changelog humano:** leia a seção "Unreleased" de `CHANGELOG.md`. Falta algo que os commits `feat`/`fix`
    desde a última tag indicam (`git log <última-tag>..origin/main --oneline`)? Complete em um PR
    `docs(release): ...` antes de seguir.
 3. **PR de release:** `npx release-please release-pr --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors` abre ou atualiza o PR
@@ -23,7 +23,7 @@ Fluxo completo em `docs/WORKFLOW.md` (seção "Versão e release") e decisões e
    (`connectors/<name>` → `plugin/.claude-plugin/plugin.json` `version`, `<name>-vX.Y.Z`, ADR 0022). Check that
    every plugin whose connector changed got a bump in its `plugin.json` (without it users see "already at the
    latest version") and that no marketplace entry got a `version`.
-4. **Mova "Não lançado"** para a versão no PR de release se o texto humano for melhor que o gerado (edite a
+4. **Mova "Unreleased"** para a versão no PR de release se o texto humano for melhor que o gerado (edite a
    branch do release-please; ele preserva edições manuais no CHANGELOG).
 5. **Mergeie** o PR de release sem pedir confirmação (`gh pr merge --squash`), como qualquer PR com
    `pr:check` verde (`docs/WORKFLOW.md`). Nunca crie tag à mão.
@@ -35,5 +35,5 @@ Fluxo completo em `docs/WORKFLOW.md` (seção "Versão e release") e decisões e
 8. **Depois:** confirme que `package.json` e cada `plugin.json` têm a mesma versão que
    `.release-please-manifest.json` na `main` (`npm test` checks the plugins) and that `npm run plugin:validate`
    passes;
-   abra nova seção "Não lançado" vazia no CHANGELOG se o release-please não o fez; ROADMAP: marque a tarefa
+   abra nova seção "Unreleased" vazia no CHANGELOG se o release-please não o fez; ROADMAP: marque a tarefa
    de release como ✅.

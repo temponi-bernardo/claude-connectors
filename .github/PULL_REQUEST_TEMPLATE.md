@@ -14,7 +14,7 @@ Para cada item: marque se atualizou **ou** escreva "não se aplica: motivo".
 - [ ] `docs/PROCESSES.md` — fluxos novos/alterados citam as funções
 - [ ] `docs/STRUCTURE.md` — pastas novas
 - [ ] `docs/ROADMAP.md` — estado da tarefa e "Próxima tarefa"
-- [ ] `CHANGELOG.md` — seção "Não lançado" (se visível ao usuário)
+- [ ] `CHANGELOG.md` — seção "Unreleased" (se visível ao usuário)
 - [ ] `docs/ARCHITECTURE.md` — camadas, dependências, serviços externos
 - [ ] `docs/adr/` — decisão de arquitetura registrada
 - [ ] `docs/PRODUCT.md` — decisão de produto registrada com data

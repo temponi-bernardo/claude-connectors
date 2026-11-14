@@ -29,6 +29,6 @@ convencionais.
 
 - Positivas: fonte única de versão (`package.json`, espelhada em `.release-please-manifest.json`),
   changelog automático, tag só após merge humano.
-- Negativas: a seção "Não lançado" do CHANGELOG é mantida à mão como visão humana e precisa ser movida para a
+- Negativas: a seção "Unreleased" do CHANGELOG é mantida à mão como visão humana e precisa ser movida para a
   versão no PR de release (a skill `/lancar-versao` cuida disso).
 - Docs afetados: WORKFLOW.md (seção release), CHANGELOG.md.

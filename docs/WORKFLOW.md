@@ -54,7 +54,7 @@ Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `bundle`, 
 
 Uma tarefa está pronta quando: o critério "Pronto quando" do ROADMAP é verificável e verdadeiro; `npm run
 check` passa; a documentação do mesmo PR está atualizada conforme [DOCUMENTATION.md](DOCUMENTATION.md);
-CHANGELOG "Não lançado" tem a entrada (se visível ao usuário); o estado no ROADMAP e a "Próxima tarefa"
+CHANGELOG "Unreleased" tem a entrada (se visível ao usuário); o estado no ROADMAP e a "Próxima tarefa"
 foram atualizados; skills afetadas foram revisadas.
 
 ## Hooks locais
@@ -103,7 +103,7 @@ get. O fluxo é da skill `/lancar-versao`:
 1. Commits convencionais chegam na `main` via PR.
 2. A CLI local abre/atualiza um **PR de release** com o bump de versão e o CHANGELOG gerado:
    `npx release-please release-pr --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`.
-3. Revisar o PR de release (e a seção "Não lançado" do CHANGELOG, que vira a versão).
+3. Revisar o PR de release (e a seção "Unreleased" do CHANGELOG, que vira a versão).
 4. O Claude mergeia o PR de release, como qualquer PR. A confirmação humana fica em publicar o rascunho. Depois, a mesma CLI cria a tag `vX.Y.Z` e um
    **rascunho** de release: `npx release-please github-release --draft --token "$(gh auth token)" --repo-url
 temponi-bernardo/claude-connectors`. It also creates `<name>-vX.Y.Z` tags and drafts for the plugins in the release PR.

@@ -1,91 +1,93 @@
-# WhatsApp pessoal no Claude (`whatsapp`)
+# Personal WhatsApp in Claude (`whatsapp`)
 
-Conector MCP **remoto** que deixa o Claude (claude.ai, app, Cowork e Claude Code) ler o seu WhatsApp **pessoal**
-(não Business): conversas, mensagens, busca, contatos e mídias, e **enviar** texto para qualquer contato ou grupo —
-uma mensagem por vez, sempre com a sua confirmação explícita e com limite por hora.
+**Remote** MCP connector that lets Claude (claude.ai, app, Cowork and Claude Code) read your **personal**
+WhatsApp (not Business): chats, messages, search, contacts and media, and **send** text to any contact or group —
+one message at a time, always with your explicit confirmation and with an hourly limit.
 
-É um **template self-host**: cada pessoa publica na **própria conta Cloudflare** e pareia o **próprio número**.
-Não existe servidor central nem serviço hospedado por terceiros. Decisões em
+It is a **self-host template**: each person deploys it to **their own Cloudflare account** and pairs **their own
+number**. There is no central server or third-party hosted service. Decisions in
 [ADR 0015](../../docs/adr/0015-whatsapp-no-cloudflare-containers.md).
 
-> ⚠️ O WhatsApp não tem API oficial para contas pessoais. Este conector usa o
-> [whatsmeow](https://github.com/tulir/whatsmeow), que se conecta como um "aparelho conectado" (como o WhatsApp
-> Web). Isso não é autorizado pela Meta e pode, em tese, levar a bloqueio da conta. Use por sua conta e risco, só
-> na sua própria conta, e evite envios automáticos.
+> ⚠️ WhatsApp has no official API for personal accounts. This connector uses
+> [whatsmeow](https://github.com/tulir/whatsmeow), which connects as a "linked device" (like WhatsApp Web). This
+> is not authorized by Meta and could, in theory, get the account banned. Use it at your own risk, only on your
+> own account, and avoid automated sending.
 
-## Como funciona
+## How it works
 
 ```text
 Claude ──OAuth 2.1 + MCP (HTTPS)──▶ Worker ──▶ Durable Object "owner" ──▶ Container (Go + whatsmeow)
-                                       │              │  restore/snapshot        │  SQLite local
-                                       │              └──────────▶ R2 (backup cifrado AES-256-GCM)
-                                       └─ /pair (login GitHub do dono)          └─ WebSocket do WhatsApp
+                                       │              │  restore/snapshot        │  local SQLite
+                                       │              └──────────▶ R2 (AES-256-GCM encrypted backup)
+                                       └─ /pair (owner's GitHub login)          └─ WhatsApp WebSocket
 ```
 
-- **Sob demanda:** o container só sobe quando chega uma chamada de ferramenta (ou você abre `/pair`) e dorme
-  depois de `SLEEP_AFTER` (padrão **5 min**) sem uso. Sem keep-alive, polling, alarme próprio nem Cron Trigger.
-- **Persistência:** o disco do container some ao dormir. A sessão do WhatsApp e o banco de mensagens viram um
-  snapshot cifrado no R2 (no máximo um por minuto de uso, na hora em que a sessão muda — pareou, conectou ou
-  saiu —, e sempre antes de dormir ou ser encerrado) e são restaurados no boot. Assim o pareamento sobrevive a
-  deploys e reinícios.
-- **Sessão única:** um só Durable Object (nome fixo `owner`) e `max_instances = 1`: duas pontes nunca rodam o
-  mesmo número ao mesmo tempo. Snapshots com geração menor que a gravada são descartados.
-- **Prazos:** toda ferramenta tem teto total (`TOOL_TIMEOUT_MS`, 25 s). Antes de ler, espera até `SYNC_WAIT_MS`
-  (8 s) pelas pendências; se não der, responde com o que já tem e um aviso de resultado parcial.
+- **On demand:** the container only starts when a tool call arrives (or you open `/pair`) and sleeps after
+  `SLEEP_AFTER` (default **5 min**) without use. No keep-alive, polling, custom alarm or Cron Trigger.
+- **Persistence:** the container's disk is wiped when it sleeps. The WhatsApp session and the message database
+  become an encrypted snapshot in R2 (at most one per minute of use, when the session changes — paired,
+  connected or logged out —, and always before sleeping or shutting down) and are restored on boot. So the
+  pairing survives deploys and restarts.
+- **Single session:** a single Durable Object (fixed name `owner`) and `max_instances = 1`: two bridges never run
+  the same number at the same time. Snapshots with a lower generation than the stored one are discarded.
+- **Deadlines:** every tool has a total ceiling (`TOOL_TIMEOUT_MS`, 25 s). Before reading, it waits up to
+  `SYNC_WAIT_MS` (8 s) for pending sync; if that is not enough, it answers with what it has and a partial-result
+  warning.
 
-## Ferramentas
+## Tools
 
-| Ferramenta        | Faz                                                                               |
-| ----------------- | --------------------------------------------------------------------------------- |
-| `whatsapp_status` | Conexão, último evento, sync completo ou não, se precisa parear                   |
-| `list_chats`      | Conversas (mais recentes primeiro) com prévia da última mensagem; filtro e página |
-| `get_messages`    | Mensagens de uma conversa, paginadas com `before`                                 |
-| `search_messages` | Busca no texto das mensagens guardadas, opcionalmente numa conversa               |
-| `search_contacts` | Contatos por nome ou número                                                       |
-| `get_media`       | Imagem, áudio ou documento de uma mensagem (até `MAX_MEDIA_BYTES`, 5 MB)          |
-| `send_message`    | Uma mensagem de texto para um contato ou grupo, opcionalmente citando outra       |
+| Tool              | Does                                                                            |
+| ----------------- | ------------------------------------------------------------------------------- |
+| `whatsapp_status` | Connection, last event, whether sync is complete, whether pairing is needed     |
+| `list_chats`      | Chats (most recent first) with a preview of the last message; filter and paging |
+| `get_messages`    | Messages in a chat, paged with `before`                                         |
+| `search_messages` | Search in the text of stored messages, optionally within one chat               |
+| `search_contacts` | Contacts by name or number                                                      |
+| `get_media`       | Image, audio or document from a message (up to `MAX_MEDIA_BYTES`, 5 MB)         |
+| `send_message`    | One text message to a contact or group, optionally quoting another              |
 
-Datas em ISO 8601 com fuso (`TIMEZONE`, padrão `America/Sao_Paulo`). Respostas compactas e com o aviso de que o
-conteúdo das mensagens é dado de terceiros não confiável.
+Dates in ISO 8601 with time zone (`TIMEZONE`, default `America/Sao_Paulo`). Compact answers, with the warning that
+message content is untrusted third-party data.
 
-## Configuração guiada
+## Guided setup
 
-Com o plugin instalado, digite **`/config-whatsapp`** no chat. O Claude confere se o seu servidor responde,
-guia a publicação (se faltar), conecta o Claude ao seu `/mcp`, conduz o pareamento em `/pair` e faz um teste.
+With the plugin installed, type **`/config-whatsapp`** in the chat. Claude checks whether your server answers,
+guides the deploy (if missing), connects Claude to your `/mcp`, walks you through pairing at `/pair` and runs a
+test.
 
-Comandos de uso, depois de configurado:
+Everyday commands, once set up:
 
-- **`/resumo-whatsapp`** — o que aconteceu nas conversas e grupos no período.
-- **`/pendencias-whatsapp`** — conversas esperando resposta da pessoa.
-- **`/buscar-whatsapp`** — endereço, PIX, link, documento ou mídia nas mensagens.
+- **`/resumo-whatsapp`** — what happened in chats and groups over a period.
+- **`/pendencias-whatsapp`** — chats waiting for your reply.
+- **`/buscar-whatsapp`** — address, PIX key, link, document or media in the messages.
 
-## Publicar (uma vez)
+## Deploy (once)
 
-**Deploy na nuvem (recomendado, é como está publicado):** o Workers Builds da Cloudflare monta a imagem e
-publica, sem Docker na sua máquina. No painel: Workers & Pages → Create → **Continue with GitHub** → este
-repositório, com nome `whatsapp-remote`, deploy command
-`npx wrangler deploy --config connectors/whatsapp/wrangler.toml`, root `/`, preview builds desligados. Em
-Settings → Builds, deixe a produção na `main` e os _build watch paths_ `connectors/whatsapp/*`, `src/remote/*`,
-`src/mcp/*`, `src/core/*` e `package-lock.json`: só merges que tocam o WhatsApp publicam (e reiniciam o
-container). Os passos 3, 5 e 6 abaixo continuam valendo (bucket, OAuth App e secrets via `wrangler secret put`).
+**Cloud deploy (recommended, this is how it is deployed):** Cloudflare's Workers Builds builds the image and
+deploys it, with no Docker on your machine. In the dashboard: Workers & Pages → Create → **Continue with GitHub**
+→ this repository, named `whatsapp-remote`, deploy command
+`npx wrangler deploy --config connectors/whatsapp/wrangler.toml`, root `/`, preview builds off. Under
+Settings → Builds, keep production on `main` and the _build watch paths_ `connectors/whatsapp/*`, `src/remote/*`,
+`src/mcp/*`, `src/core/*` and `package-lock.json`: only merges that touch WhatsApp deploy (and restart the
+container). Steps 3, 5 and 6 below still apply (bucket, OAuth App and secrets via `wrangler secret put`).
 
-**Deploy local (alternativa):**
+**Local deploy (alternative):**
 
-Pré-requisitos: conta Cloudflare com **Workers Paid** (US$ 5/mês, inclui Containers), Node 22+, Docker rodando
-(o `wrangler` constrói a imagem da ponte) e uma conta no GitHub.
+Prerequisites: a Cloudflare account with **Workers Paid** (US$ 5/month, includes Containers), Node 22+, Docker
+running (`wrangler` builds the bridge image) and a GitHub account.
 
-1. **Clone** (ou faça fork) e instale: `git clone https://github.com/temponi-bernardo/claude-connectors && cd claude-connectors && npm ci`.
-2. **Autentique o wrangler:** `npx wrangler login` (ou `CLOUDFLARE_API_TOKEN` com permissão de Workers, Containers e R2).
-3. **Bucket R2** para os backups: `npx wrangler r2 bucket create whatsapp-snapshots`.
-4. **Primeiro deploy** (para saber o endereço): `npm run whatsapp:deploy`. Anote a URL
-   `https://whatsapp-remote.<sua-conta>.workers.dev`. Até os secrets existirem, ele responde 500 explicando o que
-   falta.
-5. **OAuth App do GitHub** (login do dono): GitHub → Settings → Developer settings → OAuth Apps → New OAuth App.
-   - Homepage URL: `https://whatsapp-remote.<sua-conta>.workers.dev`
-   - Redirect URIs (as duas, sem wildcard): `https://whatsapp-remote.<sua-conta>.workers.dev/oauth/callback` (login
-     do Claude) e `https://whatsapp-remote.<sua-conta>.workers.dev/oauth/callback/pair` (página `/pair`)
-   - Gere um _client secret_.
-6. **Secrets** (cada comando pede o valor; `--config connectors/whatsapp/wrangler.toml` em todos):
+1. **Clone** (or fork) and install: `git clone https://github.com/temponi-bernardo/claude-connectors && cd claude-connectors && npm ci`.
+2. **Authenticate wrangler:** `npx wrangler login` (or `CLOUDFLARE_API_TOKEN` with Workers, Containers and R2 permissions).
+3. **R2 bucket** for the backups: `npx wrangler r2 bucket create whatsapp-snapshots`.
+4. **First deploy** (to learn the address): `npm run whatsapp:deploy`. Note the URL
+   `https://whatsapp-remote.<your-account>.workers.dev`. Until the secrets exist, it answers 500 explaining what
+   is missing.
+5. **GitHub OAuth App** (owner login): GitHub → Settings → Developer settings → OAuth Apps → New OAuth App.
+   - Homepage URL: `https://whatsapp-remote.<your-account>.workers.dev`
+   - Redirect URIs (both, no wildcard): `https://whatsapp-remote.<your-account>.workers.dev/oauth/callback` (Claude
+     login) and `https://whatsapp-remote.<your-account>.workers.dev/oauth/callback/pair` (`/pair` page)
+   - Generate a _client secret_.
+6. **Secrets** (each command asks for the value; `--config connectors/whatsapp/wrangler.toml` on all of them):
 
    ```sh
    C="--config connectors/whatsapp/wrangler.toml"
@@ -94,150 +96,157 @@ Pré-requisitos: conta Cloudflare com **Workers Paid** (US$ 5/mês, inclui Conta
    node -e "console.log(crypto.randomBytes(32).toString('hex'))"    | npx wrangler secret put BRIDGE_TOKEN $C
    npx wrangler secret put GITHUB_CLIENT_ID $C
    npx wrangler secret put GITHUB_CLIENT_SECRET $C
-   npx wrangler secret put ALLOWED_EMAILS $C   # seu e-mail verificado no GitHub (vírgula para mais de um)
+   npx wrangler secret put ALLOWED_EMAILS $C   # your verified GitHub email (comma-separated for more than one)
    ```
 
-   Guarde a `SNAPSHOT_KEY` num gerenciador de senhas: sem ela o backup não abre (e trocá-la obriga a parear de novo).
+   Keep the `SNAPSHOT_KEY` in a password manager: without it the backup cannot be opened (and changing it forces
+   you to pair again).
 
-7. **Deploy de novo:** `npm run whatsapp:deploy`.
+7. **Deploy again:** `npm run whatsapp:deploy`.
 
-## Parear o número
+## Pair the number
 
-1. Abra `https://whatsapp-remote.<sua-conta>.workers.dev/pair` e entre com o GitHub (só e-mails de
-   `ALLOWED_EMAILS` passam). O primeiro acesso acorda o container (alguns segundos).
-2. Digite seu número com DDI (ex.: `5531999999999`) e clique em **Gerar código de pareamento**.
-3. No celular: WhatsApp → **Aparelhos conectados** → **Conectar aparelho** → **Conectar com número de telefone**
-   e digite o código. Alternativa: **Mostrar QR** e ler o QR.
-4. A página atualiza sozinha; quando mostrar "Conectado", o histórico recente começa a chegar (até
-   `HISTORY_DAYS`, 90 dias).
+1. Open `https://whatsapp-remote.<your-account>.workers.dev/pair` and sign in with GitHub (only emails in
+   `ALLOWED_EMAILS` get through). The first visit wakes the container (a few seconds).
+2. Type your number with country code (e.g. `5531999999999`) and click **Gerar código de pareamento** (generate
+   pairing code).
+3. On your phone: WhatsApp → **Linked devices** → **Link a device** → **Link with phone number instead** and
+   type the code. Alternative: **Mostrar QR** (show QR) and scan the QR code.
+4. The page refreshes on its own; when it shows "Conectado" (connected), recent history starts arriving (up to
+   `HISTORY_DAYS`, 90 days).
 
-Na mesma página: **Desvincular este aparelho** (logout) e **Recomeçar do zero** (arquiva o backup no R2 e pede
-pareamento de novo; use se trocar a `SNAPSHOT_KEY` ou o backup corromper).
+On the same page: **Desvincular este aparelho** (unlink this device, i.e. logout) and **Recomeçar do zero**
+(start over: archives the backup in R2 and asks for pairing again; use it if you change the `SNAPSHOT_KEY` or the
+backup gets corrupted).
 
-## Conectar ao Claude
+## Connect to Claude
 
-- **claude.ai / app / Cowork:** Configurações → Conectores → **Adicionar conector personalizado** →
-  `https://whatsapp-remote.<sua-conta>.workers.dev/mcp`. O Claude abre o login do GitHub; só o dono entra.
-  Vale para todos os lugares: o conector da sua conta aparece no claude.ai, no app, no celular, no Cowork e no
-  Claude Code (logado na mesma conta).
-- **Claude Code sem conta claude.ai:**
-  `claude mcp add --transport http whatsapp https://whatsapp-remote.<sua-conta>.workers.dev/mcp`.
-- **Plugin do marketplace** (opcional): traz só as skills (`/config-whatsapp`, `/resumo-whatsapp` etc.), **sem**
-  servidor embutido, porque cada pessoa tem o próprio. Instale e rode `/config-whatsapp`, que conecta o seu.
+- **claude.ai / app / Cowork:** Settings → Connectors → **Add custom connector** →
+  `https://whatsapp-remote.<your-account>.workers.dev/mcp`. Claude opens the GitHub login; only the owner gets
+  in. It works everywhere: your account's connector shows up on claude.ai, in the app, on the phone, in Cowork
+  and in Claude Code (signed in to the same account).
+- **Claude Code without a claude.ai account:**
+  `claude mcp add --transport http whatsapp https://whatsapp-remote.<your-account>.workers.dev/mcp`.
+- **Marketplace plugin** (optional): brings only the skills (`/config-whatsapp`, `/resumo-whatsapp` etc.),
+  **without** a bundled server, because each person has their own. Install it and run `/config-whatsapp`, which
+  connects yours.
 
   ```text
   /plugin install whatsapp --marketplace temponi-bernardo/claude-connectors
   ```
 
-  Por que o plugin não pede a URL: um campo `${user_config.*}` no `.mcp.json` só existe no computador onde foi
-  preenchido; o plugin instalado pela organização no claude.ai fica com outra URL e o botão **Vincular** recusa o
-  login antes de abrir o GitHub. O `npm run build` recusa esse formato (ADR 0018).
+  Why the plugin does not ask for the URL: a `${user_config.*}` field in `.mcp.json` only exists on the computer
+  where it was filled in; the plugin installed by the organization on claude.ai ends up with another URL and the
+  **Connect** button rejects the login before opening GitHub. `npm run build` rejects that format (ADR 0018).
 
-O acesso dura enquanto o Claude renova o token (refresh de 30 dias). Tirar seu e-mail de `ALLOWED_EMAILS`
-revoga na hora (o `/mcp` passa a responder 403).
+Access lasts as long as Claude renews the token (30-day refresh). Removing your email from `ALLOWED_EMAILS`
+revokes it immediately (`/mcp` starts answering 403).
 
-## Configuração (`[vars]` do `wrangler.toml`)
+## Configuration (`[vars]` in `wrangler.toml`)
 
-| Variável            | Padrão              | Para quê                                                               |
-| ------------------- | ------------------- | ---------------------------------------------------------------------- |
-| `SLEEP_AFTER`       | `5m`                | Sem uso por esse tempo, guarda o backup e desliga o container (30s–1h) |
-| `TOOL_TIMEOUT_MS`   | `25000`             | Teto de cada ferramenta, de ponta a ponta                              |
-| `SYNC_WAIT_MS`      | `8000`              | Quanto esperar pendências antes de responder parcial                   |
-| `TIMEZONE`          | `America/Sao_Paulo` | Fuso das datas                                                         |
-| `HISTORY_DAYS`      | `90`                | Histórico guardado no sync inicial                                     |
-| `MAX_MEDIA_BYTES`   | `5242880`           | Limite do `get_media`                                                  |
-| `ENABLE_SEND`       | `true`              | Liga `send_message` (`"false"` desliga de vez)                         |
-| `SEND_ALLOWLIST`    | vazio               | Opcional: restringe o envio a números ou JIDs; vazia = qualquer um     |
-| `SEND_MAX_PER_HOUR` | `10`                | Limite rígido de envios por hora (Worker e ponte)                      |
-| `SYNC_CRON`         | vazio               | Sync periódico opcional (ver abaixo)                                   |
-| `PUBLIC_URL`        | —                   | Domínio próprio; sem ela vale o `*.workers.dev`                        |
+| Variable            | Default             | Purpose                                                                        |
+| ------------------- | ------------------- | ------------------------------------------------------------------------------ |
+| `SLEEP_AFTER`       | `5m`                | After this long without use, saves the backup and stops the container (30s–1h) |
+| `TOOL_TIMEOUT_MS`   | `25000`             | End-to-end ceiling for each tool                                               |
+| `SYNC_WAIT_MS`      | `8000`              | How long to wait for pending sync before answering partially                   |
+| `TIMEZONE`          | `America/Sao_Paulo` | Time zone for dates                                                            |
+| `HISTORY_DAYS`      | `90`                | History kept in the initial sync                                               |
+| `MAX_MEDIA_BYTES`   | `5242880`           | `get_media` limit                                                              |
+| `ENABLE_SEND`       | `true`              | Enables `send_message` (`"false"` turns it off for good)                       |
+| `SEND_ALLOWLIST`    | empty               | Optional: restricts sending to numbers or JIDs; empty = anyone                 |
+| `SEND_MAX_PER_HOUR` | `10`                | Hard limit of sends per hour (Worker and bridge)                               |
+| `SYNC_CRON`         | empty               | Optional periodic sync (see below)                                             |
+| `PUBLIC_URL`        | —                   | Custom domain; without it `*.workers.dev` is used                              |
 
-### Envio
+### Sending
 
-Ligado por padrão no `wrangler.toml` (`ENABLE_SEND = "true"`), para **qualquer contato ou grupo**. Proteções:
+On by default in `wrangler.toml` (`ENABLE_SEND = "true"`), to **any contact or group**. Safeguards:
 
-- **Confirmação a cada mensagem:** a ferramenta exige `confirmed_by_user: true` e manda o modelo mostrar
-  destinatário, texto e mensagem citada e pedir a sua confirmação daquela mensagem exata antes de cada envio.
-- **Limite por hora** (`SEND_MAX_PER_HOUR`, 10): guardado no Durable Object e na ponte; tentativa que falhou também
-  conta.
-- **Uma mensagem de texto por chamada**, sem envio em massa. Destinatário só como número (DDI + número) ou JID de
-  contato (`@s.whatsapp.net`, `@lid`) ou de grupo (`@g.us`, de `list_chats`); status e listas de transmissão
-  são recusados.
-- **Allowlist opcional:** com `SEND_ALLOWLIST = "5531999999999,120363000000000001@g.us"`, só esses destinatários
-  (conferido no Worker e na ponte). Vazia, vale qualquer um.
+- **Confirmation for every message:** the tool requires `confirmed_by_user: true` and tells the model to show
+  the recipient, text and quoted message and ask you to confirm that exact message before each send.
+- **Hourly limit** (`SEND_MAX_PER_HOUR`, 10): stored in the Durable Object and in the bridge; failed attempts
+  count too.
+- **One text message per call**, no bulk sending. Recipient only as a number (country code + number) or a
+  contact JID (`@s.whatsapp.net`, `@lid`) or group JID (`@g.us`, from `list_chats`); status and broadcast lists
+  are rejected.
+- **Optional allowlist:** with `SEND_ALLOWLIST = "5531999999999,120363000000000001@g.us"`, only those recipients
+  (checked in the Worker and in the bridge). Empty, anyone goes.
 
-**Responder citando** (`reply_to_message_id`): o id de uma mensagem da **mesma conversa**, como `get_messages`
-devolve. A ponte busca a mensagem no banco local e a resposta sai citada; id desconhecido é recusado sem gastar o
-limite.
+**Reply with a quote** (`reply_to_message_id`): the id of a message from the **same chat**, as `get_messages`
+returns it. The bridge looks the message up in the local database and the reply goes out quoted; an unknown id
+is rejected without using up the limit.
 
-**Fora, por ora:** envio de mídia (imagem, áudio, documento). Exigiria passar o arquivo em base64 dentro da
-chamada da ferramenta (pesa no contexto e no teto de 25 s), validar o tipo real do arquivo e gerar miniatura e
-dimensões para o WhatsApp exibir direito — mais risco de mandar o arquivo errado e de bloqueio. Detalhes na ADR 0015.
+**Out, for now:** sending media (image, audio, document). It would require passing the file as base64 inside the
+tool call (heavy on context and on the 25 s ceiling), validating the file's real type and generating a thumbnail
+and dimensions for WhatsApp to display it properly — more risk of sending the wrong file and of a ban. Details in
+ADR 0015.
 
-### Sync periódico (opcional, desligado)
+### Periodic sync (optional, off)
 
-Sem ele, mensagens que chegam com o container dormindo ficam na fila do WhatsApp e entram na próxima vez que você
-usar o conector. Se você passa semanas sem usar, a fila pode expirar e o histórico desse período não chega. Para
-evitar, ligue um cron: ponha **a mesma expressão** em `SYNC_CRON` e em `[triggers] crons`, por exemplo
-`"17 */6 * * *"` (a cada 6 h). Cada disparo acorda a ponte, espera até 20 s o sync, guarda o backup e deixa o
-container dormir após `SLEEP_AFTER`. Custo: 4 disparos/dia × ~6 min ≈ 12 h/mês de container `lite` ≈ 3 GiB-h de
-memória e 24 GB-h de disco, dentro da franquia (ver abaixo).
+Without it, messages that arrive while the container sleeps wait in WhatsApp's queue and come in the next time
+you use the connector. If you go weeks without using it, the queue may expire and that period's history never
+arrives. To avoid this, enable a cron: put **the same expression** in `SYNC_CRON` and in `[triggers] crons`, for
+example `"17 */6 * * *"` (every 6 h). Each run wakes the bridge, waits up to 20 s for the sync, saves the backup
+and lets the container sleep after `SLEEP_AFTER`. Cost: 4 runs/day × ~6 min ≈ 12 h/month of a `lite` container
+≈ 3 GiB-h of memory and 24 GB-h of disk, within the free allowance (see below).
 
-## Custo estimado
+## Estimated cost
 
-Franquia do Workers Paid (US$ 5/mês) para Containers: **25 GiB-h de memória, 375 vCPU-min, 200 GB-h de disco**;
-acima disso, US$ 0,0000025/GiB-s, US$ 0,000020/vCPU-s e US$ 0,00000007/GB-s. Memória e disco contam pelo
-provisionado enquanto o container está ligado; CPU só pelo uso real. A instância `lite` tem 256 MiB, 2 GB e
+Workers Paid allowance (US$ 5/month) for Containers: **25 GiB-h of memory, 375 vCPU-min, 200 GB-h of disk**;
+above that, US$ 0.0000025/GiB-s, US$ 0.000020/vCPU-s and US$ 0.00000007/GB-s. Memory and disk are billed as
+provisioned while the container is on; CPU only for actual use. The `lite` instance has 256 MiB, 2 GB and
 1/16 vCPU.
 
-**Uso típico: 20 sessões/dia de 5–10 min.** Cada sessão deixa o container ligado durante o uso + 5 min de
-`SLEEP_AFTER`, ou seja, 10–15 min.
+**Typical use: 20 sessions/day of 5–10 min.** Each session keeps the container on during use + 5 min of
+`SLEEP_AFTER`, i.e. 10–15 min.
 
-| Item                       | 10 min/sessão (100 h/mês)                                                                        | 15 min/sessão (150 h/mês)               |
-| -------------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------- |
-| Memória (0,25 GiB)         | 25 GiB-h → dentro da franquia                                                                    | 37,5 GiB-h → 12,5 excedentes ≈ US$ 0,11 |
-| Disco (2 GB)               | 200 GB-h → dentro da franquia                                                                    | 300 GB-h → 100 excedentes ≈ US$ 0,03    |
-| CPU (uso médio ~20%)       | ~75 vCPU-min → dentro                                                                            | ~113 vCPU-min → dentro                  |
-| Durable Object, Worker, R2 | dentro das franquias (DO: ~45–70 mil GB-s de 400 mil; R2: < 1 GB e poucos milhares de operações) | idem                                    |
-| **Total além dos US$ 5**   | **≈ US$ 0,00**                                                                                   | **≈ US$ 0,14/mês**                      |
+| Item                       | 10 min/session (100 h/month)                                                               | 15 min/session (150 h/month)      |
+| -------------------------- | ------------------------------------------------------------------------------------------ | --------------------------------- |
+| Memory (0.25 GiB)          | 25 GiB-h → within the allowance                                                            | 37.5 GiB-h → 12.5 over ≈ US$ 0.11 |
+| Disk (2 GB)                | 200 GB-h → within the allowance                                                            | 300 GB-h → 100 over ≈ US$ 0.03    |
+| CPU (~20% average use)     | ~75 vCPU-min → within                                                                      | ~113 vCPU-min → within            |
+| Durable Object, Worker, R2 | within the allowances (DO: ~45–70k GB-s of 400k; R2: < 1 GB and a few thousand operations) | same                              |
+| **Total beyond the US$ 5** | **≈ US$ 0.00**                                                                             | **≈ US$ 0.14/month**              |
 
-Saída de rede do container: 1 TB/mês incluído na América do Norte e Europa (500 GB no resto); o WhatsApp usa
-poucos MB por sessão. Para limitar gastos, use o _spending limit_ do Workers e baixe `SLEEP_AFTER` (ex.: `2m`).
+Container network egress: 1 TB/month included in North America and Europe (500 GB elsewhere); WhatsApp uses a
+few MB per session. To cap spending, use the Workers _spending limit_ and lower `SLEEP_AFTER` (e.g. `2m`).
 
-## Segurança
+## Security
 
-- **Prompt injection:** mensagens, nomes e legendas são dados de terceiros. Toda resposta vem com
-  `notice` dizendo para não seguir instruções contidas nelas; textos passam por limpeza (caracteres de controle e
-  de direção bidi removidos, corte em 2.000 caracteres) e as instruções do servidor MCP repetem a regra.
-- **Acesso:** OAuth 2.1 com PKCE e registro dinâmico (retorno só para `claude.ai`, `claude.com` e `localhost`), login
-  pelo GitHub com e-mail **verificado** em `ALLOWED_EMAILS`; o token do GitHub é descartado na hora. Os tokens do
-  conector são selados com AES-256-GCM (`SEAL_KEY`) e o servidor não guarda nada de sessão.
-- **`/pair`:** sessão em cookie `__Host-` selado (HttpOnly, Secure, SameSite=Lax, 30 min), state + nonce no login,
-  token anti-CSRF e checagem de `Origin` em todo POST, CSP sem script e sem frames.
-- **Ponte:** porta só dentro do container, `BRIDGE_TOKEN` comparado em tempo constante, SQL parametrizado, limites
-  de corpo e de tempo, logs sem texto de mensagem nem número completo.
-- **Backup:** cifrado na ponte com AES-256-GCM em blocos (HKDF por snapshot, cabeçalho autenticado): truncar,
-  reordenar ou alterar qualquer byte faz a restauração falhar. A chave nunca vai para o R2.
-- **Limitações:** quem controla sua conta Cloudflare controla o conector (secrets e container). O backup antigo
-  arquivado no "Recomeçar do zero" continua no R2 até você apagar.
+- **Prompt injection:** messages, names and captions are third-party data. Every answer comes with a `notice`
+  saying not to follow instructions contained in them; text is sanitized (control and bidi direction characters
+  removed, cut at 2,000 characters) and the MCP server instructions repeat the rule.
+- **Access:** OAuth 2.1 with PKCE and dynamic registration (redirects only to `claude.ai`, `claude.com` and
+  `localhost`), GitHub login with a **verified** email in `ALLOWED_EMAILS`; the GitHub token is discarded
+  immediately. The connector's tokens are sealed with AES-256-GCM (`SEAL_KEY`) and the server stores no session
+  state.
+- **`/pair`:** session in a sealed `__Host-` cookie (HttpOnly, Secure, SameSite=Lax, 30 min), state + nonce on
+  login, anti-CSRF token and an `Origin` check on every POST, CSP with no scripts and no frames.
+- **Bridge:** port only inside the container, `BRIDGE_TOKEN` compared in constant time, parameterized SQL, body
+  and time limits, logs without message text or full numbers.
+- **Backup:** encrypted in the bridge with chunked AES-256-GCM (HKDF per snapshot, authenticated header):
+  truncating, reordering or changing any byte makes the restore fail. The key never goes to R2.
+- **Limitations:** whoever controls your Cloudflare account controls the connector (secrets and container). The
+  old backup archived by "Recomeçar do zero" stays in R2 until you delete it.
 
-## Desenvolvimento
+## Development
 
-- Worker (TypeScript): `connectors/whatsapp/src/`, testes com `npm test`; `npm run whatsapp:build` gera o bundle sem
-  publicar; `npm run whatsapp:dev` roda local (precisa de Docker).
-- Ponte (Go 1.26+): `connectors/whatsapp/bridge/`, contrato em [`bridge/API.md`](bridge/API.md); `npm run bridge:test`
-  roda gofmt, vet e testes.
-- Licenças de terceiros em [NOTICE.md](NOTICE.md). Atenção: a imagem inclui o `go.mau.fi/libsignal` (GPL-3.0);
-  se você **distribuir** a imagem ou o binário (não só rodar na sua conta), cumpra a GPL-3.0 para o conjunto.
+- Worker (TypeScript): `connectors/whatsapp/src/`, tests with `npm test`; `npm run whatsapp:build` builds the
+  bundle without deploying; `npm run whatsapp:dev` runs it locally (needs Docker).
+- Bridge (Go 1.26+): `connectors/whatsapp/bridge/`, contract in [`bridge/API.md`](bridge/API.md);
+  `npm run bridge:test` runs gofmt, vet and tests.
+- Third-party licenses in [NOTICE.md](NOTICE.md). Note: the image includes `go.mau.fi/libsignal` (GPL-3.0); if
+  you **distribute** the image or the binary (not just run it on your account), comply with GPL-3.0 for the
+  whole.
 
-## Problemas comuns
+## Common problems
 
-| Sintoma                                     | O que fazer                                                                                    |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 500 "Configuração do Worker inválida"       | Falta um secret: a mensagem diz qual                                                           |
-| "WhatsApp is not paired"                    | Abra `/pair` e pareie                                                                          |
-| Pareamento some depois de deploy/reinício   | Confira no R2 o objeto `whatsapp/snapshot.was1`; sem ele, veja nos logs "Snapshot falhou"      |
-| "Tempo esgotado esperando o WhatsApp"       | Container acordando (primeira chamada após dormir): repita em alguns segundos                  |
-| "Não consegui abrir o backup criptografado" | `SNAPSHOT_KEY` mudou ou backup corrompido: volte a chave antiga ou use "Recomeçar do zero"     |
-| Login do GitHub recusado                    | O e-mail precisa estar verificado no GitHub e em `ALLOWED_EMAILS`                              |
-| Callback do GitHub dá erro de redirect      | O OAuth App precisa das duas URIs exatas: `<url>/oauth/callback` e `<url>/oauth/callback/pair` |
+| Symptom                                     | What to do                                                                                           |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 500 "Configuração do Worker inválida"       | A secret is missing: the message says which one                                                      |
+| "WhatsApp is not paired"                    | Open `/pair` and pair                                                                                |
+| Pairing disappears after a deploy/restart   | Check R2 for the `whatsapp/snapshot.was1` object; if missing, look for "Snapshot falhou" in the logs |
+| "Tempo esgotado esperando o WhatsApp"       | Container waking up (first call after sleeping): retry in a few seconds                              |
+| "Não consegui abrir o backup criptografado" | `SNAPSHOT_KEY` changed or the backup is corrupted: restore the old key or use "Recomeçar do zero"    |
+| GitHub login rejected                       | The email must be verified on GitHub and listed in `ALLOWED_EMAILS`                                  |
+| GitHub callback gives a redirect error      | The OAuth App needs both exact URIs: `<url>/oauth/callback` and `<url>/oauth/callback/pair`          |
