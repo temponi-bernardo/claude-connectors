@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
-# Check completo (não há CI, ADR 0006). Se demorar, é sinal para otimizar, não para pular.
+# Full check (there is no CI, ADR 0006). If it is slow, that is a sign to optimize, not to skip.
 set -e
 npm run -s check

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Hook SessionStart (só na nuvem do Claude Code): deixa a sessão pronta para `npm run check`/`pr:check`.
-# 1. gitleaks na versão fixa, pelo Go (scripts/install-gitleaks.sh).
-# 2. npm install só quando package.json ou package-lock.json mudaram desde o último install.
+# SessionStart hook (Claude Code cloud only): gets the session ready for `npm run check`/`pr:check`.
+# 1. gitleaks at the pinned version, through Go (scripts/install-gitleaks.sh).
+# 2. npm install only when package.json or package-lock.json changed since the last install.
 set -euo pipefail
 
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then

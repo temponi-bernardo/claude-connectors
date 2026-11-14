@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Hook PreCompact: rede de segurança. Antes de a conversa ser compactada, gera um
-# handoff em docs/STATE.md a partir do transcript, usando `claude -p` em processo
-# separado. Nunca falha a compactação: toda saída é 0. Desative com
+# PreCompact hook: safety net. Before the conversation is compacted, generates a
+# handoff in docs/STATE.md from the transcript, using `claude -p` in a separate
+# process. Never fails the compaction: every exit is 0. Disable with
 # CLAUDE_HANDOFF_AUTOGEN=0.
 set -uo pipefail
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0

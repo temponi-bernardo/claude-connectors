@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# Hook Stop: garante o handoff ao fim de uma tarefa.
-# Critério de "tarefa concluída": há commit novo, feito por esta pessoa, desde o último handoff
-# reconhecido. Commits trazidos por git pull (squash merge no GitHub) não contam.
-# Se docs/STATE.md foi atualizado neste turno, registra e libera. Senão, bloqueia
-# com instrução para atualizar o STATE.md e avisar o usuário de rodar /clear.
-# Nunca bloqueia duas vezes seguidas (stop_hook_active) nem em turno sem commit novo.
+# Stop hook: ensures the handoff at the end of a task.
+# "Task finished" criterion: there is a new commit, made by this person, since the last recognized
+# handoff. Commits brought by git pull (squash merge on GitHub) don't count.
+# If docs/STATE.md was updated in this turn, records it and lets go. Otherwise, blocks
+# with an instruction to update STATE.md and tell the user to run /clear.
+# Never blocks twice in a row (stop_hook_active) nor in a turn without a new commit.
 set -uo pipefail
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 # shellcheck source=hook-lib.sh
@@ -12,7 +12,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/hook-lib.sh"
 
 input="$(cat 2>/dev/null || true)"
 
-# Guarda contra loop: já bloqueamos neste ciclo, Claude continuou e parou de novo.
+# Loop guard: we already blocked in this cycle, Claude went on and stopped again.
 if [ "$(json_field "$input" stop_hook_active false)" = "true" ]; then
   exit 0
 fi
@@ -23,28 +23,28 @@ head="$(current_head)"
 state="$(file_hash "$STATE_FILE")"
 read -r last_head last_state <<<"$(read_marker)"
 
-# Primeira execução neste clone: adota o estado atual como referência.
+# First run in this clone: adopts the current state as the reference.
 if [ "$last_head" = "none" ] && [ "$last_state" = "none" ]; then
   write_marker "$head" "$state"
   exit 0
 fi
 
-# STATE.md mudou desde o último handoff: handoff feito, registra e libera.
+# STATE.md changed since the last handoff: handoff done, record it and let go.
 if [ "$state" != "$last_state" ]; then
   write_marker "$head" "$state"
   exit 0
 fi
 
-# Sem commit próprio novo: trabalho em andamento, conversa ou só git pull; não interrompe.
-# Se o HEAD andou só por commits de outros, adota o novo HEAD como referência.
+# No new own commit: work in progress, conversation or just git pull; don't interrupt.
+# If HEAD moved only through other people's commits, adopt the new HEAD as the reference.
 if [ "$(own_commits_since "$last_head")" = "0" ]; then
   [ "$head" = "$last_head" ] || write_marker "$head" "$state"
   exit 0
 fi
 
-# Commit novo e STATE.md intocado: exige o handoff antes de encerrar.
-reason="Tarefa concluída (há commit novo desde o último handoff). Antes de encerrar: "
-reason+="atualize docs/STATE.md com a skill /handoff (feito, em andamento, próximos passos, arquivos tocados), "
-reason+="e avise o usuário para rodar /clear (o STATE.md é local, não vai para o commit)."
+# New commit and untouched STATE.md: require the handoff before ending.
+reason="Task finished (there is a new commit since the last handoff). Before ending: "
+reason+="update docs/STATE.md with the /handoff skill (done, in progress, next steps, files touched), "
+reason+="and tell the user to run /clear (STATE.md is local, it is not committed)."
 printf '{"decision":"block","reason":%s}\n' "$(printf '%s' "$reason" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>process.stdout.write(JSON.stringify(d)))')"
 exit 0
