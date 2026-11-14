@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import type { DocsConfig } from './types.js';
 
-/** Valores padrão da configuração; `docs.config.json` sobrescreve o que declarar. */
+/** Default configuration values; `docs.config.json` overrides whatever it declares. */
 export const DEFAULT_DOCS_CONFIG: DocsConfig = {
   sourceDirs: ['src', 'tools'],
   ignore: ['**/fixtures/**'],
@@ -15,7 +15,7 @@ export const DEFAULT_DOCS_CONFIG: DocsConfig = {
   uiDoc: 'docs/UI.md',
 };
 
-/** Mescla um objeto parcial lido do JSON sobre os padrões, validando os tipos essenciais. */
+/** Merges a partial object read from JSON over the defaults, validating the essential types. */
 export function mergeDocsConfig(partial: unknown): DocsConfig {
   if (typeof partial !== 'object' || partial === null || Array.isArray(partial)) {
     throw new Error('docs.config.json must be a JSON object.');
@@ -30,7 +30,7 @@ export function mergeDocsConfig(partial: unknown): DocsConfig {
   return merged;
 }
 
-/** Lê `docs.config.json` da raiz (se existir) e devolve a configuração completa. */
+/** Reads `docs.config.json` from the root (if present) and returns the full configuration. */
 export function loadDocsConfig(rootDir: string): DocsConfig {
   let raw: string;
   try {

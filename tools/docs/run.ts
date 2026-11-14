@@ -7,13 +7,13 @@ import { extractProcessCitations } from './markdown.js';
 import { applyGenerated, computeGeneratedData, processesByFunction } from './render.js';
 import type { DocsConfig, Inventory, Issue } from './types.js';
 
-/** Lê um arquivo de texto da raiz; devolve null se não existir. */
+/** Reads a text file from the root; returns null if it does not exist. */
 export function readOptional(rootDir: string, relativePath: string): string | null {
   const absolute = join(rootDir, relativePath);
   return existsSync(absolute) ? readFileSync(absolute, 'utf8') : null;
 }
 
-/** Lê os documentos conferidos pelo `docs:check`. Documentos obrigatórios ausentes viram texto vazio. */
+/** Reads the documents checked by `docs:check`. Missing required documents become empty text. */
 export function readDocsTexts(rootDir: string, config: DocsConfig): DocsTexts {
   return {
     functions: readOptional(rootDir, config.functionsDoc) ?? '',
@@ -23,7 +23,7 @@ export function readDocsTexts(rootDir: string, config: DocsConfig): DocsTexts {
   };
 }
 
-/** Formata a lista de problemas para o terminal, um por bloco, com código e mensagem. */
+/** Formats the problem list for the terminal, one per block, with code and message. */
 export function formatIssues(issues: readonly Issue[]): string {
   if (issues.length === 0) return 'docs:check ✔ docs and code are in sync.';
   const lines = issues.map((issue, index) => `${index + 1}. [${issue.code}] ${issue.message}`);
@@ -38,7 +38,7 @@ export async function runCheck(rootDir: string): Promise<Issue[]> {
   return runAllChecks(inventory, docs, extractProcessCitations(docs.processes));
 }
 
-/** Calcula o novo FUNCTIONS.md a partir do inventário e do texto atual (função pura sobre textos). */
+/** Computes the new FUNCTIONS.md from the inventory and the current text (pure function over texts). */
 export function generateFunctionsDoc(inventory: Inventory, docs: DocsTexts): string {
   const citations = extractProcessCitations(docs.processes);
   const byProcess = processesByFunction(citations, inventory.callGraph);
@@ -47,7 +47,7 @@ export function generateFunctionsDoc(inventory: Inventory, docs: DocsTexts): str
   );
 }
 
-/** Regrava o FUNCTIONS.md com índice, blocos gerados e seções novas; devolve se houve mudança. */
+/** Rewrites FUNCTIONS.md with index, generated blocks and new sections; returns whether it changed. */
 export async function runGenerate(rootDir: string): Promise<boolean> {
   const config = loadDocsConfig(rootDir);
   const inventory = await buildInventory(rootDir, config);

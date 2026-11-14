@@ -1,7 +1,7 @@
-# Conector Canvas remoto no Cloudflare Workers (ADR 0010).
-# Deploy: `npm run worker:deploy` (precisa de CLOUDFLARE_API_TOKEN). A chave dos selos é um secret:
+# Remote Canvas connector on Cloudflare Workers (ADR 0010).
+# Deploy: `npm run worker:deploy` (needs CLOUDFLARE_API_TOKEN). The seal key is a secret:
 #   npx wrangler secret put SEAL_KEY --config connectors/canvas-puc/wrangler.toml
-# Sem PUBLIC_URL, o emissor OAuth é o próprio endereço do Worker (https://canvas-puc-remote.<conta>.workers.dev).
+# Without PUBLIC_URL, the OAuth issuer is the Worker's own address (https://canvas-puc-remote.<account>.workers.dev).
 name = "canvas-puc-remote"
 main = "src/worker.ts"
 compatibility_date = "2026-10-01"

@@ -12,15 +12,15 @@ import {
 } from 'ts-morph';
 import type { CallGraph, ConstantInfo, DocsConfig, FunctionInfo, ReferenceIndex } from './types.js';
 
-/** Rótulo usado quando uma referência acontece fora de qualquer função (nível do módulo). */
+/** Label used when a reference happens outside any function (module level). */
 export const MODULE_SCOPE_SUFFIX = ' (module)';
 
-/** Converte um caminho absoluto em relativo à raiz, sempre com `/`. */
+/** Converts an absolute path to one relative to the root, always with `/`. */
 export function toPosixRelative(rootDir: string, absolutePath: string): string {
   return relative(rootDir, absolutePath).split('\\').join('/');
 }
 
-/** Converte um glob simples (`**`, `*`) em expressão regular aplicada a caminhos relativos. */
+/** Converts a simple glob (`**`, `*`) into a regular expression applied to relative paths. */
 export function globToRegExp(glob: string): RegExp {
   const DIR_WILDCARD = '\u0000DIR\u0000';
   const ANY_WILDCARD = '\u0000ANY\u0000';
@@ -34,7 +34,7 @@ export function globToRegExp(glob: string): RegExp {
   return new RegExp(`^${escaped}$`);
 }
 
-/** Decide se um arquivo (relativo) entra na análise: fonte `.ts`, fora dos ignorados e dos testes. */
+/** Decides whether a (relative) file is analyzed: a `.ts` source, not ignored and not a test. */
 export function isAnalyzedSource(relativePath: string, config: DocsConfig): boolean {
   if (!relativePath.endsWith('.ts') || relativePath.endsWith('.d.ts')) return false;
   if (relativePath.endsWith(config.testSuffix)) return false;
@@ -64,7 +64,7 @@ export function openProject(rootDir: string, config: DocsConfig): Project {
   return project;
 }
 
-/** Monta a assinatura legível de uma declaração de função (sem corpo nem `export`). */
+/** Builds the readable signature of a function declaration (no body or `export`). */
 export function signatureOf(fn: FunctionDeclaration): string {
   const params = fn
     .getParameters()
@@ -72,10 +72,10 @@ export function signatureOf(fn: FunctionDeclaration): string {
     .join(', ');
   const returnType = fn.getReturnTypeNode()?.getText() ?? fn.getReturnType().getText(fn);
   const asyncPrefix = fn.isAsync() ? 'async ' : '';
-  return `${asyncPrefix}${fn.getName() ?? '(anônima)'}(${params}): ${returnType}`;
+  return `${asyncPrefix}${fn.getName() ?? '(anonymous)'}(${params}): ${returnType}`;
 }
 
-/** Lista as funções de topo (`function nome`) de um arquivo. */
+/** Lists the top-level functions (`function name`) of a file. */
 export function collectFileFunctions(rootDir: string, file: SourceFile): FunctionInfo[] {
   const relativeFile = toPosixRelative(rootDir, file.getFilePath());
   return file.getFunctions().flatMap((fn) => {
@@ -85,7 +85,7 @@ export function collectFileFunctions(rootDir: string, file: SourceFile): Functio
   });
 }
 
-/** Lista todas as funções de topo do projeto, em ordem de arquivo e posição. */
+/** Lists every top-level function in the project, ordered by file and position. */
 export function collectFunctions(rootDir: string, project: Project): FunctionInfo[] {
   return project
     .getSourceFiles()
@@ -93,7 +93,7 @@ export function collectFunctions(rootDir: string, project: Project): FunctionInf
     .flatMap((file) => collectFileFunctions(rootDir, file));
 }
 
-/** Decide se uma declaração de variável de topo exportada é um dado/constante (não uma função). */
+/** Decides whether an exported top-level variable declaration is data/a constant (not a function). */
 export function isDataDeclaration(declaration: VariableDeclaration): boolean {
   const initializer = declaration.getInitializer();
   if (initializer === undefined) return true;
@@ -116,7 +116,7 @@ export function collectConstants(rootDir: string, project: Project): ConstantInf
   return project.getSourceFiles().flatMap((file) => collectFileConstants(rootDir, file));
 }
 
-/** Decide se um nó de referência deve ser ignorado: a própria declaração, imports e exports. */
+/** Decides whether a reference node is ignored: the declaration itself, imports and exports. */
 export function isIgnoredReference(node: Node): boolean {
   const parent = node.getParent();
   if (parent === undefined) return true;
@@ -129,7 +129,7 @@ export function isIgnoredReference(node: Node): boolean {
   );
 }
 
-/** Descobre quem "é dono" de um nó: a função de topo que o contém, ou o módulo do arquivo. */
+/** Finds who "owns" a node: the top-level function containing it, or the file's module. */
 export function ownerLabelOf(rootDir: string, node: Node): string {
   const fn = node.getFirstAncestorByKind(SyntaxKind.FunctionDeclaration);
   const name = fn?.getName();
@@ -139,7 +139,7 @@ export function ownerLabelOf(rootDir: string, node: Node): string {
   return `${toPosixRelative(rootDir, node.getSourceFile().getFilePath())}${MODULE_SCOPE_SUFFIX}`;
 }
 
-/** Localiza a declaração de uma função do registro dentro do projeto. */
+/** Locates the declaration of a registry function within the project. */
 export function findDeclaration(
   rootDir: string,
   project: Project,
@@ -149,7 +149,7 @@ export function findDeclaration(
   return file?.getFunction(info.name);
 }
 
-/** Monta o índice de referências: para cada função, quem a chama ou a passa como valor. */
+/** Builds the reference index: for each function, who calls it or passes it as a value. */
 export function buildReferenceIndex(
   rootDir: string,
   project: Project,
@@ -167,7 +167,7 @@ export function buildReferenceIndex(
   return index;
 }
 
-/** Inverte o índice de referências em um grafo de chamadas: função → funções do registro que ela usa. */
+/** Inverts the reference index into a call graph: function → registry functions it uses. */
 export function buildCallGraph(
   functions: readonly FunctionInfo[],
   references: ReferenceIndex,

@@ -1,25 +1,25 @@
-# Conector Gmail remoto (multi-conta, só leitura) no Cloudflare Workers (ADR 0014).
-# Sob demanda: sem Containers, Cron Triggers, alarms de Durable Object ou polling. Estado só no Workers KV.
-# Passo a passo do deploy e dos secrets em connectors/gmail/README.md.
+# Remote multi-account Gmail connector on Cloudflare Workers (ADR 0014, ADR 0019).
+# On demand: no Containers, Cron Triggers, Durable Object alarms or polling. State lives only in Workers KV.
+# Step-by-step deploy and secrets in connectors/gmail/README.md.
 name = "gmail-remote"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"
 compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
-# Tokens, clientes e grants OAuth do Claude (gerenciados por @cloudflare/workers-oauth-provider).
-# Troque o id pelo de `npx wrangler kv namespace create OAUTH_KV`.
+# Claude's OAuth tokens, clients and grants (managed by @cloudflare/workers-oauth-provider).
+# Replace the id with the one from `npx wrangler kv namespace create OAUTH_KV`.
 [[kv_namespaces]]
 binding = "OAUTH_KV"
 id = "1339a43dd026408b8f75dd88100ddd74"
 
-# Contas Gmail vinculadas por usuário (refresh tokens selados com AES-256-GCM), pedidos e tickets de vínculo.
-# Troque o id pelo de `npx wrangler kv namespace create GMAIL_KV`.
+# Gmail accounts linked per user (refresh tokens sealed with AES-256-GCM), link requests and tickets.
+# Replace the id with the one from `npx wrangler kv namespace create GMAIL_KV`.
 [[kv_namespaces]]
 binding = "GMAIL_KV"
 id = "63a15f1df7854a279ed4aec4215d454b"
 
-# Limite simples por sessão OAuth no /mcp: 120 requisições por minuto.
+# Simple per-OAuth-session limit on /mcp: 120 requests per minute.
 [[ratelimits]]
 name = "RATE_LIMITER"
 namespace_id = "2401"
@@ -28,8 +28,8 @@ namespace_id = "2401"
   limit = 120
   period = 60
 
-# Limite por IP nas rotas sem token (registro, login, vínculo, /token): 30 requisições por minuto.
-# Barra abuso de quem não tem conta, sem custo de KV (o conector é público).
+# Per-IP limit on routes without a token (registration, sign-in, linking, /token): 30 requests per minute.
+# Blocks abuse from people without an account, at no KV cost (the connector is public).
 [[ratelimits]]
 name = "RATE_LIMITER_PUBLIC"
 namespace_id = "2402"
@@ -38,9 +38,9 @@ namespace_id = "2402"
   limit = 30
   period = 60
 
-# PUBLIC_URL (opcional): URL canônica do Worker. Sem ela, vale a origem da requisição (*.workers.dev).
+# PUBLIC_URL (optional): the Worker's canonical URL. Without it, the request origin (*.workers.dev) is used.
 # [vars]
-# PUBLIC_URL = "https://gmail-remote.<sua-conta>.workers.dev"
+# PUBLIC_URL = "https://gmail-remote.<your-account>.workers.dev"
 
 [observability]
 enabled = true

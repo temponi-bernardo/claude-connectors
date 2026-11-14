@@ -109,8 +109,8 @@ ROADMAP.md.
 ### Changelog entry
 
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) format, in the `## [Unreleased]` section,
-under `### Adicionado` (added), `### Alterado` (changed), `### Corrigido` (fixed), `### Removido` (removed) or
-`### Segurança` (security). These headings stay in Portuguese while `release-please-config.json` uses them.
+under `### Added`, `### Changed`, `### Fixed`, `### Removed` or `### Security`, the same section names
+`release-please-config.json` uses.
 
 ```markdown
 - User-facing description, in the past tense, in English. (#123)

@@ -15,16 +15,16 @@ import type {
   ReferenceIndex,
 } from './types.js';
 
-/** Campos manuais de cada função, na ordem fixa do modelo (docs/DOCUMENTATION.md). */
+/** Manual fields of each function, in the template's fixed order (docs/DOCUMENTATION.md). */
 export const MANUAL_FIELDS = ['Does', 'Input', 'Output', 'Effects', 'Errors'] as const;
 
-/** Formata uma lista para o markdown: itens em crase separados por vírgula, ou `—` se vazia. */
+/** Formats a list for markdown: backticked items separated by commas, or `—` if empty. */
 export function formatList(items: readonly string[]): string {
   if (items.length === 0) return '—';
   return items.map((item) => `\`${item}\``).join(', ');
 }
 
-/** Renderiza o conteúdo do bloco gerado de uma função (sem os marcadores). */
+/** Renders the content of a function's generated block (without the markers). */
 export function renderGeneratedBlock(info: FunctionInfo, data: GeneratedData): string {
   return [
     `- **File:** \`${info.file}\``,
@@ -34,7 +34,7 @@ export function renderGeneratedBlock(info: FunctionInfo, data: GeneratedData): s
   ].join('\n');
 }
 
-/** Renderiza uma seção nova completa, com os campos manuais marcados para preencher. */
+/** Renders a complete new section, with the manual fields marked to fill in. */
 export function renderNewSection(info: FunctionInfo, data: GeneratedData): string {
   const manual = MANUAL_FIELDS.map((field) => `- **${field}:** ${PLACEHOLDER}`).join('\n');
   return [
@@ -48,7 +48,7 @@ export function renderNewSection(info: FunctionInfo, data: GeneratedData): strin
   ].join('\n');
 }
 
-/** Renderiza o índice por módulo: um item por arquivo com links para suas funções. */
+/** Renders the per-module index: one item per file with links to its functions. */
 export function renderModuleIndex(functions: readonly FunctionInfo[]): string {
   const byFile = new Map<string, string[]>();
   for (const fn of functions) {
@@ -62,7 +62,7 @@ export function renderModuleIndex(functions: readonly FunctionInfo[]): string {
     .join('\n');
 }
 
-/** Calcula, para uma função, os dados gerados a partir do índice de referências e dos processos. */
+/** Computes a function's generated data from the reference index and the processes. */
 export function computeGeneratedData(
   name: string,
   references: ReferenceIndex,
@@ -73,7 +73,7 @@ export function computeGeneratedData(
   return { usedBy, processes };
 }
 
-/** Fecho transitivo: funções citadas mais tudo o que elas chamam, direta ou indiretamente. */
+/** Transitive closure: cited functions plus everything they call, directly or indirectly. */
 export function closureOf(graph: CallGraph, roots: ReadonlySet<string>): Set<string> {
   const seen = new Set<string>();
   const stack = [...roots];
@@ -86,7 +86,7 @@ export function closureOf(graph: CallGraph, roots: ReadonlySet<string>): Set<str
   return seen;
 }
 
-/** Inverte as citações: função → processos em que aparece (direta ou indiretamente). */
+/** Inverts the citations: function → processes it appears in (directly or indirectly). */
 export function processesByFunction(
   citations: ProcessCitations,
   graph: CallGraph,
@@ -100,7 +100,7 @@ export function processesByFunction(
   return result;
 }
 
-/** Substitui o bloco gerado de uma seção existente pelo conteúdo novo. */
+/** Replaces the generated block of an existing section with the new content. */
 export function replaceSectionBlock(markdown: string, name: string, block: string): string {
   const pattern = new RegExp(
     `(### \`${name}\`[\\s\\S]*?${GENERATED_START})[\\s\\S]*?(${GENERATED_END})`,
@@ -108,7 +108,7 @@ export function replaceSectionBlock(markdown: string, name: string, block: strin
   return markdown.replace(pattern, `$1\n${block}\n$2`);
 }
 
-/** Acrescenta uma seção nova sob o heading `## arquivo` correspondente, criando o heading se faltar. */
+/** Appends a new section under the matching `## file` heading, creating the heading if missing. */
 export function appendSection(markdown: string, info: FunctionInfo, section: string): string {
   const heading = `## \`${info.file}\``;
   const headingIndex = markdown.indexOf(heading);
@@ -120,7 +120,7 @@ export function appendSection(markdown: string, info: FunctionInfo, section: str
   return `${markdown.slice(0, nextHeading).trimEnd()}\n\n${section}\n${markdown.slice(nextHeading)}`;
 }
 
-/** Insere texto antes da seção "## Data and constants" (ou no fim, se ela não existir). */
+/** Inserts text before the "## Data and constants" section (or at the end if it does not exist). */
 export function insertBeforeDataTable(markdown: string, text: string): string {
   const marker = '\n## Data and constants';
   const index = markdown.indexOf(marker);
@@ -128,17 +128,17 @@ export function insertBeforeDataTable(markdown: string, text: string): string {
   return `${markdown.slice(0, index).trimEnd()}\n\n${text}${markdown.slice(index)}`;
 }
 
-/** Remove a seção `### \`nome\`` inteira, até o próximo heading `##`/`###` ou o fim do texto. */
+/** Removes the whole `### \`name\`` section, up to the next `##`/`###` heading or the end of the text. */
 export function removeSection(markdown: string, name: string): string {
   return markdown.replace(new RegExp(`\\n### \`${name}\`[\\s\\S]*?(?=\\n##+ |$)`), '');
 }
 
-/** Remove headings de módulo (`## \`arquivo\``) que não têm mais nenhuma seção abaixo. */
+/** Removes module headings (`## \`file\``) that no longer have any section below them. */
 export function removeEmptyModules(markdown: string): string {
   return markdown.replace(/\n## `[^`]+`\n\s*(?=\n## |$)/g, '').replace(/\n*$/, '\n');
 }
 
-/** Remove as seções de funções que não existem mais no código e os módulos que ficaram vazios. */
+/** Removes sections of functions no longer in the code and modules left empty. */
 export function pruneOrphanSections(markdown: string, functions: readonly FunctionInfo[]): string {
   const inCode = new Set(functions.map((f) => f.name));
   const orphans = extractFunctionSections(markdown).filter((s) => !inCode.has(s.name));
@@ -146,7 +146,7 @@ export function pruneOrphanSections(markdown: string, functions: readonly Functi
   return orphans.length === 0 ? markdown : removeEmptyModules(pruned);
 }
 
-/** Aplica o gerador ao FUNCTIONS.md: poda órfãs, índice, blocos gerados e seções novas. */
+/** Applies the generator to FUNCTIONS.md: prunes orphans, index, generated blocks and new sections. */
 export function applyGenerated(
   markdown: string,
   functions: readonly FunctionInfo[],

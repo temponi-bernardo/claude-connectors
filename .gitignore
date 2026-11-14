@@ -1,4 +1,4 @@
-# ===== Segredos e chaves =====
+# ===== Secrets and keys =====
 .env
 .env.*
 !.env.example
@@ -11,7 +11,7 @@
 credentials.json
 service-account*.json
 
-# ===== Dependências =====
+# ===== Dependencies =====
 node_modules/
 .pnpm-store/
 
@@ -21,18 +21,18 @@ build/
 out/
 *.tsbuildinfo
 
-# ===== Cobertura e relatórios =====
+# ===== Coverage and reports =====
 coverage/
 .nyc_output/
 report/
 .jscpd-report/
 
-# ===== Linguagem / ferramentas =====
+# ===== Language / tools =====
 .eslintcache
 .cache/
 *.tgz
 
-# ===== Instaladores =====
+# ===== Installers =====
 *.dmg
 *.pkg
 *.msi
@@ -41,14 +41,14 @@ report/
 *.rpm
 *.AppImage
 
-# ===== Sistemas operacionais =====
+# ===== Operating systems =====
 .DS_Store
 .AppleDouble
 Thumbs.db
 Desktop.ini
 *~
 
-# ===== Editores =====
+# ===== Editors =====
 .idea/
 .vscode/*
 !.vscode/extensions.json
@@ -66,10 +66,10 @@ logs/
 # ===== Claude Code =====
 .claude/settings.local.json
 
-# ===== Handoff do Claude Code (estado local do clone) =====
+# ===== Claude Code handoff (local clone state) =====
 .claude/.last-handoff
 
-# ===== Handoff do Claude Code: docs/STATE.md é estado local de cada clone (ADR 0005) =====
+# ===== Claude Code handoff: docs/STATE.md is local state of each clone (ADR 0005) =====
 docs/STATE.md
 
 # ===== Cloudflare Workers (wrangler dev/deploy, ADR 0010) =====
