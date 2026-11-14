@@ -24,6 +24,7 @@ export default {
         'config',
         'remote',
         'site',
+        'gmail',
       ],
     ],
     'scope-empty': [2, 'never'],

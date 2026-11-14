@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "gmail": {
+      "type": "http",
+      "url": "https://gmail-remote.bftemponi.workers.dev/mcp"
+    }
+  }
+}

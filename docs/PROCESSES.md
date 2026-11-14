@@ -95,7 +95,8 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
      `.mcp.json` (P05 garante que ele aponta para um servidor remoto).
   2. O `.mcp.json` registra o servidor `http` do Worker (`https://canvas-puc-remote.bftemponi.workers.dev/mcp`).
      Nada é instalado nem roda no computador.
-  3. Na primeira chamada, o servidor responde 401 e o Claude abre o OAuth do P08; a partir daí, P09.
+  3. Na primeira chamada, o servidor responde 401 e o Claude abre o OAuth do P08 (Gmail: P10); a partir daí, P09
+     (Gmail: P12).
 - **Resultado:** as ferramentas aparecem como `mcp__plugin_<nome>_<servidor>__<ferramenta>`.
 - **Falhas:** sem acesso ao repositório, o "Adicionar marketplace" falha; Worker fora do ar → o conector aparece
   como falha de conexão.
@@ -143,3 +144,59 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
 - **Falhas:** access token vencido → 401 e o Claude usa o refresh token (e o P08 passo 7 estende o token do
   Canvas); token do Canvas vencido (mais de 30 dias sem uso, ou revogado) → `unauthorizedMessage()` devolve a
   orientação de gerar outro token e reconectar (P08).
+
+## P10 — Conectar o Gmail remoto (OAuth do Claude com login no Google)
+
+- **Gatilho:** no claude.ai, Configurações → Conectores → Adicionar conector personalizado com
+  `https://<worker>/mcp` (ADR 0014).
+- **Passos:**
+  1. `handleGmailWorkerFetch()` (entrada `src/index.ts`) cria o provedor com `createGmailProvider()` para a origem
+     de `publicOrigin()`; a biblioteca atende metadados, `/register` (filtrado por `checkClientRegistration()`) e
+     `/token`, e manda o resto para `handleDefaultRequest()`, que monta `createGmailDeps()` (`readGmailSettings()`).
+  2. `GET /authorize`: `showAuthorize()` valida o pedido e mostra `consentPage()`; se o consentimento já foi
+     lembrado, vai direto a `beginGoogleSignIn()`.
+  3. `POST /authorize`: `submitAuthorize()` nega (volta ao Claude com `access_denied`) ou aprova e chama
+     `beginGoogleSignIn()`, que guarda verificador PKCE e `nonce` na transação e redireciona com
+     `googleAuthorizeUrl()` (só `openid email`).
+  4. `GET /google/callback` sem prefixo `link.`: `finishSignIn()` recupera a transação; `completeSignIn()` troca o
+     código com `exchangeGoogleCode()`, valida o `id_token` com `verifyGoogleIdToken()` e confere a allowlist com
+     `findAllowedAccount()` antes de a biblioteca concluir a autorização (props: e-mail e id de sessão).
+- **Resultado:** o Claude recebe o código e troca por tokens no KV `OAUTH_KV`.
+- **Falhas:** e-mail fora de `ALLOWED_EMAILS` → 403 (`accessDeniedPage()`); recusa no Google → `access_denied` ao
+  Claude; pedido inválido ou cookie ausente → `authorizationErrorResponse()`; secret faltando → 500
+  (`configErrorResponse()`).
+
+## P11 — Vincular uma conta Gmail (`/accounts/link`)
+
+- **Gatilho:** o dono abre `https://<worker>/accounts/link` no navegador (uma vez por conta, ou quando uma
+  ferramenta diz que a conta perdeu o acesso).
+- **Passos:**
+  1. `startAccountLink()` cria `state` (`link.` + aleatório), verificador, `nonce` e cookie de vínculo; grava o
+     pedido selado no KV pela chave de `linkRequestKey()` com validade de 10 minutos e redireciona com
+     `googleAuthorizeUrl()` (`gmail.readonly`, acesso offline).
+  2. Na volta, `finishAccountLink()` pega o pedido com `takeLinkRequest()` (uso único, cookie conferido por
+     `readCookie()` e `sha256Hex()`).
+  3. `linkSafely()` roda `linkFromCode()`, que troca o código, valida o `id_token`, confere a allowlist e `linkRefusal()` (escopo do Gmail e
+     refresh token); `storeLinkedAccount()` grava com `saveLinkedAccount()` (selo de `sealLinkedAccount()`).
+- **Resultado:** página "Conta vinculada"; o cookie é apagado com `linkCookie()`.
+- **Falhas:** pedido vencido ou de outro navegador → "Pedido expirado"; recusa no Google → "Vínculo cancelado";
+  conta fora da allowlist → 403; permissão do Gmail desmarcada → "Permissão faltando".
+
+## P12 — Responder a uma ferramenta do Gmail
+
+- **Gatilho:** o Claude chama uma ferramenta em `POST /mcp` com o access token.
+- **Passos:**
+  1. A biblioteca valida o token e chama `handleMcpApi()`, que aplica `isRateLimited()` pela sessão e monta
+     `createGmailServer()` com `GMAIL_TOOLS`; `serveMcpRequest()` responde sem sessão.
+  2. A ferramenta resolve `account` com `resolveAccounts()` ou `resolveSingleAccount()`.
+  3. `gmailGet()` pega o access token com `getAccessToken()` (memória ou `renewAccessToken()` a partir de
+     `requireLinkedAccount()`), chama a Gmail API com `gmailUrl()` e, depois de 401, tenta de novo uma vez.
+  4. As respostas viram objetos enxutos: `searchThreads()` (`searchAccount()`, `summarizeThread()`, página
+     combinada com `encodeMultiPageToken()`), `formatThread()`/`formatMessage()` (`messageBodyText()`,
+     `truncateText()`), `accountLabels()`, `accountStatus()` ou `readAttachmentText()`
+     (`attachmentBytesToText()` → `pdfToText()`, `wordToText()` ou `htmlToText()`); `withUntrustedNotice()` põe o
+     aviso de conteúdo não confiável.
+- **Resultado:** texto JSON enxuto, limitado em tamanho, com o apelido da conta em cada item.
+- **Falhas:** conta não vinculada ou revogada → `relinkError()` com o link de `linkUrl()`; `invalid_grant` marca a
+  conta como revogada; erro HTTP do Gmail → `gmailHttpError()`; mais de 120 req/min → 429
+  (`rateLimitedResponse()`); anexo acima de 5 MB ou tipo não suportado → erro explicando o limite.

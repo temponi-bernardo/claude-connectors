@@ -48,6 +48,7 @@ sessão anterior deixou está em `docs/STATE.md` (injetado no início da sessão
 | `npm run dup:check`                  | jscpd                                                                       |
 | `npm run build`                      | Valida o `.mcp.json` (só remoto) e gera `server/remote.js` de cada conector |
 | `npm run worker:deploy`              | Publica o Canvas remoto no Cloudflare Workers (`worker:dev`: local)         |
+| `npm run gmail:deploy`               | Publica o Gmail remoto no Cloudflare Workers (`gmail:dev`: local)           |
 
 ## Skills
 

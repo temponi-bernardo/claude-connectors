@@ -10,7 +10,8 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 ├── .claude-plugin/   # marketplace.json: este repo como marketplace de plugins do Claude
 ├── .github/          # Templates de PR/issue, Dependabot, CODEOWNERS (sem Actions, ADR 0006)
 ├── connectors/       # Um conector MCP remoto por pasta, cada um vira um plugin do marketplace
-│   └── canvas-puc/   # Canvas LMS da PUC Minas (plugin + src/ + Worker + server/remote.js gerado)
+│   ├── canvas-puc/   # Canvas LMS da PUC Minas (plugin + src/ + Worker + server/remote.js gerado)
+│   └── gmail/        # Gmail multi-conta só leitura (plugin + src/ + Worker), ADR 0014
 ├── docs/             # Documentação — fonte da verdade (e o site público do GitHub Pages)
 ├── scripts/          # Scripts de shell auxiliares (GitHub, segredos, pr:check)
 ├── src/              # Código compartilhado entre conectores (core puro, mcp, remote)
@@ -42,12 +43,16 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 | `connectors/canvas-puc/server/`         | Bundle gerado por `npm run build` (versionado; não editar à mão), usado pelo Dockerfile | `remote.js`                                                 |
 | `connectors/canvas-puc/src/`            | Código do conector: cliente, formatação, tools, OAuth do Canvas e Worker                | `worker.ts`, `remote.ts`, `client.ts`, `tools.ts`           |
 | `connectors/canvas-puc/src/fixtures/`   | Contexto falso (cliente simulado) para os testes das ferramentas                        | `fake-context.ts`                                           |
+| `connectors/gmail/`                     | Conector Gmail: plugin (`.mcp.json` com a URL do Worker), Worker e guia (ADR 0014)      | `.mcp.json`, `wrangler.toml`, `README.md`                   |
+| `connectors/gmail/.claude-plugin/`      | Manifesto do plugin (nome, descrição)                                                   | `plugin.json`                                               |
+| `connectors/gmail/src/`                 | OAuth (biblioteca + Google), vínculo de contas, cliente Gmail, tools, Worker            | `index.ts`, `worker.ts`, `tools.ts`, `link-flow.ts`         |
+| `connectors/gmail/src/fixtures/`        | KV, Google (chaves RSA de teste) e mensagens falsos para os testes                      | `fake-kv.ts`, `fake-google.ts`, `messages.ts`               |
 | `docs/`                                 | Documentação (índice em `README.md`) e site do GitHub Pages (`*.html`)                  | `FUNCTIONS.md`, `index.html`, `_config.yml`                 |
 | `docs/_layouts/`                        | Layout Jekyll do site público (cabeçalho, rodapé, CSP), ADR 0012                        | `site.html`                                                 |
 | `docs/adr/`                             | Registros de decisão de arquitetura                                                     | `README.md`, `0000-modelo.md`                               |
 | `scripts/`                              | Scripts de shell                                                                        | `install-gitleaks.sh`, `secrets-check.sh`, `pr-check.sh`    |
 | `src/`                                  | Código compartilhado entre conectores e lista de exceções de teste                      | `test-exceptions.ts`                                        |
-| `src/core/`                             | Lógica pura compartilhada, sem efeitos (HTML, URL, env, ZIP/OLE/Word → texto)           | `html.ts`, `http.ts`, `env.ts`                              |
+| `src/core/`                             | Lógica pura compartilhada, sem efeitos (HTML, URL, env, ZIP/OLE/Word/PDF → texto)       | `html.ts`, `http.ts`, `env.ts`                              |
 | `src/core/fixtures/`                    | Documentos do Word de exemplo (.doc/.docx) para os testes de `word.ts`                  | `exemplo.doc`, `exemplo.docx`, `unicode.doc`                |
 | `src/mcp/`                              | Definição e registro de ferramentas MCP, usados por todos os conectores                 | `tools.ts`                                                  |
 | `src/remote/`                           | Servidor remoto genérico: OAuth sem estado, página de login, `/mcp` por HTTP            | `handler.ts`, `oauth.ts`, `tokens.ts`, `node-server.ts`     |

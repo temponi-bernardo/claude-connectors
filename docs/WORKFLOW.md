@@ -32,7 +32,7 @@
 | `revert`   | Reverte um commit                         | —                       |
 
 Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `bundle`, `docs`, `tools`, `ci`, `deps`,
-`skills`, `release`, `config`, `remote`, `site`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
+`skills`, `release`, `config`, `remote`, `site`, `gmail`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
 
 `BREAKING CHANGE:` no rodapé (ou `!` após o tipo) gera major. O hook `commit-msg` valida localmente; o
 `pr:check` valida o **título do PR**, porque com squash merge é ele que vira o commit da `main`.
@@ -101,6 +101,8 @@ temponi-bernardo/claude-connectors`.
 
 O **conector remoto** (ADR 0010) não depende de release: depois de um merge que mexe no conector, rode
 `npm run worker:deploy` na `main` (precisa de `CLOUDFLARE_API_TOKEN`). Para testar antes, `npm run worker:dev`.
+O **Gmail remoto** (ADR 0014) segue o mesmo caminho com `npm run gmail:deploy` / `npm run gmail:dev`; o
+primeiro deploy (KV, secrets, Google Cloud) está em [connectors/gmail/README.md](../connectors/gmail/README.md).
 
 ## Segurança no fluxo
 

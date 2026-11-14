@@ -45,6 +45,7 @@ O MVP é o conector do Canvas instalado pelo marketplace e usado no dia a dia, s
 | F2.8  | Renovação automática do token do Canvas no refresh do OAuth            | ✅     | Refresh do OAuth estende a validade do token na PUC (ADR 0011)                           |
 | F2.9  | Site público no GitHub Pages: início, privacidade e termos (ADR 0012)  | ✅     | Páginas em `docs/` montadas pelo Jekyll, sem os `.md` internos; manifesto aponta o site  |
 | F2.10 | Remover o modo local: plugin do marketplace aponta para o Worker       | ✅     | Sem stdio, `.mcpb` e login pelo navegador; `.mcp.json` só `http` (ADR 0013)              |
+| F2.11 | Gmail remoto multi-conta só leitura no Workers (ADR 0014)              | 🟨     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai   |
 
 ## Fases seguintes
 

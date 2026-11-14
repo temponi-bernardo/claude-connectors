@@ -3,7 +3,9 @@
 Repositório de **conectores MCP remotos** para o Claude. Cada conector é um servidor HTTP com OAuth hospedado na
 nuvem (Cloudflare Workers, [ADR 0010](adr/0010-conector-remoto-no-cloudflare-workers.md)) e publicado como plugin
 do marketplace deste repositório: o plugin só aponta para a URL do servidor. Nada roda no computador de quem
-instala ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)).
+instala ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)). O conector **Gmail**
+(`connectors/gmail/`) segue o mesmo modelo, com OAuth da biblioteca `@cloudflare/workers-oauth-provider` e estado
+no Workers KV ([ADR 0014](adr/0014-gmail-remoto-sob-demanda-no-workers.md)).
 
 ## Camadas
 
@@ -38,6 +40,7 @@ Dentro de um conector, a mesma regra vale em escala menor: funções puras (`for
 - Conectores **não** importam uns dos outros: lógica usada por dois conectores sobe para `src/core/` ou `src/mcp/`.
 - `remote` não conhece conector nenhum: recebe um `RemoteConnector` (textos da página, verificação da credencial e
   fábrica de `McpServer`). Usa `node:crypto` e `node:http`, por isso não está em `core`.
+- `src/core/` também guarda leitores de formato usados por mais de um conector (Word, ZIP, PDF).
 - `core` nunca importa Node (`node:fs`, `node:http`) nem bibliotecas com efeito; testes de `core` não usam mocks.
 
 ## Fluxo de dados
@@ -65,16 +68,20 @@ O plugin tem só `.claude-plugin/plugin.json` e `.mcp.json` (servidor `http` com
 | Token de acesso do Canvas | Única credencial do conector               | `connectors/canvas-puc/src/remote.ts`                  | Só selado nos tokens OAuth (`SEAL_KEY` no servidor)              |
 | Cloudflare Workers        | Rodar o conector remoto                    | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (secret do Worker); deploy com `CLOUDFLARE_API_TOKEN` |
 | GitHub Pages              | Site público (início, privacidade, termos) | `docs/_config.yml`, `docs/_layouts/site.html`          | Nenhum (ADR 0012)                                                |
+| Google OAuth / OIDC       | Login do dono e vínculo de contas          | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`  | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (secrets do Worker)   |
+| Gmail API (só leitura)    | Buscar e ler e-mails e anexos              | `connectors/gmail/src/gmail-api.ts`                    | Refresh token selado no KV com `TOKEN_ENC_KEY`                   |
+| Workers KV / rate limit   | Grants OAuth, contas e limite (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`, `ALLOWED_EMAILS` (secrets do Worker)           |
 
 Nada de credencial no repositório nem no servidor: o token do Canvas só existe selado (AES-GCM com a `SEAL_KEY`)
 dentro dos tokens OAuth que o Claude guarda.
 
 ## Dependências de runtime
 
-| Pacote                      | Para quê                            |
-| --------------------------- | ----------------------------------- |
-| `@modelcontextprotocol/sdk` | Servidor MCP em Streamable HTTP     |
-| `zod` (v3)                  | Esquemas de entrada das ferramentas |
+| Pacote                               | Para quê                                                   |
+| ------------------------------------ | ---------------------------------------------------------- |
+| `@modelcontextprotocol/sdk`          | Servidor MCP em Streamable HTTP                            |
+| `zod` (v3)                           | Esquemas de entrada das ferramentas                        |
+| `@cloudflare/workers-oauth-provider` | OAuth 2.1 do conector Gmail (DCR, PKCE, consentimento, KV) |
 
 Dev: `esbuild` (bundle do Dockerfile) e `wrangler` (Worker, ADR 0010), além
 das ferramentas do template.

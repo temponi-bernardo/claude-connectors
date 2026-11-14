@@ -16,3 +16,10 @@ export function envValue(env: EnvVars, key: string): string | null {
 export function parseFlag(value: string | null): boolean {
   return ['1', 'true', 'sim', 'yes'].includes((value ?? '').toLowerCase());
 }
+
+/** Converte o ambiente de um Worker (variáveis, secrets e bindings) em variáveis de texto. */
+export function toEnvVars(env: Readonly<Record<string, unknown>>): EnvVars {
+  return Object.fromEntries(
+    Object.entries(env).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),
+  );
+}
