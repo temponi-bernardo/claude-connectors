@@ -50,14 +50,14 @@ conteúdo das mensagens é dado de terceiros não confiável.
 
 ## Configuração guiada
 
-Com o plugin instalado, digite **`/config-whatsapp`** no chat. O Claude confere se o seu servidor responde,
+Com o plugin instalado, digite **`/setup-whatsapp`** no chat. O Claude confere se o seu servidor responde,
 guia a publicação (se faltar), conecta o Claude ao seu `/mcp`, conduz o pareamento em `/pair` e faz um teste.
 
 Comandos de uso, depois de configurado:
 
-- **`/resumo-whatsapp`** — o que aconteceu nas conversas e grupos no período.
-- **`/pendencias-whatsapp`** — conversas esperando resposta da pessoa.
-- **`/buscar-whatsapp`** — endereço, PIX, link, documento ou mídia nas mensagens.
+- **`/whatsapp-summary`** — o que aconteceu nas conversas e grupos no período.
+- **`/whatsapp-pending`** — conversas esperando resposta da pessoa.
+- **`/search-whatsapp`** — endereço, PIX, link, documento ou mídia nas mensagens.
 
 ## Publicar (uma vez)
 
@@ -122,8 +122,8 @@ pareamento de novo; use se trocar a `SNAPSHOT_KEY` ou o backup corromper).
   Claude Code (logado na mesma conta).
 - **Claude Code sem conta claude.ai:**
   `claude mcp add --transport http whatsapp https://whatsapp-remote.<sua-conta>.workers.dev/mcp`.
-- **Plugin do marketplace** (opcional): traz só as skills (`/config-whatsapp`, `/resumo-whatsapp` etc.), **sem**
-  servidor embutido, porque cada pessoa tem o próprio. Instale e rode `/config-whatsapp`, que conecta o seu.
+- **Plugin do marketplace** (opcional): traz só as skills (`/setup-whatsapp`, `/whatsapp-summary` etc.), **sem**
+  servidor embutido, porque cada pessoa tem o próprio. Instale e rode `/setup-whatsapp`, que conecta o seu.
 
   ```text
   /plugin install whatsapp --marketplace temponi-bernardo/claude-connectors

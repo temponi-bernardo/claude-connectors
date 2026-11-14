@@ -11,7 +11,7 @@ Triggers, alarms ou polling, então ficar ocioso não custa nada. Estado no Work
 
 ## Para quem vai usar
 
-O jeito mais fácil: digite **`/config-gmail`** no chat. O Claude confere a conexão, mostra as contas, vincula
+O jeito mais fácil: digite **`/setup-gmail`** no chat. O Claude confere a conexão, mostra as contas, vincula
 ou desvincula contas e faz um teste. O passo a passo manual é este:
 
 1. No Claude, adicione o marketplace `temponi-bernardo/claude-connectors` e instale o plugin **`gmail`** (ou
@@ -36,10 +36,10 @@ app"**: clique em **Avançado → Acessar**. O Google limita apps não verificad
 
 ## Comandos do plugin
 
-- **`/config-gmail`** — configuração guiada (conexão, contas e teste).
-- **`/triagem-email`** — caixa de entrada de todas as contas por prioridade.
-- **`/achar-documento`** — boletos, faturas, recibos e contratos, com os dados do anexo.
-- **`/resumir-conversa`** — resumo de uma thread, pendências e rascunho de resposta.
+- **`/setup-gmail`** — configuração guiada (conexão, contas e teste).
+- **`/triage-inbox`** — caixa de entrada de todas as contas por prioridade.
+- **`/find-document`** — boletos, faturas, recibos e contratos, com os dados do anexo.
+- **`/summarize-thread`** — resumo de uma thread, pendências e rascunho de resposta.
 
 Também dá para pedir em linguagem natural ("tem e-mail pra responder?"): o Claude usa a skill certa.
 

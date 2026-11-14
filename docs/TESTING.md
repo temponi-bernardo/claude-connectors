@@ -7,7 +7,7 @@
 3. Write the minimum code that makes it pass.
 4. Refactor with the tests green.
 
-For a bug: first the test that reproduces the bug (failing), then the fix. The `/testes-primeiro` skill drives the
+For a bug: first the test that reproduces the bug (failing), then the fix. The `/tests-first` skill drives the
 cycle.
 
 ## Rules

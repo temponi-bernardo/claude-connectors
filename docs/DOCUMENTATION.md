@@ -20,10 +20,10 @@ each kind of change, in what format, and what the machine checks.
 | New layer, dependency or external service            | ARCHITECTURE.md                                   | Prose + dependency table                                                                    | PR                            |
 | Product decision, plan, pricing                      | PRODUCT.md                                        | Open question → dated decision                                                              | PR                            |
 | Command, hook, workflow rule                         | WORKFLOW.md, CLAUDE.md                            | Short prose                                                                                 | PR                            |
-| Plugin changed (`connectors/`, `.claude-plugin/`)    | Connector README, CHANGELOG.md and whatever fits  | `/atualizar-docs` skill                                                                     | `Stop` hook + PR              |
+| Plugin changed (`connectors/`, `.claude-plugin/`)    | Connector README, CHANGELOG.md and whatever fits  | `/update-docs` skill                                                                        | `Stop` hook + PR              |
 | New code rule                                        | CODING-STANDARDS.md and, if possible, a lint rule | Prose + example                                                                             | PR                            |
 | New term                                             | GLOSSARY.md                                       | `**Term** — definition.`                                                                    | PR                            |
-| Step repeated with Claude                            | `.claude/skills/<name>/SKILL.md`, CLAUDE.md       | See `/melhorar-skills`                                                                      | PR                            |
+| Step repeated with Claude                            | `.claude/skills/<name>/SKILL.md`, CLAUDE.md       | See `/improve-skills`                                                                       | PR                            |
 
 ## Standard formats
 

@@ -88,7 +88,7 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
   3. Runs `npm run plugin:validate` (`scripts/plugin-validate.sh`): `claude plugin validate --strict` on the
      marketplace and on each `connectors/<name>/plugin`; any warning fails (needs the Claude Code CLI, ADR 0022).
   4. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
-- **Resultado:** `✔ pr:check verde`, condição para o Claude mergear com squash.
+- **Resultado:** `✔ pr:check green`, condição para o Claude mergear com squash.
 - **Falhas:** qualquer etapa com erro para o script com código ≠ 0.
 
 ## P07 — Instalar um conector pelo marketplace (Claude, Cowork e Claude Code)

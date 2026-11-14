@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Funções compartilhadas pelos hooks de handoff. Carregue com `source`.
-# Sem dependências além de bash, git e node (já exigidos pelo projeto).
+# Functions shared by the handoff hooks. Load with `source`.
+# No dependencies beyond bash, git and node (already required by the project).
 
 STATE_FILE="docs/STATE.md"
 MARKER_FILE=".claude/.last-handoff"
 
-# Lê um campo de primeiro nível do JSON recebido no stdin do hook.
-# Uso: json_field "$input" session_id [padrão]
+# Reads a top-level field of the JSON the hook received on stdin.
+# Usage: json_field "$input" session_id [default]
 json_field() {
   local input="$1" field="$2" default="${3:-}"
   printf '%s' "$input" | node -e '
@@ -22,12 +22,12 @@ json_field() {
     });' "$field" "$default" 2>/dev/null || printf '%s' "$default"
 }
 
-# Hash do HEAD atual ou "none" (repositório sem commits / fora do git).
+# Hash of the current HEAD or "none" (repository without commits / outside git).
 current_head() {
   git rev-parse --verify HEAD 2>/dev/null || echo "none"
 }
 
-# Hash do conteúdo de um arquivo ou "none" se não existir.
+# Hash of a file's content or "none" if it does not exist.
 file_hash() {
   if [ -f "$1" ]; then
     git hash-object "$1" 2>/dev/null || echo "none"
@@ -36,13 +36,13 @@ file_hash() {
   fi
 }
 
-# Grava o marcador "head state_hash" do último handoff reconhecido.
+# Writes the "head state_hash" marker of the last recognized handoff.
 write_marker() {
   mkdir -p "$(dirname "$MARKER_FILE")"
   printf '%s %s\n' "$1" "$2" > "$MARKER_FILE"
 }
 
-# Lê o marcador; imprime "head state_hash" ou "none none".
+# Reads the marker; prints "head state_hash" or "none none".
 read_marker() {
   if [ -f "$MARKER_FILE" ]; then
     read -r h s < "$MARKER_FILE" || true
@@ -52,10 +52,10 @@ read_marker() {
   fi
 }
 
-# Conta commits feitos por esta pessoa (e-mail de `git var GIT_COMMITTER_IDENT`, que respeita
-# GIT_COMMITTER_EMAIL e user.email) desde $1 até o HEAD.
-# Commits trazidos por git pull (ex.: squash merge feito no GitHub) têm outro committer e não contam.
-# Marcador inválido ou sem e-mail configurado: conta todos os commits ou devolve 0 se o git falhar.
+# Counts commits made by this person (e-mail from `git var GIT_COMMITTER_IDENT`, which honors
+# GIT_COMMITTER_EMAIL and user.email) from $1 to HEAD.
+# Commits brought by git pull (e.g. a squash merge done on GitHub) have another committer and don't count.
+# Invalid marker or no e-mail configured: counts every commit, or returns 0 if git fails.
 own_commits_since() {
   local since="$1" email
   email="$(git var GIT_COMMITTER_IDENT 2>/dev/null | sed -n 's/.*<\(.*\)>.*/\1/p')"
@@ -66,34 +66,35 @@ own_commits_since() {
   fi
 }
 
-# Gera docs/STATE.md a partir do fim do transcript via `claude -p` (processo separado).
-# Uso: generate_handoff "$transcript" "PreCompact". Só grava se a resposta começar por "# Estado atual".
-# Nunca falha: sem `claude`, timeout ou resposta inválida, deixa o STATE.md como estava.
+# Generates docs/STATE.md from the end of the transcript via `claude -p` (separate process).
+# Usage: generate_handoff "$transcript" "PreCompact". Only writes if the reply starts with "# Current state"
+# (or the older Portuguese "# Estado atual").
+# Never fails: without `claude`, on timeout or an invalid reply, leaves STATE.md as it was.
 generate_handoff() {
   local transcript="$1" label="$2" excerpt prompt out limit=() t
   command -v claude >/dev/null 2>&1 || return 0
-  # Só o fim do transcript (últimos 300 KB) para caber no prompt e no tempo.
+  # Only the end of the transcript (last 300 KB) to fit the prompt and the time budget.
   excerpt="$(tail -c 300000 "$transcript" 2>/dev/null || true)"
   [ -n "$excerpt" ] || return 0
-  prompt="Você vai escrever o arquivo docs/STATE.md (handoff de contexto) de um projeto de software, em português do Brasil.
-Baseie-se SOMENTE no transcript JSONL abaixo. Responda apenas com o conteúdo Markdown do arquivo, começando por '# Estado atual', sem cercas de código.
-Seções obrigatórias, nesta ordem: '## Tarefa atual', '## Feito', '## Em andamento', '## Próximos passos', '## Arquivos tocados', '## Decisões e pendências'.
-Seja concreto: ids de tarefa, nomes de arquivo, comandos, erros abertos. Máximo de 60 linhas.
+  prompt="You will write the docs/STATE.md file (context handoff) of a software project, in English.
+Base it ONLY on the JSONL transcript below. Reply only with the file's Markdown content, starting with '# Current state', without code fences.
+Required sections, in this order: '## Current task', '## Done', '## In progress', '## Next steps', '## Files touched', '## Decisions and open items'.
+Be concrete: task ids, file names, commands, open errors. At most 60 lines.
 
 TRANSCRIPT:
 $excerpt"
-  # `timeout` é do GNU coreutils: ausente no macOS padrão (lá pode existir como `gtimeout`).
+  # `timeout` comes from GNU coreutils: missing on stock macOS (it may exist there as `gtimeout`).
   for t in timeout gtimeout; do
     if command -v "$t" >/dev/null 2>&1; then limit=("$t" "${CLAUDE_HANDOFF_TIMEOUT:-45}"); break; fi
   done
   out="$(printf '%s' "$prompt" | (cd "${TMPDIR:-/tmp}" && env -u CLAUDECODE CLAUDE_HANDOFF_AUTOGEN=0 \
     ${limit[@]+"${limit[@]}"} claude -p --output-format text 2>/dev/null) || true)"
   case "$out" in
-    "# Estado atual"*)
+    "# Current state"* | "# Estado atual"*)
       mkdir -p "$(dirname "$STATE_FILE")"
       {
         printf '%s\n' "$out"
-        printf '\n_Gerado automaticamente pelo hook %s em %s._\n' "$label" "$(date +%Y-%m-%d\ %H:%M)"
+        printf '\n_Generated automatically by the %s hook on %s._\n' "$label" "$(date +%Y-%m-%d\ %H:%M)"
       } > "$STATE_FILE"
       write_marker "$(current_head)" "$(file_hash "$STATE_FILE")"
       ;;
@@ -101,9 +102,9 @@ $excerpt"
   return 0
 }
 
-# Decide se o handoff está defasado: imprime "yes" se o transcript tem trabalho (Edit, Write,
-# MultiEdit, NotebookEdit fora do STATE.md, ou Bash com git commit/merge/push) depois da última
-# modificação do STATE.md (ou se ele não existe); senão "no". Sessão só de conversa/leitura: "no".
+# Decides whether the handoff is stale: prints "yes" if the transcript has work (Edit, Write,
+# MultiEdit, NotebookEdit outside STATE.md, or Bash with git commit/merge/push) after the last
+# modification of STATE.md (or if it does not exist); otherwise "no". Chat/read-only session: "no".
 handoff_is_stale() {
   node -e '
     const fs = require("fs");

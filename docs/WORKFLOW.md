@@ -88,7 +88,7 @@ Claude works in small contexts: one task per session. The cycle, supported by th
    and asks for the handoff; commits brought in by `git pull` do not count.
 4. If the branch changed a plugin (`connectors/` or `.claude-plugin/`) without touching documentation (`docs/`,
    `CHANGELOG.md`, `README.md` or the connector's README), the `Stop` hook `stop-plugin-docs.sh` blocks ending the
-   turn and asks for the `/atualizar-docs` skill: every plugin change documents everything that was done.
+   turn and asks for the `/update-docs` skill: every plugin change documents everything that was done.
 5. Claude says so; the user runs `/clear`. If the context overflows first, `PreCompact` generates an automatic
    handoff via `claude -p` (turn it off with `CLAUDE_HANDOFF_AUTOGEN=0`).
 6. If `/clear` (or the end of the session) comes without a handoff, `SessionEnd` (`session-end-handoff.sh`)
@@ -105,7 +105,7 @@ Each version lives in one place ([ADR 0022](adr/0022-version-per-plugin.md)). Th
 the `plugin.json` field through `extra-files` (`jsonpath: $.version`). The marketplace entry never carries a
 version. `.release-please-manifest.json` mirrors every package's current version. A plugin only shows an update
 to users after its version is bumped, so release any change to a connector (server or plugin) that users should
-get. The flow belongs to the `/lancar-versao` skill:
+get. The flow belongs to the `/release` skill:
 
 1. Conventional commits reach `main` through PRs.
 2. The local CLI opens/updates a **release PR** with the version bump and the generated CHANGELOG:
