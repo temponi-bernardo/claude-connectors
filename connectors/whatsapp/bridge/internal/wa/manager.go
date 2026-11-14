@@ -59,6 +59,8 @@ type Options struct {
 	Store       *store.Store
 	HistoryDays int
 	Log         *slog.Logger
+	// OnSessionChange é chamado (em segundo plano) quando a sessão do aparelho muda: pareou, conectou ou saiu.
+	OnSessionChange func()
 }
 
 // Manager é dono do *whatsmeow.Client e traduz eventos em gravações no banco.

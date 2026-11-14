@@ -10,19 +10,19 @@ Sem o header ou com token errado: `401 {"error":"unauthorized"}`.
 
 ## Ambiente do container
 
-| Variável            | Obrigatória | Padrão              | Para quê                                                              |
-| ------------------- | ----------- | ------------------- | --------------------------------------------------------------------- |
-| `BRIDGE_TOKEN`      | sim         | —                   | Token compartilhado com o Worker (≥ 32 caracteres)                    |
-| `SNAPSHOT_KEY`      | sim         | —                   | 32 bytes em base64: chave AES-256 dos snapshots                       |
-| `DATA_DIR`          | não         | `/data`             | Onde ficam `session.db` e `messages.db`                               |
-| `PORT`              | não         | `8080`              | Porta HTTP                                                            |
-| `TIMEZONE`          | não         | `America/Sao_Paulo` | Fuso das datas ISO devolvidas (IANA; `time/tzdata` embutido)          |
-| `HISTORY_DAYS`      | não         | `90`                | Mensagens mais antigas que isso não são guardadas (sync de histórico) |
-| `MAX_MEDIA_BYTES`   | não         | `5242880`           | Limite de `GET /media`                                                |
-| `ENABLE_SEND`       | não         | `false`             | Liga `POST /send` (o `wrangler.toml` do Worker repassa `true`)        |
-| `SEND_ALLOWLIST`    | não         | vazio               | Números ou JIDs separados por vírgula; vazia = qualquer destinatário  |
-| `SEND_MAX_PER_HOUR` | não         | `10`                | Limite rígido de envios por hora (persistido no banco)                |
-| `SNAPSHOT_PUSH_URL` | não         | vazio               | Melhor esforço: para onde enviar o snapshot no `SIGTERM` (ver abaixo) |
+| Variável            | Obrigatória | Padrão              | Para quê                                                                     |
+| ------------------- | ----------- | ------------------- | ---------------------------------------------------------------------------- |
+| `BRIDGE_TOKEN`      | sim         | —                   | Token compartilhado com o Worker (≥ 32 caracteres)                           |
+| `SNAPSHOT_KEY`      | sim         | —                   | 32 bytes em base64: chave AES-256 dos snapshots                              |
+| `DATA_DIR`          | não         | `/data`             | Onde ficam `session.db` e `messages.db`                                      |
+| `PORT`              | não         | `8080`              | Porta HTTP                                                                   |
+| `TIMEZONE`          | não         | `America/Sao_Paulo` | Fuso das datas ISO devolvidas (IANA; `time/tzdata` embutido)                 |
+| `HISTORY_DAYS`      | não         | `90`                | Mensagens mais antigas que isso não são guardadas (sync de histórico)        |
+| `MAX_MEDIA_BYTES`   | não         | `5242880`           | Limite de `GET /media`                                                       |
+| `ENABLE_SEND`       | não         | `false`             | Liga `POST /send` (o `wrangler.toml` do Worker repassa `true`)               |
+| `SEND_ALLOWLIST`    | não         | vazio               | Números ou JIDs separados por vírgula; vazia = qualquer destinatário         |
+| `SEND_MAX_PER_HOUR` | não         | `10`                | Limite rígido de envios por hora (persistido no banco)                       |
+| `SNAPSHOT_PUSH_URL` | não         | vazio               | Para onde enviar o snapshot no `SIGTERM` e quando a sessão muda (ver abaixo) |
 
 Logs nunca contêm texto de mensagem, número de telefone completo nem chaves.
 
@@ -217,3 +217,10 @@ O conteúdo em claro é um tar com `session.db` e `messages.db`.
 Para de aceitar requisições, desconecta o whatsmeow e, se `SNAPSHOT_PUSH_URL` estiver definida e houver mudança
 desde o último snapshot, faz `PUT` do snapshot nela (header `Authorization: Bearer <BRIDGE_TOKEN>`,
 `x-snapshot-generation`), com limite de 10 s. Falha só vai para o log.
+
+## Mudança de sessão
+
+O mesmo `PUT` acontece, em segundo plano, quando a sessão do aparelho muda: pareamento concluído
+(`PairSuccess`), conexão aberta (`Connected`) e logout pelo celular (`LoggedOut`). Sem mudança desde o último
+snapshot, nada é enviado; antes de `ready`, o aviso é ignorado. Assim um pareamento novo chega ao R2 na hora e
+sobrevive a deploys e reinícios do container.

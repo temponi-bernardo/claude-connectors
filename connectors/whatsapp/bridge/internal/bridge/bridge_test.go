@@ -231,3 +231,37 @@ func TestSnapshotInternalErrors(t *testing.T) {
 		t.Fatal("diretório ausente deveria falhar")
 	}
 }
+
+func TestSnapshotNotifierPushesInBackground(t *testing.T) {
+	got := make(chan string, 2)
+	srv := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		got <- r.Header.Get("X-Snapshot-Generation")
+	}))
+	defer srv.Close()
+	b, _ := readyBridge(t)
+	notify := b.SnapshotNotifier(srv.Client(), srv.URL, "tok")
+	notify()
+	select {
+	case gen := <-got:
+		if gen != "1" {
+			t.Fatalf("geração: %s", gen)
+		}
+	case <-time.After(5 * time.Second):
+		t.Fatal("o snapshot não foi enviado depois da mudança de sessão")
+	}
+	b.mu.Lock() // espera o push terminar de registrar a geração
+	b.mu.Unlock()
+	if changed, err := b.PushSnapshot(context.Background(), srv.Client(), srv.URL, "tok"); err != nil || changed {
+		t.Fatalf("sem mudança não deveria reenviar: %v %v", changed, err)
+	}
+}
+
+func TestSnapshotNotifierIgnoresMissingURLAndNotReady(t *testing.T) {
+	b, _ := newTestBridge(t, nil)
+	b.SnapshotNotifier(http.DefaultClient, "", "t")() // sem URL: nada a fazer
+	if _, err := b.PushSnapshot(context.Background(), http.DefaultClient, "http://127.0.0.1:1", "t"); !errors.Is(err, ErrNotReady) {
+		t.Fatalf("antes de ready: %v", err)
+	}
+	b.SnapshotNotifier(http.DefaultClient, "http://127.0.0.1:1", "t")() // falha só vai para o log
+	time.Sleep(50 * time.Millisecond)
+}

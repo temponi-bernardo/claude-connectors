@@ -41,6 +41,28 @@ export type FixedLength = (
 /** Resultado de uma tentativa de gravar snapshot. */
 export type SnapshotOutcome = 'saved' | 'unchanged' | 'stale';
 
+/**
+ * Copia `source` para `writable` bloco a bloco e fecha o destino. Não usa `pipeTo`: no Workers, ligar o corpo da
+ * resposta do container a um `FixedLengthStream` falha ("Inter-TransformStream ReadableStream.pipeTo() is not
+ * implemented") e o snapshot nunca chegava ao R2. Erro de um lado aborta o outro; nunca rejeita (quem lê o destino
+ * recebe o erro).
+ */
+export async function pumpInto(
+  source: ReadableStream<Uint8Array>,
+  writable: WritableStream<Uint8Array>,
+): Promise<void> {
+  const reader = source.getReader();
+  const writer = writable.getWriter();
+  try {
+    for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
+      await writer.write(chunk.value);
+    }
+    await writer.close();
+  } catch (error) {
+    await Promise.allSettled([writer.abort(error), reader.cancel(error)]);
+  }
+}
+
 /** Lê a geração gravada nos metadados de um objeto; 0 se ausente ou inválida. */
 export function storedGeneration(meta: Pick<SnapshotObject, 'customMetadata'> | null): number {
   const value = Number(meta?.customMetadata?.generation ?? 0);

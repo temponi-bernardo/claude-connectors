@@ -44,8 +44,7 @@ func run(log *slog.Logger) error {
 	if os.Getenv("GOMEMLIMIT") == "" {
 		debug.SetMemoryLimit(memoryLimit)
 	}
-	b := bridge.New(bridge.Options{DataDir: cfg.DataDir, SnapshotKey: cfg.SnapshotKey, MaxRestore: maxRestore, Log: log,
-		Start: startWhatsApp(cfg.HistoryDays, log)})
+	b := newBridge(cfg, log)
 	srv := api.NewHTTPServer(":"+strconv.Itoa(cfg.Port), api.New(b, apiOptions(cfg, log)).Handler())
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
@@ -61,6 +60,17 @@ func run(log *slog.Logger) error {
 	return nil
 }
 
+// newBridge cria a ponte; cada mudança de sessão (pareou, conectou, saiu) envia o snapshot na hora ao Worker.
+func newBridge(cfg config.Config, log *slog.Logger) *bridge.Bridge {
+	var b *bridge.Bridge
+	onChange := func() {
+		b.SnapshotNotifier(&http.Client{Timeout: bridge.PushTimeout}, cfg.SnapshotPushURL, cfg.Token)()
+	}
+	b = bridge.New(bridge.Options{DataDir: cfg.DataDir, SnapshotKey: cfg.SnapshotKey, MaxRestore: maxRestore, Log: log,
+		Start: startWhatsApp(cfg.HistoryDays, log, onChange)})
+	return b
+}
+
 // apiOptions traduz a configuração para a API.
 func apiOptions(cfg config.Config, log *slog.Logger) api.Options {
 	return api.Options{Token: cfg.Token, Location: cfg.Location, MaxMediaBytes: cfg.MaxMediaBytes, MaxRestore: maxRestore,
@@ -68,9 +78,11 @@ func apiOptions(cfg config.Config, log *slog.Logger) api.Options {
 }
 
 // startWhatsApp cria o StartFunc que liga o whatsmeow aos bancos restaurados.
-func startWhatsApp(historyDays int, log *slog.Logger) bridge.StartFunc {
+// onChange é chamado quando a sessão muda (pareou, conectou, saiu), para enviar o snapshot na hora.
+func startWhatsApp(historyDays int, log *slog.Logger, onChange func()) bridge.StartFunc {
 	return func(ctx context.Context, sessionDB *sql.DB, st *store.Store) (bridge.WhatsApp, error) {
-		m, err := wa.New(ctx, wa.Options{SessionDB: sessionDB, Store: st, HistoryDays: historyDays, Log: log})
+		m, err := wa.New(ctx, wa.Options{SessionDB: sessionDB, Store: st, HistoryDays: historyDays, Log: log,
+			OnSessionChange: onChange})
 		if err != nil {
 			return nil, err
 		}

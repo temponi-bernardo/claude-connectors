@@ -18,6 +18,10 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Corrigido
 
+- WhatsApp: o pareamento caía a cada deploy ou reinício do container. O backup da sessão nunca chegava ao R2
+  (`pipeTo` entre o corpo da ponte e o `FixedLengthStream` falha no Workers); agora a cópia é feita bloco a bloco
+  (`pumpInto`). Além disso, a ponte envia o snapshot sozinha assim que a sessão muda (pareou, conectou ou saiu),
+  sem esperar uso ou o container dormir.
 - WhatsApp: o plugin deixa de embutir o servidor (`${user_config.server_url}`) e traz só as skills; cada pessoa
   conecta o próprio servidor como conector personalizado da conta, que vale no claude.ai, app, celular, Cowork e
   Claude Code. O campo ficava só no computador e o plugin instalado pela organização no claude.ai ficava com outra

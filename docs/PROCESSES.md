@@ -286,14 +286,16 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
      os snapshots rodam em fila e falhas só vão ao log (`logSnapshotFailure()`).
   2. `snapshotBridge()` pede `GET /snapshot` à ponte (já cifrado) e `storeSnapshotResponse()` lê
      `readUploadHeaders()`; `storeSnapshot()` compara com `storedGeneration()` e grava em fluxo de tamanho fixo
-     (`workersFixedLength()`), descartando geração velha.
+     (`workersFixedLength()`, que copia com `pumpInto()`), descartando geração velha.
   3. Antes de dormir, o `onActivityExpired` do `WhatsAppBridge` tira o último snapshot e para o container.
-  4. No `SIGTERM`, a ponte envia o snapshot a `snapshot.internal`, interceptado pelo Worker em
-     `acceptSnapshotPush()` (token conferido por `sameSecret()`).
+  4. No `SIGTERM` e sempre que a sessão do aparelho muda (pareou, conectou ou saiu), a ponte envia o snapshot
+     sozinha a `snapshot.internal`, interceptado pelo Worker em `acceptSnapshotPush()` (token conferido por
+     `sameSecret()`). Assim um pareamento novo vai para o R2 na hora, sem esperar uso ou o container dormir.
   5. No próximo boot, `ensureRestored()` devolve o snapshot à ponte (P14, passo 4).
 - **Resultado:** sessão e mensagens sobrevivem ao container dormir, sem o Worker ver o conteúdo em claro.
 - **Falhas:** snapshot recusado pela ponte → erro até "Recomeçar do zero" no `/pair`; queda abrupta sem `SIGTERM`
-  → perde só o que mudou desde o último snapshot (o WhatsApp reenvia as pendências).
+  → perde só o que mudou desde o último snapshot (o WhatsApp reenvia as pendências); gravação no R2 que falha →
+  o próximo snapshot é forçado (`?force=1`).
 
 ## P17 — Enviar uma mensagem (`ENABLE_SEND`) e sync periódico opcional
 
