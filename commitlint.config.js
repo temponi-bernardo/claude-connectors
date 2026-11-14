@@ -23,6 +23,7 @@ export default {
         'release',
         'config',
         'remote',
+        'gmail',
       ],
     ],
     'scope-empty': [2, 'never'],
