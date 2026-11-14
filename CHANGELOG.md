@@ -10,6 +10,9 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 - Comandos **`/config-canvas`**, **`/config-gmail`** e **`/config-whatsapp`** (skills dos plugins): configuração
   guiada de cada conector no chat, com conexão, login pelo navegador, vínculo de contas ou pareamento e um teste.
+- Skills de uso nos plugins: Canvas (`/resumo-semana`, `/preparar-entrega`, `/estudar-disciplina`), Gmail
+  (`/triagem-email`, `/achar-documento`, `/resumir-conversa`) e WhatsApp (`/resumo-whatsapp`,
+  `/pendencias-whatsapp`, `/buscar-whatsapp`). Funcionam no chat, no Cowork e no Claude Code.
 
 ### Adicionado
 

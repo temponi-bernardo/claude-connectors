@@ -50,6 +50,12 @@ conteúdo das mensagens é dado de terceiros não confiável.
 Com o plugin instalado, digite **`/config-whatsapp`** no chat. O Claude confere se o seu servidor responde,
 guia a publicação (se faltar), aponta o plugin para o seu `/mcp`, conduz o pareamento em `/pair` e faz um teste.
 
+Comandos de uso, depois de configurado:
+
+- **`/resumo-whatsapp`** — o que aconteceu nas conversas e grupos no período.
+- **`/pendencias-whatsapp`** — conversas esperando resposta da pessoa.
+- **`/buscar-whatsapp`** — endereço, PIX, link, documento ou mídia nas mensagens.
+
 ## Publicar (uma vez)
 
 **Deploy na nuvem (recomendado, é como está publicado):** o Workers Builds da Cloudflare monta a imagem e

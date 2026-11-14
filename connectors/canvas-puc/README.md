@@ -29,6 +29,15 @@ avisam: gere outro token e reconecte o conector nas configurações do Claude.
 Segurança: o token do Canvas nunca é gravado no servidor; ele só viaja cifrado dentro dos tokens OAuth.
 Qualquer pessoa com um token válido do Canvas pode usar o servidor, mas só acessa a própria conta.
 
+## Comandos do plugin
+
+- **`/config-canvas`** — configuração guiada (token, conexão e teste).
+- **`/resumo-semana`** — entregas, atrasos, avisos e notas da semana.
+- **`/preparar-entrega`** — enunciado, rubrica, checklist, plano e revisão; envia só com confirmação.
+- **`/estudar-disciplina`** — resumo dos módulos, conceitos, questões de revisão e plano até a prova.
+
+Também dá para pedir em linguagem natural ("o que vence essa semana?"): o Claude usa a skill certa.
+
 ## Servidor remoto (mantenedor)
 
 O plugin usa o servidor HTTP com OAuth ([ADR 0009](../../docs/adr/0009-conector-remoto-http-oauth.md)),
