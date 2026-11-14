@@ -1,11 +1,11 @@
 import type { FunctionSection, ProcessCitations } from './types.js';
 
-export const GENERATED_START = '<!-- gerado:inicio -->';
-export const GENERATED_END = '<!-- gerado:fim -->';
-export const INDEX_START = '<!-- indice:inicio -->';
-export const INDEX_END = '<!-- indice:fim -->';
+export const GENERATED_START = '<!-- generated:start -->';
+export const GENERATED_END = '<!-- generated:end -->';
+export const INDEX_START = '<!-- index:start -->';
+export const INDEX_END = '<!-- index:end -->';
 /** Marcador que o gerador deixa nos campos manuais ainda não escritos. */
-export const PLACEHOLDER = '_preencher_';
+export const PLACEHOLDER = '_fill_in_';
 
 /** Devolve o primeiro grupo de captura de um match (string vazia se o grupo não casou). */
 export function firstGroup(match: RegExpMatchArray): string {

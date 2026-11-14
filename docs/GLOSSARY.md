@@ -3,7 +3,7 @@
 **ADR** — Architecture Decision Record; registro curto de uma decisão de arquitetura, seu contexto e
 consequências. Vive em `docs/adr/`.
 
-**Bloco gerado** — Trecho de FUNCTIONS.md entre `<!-- gerado:inicio -->` e `<!-- gerado:fim -->`, escrito
+**Bloco gerado** — Trecho de FUNCTIONS.md entre `<!-- generated:start -->` e `<!-- generated:end -->`, escrito
 por `npm run docs:generate` a partir do código.
 
 **Campos manuais** — Faz, Entrada, Saída, Efeitos e Erros de cada função em FUNCTIONS.md; escritos à mão.

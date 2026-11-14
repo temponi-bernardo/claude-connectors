@@ -103,7 +103,7 @@ Uma linha por pasta versionada. `npm run docs:check` falha se uma pasta versiona
 | Lógica pura usada por mais de um conector     | `src/core/`                                                                            | FUNCTIONS.md, PROCESSES.md se for um fluxo novo   |
 | Efeito (IO, rede, banco, terminal)            | `src/<camada>/` conforme ARCHITECTURE.md                                               | FUNCTIONS.md (campo Efeitos)                      |
 | Componente de UI                              | pasta `uiDir` de `docs.config.json`                                                    | UI.md                                             |
-| Constante ou dado compartilhado               | junto do módulo que o usa; exportado                                                   | FUNCTIONS.md, tabela "Dados e constantes"         |
+| Constante ou dado compartilhado               | junto do módulo que o usa; exportado                                                   | FUNCTIONS.md, tabela "Data and constants"         |
 | Ferramenta interna do repositório             | `tools/<nome>/`                                                                        | STRUCTURE.md, FUNCTIONS.md                        |
 | Script de shell                               | `scripts/`                                                                             | STRUCTURE.md, WORKFLOW.md se for parte do fluxo   |
 | Decisão de arquitetura                        | `docs/adr/NNNN-titulo.md`                                                              | `docs/adr/README.md`                              |

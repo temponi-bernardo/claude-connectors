@@ -17,7 +17,7 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
   3. As citações de PROCESSES.md são extraídas com `extractProcessCitations()`.
   4. `runAllChecks()` roda cada checagem pura e junta os problemas.
   5. `formatIssues()` imprime o resultado; o processo sai com código 1 se houver qualquer problema.
-- **Resultado:** lista numerada de problemas com código (`FUNCAO_SEM_DOC`, `PASTA_SEM_DOC`...) e a
+- **Resultado:** lista numerada de problemas com código (`FUNCTION_UNDOCUMENTED`, `DIR_UNDOCUMENTED`...) e a
   correção esperada, ou `✔` quando tudo está em dia.
 - **Falhas:** `docs.config.json` inválido ou `TEST_EXCEPTIONS` fora do formato interrompem a execução com erro.
 
@@ -29,7 +29,7 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
   2. `runGenerate()` monta o inventário e lê os documentos como no P01, e chama `generateFunctionsDoc()`.
   3. `generateFunctionsDoc()` calcula "Processos" por função com `processesByFunction()` e aplica
      `applyGenerated()`: atualiza o índice por módulo, substitui os blocos gerados existentes e acrescenta
-     seções novas com os campos manuais marcados como `_preencher_`.
+     seções novas com os campos manuais marcados como `_fill_in_`.
   4. O arquivo só é regravado se houver mudança.
 - **Resultado:** `docs/FUNCTIONS.md` com blocos gerados em dia; os campos manuais novos ficam para a pessoa
   (ou o Claude) preencher — o P01 cobra isso.

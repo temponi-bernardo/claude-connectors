@@ -25,9 +25,9 @@ export function readDocsTexts(rootDir: string, config: DocsConfig): DocsTexts {
 
 /** Formata a lista de problemas para o terminal, um por bloco, com código e mensagem. */
 export function formatIssues(issues: readonly Issue[]): string {
-  if (issues.length === 0) return 'docs:check ✔ documentação e código em dia.';
+  if (issues.length === 0) return 'docs:check ✔ docs and code are in sync.';
   const lines = issues.map((issue, index) => `${index + 1}. [${issue.code}] ${issue.message}`);
-  return `docs:check ✖ ${issues.length} problema(s):\n\n${lines.join('\n\n')}`;
+  return `docs:check ✖ ${issues.length} problem(s):\n\n${lines.join('\n\n')}`;
 }
 
 /** Executa a checagem completa e devolve os problemas encontrados. */

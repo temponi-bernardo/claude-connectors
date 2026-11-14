@@ -32,5 +32,5 @@ Objetivo: a próxima sessão (após `/clear`) começa sabendo exatamente onde pa
 
 ## Não faça
 
-Não colar diffs ou saídas de comando; não deixar `_preencher_`; não gravar segredos ou caminhos fora do
+Não colar diffs ou saídas de comando; não deixar `_fill_in_`; não gravar segredos ou caminhos fora do
 repositório; não pular o aviso de `/clear`.

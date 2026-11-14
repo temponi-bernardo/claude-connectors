@@ -36,7 +36,7 @@ deve encontrar tudo aqui, sem varrer o código. Quando docs e código divergem, 
 | Toda pasta versionada em STRUCTURE.md                                     | `docs:check`                             | Descrição da pasta faz sentido                  |
 | Todo componente de UI em UI.md                                            | `docs:check` (se `uiDir` configurado)    | Estados e variantes documentados                |
 | Toda função tem teste (ou exceção justificada)                            | `docs:check`                             | Teste cobre o comportamento, não só o nome      |
-| Constante exportada na tabela "Dados e constantes"                        | `docs:check`                             | —                                               |
+| Constante exportada na tabela "Data and constants"                        | `docs:check`                             | —                                               |
 | Cobertura mínima de 90%                                                   | `test:coverage`                          | —                                               |
 | Nenhuma duplicação                                                        | `dup:check` (jscpd)                      | Lógica parecida sem ser idêntica foi unificada? |
 | Funções ≤ 25 linhas, ≤ 3 parâmetros, complexidade ≤ 8, `function` no topo | `lint` (ESLint)                          | Função faz um único trabalho?                   |

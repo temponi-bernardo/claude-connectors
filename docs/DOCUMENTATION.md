@@ -9,7 +9,7 @@ tipo de mudança, em que formato, e o que a máquina confere.
 | --------------------------------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------- |
 | Função nova, renomeada ou removida                        | FUNCTIONS.md                                      | [Função](#função) — `npm run docs:generate` (cria e poda seções) e preencha | `docs:check`                 |
 | Assinatura, chamadores ou processos de uma função mudaram | FUNCTIONS.md                                      | `npm run docs:generate`                                                     | `docs:check`                 |
-| Constante exportada nova                                  | FUNCTIONS.md, tabela "Dados e constantes"         | [Linha de constante](#linha-de-constante)                                   | `docs:check`                 |
+| Constante exportada nova                                  | FUNCTIONS.md, tabela "Data and constants"         | [Linha de constante](#linha-de-constante)                                   | `docs:check`                 |
 | Fluxo novo ou alterado                                    | PROCESSES.md                                      | [Processo](#processo)                                                       | `docs:check` (citações) + PR |
 | Pasta nova                                                | STRUCTURE.md (árvore + tabela)                    | [Linha de pasta](#linha-de-pasta)                                           | `docs:check`                 |
 | Componente de UI novo                                     | UI.md                                             | [Componente](#componente)                                                   | `docs:check`                 |
@@ -34,20 +34,20 @@ Gerada por `npm run docs:generate`; só os cinco campos manuais são escritos à
 ```markdown
 ### `nomeDaFuncao`
 
-<!-- gerado:inicio -->
+<!-- generated:start -->
 
-- **Arquivo:** `src/pasta/arquivo.ts`
-- **Assinatura:** `nomeDaFuncao(a: string, b: number): Resultado`
-- **Usada por:** `outraFuncao()`, `src/main.ts (módulo)`
-- **Processos:** P01, P03
+- **File:** `src/pasta/arquivo.ts`
+- **Signature:** `nomeDaFuncao(a: string, b: number): Resultado`
+- **Used by:** `outraFuncao()`, `src/main.ts (module)`
+- **Processes:** P01, P03
 
-<!-- gerado:fim -->
+<!-- generated:end -->
 
-- **Faz:** uma frase no presente, sem "e" (se precisar de "e", a função faz duas coisas).
-- **Entrada:** cada parâmetro, com o que é e restrições.
-- **Saída:** o que devolve, inclusive casos vazios/nulos.
-- **Efeitos:** `Nenhum (pura).` ou o que toca (disco, rede, stdout, estado).
-- **Erros:** `Nenhum.` ou cada erro lançado e quando.
+- **Does:** uma frase no presente, sem "e" (se precisar de "e", a função faz duas coisas).
+- **Input:** cada parâmetro, com o que é e restrições.
+- **Output:** o que devolve, inclusive casos vazios/nulos.
+- **Effects:** `Nenhum (pura).` ou o que toca (disco, rede, stdout, estado).
+- **Errors:** `Nenhum.` ou cada erro lançado e quando.
 ```
 
 Regras: a seção fica sob o heading `` ## `caminho/do/arquivo.ts` ``; nunca escreva o marcador de

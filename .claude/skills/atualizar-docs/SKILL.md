@@ -19,8 +19,8 @@ Guia e modelos: `docs/DOCUMENTATION.md`. Índice do que existe: `docs/README.md`
 3. **Aplique nesta ordem:**
    1. `npm run docs:generate` (índice, blocos gerados, seções novas em FUNCTIONS.md).
    2. Preencha os campos manuais das seções novas (Faz, Entrada, Saída, Efeitos, Erros); remova seções de
-      funções apagadas; adicione constantes à tabela "Dados e constantes". Função que mudou de arquivo dá
-      `SECAO_NO_MODULO_ERRADO`: o `docs:generate` não move a seção; mova-a para o heading do arquivo novo.
+      funções apagadas; adicione constantes à tabela "Data and constants". Função que mudou de arquivo dá
+      `SECTION_IN_WRONG_MODULE`: o `docs:generate` não move a seção; mova-a para o heading do arquivo novo.
    3. PROCESSES.md: crie/edite o processo citando as funções como `` `nome()` ``; depois rode
       `npm run docs:generate` de novo (o campo Processos depende disso).
    4. STRUCTURE.md (pastas), UI.md (componentes), ARCHITECTURE.md (camadas, serviços), ADR se houve
@@ -28,7 +28,7 @@ Guia e modelos: `docs/DOCUMENTATION.md`. Índice do que existe: `docs/README.md`
    5. ROADMAP.md (estado e "Próxima tarefa") e CHANGELOG.md ("Não lançado").
    6. `.env.example` se surgiu variável nova; GLOSSARY.md se surgiu termo novo.
 4. **`npm run docs:check`** até `✔`. Leia cada mensagem: ela diz exatamente o que falta ou sobra.
-   `BLOCO_GERADO_DESATUALIZADO` que volta depois do Prettier costuma ser assinatura com tipo de objeto inline
+   `GENERATED_BLOCK_OUTDATED` que volta depois do Prettier costuma ser assinatura com tipo de objeto inline
    em várias linhas (parâmetro ou retorno): o Prettier reindenta o bloco e o gerador não. Dê nome ao tipo
    (`interface`) e rode `docs:generate` de novo.
 5. **Relate** no corpo do PR usando o checklist do template: para cada doc, "atualizado" ou "não se aplica:

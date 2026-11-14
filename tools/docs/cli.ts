@@ -7,12 +7,12 @@ export async function runDocsCli(args: readonly string[]): Promise<number> {
   if (command === 'generate') {
     const changed = await runGenerate(rootDir);
     console.log(
-      changed ? 'docs:generate ✔ FUNCTIONS.md atualizado.' : 'docs:generate ✔ nada a mudar.',
+      changed ? 'docs:generate ✔ FUNCTIONS.md updated.' : 'docs:generate ✔ nothing to change.',
     );
     return 0;
   }
   if (command !== 'check') {
-    console.error(`Comando desconhecido: ${command}. Use "check" ou "generate".`);
+    console.error(`Unknown command: ${command}. Use "check" or "generate".`);
     return 2;
   }
   const issues = await runCheck(rootDir);
