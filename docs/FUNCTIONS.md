@@ -20,21 +20,22 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
 - `connectors/canvas-puc/src/worker.ts`: [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
-- `connectors/gmail/src/access-token.ts`: [`forgetAccessToken`](#forgetaccesstoken), [`clearAccessTokenCache`](#clearaccesstokencache), [`linkUrl`](#linkurl), [`relinkError`](#relinkerror), [`requireLinkedAccount`](#requirelinkedaccount), [`renewAccessToken`](#renewaccesstoken), [`getAccessToken`](#getaccesstoken)
+- `connectors/gmail/src/access-token.ts`: [`accessTokenKey`](#accesstokenkey), [`forgetAccessToken`](#forgetaccesstoken), [`clearAccessTokenCache`](#clearaccesstokencache), [`relinkError`](#relinkerror), [`markAccountRevoked`](#markaccountrevoked), [`renewAccessToken`](#renewaccesstoken), [`getAccessToken`](#getaccesstoken)
+- `connectors/gmail/src/accounts.ts`: [`accountAlias`](#accountalias), [`aliasAccounts`](#aliasaccounts), [`noAccountsError`](#noaccountserror), [`resolveAccounts`](#resolveaccounts)
 - `connectors/gmail/src/attachments.ts`: [`looksLikeText`](#looksliketext), [`detectAttachmentKind`](#detectattachmentkind), [`attachmentBytesToText`](#attachmentbytestotext), [`readAttachmentText`](#readattachmenttext)
-- `connectors/gmail/src/config.ts`: [`accountAlias`](#accountalias), [`isEmailAddress`](#isemailaddress), [`parseAllowedEmails`](#parseallowedemails), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`readGmailSettings`](#readgmailsettings), [`findAllowedAccount`](#findallowedaccount), [`resolveAccounts`](#resolveaccounts)
+- `connectors/gmail/src/config.ts`: [`isEmailAddress`](#isemailaddress), [`parseAllowedEmails`](#parseallowedemails), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`readGmailSettings`](#readgmailsettings), [`isEmailAllowed`](#isemailallowed)
 - `connectors/gmail/src/gmail-api.ts`: [`gmailUrl`](#gmailurl), [`gmailHttpError`](#gmailhttperror), [`sendGmailGet`](#sendgmailget), [`gmailGet`](#gmailget)
-- `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`randomToken`](#randomtoken), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken)
+- `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`randomToken`](#randomtoken), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken), [`revokeGoogleToken`](#revokegoogletoken)
 - `connectors/gmail/src/id-token.ts`: [`decodeJwtJson`](#decodejwtjson), [`decodeJwt`](#decodejwt), [`idTokenProblems`](#idtokenproblems), [`checkIdTokenClaims`](#checkidtokenclaims), [`fetchGoogleKey`](#fetchgooglekey), [`verifyRs256`](#verifyrs256), [`verifyGoogleIdToken`](#verifygoogleidtoken)
-- `connectors/gmail/src/link-flow.ts`: [`sha256Hex`](#sha256hex), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`startAccountLink`](#startaccountlink), [`takeLinkRequest`](#takelinkrequest), [`accessDeniedPage`](#accessdeniedpage), [`linkRefusal`](#linkrefusal), [`storeLinkedAccount`](#storelinkedaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
+- `connectors/gmail/src/link-flow.ts`: [`nowSeconds`](#nowseconds), [`issueLinkUrl`](#issuelinkurl), [`redeemLinkTicket`](#redeemlinkticket), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`invalidTicketPage`](#invalidticketpage), [`startAccountLink`](#startaccountlink), [`takeLinkRequest`](#takelinkrequest), [`linkRefusalReason`](#linkrefusalreason), [`storeGoogleAccount`](#storegoogleaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
 - `connectors/gmail/src/message-format.ts`: [`base64UrlToBytes`](#base64urltobytes), [`partCharset`](#partcharset), [`decodePartBody`](#decodepartbody), [`headerValues`](#headervalues), [`flattenParts`](#flattenparts), [`isBodyPart`](#isbodypart), [`messageBodyText`](#messagebodytext), [`messageAttachments`](#messageattachments), [`truncateText`](#truncatetext), [`internalDateIso`](#internaldateiso), [`pickHeaders`](#pickheaders), [`formatMessage`](#formatmessage), [`perMessageLimit`](#permessagelimit), [`formatThread`](#formatthread), [`summarizeThread`](#summarizethread)
 - `connectors/gmail/src/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`consentPageBody`](#consentpagebody), [`copyConsentHeaders`](#copyconsentheaders), [`consentPage`](#consentpage), [`redirectWith`](#redirectwith)
 - `connectors/gmail/src/rate-limit.ts`: [`isRateLimited`](#isratelimited), [`rateLimitedResponse`](#ratelimitedresponse)
 - `connectors/gmail/src/search.ts`: [`encodeMultiPageToken`](#encodemultipagetoken), [`decodeMultiPageToken`](#decodemultipagetoken), [`fetchThreadMetadata`](#fetchthreadmetadata), [`searchAccount`](#searchaccount), [`threadDate`](#threaddate), [`sortByDateDesc`](#sortbydatedesc), [`pagesToFetch`](#pagestofetch), [`searchThreads`](#searchthreads)
-- `connectors/gmail/src/sign-in.ts`: [`authorizationErrorResponse`](#authorizationerrorresponse), [`beginGoogleSignIn`](#begingooglesignin), [`showAuthorize`](#showauthorize), [`submitAuthorize`](#submitauthorize), [`completeSignIn`](#completesignin), [`finishSignIn`](#finishsignin)
-- `connectors/gmail/src/token-store.ts`: [`accountKey`](#accountkey), [`sealLinkedAccount`](#seallinkedaccount), [`openLinkedAccount`](#openlinkedaccount), [`saveLinkedAccount`](#savelinkedaccount), [`loadLinkedAccount`](#loadlinkedaccount)
-- `connectors/gmail/src/tools.ts`: [`resolveSingleAccount`](#resolvesingleaccount), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
-- `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
+- `connectors/gmail/src/sign-in.ts`: [`accessDeniedPage`](#accessdeniedpage), [`authorizationErrorResponse`](#authorizationerrorresponse), [`beginGoogleSignIn`](#begingooglesignin), [`showAuthorize`](#showauthorize), [`submitAuthorize`](#submitauthorize), [`linkSignedInAccount`](#linksignedinaccount), [`completeSignIn`](#completesignin), [`finishSignIn`](#finishsignin)
+- `connectors/gmail/src/token-store.ts`: [`sha256Hex`](#sha256hex), [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
+- `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
+- `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
 - `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
 - `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
 - `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
@@ -3056,8 +3057,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `sealPayload(payload: unknown, key: Buffer): string`
-- **Usada por:** `issueAuthorizationCode()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealLinkedAccount()`, `startAccountLink()`, `startPairLogin()`
-- **Processos:** P08, P11, P12, P13, P15
+- **Usada por:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `startAccountLink()`, `startPairLogin()`
+- **Processos:** P08, P10, P11, P12, P13, P15
 
 <!-- gerado:fim -->
 
@@ -3074,7 +3075,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `unsealPayload(sealed: string, key: Buffer): Record<string, unknown> | null`
 - **Usada por:** `openSealed()`
-- **Processos:** P08, P09, P11, P12, P13, P14, P15
+- **Processos:** P08, P09, P10, P11, P12, P13, P14, P15
 
 <!-- gerado:fim -->
 
@@ -3090,8 +3091,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `openSealed(sealed: string, key: Buffer, expected: SealExpectation): SealedClaims | null`
-- **Usada por:** `clientRedirectUris()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openLinkedAccount()`, `readAccessSecret()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `takeLinkRequest()`
-- **Processos:** P08, P09, P11, P12, P13, P14, P15
+- **Usada por:** `clientRedirectUris()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openOwnerAccounts()`, `readAccessSecret()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemLinkTicket()`, `redeemRefreshToken()`, `takeLinkRequest()`
+- **Processos:** P08, P09, P10, P11, P12, P13, P14, P15
 
 <!-- gerado:fim -->
 
@@ -4010,16 +4011,16 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
-- **Assinatura:** `forgetAccessToken(email: string): void`
-- **Usada por:** `gmailGet()`, `storeLinkedAccount()`
-- **Processos:** P11, P12
+- **Assinatura:** `forgetAccessToken(owner: string, email: string): void`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `gmailGet()`, `storeGoogleAccount()`
+- **Processos:** P10, P11, P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Esquece o access token guardado de uma conta (ex.: depois de um 401 do Gmail).
-- **Entrada:** `email`: e-mail completo da conta, em minúsculas.
+- **Faz:** Esquece o access token guardado de uma conta de um usuário.
+- **Entrada:** `owner`: usuário. `email`: conta Gmail.
 - **Saída:** Nada.
-- **Efeitos:** Memória do isolate: remove a entrada da conta do cache de access tokens.
+- **Efeitos:** Memória do isolate: remove a entrada do cache.
 - **Erros:** Nenhum.
 
 ### `clearAccessTokenCache`
@@ -4039,90 +4040,90 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Memória do isolate: esvazia o cache de access tokens.
 - **Erros:** Nenhum.
 
-### `linkUrl`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/access-token.ts`
-- **Assinatura:** `linkUrl(origin: string): string`
-- **Usada por:** `accountStatus()`, `relinkError()`
-- **Processos:** P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta o link da página que vincula contas.
-- **Entrada:** `origin`: origem pública do Worker, sem barra no fim.
-- **Saída:** A URL `<origin>/accounts/link`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
 ### `relinkError`
 
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
-- **Assinatura:** `relinkError(account: AllowedAccount, origin: string, revoked: boolean): Error`
-- **Usada por:** `renewAccessToken()`, `requireLinkedAccount()`
+- **Assinatura:** `relinkError(alias: string): Error`
+- **Usada por:** `getAccessToken()`, `renewAccessToken()`
 - **Processos:** P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Cria o erro acionável de conta sem vínculo válido (nunca vinculada ou revogada).
-- **Entrada:** `account`: conta permitida. `origin`: origem pública do Worker. `revoked`: verdadeiro se o acesso foi revogado ou expirou; falso se a conta nunca foi vinculada.
-- **Saída:** Um `Error` com o apelido da conta, o motivo e o link de vínculo.
+- **Faz:** Monta o erro de conta que perdeu o acesso ao Gmail.
+- **Entrada:** `alias`: apelido da conta.
+- **Saída:** `Error` que orienta a usar `link_account` e entrar de novo.
 - **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum (devolve o erro, não lança).
-
-### `requireLinkedAccount`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/access-token.ts`
-- **Assinatura:** `async requireLinkedAccount(deps: GmailDeps, account: AllowedAccount): Promise<LinkedAccount>`
-- **Usada por:** `getAccessToken()`
-- **Processos:** P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê a conta vinculada e ativa do KV.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, origem). `account`: conta permitida.
-- **Saída:** A conta vinculada com status ativo.
-- **Efeitos:** KV: lê o registro selado da conta.
-- **Erros:** Lança o erro de `relinkError()` se não houver vínculo válido ou se a conta estiver revogada.
+- **Erros:** Nenhum.
 
 ### `renewAccessToken`
 
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
-- **Assinatura:** `async renewAccessToken(deps: GmailDeps, account: AllowedAccount, linked: LinkedAccount): Promise<string>`
+- **Assinatura:** `async renewAccessToken(deps: OwnerDeps, ref: AccountRef): Promise<string>`
 - **Usada por:** `getAccessToken()`
 - **Processos:** P12
 
 <!-- gerado:fim -->
 
 - **Faz:** Renova o access token da conta pelo refresh token.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `linked`: conta vinculada com o refresh token.
+- **Entrada:** `deps`: dependências com o usuário. `ref`: conta com apelido.
 - **Saída:** O access token novo.
-- **Efeitos:** Rede: endpoint de tokens do Google. Memória do isolate: guarda o token no cache até perto de vencer. KV: grava a conta como revogada se o Google responder `invalid_grant`.
-- **Erros:** Lança o erro de `relinkError()` (revogada) quando o Google responde `invalid_grant`. Propaga os demais erros de `refreshGoogleToken()`.
+- **Efeitos:** Rede: endpoint de tokens do Google. Memória do isolate: guarda o token até 1 min antes de vencer. KV: marca a conta como revogada em `invalid_grant`.
+- **Erros:** Lança `relinkError()` em `invalid_grant`; propaga outros `GoogleTokenError` e erros de rede.
 
 ### `getAccessToken`
 
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/access-token.ts`
-- **Assinatura:** `async getAccessToken(deps: GmailDeps, account: AllowedAccount): Promise<string>`
+- **Assinatura:** `async getAccessToken(deps: OwnerDeps, ref: AccountRef): Promise<string>`
 - **Usada por:** `accountStatus()`, `gmailGet()`
 - **Processos:** P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Devolve um access token válido da conta, da memória ou renovado pelo refresh token do KV.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida.
-- **Saída:** O access token válido.
-- **Efeitos:** Memória do isolate: lê o cache de access tokens. Quando ele falta ou venceu: KV (lê, e grava se revogada) e rede (endpoint de tokens do Google).
-- **Erros:** Propaga os erros de `requireLinkedAccount()` e `renewAccessToken()`.
+- **Faz:** Devolve um access token válido da conta.
+- **Entrada:** `deps`: dependências com o usuário. `ref`: conta com apelido.
+- **Saída:** Access token da memória, ou renovado.
+- **Efeitos:** Os de `renewAccessToken()` quando não há token válido na memória.
+- **Erros:** Lança `relinkError()` se a conta já está revogada; propaga os de `renewAccessToken()`.
+
+### `accessTokenKey`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `accessTokenKey(owner: string, email: string): string`
+- **Usada por:** `forgetAccessToken()`, `getAccessToken()`, `renewAccessToken()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a chave do cache de access tokens por usuário e conta.
+- **Entrada:** `owner`: usuário (`sub`). `email`: conta Gmail.
+- **Saída:** Texto que separa usuário e conta.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `markAccountRevoked`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `async markAccountRevoked(deps: OwnerDeps, email: string): Promise<void>`
+- **Usada por:** `renewAccessToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Marca a conta do usuário como revogada no KV.
+- **Entrada:** `deps`: dependências com o usuário. `email`: conta a marcar.
+- **Saída:** Nada.
+- **Efeitos:** KV: lê e regrava o registro do usuário.
+- **Erros:** Propaga falhas do KV.
 
 ## `connectors/gmail/src/attachments.ts`
 
@@ -4182,7 +4183,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/attachments.ts`
-- **Assinatura:** `async readAttachmentText(deps: GmailDeps, account: AllowedAccount, ids: { readonly messageId: string; readonly attachmentId: string }): Promise<Record<string, unknown>>`
+- **Assinatura:** `async readAttachmentText(deps: OwnerDeps, ref: AccountRef, ids: { readonly messageId: string; readonly attachmentId: string }): Promise<Record<string, unknown>>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
 - **Processos:** P12
 
@@ -4195,23 +4196,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Erros:** Lança erro se o anexo passar de 5 MB. Propaga os erros de `gmailGet()` e `attachmentBytesToText()`.
 
 ## `connectors/gmail/src/config.ts`
-
-### `accountAlias`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/config.ts`
-- **Assinatura:** `accountAlias(email: string): string`
-- **Usada por:** `parseAllowedEmails()`, `saveLinkedAccount()`
-- **Processos:** P10, P11, P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Extrai o apelido de uma conta: a parte antes do `@`, em minúsculas.
-- **Entrada:** `email`: e-mail completo; precisa conter `@`.
-- **Saída:** O apelido em minúsculas.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
 
 ### `isEmailAddress`
 
@@ -4235,17 +4219,17 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/config.ts`
-- **Assinatura:** `parseAllowedEmails(raw: string | null): AllowedAccount[]`
+- **Assinatura:** `parseAllowedEmails(raw: string | null): string[] | null`
 - **Usada por:** `readGmailSettings()`
 - **Processos:** P10, P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Lê `ALLOWED_EMAILS` como a lista de contas permitidas.
-- **Entrada:** `raw`: e-mails separados por vírgula, ou nulo.
-- **Saída:** As contas permitidas, com apelido e e-mail em minúsculas.
+- **Faz:** Lê a lista opcional `ALLOWED_EMAILS`.
+- **Entrada:** `raw`: valor do secret (vírgulas), ou nulo.
+- **Saída:** E-mails em minúsculas; nulo se vazio (modo público).
 - **Efeitos:** Nenhum (pura).
-- **Erros:** Lança erro se a lista estiver vazia, se um item não for e-mail, ou se os apelidos se repetirem ou um deles for `all`.
+- **Erros:** Lança erro se algum item não for e-mail.
 
 ### `requiredSecret`
 
@@ -4292,45 +4276,28 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Monta a configuração do conector a partir dos secrets do Worker.
-- **Entrada:** `env`: variáveis de texto do Worker.
-- **Saída:** A configuração validada: credenciais do cliente Google, chave de selagem, contas permitidas e segredo do consentimento.
+- **Faz:** Monta a configuração a partir dos secrets do Worker.
+- **Entrada:** `env`: variáveis e secrets em texto.
+- **Saída:** `GmailSettings` com cliente Google, chave de cifra, allowlist opcional e segredo do consentimento.
 - **Efeitos:** Nenhum (pura).
-- **Erros:** Propaga os erros de `requiredSecret()`, `parseSealKey()`, `parseAllowedEmails()` e `readConsentSecret()`.
+- **Erros:** Lança erro dizendo qual secret falta ou está inválido.
 
-### `findAllowedAccount`
+### `isEmailAllowed`
 
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/config.ts`
-- **Assinatura:** `findAllowedAccount(accounts: readonly AllowedAccount[], email: string): AllowedAccount | null`
-- **Usada por:** `completeSignIn()`, `linkFromCode()`
-- **Processos:** P10, P11
+- **Assinatura:** `isEmailAllowed(settings: GmailSettings, email: string): boolean`
+- **Usada por:** `completeSignIn()`
+- **Processos:** P10
 
 <!-- gerado:fim -->
 
-- **Faz:** Procura a conta permitida com o e-mail dado, sem diferenciar maiúsculas.
-- **Entrada:** `accounts`: contas permitidas. `email`: e-mail a procurar.
-- **Saída:** A conta encontrada, ou nulo.
+- **Faz:** Diz se o e-mail pode entrar no conector.
+- **Entrada:** `settings`: configuração. `email`: e-mail verificado do login.
+- **Saída:** `true` no modo público; no privado, só para os e-mails de `ALLOWED_EMAILS`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
-
-### `resolveAccounts`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/config.ts`
-- **Assinatura:** `resolveAccounts(accounts: readonly AllowedAccount[], requested: string): AllowedAccount[]`
-- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `resolveSingleAccount()`
-- **Processos:** P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Resolve as contas pedidas numa ferramenta pelo apelido ou por `all`.
-- **Entrada:** `accounts`: contas permitidas. `requested`: apelido ou `all` (espaços e maiúsculas ignorados).
-- **Saída:** Todas as contas para `all`; senão, uma lista com a conta do apelido.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Lança erro listando os apelidos válidos se o apelido for desconhecido.
 
 ## `connectors/gmail/src/gmail-api.ts`
 
@@ -4356,17 +4323,17 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/gmail-api.ts`
-- **Assinatura:** `gmailHttpError(status: number, account: AllowedAccount): Error`
+- **Assinatura:** `gmailHttpError(status: number, alias: string): Error`
 - **Usada por:** `gmailGet()`
 - **Processos:** P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Cria o erro acionável para uma resposta de falha da Gmail API.
-- **Entrada:** `status`: status HTTP da resposta. `account`: conta consultada.
-- **Saída:** Um `Error` com o apelido da conta e a mensagem do status (ou uma genérica com o número do HTTP).
+- **Faz:** Monta o erro acionável de uma falha da Gmail API.
+- **Entrada:** `status`: status HTTP. `alias`: apelido da conta.
+- **Saída:** `Error` com a conta e a orientação.
 - **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum (devolve o erro, não lança).
+- **Erros:** Nenhum.
 
 ### `sendGmailGet`
 
@@ -4390,17 +4357,17 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/gmail-api.ts`
-- **Assinatura:** `async gmailGet(deps: GmailDeps, account: AllowedAccount, url: string): Promise<T>`
+- **Assinatura:** `async gmailGet(deps: OwnerDeps, ref: AccountRef, url: string): Promise<T>`
 - **Usada por:** `accountLabels()`, `connectors/gmail/src/tools.ts (módulo)`, `fetchThreadMetadata()`, `readAttachmentText()`, `searchAccount()`
 - **Processos:** P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Lê um recurso da Gmail API como JSON, com uma nova tentativa depois de 401.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `url`: URL completa da Gmail API.
-- **Saída:** O corpo JSON da resposta.
-- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). Memória do isolate: esquece o access token depois de 401. KV pelo access token.
-- **Erros:** Lança o erro de `gmailHttpError()` se a resposta final não for de sucesso. Propaga os erros de `getAccessToken()` e de rede.
+- **Faz:** Lê um recurso da Gmail API como JSON, com nova tentativa depois de 401.
+- **Entrada:** `deps`: dependências com o usuário. `ref`: conta. `url`: URL da Gmail API.
+- **Saída:** O corpo JSON.
+- **Efeitos:** Rede: Gmail API e, se renovar, Google. Memória do isolate: esquece o token depois de 401.
+- **Erros:** Lança `gmailHttpError()` se a resposta final falhar; propaga os de `getAccessToken()`.
 
 ## `connectors/gmail/src/google-oauth.ts`
 
@@ -4444,7 +4411,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/google-oauth.ts`
 - **Assinatura:** `randomToken(bytes = 32): string`
-- **Usada por:** `beginGoogleSignIn()`, `completeSignIn()`, `startAccountLink()`
+- **Usada por:** `beginGoogleSignIn()`, `completeSignIn()`, `issueLinkUrl()`, `startAccountLink()`
 - **Processos:** P10, P11
 
 <!-- gerado:fim -->
@@ -4540,6 +4507,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Rede: endpoint de tokens do Google.
 - **Erros:** Propaga os erros de `postGoogleToken()` (`invalid_grant` quando o acesso foi revogado).
 
+### `revokeGoogleToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `async revokeGoogleToken(deps: GmailDeps, token: string): Promise<boolean>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Revoga o refresh token no Google.
+- **Entrada:** `deps`: dependências. `token`: refresh token.
+- **Saída:** `true` se o Google confirmou; `false` se recusou ou a rede falhou.
+- **Efeitos:** Rede: endpoint de revogação do Google.
+- **Erros:** Nenhum (falha devolve `false`).
+
 ## `connectors/gmail/src/id-token.ts`
 
 ### `decodeJwtJson`
@@ -4598,15 +4582,15 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/id-token.ts`
-- **Assinatura:** `checkIdTokenClaims(payload: Readonly<Record<string, unknown>>, expected: IdTokenExpectation): string`
+- **Assinatura:** `checkIdTokenClaims(payload: Readonly<Record<string, unknown>>, expected: IdTokenExpectation): GoogleIdentity`
 - **Usada por:** `verifyGoogleIdToken()`
 - **Processos:** P10, P11
 
 <!-- gerado:fim -->
 
-- **Faz:** Confere as claims do `id_token` contra o esperado.
-- **Entrada:** `payload`: claims do `id_token`. `expected`: cliente, `nonce` e instante atual em segundos Unix.
-- **Saída:** O e-mail verificado, em minúsculas.
+- **Faz:** Confere as claims do `id_token`.
+- **Entrada:** `payload`: claims. `expected`: cliente, `nonce` e instante atual.
+- **Saída:** `GoogleIdentity` com `sub` e e-mail em minúsculas.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Lança erro listando as verificações que falharam.
 
@@ -4649,36 +4633,19 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/id-token.ts`
-- **Assinatura:** `async verifyGoogleIdToken(deps: GmailDeps, idToken: string, nonce: string): Promise<string>`
+- **Assinatura:** `async verifyGoogleIdToken(deps: GmailDeps, idToken: string, nonce: string): Promise<GoogleIdentity>`
 - **Usada por:** `completeSignIn()`, `linkFromCode()`
 - **Processos:** P10, P11
 
 <!-- gerado:fim -->
 
-- **Faz:** Valida o `id_token` do Google (assinatura e claims) para obter o e-mail verificado.
-- **Entrada:** `deps`: dependências do conector (configuração, rede, relógio). `idToken`: JWT recebido do Google. `nonce`: nonce enviado na autorização.
-- **Saída:** O e-mail verificado, em minúsculas.
+- **Faz:** Valida o `id_token` do Google.
+- **Entrada:** `deps`: dependências. `idToken`: JWT. `nonce`: valor esperado.
+- **Saída:** `GoogleIdentity` verificada.
 - **Efeitos:** Rede: JWKS do Google.
-- **Erros:** Lança erro se o algoritmo não for RS256 ou a assinatura não conferir. Propaga os erros de `decodeJwt()`, `fetchGoogleKey()`, `verifyRs256()` e `checkIdTokenClaims()`.
+- **Erros:** Lança erro de algoritmo, chave, assinatura ou claims inválidas.
 
 ## `connectors/gmail/src/link-flow.ts`
-
-### `sha256Hex`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/link-flow.ts`
-- **Assinatura:** `sha256Hex(text: string): string`
-- **Usada por:** `linkRequestKey()`, `startAccountLink()`, `takeLinkRequest()`
-- **Processos:** P11
-
-<!-- gerado:fim -->
-
-- **Faz:** Calcula o SHA-256 de um texto em hexadecimal.
-- **Entrada:** `text`: texto a resumir (ex.: `state` ou cookie do vínculo).
-- **Saída:** Hash SHA-256 em hexadecimal minúsculo (64 caracteres).
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
 
 ### `linkRequestKey`
 
@@ -4736,17 +4703,17 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/link-flow.ts`
-- **Assinatura:** `async startAccountLink(deps: GmailDeps): Promise<Response>`
+- **Assinatura:** `async startAccountLink(deps: GmailDeps, request: Request): Promise<Response>`
 - **Usada por:** `connectors/gmail/src/worker.ts (módulo)`
 - **Processos:** P11
 
 <!-- gerado:fim -->
 
-- **Faz:** Inicia o vínculo de uma conta Gmail mandando o navegador ao Google.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio, origem).
-- **Saída:** Redirecionamento 302 para o login do Google (`gmail.readonly`, acesso offline, PKCE e `nonce`) com o cookie de vínculo.
-- **Efeitos:** Grava no KV o pedido de vínculo selado, com validade de 600 s; define o cookie `__Host-gmail-link`.
-- **Erros:** Nenhum próprio; falhas do KV propagam.
+- **Faz:** Resgata o ticket e manda o navegador ao Google para vincular a conta.
+- **Entrada:** `deps`: dependências. `request`: requisição de `/accounts/link?ticket=...`.
+- **Saída:** 302 ao Google com cookie de vínculo; página 400 sem ticket válido.
+- **Efeitos:** KV: marca o ticket e grava o pedido selado (10 minutos). Define o cookie `__Host-gmail-link`.
+- **Erros:** Propaga falhas do KV.
 
 ### `takeLinkRequest`
 
@@ -4759,62 +4726,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Recupera o pedido de vínculo de uso único.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, relógio). `request`: volta do Google, com `state` na URL e o cookie de vínculo.
-- **Saída:** O pedido (`verifier`, `nonce`, `bindingHash`), ou nulo se não existir, tiver vencido, o selo não abrir ou o cookie não conferir.
-- **Efeitos:** Lê e apaga do KV o pedido de vínculo (mesmo quando depois o recusa).
-- **Erros:** Nenhum próprio; falhas do KV propagam.
-
-### `accessDeniedPage`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/link-flow.ts`
-- **Assinatura:** `accessDeniedPage(): Response`
-- **Usada por:** `finishSignIn()`
-- **Processos:** P10
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta a página de conta Google fora da allowlist.
-- **Entrada:** Nenhuma.
-- **Saída:** Página HTML 403 "Acesso negado".
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `linkRefusal`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/link-flow.ts`
-- **Assinatura:** `linkRefusal(tokens: GoogleTokens): Response | null`
-- **Usada por:** `linkFromCode()`
-- **Processos:** P11
-
-<!-- gerado:fim -->
-
-- **Faz:** Decide se os tokens do Google servem para ler o Gmail.
-- **Entrada:** `tokens`: tokens devolvidos pelo Google na troca do código.
-- **Saída:** Página 400 se faltar o escopo `gmail.readonly` ou o refresh token; nulo se os tokens servem.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `storeLinkedAccount`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/link-flow.ts`
-- **Assinatura:** `async storeLinkedAccount(deps: GmailDeps, email: string, tokens: GoogleTokens): Promise<void>`
-- **Usada por:** `linkFromCode()`
-- **Processos:** P11
-
-<!-- gerado:fim -->
-
-- **Faz:** Grava a conta vinculada com o refresh token selado.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, relógio). `email`: e-mail da conta, já na allowlist. `tokens`: tokens do Google com refresh token.
-- **Saída:** Nada.
-- **Efeitos:** Grava no KV a conta selada com status `active`; descarta da memória o access token antigo dela.
-- **Erros:** Nenhum próprio; falhas do KV propagam.
+- **Faz:** Recupera e apaga o pedido de vínculo da volta do Google.
+- **Entrada:** `deps`: dependências. `request`: volta do Google com `state` e cookie.
+- **Saída:** Usuário, verificador e `nonce`; nulo se ausente, vencido ou de outro navegador.
+- **Efeitos:** KV: lê e apaga o pedido (uso único).
+- **Erros:** Propaga falhas do KV.
 
 ### `linkFromCode`
 
@@ -4827,11 +4743,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Conclui o vínculo a partir do código do Google.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `code`: código de autorização do Google. `link`: pedido de vínculo recuperado (verifier e `nonce`).
-- **Saída:** Página 200 "Conta vinculada"; 400 sem `id_token`, sem escopo ou sem refresh token; 403 se o e-mail não está na allowlist.
-- **Efeitos:** Rede (troca do código no Google, chaves públicas do Google); grava a conta no KV quando permitida.
-- **Erros:** Propaga o erro da troca do código (`GoogleTokenError`) e da validação do `id_token` (malformado, assinatura ou claims inválidos, chaves indisponíveis).
+- **Faz:** Troca o código do Google e grava a conta no usuário do ticket.
+- **Entrada:** `deps`: dependências. `code`: código do Google. `link`: pedido recuperado (usuário, verificador, `nonce`).
+- **Saída:** Página de sucesso, ou página 400 sem `id_token` ou sem permissão do Gmail.
+- **Efeitos:** Rede: tokens e JWKS do Google. KV: grava a conta.
+- **Erros:** Propaga falhas da troca, do `id_token` e do limite de contas (tratadas por `linkSafely()`).
 
 ### `linkSafely`
 
@@ -4862,10 +4778,112 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:fim -->
 
 - **Faz:** Atende a volta do Google no vínculo de conta.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `request`: requisição da volta, com `state`, `code` ou `error` e o cookie de vínculo.
-- **Saída:** Página 400 se o pedido expirou ou o Google recusou; senão a página de `linkFromCode`; sempre com o cookie de vínculo apagado.
-- **Efeitos:** Lê e apaga o pedido no KV; rede (Google); grava a conta no KV quando permitida; apaga o cookie `__Host-gmail-link`.
-- **Erros:** Nenhum: falhas da troca do código ou do `id_token` viram página 400 por `linkSafely()`.
+- **Entrada:** `deps`: dependências. `request`: volta com `state`, `code` ou `error` e o cookie.
+- **Saída:** Página do resultado, sempre com o cookie de vínculo apagado.
+- **Efeitos:** Os de `takeLinkRequest()` e `linkSafely()`; apaga o cookie.
+- **Erros:** Nenhum: falhas viram página 400.
+
+### `nowSeconds`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `nowSeconds(deps: GmailDeps): number`
+- **Usada por:** `issueLinkUrl()`, `redeemLinkTicket()`, `startAccountLink()`, `takeLinkRequest()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o relógio das dependências em segundos Unix.
+- **Entrada:** `deps`: dependências.
+- **Saída:** Segundos inteiros.
+- **Efeitos:** Lê o relógio injetado.
+- **Erros:** Nenhum.
+
+### `issueLinkUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `issueLinkUrl(deps: OwnerDeps): string`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera o link de vínculo de uso único do usuário.
+- **Entrada:** `deps`: dependências com o usuário.
+- **Saída:** `<origem>/accounts/link?ticket=<selo>`, válido por 10 minutos.
+- **Efeitos:** Nenhum (só sela; não grava nada).
+- **Erros:** Nenhum.
+
+### `redeemLinkTicket`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async redeemLinkTicket(deps: GmailDeps, ticket: string): Promise<string | null>`
+- **Usada por:** `startAccountLink()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Resgata o ticket de vínculo uma única vez.
+- **Entrada:** `deps`: dependências. `ticket`: selo do link.
+- **Saída:** O usuário do ticket; nulo se inválido, vencido ou já usado.
+- **Efeitos:** KV: lê e grava a marca de uso do `jti` (validade de 10 minutos).
+- **Erros:** Propaga falhas do KV.
+
+### `invalidTicketPage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `invalidTicketPage(): Response`
+- **Usada por:** `finishAccountLink()`, `startAccountLink()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a página de link de vínculo inválido.
+- **Entrada:** Nenhuma.
+- **Saída:** Página 400 que orienta a pedir outro link com `link_account`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `linkRefusalReason`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `linkRefusalReason(tokens: GoogleTokens): string | null`
+- **Usada por:** `linkFromCode()`, `linkSignedInAccount()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz por que os tokens não servem para ler o Gmail.
+- **Entrada:** `tokens`: resposta do Google.
+- **Saída:** Mensagem se faltar o escopo do Gmail ou o refresh token; nulo se servem.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `storeGoogleAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async storeGoogleAccount(deps: OwnerDeps, email: string, tokens: GoogleTokens): Promise<void>`
+- **Usada por:** `linkFromCode()`, `linkSignedInAccount()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava a conta Google nas contas do usuário.
+- **Entrada:** `deps`: dependências com o usuário. `email`: conta verificada. `tokens`: tokens do Google com refresh token.
+- **Saída:** Nada.
+- **Efeitos:** KV: lê e regrava o registro do usuário. Memória do isolate: esquece o access token antigo.
+- **Erros:** Lança o erro de limite de `upsertAccount()`; propaga falhas do KV.
 
 ## `connectors/gmail/src/message-format.ts`
 
@@ -5149,7 +5167,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/pages.ts`
 - **Assinatura:** `messagePage(title: string, message: string, status = 200): Response`
-- **Usada por:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `linkFromCode()`, `linkRefusal()`, `linkSafely()`
+- **Usada por:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`
 - **Processos:** P10, P11
 
 <!-- gerado:fim -->
@@ -5236,7 +5254,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/rate-limit.ts`
 - **Assinatura:** `async isRateLimited(limiter: RateLimiter | undefined, key: string): Promise<boolean>`
-- **Usada por:** `handleMcpApi()`
+- **Usada por:** `handleGmailWorkerFetch()`, `handleMcpApi()`
 - **Processos:** P10, P12
 
 <!-- gerado:fim -->
@@ -5253,7 +5271,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/gmail/src/rate-limit.ts`
 - **Assinatura:** `rateLimitedResponse(): Response`
-- **Usada por:** `handleMcpApi()`
+- **Usada por:** `handleGmailWorkerFetch()`, `handleMcpApi()`
 - **Processos:** P10, P12
 
 <!-- gerado:fim -->
@@ -5305,7 +5323,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/search.ts`
-- **Assinatura:** `fetchThreadMetadata(deps: GmailDeps, account: AllowedAccount, threadId: string): Promise<GmailThread>`
+- **Assinatura:** `fetchThreadMetadata(deps: OwnerDeps, ref: AccountRef, threadId: string): Promise<GmailThread>`
 - **Usada por:** `searchAccount()`
 - **Processos:** P12
 
@@ -5322,7 +5340,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/search.ts`
-- **Assinatura:** `async searchAccount(deps: GmailDeps, account: AllowedAccount, request: SearchRequest): Promise<AccountSearchResult>`
+- **Assinatura:** `async searchAccount(deps: OwnerDeps, ref: AccountRef, request: SearchRequest): Promise<AccountSearchResult>`
 - **Usada por:** `searchThreads()`
 - **Processos:** P12
 
@@ -5373,7 +5391,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/search.ts`
-- **Assinatura:** `pagesToFetch(accounts: readonly AllowedAccount[], pageToken: string | null): [AllowedAccount, string | null][]`
+- **Assinatura:** `pagesToFetch(accounts: readonly AccountRef[], pageToken: string | null): [AccountRef, string | null][]`
 - **Usada por:** `searchThreads()`
 - **Processos:** P12
 
@@ -5390,7 +5408,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/search.ts`
-- **Assinatura:** `async searchThreads(deps: GmailDeps, accounts: readonly AllowedAccount[], request: SearchRequest): Promise<Record<string, unknown>>`
+- **Assinatura:** `async searchThreads(deps: OwnerDeps, accounts: readonly AccountRef[], request: SearchRequest): Promise<Record<string, unknown>>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
 - **Processos:** P12
 
@@ -5432,11 +5450,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Inicia o login do dono no Google.
-- **Entrada:** `deps`: dependências do conector (configuração, origem). `oauth`: `OAuthHelpers` da biblioteca. `approved`: pedido de autorização aprovado e headers da transação.
-- **Saída:** Redirecionamento 302 ao Google com `openid email`, sem acesso offline, PKCE, `nonce` e os headers da biblioteca.
-- **Efeitos:** Guarda o verifier e o `nonce` cifrados pela biblioteca (`beginUpstream`, KV OAUTH_KV); define cookies da transação.
-- **Erros:** Propaga os erros de `beginUpstream`.
+- **Faz:** Inicia a ida ao Google no login do conector.
+- **Entrada:** `deps`: dependências. `oauth`: helpers da biblioteca. `approved`: pedido do Claude aprovado e headers.
+- **Saída:** 302 ao Google pedindo `openid email gmail.readonly` com acesso offline.
+- **Efeitos:** KV `OAUTH_KV` (pela biblioteca): grava a transação com verificador e `nonce`; define o cookie `__Host-`.
+- **Erros:** Propaga os erros da biblioteca.
 
 ### `showAuthorize`
 
@@ -5483,11 +5501,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Conclui a autorização do Claude a partir do código do Google.
-- **Entrada:** `deps`: dependências do conector (configuração, rede, relógio). `oauth`: `OAuthHelpers` da biblioteca. `resumed`: pedido de autorização, verifier e `nonce` guardados e o código do Google.
-- **Saída:** Endereço de retorno ao Claude com o código emitido; nulo se o e-mail não está na allowlist.
-- **Efeitos:** Rede (troca do código e chaves públicas do Google); grava a concessão com e-mail e id de sessão via `OAuthHelpers` (KV OAUTH_KV).
-- **Erros:** Lança erro se o Google não devolver `id_token`; propaga os erros da troca do código, da validação do `id_token` e da biblioteca.
+- **Faz:** Valida o login no Google e conclui a autorização do Claude.
+- **Entrada:** `deps`: dependências. `oauth`: helpers da biblioteca. `resumed`: pedido do Claude, verificador e `nonce`, código do Google.
+- **Saída:** URL de retorno ao Claude; nulo se o e-mail não pode entrar (modo privado).
+- **Efeitos:** Rede: Google. KV: vincula a conta e grava o grant (`OAUTH_KV`) com `props` de usuário, e-mail e sessão.
+- **Erros:** Lança erro sem `id_token`; propaga os da troca e da validação do `id_token`.
 
 ### `finishSignIn`
 
@@ -5506,92 +5524,39 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Lê e consome o `state` via `OAuthHelpers` (KV OAUTH_KV); rede (Google); grava a concessão quando permitida; define cookies.
 - **Erros:** Nenhum: erros de autorização, troca do código e `id_token` viram página 400 ou redirecionamento.
 
-## `connectors/gmail/src/token-store.ts`
-
-### `accountKey`
+### `linkSignedInAccount`
 
 <!-- gerado:inicio -->
 
-- **Arquivo:** `connectors/gmail/src/token-store.ts`
-- **Assinatura:** `accountKey(alias: string): string`
-- **Usada por:** `loadLinkedAccount()`, `saveLinkedAccount()`
-- **Processos:** P11, P12
+- **Arquivo:** `connectors/gmail/src/sign-in.ts`
+- **Assinatura:** `async linkSignedInAccount(deps: GmailDeps, identity: GoogleIdentity, tokens: GoogleTokens): Promise<boolean>`
+- **Usada por:** `completeSignIn()`
+- **Processos:** P10
 
 <!-- gerado:fim -->
 
-- **Faz:** Monta a chave da conta no KV pelo apelido.
-- **Entrada:** `alias`: apelido da conta.
-- **Saída:** O texto `account:<apelido>`.
+- **Faz:** Vincula a conta que acabou de entrar no login.
+- **Entrada:** `deps`: dependências. `identity`: `sub` e e-mail verificados. `tokens`: tokens do Google.
+- **Saída:** `true` se vinculou; `false` sem Gmail, sem refresh token ou se a gravação falhar.
+- **Efeitos:** KV: grava a conta no registro do usuário.
+- **Erros:** Nenhum: falha não impede o login.
+
+### `accessDeniedPage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/sign-in.ts`
+- **Assinatura:** `accessDeniedPage(): Response`
+- **Usada por:** `finishSignIn()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a página 403 do modo privado.
+- **Entrada:** Nenhuma.
+- **Saída:** Página 403 para conta fora de `ALLOWED_EMAILS`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
-
-### `sealLinkedAccount`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/token-store.ts`
-- **Assinatura:** `sealLinkedAccount(account: LinkedAccount, key: Buffer): string`
-- **Usada por:** `saveLinkedAccount()`
-- **Processos:** P11, P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Sela uma conta vinculada para gravar no KV.
-- **Entrada:** `account`: conta vinculada. `key`: chave AES-256 de 32 bytes (`TOKEN_ENC_KEY`).
-- **Saída:** O selo em base64url, com tipo `gmail_account` e validade técnica no ano 2100.
-- **Efeitos:** Lê o gerador aleatório criptográfico (vetor de inicialização).
-- **Erros:** Propaga o erro da cifra se a chave não tiver 32 bytes.
-
-### `openLinkedAccount`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/token-store.ts`
-- **Assinatura:** `openLinkedAccount(sealed: string, key: Buffer, email: string): LinkedAccount | null`
-- **Usada por:** `loadLinkedAccount()`
-- **Processos:** P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Abre o selo de uma conta conferindo o e-mail esperado.
-- **Entrada:** `sealed`: selo lido do KV. `key`: chave AES-256 (`TOKEN_ENC_KEY`). `email`: e-mail esperado da conta.
-- **Saída:** A conta vinculada; nulo se a chave, o conteúdo ou o e-mail não conferem.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `saveLinkedAccount`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/token-store.ts`
-- **Assinatura:** `async saveLinkedAccount(kv: KvStore, key: Buffer, account: LinkedAccount): Promise<void>`
-- **Usada por:** `renewAccessToken()`, `storeLinkedAccount()`
-- **Processos:** P11, P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Grava a conta vinculada (selada) no KV.
-- **Entrada:** `kv`: KV do conector. `key`: chave AES-256 (`TOKEN_ENC_KEY`). `account`: conta vinculada.
-- **Saída:** Nada.
-- **Efeitos:** KV: grava o selo na chave do apelido da conta.
-- **Erros:** Propaga os erros do KV e de `sealLinkedAccount()`.
-
-### `loadLinkedAccount`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/gmail/src/token-store.ts`
-- **Assinatura:** `async loadLinkedAccount(kv: KvStore, key: Buffer, account: AllowedAccount): Promise<LinkedAccount | null>`
-- **Usada por:** `accountStatus()`, `requireLinkedAccount()`
-- **Processos:** P12
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê a conta vinculada do KV.
-- **Entrada:** `kv`: KV do conector. `key`: chave AES-256 (`TOKEN_ENC_KEY`). `account`: conta permitida.
-- **Saída:** A conta vinculada; nulo se não houver vínculo ou o registro não abrir.
-- **Efeitos:** KV: lê o selo da conta.
-- **Erros:** Propaga os erros do KV.
 
 ## `connectors/gmail/src/tools.ts`
 
@@ -5600,34 +5565,34 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/tools.ts`
-- **Assinatura:** `resolveSingleAccount(deps: GmailDeps, requested: string): AllowedAccount`
+- **Assinatura:** `async resolveSingleAccount(deps: OwnerDeps, requested: string): Promise<AccountRef>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
 - **Processos:** P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Resolve o parâmetro `account` exigindo uma única conta.
-- **Entrada:** `deps`: dependências do conector (configuração). `requested`: apelido pedido pelo modelo.
-- **Saída:** A conta permitida correspondente.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Lança erro se `requested` é `all` ou resulta em mais de uma conta; propaga o erro de conta desconhecida.
+- **Faz:** Resolve `account` exigindo uma única conta.
+- **Entrada:** `deps`: dependências com o usuário. `requested`: apelido ou e-mail.
+- **Saída:** A conta pedida.
+- **Efeitos:** KV: uma leitura.
+- **Erros:** Lança erro para `all`; os de `resolveAccounts()`.
 
 ### `accountStatus`
 
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/tools.ts`
-- **Assinatura:** `async accountStatus(deps: GmailDeps, account: AllowedAccount): Promise<Record<string, unknown>>`
+- **Assinatura:** `async accountStatus(deps: OwnerDeps, ref: AccountRef): Promise<Record<string, unknown>>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
 - **Processos:** P12
 
 <!-- gerado:fim -->
 
 - **Faz:** Monta o status de uma conta para `list_accounts`.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio, origem). `account`: conta permitida.
-- **Saída:** Apelido, e-mail, data do vínculo e status: `not_linked` ou `needs_relink` (com `link_url`), `ok` ou `token_error` (com a mensagem).
-- **Efeitos:** Lê a conta no KV; rede (renovação do token no Google, se não houver em memória); pode marcar a conta como revogada no KV.
-- **Erros:** Nenhum: falhas do token viram `status: token_error`; falhas do KV propagam.
+- **Entrada:** `deps`: dependências com o usuário. `ref`: conta.
+- **Saída:** Apelido, e-mail, data do vínculo e status `ok`, `needs_relink` ou `token_error` (com a mensagem).
+- **Efeitos:** Os de `getAccessToken()` (rede e cache).
+- **Erros:** Nenhum: falhas viram `token_error`.
 
 ### `withUntrustedNotice`
 
@@ -5651,7 +5616,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/tools.ts`
-- **Assinatura:** `async accountLabels(deps: GmailDeps, account: AllowedAccount): Promise<Record<string, unknown>>`
+- **Assinatura:** `async accountLabels(deps: OwnerDeps, ref: AccountRef): Promise<Record<string, unknown>>`
 - **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
 - **Processos:** P12
 
@@ -5662,6 +5627,40 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Apelido da conta e rótulos (`id`, `name`, `type`, com `user` por padrão); lista vazia se não houver.
 - **Efeitos:** Rede (Gmail API e, se preciso, renovação do token no Google); pode marcar a conta como revogada no KV.
 - **Erros:** Propaga os erros de `gmailGet`: HTTP da Gmail API, conta sem vínculo ou revogada, falha na renovação do token.
+
+### `ownerRefs`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/tools.ts`
+- **Assinatura:** `async ownerRefs(deps: OwnerDeps): Promise<AccountRef[]>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `resolveOwnerAccounts()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê as contas vinculadas do usuário com apelidos.
+- **Entrada:** `deps`: dependências com o usuário.
+- **Saída:** Lista de `AccountRef` (vazia sem contas).
+- **Efeitos:** KV: uma leitura.
+- **Erros:** Propaga falhas do KV.
+
+### `resolveOwnerAccounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/tools.ts`
+- **Assinatura:** `async resolveOwnerAccounts(deps: OwnerDeps, requested: string): Promise<AccountRef[]>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `resolveSingleAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Resolve `account` nas contas do usuário.
+- **Entrada:** `deps`: dependências com o usuário. `requested`: apelido, e-mail ou `all`.
+- **Saída:** As contas pedidas.
+- **Efeitos:** KV: uma leitura.
+- **Erros:** Os de `resolveAccounts()`.
 
 ## `connectors/gmail/src/worker.ts`
 
@@ -5687,16 +5686,16 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/worker.ts`
-- **Assinatura:** `createGmailServer(deps: GmailDeps): McpServer`
+- **Assinatura:** `createGmailServer(deps: OwnerDeps): McpServer`
 - **Usada por:** `handleMcpApi()`
 - **Processos:** P10, P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Cria o servidor MCP com as ferramentas do Gmail.
-- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio).
-- **Saída:** Servidor MCP `gmail-multi` com instruções e as seis ferramentas registradas.
-- **Efeitos:** Nenhum (pura).
+- **Faz:** Cria o servidor MCP com as ferramentas do Gmail do usuário.
+- **Entrada:** `deps`: dependências com o usuário.
+- **Saída:** `McpServer` com `GMAIL_TOOLS` registradas.
+- **Efeitos:** Nenhum.
 - **Erros:** Nenhum.
 
 ### `configErrorResponse`
@@ -5728,10 +5727,10 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:fim -->
 
 - **Faz:** Atende o `/mcp` já autenticado pela biblioteca.
-- **Entrada:** `request`: requisição MCP. `env`: variáveis, secrets e bindings do Worker. `ctx`: contexto de execução, com `props` da concessão (e-mail e `sid`).
-- **Saída:** Resposta do servidor MCP; 429 se a sessão passou do limite; 500 se a configuração é inválida.
-- **Efeitos:** Conta a requisição no binding de rate limiting; as ferramentas acessam a rede (Gmail API, Google) e o KV.
-- **Erros:** Nenhum: configuração inválida vira 500 e erros das ferramentas viram resultado de erro MCP.
+- **Entrada:** `request`: requisição MCP. `env`: bindings e secrets. `ctx`: contexto com `props` (usuário, e-mail, sessão).
+- **Saída:** Resposta MCP; 429 acima do limite da sessão; 500 com configuração inválida.
+- **Efeitos:** Binding de rate limiting por sessão; as ferramentas usam KV e rede.
+- **Erros:** Nenhum: configuração inválida vira 500 e erros de ferramenta viram resultado MCP de erro.
 
 ### `handleDefaultRequest`
 
@@ -5806,17 +5805,51 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/gmail/src/worker.ts`
-- **Assinatura:** `handleGmailWorkerFetch(request: Request, env: GmailWorkerEnv, ctx: ExecutionContext): Promise<Response>`
+- **Assinatura:** `async handleGmailWorkerFetch(request: Request, env: GmailWorkerEnv, ctx: ExecutionContext): Promise<Response>`
 - **Usada por:** `connectors/gmail/src/index.ts (módulo)`
 - **Processos:** P10
 
 <!-- gerado:fim -->
 
-- **Faz:** Repassa a requisição do Worker ao provedor OAuth da origem pública.
-- **Entrada:** `request`: requisição recebida. `env`: variáveis, secrets e bindings do Worker. `ctx`: contexto de execução.
-- **Saída:** Resposta do provedor: endpoints OAuth, `/mcp` ou rotas próprias; 401 no `/mcp` sem token válido.
-- **Efeitos:** Os da biblioteca OAuth (KV OAUTH_KV) e das rotas atendidas (KV, rede, rate limiting, cookies).
-- **Erros:** Lança `TypeError` se `PUBLIC_URL` for inválida; propaga erros não tratados das rotas.
+- **Faz:** Atende uma requisição do Worker.
+- **Entrada:** `request`: requisição. `env`: bindings e secrets. `ctx`: contexto de execução.
+- **Saída:** 429 se o IP passou do limite fora do `/mcp`; senão a resposta do provedor OAuth.
+- **Efeitos:** Binding de rate limiting por IP; os do provedor e das rotas.
+- **Erros:** Propaga os da biblioteca OAuth.
+
+### `clientIpKey`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `clientIpKey(request: Request): string`
+- **Usada por:** `handleGmailWorkerFetch()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a chave do limite público pelo IP do cliente.
+- **Entrada:** `request`: requisição.
+- **Saída:** `ip:<cf-connecting-ip>` ou `ip:unknown`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isMcpPath`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `isMcpPath(request: Request): boolean`
+- **Usada por:** `handleGmailWorkerFetch()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se a rota é o `/mcp` protegido por token.
+- **Entrada:** `request`: requisição.
+- **Saída:** `true` para `/mcp` e subcaminhos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
 
 ## `src/core/pdf.ts`
 
@@ -8156,6 +8189,214 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+## `connectors/gmail/src/accounts.ts`
+
+### `aliasAccounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/accounts.ts`
+- **Assinatura:** `aliasAccounts(accounts: readonly LinkedAccount[]): AccountRef[]`
+- **Usada por:** `ownerRefs()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Dá a cada conta vinculada o apelido usado nas ferramentas.
+- **Entrada:** `accounts`: contas vinculadas do usuário.
+- **Saída:** Lista de `AccountRef`: apelido é a parte antes do `@`, ou o e-mail inteiro quando duas contas a repetem.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `noAccountsError`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/accounts.ts`
+- **Assinatura:** `noAccountsError(): Error`
+- **Usada por:** `resolveAccounts()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o erro de quem ainda não vinculou nenhuma conta.
+- **Entrada:** Nenhuma.
+- **Saída:** `Error` que orienta a usar `link_account`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `accountAlias`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/accounts.ts`
+- **Assinatura:** `accountAlias(email: string): string`
+- **Usada por:** `aliasAccounts()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o apelido de um e-mail: a parte antes do `@`, em minúsculas.
+- **Entrada:** `email`: endereço completo.
+- **Saída:** O apelido (ex.: `musica.nova`).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `resolveAccounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/accounts.ts`
+- **Assinatura:** `resolveAccounts(refs: readonly AccountRef[], requested: string): AccountRef[]`
+- **Usada por:** `resolveOwnerAccounts()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Resolve o parâmetro `account` nas contas do usuário.
+- **Entrada:** `refs`: contas com apelido. `requested`: apelido, e-mail ou `all` (sem diferenciar maiúsculas).
+- **Saída:** Todas as contas para `all`; senão a lista com a conta encontrada.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `noAccountsError()` sem contas; lança erro com os apelidos válidos se nenhuma conta casar.
+
+## `connectors/gmail/src/token-store.ts`
+
+### `ownerKey`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `ownerKey(owner: string): string`
+- **Usada por:** `loadOwnerAccounts()`, `saveOwnerAccounts()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a chave do registro do usuário no KV.
+- **Entrada:** `owner`: usuário (`sub` do Google).
+- **Saída:** `owner:<sha256>`, sem o id em claro.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toLinkedAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `toLinkedAccount(value: unknown): LinkedAccount | null`
+- **Usada por:** `openOwnerAccounts()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um item do selo em conta vinculada.
+- **Entrada:** `value`: item lido do registro.
+- **Saída:** `LinkedAccount` com padrões para campos ausentes; nulo sem e-mail ou refresh token.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `sealOwnerAccounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `sealOwnerAccounts(owner: string, accounts: readonly LinkedAccount[], key: Buffer): string`
+- **Usada por:** `saveOwnerAccounts()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Sela as contas de um usuário para gravar no KV.
+- **Entrada:** `owner`: usuário. `accounts`: contas. `key`: `TOKEN_ENC_KEY`.
+- **Saída:** Selo AES-256-GCM em base64url.
+- **Efeitos:** Nenhum (pura, exceto o IV aleatório).
+- **Erros:** Nenhum.
+
+### `openOwnerAccounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `openOwnerAccounts(sealed: string, key: Buffer, owner: string): LinkedAccount[]`
+- **Usada por:** `loadOwnerAccounts()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Abre o registro do usuário conferindo o dono.
+- **Entrada:** `sealed`: selo do KV. `key`: `TOKEN_ENC_KEY`. `owner`: usuário esperado.
+- **Saída:** Contas válidas; vazio se a chave, o conteúdo ou o dono não conferem.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `loadOwnerAccounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `async loadOwnerAccounts(kv: KvStore, key: Buffer, owner: string): Promise<LinkedAccount[]>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `markAccountRevoked()`, `ownerRefs()`, `storeGoogleAccount()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê as contas vinculadas do usuário.
+- **Entrada:** `kv`: KV. `key`: `TOKEN_ENC_KEY`. `owner`: usuário.
+- **Saída:** Contas do usuário; vazio se ele ainda não vinculou nenhuma.
+- **Efeitos:** KV: uma leitura.
+- **Erros:** Propaga falhas do KV.
+
+### `saveOwnerAccounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `async saveOwnerAccounts(kv: KvStore, key: Buffer, record: { readonly owner: string; readonly accounts: readonly LinkedAccount[] }): Promise<void>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `markAccountRevoked()`, `storeGoogleAccount()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava as contas do usuário no KV.
+- **Entrada:** `kv`: KV. `key`: `TOKEN_ENC_KEY`. `record`: usuário e contas.
+- **Saída:** Nada.
+- **Efeitos:** KV: grava o registro selado, ou apaga quando não sobra conta.
+- **Erros:** Propaga falhas do KV.
+
+### `upsertAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `upsertAccount(accounts: readonly LinkedAccount[], account: LinkedAccount): LinkedAccount[]`
+- **Usada por:** `storeGoogleAccount()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Põe ou troca a conta na lista pelo e-mail.
+- **Entrada:** `accounts`: contas atuais. `account`: conta nova ou renovada.
+- **Saída:** Lista nova com a conta no fim.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se passaria de `MAX_LINKED_ACCOUNTS`.
+
+### `sha256Hex`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `sha256Hex(text: string): string`
+- **Usada por:** `linkRequestKey()`, `ownerKey()`, `redeemLinkTicket()`, `startAccountLink()`, `takeLinkRequest()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula o SHA-256 em hexadecimal.
+- **Entrada:** `text`: texto a resumir.
+- **Saída:** 64 caracteres hexadecimais.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
 ## Dados e constantes
 
 | Nome                        | Arquivo                                    | O que é                                                                                                           |
@@ -8209,8 +8450,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `MAX_ATTACHMENT_BYTES`      | `connectors/gmail/src/attachments.ts`      | Maior anexo lido como texto (5 MB).                                                                               |
 | `MAX_ATTACHMENT_CHARS`      | `connectors/gmail/src/attachments.ts`      | Maior texto devolvido de um anexo.                                                                                |
 | `GMAIL_READONLY_SCOPE`      | `connectors/gmail/src/config.ts`           | Escopo `gmail.readonly`, o único escopo de dados pedido.                                                          |
-| `GMAIL_LINK_SCOPES`         | `connectors/gmail/src/config.ts`           | Escopos do vínculo de conta (`openid email` + Gmail só leitura).                                                  |
-| `SIGN_IN_SCOPES`            | `connectors/gmail/src/config.ts`           | Escopos do login do dono (`openid email`).                                                                        |
 | `MIN_CONSENT_SECRET_CHARS`  | `connectors/gmail/src/config.ts`           | Tamanho mínimo de `CONSENT_SECRET`.                                                                               |
 | `UPSTREAM_USER_AGENT`       | `connectors/gmail/src/context.ts`          | User-Agent enviado ao Google e à Gmail API.                                                                       |
 | `GMAIL_API_BASE`            | `connectors/gmail/src/gmail-api.ts`        | Base da Gmail API para a conta do token.                                                                          |
@@ -8232,8 +8471,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `UNTRUSTED_NOTICE`          | `connectors/gmail/src/message-format.ts`   | Aviso de conteúdo de e-mail não confiável (prompt injection).                                                     |
 | `GOOGLE_ACCOUNTS_ORIGIN`    | `connectors/gmail/src/pages.ts`            | Origem do Google liberada no `form-action` do consentimento.                                                      |
 | `RATE_LIMIT_RETRY_SECONDS`  | `connectors/gmail/src/rate-limit.ts`       | Segundos do `Retry-After` na resposta 429.                                                                        |
-| `LINKED_ACCOUNT_TYP`        | `connectors/gmail/src/token-store.ts`      | Tipo do selo da conta vinculada.                                                                                  |
-| `LINKED_ACCOUNT_EXP`        | `connectors/gmail/src/token-store.ts`      | Validade técnica do selo da conta (ano 2100).                                                                     |
 | `GMAIL_ID`                  | `connectors/gmail/src/tools.ts`            | Esquema zod de id da Gmail API (só caracteres seguros na URL).                                                    |
 | `listAccountsTool`          | `connectors/gmail/src/tools.ts`            | Ferramenta `list_accounts`.                                                                                       |
 | `searchThreadsTool`         | `connectors/gmail/src/tools.ts`            | Ferramenta `search_threads`.                                                                                      |
@@ -8271,3 +8508,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `GITHUB_USER_AGENT`         | `src/remote/github-login.ts`               | User-Agent das chamadas ao GitHub (a API recusa requisições sem ele).                                             |
 | `UPSTREAM_CALLBACK_PATH`    | `src/remote/handler.ts`                    | Caminho do retorno do login delegado (`/oauth/callback`), cadastrado no provedor.                                 |
 | `BRIDGE_RETRY_MS`           | `connectors/whatsapp/src/bridge-client.ts` | Espera entre tentativas enquanto a ponte acorda (750 ms).                                                         |
+| `GMAIL_SCOPES`              | `connectors/gmail/src/config.ts`           | Escopos do login e do vínculo (`openid email` + Gmail só leitura).                                                |
+| `GOOGLE_REVOKE_URL`         | `connectors/gmail/src/google-oauth.ts`     | Endpoint de revogação de tokens do Google.                                                                        |
+| `LINK_TICKET_TYP`           | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do ticket de vínculo emitido por `link_account`.                                                     |
+| `OWNER_RECORD_TYP`          | `connectors/gmail/src/token-store.ts`      | Tipo do selo do registro de contas de um usuário.                                                                 |
+| `OWNER_RECORD_EXP`          | `connectors/gmail/src/token-store.ts`      | Validade técnica do selo do registro (ano 2100).                                                                  |
+| `MAX_LINKED_ACCOUNTS`       | `connectors/gmail/src/token-store.ts`      | Mais contas Gmail que um usuário pode vincular (10).                                                              |
+| `linkAccountTool`           | `connectors/gmail/src/tools.ts`            | Ferramenta `link_account`.                                                                                        |
+| `unlinkAccountTool`         | `connectors/gmail/src/tools.ts`            | Ferramenta `unlink_account`.                                                                                      |

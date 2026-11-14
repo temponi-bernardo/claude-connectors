@@ -1,6 +1,6 @@
 {
   "name": "gmail",
-  "description": "Gmail multi-conta, só leitura, direto da nuvem: busca, conversas, rótulos e texto de anexos. Entre com o Google na primeira vez e vincule cada conta em /accounts/link.",
+  "description": "Gmail de várias contas, só leitura, direto da nuvem: busca, conversas, rótulos e texto de anexos. Entre com o Google na primeira vez; peça ao Claude um link para vincular mais contas.",
   "author": {
     "name": "Bernardo Temponi"
   },

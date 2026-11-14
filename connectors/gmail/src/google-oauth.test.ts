@@ -10,6 +10,7 @@ import {
   postGoogleToken,
   randomToken,
   refreshGoogleToken,
+  revokeGoogleToken,
 } from './google-oauth.js';
 
 const BASE = {
@@ -109,5 +110,19 @@ describe('chamadas ao endpoint de tokens', () => {
     expect(seen[0]?.get('code_verifier')).toBe('ver-1');
     expect(seen[0]?.get('redirect_uri')).toBe('https://gmail.test/google/callback');
     expect((await refreshGoogleToken(deps, 'r1')).accessToken).toBe('access-r1');
+  });
+});
+
+describe('revokeGoogleToken', () => {
+  it('manda o token ao endpoint de revogação e diz se o Google confirmou', async () => {
+    const calls: RecordedCall[] = [];
+    const ok = testDeps(fakeFetch([() => new Response('')], calls));
+    expect(await revokeGoogleToken(ok, 'r1')).toBe(true);
+    expect(calls[0]?.url).toBe('https://oauth2.googleapis.com/revoke');
+    expect(new URLSearchParams(calls[0]?.init?.body as string).get('token')).toBe('r1');
+    const refused = testDeps(() => Promise.resolve(new Response('', { status: 400 })));
+    expect(await revokeGoogleToken(refused, 'r1')).toBe(false);
+    const offline = testDeps(() => Promise.reject(new Error('rede')));
+    expect(await revokeGoogleToken(offline, 'r1')).toBe(false);
   });
 });

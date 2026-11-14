@@ -12,9 +12,9 @@ import {
   validIdToken,
 } from './fixtures/fake-google.js';
 import { authorizationErrorResponse } from './sign-in.js';
-import { saveLinkedAccount } from './token-store.js';
 import {
   checkClientRegistration,
+  clientIpKey,
   configErrorResponse,
   createGmailDeps,
   createGmailProvider,
@@ -22,6 +22,7 @@ import {
   handleDefaultRequest,
   handleGmailWorkerFetch,
   handleMcpApi,
+  isMcpPath,
   publicOrigin,
   type GmailWorkerEnv,
 } from './worker.js';
@@ -33,7 +34,6 @@ const SECRETS = {
   GOOGLE_CLIENT_ID: 'client-123.apps.googleusercontent.com',
   GOOGLE_CLIENT_SECRET: 'segredo',
   TOKEN_ENC_KEY: TEST_TOKEN_KEY.toString('base64'),
-  ALLOWED_EMAILS: 'dono@example.com,musica@example.com',
   CONSENT_SECRET: 's'.repeat(40),
 };
 
@@ -75,7 +75,12 @@ function stubGoogle(email: string, routes: Parameters<typeof fakeFetch>[0] = [])
     'fetch',
     fakeFetch([
       tokenRoute(() =>
-        Response.json({ access_token: 'a', id_token: validIdToken(email, state.nonce, { exp }) }),
+        Response.json({
+          access_token: 'a',
+          refresh_token: `r-${email.slice(0, email.indexOf('@'))}`,
+          scope: 'openid email https://www.googleapis.com/auth/gmail.readonly',
+          id_token: validIdToken(email, state.nonce, { exp }),
+        }),
       ),
       ...routes,
     ]),
@@ -168,6 +173,22 @@ function mcpCall(browser: Browser, token: string, body: unknown): Promise<Respon
   });
 }
 
+/** Chama uma ferramenta pelo `/mcp` e devolve o texto do primeiro bloco do resultado. */
+async function toolText(
+  browser: Browser,
+  token: string,
+  [name, args]: [string, Record<string, unknown>],
+): Promise<string> {
+  const call = await mcpCall(browser, token, {
+    jsonrpc: '2.0',
+    id: 2,
+    method: 'tools/call',
+    params: { name, arguments: args },
+  });
+  const body = (await call.json()) as { result: { content: { text: string }[] } };
+  return body.result.content[0]?.text ?? '';
+}
+
 beforeEach(() => {
   clearAccessTokenCache();
 });
@@ -211,7 +232,7 @@ describe('rotas básicas e descoberta', () => {
   });
 });
 
-describe('login do dono e /mcp', () => {
+describe('login de quem instalou e /mcp', () => {
   it('faz o fluxo completo e lista as ferramentas', async () => {
     const browser = new Browser(workerEnv());
     const token = await signIn(browser);
@@ -221,30 +242,45 @@ describe('login do dono e /mcp', () => {
     expect(body.result.tools.map((t) => t.name)).toContain('get_attachment_text');
   });
 
-  it('a ferramenta usa a conta vinculada no KV', async () => {
+  it('a conta do login já fica vinculada e responde às ferramentas', async () => {
+    const browser = new Browser(workerEnv());
+    const token = await signIn(browser);
+    const text = await toolText(browser, token, ['list_labels', { account: 'dono' }]);
+    expect(JSON.parse(text)).toEqual({ results: [{ account: 'dono', labels: [] }] });
+  });
+
+  it('cada usuário só vê as próprias contas', async () => {
+    const env = workerEnv();
+    const ana = await signIn(new Browser(env), 'ana@example.com');
+    const bia = await signIn(new Browser(env), 'bia@example.com');
+    const anaAccounts = JSON.parse(
+      await toolText(new Browser(env), ana, ['list_accounts', {}]),
+    ) as {
+      accounts: { account: string }[];
+    };
+    expect(anaAccounts.accounts.map((a) => a.account)).toEqual(['ana']);
+    const biaCall = await toolText(new Browser(env), bia, ['list_labels', { account: 'ana' }]);
+    expect(biaCall).toMatch(/não vinculada/);
+  });
+
+  it('link_account gera link que leva ao Google com acesso offline', async () => {
     const env = workerEnv();
     const browser = new Browser(env);
     const token = await signIn(browser);
-    await saveLinkedAccount(env.GMAIL_KV, TEST_TOKEN_KEY, {
-      email: 'dono@example.com',
-      refreshToken: 'r',
-      scope: '',
-      linkedAt: 'x',
-      status: 'active',
-    });
-    const call = await mcpCall(browser, token, {
-      jsonrpc: '2.0',
-      id: 2,
-      method: 'tools/call',
-      params: { name: 'list_labels', arguments: { account: 'dono' } },
-    });
-    const text = ((await call.json()) as { result: { content: { text: string }[] } }).result
-      .content[0]?.text;
-    expect(JSON.parse(text ?? '{}')).toEqual({ results: [{ account: 'dono', labels: [] }] });
+    const { link_url } = JSON.parse(await toolText(browser, token, ['link_account', {}])) as {
+      link_url: string;
+    };
+    const response = await browser.fetch(new URL(link_url).pathname + new URL(link_url).search);
+    const google = new URL(response.headers.get('location') ?? '');
+    expect(google.searchParams.get('access_type')).toBe('offline');
+    const back = await browser.fetch(
+      `/google/callback?state=${google.searchParams.get('state') ?? ''}&error=access_denied`,
+    );
+    expect(await back.text()).toContain('Vínculo cancelado');
   });
 
-  it('e-mail fora da allowlist recebe 403 e nenhum código', async () => {
-    const browser = new Browser(workerEnv());
+  it('no modo privado, e-mail fora de ALLOWED_EMAILS recebe 403 e nenhum código', async () => {
+    const browser = new Browser(workerEnv({ ALLOWED_EMAILS: 'dono@example.com' }));
     const holder = stubGoogle('intruso@example.com');
     const clientId = await register(browser);
     const callback = await googleCallback(browser, await approve(browser, clientId, holder));
@@ -314,29 +350,38 @@ describe('login do dono e /mcp', () => {
   });
 });
 
-describe('vínculo de conta pela rota', () => {
-  it('/accounts/link redireciona ao Google com acesso offline', async () => {
-    const browser = new Browser(workerEnv());
-    const response = await browser.fetch('/accounts/link');
-    expect(new URL(response.headers.get('location') ?? '').searchParams.get('access_type')).toBe(
-      'offline',
-    );
-    const state = new URL(response.headers.get('location') ?? '').searchParams.get('state') ?? '';
-    const back = await browser.fetch(`/google/callback?state=${state}&error=access_denied`);
-    expect(await back.text()).toContain('Vínculo cancelado');
+describe('rotas públicas', () => {
+  it('/accounts/link sem ticket mostra link inválido', async () => {
+    const response = await new Browser(workerEnv()).fetch('/accounts/link');
+    expect(response.status).toBe(400);
+  });
+
+  it('limita por IP as rotas sem token, mas não o /mcp', async () => {
+    const browser = new Browser(workerEnv({ RATE_LIMITER_PUBLIC: countingLimiter(1) }));
+    expect((await browser.fetch('/')).status).toBe(200);
+    expect((await browser.fetch('/')).status).toBe(429);
+    expect((await browser.fetch('/mcp', { method: 'POST' })).status).toBe(401);
+  });
+
+  it('clientIpKey e isMcpPath', () => {
+    const request = new Request(`${ORIGIN}/mcp/x`, { headers: { 'cf-connecting-ip': '1.2.3.4' } });
+    expect(clientIpKey(request)).toBe('ip:1.2.3.4');
+    expect(clientIpKey(new Request(ORIGIN))).toBe('ip:unknown');
+    expect(isMcpPath(request)).toBe(true);
+    expect(isMcpPath(new Request(`${ORIGIN}/mcpx`))).toBe(false);
   });
 });
 
 describe('configuração e peças do Worker', () => {
   it('secret ausente vira 500 explicando qual falta', async () => {
     const env = workerEnv({ GOOGLE_CLIENT_ID: undefined });
-    const response = await new Browser(env).fetch('/accounts/link');
+    const response = await new Browser(env).fetch('/authorize');
     expect(response.status).toBe(500);
     expect(await response.text()).toContain('GOOGLE_CLIENT_ID');
     const ctx = {
       waitUntil: () => undefined,
       passThroughOnException: () => undefined,
-      props: { sid: 's' },
+      props: { sid: 's', owner: 'o' },
     };
     const mcp = await handleMcpApi(new Request(`${ORIGIN}/mcp`), env, ctx);
     expect(mcp.status).toBe(500);
@@ -352,9 +397,9 @@ describe('configuração e peças do Worker', () => {
 
   it('createGmailDeps e createGmailServer montam o conector', () => {
     const deps = createGmailDeps(workerEnv(), ORIGIN);
-    expect(deps.settings.accounts).toHaveLength(2);
+    expect(deps.settings.allowedEmails).toBeNull();
     expect(deps.now()).toBeGreaterThan(0);
-    expect(createGmailServer(deps)).toBeDefined();
+    expect(createGmailServer({ ...deps, owner: 'o' })).toBeDefined();
     expect(createGmailProvider(ORIGIN)).toBeDefined();
   });
 

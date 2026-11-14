@@ -13,7 +13,7 @@ workers_dev = true
 binding = "OAUTH_KV"
 id = "00000000000000000000000000000001"
 
-# Contas Gmail vinculadas (refresh tokens selados com AES-256-GCM) e pedidos de vínculo.
+# Contas Gmail vinculadas por usuário (refresh tokens selados com AES-256-GCM), pedidos e tickets de vínculo.
 # Troque o id pelo de `npx wrangler kv namespace create GMAIL_KV`.
 [[kv_namespaces]]
 binding = "GMAIL_KV"
@@ -26,6 +26,16 @@ namespace_id = "2401"
 
   [ratelimits.simple]
   limit = 120
+  period = 60
+
+# Limite por IP nas rotas sem token (registro, login, vínculo, /token): 30 requisições por minuto.
+# Barra abuso de quem não tem conta, sem custo de KV (o conector é público).
+[[ratelimits]]
+name = "RATE_LIMITER_PUBLIC"
+namespace_id = "2402"
+
+  [ratelimits.simple]
+  limit = 30
   period = 60
 
 # PUBLIC_URL (opcional): URL canônica do Worker. Sem ela, vale a origem da requisição (*.workers.dev).

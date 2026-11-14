@@ -74,7 +74,7 @@ O plugin tem só `.claude-plugin/plugin.json` e `.mcp.json` (servidor `http` com
 | GitHub Pages               | Site público (início, privacidade, termos) | `docs/_config.yml`, `docs/_layouts/site.html`          | Nenhum (ADR 0012)                                                |
 | Google OAuth / OIDC        | Login do dono e vínculo de contas          | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`  | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (secrets do Worker)   |
 | Gmail API (só leitura)     | Buscar e ler e-mails e anexos              | `connectors/gmail/src/gmail-api.ts`                    | Refresh token selado no KV com `TOKEN_ENC_KEY`                   |
-| Workers KV / rate limit    | Grants OAuth, contas e limite (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`, `ALLOWED_EMAILS` (secrets do Worker)           |
+| Workers KV / rate limit    | Grants OAuth, contas e limite (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`; `ALLOWED_EMAILS` opcional (modo privado)       |
 | GitHub OAuth App           | Login do dono (WhatsApp)                   | `src/remote/github-login.ts`                           | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `ALLOWED_EMAILS`     |
 | Cloudflare Containers + DO | Ponte do WhatsApp sob demanda              | `connectors/whatsapp/src/container.ts`, `lifecycle.ts` | `BRIDGE_TOKEN` (Worker ↔ ponte)                                  |
 | Cloudflare R2              | Backup cifrado da sessão (WhatsApp)        | `connectors/whatsapp/src/snapshots.ts`                 | `SNAPSHOT_KEY` (só no container)                                 |

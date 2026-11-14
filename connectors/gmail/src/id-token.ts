@@ -25,6 +25,12 @@ export interface DecodedJwt {
   readonly signature: Uint8Array<ArrayBuffer>;
 }
 
+/** Identidade confirmada pelo `id_token`: id estável (`sub`) e e-mail verificado. */
+export interface GoogleIdentity {
+  readonly sub: string;
+  readonly email: string;
+}
+
 /** O que o `id_token` precisa conferir. */
 export interface IdTokenExpectation {
   readonly clientId: string;
@@ -65,18 +71,19 @@ export function idTokenProblems(
     ['validade', exp + CLOCK_SKEW_SECONDS > expected.now],
     ['nonce', payload.nonce === expected.nonce],
     ['e-mail verificado', payload.email_verified === true && typeof payload.email === 'string'],
+    ['sub', typeof payload.sub === 'string' && payload.sub.length > 0],
   ];
   return checks.filter(([, ok]) => !ok).map(([name]) => name);
 }
 
-/** Confere emissor, audiência, validade, `nonce` e e-mail verificado; devolve o e-mail em minúsculas. */
+/** Confere emissor, audiência, validade, `nonce`, `sub` e e-mail verificado; devolve a identidade. */
 export function checkIdTokenClaims(
   payload: Readonly<Record<string, unknown>>,
   expected: IdTokenExpectation,
-): string {
+): GoogleIdentity {
   const problems = idTokenProblems(payload, expected);
   if (problems.length > 0) throw new Error(`id_token do Google inválido (${problems.join(', ')}).`);
-  return String(payload.email).toLowerCase();
+  return { sub: String(payload.sub), email: String(payload.email).toLowerCase() };
 }
 
 /** Busca a chave pública do Google com o `kid` dado; lança erro se não existir. */
@@ -111,12 +118,12 @@ export async function verifyRs256(jwt: DecodedJwt, jwk: webcrypto.JsonWebKey): P
   );
 }
 
-/** Valida o `id_token` do Google (assinatura e claims) e devolve o e-mail verificado. */
+/** Valida o `id_token` do Google (assinatura e claims) e devolve a identidade verificada. */
 export async function verifyGoogleIdToken(
   deps: GmailDeps,
   idToken: string,
   nonce: string,
-): Promise<string> {
+): Promise<GoogleIdentity> {
   const jwt = decodeJwt(idToken);
   if (jwt.header.alg !== 'RS256') throw new Error('id_token do Google com algoritmo inesperado.');
   const jwk = await fetchGoogleKey(deps, String(jwt.header.kid));

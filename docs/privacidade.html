@@ -9,9 +9,9 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
 
 <p>
   Esta política vale para os conectores do projeto Claude Connectors, mantido por Bernardo Temponi,
-  hoje o conector <strong>Canvas PUC Minas</strong>. Ele roda só na nuvem e é usado pelo plugin do
-  marketplace ou como conector personalizado no claude.ai, no Cowork, no app do celular e no Claude
-  Code.
+  hoje os conectores <strong>Canvas PUC Minas</strong> e <strong>Gmail</strong>. Eles rodam só na
+  nuvem e são usados pelo plugin do marketplace ou como conector personalizado no claude.ai, no
+  Cowork, no app do celular e no Claude Code.
 </p>
 
 <h2>Que dados são acessados</h2>
@@ -21,6 +21,31 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
   acessa nenhum outro sistema e não vê dados de outras pessoas além do que a sua conta já pode ver
   no Canvas.
 </p>
+
+<h2>Gmail</h2>
+<ul>
+  <li>
+    <strong>O que é lido:</strong> só leitura (escopo <code>gmail.readonly</code>) das contas Gmail
+    que você mesmo vincula: busca, conversas, mensagens, rótulos e o texto de anexos, só quando você
+    pede algo ao Claude. O conector não envia, apaga nem altera e-mails.
+  </li>
+  <li>
+    <strong>O que é guardado:</strong> por pessoa que usa o conector, o identificador da conta
+    Google usada no login e, para cada conta Gmail vinculada, o e-mail e o refresh token do Google,
+    cifrados com AES-256-GCM no Cloudflare Workers KV. O conteúdo dos e-mails não é gravado: ele vai
+    direto do Google para a conversa.
+  </li>
+  <li><strong>Isolamento:</strong> cada pessoa só vê as contas que ela vinculou.</li>
+  <li>
+    <strong>Uso Limitado:</strong> o uso e a transferência de informações recebidas das APIs do
+    Google seguem a
+    <a href="https://developers.google.com/terms/api-services-user-data-policy"
+      >Política de Dados do Usuário dos Serviços de API do Google</a
+    >, incluindo os requisitos de Uso Limitado. Os dados do Gmail só servem para responder ao que
+    você pede ao Claude; não são vendidos, não alimentam anúncios nem treinamento de modelos e não
+    são lidos por pessoas.
+  </li>
+</ul>
 
 <h2>Credenciais</h2>
 <ul>
@@ -40,6 +65,10 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
   <li>
     <strong>Canvas (Instructure / PUC Minas):</strong> recebe as chamadas feitas em seu nome, como
     no site.
+  </li>
+  <li>
+    <strong>Google (Gmail):</strong> recebe as chamadas de leitura feitas em seu nome e o login com
+    a sua conta Google.
   </li>
   <li>
     <strong>Anthropic (Claude):</strong> recebe o resultado de cada ferramenta que você usa na
@@ -69,8 +98,13 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
 
 <h2>Como apagar seus dados</h2>
 <p>
-  Remova o conector (ou o plugin) no Claude e apague o token em Canvas → Conta → Configurações. Sem
-  o token, o acesso guardado pelo Claude deixa de funcionar.
+  Canvas: remova o conector (ou o plugin) no Claude e apague o token em Canvas → Conta →
+  Configurações. Sem o token, o acesso guardado pelo Claude deixa de funcionar.
+</p>
+<p>
+  Gmail: peça ao Claude para desvincular a conta (ferramenta <code>unlink_account</code>), que apaga
+  o token guardado e revoga o acesso no Google. Você também pode revogar a qualquer momento em
+  <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.
 </p>
 
 <h2>Mudanças e contato</h2>

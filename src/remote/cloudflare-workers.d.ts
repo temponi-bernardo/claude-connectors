@@ -1,7 +1,8 @@
 /**
- * Tipos mínimos do runtime do Cloudflare Workers usados pelo conector WhatsApp. O projeto não carrega
- * `@cloudflare/workers-types` (conflita com os tipos globais do Node usados nos testes); estes cobrem só o que o
- * `Container` de `@cloudflare/containers` e o nosso Durable Object usam.
+ * Tipos mínimos do runtime do Cloudflare Workers, um só arquivo para todos os conectores. O projeto não carrega
+ * `@cloudflare/workers-types` (conflita com os tipos globais do Node usados nos testes); estes cobrem o que usam
+ * o `Container` de `@cloudflare/containers` e o Durable Object do WhatsApp, e as declarações de
+ * `@cloudflare/workers-oauth-provider` usadas pelo Gmail (ADR 0014).
  */
 declare module 'cloudflare:workers' {
   /** Armazenamento transacional do Durable Object (subconjunto). */
@@ -25,11 +26,30 @@ declare module 'cloudflare:workers' {
   }
 
   /** Classe base de entrypoint de Worker. */
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   export abstract class WorkerEntrypoint<Env = unknown, Props = unknown> {
+    protected readonly ctx: ExecutionContext<Props>;
     protected readonly env: Env;
     protected readonly props: Props;
+    constructor(ctx: ExecutionContext<Props>, env: Env);
+    fetch?(request: Request): Response | Promise<Response>;
   }
+}
+
+/** Contexto de execução de uma requisição do Worker (`props` vem do OAuth). */
+interface ExecutionContext<Props = unknown> {
+  waitUntil(promise: Promise<unknown>): void;
+  passThroughOnException(): void;
+  readonly props: Props;
+}
+
+/** Handler exportado de um Worker (só `fetch`). */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- mesma aridade do tipo oficial
+interface ExportedHandler<Env = unknown, Queue = unknown, Cf = unknown, Props = unknown> {
+  fetch?: (
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext<Props>,
+  ) => Response | Promise<Response>;
 }
 
 declare namespace Cloudflare {

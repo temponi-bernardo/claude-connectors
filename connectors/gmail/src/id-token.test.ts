@@ -20,6 +20,7 @@ const GOOD = {
   nonce: 'n1',
   email: 'Dono@Example.com',
   email_verified: true,
+  sub: 's1',
 };
 const otherKey = generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey;
 
@@ -41,9 +42,9 @@ describe('decodificação do JWT', () => {
 describe('claims do id_token', () => {
   it('aceita claims corretas e devolve o e-mail em minúsculas', () => {
     expect(idTokenProblems(GOOD, EXPECT)).toEqual([]);
-    expect(checkIdTokenClaims(GOOD, EXPECT)).toBe('dono@example.com');
+    expect(checkIdTokenClaims(GOOD, EXPECT)).toEqual({ sub: 's1', email: 'dono@example.com' });
     const shortIss = { ...GOOD, iss: 'accounts.google.com' };
-    expect(checkIdTokenClaims(shortIss, EXPECT)).toBe('dono@example.com');
+    expect(checkIdTokenClaims(shortIss, EXPECT).email).toBe('dono@example.com');
   });
 
   it('aponta cada problema', () => {
@@ -60,6 +61,7 @@ describe('claims do id_token', () => {
       'validade',
       'nonce',
       'e-mail verificado',
+      'sub',
     ]);
     expect(idTokenProblems({ ...GOOD, exp: 'x' }, EXPECT)).toEqual(['validade']);
     const noEmail = { ...GOOD, email: undefined };
@@ -85,7 +87,10 @@ describe('assinatura', () => {
   it('verifyGoogleIdToken valida tudo e recusa algoritmo, assinatura ou nonce errados', async () => {
     const deps = testDeps(fakeFetch([]));
     const token = validIdToken('dono@example.com', 'n1');
-    expect(await verifyGoogleIdToken(deps, token, 'n1')).toBe('dono@example.com');
+    expect(await verifyGoogleIdToken(deps, token, 'n1')).toEqual({
+      sub: 'sub-dono@example.com',
+      email: 'dono@example.com',
+    });
     const none = signJwt(GOOD, { alg: 'none' });
     await expect(verifyGoogleIdToken(deps, none, 'n1')).rejects.toThrow(/algoritmo/);
     const forged = signJwt(GOOD, undefined, otherKey);

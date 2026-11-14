@@ -1,30 +1,23 @@
 import { describe, expect, it } from 'vitest';
 import {
-  accountAlias,
-  findAllowedAccount,
   isEmailAddress,
+  isEmailAllowed,
   parseAllowedEmails,
   readConsentSecret,
   readGmailSettings,
   requiredSecret,
-  resolveAccounts,
 } from './config.js';
-import { TEST_ACCOUNTS } from './fixtures/fake-google.js';
+import { TEST_SETTINGS } from './fixtures/fake-google.js';
 
 const KEY = Buffer.alloc(32, 1).toString('base64');
 const ENV = {
   GOOGLE_CLIENT_ID: 'id',
   GOOGLE_CLIENT_SECRET: 'secret',
   TOKEN_ENC_KEY: KEY,
-  ALLOWED_EMAILS: ' Dono@Example.com , musica@example.com ',
   CONSENT_SECRET: 'x'.repeat(32),
 };
 
-describe('accountAlias e isEmailAddress', () => {
-  it('usa a parte antes do @ em minúsculas', () => {
-    expect(accountAlias('Musica.Nova@example.com')).toBe('musica.nova');
-  });
-
+describe('isEmailAddress', () => {
   it('reconhece e-mails simples', () => {
     expect(isEmailAddress('a@b.co')).toBe(true);
     expect(isEmailAddress('a b@c.d')).toBe(false);
@@ -33,19 +26,17 @@ describe('accountAlias e isEmailAddress', () => {
 });
 
 describe('parseAllowedEmails', () => {
-  it('normaliza e gera apelidos', () => {
-    expect(parseAllowedEmails(ENV.ALLOWED_EMAILS)).toEqual(TEST_ACCOUNTS);
+  it('sem valor é modo público (nulo)', () => {
+    expect(parseAllowedEmails(null)).toBeNull();
+    expect(parseAllowedEmails(' , ')).toBeNull();
   });
 
-  it('exige ao menos um e-mail válido', () => {
-    expect(() => parseAllowedEmails(null)).toThrow(/ALLOWED_EMAILS/);
-    expect(() => parseAllowedEmails(' , ')).toThrow(/ALLOWED_EMAILS/);
+  it('normaliza a lista do modo privado e recusa item inválido', () => {
+    expect(parseAllowedEmails(' Dono@Example.com , musica@example.com ')).toEqual([
+      'dono@example.com',
+      'musica@example.com',
+    ]);
     expect(() => parseAllowedEmails('nao-e-email')).toThrow(/não é e-mail/);
-  });
-
-  it('recusa apelidos repetidos ou "all"', () => {
-    expect(() => parseAllowedEmails('a@x.com,a@y.com')).toThrow(/única/);
-    expect(() => parseAllowedEmails('all@x.com')).toThrow(/all/);
   });
 });
 
@@ -62,23 +53,21 @@ describe('secrets', () => {
     expect(() => readConsentSecret({ CONSENT_SECRET: 'curto' })).toThrow(/32/);
   });
 
-  it('readGmailSettings monta tudo e valida a chave de cifra', () => {
+  it('readGmailSettings funciona sem ALLOWED_EMAILS e valida a chave de cifra', () => {
     const settings = readGmailSettings(ENV);
-    expect(settings.accounts).toEqual(TEST_ACCOUNTS);
+    expect(settings.allowedEmails).toBeNull();
     expect(settings.tokenKey.length).toBe(32);
+    const restricted = readGmailSettings({ ...ENV, ALLOWED_EMAILS: 'a@b.co' });
+    expect(restricted.allowedEmails).toEqual(['a@b.co']);
     expect(() => readGmailSettings({ ...ENV, TOKEN_ENC_KEY: 'YQ==' })).toThrow(/TOKEN_ENC_KEY/);
   });
 });
 
-describe('findAllowedAccount e resolveAccounts', () => {
-  it('acha a conta pelo e-mail sem diferenciar maiúsculas', () => {
-    expect(findAllowedAccount(TEST_ACCOUNTS, 'DONO@example.com')?.alias).toBe('dono');
-    expect(findAllowedAccount(TEST_ACCOUNTS, 'outro@gmail.com')).toBeNull();
-  });
-
-  it('resolve "all", um apelido ou explica os válidos', () => {
-    expect(resolveAccounts(TEST_ACCOUNTS, 'all')).toHaveLength(2);
-    expect(resolveAccounts(TEST_ACCOUNTS, ' Musica ')).toEqual([TEST_ACCOUNTS[1]]);
-    expect(() => resolveAccounts(TEST_ACCOUNTS, 'x')).toThrow(/"dono", "musica", "all"/);
+describe('isEmailAllowed', () => {
+  it('libera qualquer conta no modo público e só as listadas no privado', () => {
+    expect(isEmailAllowed(TEST_SETTINGS, 'qualquer@example.com')).toBe(true);
+    const restricted = { ...TEST_SETTINGS, allowedEmails: ['dono@example.com'] };
+    expect(isEmailAllowed(restricted, 'DONO@example.com')).toBe(true);
+    expect(isEmailAllowed(restricted, 'outro@example.com')).toBe(false);
   });
 });
