@@ -1,0 +1,36 @@
+# Conector Gmail remoto (multi-conta, só leitura) no Cloudflare Workers (ADR 0014).
+# Sob demanda: sem Containers, Cron Triggers, alarms de Durable Object ou polling. Estado só no Workers KV.
+# Passo a passo do deploy e dos secrets em connectors/gmail/README.md.
+name = "gmail-remote"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+# Tokens, clientes e grants OAuth do Claude (gerenciados por @cloudflare/workers-oauth-provider).
+# Troque o id pelo de `npx wrangler kv namespace create OAUTH_KV`.
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "00000000000000000000000000000001"
+
+# Contas Gmail vinculadas (refresh tokens selados com AES-256-GCM) e pedidos de vínculo.
+# Troque o id pelo de `npx wrangler kv namespace create GMAIL_KV`.
+[[kv_namespaces]]
+binding = "GMAIL_KV"
+id = "00000000000000000000000000000002"
+
+# Limite simples por sessão OAuth no /mcp: 120 requisições por minuto.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "2401"
+
+  [ratelimits.simple]
+  limit = 120
+  period = 60
+
+# PUBLIC_URL (opcional): URL canônica do Worker. Sem ela, vale a origem da requisição (*.workers.dev).
+# [vars]
+# PUBLIC_URL = "https://gmail-remote.<sua-conta>.workers.dev"
+
+[observability]
+enabled = true

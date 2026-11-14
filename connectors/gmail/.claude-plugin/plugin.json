@@ -1,0 +1,9 @@
+{
+  "name": "gmail",
+  "description": "Gmail multi-conta, só leitura, direto da nuvem: busca, conversas, rótulos e texto de anexos. Entre com o Google na primeira vez e vincule cada conta em /accounts/link.",
+  "author": {
+    "name": "Bernardo Temponi"
+  },
+  "homepage": "https://temponi-bernardo.github.io/claude-connectors/",
+  "repository": "https://github.com/temponi-bernardo/claude-connectors"
+}

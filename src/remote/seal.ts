@@ -23,15 +23,15 @@ export interface SealExpectation {
   readonly now: number;
 }
 
-/** Decodifica a chave do servidor (base64 ou base64url) e exige 32 bytes. */
-export function parseSealKey(raw: string | null): Buffer {
+/** Decodifica uma chave de selo (base64 ou base64url) e exige 32 bytes; `name` é a variável, para o erro. */
+export function parseSealKey(raw: string | null, name = 'SEAL_KEY'): Buffer {
   if (!raw) {
     throw new Error(
-      'Defina SEAL_KEY com 32 bytes aleatórios em base64: `node -e "console.log(crypto.randomBytes(32).toString(\'base64\'))"`.',
+      `Defina ${name} com 32 bytes aleatórios em base64: \`node -e "console.log(crypto.randomBytes(32).toString('base64'))"\`.`,
     );
   }
   const key = Buffer.from(raw, 'base64');
-  if (key.length !== SEAL_KEY_BYTES) throw new Error('SEAL_KEY precisa ter 32 bytes em base64.');
+  if (key.length !== SEAL_KEY_BYTES) throw new Error(`${name} precisa ter 32 bytes em base64.`);
   return key;
 }
 

@@ -2,8 +2,7 @@
 
 ## Próxima tarefa
 
-**F3.2 — Publicar o WhatsApp na conta do dono e parear o número** (guia em `connectors/whatsapp/README.md`).
-Depois, F2.1 (primeira release `v0.1.0`).
+**F2.1 — Primeira release `v0.1.0`** do conector remoto (skill `/lancar-versao`).
 
 ## Como ler
 
@@ -13,7 +12,7 @@ a "Próxima tarefa". Formato das linhas: [DOCUMENTATION.md](DOCUMENTATION.md#est
 
 ## MVP
 
-O MVP é o conector do Canvas instalado como extensão e usado no dia a dia: **Fases 1 e 2**.
+O MVP é o conector do Canvas instalado pelo marketplace e usado no dia a dia, sem nada local: **Fases 1 e 2**.
 
 ## Fase 0 — Fundação (template) ✅
 
@@ -34,24 +33,27 @@ O MVP é o conector do Canvas instalado como extensão e usado no dia a dia: **F
 
 ## Fase 2 — Uso real
 
-| Id   | Tarefa                                                                 | Estado | Pronto quando                                                                          |
-| ---- | ---------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------- |
-| F2.1 | Primeira release `v0.1.0` com o `.mcpb` anexado                        | ⬜     | Rascunho de release com `canvas-puc-1.3.0.mcpb`                                        |
-| F2.2 | Instalar pelo marketplace e aposentar `Documents/canvas-mcp`           | ⬜     | Extensão ativa; registro antigo no Claude Code trocado pelo do repo                    |
-| F2.3 | Escolher e esboçar o próximo conector (PRODUCT Q4)                     | ⬜     | Pergunta Q4 decidida e tarefas da Fase 3 escritas                                      |
-| F2.4 | Avaliar a migração para zod 4 (Dependabot ignora majors do zod até lá) | ⬜     | Conector testado com zod 4 e regra de ignore removida, ou ADR dizendo por que não      |
-| F2.5 | Avaliar TypeScript 7 (Dependabot ignora majors do TS até lá)           | ⬜     | `npm run check` verde com TS 7 e regra de ignore removida, ou ADR dizendo por que não  |
-| F2.6 | Conector remoto do Canvas: HTTP + OAuth com token (ADR 0009)           | ✅     | `server/remote.js` faz o OAuth completo e responde as ferramentas; Dockerfile e Render |
-| F2.7 | Conector remoto no Cloudflare Workers e conectado no claude.ai         | ✅     | Worker no ar e `proximas_entregas` respondendo numa sessão do Cowork (ADR 0010)        |
-| F2.8 | Renovação automática do token do Canvas no refresh do OAuth            | ✅     | Refresh do OAuth estende a validade do token na PUC (ADR 0011)                         |
+| Id    | Tarefa                                                                 | Estado | Pronto quando                                                                            |
+| ----- | ---------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| F2.1  | Primeira release `v0.1.0` do conector remoto                           | ⬜     | Tag e notas da `v0.1.0` publicadas, sem anexo (ADR 0013)                                 |
+| F2.2  | Instalar pelo marketplace e aposentar `Documents/canvas-mcp`           | ⬜     | Plugin instalado pelo marketplace conecta por OAuth; registro antigo e `.mcpb` removidos |
+| F2.3  | Escolher e esboçar o próximo conector (PRODUCT Q4)                     | ⬜     | Pergunta Q4 decidida e tarefas da Fase 3 escritas                                        |
+| F2.4  | Avaliar a migração para zod 4 (Dependabot ignora majors do zod até lá) | ⬜     | Conector testado com zod 4 e regra de ignore removida, ou ADR dizendo por que não        |
+| F2.5  | Avaliar TypeScript 7 (Dependabot ignora majors do TS até lá)           | ⬜     | `npm run check` verde com TS 7 e regra de ignore removida, ou ADR dizendo por que não    |
+| F2.6  | Conector remoto do Canvas: HTTP + OAuth com token (ADR 0009)           | ✅     | `server/remote.js` faz o OAuth completo e responde as ferramentas; Dockerfile e Render   |
+| F2.7  | Conector remoto no Cloudflare Workers e conectado no claude.ai         | ✅     | Worker no ar e `proximas_entregas` respondendo numa sessão do Cowork (ADR 0010)          |
+| F2.8  | Renovação automática do token do Canvas no refresh do OAuth            | ✅     | Refresh do OAuth estende a validade do token na PUC (ADR 0011)                           |
+| F2.9  | Site público no GitHub Pages: início, privacidade e termos (ADR 0012)  | ✅     | Páginas em `docs/` montadas pelo Jekyll, sem os `.md` internos; manifesto aponta o site  |
+| F2.10 | Remover o modo local: plugin do marketplace aponta para o Worker       | ✅     | Sem stdio, `.mcpb` e login pelo navegador; `.mcp.json` só `http` (ADR 0013)              |
+| F2.11 | Gmail remoto multi-conta só leitura no Workers (ADR 0014)              | 🟨     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai   |
 
-## Fase 3 — WhatsApp pessoal (remoto, self-host)
+## Fase 3 — WhatsApp pessoal (self-host)
 
-| Id   | Tarefa                                                                          | Estado | Pronto quando                                                                                           |
-| ---- | ------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| F3.1 | Conector `whatsapp`: Worker + OAuth GitHub, ponte Go no container, snapshots R2 | 🟨     | `pr:check` verde com leitura completa, `/pair`, envio atrás de flag e ADR 0012 com a medição            |
-| F3.2 | Publicar na conta do dono e parear o número                                     | ⬜     | `list_chats` respondendo numa sessão do claude.ai; RSS real do container registrado na ADR              |
-| F3.3 | Restringir a saída do container aos hosts do WhatsApp (`allowedHosts`)          | ⬜     | Ponte conecta com `enableInternet = false` e só hosts do WhatsApp liberados, ou ADR dizendo por que não |
+| Id   | Tarefa                                                                          | Estado | Pronto quando                                                                                 |
+| ---- | ------------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| F3.1 | Conector `whatsapp`: Worker + OAuth GitHub, ponte Go no container, snapshots R2 | ✅     | `pr:check` verde com leitura completa, `/pair`, envio atrás de flag e ADR 0015 com a medição  |
+| F3.2 | Publicar na conta do dono e parear o número                                     | ⬜     | `list_chats` respondendo no claude.ai; RSS real do history sync registrado na ADR             |
+| F3.3 | Restringir a saída do container aos hosts do WhatsApp (`allowedHosts`)          | ⬜     | Ponte conecta com `enableInternet = false` e só hosts do WhatsApp, ou ADR dizendo por que não |
 
 ## Fases seguintes
 

@@ -1,4 +1,4 @@
-# Conector WhatsApp pessoal no Cloudflare Workers + Containers (ADR 0012). Template self-host: cada pessoa publica
+# Conector WhatsApp pessoal no Cloudflare Workers + Containers (ADR 0015). Template self-host: cada pessoa publica
 # na própria conta e pareia o próprio número. Guia completo: connectors/whatsapp/README.md.
 #
 # Secrets (wrangler secret put <NOME> --config connectors/whatsapp/wrangler.toml):
@@ -36,7 +36,7 @@ crons = []
 [[containers]]
 class_name = "WhatsAppBridge"
 image = "./Dockerfile"
-# Menor instância: 1/16 vCPU, 256 MiB, 2 GB (medição na ADR 0012).
+# Menor instância: 1/16 vCPU, 256 MiB, 2 GB (medição na ADR 0015).
 instance_type = "lite"
 # Uma instância só: duas pontes nunca rodam a mesma sessão do WhatsApp.
 max_instances = 1

@@ -14,6 +14,11 @@ describe('parseSealKey', () => {
     expect(() => parseSealKey(null)).toThrow(/SEAL_KEY/);
     expect(() => parseSealKey(randomBytes(16).toString('base64'))).toThrow(/32 bytes/);
   });
+
+  it('cita no erro o nome da variável dada', () => {
+    expect(() => parseSealKey(null, 'TOKEN_ENC_KEY')).toThrow(/TOKEN_ENC_KEY/);
+    expect(() => parseSealKey('YQ==', 'TOKEN_ENC_KEY')).toThrow(/TOKEN_ENC_KEY precisa/);
+  });
 });
 
 describe('sealPayload e unsealPayload', () => {

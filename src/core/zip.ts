@@ -58,12 +58,20 @@ export function zipEntryBytes(bytes: Uint8Array, entry: ZipEntry): Uint8Array {
   return bytes.subarray(start, start + entry.compressedSize);
 }
 
-/** Descomprime dados em DEFLATE puro (método 8 do ZIP). */
-export async function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
+/** Descomprime dados com `DecompressionStream` no formato dado (DEFLATE puro ou com cabeçalho zlib). */
+export async function decompressBytes(
+  data: Uint8Array,
+  format: 'deflate' | 'deflate-raw',
+): Promise<Uint8Array> {
   const stream = new Blob([new Uint8Array(data)])
     .stream()
-    .pipeThrough(new DecompressionStream('deflate-raw'));
+    .pipeThrough(new DecompressionStream(format));
   return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+
+/** Descomprime dados em DEFLATE puro (método 8 do ZIP). */
+export function inflateRaw(data: Uint8Array): Promise<Uint8Array> {
+  return decompressBytes(data, 'deflate-raw');
 }
 
 /** Conteúdo descompactado da entrada `name`, ou `null` se ela não existir no ZIP. */

@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
 // Os hooks do git (ex.: pre-push num worktree) exportam GIT_DIR e afins; os testes que criam repositórios
@@ -7,7 +8,16 @@ for (const name of ['GIT_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE', 'GIT_PREFIX', 
 }
 
 export default defineConfig({
+  // `cloudflare:workers` só existe no runtime do Workers; nos testes em Node vira um substituto (ADR 0014).
+  resolve: {
+    alias: {
+      'cloudflare:workers': fileURLToPath(
+        new URL('./connectors/gmail/src/fixtures/cloudflare-workers-stub.ts', import.meta.url),
+      ),
+    },
+  },
   test: {
+    server: { deps: { inline: ['@cloudflare/workers-oauth-provider'] } },
     include: ['src/**/*.test.ts', 'tools/**/*.test.ts', 'connectors/**/*.test.ts'],
     testTimeout: 30000,
     coverage: {
@@ -17,10 +27,10 @@ export default defineConfig({
         '**/*.test.ts',
         'tools/**/cli.ts',
         'tools/**/fixtures/**',
-        // Pontos de entrada e automação de navegador: exceções em src/test-exceptions.ts
-        'connectors/*/src/main.ts',
+        'connectors/*/src/fixtures/**',
+        '**/*.d.ts',
+        // Ponto de entrada do servidor Node: exceção em src/test-exceptions.ts
         'connectors/*/src/remote-main.ts',
-        'connectors/*/src/browser-login.ts',
         // Runtime do Cloudflare (Durable Object/Container e entrada do Worker): exceções em src/test-exceptions.ts
         'connectors/*/src/container.ts',
         'connectors/*/src/index.ts',

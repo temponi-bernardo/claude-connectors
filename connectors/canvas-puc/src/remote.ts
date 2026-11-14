@@ -5,10 +5,11 @@
 import { envValue, parseFlag, type EnvVars } from '../../../src/core/env.js';
 import type { RemoteConnector } from '../../../src/remote/handler.js';
 import type { LoginPageText } from '../../../src/remote/login-page.js';
-import type { AuthProvider, CanvasAuth } from './auth.js';
 import { createCanvasClient } from './client.js';
-import { DEFAULT_CANVAS_URL } from './config.js';
-import { canvasServiceTools, createCanvasMcpServer } from './tools.js';
+import { canvasTools, createCanvasMcpServer } from './tools.js';
+
+/** Canvas da PUC Minas, usado quando `CANVAS_BASE_URL` não vem preenchida. */
+export const DEFAULT_CANVAS_URL = 'https://pucminas.instructure.com';
 
 /** Configuração do modo remoto: Canvas fixo do servidor, escrita liberada ou não, e `fetch`. */
 export interface CanvasRemoteSettings {
@@ -48,22 +49,6 @@ export function canvasLoginText(baseUrl: string): LoginPageText {
     helpUrl: `${baseUrl}/profile/settings`,
     helpLabel: 'Abrir a página de tokens do Canvas',
     submit: 'Conectar',
-  };
-}
-
-/** Mensagem de 401 no modo remoto: o token venceu ou foi revogado. */
-export function remoteUnauthorizedMessage(_auth: CanvasAuth | null, baseUrl: string): string {
-  return `O Canvas recusou o token (vencido ou revogado). Gere outro em ${baseUrl}/profile/settings e reconecte o conector nas configurações do Claude.`;
-}
-
-/** Autenticação só por token: não renova nem abre login (a validade é estendida no refresh do OAuth). */
-export function createTokenAuthProvider(token: string): AuthProvider {
-  return {
-    current: () => ({ kind: 'token', token }),
-    renew: () => Promise.resolve(null),
-    connect: () =>
-      Promise.reject(new Error('No conector remoto, reconecte pelas configurações do Claude.')),
-    disconnect: () => undefined,
   };
 }
 
@@ -173,16 +158,13 @@ export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteCon
     },
     renewSecret: (secret) => renewCanvasToken(settings, secret, new Date()),
     createServer: (secret) => {
-      const auth = createTokenAuthProvider(secret);
       const client = createCanvasClient({
         baseUrl: settings.baseUrl,
-        auth,
+        token: secret,
         fetchFn: settings.fetchFn,
-        describeUnauthorized: remoteUnauthorizedMessage,
       });
-      return createCanvasMcpServer(canvasServiceTools(settings.allowWrite), {
+      return createCanvasMcpServer(canvasTools(settings.allowWrite), {
         client,
-        auth,
         now: () => new Date(),
       });
     },

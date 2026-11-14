@@ -1,39 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { AuthProvider, CanvasAuth } from './auth.js';
 import {
   collectPages,
   createCanvasClient,
   fetchDownload,
   fetchFileBytes,
   fetchPlainText,
-  requestWithRenewal,
+  requestCanvas,
   sendCanvasRequest,
-  unauthorizedError,
   unauthorizedMessage,
   type ClientDeps,
 } from './client.js';
-
-describe('unauthorizedError', () => {
-  it('usa a mensagem padrão ou a injetada', () => {
-    const base: ClientDeps = { baseUrl: 'b', auth: {} as AuthProvider, fetchFn: fetch };
-    expect(unauthorizedError(base, null).message).toContain('não está conectado');
-    expect(unauthorizedError({ ...base, describeUnauthorized: () => 'outra' }, null).message).toBe(
-      'outra',
-    );
-  });
-});
-
-const token: CanvasAuth = { kind: 'token', token: 't' };
-const fresh: CanvasAuth = { kind: 'token', token: 'novo' };
-
-function provider(current: CanvasAuth | null, renewed: CanvasAuth | null = null): AuthProvider {
-  return {
-    current: () => current,
-    renew: vi.fn(() => Promise.resolve(renewed)),
-    connect: vi.fn(),
-    disconnect: vi.fn(),
-  };
-}
 
 function json(data: unknown, init: ResponseInit = {}): Response {
   return new Response(JSON.stringify(data), { status: 200, ...init });
@@ -46,36 +22,27 @@ function fakeFetch(...responses: Response[]) {
   );
 }
 
-function deps(
-  fetchFn: ReturnType<typeof fakeFetch>,
-  auth: AuthProvider = provider(token),
-): ClientDeps {
-  return { baseUrl: 'https://x.test', auth, fetchFn: fetchFn as unknown as typeof fetch };
+function deps(fetchFn: ReturnType<typeof fakeFetch>): ClientDeps {
+  return { baseUrl: 'https://x.test', token: 't', fetchFn: fetchFn as unknown as typeof fetch };
 }
 
 describe('unauthorizedMessage', () => {
-  it('orienta conforme a credencial', () => {
-    expect(unauthorizedMessage(null, 'b')).toContain('não está conectado');
-    expect(
-      unauthorizedMessage(
-        { kind: 'session', session: { baseUrl: 'b', savedAt: '', cookies: [] } },
-        'b',
-      ),
-    ).toContain('sessão');
-    expect(unauthorizedMessage(token, 'https://x.test')).toContain(
-      'https://x.test/profile/settings',
-    );
+  it('manda gerar outro token e reconectar no Claude', () => {
+    const message = unauthorizedMessage('https://x.test');
+    expect(message).toContain('https://x.test/profile/settings');
+    expect(message).toContain('reconecte');
   });
 });
 
 describe('sendCanvasRequest', () => {
-  it('monta URL da API, headers e corpo JSON', async () => {
+  it('monta URL da API, headers com o token e corpo JSON', async () => {
     const f = fakeFetch(json({}));
-    await sendCanvasRequest(
-      deps(f),
-      { method: 'POST', path: '/a', params: { x: 1 }, body: { b: 2 } },
-      token,
-    );
+    await sendCanvasRequest(deps(f), {
+      method: 'POST',
+      path: '/a',
+      params: { x: 1 },
+      body: { b: 2 },
+    });
     const [url, init] = f.mock.calls[0]!;
     expect(String(url)).toBe('https://x.test/api/v1/a?x=1');
     expect(init).toMatchObject({
@@ -87,59 +54,31 @@ describe('sendCanvasRequest', () => {
 
   it('não manda corpo em GET', async () => {
     const f = fakeFetch(json({}));
-    await sendCanvasRequest(deps(f), { method: 'GET', path: '/a' }, token);
+    await sendCanvasRequest(deps(f), { method: 'GET', path: '/a' });
     expect(f.mock.calls[0]![1]).not.toHaveProperty('body');
   });
 });
 
-describe('requestWithRenewal', () => {
-  it('devolve a resposta quando dá certo de primeira', async () => {
-    const auth = provider(token);
-    const res = await requestWithRenewal(deps(fakeFetch(json({ ok: 1 })), auth), {
+describe('requestCanvas', () => {
+  it('devolve a resposta quando dá certo', async () => {
+    const res = await requestCanvas(deps(fakeFetch(json({ ok: 1 }))), {
       method: 'GET',
       path: '/a',
     });
     expect(await res.json()).toEqual({ ok: 1 });
-    expect(auth.renew).not.toHaveBeenCalled();
   });
 
-  it('renova e repete em 401', async () => {
-    const f = fakeFetch(json({}, { status: 401 }), json({ ok: 2 }));
-    const res = await requestWithRenewal(deps(f, provider(token, fresh)), {
-      method: 'GET',
-      path: '/a',
-    });
-    expect(await res.json()).toEqual({ ok: 2 });
-    expect(f.mock.calls[1]![1]).toMatchObject({ headers: { Authorization: 'Bearer novo' } });
-  });
-
-  it('renova quando não há credencial e falha se a renovação não trouxer nenhuma', async () => {
-    await expect(
-      requestWithRenewal(deps(fakeFetch(), provider(null)), { method: 'GET', path: '/a' }),
-    ).rejects.toThrow('não está conectado');
-  });
-
-  it('falha com a mensagem de 401 se repetir 401', async () => {
-    const f = fakeFetch(json({}, { status: 401 }), json({}, { status: 401 }));
-    await expect(
-      requestWithRenewal(deps(f, provider(token, fresh)), { method: 'GET', path: '/a' }),
-    ).rejects.toThrow('token');
-  });
-
-  it('usa a mensagem de 401 injetada quando houver', async () => {
+  it('em 401 falha uma vez só, orientando a reconectar', async () => {
     const f = fakeFetch(json({}, { status: 401 }));
-    const custom: ClientDeps = {
-      ...deps(f, provider(token)),
-      describeUnauthorized: () => 'reconecte',
-    };
-    await expect(requestWithRenewal(custom, { method: 'GET', path: '/a' })).rejects.toThrow(
+    await expect(requestCanvas(deps(f), { method: 'GET', path: '/a' })).rejects.toThrow(
       'reconecte',
     );
+    expect(f).toHaveBeenCalledOnce();
   });
 
   it('inclui status e corpo em outros erros', async () => {
     const f = fakeFetch(new Response('proibido', { status: 403 }));
-    await expect(requestWithRenewal(deps(f), { method: 'GET', path: '/a' })).rejects.toThrow(
+    await expect(requestCanvas(deps(f), { method: 'GET', path: '/a' })).rejects.toThrow(
       'Canvas 403 em GET /a: proibido',
     );
   });

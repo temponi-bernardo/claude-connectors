@@ -1,5 +1,5 @@
 /**
- * Leitura de variáveis de ambiente, compartilhada pelos conectores (stdio e remoto). Pura.
+ * Leitura de variáveis de ambiente, compartilhada pelos conectores. Pura.
  */
 
 /** Variáveis de ambiente (subconjunto de `process.env`). */
@@ -17,7 +17,7 @@ export function parseFlag(value: string | null): boolean {
   return ['1', 'true', 'sim', 'yes'].includes((value ?? '').toLowerCase());
 }
 
-/** Converte o ambiente do Cloudflare Worker (variáveis, secrets e bindings) em variáveis de texto. */
+/** Converte o ambiente de um Worker (variáveis, secrets e bindings) em variáveis de texto. */
 export function toEnvVars(env: Readonly<Record<string, unknown>>): EnvVars {
   return Object.fromEntries(
     Object.entries(env).filter((entry): entry is [string, string] => typeof entry[1] === 'string'),

@@ -74,13 +74,17 @@ export async function storeSnapshot(
   return 'saved';
 }
 
-/** Grava a resposta de `GET /snapshot` da ponte: 204 é `unchanged`; headers inválidos lançam. */
+/** Grava a resposta de `GET /snapshot` da ponte: 204 (sem mudança) e 503 (ainda iniciando) são `unchanged`. */
 export async function storeSnapshotResponse(
   bucket: SnapshotBucket,
   res: Response,
   fixedLength: FixedLength,
 ): Promise<SnapshotOutcome> {
   if (res.status === 204 || !res.body) return 'unchanged';
+  if (res.status === 503) {
+    await res.body.cancel();
+    return 'unchanged';
+  }
   const meta = readUploadHeaders(res.headers);
   if (!res.ok || !meta) {
     await res.body.cancel();

@@ -10,6 +10,7 @@ export default tseslint.config(
       'coverage/**',
       'node_modules/**',
       'tools/**/fixtures/**',
+      'connectors/*/src/fixtures/**',
       'connectors/*/server/**',
     ],
   },

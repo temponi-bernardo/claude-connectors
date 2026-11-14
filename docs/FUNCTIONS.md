@@ -11,22 +11,31 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- indice:inicio -->
 
-- `connectors/canvas-puc/src/auth.ts`: [`pickAuth`](#pickauth), [`authHeaders`](#authheaders), [`loginAndStore`](#loginandstore), [`renewAuth`](#renewauth), [`renewOnce`](#renewonce), [`createAuthProvider`](#createauthprovider)
-- `connectors/canvas-puc/src/browser-login.ts`: [`isLoginChooserUrl`](#isloginchooserurl), [`launchLoginBrowser`](#launchloginbrowser), [`pageHasCanvasSession`](#pagehascanvassession), [`clickInstitutionButton`](#clickinstitutionbutton), [`waitForCanvasLogin`](#waitforcanvaslogin), [`browserLogin`](#browserlogin)
-- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`unauthorizedError`](#unauthorizederror), [`requestWithRenewal`](#requestwithrenewal), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`createCanvasClient`](#createcanvasclient)
-- `connectors/canvas-puc/src/config.ts`: [`readCanvasConfig`](#readcanvasconfig)
+- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`requestCanvas`](#requestcanvas), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`createCanvasClient`](#createcanvasclient)
 - `connectors/canvas-puc/src/files.ts`: [`fileContentBlock`](#filecontentblock), [`downloadedFileResult`](#downloadedfileresult), [`downloadRefusal`](#downloadrefusal), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
-- `connectors/canvas-puc/src/main.ts`: [`startCanvasServer`](#startcanvasserver)
-- `connectors/canvas-puc/src/playwright-runtime.ts`: [`runtimeDir`](#runtimedir), [`npmInstallArgs`](#npminstallargs), [`resolveFrom`](#resolvefrom), [`installPlaywright`](#installplaywright), [`loadPlaywright`](#loadplaywright)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
-- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`remoteUnauthorizedMessage`](#remoteunauthorizedmessage), [`createTokenAuthProvider`](#createtokenauthprovider), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
-- `connectors/canvas-puc/src/session.ts`: [`sessionFilePath`](#sessionfilepath), [`cookieHeader`](#cookieheader), [`csrfToken`](#csrftoken), [`isCanvasSession`](#iscanvassession), [`loadSession`](#loadsession), [`saveSession`](#savesession), [`clearSession`](#clearsession)
+- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
-- `connectors/canvas-puc/src/tools.ts`: [`canvasServiceTools`](#canvasservicetools), [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
+- `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
 - `connectors/canvas-puc/src/worker.ts`: [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
-- `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
+- `connectors/gmail/src/access-token.ts`: [`forgetAccessToken`](#forgetaccesstoken), [`clearAccessTokenCache`](#clearaccesstokencache), [`linkUrl`](#linkurl), [`relinkError`](#relinkerror), [`requireLinkedAccount`](#requirelinkedaccount), [`renewAccessToken`](#renewaccesstoken), [`getAccessToken`](#getaccesstoken)
+- `connectors/gmail/src/attachments.ts`: [`looksLikeText`](#looksliketext), [`detectAttachmentKind`](#detectattachmentkind), [`attachmentBytesToText`](#attachmentbytestotext), [`readAttachmentText`](#readattachmenttext)
+- `connectors/gmail/src/config.ts`: [`accountAlias`](#accountalias), [`isEmailAddress`](#isemailaddress), [`parseAllowedEmails`](#parseallowedemails), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`readGmailSettings`](#readgmailsettings), [`findAllowedAccount`](#findallowedaccount), [`resolveAccounts`](#resolveaccounts)
+- `connectors/gmail/src/gmail-api.ts`: [`gmailUrl`](#gmailurl), [`gmailHttpError`](#gmailhttperror), [`sendGmailGet`](#sendgmailget), [`gmailGet`](#gmailget)
+- `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`randomToken`](#randomtoken), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken)
+- `connectors/gmail/src/id-token.ts`: [`decodeJwtJson`](#decodejwtjson), [`decodeJwt`](#decodejwt), [`idTokenProblems`](#idtokenproblems), [`checkIdTokenClaims`](#checkidtokenclaims), [`fetchGoogleKey`](#fetchgooglekey), [`verifyRs256`](#verifyrs256), [`verifyGoogleIdToken`](#verifygoogleidtoken)
+- `connectors/gmail/src/link-flow.ts`: [`sha256Hex`](#sha256hex), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`startAccountLink`](#startaccountlink), [`takeLinkRequest`](#takelinkrequest), [`accessDeniedPage`](#accessdeniedpage), [`linkRefusal`](#linkrefusal), [`storeLinkedAccount`](#storelinkedaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
+- `connectors/gmail/src/message-format.ts`: [`base64UrlToBytes`](#base64urltobytes), [`partCharset`](#partcharset), [`decodePartBody`](#decodepartbody), [`headerValues`](#headervalues), [`flattenParts`](#flattenparts), [`isBodyPart`](#isbodypart), [`messageBodyText`](#messagebodytext), [`messageAttachments`](#messageattachments), [`truncateText`](#truncatetext), [`internalDateIso`](#internaldateiso), [`pickHeaders`](#pickheaders), [`formatMessage`](#formatmessage), [`perMessageLimit`](#permessagelimit), [`formatThread`](#formatthread), [`summarizeThread`](#summarizethread)
+- `connectors/gmail/src/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`consentPageBody`](#consentpagebody), [`copyConsentHeaders`](#copyconsentheaders), [`consentPage`](#consentpage), [`redirectWith`](#redirectwith)
+- `connectors/gmail/src/rate-limit.ts`: [`isRateLimited`](#isratelimited), [`rateLimitedResponse`](#ratelimitedresponse)
+- `connectors/gmail/src/search.ts`: [`encodeMultiPageToken`](#encodemultipagetoken), [`decodeMultiPageToken`](#decodemultipagetoken), [`fetchThreadMetadata`](#fetchthreadmetadata), [`searchAccount`](#searchaccount), [`threadDate`](#threaddate), [`sortByDateDesc`](#sortbydatedesc), [`pagesToFetch`](#pagestofetch), [`searchThreads`](#searchthreads)
+- `connectors/gmail/src/sign-in.ts`: [`authorizationErrorResponse`](#authorizationerrorresponse), [`beginGoogleSignIn`](#begingooglesignin), [`showAuthorize`](#showauthorize), [`submitAuthorize`](#submitauthorize), [`completeSignIn`](#completesignin), [`finishSignIn`](#finishsignin)
+- `connectors/gmail/src/token-store.ts`: [`accountKey`](#accountkey), [`sealLinkedAccount`](#seallinkedaccount), [`openLinkedAccount`](#openlinkedaccount), [`saveLinkedAccount`](#savelinkedaccount), [`loadLinkedAccount`](#loadlinkedaccount)
+- `connectors/gmail/src/tools.ts`: [`resolveSingleAccount`](#resolvesingleaccount), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
+- `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
+- `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
 - `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
 - `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
 - `connectors/whatsapp/src/format.ts`: [`isHiddenChar`](#ishiddenchar), [`sanitizeText`](#sanitizetext), [`untrusted`](#untrusted), [`compactMessage`](#compactmessage), [`compactChat`](#compactchat), [`partialSyncWarning`](#partialsyncwarning), [`compactStatus`](#compactstatus)
@@ -42,8 +51,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `src/core/env.ts`: [`envValue`](#envvalue), [`parseFlag`](#parseflag), [`toEnvVars`](#toenvvars)
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
+- `src/core/pdf.ts`: [`bytesToLatin1`](#bytestolatin1), [`isPdf`](#ispdf), [`streamDataStart`](#streamdatastart), [`trimStreamEol`](#trimstreameol), [`readRawObject`](#readrawobject), [`listRawObjects`](#listrawobjects), [`decodePdfStream`](#decodepdfstream), [`splitObjectStream`](#splitobjectstream), [`storePdfObject`](#storepdfobject), [`readPdfObjects`](#readpdfobjects), [`pdfRefs`](#pdfrefs), [`dictRefs`](#dictrefs), [`collectPdfPages`](#collectpdfpages), [`orderedPages`](#orderedpages), [`utf16beHexToString`](#utf16behextostring), [`readBfChars`](#readbfchars), [`readBfRanges`](#readbfranges), [`rangeTarget`](#rangetarget), [`parseToUnicodeCMap`](#parsetounicodecmap), [`addFontRefs`](#addfontrefs), [`fontResourceRefs`](#fontresourcerefs), [`fontCMaps`](#fontcmaps), [`decodePdfText`](#decodepdftext), [`readLiteralString`](#readliteralstring), [`readEscape`](#readescape), [`readHexString`](#readhexstring), [`skipPdfSpace`](#skippdfspace), [`nextPdfToken`](#nextpdftoken), [`readPdfWord`](#readpdfword), [`wrapString`](#wrapstring), [`classifyWord`](#classifyword), [`showArrayText`](#showarraytext), [`lastOperandText`](#lastoperandtext), [`moveText`](#movetext), [`applyTextOperator`](#applytextoperator), [`feedPdfToken`](#feedpdftoken), [`contentStreamText`](#contentstreamtext), [`tidyPdfText`](#tidypdftext), [`pdfToText`](#pdftotext)
 - `src/core/word.ts`: [`docxXmlToText`](#docxxmltotext), [`docxToText`](#docxtotext), [`cp1252ToString`](#cp1252tostring), [`parsePieceTable`](#parsepiecetable), [`pieceText`](#piecetext), [`cleanWordText`](#cleanwordtext), [`docToText`](#doctotext), [`wordKind`](#wordkind), [`wordToText`](#wordtotext)
-- `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
+- `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`decompressBytes`](#decompressbytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
 - `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`rawToolResult`](#rawtoolresult), [`toToolResult`](#totoolresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs), [`binaryContentBlock`](#binarycontentblock)
 - `src/remote/github-login.ts`: [`githubAuthorizeUrl`](#githubauthorizeurl), [`parseEmailList`](#parseemaillist), [`pickAllowedEmail`](#pickallowedemail), [`exchangeGithubCode`](#exchangegithubcode), [`fetchGithubEmails`](#fetchgithubemails), [`finishGithubLogin`](#finishgithublogin), [`githubUpstreamLogin`](#githubupstreamlogin)
 - `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
@@ -53,6 +63,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`resolveIssuer`](#resolveissuer), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
 - `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed)
 - `src/remote/tokens.ts`: [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessSecret`](#readaccesssecret)
+- `tools/bundle/bundle.ts`: [`listConnectors`](#listconnectors), [`isRemoteMcpUrl`](#isremotemcpurl), [`mcpServerProblems`](#mcpserverproblems), [`pluginMcpProblems`](#pluginmcpproblems), [`bundleOptions`](#bundleoptions)
+- `tools/bundle/cli.ts`: [`buildConnector`](#buildconnector), [`runBuildCli`](#runbuildcli)
 - `tools/docs/ast.ts`: [`toPosixRelative`](#toposixrelative), [`globToRegExp`](#globtoregexp), [`isAnalyzedSource`](#isanalyzedsource), [`openProject`](#openproject), [`signatureOf`](#signatureof), [`collectFileFunctions`](#collectfilefunctions), [`collectFunctions`](#collectfunctions), [`isDataDeclaration`](#isdatadeclaration), [`collectFileConstants`](#collectfileconstants), [`collectConstants`](#collectconstants), [`isIgnoredReference`](#isignoredreference), [`ownerLabelOf`](#ownerlabelof), [`findDeclaration`](#finddeclaration), [`buildReferenceIndex`](#buildreferenceindex), [`buildCallGraph`](#buildcallgraph)
 - `tools/docs/checks.ts`: [`checkFunctionsDocumented`](#checkfunctionsdocumented), [`checkSectionModules`](#checksectionmodules), [`checkUniqueNames`](#checkuniquenames), [`checkGeneratedBlocks`](#checkgeneratedblocks), [`checkManualFields`](#checkmanualfields), [`checkProcessCitations`](#checkprocesscitations), [`checkStructure`](#checkstructure), [`checkUiComponents`](#checkuicomponents), [`checkTests`](#checktests), [`checkConstants`](#checkconstants), [`runAllChecks`](#runallchecks)
 - `tools/docs/cli.ts`: [`runDocsCli`](#rundocscli)
@@ -61,8 +73,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `tools/docs/markdown.ts`: [`firstGroup`](#firstgroup), [`stripCodeBlocks`](#stripcodeblocks), [`extractCalledNames`](#extractcallednames), [`sliceBetween`](#slicebetween), [`replaceBetween`](#replacebetween), [`extractFunctionSections`](#extractfunctionsections), [`buildSection`](#buildsection), [`extractProcessCitations`](#extractprocesscitations), [`extractDocumentedDirs`](#extractdocumenteddirs), [`extractBacktickedNames`](#extractbacktickednames)
 - `tools/docs/render.ts`: [`formatList`](#formatlist), [`renderGeneratedBlock`](#rendergeneratedblock), [`renderNewSection`](#rendernewsection), [`renderModuleIndex`](#rendermoduleindex), [`computeGeneratedData`](#computegenerateddata), [`closureOf`](#closureof), [`processesByFunction`](#processesbyfunction), [`replaceSectionBlock`](#replacesectionblock), [`appendSection`](#appendsection), [`insertBeforeDataTable`](#insertbeforedatatable), [`removeSection`](#removesection), [`removeEmptyModules`](#removeemptymodules), [`pruneOrphanSections`](#pruneorphansections), [`applyGenerated`](#applygenerated)
 - `tools/docs/run.ts`: [`readOptional`](#readoptional), [`readDocsTexts`](#readdocstexts), [`formatIssues`](#formatissues), [`runCheck`](#runcheck), [`generateFunctionsDoc`](#generatefunctionsdoc), [`runGenerate`](#rungenerate)
-- `tools/pack/cli.ts`: [`installedExternalVersions`](#installedexternalversions), [`runNodeBin`](#runnodebin), [`writeJson`](#writejson), [`buildConnectorRuntime`](#buildconnectorruntime), [`packMcpb`](#packmcpb), [`runPackCli`](#runpackcli)
-- `tools/pack/pack.ts`: [`listConnectors`](#listconnectors), [`pluginManifest`](#pluginmanifest), [`pluginMcpConfig`](#pluginmcpconfig), [`readManifestIdentity`](#readmanifestidentity), [`runtimePackageJson`](#runtimepackagejson), [`bundleOptions`](#bundleoptions)
 
 <!-- indice:fim -->
 
@@ -1221,214 +1231,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Lê e grava `docs/FUNCTIONS.md`.
 - **Erros:** Propaga erros de configuração e de escrita.
 
-## `connectors/canvas-puc/src/auth.ts`
-
-### `pickAuth`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `pickAuth(session: CanvasSession | null, token: string | null): CanvasAuth | null`
-- **Usada por:** `createAuthProvider()`, `renewAuth()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Escolhe a credencial atual: sessão se houver, senão token, senão nenhuma.
-- **Entrada:** `session`: sessão salva ou `null`; `token`: token de acesso ou `null`.
-- **Saída:** `CanvasAuth` do tipo `session` ou `token`; `null` se não houver nenhuma credencial.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `authHeaders`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `authHeaders(auth: CanvasAuth, method: string): Record<string, string>`
-- **Usada por:** `sendCanvasRequest()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta os headers de autenticação de uma requisição ao Canvas.
-- **Entrada:** `auth`: credencial (sessão ou token); `method`: método HTTP (`GET`, `POST`...).
-- **Saída:** `Authorization: Bearer` para token; `Cookie` (mais `X-CSRF-Token` fora de GET, se houver) para sessão.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `loginAndStore`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `async loginAndStore(deps: AuthDeps, state: AuthState, mode: LoginMode): Promise<CanvasSession>`
-- **Usada por:** `createAuthProvider()`, `renewAuth()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Faz login no navegador no modo pedido, guardando a sessão em disco e no estado.
-- **Entrada:** `deps`: dependências (arquivo da sessão, função de login); `state`: estado mutável; `mode`: `silent` ou `window`.
-- **Saída:** Promise com a `CanvasSession` obtida.
-- **Efeitos:** Abre navegador (via `deps.login`), grava o arquivo da sessão, altera `state.session`.
-- **Erros:** Propaga a rejeição de `deps.login` e erros de escrita do arquivo.
-
-### `renewAuth`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `async renewAuth(deps: AuthDeps, state: AuthState): Promise<CanvasAuth | null>`
-- **Usada por:** `renewOnce()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Renova a credencial: login silencioso, depois token, depois janela de login.
-- **Entrada:** `deps`: dependências do provedor; `state`: estado mutável.
-- **Saída:** Promise com a nova `CanvasAuth`; `null` se nenhum caminho funcionar.
-- **Efeitos:** Abre navegador (oculto e, se preciso, com janela), grava a sessão em disco, altera `state.session`.
-- **Erros:** Nenhum (falhas de login viram `null`).
-
-### `renewOnce`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `renewOnce(deps: AuthDeps, state: AuthState): Promise<CanvasAuth | null>`
-- **Usada por:** `createAuthProvider()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Garante uma só renovação por vez, compartilhando a promessa entre chamadas simultâneas.
-- **Entrada:** `deps`: dependências do provedor; `state`: estado mutável (usa `state.pending`).
-- **Saída:** A promessa de `renewAuth()` em andamento (nova ou já existente).
-- **Efeitos:** Altera `state.pending` (definido no início, limpo ao terminar); efeitos de `renewAuth()`.
-- **Erros:** Nenhum.
-
-### `createAuthProvider`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/auth.ts`
-- **Assinatura:** `createAuthProvider(deps: AuthDeps): AuthProvider`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Cria o provedor de autenticação a partir da sessão salva em disco.
-- **Entrada:** `deps`: token opcional, caminho do arquivo da sessão e função de login no navegador.
-- **Saída:** `AuthProvider` com `current`, `renew`, `connect` e `disconnect`.
-- **Efeitos:** Lê o arquivo da sessão; os métodos devolvidos abrem navegador, gravam ou apagam a sessão.
-- **Erros:** Nenhum.
-
-## `connectors/canvas-puc/src/browser-login.ts`
-
-### `isLoginChooserUrl`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `isLoginChooserUrl(url: string): boolean`
-- **Usada por:** `clickInstitutionButton()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Decide se a URL é a tela de escolha de login do Canvas.
-- **Entrada:** `url`: endereço atual de uma aba.
-- **Saída:** `true` para `login.instructure.com/discovery` ou caminhos `/login`; senão `false`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `launchLoginBrowser`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async launchLoginBrowser(dataDir: string, headless: boolean): Promise<BrowserContext>`
-- **Usada por:** `browserLogin()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Abre o perfil do conector no primeiro navegador disponível (Chrome, depois Edge).
-- **Entrada:** `dataDir`: pasta de dados (perfil em `browser-profile`); `headless`: `true` para navegador oculto.
-- **Saída:** Promise com o `BrowserContext` persistente aberto.
-- **Efeitos:** Abre um processo de navegador; cria/usa a pasta do perfil em disco.
-- **Erros:** Rejeita com "Não consegui abrir o Chrome nem o Edge" se nenhum canal abrir.
-
-### `pageHasCanvasSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async pageHasCanvasSession(page: Page, baseUrl: string): Promise<boolean>`
-- **Usada por:** `waitForCanvasLogin()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Confere se uma aba no domínio do Canvas já tem sessão válida na API.
-- **Entrada:** `page`: aba do navegador; `baseUrl`: URL base do Canvas.
-- **Saída:** Promise com `true` se `/api/v1/users/self` responde ok; `false` fora do domínio ou em erro.
-- **Efeitos:** Rede: faz `fetch` de dentro da aba.
-- **Erros:** Nenhum (erros viram `false`).
-
-### `clickInstitutionButton`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async clickInstitutionButton(pages: readonly Page[], text: string): Promise<void>`
-- **Usada por:** `waitForCanvasLogin()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Clica no botão da instituição nas abas que estão na tela de escolha de login.
-- **Entrada:** `pages`: abas abertas; `text`: trecho do texto do botão.
-- **Saída:** Promise vazia.
-- **Efeitos:** Navegador: clica no botão visível de cada aba elegível.
-- **Erros:** Nenhum (falhas de clique são ignoradas).
-
-### `waitForCanvasLogin`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async waitForCanvasLogin(context: BrowserContext, opts: BrowserLoginOptions, mode: LoginMode): Promise<void>`
-- **Usada por:** `browserLogin()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Espera até alguma aba ter sessão no Canvas, clicando no botão da instituição pelo caminho.
-- **Entrada:** `context`: navegador aberto; `opts`: URL base e texto do botão; `mode`: define o tempo máximo (`LOGIN_TIMEOUT_MS`).
-- **Saída:** Promise vazia, resolvida quando há sessão.
-- **Efeitos:** Navegador: consulta e clica nas abas; espera 1,5 s entre tentativas.
-- **Erros:** Rejeita se todas as abas forem fechadas ou se o prazo acabar sem login.
-
-### `browserLogin`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/browser-login.ts`
-- **Assinatura:** `async browserLogin(opts: BrowserLoginOptions, mode: LoginMode): Promise<CanvasSession>`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Faz o login no navegador e devolve a sessão com os cookies do domínio do Canvas.
-- **Entrada:** `opts`: URL base, pasta de dados e texto do botão; `mode`: `silent` (oculto) ou `window`.
-- **Saída:** Promise com `CanvasSession` (URL base, data e cookies `name`/`value`).
-- **Efeitos:** Abre e fecha o navegador; rede (navegação ao Canvas e login).
-- **Erros:** Propaga as rejeições de `launchLoginBrowser()` e `waitForCanvasLogin()`.
-
 ## `connectors/canvas-puc/src/client.ts`
 
 ### `unauthorizedMessage`
@@ -1436,15 +1238,15 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
-- **Assinatura:** `unauthorizedMessage(auth: CanvasAuth | null, baseUrl: string): string`
-- **Usada por:** `unauthorizedError()`
-- **Processos:** P03, P04, P08, P09
+- **Assinatura:** `unauthorizedMessage(baseUrl: string): string`
+- **Usada por:** `requestCanvas()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
-- **Faz:** Escolhe a mensagem de erro para 401 ou ausência de credencial.
-- **Entrada:** `auth`: credencial usada ou `null`; `baseUrl`: URL base do Canvas (para o link de gerar token).
-- **Saída:** Texto pedindo `conectar_canvas`, adaptado a sem credencial, sessão expirada ou token inválido.
+- **Faz:** Monta a mensagem de erro para 401: o token venceu ou foi revogado.
+- **Entrada:** `baseUrl`: URL base do Canvas (para o link de gerar token).
+- **Saída:** Texto pedindo para gerar outro token e reconectar o conector nas configurações do Claude.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -1453,34 +1255,17 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
-- **Assinatura:** `sendCanvasRequest(deps: ClientDeps, req: CanvasRequest, auth: CanvasAuth): Promise<Response>`
-- **Usada por:** `requestWithRenewal()`
-- **Processos:** P03, P04, P08, P09
+- **Assinatura:** `sendCanvasRequest(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
+- **Usada por:** `requestCanvas()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
-- **Faz:** Envia uma requisição à API do Canvas com a credencial dada, sem tratar o status.
-- **Entrada:** `deps`: URL base e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional; `auth`: credencial.
+- **Faz:** Envia uma requisição à API do Canvas com o token (`Authorization: Bearer`), sem tratar o status.
+- **Entrada:** `deps`: URL base, token e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional.
 - **Saída:** Promise com a `Response` crua.
 - **Efeitos:** Rede (via `deps.fetchFn`).
 - **Erros:** Propaga a rejeição de `fetchFn`.
-
-### `requestWithRenewal`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/client.ts`
-- **Assinatura:** `async requestWithRenewal(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
-- **Usada por:** `collectPages()`, `createCanvasClient()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Envia a requisição e, em 401 ou sem credencial, renova uma vez e repete.
-- **Entrada:** `deps`: dependências do cliente; `req`: requisição.
-- **Saída:** Promise com a `Response` de status ok.
-- **Efeitos:** Rede; pode renovar a autenticação (navegador, disco).
-- **Erros:** Rejeita com `unauthorizedMessage()` se continuar 401/sem credencial; com `Canvas <status> em ...` para outro status não ok.
 
 ### `collectPages`
 
@@ -1497,7 +1282,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Entrada:** `deps`: dependências do cliente; `first`: primeira requisição; `max`: limite de itens.
 - **Saída:** Promise com até `max` itens (resposta não-lista vira um item); lista vazia se não houver.
 - **Efeitos:** Rede (uma requisição por página).
-- **Erros:** Propaga erros de `requestWithRenewal()` e de JSON inválido.
+- **Erros:** Propaga erros de `requestCanvas()` e de JSON inválido.
 
 ### `fetchPlainText`
 
@@ -1522,33 +1307,16 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/client.ts`
 - **Assinatura:** `createCanvasClient(deps: ClientDeps): CanvasClient`
-- **Usada por:** `canvasRemoteConnector()`, `startCanvasServer()`
+- **Usada por:** `canvasRemoteConnector()`
 - **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
 - **Faz:** Cria o cliente do Canvas usado pelas ferramentas.
-- **Entrada:** `deps`: URL base, provedor de autenticação e `fetchFn`.
+- **Entrada:** `deps`: URL base, token e `fetchFn`.
 - **Saída:** `CanvasClient` com `get`, `getAll` (página de `CANVAS_PAGE_SIZE`, limite `DEFAULT_MAX_ITEMS`), `post` e `fetchText`.
 - **Efeitos:** Nenhum na criação; os métodos fazem rede.
 - **Erros:** Nenhum na criação; os métodos propagam erros das requisições.
-
-### `unauthorizedError`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/client.ts`
-- **Assinatura:** `unauthorizedError(deps: ClientDeps, auth: CanvasAuth | null): Error`
-- **Usada por:** `requestWithRenewal()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Cria o erro de 401 com a mensagem injetada (`describeUnauthorized`) ou a padrão.
-- **Entrada:** `deps`: dependências do cliente; `auth`: credencial usada (ou nula).
-- **Saída:** `Error` com a orientação ao usuário.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
 
 ### `fetchDownload`
 
@@ -1584,24 +1352,22 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Rede.
 - **Erros:** Repassa o erro de `fetchDownload`.
 
-## `connectors/canvas-puc/src/config.ts`
-
-### `readCanvasConfig`
+### `requestCanvas`
 
 <!-- gerado:inicio -->
 
-- **Arquivo:** `connectors/canvas-puc/src/config.ts`
-- **Assinatura:** `readCanvasConfig(env: EnvVars, homeDir: string): CanvasConfig`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03
+- **Arquivo:** `connectors/canvas-puc/src/client.ts`
+- **Assinatura:** `async requestCanvas(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
+- **Usada por:** `collectPages()`, `createCanvasClient()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
-- **Faz:** Monta a configuração do conector a partir do ambiente.
-- **Entrada:** `env`: variáveis de ambiente (`CANVAS_*`); `homeDir`: pasta do usuário (base da pasta de dados padrão).
-- **Saída:** `CanvasConfig` com URL base sem `/` final, token, `allowWrite`, texto do botão e pasta de dados (padrões quando ausentes).
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
+- **Faz:** Envia uma requisição à API do Canvas com o token e confere o status.
+- **Entrada:** `deps`: URL base, token e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional.
+- **Saída:** Promise com a `Response` 2xx.
+- **Efeitos:** Rede (via `deps.fetchFn`).
+- **Erros:** Rejeita com `unauthorizedMessage()` em 401 e com "Canvas <status> em <método> <caminho>: <corpo>" em outro status fora de 2xx.
 
 ## `connectors/canvas-puc/src/format.ts`
 
@@ -2083,146 +1849,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Rede.
 - **Erros:** Nenhum (falhas viram `[]`).
 
-## `connectors/canvas-puc/src/main.ts`
-
-### `startCanvasServer`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/main.ts`
-- **Assinatura:** `async startCanvasServer(): Promise<void>`
-- **Usada por:** `connectors/canvas-puc/src/main.ts (módulo)`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Sobe o servidor MCP do Canvas em stdio.
-- **Entrada:** Nenhuma (lê `process.env` e a pasta do usuário).
-- **Saída:** Promise vazia, resolvida quando o transporte conecta.
-- **Efeitos:** Lê ambiente e sessão em disco; registra ferramentas; abre o transporte stdio.
-- **Erros:** Propaga erros de conexão do servidor MCP.
-
-## `connectors/canvas-puc/src/session.ts`
-
-### `sessionFilePath`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `sessionFilePath(dataDir: string): string`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Calcula o caminho do arquivo da sessão dentro da pasta de dados.
-- **Entrada:** `dataDir`: pasta de dados do conector.
-- **Saída:** `<dataDir>/session.json`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `cookieHeader`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `cookieHeader(session: CanvasSession): string`
-- **Usada por:** `authHeaders()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta o valor do header `Cookie` com todos os cookies da sessão.
-- **Entrada:** `session`: sessão salva.
-- **Saída:** Texto `nome=valor; ...`; `''` sem cookies.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `csrfToken`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `csrfToken(session: CanvasSession): string | null`
-- **Usada por:** `authHeaders()`
-- **Processos:** P03, P04, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Extrai o token CSRF (cookie `_csrf_token`, decodificado) da sessão.
-- **Entrada:** `session`: sessão salva.
-- **Saída:** Token decodificado; `null` se o cookie não existe.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `isCanvasSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `isCanvasSession(value: unknown): value is CanvasSession`
-- **Usada por:** `loadSession()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Confere se um valor lido do disco tem a forma de uma sessão válida.
-- **Entrada:** `value`: qualquer valor (JSON já interpretado).
-- **Saída:** `true` se tem `baseUrl` texto e `cookies` lista de `{ name, value }` texto; senão `false`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `loadSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `loadSession(file: string): CanvasSession | null`
-- **Usada por:** `createAuthProvider()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê a sessão salva em disco.
-- **Entrada:** `file`: caminho do arquivo da sessão.
-- **Saída:** `CanvasSession`; `null` se o arquivo não existe, está corrompido ou tem forma inválida.
-- **Efeitos:** Lê um arquivo.
-- **Erros:** Nenhum (falhas viram `null`).
-
-### `saveSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `saveSession(file: string, session: CanvasSession): void`
-- **Usada por:** `loginAndStore()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Grava a sessão em disco, criando a pasta se preciso.
-- **Entrada:** `file`: caminho do arquivo; `session`: sessão a salvar.
-- **Saída:** Nada.
-- **Efeitos:** Cria pasta e grava o arquivo JSON.
-- **Erros:** Propaga erros de escrita.
-
-### `clearSession`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/session.ts`
-- **Assinatura:** `clearSession(file: string): void`
-- **Usada por:** `createAuthProvider()`
-- **Processos:** P03, P04
-
-<!-- gerado:fim -->
-
-- **Faz:** Apaga o arquivo da sessão salva, se existir.
-- **Entrada:** `file`: caminho do arquivo da sessão.
-- **Saída:** Nada.
-- **Efeitos:** Apaga o arquivo em disco.
-- **Erros:** Propaga erros de remoção.
-
 ## `connectors/canvas-puc/src/tools-write.ts`
 
 ### `submissionPayload`
@@ -2250,31 +1876,14 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/tools.ts`
 - **Assinatura:** `canvasTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[]`
-- **Usada por:** `startCanvasServer()`
-- **Processos:** P03
+- **Usada por:** `canvasRemoteConnector()`
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
 - **Faz:** Seleciona as ferramentas do Canvas a registrar.
 - **Entrada:** `allowWrite`: se as ferramentas de escrita entram.
-- **Saída:** Lista com conexão e leitura, mais `CANVAS_WRITE_TOOLS` quando `allowWrite` é `true`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `canvasServiceTools`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/tools.ts`
-- **Assinatura:** `canvasServiceTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[]`
-- **Usada por:** `canvasRemoteConnector()`, `canvasTools()`
-- **Processos:** P03, P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Lista as ferramentas do serviço (leitura, e escrita se permitida), sem as de conexão.
-- **Entrada:** `allowWrite`: libera `entregar_tarefa_texto` e `responder_discussao`.
-- **Saída:** Lista de `ToolSpec`.
+- **Saída:** `CANVAS_READ_TOOLS`, mais `CANVAS_WRITE_TOOLS` quando `allowWrite` é `true`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -2284,35 +1893,18 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/tools.ts`
 - **Assinatura:** `createCanvasMcpServer(specs: readonly ToolSpec<CanvasContext>[], ctx: CanvasContext): McpServer`
-- **Usada por:** `canvasRemoteConnector()`, `startCanvasServer()`
+- **Usada por:** `canvasRemoteConnector()`
 - **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
 - **Faz:** Cria o `McpServer` do Canvas com as ferramentas ligadas ao contexto.
-- **Entrada:** `specs`: ferramentas; `ctx`: cliente, autenticação e relógio.
+- **Entrada:** `specs`: ferramentas; `ctx`: cliente e relógio.
 - **Saída:** Servidor MCP ainda não conectado.
 - **Efeitos:** Nenhum além de criar o objeto.
 - **Erros:** Nenhum.
 
 ## `src/core/env.ts`
-
-### `toEnvVars`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `src/core/env.ts`
-- **Assinatura:** `toEnvVars(env: Readonly<Record<string, unknown>>): EnvVars`
-- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`, `handleWhatsAppFetch()`, `handleWorkerFetch()`, `runScheduledSync()`
-- **Processos:** P08, P10, P14
-
-<!-- gerado:fim -->
-
-- **Faz:** Converte o ambiente do Worker em variáveis de texto.
-- **Entrada:** `env`: variáveis, secrets e bindings do Worker.
-- **Saída:** Só as entradas cujo valor é texto.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
 
 ### `envValue`
 
@@ -2320,8 +1912,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/env.ts`
 - **Assinatura:** `envValue(env: EnvVars, key: string): string | null`
-- **Usada por:** `containerEnvVars()`, `readAllowedEmails()`, `readCanvasConfig()`, `readCanvasRemoteSettings()`, `readIntInRange()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `readSendAllowlist()`, `readSendSettings()`, `readSleepAfter()`, `readWhatsAppSettings()`, `requireEnv()`, `resolveIssuer()`
-- **Processos:** P03, P08, P10, P14
+- **Usada por:** `containerEnvVars()`, `publicOrigin()`, `readAllowedEmails()`, `readCanvasRemoteSettings()`, `readGmailSettings()`, `readIntInRange()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `readSendAllowlist()`, `readSendSettings()`, `readSleepAfter()`, `readWhatsAppSettings()`, `requiredSecret()`, `requireEnv()`, `resolveIssuer()`
+- **Processos:** P08, P10, P12, P13, P17
 
 <!-- gerado:fim -->
 
@@ -2337,14 +1929,31 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/env.ts`
 - **Assinatura:** `parseFlag(value: string | null): boolean`
-- **Usada por:** `readCanvasConfig()`, `readCanvasRemoteSettings()`, `readSendSettings()`
-- **Processos:** P03, P08, P10, P14
+- **Usada por:** `readCanvasRemoteSettings()`, `readSendSettings()`
+- **Processos:** P08, P13, P17
 
 <!-- gerado:fim -->
 
 - **Faz:** Interpreta uma opção liga/desliga.
 - **Entrada:** `value`: texto da opção ou `null`.
 - **Saída:** `true` para `1`, `true`, `sim` ou `yes` (sem diferenciar maiúsculas); senão `false`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `toEnvVars`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/env.ts`
+- **Assinatura:** `toEnvVars(env: Readonly<Record<string, unknown>>): EnvVars`
+- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`, `createGmailDeps()`, `handleWhatsAppFetch()`, `handleWorkerFetch()`, `publicOrigin()`, `runScheduledSync()`
+- **Processos:** P08, P10, P12, P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o ambiente do Worker em variáveis de texto.
+- **Entrada:** `env`: variáveis, secrets e bindings do Worker.
+- **Saída:** Só as entradas cujo valor é texto.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -2356,8 +1965,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/html.ts`
 - **Assinatura:** `htmlToText(html: string | null | undefined): string`
-- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `docxXmlToText()`, `flattenDiscussion()`, `readCanvasFileText()`, `shortText()`, `toAssignmentDetail()`
-- **Processos:** P03
+- **Usada por:** `attachmentBytesToText()`, `connectors/canvas-puc/src/tools-read.ts (módulo)`, `docxXmlToText()`, `flattenDiscussion()`, `messageBodyText()`, `readCanvasFileText()`, `shortText()`, `toAssignmentDetail()`
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -2376,7 +1985,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/http.ts`
 - **Assinatura:** `buildUrl(base: string, path: string, params: QueryParams = {}): URL`
 - **Usada por:** `sendCanvasRequest()`
-- **Processos:** P03, P04, P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2411,7 +2020,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `defineTool(def: ToolDefinition<C, S>): ToolSpec<C>`
-- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/canvas-puc/src/tools.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/gmail/src/tools.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`
 - **Processos:** P03
 
 <!-- gerado:fim -->
@@ -2429,7 +2038,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `textResult(data: unknown, notes: readonly string[] = []): CallToolResult`
 - **Usada por:** `toToolResult()`
-- **Processos:** P03, P08, P09, P10, P11
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2446,7 +2055,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `errorResult(error: unknown): CallToolResult`
 - **Usada por:** `runToolSafely()`
-- **Processos:** P03, P08, P09, P10, P11
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2463,7 +2072,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `async runToolSafely(spec: ToolSpec<C>, ctx: C, rawArgs: unknown): Promise<CallToolResult>`
 - **Usada por:** `registerToolSpecs()`
-- **Processos:** P03, P08, P09, P10, P11
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2479,8 +2088,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `registerToolSpecs(server: McpServer, specs: readonly ToolSpec<C>[], ctx: C): void`
-- **Usada por:** `createCanvasMcpServer()`, `createWhatsAppMcpServer()`
-- **Processos:** P03, P08, P09, P10, P11
+- **Usada por:** `createCanvasMcpServer()`, `createGmailServer()`, `createWhatsAppMcpServer()`
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2497,7 +2106,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `rawToolResult(result: CallToolResult): RawToolResult`
 - **Usada por:** `downloadedFileResult()`, `mediaResult()`
-- **Processos:** P03, P11
+- **Processos:** P03, P14
 
 <!-- gerado:fim -->
 
@@ -2514,7 +2123,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `toToolResult(data: unknown): CallToolResult`
 - **Usada por:** `runToolSafely()`
-- **Processos:** P03, P08, P09, P10, P11
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2531,7 +2140,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `binaryContentBlock(mimeType: string, bytes: Uint8Array, uri: string): CallToolResult['content'][number]`
 - **Usada por:** `fileContentBlock()`, `mediaResult()`
-- **Processos:** P03, P11
+- **Processos:** P03, P14
 
 <!-- gerado:fim -->
 
@@ -2540,301 +2149,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Bloco `image`, `audio` ou `resource` com os bytes em base64.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
-
-## `tools/pack/cli.ts`
-
-### `installedExternalVersions`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `installedExternalVersions(root: string): Record<string, string>`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê as versões instaladas das dependências externas em `node_modules`.
-- **Entrada:** `root`: raiz do repositório.
-- **Saída:** Mapa dependência → versão para cada item de `RUNTIME_EXTERNALS`.
-- **Efeitos:** Lê `package.json` em `node_modules`.
-- **Erros:** Propaga erro se a dependência não estiver instalada ou o JSON for inválido.
-
-### `runNodeBin`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `runNodeBin(bin: 'npm' | 'npx', args: readonly string[], cwd: string): void`
-- **Usada por:** `buildConnectorRuntime()`, `packMcpb()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Roda `npm` ou `npx` de forma portátil entre Windows e Unix.
-- **Entrada:** `bin`: `npm` ou `npx`; `args`: argumentos; `cwd`: pasta de trabalho.
-- **Saída:** Nada.
-- **Efeitos:** Executa processo filho com saída herdada (stdout/stderr).
-- **Erros:** Lança se o comando sair com código diferente de zero.
-
-### `runPackCli`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `async runPackCli(argv: readonly string[]): Promise<void>`
-- **Usada por:** `tools/pack/cli.ts (módulo)`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Empacota o conector pedido, ou todos com `--all`.
-- **Entrada:** `argv`: argumentos da linha de comando (nomes de conector ou `--all`).
-- **Saída:** Promise vazia.
-- **Efeitos:** Gera pacotes em disco; imprime o caminho de cada um no stdout.
-- **Erros:** Rejeita com a mensagem de uso se nenhum conector for informado; propaga erros de `packConnector()`.
-
-### `buildConnectorRuntime`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `async buildConnectorRuntime(root: string, name: string): Promise<void>`
-- **Usada por:** `runPackCli()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Gera na pasta do conector o runtime usado pelo plugin: bundle `server/index.js`, `package.json` e `package-lock.json`.
-- **Entrada:** `root`: raiz do repositório; `name`: nome da pasta do conector em `connectors/`.
-- **Saída:** Promise vazia quando termina.
-- **Efeitos:** Escreve arquivos na pasta do conector; roda o esbuild e `npm install --package-lock-only` (rede).
-- **Erros:** Rejeita se o manifesto não tiver nome/versão, se o esbuild falhar ou se o npm sair com erro.
-
-### `packMcpb`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `packMcpb(root: string, name: string): string`
-- **Usada por:** `runPackCli()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta o staging com `RUNTIME_FILES` do conector, instala as externas e gera o `.mcpb`.
-- **Entrada:** `root`: raiz do repositório; `name`: nome da pasta do conector.
-- **Saída:** Caminho do `.mcpb` gerado em `dist/connectors/<nome>-<versão>.mcpb`.
-- **Efeitos:** Apaga e recria `dist/stage/<nome>`; roda `npm ci` (rede) e `mcpb pack`; escreve em `dist/connectors/`.
-- **Erros:** Lança se faltar um arquivo de runtime (rode `buildConnectorRuntime` antes) ou se npm/mcpb falharem.
-
-### `writeJson`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/cli.ts`
-- **Assinatura:** `writeJson(file: string, data: unknown): void`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Grava um valor como JSON indentado com quebra de linha final.
-- **Entrada:** `file`: caminho do arquivo; `data`: valor serializável.
-- **Saída:** Nada.
-- **Efeitos:** Escreve o arquivo no disco (sobrescreve).
-- **Erros:** Lança se o disco recusar a escrita.
-
-## `tools/pack/pack.ts`
-
-### `listConnectors`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `listConnectors(rootDir: string): string[]`
-- **Usada por:** `runPackCli()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Lista os conectores com `manifest.json` em `connectors/`.
-- **Entrada:** `rootDir`: raiz do repositório.
-- **Saída:** Nomes das subpastas em ordem alfabética; vazia se `connectors/` não existe.
-- **Efeitos:** Lê o disco.
-- **Erros:** Propaga erros de leitura da pasta.
-
-### `readManifestIdentity`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `readManifestIdentity(manifestPath: string): { name: string; version: string }`
-- **Usada por:** `buildConnectorRuntime()`, `packMcpb()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Lê `name` e `version` do manifesto de um conector.
-- **Entrada:** `manifestPath`: caminho do `manifest.json`.
-- **Saída:** `{ name, version }`.
-- **Efeitos:** Lê um arquivo.
-- **Erros:** Lança se faltar `name` ou `version` (texto); propaga erros de leitura e JSON inválido.
-
-### `runtimePackageJson`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `runtimePackageJson(identity: { name: string; version: string }, installedVersions: Readonly<Record<string, string>>): RuntimePackageJson`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta o `package.json` do pacote com as versões exatas das dependências externas.
-- **Entrada:** `identity`: nome e versão do conector; `installedVersions`: mapa dependência → versão instalada.
-- **Saída:** `RuntimePackageJson` privado, ESM, com `dependencies` de `RUNTIME_EXTERNALS`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Lança se alguma dependência externa não estiver em `installedVersions`.
-
-### `bundleOptions`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `bundleOptions(entry: string, outfile: string): BuildOptions`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta as opções do esbuild para unir o conector num ESM para Node 18+.
-- **Entrada:** `entry`: arquivo de entrada; `outfile`: arquivo de saída.
-- **Saída:** `BuildOptions` com bundle, `node18`, externos de `RUNTIME_EXTERNALS` e banner que define `require`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `pluginManifest`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `pluginManifest(manifest: McpbManifest): Record<string, unknown>`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Gera o `plugin.json` do plugin a partir do manifesto `.mcpb`, fonte única de nome, descrição e configuração.
-- **Entrada:** `manifest`: manifesto `.mcpb` do conector.
-- **Saída:** Objeto com `name`, `description`, `author`, `repository` (URL) e `userConfig` (= `user_config` do manifesto).
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `pluginMcpConfig`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `tools/pack/pack.ts`
-- **Assinatura:** `pluginMcpConfig(manifest: McpbManifest): Record<string, unknown>`
-- **Usada por:** `buildConnectorRuntime()`
-- **Processos:** P05
-
-<!-- gerado:fim -->
-
-- **Faz:** Gera o `.mcp.json` do plugin com o comando do `.mcpb`, trocando `${__dirname}` por `${CLAUDE_PLUGIN_ROOT}`.
-- **Entrada:** `manifest`: manifesto `.mcpb` do conector.
-- **Saída:** `{ mcpServers: { <nome>: { command, args, env } } }`; `env` vazio se o manifesto não tiver.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-## `connectors/canvas-puc/src/playwright-runtime.ts`
-
-### `runtimeDir`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `runtimeDir(dataDir: string): string`
-- **Usada por:** `loadPlaywright()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Devolve a pasta onde o playwright-core é instalado sob demanda.
-- **Entrada:** `dataDir`: pasta de dados do conector (padrão `~/.canvas-puc`).
-- **Saída:** `<dataDir>/runtime`.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `npmInstallArgs`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `npmInstallArgs(version: string): string[]`
-- **Usada por:** `installPlaywright()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Monta os argumentos do `npm install` que instala uma versão fixa do playwright-core.
-- **Entrada:** `version`: versão exata do playwright-core.
-- **Saída:** Lista de argumentos para o npm (sem dependências de desenvolvimento, sem audit/fund, silencioso).
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `resolveFrom`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `resolveFrom(dir: string, pkg: string): string | null`
-- **Usada por:** `loadPlaywright()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Resolve o arquivo de entrada de um pacote instalado numa pasta.
-- **Entrada:** `dir`: pasta que contém (ou não) `node_modules`; `pkg`: nome do pacote.
-- **Saída:** Caminho absoluto do arquivo de entrada; `null` se o pacote não estiver instalado ali.
-- **Efeitos:** Lê o disco (resolução de módulos do Node).
-- **Erros:** Nenhum (falhas viram `null`).
-
-### `installPlaywright`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `installPlaywright(dir: string): void`
-- **Usada por:** `loadPlaywright()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Instala o playwright-core na pasta de runtime com o npm do sistema.
-- **Entrada:** `dir`: pasta de runtime (criada se não existir).
-- **Saída:** Nada.
-- **Efeitos:** Cria a pasta e um `package.json` mínimo; roda `npm install` (rede, disco).
-- **Erros:** Lança se o npm não estiver no PATH ou sair com erro.
-
-### `loadPlaywright`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/playwright-runtime.ts`
-- **Assinatura:** `async loadPlaywright(dataDir: string): Promise<PlaywrightModule>`
-- **Usada por:** `launchLoginBrowser()`
-- **Processos:** P03, P04, P07
-
-<!-- gerado:fim -->
-
-- **Faz:** Carrega o playwright-core do node_modules normal, da pasta de runtime ou instalando nela.
-- **Entrada:** `dataDir`: pasta de dados do conector.
-- **Saída:** Promise com o módulo do playwright-core.
-- **Efeitos:** Importa módulos dinamicamente; na primeira vez sem o pacote, instala com `installPlaywright()` (rede).
-- **Erros:** Rejeita com "Não consegui instalar o playwright-core" se a instalação não deixar o pacote resolvível.
 
 ## `connectors/canvas-puc/src/remote-main.ts`
 
@@ -2881,7 +2195,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `canvasLoginText(baseUrl: string): LoginPageText`
 - **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2891,40 +2205,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
-### `remoteUnauthorizedMessage`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
-- **Assinatura:** `remoteUnauthorizedMessage(_auth: CanvasAuth | null, baseUrl: string): string`
-- **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Escreve a mensagem de 401 do modo remoto (gerar outro token e reconectar no Claude).
-- **Entrada:** `_auth`: ignorada; `baseUrl`: endereço do Canvas.
-- **Saída:** Texto da mensagem.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
-
-### `createTokenAuthProvider`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
-- **Assinatura:** `createTokenAuthProvider(token: string): AuthProvider`
-- **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
-
-<!-- gerado:fim -->
-
-- **Faz:** Cria um `AuthProvider` que usa só o token, sem renovação nem login.
-- **Entrada:** `token`: token de acesso do Canvas.
-- **Saída:** Provedor: `current` dá o token, `renew` dá nulo, `disconnect` não faz nada.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** `connect` rejeita orientando a reconectar pelas configurações do Claude.
-
 ### `verifyCanvasToken`
 
 <!-- gerado:inicio -->
@@ -2932,7 +2212,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `async verifyCanvasToken(settings: CanvasRemoteSettings, token: string): Promise<void>`
 - **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2949,7 +2229,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector`
 - **Usada por:** `createWorkerApp()`, `startCanvasRemoteServer()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -2983,7 +2263,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `matchesVisibleToken(visible: string, token: string): boolean`
 - **Usada por:** `planTokenRenewal()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -3000,7 +2280,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `planTokenRenewal(list: readonly CanvasTokenInfo[], token: string, now: Date): { readonly id: number; readonly expiresAt: string } | null`
 - **Usada por:** `renewCanvasToken()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -3017,7 +2297,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `async canvasTokenApi(settings: CanvasRemoteSettings, token: string, request: CanvasTokenRequest): Promise<unknown>`
 - **Usada por:** `renewCanvasToken()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -3034,7 +2314,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `async renewCanvasToken(settings: CanvasRemoteSettings, token: string, now: Date): Promise<void>`
 - **Usada por:** `canvasRemoteConnector()`
-- **Processos:** P08, P09
+- **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
 
@@ -3053,7 +2333,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `jsonResponse(data: unknown, status = 200): Response`
 - **Usada por:** `handleMcp()`, `handleRegister()`, `handleToken()`, `src/remote/handler.ts (módulo)`
-- **Processos:** P08, P09, P11
+- **Processos:** P08, P09, P14
 
 <!-- gerado:fim -->
 
@@ -3069,8 +2349,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `htmlResponse(html: string, status = 200, formTarget: string | null = null): Response`
-- **Usada por:** `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `loginPageFor()`, `pairPage()`, `routePairRequest()`
-- **Processos:** P08, P10, P12
+- **Usada por:** `consentPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `loginPageFor()`, `messagePage()`, `pairPage()`, `routePairRequest()`
+- **Processos:** P08, P10, P11, P13, P15
 
 <!-- gerado:fim -->
 
@@ -3086,8 +2366,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `async readForm(request: Request): Promise<URLSearchParams>`
-- **Usada por:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`
-- **Processos:** P08, P10, P12
+- **Usada por:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`, `submitAuthorize()`
+- **Processos:** P08, P10, P13, P15
 
 <!-- gerado:fim -->
 
@@ -3121,7 +2401,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `loginPageFor(app: RemoteApp, request: AuthorizeRequest, error: string | null): Response`
 - **Usada por:** `handleAuthorizePage()`, `handleAuthorizeSubmit()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3138,7 +2418,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `redirectWithCode(request: AuthorizeRequest, code: string): Response`
 - **Usada por:** `handleAuthorizeSubmit()`, `handleUpstreamCallback()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3172,7 +2452,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `handleAuthorizePage(app: RemoteApp, request: Request): Promise<Response>`
 - **Usada por:** `src/remote/handler.ts (módulo)`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3223,7 +2503,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `handleMcp(app: RemoteApp, request: Request): Promise<Response>`
 - **Usada por:** `src/remote/handler.ts (módulo)`
-- **Processos:** P09, P11
+- **Processos:** P09, P14
 
 <!-- gerado:fim -->
 
@@ -3240,7 +2520,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `withCors(response: Response): Response`
 - **Usada por:** `routeRemoteRequest()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3257,7 +2537,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `async routeRemoteRequest(app: RemoteApp, request: Request): Promise<Response>`
 - **Usada por:** `createRemoteHandler()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3274,7 +2554,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `createRemoteHandler(app: RemoteApp): (request: Request) => Promise<Response>`
 - **Usada por:** `handleWhatsAppFetch()`, `handleWorkerFetch()`, `startCanvasRemoteServer()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3291,7 +2571,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `pageSecurityPolicy(formTarget: string | null): string`
 - **Usada por:** `htmlResponse()`
-- **Processos:** P08, P10, P12
+- **Processos:** P08, P10, P11, P13, P15
 
 <!-- gerado:fim -->
 
@@ -3325,7 +2605,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `redirectToUpstream(app: RemoteApp, login: UpstreamLogin, request: AuthorizeRequest): Response`
 - **Usada por:** `handleAuthorizePage()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3342,7 +2622,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `async handleUpstreamCallback(app: RemoteApp, request: Request): Promise<Response>`
 - **Usada por:** `src/remote/handler.ts (módulo)`
-- **Processos:** P10
+- **Processos:** P13
 
 <!-- gerado:fim -->
 
@@ -3360,8 +2640,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/login-page.ts`
 - **Assinatura:** `escapeHtml(value: string): string`
-- **Usada por:** `alertHtml()`, `handlePairCallback()`, `handleUpstreamCallback()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`
-- **Processos:** P08, P10, P12
+- **Usada por:** `alertHtml()`, `consentPageBody()`, `handlePairCallback()`, `handleUpstreamCallback()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`
+- **Processos:** P08, P10, P11, P13, P15
 
 <!-- gerado:fim -->
 
@@ -3378,7 +2658,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/login-page.ts`
 - **Assinatura:** `renderLoginPage(view: LoginPageView): string`
 - **Usada por:** `loginPageFor()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3396,8 +2676,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/mcp-endpoint.ts`
 - **Assinatura:** `async serveMcpRequest(server: McpServer, request: Request): Promise<Response>`
-- **Usada por:** `handleMcp()`
-- **Processos:** P09, P11
+- **Usada por:** `handleMcp()`, `handleMcpApi()`
+- **Processos:** P09, P10, P12, P14
 
 <!-- gerado:fim -->
 
@@ -3414,7 +2694,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/mcp-endpoint.ts`
 - **Assinatura:** `mcpUnauthorizedResponse(issuer: string): Response`
 - **Usada por:** `handleMcp()`
-- **Processos:** P08, P09, P11
+- **Processos:** P08, P09, P14
 
 <!-- gerado:fim -->
 
@@ -3554,7 +2834,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `oauthError(error: string, description: string): OAuthResult<T>`
 - **Usada por:** `parseAuthorizeQuery()`, `readCodeChallenge()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `redeemTokenRequest()`, `registerClient()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3604,8 +2884,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `isAllowedRedirect(uri: string, hosts: readonly string[]): boolean`
-- **Usada por:** `registerClient()`
-- **Processos:** P08
+- **Usada por:** `checkClientRegistration()`, `registerClient()`
+- **Processos:** P08, P10
 
 <!-- gerado:fim -->
 
@@ -3621,8 +2901,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `pkceChallenge(verifier: string): string`
-- **Usada por:** `redeemAuthorizationCode()`
-- **Processos:** P08
+- **Usada por:** `beginGoogleSignIn()`, `redeemAuthorizationCode()`, `startAccountLink()`
+- **Processos:** P08, P10, P11
 
 <!-- gerado:fim -->
 
@@ -3638,8 +2918,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `readRedirectUris(body: unknown): string[] | null`
-- **Usada por:** `clientRedirectUris()`, `registerClient()`
-- **Processos:** P08, P10
+- **Usada por:** `checkClientRegistration()`, `clientRedirectUris()`, `registerClient()`
+- **Processos:** P08, P10, P13
 
 <!-- gerado:fim -->
 
@@ -3673,7 +2953,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `clientRedirectUris(clientId: string, settings: OAuthSettings, now: number): string[] | null`
 - **Usada por:** `parseAuthorizeQuery()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3690,7 +2970,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `parseAuthorizeQuery(query: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<AuthorizeRequest>`
 - **Usada por:** `handleAuthorizePage()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3707,7 +2987,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `readCodeChallenge(query: URLSearchParams): OAuthResult<string>`
 - **Usada por:** `parseAuthorizeQuery()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3724,7 +3004,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `readOAuthSettings(env: EnvVars, issuer: string): OAuthSettings`
 - **Usada por:** `createWhatsAppApps()`, `createWorkerApp()`, `readRemoteServerConfig()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3741,7 +3021,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `resolveIssuer(env: EnvVars, origin: string): string`
 - **Usada por:** `createWhatsAppApps()`, `createWorkerApp()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3758,9 +3038,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `src/remote/seal.ts`
-- **Assinatura:** `parseSealKey(raw: string | null): Buffer`
-- **Usada por:** `readOAuthSettings()`
-- **Processos:** P08, P10
+- **Assinatura:** `parseSealKey(raw: string | null, name = 'SEAL_KEY'): Buffer`
+- **Usada por:** `readGmailSettings()`, `readOAuthSettings()`
+- **Processos:** P08, P10, P12, P13
 
 <!-- gerado:fim -->
 
@@ -3776,8 +3056,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `sealPayload(payload: unknown, key: Buffer): string`
-- **Usada por:** `issueAuthorizationCode()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `startPairLogin()`
-- **Processos:** P08, P10, P12
+- **Usada por:** `issueAuthorizationCode()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealLinkedAccount()`, `startAccountLink()`, `startPairLogin()`
+- **Processos:** P08, P11, P12, P13, P15
 
 <!-- gerado:fim -->
 
@@ -3794,7 +3074,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `unsealPayload(sealed: string, key: Buffer): Record<string, unknown> | null`
 - **Usada por:** `openSealed()`
-- **Processos:** P08, P09, P10, P11, P12
+- **Processos:** P08, P09, P11, P12, P13, P14, P15
 
 <!-- gerado:fim -->
 
@@ -3810,8 +3090,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `openSealed(sealed: string, key: Buffer, expected: SealExpectation): SealedClaims | null`
-- **Usada por:** `clientRedirectUris()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `readAccessSecret()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`
-- **Processos:** P08, P09, P10, P11, P12
+- **Usada por:** `clientRedirectUris()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openLinkedAccount()`, `readAccessSecret()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `takeLinkRequest()`
+- **Processos:** P08, P09, P11, P12, P13, P14, P15
 
 <!-- gerado:fim -->
 
@@ -3830,7 +3110,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/tokens.ts`
 - **Assinatura:** `sealAuthorizeRequest(request: AuthorizeRequest, settings: OAuthSettings, now: number): string`
 - **Usada por:** `loginPageFor()`, `redirectToUpstream()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3847,7 +3127,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/tokens.ts`
 - **Assinatura:** `openAuthorizeRequest(sealed: string, settings: OAuthSettings, now: number): AuthorizeRequest | null`
 - **Usada por:** `handleAuthorizeSubmit()`, `handleUpstreamCallback()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3864,7 +3144,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/tokens.ts`
 - **Assinatura:** `issueAuthorizationCode(grant: ApprovedGrant, settings: OAuthSettings, now: number): string`
 - **Usada por:** `handleAuthorizeSubmit()`, `handleUpstreamCallback()`
-- **Processos:** P08, P10
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3949,7 +3229,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/tokens.ts`
 - **Assinatura:** `readAccessSecret(authorization: string | null, settings: OAuthSettings, now: number): string | null`
 - **Usada por:** `handleMcp()`
-- **Processos:** P09, P11
+- **Processos:** P09, P14
 
 <!-- gerado:fim -->
 
@@ -4091,7 +3371,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `isCfb(bytes: Uint8Array): boolean`
 - **Usada por:** `readCfbHeader()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4108,7 +3388,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `readCfbHeader(bytes: Uint8Array): CfbHeader`
 - **Usada por:** `openCfb()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4125,7 +3405,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `cfbSector(bytes: Uint8Array, header: CfbHeader, id: number): Uint8Array`
 - **Usada por:** `fatSectorIds()`, `openCfb()`, `readRegularChain()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4142,7 +3422,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `sectorWords(sector: Uint8Array): number[]`
 - **Usada por:** `fatSectorIds()`, `openCfb()`, `readMiniStream()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4159,7 +3439,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `fatSectorIds(bytes: Uint8Array, header: CfbHeader): number[]`
 - **Usada por:** `openCfb()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4176,7 +3456,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `followChain(table: readonly number[], start: number): number[]`
 - **Usada por:** `readMiniStream()`, `readRegularChain()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4193,7 +3473,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `readRegularChain(file: Omit<CfbFile, 'entries'>, start: number): Uint8Array`
 - **Usada por:** `openCfb()`, `readCfbStream()`, `readMiniStream()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4210,7 +3490,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `parseDirectory(dir: Uint8Array): CfbEntry[]`
 - **Usada por:** `openCfb()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4227,7 +3507,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `openCfb(bytes: Uint8Array): CfbFile`
 - **Usada por:** `docToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4244,7 +3524,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `readMiniStream(file: CfbFile, entry: CfbEntry): Uint8Array`
 - **Usada por:** `readCfbStream()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4261,7 +3541,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/cfb.ts`
 - **Assinatura:** `readCfbStream(file: CfbFile, name: string): Uint8Array | null`
 - **Usada por:** `docToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4280,7 +3560,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `docxXmlToText(xml: string): string`
 - **Usada por:** `docxToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4297,7 +3577,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `async docxToText(bytes: Uint8Array): Promise<string>`
 - **Usada por:** `wordToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4313,8 +3593,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `cp1252ToString(bytes: Uint8Array): string`
-- **Usada por:** `pieceText()`
-- **Processos:** P03
+- **Usada por:** `decodePartBody()`, `pieceText()`
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4331,7 +3611,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `parsePieceTable(table: Uint8Array, fcClx: number): DocPiece[]`
 - **Usada por:** `docToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4348,7 +3628,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `pieceText(wordDoc: Uint8Array, piece: DocPiece): string`
 - **Usada por:** `docToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4365,7 +3645,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `cleanWordText(raw: string): string`
 - **Usada por:** `docToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4382,7 +3662,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `docToText(bytes: Uint8Array): string`
 - **Usada por:** `wordToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4415,8 +3695,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/word.ts`
 - **Assinatura:** `wordToText(kind: 'docx' | 'doc', bytes: Uint8Array): Promise<string>`
-- **Usada por:** `readCanvasFileText()`
-- **Processos:** P03
+- **Usada por:** `attachmentBytesToText()`, `readCanvasFileText()`
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4435,7 +3715,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/zip.ts`
 - **Assinatura:** `findEndOfCentralDirectory(bytes: Uint8Array): number`
 - **Usada por:** `listZipEntries()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4452,7 +3732,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/zip.ts`
 - **Assinatura:** `listZipEntries(bytes: Uint8Array): ZipEntry[]`
 - **Usada por:** `readZipEntry()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4469,7 +3749,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/zip.ts`
 - **Assinatura:** `zipEntryBytes(bytes: Uint8Array, entry: ZipEntry): Uint8Array`
 - **Usada por:** `readZipEntry()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4484,9 +3764,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `src/core/zip.ts`
-- **Assinatura:** `async inflateRaw(data: Uint8Array): Promise<Uint8Array>`
+- **Assinatura:** `inflateRaw(data: Uint8Array): Promise<Uint8Array>`
 - **Usada por:** `readZipEntry()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4503,7 +3783,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/zip.ts`
 - **Assinatura:** `async readZipEntry(bytes: Uint8Array, name: string): Promise<Uint8Array | null>`
 - **Usada por:** `docxToText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4513,24 +3793,24 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (só CPU).
 - **Erros:** Rejeita com "Compressão ZIP não suportada (método N)." para outros métodos.
 
-## `src/core/bytes.ts`
-
-### `bytesToBase64`
+### `decompressBytes`
 
 <!-- gerado:inicio -->
 
-- **Arquivo:** `src/core/bytes.ts`
-- **Assinatura:** `bytesToBase64(bytes: Uint8Array): string`
-- **Usada por:** `binaryContentBlock()`
-- **Processos:** P03, P11
+- **Arquivo:** `src/core/zip.ts`
+- **Assinatura:** `async decompressBytes(data: Uint8Array, format: 'deflate' | 'deflate-raw'): Promise<Uint8Array>`
+- **Usada por:** `decodePdfStream()`, `inflateRaw()`
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
-- **Faz:** Codifica bytes em base64 em blocos de 32 KB, sem `Buffer` (Node e Workers).
-- **Entrada:** `bytes`.
-- **Saída:** Texto base64.
+- **Faz:** Descomprime dados com `DecompressionStream` no formato dado.
+- **Entrada:** `data`: bytes comprimidos. `format`: `deflate-raw` (DEFLATE puro) ou `deflate` (com cabeçalho zlib).
+- **Saída:** Os bytes descomprimidos.
 - **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
+- **Erros:** Propaga o erro do `DecompressionStream` se os dados estiverem corrompidos.
+
+## `src/core/bytes.ts`
 
 ### `byteView`
 
@@ -4539,7 +3819,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/bytes.ts`
 - **Assinatura:** `byteView(bytes: Uint8Array): DataView`
 - **Usada por:** `docToText()`, `findEndOfCentralDirectory()`, `listZipEntries()`, `parseDirectory()`, `parsePieceTable()`, `readCfbHeader()`, `sectorWords()`, `utf16leToString()`, `zipEntryBytes()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4556,7 +3836,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/bytes.ts`
 - **Assinatura:** `concatBytes(parts: readonly Uint8Array[]): Uint8Array`
 - **Usada por:** `readMiniStream()`, `readRegularChain()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4573,7 +3853,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/core/bytes.ts`
 - **Assinatura:** `utf16leToString(bytes: Uint8Array): string`
 - **Usada por:** `parseDirectory()`, `pieceText()`
-- **Processos:** P03
+- **Processos:** P03, P12
 
 <!-- gerado:fim -->
 
@@ -4583,6 +3863,2626 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+### `bytesToBase64`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/bytes.ts`
+- **Assinatura:** `bytesToBase64(bytes: Uint8Array): string`
+- **Usada por:** `binaryContentBlock()`
+- **Processos:** P03, P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Codifica bytes em base64 em blocos de 32 KB, sem `Buffer` (Node e Workers).
+- **Entrada:** `bytes`.
+- **Saída:** Texto base64.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `tools/bundle/bundle.ts`
+
+### `listConnectors`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `listConnectors(rootDir: string): string[]`
+- **Usada por:** `runBuildCli()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os conectores com manifesto de plugin (`.claude-plugin/plugin.json`) em `connectors/`.
+- **Entrada:** `rootDir`: raiz do repositório.
+- **Saída:** Nomes das subpastas em ordem alfabética; vazia se `connectors/` não existe.
+- **Efeitos:** Lê o disco.
+- **Erros:** Propaga erros de leitura da pasta.
+
+### `bundleOptions`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `bundleOptions(entry: string, outfile: string): BuildOptions`
+- **Usada por:** `buildConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta as opções do esbuild para unir o servidor remoto num ESM para Node 22.
+- **Entrada:** `entry`: arquivo de entrada; `outfile`: arquivo de saída.
+- **Saída:** `BuildOptions` com bundle, `node22`, sem dependências externas, e banner que define `require`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `mcpServerProblems`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `mcpServerProblems(name: string, server: unknown): string[]`
+- **Usada por:** `pluginMcpProblems()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere um servidor do `.mcp.json` do plugin: tem de ser remoto (`type: "http"`, URL `https://`, sem `command`).
+- **Entrada:** `name`: nome do servidor; `server`: valor lido do JSON.
+- **Saída:** Lista de problemas em português; vazia se o servidor está certo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pluginMcpProblems`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `pluginMcpProblems(config: unknown): string[]`
+- **Usada por:** `buildConnector()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere o `.mcp.json` inteiro de um plugin: ao menos um servidor, todos remotos.
+- **Entrada:** `config`: conteúdo do `.mcp.json` já lido como JSON.
+- **Saída:** Lista de problemas; vazia se a configuração está certa.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isRemoteMcpUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `isRemoteMcpUrl(url: unknown): boolean`
+- **Usada por:** `mcpServerProblems()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se a URL é remota: `https://` fixo, ou `${user_config.<campo>}` de um template self-host (ADR 0015).
+- **Entrada:** `url`: valor do campo `url` do servidor no `.mcp.json`.
+- **Saída:** `true` para `https://...` ou um placeholder `${user_config.<campo>}` inteiro; `false` para o resto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `tools/bundle/cli.ts`
+
+### `buildConnector`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/cli.ts`
+- **Assinatura:** `async buildConnector(root: string, name: string): Promise<void>`
+- **Usada por:** `runBuildCli()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida o `.mcp.json` do conector e gera o bundle `server/remote.js`, se houver `src/remote-main.ts`.
+- **Entrada:** `root`: raiz do repositório; `name`: pasta do conector.
+- **Saída:** Promise vazia.
+- **Efeitos:** Lê o `.mcp.json`; roda o esbuild e grava `server/remote.js`.
+- **Erros:** Rejeita listando os problemas de `pluginMcpProblems()`; propaga erros de leitura e do esbuild.
+
+### `runBuildCli`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/cli.ts`
+- **Assinatura:** `async runBuildCli(): Promise<void>`
+- **Usada por:** `tools/bundle/cli.ts (módulo)`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Ponto de entrada de `npm run build`: faz o build de todos os conectores.
+- **Entrada:** Nenhuma.
+- **Saída:** Promise vazia; imprime "✔ <conector>" por conector.
+- **Efeitos:** Os de `buildConnector()`; escreve no terminal.
+- **Erros:** Propaga erros de `buildConnector()`.
+
+## `connectors/gmail/src/access-token.ts`
+
+### `forgetAccessToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `forgetAccessToken(email: string): void`
+- **Usada por:** `gmailGet()`, `storeLinkedAccount()`
+- **Processos:** P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Esquece o access token guardado de uma conta (ex.: depois de um 401 do Gmail).
+- **Entrada:** `email`: e-mail completo da conta, em minúsculas.
+- **Saída:** Nada.
+- **Efeitos:** Memória do isolate: remove a entrada da conta do cache de access tokens.
+- **Erros:** Nenhum.
+
+### `clearAccessTokenCache`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `clearAccessTokenCache(): void`
+- **Usada por:** —
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Esquece todos os access tokens guardados.
+- **Entrada:** Nenhuma.
+- **Saída:** Nada.
+- **Efeitos:** Memória do isolate: esvazia o cache de access tokens.
+- **Erros:** Nenhum.
+
+### `linkUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `linkUrl(origin: string): string`
+- **Usada por:** `accountStatus()`, `relinkError()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o link da página que vincula contas.
+- **Entrada:** `origin`: origem pública do Worker, sem barra no fim.
+- **Saída:** A URL `<origin>/accounts/link`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `relinkError`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `relinkError(account: AllowedAccount, origin: string, revoked: boolean): Error`
+- **Usada por:** `renewAccessToken()`, `requireLinkedAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o erro acionável de conta sem vínculo válido (nunca vinculada ou revogada).
+- **Entrada:** `account`: conta permitida. `origin`: origem pública do Worker. `revoked`: verdadeiro se o acesso foi revogado ou expirou; falso se a conta nunca foi vinculada.
+- **Saída:** Um `Error` com o apelido da conta, o motivo e o link de vínculo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum (devolve o erro, não lança).
+
+### `requireLinkedAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `async requireLinkedAccount(deps: GmailDeps, account: AllowedAccount): Promise<LinkedAccount>`
+- **Usada por:** `getAccessToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a conta vinculada e ativa do KV.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, origem). `account`: conta permitida.
+- **Saída:** A conta vinculada com status ativo.
+- **Efeitos:** KV: lê o registro selado da conta.
+- **Erros:** Lança o erro de `relinkError()` se não houver vínculo válido ou se a conta estiver revogada.
+
+### `renewAccessToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `async renewAccessToken(deps: GmailDeps, account: AllowedAccount, linked: LinkedAccount): Promise<string>`
+- **Usada por:** `getAccessToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Renova o access token da conta pelo refresh token.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `linked`: conta vinculada com o refresh token.
+- **Saída:** O access token novo.
+- **Efeitos:** Rede: endpoint de tokens do Google. Memória do isolate: guarda o token no cache até perto de vencer. KV: grava a conta como revogada se o Google responder `invalid_grant`.
+- **Erros:** Lança o erro de `relinkError()` (revogada) quando o Google responde `invalid_grant`. Propaga os demais erros de `refreshGoogleToken()`.
+
+### `getAccessToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/access-token.ts`
+- **Assinatura:** `async getAccessToken(deps: GmailDeps, account: AllowedAccount): Promise<string>`
+- **Usada por:** `accountStatus()`, `gmailGet()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Devolve um access token válido da conta, da memória ou renovado pelo refresh token do KV.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida.
+- **Saída:** O access token válido.
+- **Efeitos:** Memória do isolate: lê o cache de access tokens. Quando ele falta ou venceu: KV (lê, e grava se revogada) e rede (endpoint de tokens do Google).
+- **Erros:** Propaga os erros de `requireLinkedAccount()` e `renewAccessToken()`.
+
+## `connectors/gmail/src/attachments.ts`
+
+### `looksLikeText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/attachments.ts`
+- **Assinatura:** `looksLikeText(text: string): boolean`
+- **Usada por:** `detectAttachmentKind()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se o texto parece texto de verdade (sem caracteres de controle além de espaços e quebras).
+- **Entrada:** `text`: texto decodificado; só os primeiros 4096 caracteres são examinados.
+- **Saída:** Verdadeiro se a amostra não é vazia e tem menos de 1% de caracteres de controle ou de substituição; falso no resto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `detectAttachmentKind`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/attachments.ts`
+- **Assinatura:** `detectAttachmentKind(bytes: Uint8Array): AttachmentKind`
+- **Usada por:** `attachmentBytesToText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Detecta o tipo do anexo pelos primeiros bytes ou pelo conteúdo.
+- **Entrada:** `bytes`: conteúdo bruto do anexo.
+- **Saída:** `pdf`, `docx`, `doc`, `html` ou `text`; nulo se não for um tipo reconhecido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `attachmentBytesToText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/attachments.ts`
+- **Assinatura:** `async attachmentBytesToText(bytes: Uint8Array): Promise<string>`
+- **Usada por:** `readAttachmentText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte os bytes do anexo em texto conforme o tipo detectado.
+- **Entrada:** `bytes`: conteúdo bruto do anexo.
+- **Saída:** O texto extraído; pode ser vazio (ex.: PDF escaneado).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se o tipo não for PDF, Word, HTML ou texto. Propaga os erros de `pdfToText()` e `wordToText()`.
+
+### `readAttachmentText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/attachments.ts`
+- **Assinatura:** `async readAttachmentText(deps: GmailDeps, account: AllowedAccount, ids: { readonly messageId: string; readonly attachmentId: string }): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Baixa um anexo do Gmail como texto limitado.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `ids`: `messageId` da mensagem e `attachmentId` do anexo.
+- **Saída:** Objeto com `account`, `message_id`, `size` e `text` (truncado em 50.000 caracteres; aviso de texto não extraível quando vazio).
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
+- **Erros:** Lança erro se o anexo passar de 5 MB. Propaga os erros de `gmailGet()` e `attachmentBytesToText()`.
+
+## `connectors/gmail/src/config.ts`
+
+### `accountAlias`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `accountAlias(email: string): string`
+- **Usada por:** `parseAllowedEmails()`, `saveLinkedAccount()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o apelido de uma conta: a parte antes do `@`, em minúsculas.
+- **Entrada:** `email`: e-mail completo; precisa conter `@`.
+- **Saída:** O apelido em minúsculas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isEmailAddress`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `isEmailAddress(text: string): boolean`
+- **Usada por:** `parseAllowedEmails()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se o texto parece um e-mail simples (`nome@dominio.tld`, sem espaços).
+- **Entrada:** `text`: texto a conferir.
+- **Saída:** Verdadeiro se tem o formato de e-mail; falso no resto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseAllowedEmails`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `parseAllowedEmails(raw: string | null): AllowedAccount[]`
+- **Usada por:** `readGmailSettings()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê `ALLOWED_EMAILS` como a lista de contas permitidas.
+- **Entrada:** `raw`: e-mails separados por vírgula, ou nulo.
+- **Saída:** As contas permitidas, com apelido e e-mail em minúsculas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se a lista estiver vazia, se um item não for e-mail, ou se os apelidos se repetirem ou um deles for `all`.
+
+### `requiredSecret`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `requiredSecret(env: EnvVars, name: string): string`
+- **Usada por:** `readConsentSecret()`, `readGmailSettings()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma variável obrigatória do Worker.
+- **Entrada:** `env`: variáveis de texto do Worker. `name`: nome da variável.
+- **Saída:** O valor da variável, sem espaços nas pontas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro com o comando `wrangler secret put` se a variável faltar, estiver vazia ou for um placeholder.
+
+### `readConsentSecret`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `readConsentSecret(env: EnvVars): string`
+- **Usada por:** `readGmailSettings()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o segredo do consentimento lembrado com o tamanho mínimo exigido.
+- **Entrada:** `env`: variáveis de texto do Worker.
+- **Saída:** O valor de `CONSENT_SECRET`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se o segredo tiver menos de 32 caracteres. Propaga o erro de `requiredSecret()`.
+
+### `readGmailSettings`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `readGmailSettings(env: EnvVars): GmailSettings`
+- **Usada por:** `createGmailDeps()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a configuração do conector a partir dos secrets do Worker.
+- **Entrada:** `env`: variáveis de texto do Worker.
+- **Saída:** A configuração validada: credenciais do cliente Google, chave de selagem, contas permitidas e segredo do consentimento.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Propaga os erros de `requiredSecret()`, `parseSealKey()`, `parseAllowedEmails()` e `readConsentSecret()`.
+
+### `findAllowedAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `findAllowedAccount(accounts: readonly AllowedAccount[], email: string): AllowedAccount | null`
+- **Usada por:** `completeSignIn()`, `linkFromCode()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Procura a conta permitida com o e-mail dado, sem diferenciar maiúsculas.
+- **Entrada:** `accounts`: contas permitidas. `email`: e-mail a procurar.
+- **Saída:** A conta encontrada, ou nulo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `resolveAccounts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/config.ts`
+- **Assinatura:** `resolveAccounts(accounts: readonly AllowedAccount[], requested: string): AllowedAccount[]`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `resolveSingleAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Resolve as contas pedidas numa ferramenta pelo apelido ou por `all`.
+- **Entrada:** `accounts`: contas permitidas. `requested`: apelido ou `all` (espaços e maiúsculas ignorados).
+- **Saída:** Todas as contas para `all`; senão, uma lista com a conta do apelido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro listando os apelidos válidos se o apelido for desconhecido.
+
+## `connectors/gmail/src/gmail-api.ts`
+
+### `gmailUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `gmailUrl(path: string, params: Readonly<Record<string, GmailQueryValue>> = {}): string`
+- **Usada por:** `accountLabels()`, `connectors/gmail/src/tools.ts (módulo)`, `fetchThreadMetadata()`, `readAttachmentText()`, `searchAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a URL de um caminho da Gmail API com os parâmetros dados.
+- **Entrada:** `path`: caminho relativo à base da conta (ex.: `messages/<id>`). `params`: parâmetros opcionais; listas viram o parâmetro repetido.
+- **Saída:** A URL completa; parâmetros nulos, indefinidos ou vazios são omitidos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `gmailHttpError`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `gmailHttpError(status: number, account: AllowedAccount): Error`
+- **Usada por:** `gmailGet()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o erro acionável para uma resposta de falha da Gmail API.
+- **Entrada:** `status`: status HTTP da resposta. `account`: conta consultada.
+- **Saída:** Um `Error` com o apelido da conta e a mensagem do status (ou uma genérica com o número do HTTP).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum (devolve o erro, não lança).
+
+### `sendGmailGet`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `sendGmailGet(deps: GmailDeps, url: string, token: string): Promise<Response>`
+- **Usada por:** `gmailGet()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Envia um GET autenticado à Gmail API com o access token dado.
+- **Entrada:** `deps`: dependências do conector (rede). `url`: URL completa da Gmail API. `token`: access token da conta.
+- **Saída:** A resposta HTTP, sem conferir o status.
+- **Efeitos:** Rede: Gmail API.
+- **Erros:** Propaga as falhas de rede de `deps.fetch`.
+
+### `gmailGet`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/gmail-api.ts`
+- **Assinatura:** `async gmailGet(deps: GmailDeps, account: AllowedAccount, url: string): Promise<T>`
+- **Usada por:** `accountLabels()`, `connectors/gmail/src/tools.ts (módulo)`, `fetchThreadMetadata()`, `readAttachmentText()`, `searchAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê um recurso da Gmail API como JSON, com uma nova tentativa depois de 401.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `url`: URL completa da Gmail API.
+- **Saída:** O corpo JSON da resposta.
+- **Efeitos:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). Memória do isolate: esquece o access token depois de 401. KV pelo access token.
+- **Erros:** Lança o erro de `gmailHttpError()` se a resposta final não for de sucesso. Propaga os erros de `getAccessToken()` e de rede.
+
+## `connectors/gmail/src/google-oauth.ts`
+
+### `googleRedirectUri`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `googleRedirectUri(origin: string): string`
+- **Usada por:** `beginGoogleSignIn()`, `exchangeGoogleCode()`, `startAccountLink()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o endereço de retorno do Google para a origem do Worker.
+- **Entrada:** `origin`: origem pública do Worker, sem barra no fim.
+- **Saída:** A URL `<origin>/google/callback`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `googleAuthorizeUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `googleAuthorizeUrl(params: GoogleAuthorizeParams): string`
+- **Usada por:** `beginGoogleSignIn()`, `startAccountLink()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a URL de autorização do Google.
+- **Entrada:** `params`: cliente, endereço de retorno, escopos, `state`, desafio PKCE, `nonce` e `offline` (pede refresh token e novo consentimento).
+- **Saída:** A URL de autorização com PKCE S256 e escolha de conta.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `randomToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `randomToken(bytes = 32): string`
+- **Usada por:** `beginGoogleSignIn()`, `completeSignIn()`, `startAccountLink()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Gera um texto aleatório em base64url (state, nonce, verificador PKCE).
+- **Entrada:** `bytes`: bytes de entropia; padrão 32.
+- **Saída:** O texto aleatório em base64url.
+- **Efeitos:** Lê o gerador aleatório criptográfico.
+- **Erros:** Nenhum.
+
+### `parseGoogleTokens`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `parseGoogleTokens(body: unknown): GoogleTokens`
+- **Usada por:** `postGoogleToken()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida o JSON de sucesso do endpoint de tokens do Google.
+- **Entrada:** `body`: corpo JSON da resposta, de qualquer forma.
+- **Saída:** Os tokens; `expiresIn` vale 3600 se faltar, refresh token e `id_token` nulos se faltarem, escopo vazio se faltar.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `GoogleTokenError` (`invalid_response`) se faltar o access token.
+
+### `googleErrorCode`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `async googleErrorCode(response: Response): Promise<string>`
+- **Usada por:** `postGoogleToken()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o código de erro OAuth de uma resposta de falha do Google.
+- **Entrada:** `response`: resposta HTTP de falha.
+- **Saída:** O campo `error` do corpo; `http_<status>` se o corpo não for JSON ou não tiver `error`.
+- **Efeitos:** Consome o corpo da resposta.
+- **Erros:** Nenhum.
+
+### `postGoogleToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `async postGoogleToken(deps: GmailDeps, form: Readonly<Record<string, string>>): Promise<GoogleTokens>`
+- **Usada por:** `exchangeGoogleCode()`, `refreshGoogleToken()`
+- **Processos:** P10, P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Envia um formulário ao endpoint de tokens do Google com as credenciais do cliente.
+- **Entrada:** `deps`: dependências do conector (configuração, rede). `form`: campos do pedido (tipo de concessão e dados dela).
+- **Saída:** Os tokens validados.
+- **Efeitos:** Rede: endpoint de tokens do Google.
+- **Erros:** Lança `GoogleTokenError` com o código do Google se a resposta não for de sucesso. Propaga os erros de `parseGoogleTokens()` e de rede.
+
+### `exchangeGoogleCode`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `exchangeGoogleCode(deps: GmailDeps, code: string, verifier: string): Promise<GoogleTokens>`
+- **Usada por:** `completeSignIn()`, `linkFromCode()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Troca o código de autorização do Google (com o verificador PKCE) por tokens.
+- **Entrada:** `deps`: dependências do conector (configuração, origem, rede). `code`: código recebido no retorno. `verifier`: verificador PKCE da autorização.
+- **Saída:** Os tokens validados.
+- **Efeitos:** Rede: endpoint de tokens do Google.
+- **Erros:** Propaga os erros de `postGoogleToken()`.
+
+### `refreshGoogleToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/google-oauth.ts`
+- **Assinatura:** `refreshGoogleToken(deps: GmailDeps, refreshToken: string): Promise<GoogleTokens>`
+- **Usada por:** `renewAccessToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Renova o access token com o refresh token guardado.
+- **Entrada:** `deps`: dependências do conector (configuração, rede). `refreshToken`: refresh token da conta.
+- **Saída:** Os tokens validados.
+- **Efeitos:** Rede: endpoint de tokens do Google.
+- **Erros:** Propaga os erros de `postGoogleToken()` (`invalid_grant` quando o acesso foi revogado).
+
+## `connectors/gmail/src/id-token.ts`
+
+### `decodeJwtJson`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/id-token.ts`
+- **Assinatura:** `decodeJwtJson(part: string): Record<string, unknown>`
+- **Usada por:** `decodeJwt()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica um pedaço base64url de JSON em objeto.
+- **Entrada:** `part`: cabeçalho ou payload do JWT em base64url.
+- **Saída:** O objeto decodificado.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se o JSON não for objeto. Propaga o `SyntaxError` de JSON inválido.
+
+### `decodeJwt`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/id-token.ts`
+- **Assinatura:** `decodeJwt(token: string): DecodedJwt`
+- **Usada por:** `verifyGoogleIdToken()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Separa e decodifica um JWT (`header.payload.assinatura`).
+- **Entrada:** `token`: JWT compacto.
+- **Saída:** Cabeçalho, payload, texto assinado e bytes da assinatura.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se o token não tiver três partes. Propaga os erros de `decodeJwtJson()`.
+
+### `idTokenProblems`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/id-token.ts`
+- **Assinatura:** `idTokenProblems(payload: Readonly<Record<string, unknown>>, expected: IdTokenExpectation): string[]`
+- **Usada por:** `checkIdTokenClaims()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista as verificações do `id_token` que falharam.
+- **Entrada:** `payload`: claims do `id_token`. `expected`: cliente, `nonce` e instante atual em segundos Unix.
+- **Saída:** Nomes das verificações que falharam (emissor, audiência, validade, nonce, e-mail verificado); vazio quando todas passam.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `checkIdTokenClaims`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/id-token.ts`
+- **Assinatura:** `checkIdTokenClaims(payload: Readonly<Record<string, unknown>>, expected: IdTokenExpectation): string`
+- **Usada por:** `verifyGoogleIdToken()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere as claims do `id_token` contra o esperado.
+- **Entrada:** `payload`: claims do `id_token`. `expected`: cliente, `nonce` e instante atual em segundos Unix.
+- **Saída:** O e-mail verificado, em minúsculas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro listando as verificações que falharam.
+
+### `fetchGoogleKey`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/id-token.ts`
+- **Assinatura:** `async fetchGoogleKey(deps: GmailDeps, kid: string): Promise<webcrypto.JsonWebKey>`
+- **Usada por:** `verifyGoogleIdToken()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Busca a chave pública do Google com o `kid` dado.
+- **Entrada:** `deps`: dependências do conector (rede). `kid`: identificador da chave no cabeçalho do JWT.
+- **Saída:** A chave pública em formato JWK.
+- **Efeitos:** Rede: JWKS do Google.
+- **Erros:** Lança erro se a resposta não for de sucesso ou se a chave não existir. Propaga as falhas de rede.
+
+### `verifyRs256`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/id-token.ts`
+- **Assinatura:** `async verifyRs256(jwt: DecodedJwt, jwk: webcrypto.JsonWebKey): Promise<boolean>`
+- **Usada por:** `verifyGoogleIdToken()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere a assinatura RS256 do JWT com a chave pública dada.
+- **Entrada:** `jwt`: JWT decodificado. `jwk`: chave pública RSA em formato JWK.
+- **Saída:** Verdadeiro se a assinatura confere; falso no resto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Propaga o erro de `crypto.subtle.importKey` se a chave for inválida.
+
+### `verifyGoogleIdToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/id-token.ts`
+- **Assinatura:** `async verifyGoogleIdToken(deps: GmailDeps, idToken: string, nonce: string): Promise<string>`
+- **Usada por:** `completeSignIn()`, `linkFromCode()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida o `id_token` do Google (assinatura e claims) para obter o e-mail verificado.
+- **Entrada:** `deps`: dependências do conector (configuração, rede, relógio). `idToken`: JWT recebido do Google. `nonce`: nonce enviado na autorização.
+- **Saída:** O e-mail verificado, em minúsculas.
+- **Efeitos:** Rede: JWKS do Google.
+- **Erros:** Lança erro se o algoritmo não for RS256 ou a assinatura não conferir. Propaga os erros de `decodeJwt()`, `fetchGoogleKey()`, `verifyRs256()` e `checkIdTokenClaims()`.
+
+## `connectors/gmail/src/link-flow.ts`
+
+### `sha256Hex`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `sha256Hex(text: string): string`
+- **Usada por:** `linkRequestKey()`, `startAccountLink()`, `takeLinkRequest()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula o SHA-256 de um texto em hexadecimal.
+- **Entrada:** `text`: texto a resumir (ex.: `state` ou cookie do vínculo).
+- **Saída:** Hash SHA-256 em hexadecimal minúsculo (64 caracteres).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `linkRequestKey`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `linkRequestKey(state: string): string`
+- **Usada por:** `startAccountLink()`, `takeLinkRequest()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a chave do pedido de vínculo no KV.
+- **Entrada:** `state`: `state` do vínculo recebido ou gerado.
+- **Saída:** Texto `link:<sha256 do state>`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readCookie`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `readCookie(header: string | null, name: string): string | null`
+- **Usada por:** `takeLinkRequest()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o valor de um cookie do header `Cookie`.
+- **Entrada:** `header`: valor do header `Cookie`, ou nulo. `name`: nome exato do cookie.
+- **Saída:** Valor do cookie (pode conter `=`), ou nulo se o header faltar ou não tiver o cookie.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `linkCookie`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `linkCookie(value: string | null): string`
+- **Usada por:** `finishAccountLink()`, `startAccountLink()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o header `Set-Cookie` do vínculo.
+- **Entrada:** `value`: valor do cookie, ou nulo para apagá-lo.
+- **Saída:** Texto do `Set-Cookie` de `__Host-gmail-link` (`Secure`, `HttpOnly`, `SameSite=Lax`), com `Max-Age` de 600 s ou 0 quando `value` é nulo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `startAccountLink`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async startAccountLink(deps: GmailDeps): Promise<Response>`
+- **Usada por:** `connectors/gmail/src/worker.ts (módulo)`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Inicia o vínculo de uma conta Gmail mandando o navegador ao Google.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio, origem).
+- **Saída:** Redirecionamento 302 para o login do Google (`gmail.readonly`, acesso offline, PKCE e `nonce`) com o cookie de vínculo.
+- **Efeitos:** Grava no KV o pedido de vínculo selado, com validade de 600 s; define o cookie `__Host-gmail-link`.
+- **Erros:** Nenhum próprio; falhas do KV propagam.
+
+### `takeLinkRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async takeLinkRequest(deps: GmailDeps, request: Request): Promise<LinkRequest | null>`
+- **Usada por:** `finishAccountLink()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Recupera o pedido de vínculo de uso único.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, relógio). `request`: volta do Google, com `state` na URL e o cookie de vínculo.
+- **Saída:** O pedido (`verifier`, `nonce`, `bindingHash`), ou nulo se não existir, tiver vencido, o selo não abrir ou o cookie não conferir.
+- **Efeitos:** Lê e apaga do KV o pedido de vínculo (mesmo quando depois o recusa).
+- **Erros:** Nenhum próprio; falhas do KV propagam.
+
+### `accessDeniedPage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `accessDeniedPage(): Response`
+- **Usada por:** `finishSignIn()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a página de conta Google fora da allowlist.
+- **Entrada:** Nenhuma.
+- **Saída:** Página HTML 403 "Acesso negado".
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `linkRefusal`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `linkRefusal(tokens: GoogleTokens): Response | null`
+- **Usada por:** `linkFromCode()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide se os tokens do Google servem para ler o Gmail.
+- **Entrada:** `tokens`: tokens devolvidos pelo Google na troca do código.
+- **Saída:** Página 400 se faltar o escopo `gmail.readonly` ou o refresh token; nulo se os tokens servem.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `storeLinkedAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async storeLinkedAccount(deps: GmailDeps, email: string, tokens: GoogleTokens): Promise<void>`
+- **Usada por:** `linkFromCode()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava a conta vinculada com o refresh token selado.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, relógio). `email`: e-mail da conta, já na allowlist. `tokens`: tokens do Google com refresh token.
+- **Saída:** Nada.
+- **Efeitos:** Grava no KV a conta selada com status `active`; descarta da memória o access token antigo dela.
+- **Erros:** Nenhum próprio; falhas do KV propagam.
+
+### `linkFromCode`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async linkFromCode(deps: GmailDeps, code: string, link: LinkRequest): Promise<Response>`
+- **Usada por:** `linkSafely()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Conclui o vínculo a partir do código do Google.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `code`: código de autorização do Google. `link`: pedido de vínculo recuperado (verifier e `nonce`).
+- **Saída:** Página 200 "Conta vinculada"; 400 sem `id_token`, sem escopo ou sem refresh token; 403 se o e-mail não está na allowlist.
+- **Efeitos:** Rede (troca do código no Google, chaves públicas do Google); grava a conta no KV quando permitida.
+- **Erros:** Propaga o erro da troca do código (`GoogleTokenError`) e da validação do `id_token` (malformado, assinatura ou claims inválidos, chaves indisponíveis).
+
+### `linkSafely`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async linkSafely(deps: GmailDeps, code: string, link: LinkRequest): Promise<Response>`
+- **Usada por:** `finishAccountLink()`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Roda `linkFromCode()` convertendo falhas em página de erro.
+- **Entrada:** `deps`: dependências do conector. `code`: código do Google. `link`: pedido de vínculo recuperado.
+- **Saída:** A página de `linkFromCode()`, ou página 400 com a mensagem do erro.
+- **Efeitos:** Os de `linkFromCode()` (rede com o Google; grava a conta no KV quando permitida).
+- **Erros:** Nenhum: qualquer falha vira página 400 e nada é gravado.
+
+### `finishAccountLink`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/link-flow.ts`
+- **Assinatura:** `async finishAccountLink(deps: GmailDeps, request: Request): Promise<Response>`
+- **Usada por:** `connectors/gmail/src/worker.ts (módulo)`
+- **Processos:** P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende a volta do Google no vínculo de conta.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `request`: requisição da volta, com `state`, `code` ou `error` e o cookie de vínculo.
+- **Saída:** Página 400 se o pedido expirou ou o Google recusou; senão a página de `linkFromCode`; sempre com o cookie de vínculo apagado.
+- **Efeitos:** Lê e apaga o pedido no KV; rede (Google); grava a conta no KV quando permitida; apaga o cookie `__Host-gmail-link`.
+- **Erros:** Nenhum: falhas da troca do código ou do `id_token` viram página 400 por `linkSafely()`.
+
+## `connectors/gmail/src/message-format.ts`
+
+### `base64UrlToBytes`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `base64UrlToBytes(data: string): Uint8Array`
+- **Usada por:** `decodePartBody()`, `readAttachmentText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica base64url em bytes.
+- **Entrada:** `data`: texto em base64url (corpo ou anexo da Gmail API).
+- **Saída:** Bytes decodificados; vazio para texto vazio (caracteres inválidos são ignorados).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `partCharset`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `partCharset(part: GmailPart): string`
+- **Usada por:** `decodePartBody()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o charset declarado no `Content-Type` de uma parte.
+- **Entrada:** `part`: parte MIME da Gmail API.
+- **Saída:** Charset em minúsculas, ou `utf-8` se não houver.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `decodePartBody`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `decodePartBody(part: GmailPart): string`
+- **Usada por:** `messageBodyText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte o corpo de uma parte MIME em texto.
+- **Entrada:** `part`: parte MIME da Gmail API (corpo em base64url).
+- **Saída:** Texto do corpo: Windows-1252 para charsets latinos e `us-ascii`, UTF-8 nos demais; vazio sem corpo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `headerValues`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `headerValues(headers: readonly { readonly name: string; readonly value: string }[]): Map<string, string>`
+- **Usada por:** `partCharset()`, `pickHeaders()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Indexa cabeçalhos pelo nome em minúsculas.
+- **Entrada:** `headers`: lista de cabeçalhos `{ name, value }`.
+- **Saída:** Mapa nome em minúsculas → valor, com o primeiro de cada nome; vazio para lista vazia.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `flattenParts`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `flattenParts(part: GmailPart | undefined, depth = 0): GmailPart[]`
+- **Usada por:** `flattenParts()`, `messageAttachments()`, `messageBodyText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Achata a árvore MIME em profundidade.
+- **Entrada:** `part`: raiz da árvore MIME, ou indefinida. `depth`: profundidade atual (padrão 0; acima de 20 para).
+- **Saída:** Todas as partes, a raiz primeiro; vazio sem raiz ou além da profundidade 20.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isBodyPart`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `isBodyPart(part: GmailPart, mimeType: string): boolean`
+- **Usada por:** `messageBodyText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se a parte é corpo do tipo dado.
+- **Entrada:** `part`: parte MIME. `mimeType`: tipo esperado (ex.: `text/plain`).
+- **Saída:** Verdadeiro se o tipo bate, não há nome de arquivo e há dados no corpo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `messageBodyText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `messageBodyText(payload: GmailPart | undefined): string`
+- **Usada por:** `formatMessage()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o corpo da mensagem em texto plano.
+- **Entrada:** `payload`: raiz MIME da mensagem, ou indefinida.
+- **Saída:** Partes `text/plain` unidas; sem elas, as `text/html` convertidas em texto; vazio sem corpo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `messageAttachments`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `messageAttachments(payload: GmailPart | undefined): AttachmentInfo[]`
+- **Usada por:** `formatMessage()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os anexos de uma mensagem.
+- **Entrada:** `payload`: raiz MIME da mensagem, ou indefinida.
+- **Saída:** Anexos (`attachment_id`, `filename`, `mime_type`, `size`) das partes com nome e `attachmentId`; vazio se não houver.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `truncateText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `truncateText(text: string, max: number): string`
+- **Usada por:** `formatMessage()`, `readAttachmentText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Corta um texto no limite de caracteres.
+- **Entrada:** `text`: texto a limitar. `max`: maior número de caracteres mantidos.
+- **Saída:** O texto intacto se couber; senão os `max` primeiros caracteres e um aviso de quantos ficaram de fora.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `internalDateIso`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `internalDateIso(internalDate: string | undefined): string | null`
+- **Usada por:** `formatMessage()`, `summarizeThread()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte `internalDate` da Gmail API em data ISO 8601.
+- **Entrada:** `internalDate`: milissegundos Unix em texto, ou indefinido.
+- **Saída:** Data ISO 8601, ou nulo se vazio ou não numérico.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pickHeaders`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `pickHeaders(payload: GmailPart | undefined): Record<string, string>`
+- **Usada por:** `formatMessage()`, `summarizeThread()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Separa os cabeçalhos úteis da mensagem.
+- **Entrada:** `payload`: raiz MIME da mensagem, ou indefinida.
+- **Saída:** Objeto com `from`, `to`, `cc`, `date` e `subject` presentes; vazio se não houver.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `formatMessage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `formatMessage(message: GmailMessage, format: MessageFormat, maxChars = MAX_MESSAGE_CHARS): Record<string, unknown>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`, `formatThread()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte uma mensagem da Gmail API em objeto enxuto.
+- **Entrada:** `message`: mensagem da Gmail API. `format`: `text` (com corpo) ou `minimal`. `maxChars`: limite do corpo (padrão 20.000).
+- **Saída:** Ids, data, cabeçalhos, rótulos, resumo e anexos; no formato `text`, também o corpo cortado no limite. Campos ausentes viram nulo ou vazio.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `perMessageLimit`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `perMessageLimit(count: number): number`
+- **Usada por:** `formatThread()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula o limite de corpo por mensagem numa conversa.
+- **Entrada:** `count`: número de mensagens da conversa (0 conta como 1).
+- **Saída:** 60.000 dividido por `count`, entre 2.000 e 20.000 caracteres.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `formatThread`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `formatThread(thread: GmailThread, format: MessageFormat): Record<string, unknown>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte uma conversa da Gmail API em objeto enxuto.
+- **Entrada:** `thread`: conversa da Gmail API. `format`: `text` (com corpos) ou `minimal`.
+- **Saída:** `thread_id`, `message_count` e as mensagens formatadas, com o limite de corpo dividido entre elas; lista vazia sem mensagens.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `summarizeThread`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/message-format.ts`
+- **Assinatura:** `summarizeThread(thread: GmailThread, account: string): Record<string, unknown>`
+- **Usada por:** `searchAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Resume uma conversa para a busca.
+- **Entrada:** `thread`: conversa da Gmail API (só cabeçalhos basta). `account`: apelido da conta.
+- **Saída:** Conta, `thread_id`, assunto da primeira mensagem, remetente, data, resumo e rótulos da última, e `message_count`; texto vazio ou nulo onde faltar dado.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/gmail/src/pages.ts`
+
+### `pageDocument`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/pages.ts`
+- **Assinatura:** `pageDocument(title: string, body: string): string`
+- **Usada por:** `consentPage()`, `messagePage()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o documento HTML completo de uma página.
+- **Entrada:** `title`: título (escapado aqui). `body`: corpo HTML já escapado por quem chama.
+- **Saída:** HTML com `lang="pt-BR"`, título e estilo inline.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `messagePage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/pages.ts`
+- **Assinatura:** `messagePage(title: string, message: string, status = 200): Response`
+- **Usada por:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `linkFromCode()`, `linkRefusal()`, `linkSafely()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta uma página simples de aviso.
+- **Entrada:** `title`: título em texto. `message`: mensagem em texto. `status`: código HTTP (padrão 200).
+- **Saída:** Resposta HTML com o status dado, CSP restritiva e `no-store`; título e mensagem escapados.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `consentPageBody`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/pages.ts`
+- **Assinatura:** `consentPageBody(details: ConsentDescription, handle: string): string`
+- **Usada por:** `consentPage()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o corpo HTML da página de consentimento.
+- **Entrada:** `details`: descrição do cliente OAuth (nome, destino, se é loopback). `handle`: identificador da transação de consentimento.
+- **Saída:** HTML com quem pede, para onde vai o acesso, aviso de loopback quando houver e o formulário Permitir/Negar; tudo escapado.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `copyConsentHeaders`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/pages.ts`
+- **Assinatura:** `copyConsentHeaders(response: Response, headers: Headers): Response`
+- **Usada por:** `consentPage()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Copia para a resposta os headers da transação de consentimento.
+- **Entrada:** `response`: resposta da página. `headers`: headers da biblioteca OAuth (cookies e anti-frame).
+- **Saída:** A mesma resposta com os cookies acrescentados e os demais headers copiados, exceto `content-type`, CSP e `set-cookie`.
+- **Efeitos:** Altera os headers da resposta recebida.
+- **Erros:** Nenhum.
+
+### `consentPage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/pages.ts`
+- **Assinatura:** `consentPage(details: ConsentDescription, handle: string, headers: Headers): Response`
+- **Usada por:** `showAuthorize()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a página de consentimento do conector.
+- **Entrada:** `details`: descrição do cliente OAuth. `handle`: identificador da transação. `headers`: headers da transação de consentimento.
+- **Saída:** Página HTML 200 com CSP que só libera o formulário para o Google e a origem do retorno do cliente, mais os headers da transação.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `TypeError` se `details.redirectUri` não for URL válida.
+
+### `redirectWith`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/pages.ts`
+- **Assinatura:** `redirectWith(location: string, headers: Headers = new Headers()): Response`
+- **Usada por:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `finishSignIn()`, `startAccountLink()`, `submitAuthorize()`
+- **Processos:** P10, P11
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta um redirecionamento 302 com os headers dados.
+- **Entrada:** `location`: destino. `headers`: headers a manter, como cookies da transação (padrão vazio).
+- **Saída:** Resposta 302 sem corpo, com `Location` e `cache-control: no-store`.
+- **Efeitos:** Altera o objeto `headers` recebido.
+- **Erros:** Nenhum.
+
+## `connectors/gmail/src/rate-limit.ts`
+
+### `isRateLimited`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/rate-limit.ts`
+- **Assinatura:** `async isRateLimited(limiter: RateLimiter | undefined, key: string): Promise<boolean>`
+- **Usada por:** `handleMcpApi()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se a sessão passou do limite de requisições.
+- **Entrada:** `limiter`: binding de rate limiting do Workers, ou indefinido. `key`: chave da sessão (id da sessão OAuth).
+- **Saída:** Verdadeiro se o binding recusou; falso se aceitou ou se não há binding.
+- **Efeitos:** Conta a requisição no binding de rate limiting.
+- **Erros:** Nenhum próprio; falhas do binding propagam.
+
+### `rateLimitedResponse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/rate-limit.ts`
+- **Assinatura:** `rateLimitedResponse(): Response`
+- **Usada por:** `handleMcpApi()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a resposta de excesso de requisições.
+- **Entrada:** Nenhuma.
+- **Saída:** Resposta 429 em JSON (`rate_limited`) com `Retry-After: 60`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/gmail/src/search.ts`
+
+### `encodeMultiPageToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/search.ts`
+- **Assinatura:** `encodeMultiPageToken(tokens: MultiPageToken): string | null`
+- **Usada por:** `searchThreads()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Codifica os `page_token` de várias contas num só texto.
+- **Entrada:** `tokens`: `page_token` por apelido de conta.
+- **Saída:** Base64url do JSON dos tokens, ou nulo se não houver nenhum.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `decodeMultiPageToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/search.ts`
+- **Assinatura:** `decodeMultiPageToken(token: string): MultiPageToken`
+- **Usada por:** `pagesToFetch()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica o `page_token` de várias contas.
+- **Entrada:** `token`: `next_page_token` de uma busca anterior com `all`.
+- **Saída:** `page_token` por apelido; entradas que não são texto são descartadas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro acionável ("page_token inválido") se o texto não for base64url de um objeto JSON.
+
+### `fetchThreadMetadata`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/search.ts`
+- **Assinatura:** `fetchThreadMetadata(deps: GmailDeps, account: AllowedAccount, threadId: string): Promise<GmailThread>`
+- **Usada por:** `searchAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma conversa só com os cabeçalhos úteis.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `threadId`: id da conversa.
+- **Saída:** Conversa da Gmail API em `format=metadata`, com `From`, `To`, `Cc`, `Date` e `Subject`.
+- **Efeitos:** Rede (Gmail API e, se preciso, renovação do token no Google); pode marcar a conta como revogada no KV.
+- **Erros:** Propaga os erros de `gmailGet`: HTTP da Gmail API, conta sem vínculo ou revogada, falha na renovação do token.
+
+### `searchAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/search.ts`
+- **Assinatura:** `async searchAccount(deps: GmailDeps, account: AllowedAccount, request: SearchRequest): Promise<AccountSearchResult>`
+- **Usada por:** `searchThreads()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Busca conversas numa conta.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `request`: consulta, máximo de resultados e `page_token`.
+- **Saída:** Resumos das conversas encontradas e o próximo `page_token`, ou nulo; lista vazia sem resultados.
+- **Efeitos:** Rede (Gmail API, uma leitura por conversa em paralelo, e renovação do token no Google); pode marcar a conta como revogada no KV.
+- **Erros:** Propaga os erros de `gmailGet`: HTTP da Gmail API, conta sem vínculo ou revogada, falha na renovação do token.
+
+### `threadDate`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/search.ts`
+- **Assinatura:** `threadDate(thread: Readonly<Record<string, unknown>>): string`
+- **Usada por:** `sortByDateDesc()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a data ISO de um resumo de conversa.
+- **Entrada:** `thread`: resumo de conversa.
+- **Saída:** O campo `date` se for texto; senão texto vazio.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `sortByDateDesc`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/search.ts`
+- **Assinatura:** `sortByDateDesc(threads: Record<string, unknown>[]): Record<string, unknown>[]`
+- **Usada por:** `searchThreads()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Ordena resumos de conversas da mais recente para a mais antiga.
+- **Entrada:** `threads`: resumos de conversas.
+- **Saída:** Nova lista ordenada por data decrescente; sem data vão para o fim.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pagesToFetch`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/search.ts`
+- **Assinatura:** `pagesToFetch(accounts: readonly AllowedAccount[], pageToken: string | null): [AllowedAccount, string | null][]`
+- **Usada por:** `searchThreads()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide quais contas consultar e com qual token.
+- **Entrada:** `accounts`: contas da busca. `pageToken`: `page_token` de várias contas, ou nulo na primeira página.
+- **Saída:** Pares conta → token: todas as contas com nulo na primeira página; senão só as que têm token.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança o erro de `page_token` inválido de `decodeMultiPageToken`.
+
+### `searchThreads`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/search.ts`
+- **Assinatura:** `async searchThreads(deps: GmailDeps, accounts: readonly AllowedAccount[], request: SearchRequest): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Busca conversas em uma ou várias contas.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `accounts`: contas resolvidas. `request`: consulta, máximo por conta e `page_token`.
+- **Saída:** `threads` (por data decrescente quando há várias contas) e `next_page_token`: o da conta, ou o combinado das contas; nulo quando acabou.
+- **Efeitos:** Rede (Gmail API em paralelo por conta e renovação do token no Google); pode marcar contas como revogadas no KV.
+- **Erros:** Lança erro de `page_token` inválido; propaga os erros de `gmailGet` de qualquer conta.
+
+## `connectors/gmail/src/sign-in.ts`
+
+### `authorizationErrorResponse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/sign-in.ts`
+- **Assinatura:** `authorizationErrorResponse(error: unknown): Response`
+- **Usada por:** `finishSignIn()`, `showAuthorize()`, `submitAuthorize()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte um erro de autorização em resposta.
+- **Entrada:** `error`: erro capturado no fluxo de autorização.
+- **Saída:** Redirecionamento 302 ao cliente se o `AuthorizationError` diz para onde; senão página 400 com a descrição do erro ou mensagem genérica.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `beginGoogleSignIn`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/sign-in.ts`
+- **Assinatura:** `async beginGoogleSignIn(deps: GmailDeps, oauth: OAuthHelpers, approved: { readonly request: AuthRequest; readonly headers: Headers }): Promise<Response>`
+- **Usada por:** `showAuthorize()`, `submitAuthorize()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Inicia o login do dono no Google.
+- **Entrada:** `deps`: dependências do conector (configuração, origem). `oauth`: `OAuthHelpers` da biblioteca. `approved`: pedido de autorização aprovado e headers da transação.
+- **Saída:** Redirecionamento 302 ao Google com `openid email`, sem acesso offline, PKCE, `nonce` e os headers da biblioteca.
+- **Efeitos:** Guarda o verifier e o `nonce` cifrados pela biblioteca (`beginUpstream`, KV OAUTH_KV); define cookies da transação.
+- **Erros:** Propaga os erros de `beginUpstream`.
+
+### `showAuthorize`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/sign-in.ts`
+- **Assinatura:** `async showAuthorize(deps: GmailDeps, oauth: OAuthHelpers, request: Request): Promise<Response>`
+- **Usada por:** `connectors/gmail/src/worker.ts (módulo)`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Mostra o consentimento do `GET /authorize`.
+- **Entrada:** `deps`: dependências do conector (configuração, origem). `oauth`: `OAuthHelpers` da biblioteca. `request`: pedido de autorização do Claude.
+- **Saída:** Página de consentimento 200; ou redirecionamento 302 ao Google se o consentimento já foi lembrado.
+- **Efeitos:** Lê o pedido e o cliente via `OAuthHelpers` (KV OAUTH_KV); abre a transação de consentimento ou a ida ao Google; define cookies.
+- **Erros:** Nenhum: erros de autorização viram página 400 ou redirecionamento.
+
+### `submitAuthorize`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/sign-in.ts`
+- **Assinatura:** `async submitAuthorize(deps: GmailDeps, oauth: OAuthHelpers, request: Request): Promise<Response>`
+- **Usada por:** `connectors/gmail/src/worker.ts (módulo)`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende a decisão do `POST /authorize`.
+- **Entrada:** `deps`: dependências do conector (configuração, origem). `oauth`: `OAuthHelpers` da biblioteca. `request`: formulário com `handle` e `decision`.
+- **Saída:** Ao aprovar, redirecionamento 302 ao Google; ao negar, 302 de volta ao cliente.
+- **Efeitos:** Fecha a transação de consentimento via `OAuthHelpers` (KV OAUTH_KV), lembrando a aprovação por 30 dias; define cookies.
+- **Erros:** Nenhum: erros de autorização viram página 400 ou redirecionamento.
+
+### `completeSignIn`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/sign-in.ts`
+- **Assinatura:** `async completeSignIn(deps: GmailDeps, oauth: OAuthHelpers, resumed: { readonly request: AuthRequest; readonly data: SignInData; readonly code: string }): Promise<string | null>`
+- **Usada por:** `finishSignIn()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Conclui a autorização do Claude a partir do código do Google.
+- **Entrada:** `deps`: dependências do conector (configuração, rede, relógio). `oauth`: `OAuthHelpers` da biblioteca. `resumed`: pedido de autorização, verifier e `nonce` guardados e o código do Google.
+- **Saída:** Endereço de retorno ao Claude com o código emitido; nulo se o e-mail não está na allowlist.
+- **Efeitos:** Rede (troca do código e chaves públicas do Google); grava a concessão com e-mail e id de sessão via `OAuthHelpers` (KV OAUTH_KV).
+- **Erros:** Lança erro se o Google não devolver `id_token`; propaga os erros da troca do código, da validação do `id_token` e da biblioteca.
+
+### `finishSignIn`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/sign-in.ts`
+- **Assinatura:** `async finishSignIn(deps: GmailDeps, oauth: OAuthHelpers, request: Request): Promise<Response>`
+- **Usada por:** `connectors/gmail/src/worker.ts (módulo)`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende a volta do Google no login do dono.
+- **Entrada:** `deps`: dependências do conector (configuração, rede, relógio). `oauth`: `OAuthHelpers` da biblioteca. `request`: volta do Google com `state` e `code` ou erro.
+- **Saída:** Redirecionamento 302 ao Claude com o código; 302 com `access_denied` se o Google recusou; página 403 se o e-mail não está na allowlist.
+- **Efeitos:** Lê e consome o `state` via `OAuthHelpers` (KV OAUTH_KV); rede (Google); grava a concessão quando permitida; define cookies.
+- **Erros:** Nenhum: erros de autorização, troca do código e `id_token` viram página 400 ou redirecionamento.
+
+## `connectors/gmail/src/token-store.ts`
+
+### `accountKey`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `accountKey(alias: string): string`
+- **Usada por:** `loadLinkedAccount()`, `saveLinkedAccount()`
+- **Processos:** P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a chave da conta no KV pelo apelido.
+- **Entrada:** `alias`: apelido da conta.
+- **Saída:** O texto `account:<apelido>`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `sealLinkedAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `sealLinkedAccount(account: LinkedAccount, key: Buffer): string`
+- **Usada por:** `saveLinkedAccount()`
+- **Processos:** P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Sela uma conta vinculada para gravar no KV.
+- **Entrada:** `account`: conta vinculada. `key`: chave AES-256 de 32 bytes (`TOKEN_ENC_KEY`).
+- **Saída:** O selo em base64url, com tipo `gmail_account` e validade técnica no ano 2100.
+- **Efeitos:** Lê o gerador aleatório criptográfico (vetor de inicialização).
+- **Erros:** Propaga o erro da cifra se a chave não tiver 32 bytes.
+
+### `openLinkedAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `openLinkedAccount(sealed: string, key: Buffer, email: string): LinkedAccount | null`
+- **Usada por:** `loadLinkedAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Abre o selo de uma conta conferindo o e-mail esperado.
+- **Entrada:** `sealed`: selo lido do KV. `key`: chave AES-256 (`TOKEN_ENC_KEY`). `email`: e-mail esperado da conta.
+- **Saída:** A conta vinculada; nulo se a chave, o conteúdo ou o e-mail não conferem.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `saveLinkedAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `async saveLinkedAccount(kv: KvStore, key: Buffer, account: LinkedAccount): Promise<void>`
+- **Usada por:** `renewAccessToken()`, `storeLinkedAccount()`
+- **Processos:** P11, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava a conta vinculada (selada) no KV.
+- **Entrada:** `kv`: KV do conector. `key`: chave AES-256 (`TOKEN_ENC_KEY`). `account`: conta vinculada.
+- **Saída:** Nada.
+- **Efeitos:** KV: grava o selo na chave do apelido da conta.
+- **Erros:** Propaga os erros do KV e de `sealLinkedAccount()`.
+
+### `loadLinkedAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/token-store.ts`
+- **Assinatura:** `async loadLinkedAccount(kv: KvStore, key: Buffer, account: AllowedAccount): Promise<LinkedAccount | null>`
+- **Usada por:** `accountStatus()`, `requireLinkedAccount()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a conta vinculada do KV.
+- **Entrada:** `kv`: KV do conector. `key`: chave AES-256 (`TOKEN_ENC_KEY`). `account`: conta permitida.
+- **Saída:** A conta vinculada; nulo se não houver vínculo ou o registro não abrir.
+- **Efeitos:** KV: lê o selo da conta.
+- **Erros:** Propaga os erros do KV.
+
+## `connectors/gmail/src/tools.ts`
+
+### `resolveSingleAccount`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/tools.ts`
+- **Assinatura:** `resolveSingleAccount(deps: GmailDeps, requested: string): AllowedAccount`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Resolve o parâmetro `account` exigindo uma única conta.
+- **Entrada:** `deps`: dependências do conector (configuração). `requested`: apelido pedido pelo modelo.
+- **Saída:** A conta permitida correspondente.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se `requested` é `all` ou resulta em mais de uma conta; propaga o erro de conta desconhecida.
+
+### `accountStatus`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/tools.ts`
+- **Assinatura:** `async accountStatus(deps: GmailDeps, account: AllowedAccount): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o status de uma conta para `list_accounts`.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio, origem). `account`: conta permitida.
+- **Saída:** Apelido, e-mail, data do vínculo e status: `not_linked` ou `needs_relink` (com `link_url`), `ok` ou `token_error` (com a mensagem).
+- **Efeitos:** Lê a conta no KV; rede (renovação do token no Google, se não houver em memória); pode marcar a conta como revogada no KV.
+- **Erros:** Nenhum: falhas do token viram `status: token_error`; falhas do KV propagam.
+
+### `withUntrustedNotice`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/tools.ts`
+- **Assinatura:** `withUntrustedNotice(data: Record<string, unknown>): Record<string, unknown>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Acrescenta o aviso de conteúdo não confiável a um resultado.
+- **Entrada:** `data`: resultado com conteúdo de e-mail.
+- **Saída:** Novo objeto com `notice` primeiro e os campos de `data`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `accountLabels`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/tools.ts`
+- **Assinatura:** `async accountLabels(deps: GmailDeps, account: AllowedAccount): Promise<Record<string, unknown>>`
+- **Usada por:** `connectors/gmail/src/tools.ts (módulo)`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os rótulos de uma conta.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida.
+- **Saída:** Apelido da conta e rótulos (`id`, `name`, `type`, com `user` por padrão); lista vazia se não houver.
+- **Efeitos:** Rede (Gmail API e, se preciso, renovação do token no Google); pode marcar a conta como revogada no KV.
+- **Erros:** Propaga os erros de `gmailGet`: HTTP da Gmail API, conta sem vínculo ou revogada, falha na renovação do token.
+
+## `connectors/gmail/src/worker.ts`
+
+### `createGmailDeps`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `createGmailDeps(env: GmailWorkerEnv, origin: string): GmailDeps`
+- **Usada por:** `handleDefaultRequest()`, `handleMcpApi()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta as dependências da requisição a partir do ambiente do Worker.
+- **Entrada:** `env`: variáveis, secrets e bindings do Worker. `origin`: origem pública do conector.
+- **Saída:** Dependências com configuração lida, KV `GMAIL_KV`, `fetch`, relógio e origem.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança erro se `ALLOWED_EMAILS` faltar ou for inválido, ou se faltar um secret obrigatório.
+
+### `createGmailServer`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `createGmailServer(deps: GmailDeps): McpServer`
+- **Usada por:** `handleMcpApi()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o servidor MCP com as ferramentas do Gmail.
+- **Entrada:** `deps`: dependências do conector (configuração, KV, rede, relógio).
+- **Saída:** Servidor MCP `gmail-multi` com instruções e as seis ferramentas registradas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `configErrorResponse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `configErrorResponse(error: unknown): Response`
+- **Usada por:** `handleDefaultRequest()`, `handleMcpApi()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta a resposta de configuração inválida do Worker.
+- **Entrada:** `error`: erro lançado ao ler a configuração.
+- **Saída:** Resposta 500 em texto com a mensagem do erro (nunca o valor de um secret).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `handleMcpApi`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `async handleMcpApi(request: Request, env: GmailWorkerEnv, ctx: ExecutionContext): Promise<Response>`
+- **Usada por:** `createGmailProvider()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende o `/mcp` já autenticado pela biblioteca.
+- **Entrada:** `request`: requisição MCP. `env`: variáveis, secrets e bindings do Worker. `ctx`: contexto de execução, com `props` da concessão (e-mail e `sid`).
+- **Saída:** Resposta do servidor MCP; 429 se a sessão passou do limite; 500 se a configuração é inválida.
+- **Efeitos:** Conta a requisição no binding de rate limiting; as ferramentas acessam a rede (Gmail API, Google) e o KV.
+- **Erros:** Nenhum: configuração inválida vira 500 e erros das ferramentas viram resultado de erro MCP.
+
+### `handleDefaultRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `async handleDefaultRequest(request: Request, env: GmailWorkerEnv): Promise<Response>`
+- **Usada por:** `createGmailProvider()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende as rotas próprias do conector fora do `/mcp`.
+- **Entrada:** `request`: requisição recebida. `env`: variáveis, secrets e bindings do Worker, com `OAUTH_PROVIDER` injetado pela biblioteca.
+- **Saída:** 200 `ok` em `GET /`; a resposta da rota encontrada; página 404 se a rota não existe ou falta `OAUTH_PROVIDER`; 500 se a configuração é inválida.
+- **Efeitos:** Os da rota atendida: KV, `OAuthHelpers` (KV OAUTH_KV), rede (Google) e cookies.
+- **Erros:** Nenhum: configuração inválida vira 500; propaga só os erros não tratados da rota de vínculo (troca do código e `id_token`).
+
+### `checkClientRegistration`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `checkClientRegistration(options: ClientRegistrationCallbackOptions): ClientRegistrationCallbackResult | undefined`
+- **Usada por:** `createGmailProvider()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide se o registro dinâmico de um cliente é aceito.
+- **Entrada:** `options`: metadados do cliente que pede registro.
+- **Saída:** Indefinido se todos os endereços de retorno são do Claude ou localhost; senão erro `invalid_redirect_uri` com status 400.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `publicOrigin`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `publicOrigin(env: GmailWorkerEnv, request: Request): string`
+- **Usada por:** `handleDefaultRequest()`, `handleGmailWorkerFetch()`, `handleMcpApi()`
+- **Processos:** P10, P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula a origem pública canônica do conector.
+- **Entrada:** `env`: variáveis do Worker (`PUBLIC_URL` opcional). `request`: requisição recebida.
+- **Saída:** Origem de `PUBLIC_URL` sem barra final; sem ela, a origem da requisição.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `TypeError` se `PUBLIC_URL` não for URL válida.
+
+### `createGmailProvider`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `createGmailProvider(origin: string): OAuthProvider<GmailWorkerEnv>`
+- **Usada por:** `handleGmailWorkerFetch()`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o provedor OAuth que embrulha o Worker.
+- **Entrada:** `origin`: origem pública do conector.
+- **Saída:** `OAuthProvider` com `/mcp` como recurso, endpoints `/authorize`, `/token` e `/register`, TTLs de 1 hora e 30 dias e a checagem de registro.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `handleGmailWorkerFetch`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/gmail/src/worker.ts`
+- **Assinatura:** `handleGmailWorkerFetch(request: Request, env: GmailWorkerEnv, ctx: ExecutionContext): Promise<Response>`
+- **Usada por:** `connectors/gmail/src/index.ts (módulo)`
+- **Processos:** P10
+
+<!-- gerado:fim -->
+
+- **Faz:** Repassa a requisição do Worker ao provedor OAuth da origem pública.
+- **Entrada:** `request`: requisição recebida. `env`: variáveis, secrets e bindings do Worker. `ctx`: contexto de execução.
+- **Saída:** Resposta do provedor: endpoints OAuth, `/mcp` ou rotas próprias; 401 no `/mcp` sem token válido.
+- **Efeitos:** Os da biblioteca OAuth (KV OAUTH_KV) e das rotas atendidas (KV, rede, rate limiting, cookies).
+- **Erros:** Lança `TypeError` se `PUBLIC_URL` for inválida; propaga erros não tratados das rotas.
+
+## `src/core/pdf.ts`
+
+### `bytesToLatin1`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `bytesToLatin1(bytes: Uint8Array): string`
+- **Usada por:** `fontCMaps()`, `isPdf()`, `listRawObjects()`, `pdfToText()`, `splitObjectStream()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Converte bytes em texto de um caractere por byte (latin1), para achar palavras-chave sem perder offsets.
+- **Entrada:** `bytes`: conteúdo binário qualquer.
+- **Saída:** Texto com um caractere por byte; vazio se não houver bytes.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isPdf`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `isPdf(bytes: Uint8Array): boolean`
+- **Usada por:** `detectAttachmentKind()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se os bytes começam como um PDF (`%PDF-`).
+- **Entrada:** `bytes`: conteúdo do arquivo.
+- **Saída:** `true` se os cinco primeiros bytes são `%PDF-`; `false` caso contrário (inclusive arquivo curto).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `streamDataStart`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `streamDataStart(text: string, keywordAt: number): number`
+- **Usada por:** `readRawObject()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula o início dos dados de um fluxo, depois de `stream` e da quebra de linha (CRLF ou LF).
+- **Entrada:** `text`: PDF em latin1. `keywordAt`: posição da palavra `stream`.
+- **Saída:** Posição do primeiro byte de dados; logo após `stream` se não houver quebra de linha.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `trimStreamEol`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `trimStreamEol(text: string, dataStart: number, streamEnd: number): number`
+- **Usada por:** `readRawObject()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula o fim dos dados de um fluxo sem a quebra de linha que precede `endstream`.
+- **Entrada:** `text`: PDF em latin1. `dataStart`: início dos dados. `streamEnd`: posição de `endstream`.
+- **Saída:** Posição final dos dados, recuada de CRLF, LF ou CR; nunca antes de `dataStart`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readRawObject`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `readRawObject(text: string, bytes: Uint8Array, start: number): { dict: string; stream: Uint8Array | null; end: number }`
+- **Usada por:** `listRawObjects()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o objeto que começa em `start`, logo após `N G obj`.
+- **Entrada:** `text`: PDF em latin1. `bytes`: o mesmo PDF em bytes. `start`: posição logo após `N G obj`.
+- **Saída:** `{ dict, stream, end }`: dicionário em texto, bytes do fluxo ainda comprimido (`null` se não houver) e onde a busca pelo próximo objeto continua; sem `endobj`, vai até o fim do texto.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `listRawObjects`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `listRawObjects(bytes: Uint8Array): RawPdfObject[]`
+- **Usada por:** `readPdfObjects()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os objetos `N G obj ... endobj` do arquivo, na ordem em que aparecem.
+- **Entrada:** `bytes`: conteúdo do PDF.
+- **Saída:** Lista de objetos crus com número, dicionário e fluxo comprimido (`null` sem fluxo); vazia se não houver objetos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `decodePdfStream`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `async decodePdfStream(dict: string, stream: Uint8Array): Promise<Uint8Array | null>`
+- **Usada por:** `readPdfObjects()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Descomprime o fluxo conforme o `/Filter` do dicionário.
+- **Entrada:** `dict`: dicionário do objeto. `stream`: bytes do fluxo como estão no arquivo.
+- **Saída:** Os próprios bytes sem `/Filter`; os bytes inflados com FlateDecode; `null` para outro filtro ou fluxo corrompido.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum (fluxo corrompido devolve `null`).
+
+### `splitObjectStream`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `splitObjectStream(dict: string, data: Uint8Array): [number, PdfObject][]`
+- **Usada por:** `storePdfObject()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Separa os objetos guardados num fluxo de objetos (`/Type /ObjStm`).
+- **Entrada:** `dict`: dicionário do fluxo de objetos, com `/First`. `data`: fluxo já descomprimido.
+- **Saída:** Pares [número, objeto] com o dicionário de cada objeto e `data` nulo; vazia se faltar `/First`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `storePdfObject`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `storePdfObject(objects: Map<number, PdfObject>, num: number, obj: PdfObject): void`
+- **Usada por:** `readPdfObjects()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Guarda um objeto lido e, se ele for um fluxo de objetos, os objetos de dentro sem sobrescrever.
+- **Entrada:** `objects`: mapa de objetos em construção. `num`: número do objeto. `obj`: dicionário e fluxo descomprimido.
+- **Saída:** Nada.
+- **Efeitos:** Altera `objects`.
+- **Erros:** Nenhum.
+
+### `readPdfObjects`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `async readPdfObjects(bytes: Uint8Array): Promise<PdfObjects>`
+- **Usada por:** `pdfToText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê todos os objetos do PDF, descomprimindo fluxos e abrindo os fluxos de objetos.
+- **Entrada:** `bytes`: conteúdo do PDF.
+- **Saída:** Mapa número → objeto; fluxo com filtro desconhecido ou corrompido fica com `data` nulo; mapa vazio se não houver objetos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum (fluxo corrompido fica com `data` nulo).
+
+### `pdfRefs`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `pdfRefs(text: string): number[]`
+- **Usada por:** `dictRefs()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista os números de objeto citados como referência (`N 0 R`) num trecho.
+- **Entrada:** `text`: trecho de dicionário do PDF.
+- **Saída:** Números dos objetos referenciados, na ordem; vazia se não houver referência.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `dictRefs`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `dictRefs(dict: string, key: string): number[]`
+- **Usada por:** `collectPdfPages()`, `fontCMaps()`, `pdfToText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o valor de uma chave que pode ser referência única ou lista de referências.
+- **Entrada:** `dict`: dicionário do objeto. `key`: nome da chave sem a barra (ex.: `Kids`, `Contents`).
+- **Saída:** Números dos objetos referenciados; vazia se a chave não existir ou não for referência.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `collectPdfPages`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `collectPdfPages(objects: PdfObjects, num: number, pages: number[]): void`
+- **Usada por:** `collectPdfPages()`, `orderedPages()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Acrescenta a `pages` as páginas sob o nó `num` da árvore de páginas, em ordem.
+- **Entrada:** `objects`: objetos do PDF. `num`: nó da árvore de páginas. `pages`: lista que recebe as páginas; a descida para em 10 000 páginas.
+- **Saída:** Nada.
+- **Efeitos:** Altera `pages`.
+- **Erros:** Nenhum.
+
+### `orderedPages`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `orderedPages(objects: PdfObjects): number[]`
+- **Usada por:** `pdfToText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lista as páginas na ordem de leitura, percorrendo a árvore `/Pages` a partir da raiz.
+- **Entrada:** `objects`: objetos do PDF.
+- **Saída:** Números dos objetos de página em ordem; vazia se não houver raiz `/Pages`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `utf16beHexToString`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `utf16beHexToString(hex: string): string`
+- **Usada por:** `rangeTarget()`, `readBfChars()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica hexadecimal UTF-16BE (destino de um mapa ToUnicode) em texto.
+- **Entrada:** `hex`: dígitos hexadecimais; dois dígitos valem como um byte.
+- **Saída:** O texto decodificado; dígitos que sobram fora de grupos de quatro são ignorados; vazio se `hex` for vazio.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readBfChars`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `readBfChars(text: string, map: Map<number, string>): void`
+- **Usada por:** `parseToUnicodeCMap()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê as linhas `<orig> <destino>` dos blocos `beginbfchar` de um mapa ToUnicode.
+- **Entrada:** `text`: mapa ToUnicode em texto. `map`: mapa código → texto que recebe as entradas.
+- **Saída:** Nada.
+- **Efeitos:** Altera `map`.
+- **Erros:** Nenhum.
+
+### `readBfRanges`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `readBfRanges(text: string, map: Map<number, string>): void`
+- **Usada por:** `parseToUnicodeCMap()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê os blocos `beginbfrange` de um mapa ToUnicode.
+- **Entrada:** `text`: mapa ToUnicode em texto. `map`: mapa código → texto que recebe as entradas; cada faixa é limitada a 65 536 códigos.
+- **Saída:** Nada.
+- **Efeitos:** Altera `map`.
+- **Erros:** Nenhum.
+
+### `rangeTarget`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `rangeTarget(targets: readonly string[], offset: number): string`
+- **Usada por:** `readBfRanges()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Calcula o destino de um código num `bfrange`.
+- **Entrada:** `targets`: destinos em hexadecimal (um inicial ou uma lista). `offset`: distância do código ao início da faixa.
+- **Saída:** O item da lista, ou o destino inicial com o último caractere somado ao deslocamento; vazio se o destino for vazio ou faltar.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseToUnicodeCMap`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `parseToUnicodeCMap(text: string): PdfCMap`
+- **Usada por:** `fontCMaps()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Interpreta um mapa ToUnicode com seus códigos de 1 ou 2 bytes.
+- **Entrada:** `text`: mapa ToUnicode em texto.
+- **Saída:** `{ map, bytes }`: código → texto e o tamanho do código (2 se o `codespacerange` tiver 4+ dígitos, senão 1); mapa vazio se não houver blocos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `addFontRefs`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `addFontRefs(fonts: Map<string, number>, text: string): void`
+- **Usada por:** `fontResourceRefs()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Acrescenta a `fonts` os pares nome → objeto (`/F1 5 0 R`) de um dicionário de fontes.
+- **Entrada:** `fonts`: mapa nome → objeto que recebe os pares. `text`: conteúdo do dicionário de fontes.
+- **Saída:** Nada.
+- **Efeitos:** Altera `fonts` (não sobrescreve nomes já presentes).
+- **Erros:** Nenhum.
+
+### `fontResourceRefs`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `fontResourceRefs(objects: PdfObjects): Map<string, number>`
+- **Usada por:** `fontCMaps()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Junta os nomes de fonte (`/F1`) e seus objetos de todos os dicionários `/Font` dos recursos.
+- **Entrada:** `objects`: objetos do PDF.
+- **Saída:** Mapa nome → número do objeto da fonte; o primeiro encontrado vence; vazio sem fontes.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `fontCMaps`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `fontCMaps(objects: PdfObjects): Map<string, PdfCMap>`
+- **Usada por:** `pdfToText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta os mapas ToUnicode por nome de fonte, para as fontes que têm `/ToUnicode`.
+- **Entrada:** `objects`: objetos do PDF.
+- **Saída:** Mapa nome da fonte → mapa ToUnicode; fontes sem `/ToUnicode` legível ficam de fora.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `decodePdfText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `decodePdfText(raw: string, cmap: PdfCMap | undefined): string`
+- **Usada por:** `lastOperandText()`, `showArrayText()`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica os bytes de uma string de texto pela fonte atual (ToUnicode).
+- **Entrada:** `raw`: string crua (um caractere por byte). `cmap`: mapa ToUnicode da fonte, ou `undefined`.
+- **Saída:** O texto decodificado; sem mapa, a própria string (latin1); códigos sem entrada no mapa somem.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readLiteralString`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `readLiteralString(src: string, start: number): [string, number]`
+- **Usada por:** `nextPdfToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma string literal `( ... )` a partir do `(`.
+- **Entrada:** `src`: fluxo de conteúdo. `start`: posição do `(`.
+- **Saída:** [texto cru com escapes resolvidos, posição seguinte]; sem `)` de fechamento, vai até o fim.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readEscape`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `readEscape(src: string, pos: number): [string, number]`
+- **Usada por:** `readLiteralString()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o escape que vem depois de `\` numa string literal.
+- **Entrada:** `src`: fluxo de conteúdo. `pos`: posição logo após a `\`.
+- **Saída:** [texto do escape, posição seguinte]: octal de até 3 dígitos, letra conhecida, vazio para quebra de linha ou o próprio caractere.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readHexString`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `readHexString(src: string, start: number): [string, number]`
+- **Usada por:** `nextPdfToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma string hexadecimal `<...>` a partir do `<`.
+- **Entrada:** `src`: fluxo de conteúdo. `start`: posição do `<`.
+- **Saída:** [texto cru, posição seguinte]; ignora não-hexadecimais e completa dígito ímpar com 0; sem `>`, vai até o fim.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `skipPdfSpace`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `skipPdfSpace(src: string, pos: number): number`
+- **Usada por:** `nextPdfToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Acha a posição do próximo caractere que não é espaço, a partir de `pos`.
+- **Entrada:** `src`: fluxo de conteúdo. `pos`: posição inicial.
+- **Saída:** A posição do próximo caractere não branco, ou o fim do texto.
+- **Efeitos:** Altera o `lastIndex` da regex do módulo `PDF_SPACE`.
+- **Erros:** Nenhum.
+
+### `nextPdfToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `nextPdfToken(src: string, pos: number): [PdfToken, number] | null`
+- **Usada por:** `contentStreamText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o próximo item do fluxo de conteúdo a partir de `pos`.
+- **Entrada:** `src`: fluxo de conteúdo. `pos`: posição inicial.
+- **Saída:** [item, posição seguinte]; `null` no fim do texto.
+- **Efeitos:** Altera o `lastIndex` das regex do módulo `PDF_SPACE` e `PDF_WORD`.
+- **Erros:** Nenhum.
+
+### `readPdfWord`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `readPdfWord(src: string, at: number): [PdfToken, number]`
+- **Usada por:** `nextPdfToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma palavra (nome, número, operador, `<<`/`>>` ou comentário) a partir de `at`.
+- **Entrada:** `src`: fluxo de conteúdo. `at`: posição de um caractere não branco.
+- **Saída:** [item classificado, posição seguinte].
+- **Efeitos:** Altera o `lastIndex` da regex do módulo `PDF_WORD`.
+- **Erros:** Nenhum.
+
+### `wrapString`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `wrapString([value, next]: [string, number]): [PdfToken, number]`
+- **Usada por:** `nextPdfToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Embrulha o resultado de uma leitura de string num item `string`.
+- **Entrada:** `[value, next]`: texto lido e posição seguinte.
+- **Saída:** [item `string` com o texto, posição seguinte].
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `classifyWord`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `classifyWord(word: string): PdfToken`
+- **Usada por:** `readPdfWord()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Classifica uma palavra do fluxo como nome (`/F1`), número ou operador.
+- **Entrada:** `word`: palavra lida do fluxo.
+- **Saída:** Item `name` sem a barra, `number` com o valor, ou `op` com a palavra.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `showArrayText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `showArrayText(items: readonly PdfToken[], font: PdfCMap | undefined): string`
+- **Usada por:** `src/core/pdf.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o texto de um operando de `TJ`, com espaços onde o ajuste é grande.
+- **Entrada:** `items`: itens da lista do `TJ`. `font`: mapa ToUnicode da fonte atual, ou `undefined`.
+- **Saída:** Strings decodificadas, com espaço para ajuste menor que `TJ_SPACE_THRESHOLD`; vazio se não houver strings.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `lastOperandText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `lastOperandText(state: PdfTextState): string`
+- **Usada por:** `src/core/pdf.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica o texto da última string dos operandos pela fonte atual.
+- **Entrada:** `state`: estado do intérprete de texto.
+- **Saída:** O texto decodificado; vazio se o último operando não for string ou não houver operandos.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `moveText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `moveText(state: PdfTextState): string`
+- **Usada por:** `src/core/pdf.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide o que um `Td`/`TD` produz no texto.
+- **Entrada:** `state`: estado do intérprete, com os operandos do operador.
+- **Saída:** Quebra de linha se o último operando (ty) for número diferente de zero; senão um espaço.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `applyTextOperator`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `applyTextOperator(state: PdfTextState, op: string, cmaps: ReadonlyMap<string, PdfCMap>): void`
+- **Usada por:** `feedPdfToken()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Aplica um operador de texto ao estado do intérprete.
+- **Entrada:** `state`: estado do intérprete. `op`: nome do operador. `cmaps`: mapas ToUnicode por nome de fonte.
+- **Saída:** Nada.
+- **Efeitos:** Altera `state` (troca a fonte em `Tf` ou acrescenta texto em `out`); operador desconhecido não muda nada.
+- **Erros:** Nenhum.
+
+### `feedPdfToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `feedPdfToken(state: PdfTextState, token: PdfToken, cmaps: ReadonlyMap<string, PdfCMap>): void`
+- **Usada por:** `contentStreamText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Consome um item no intérprete de texto.
+- **Entrada:** `state`: estado do intérprete. `token`: item lido do fluxo. `cmaps`: mapas ToUnicode por nome de fonte.
+- **Saída:** Nada.
+- **Efeitos:** Altera `state` (lista aberta, operandos e texto produzido).
+- **Erros:** Nenhum.
+
+### `contentStreamText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `contentStreamText(content: string, cmaps: ReadonlyMap<string, PdfCMap>): string`
+- **Usada por:** `pdfToText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o texto de um fluxo de conteúdo de página.
+- **Entrada:** `content`: fluxo de conteúdo em latin1. `cmaps`: mapas ToUnicode por nome de fonte.
+- **Saída:** O texto produzido pelos operadores de texto; vazio se não houver nenhum.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `tidyPdfText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `tidyPdfText(text: string): string`
+- **Usada por:** `pdfToText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Limpa o texto extraído de espaços repetidos, linhas em branco em excesso e pontas.
+- **Entrada:** `text`: texto extraído do PDF.
+- **Saída:** O texto com espaços colapsados, no máximo uma linha em branco seguida e sem espaços nas pontas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pdfToText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/pdf.ts`
+- **Assinatura:** `async pdfToText(bytes: Uint8Array): Promise<string>`
+- **Usada por:** `attachmentBytesToText()`
+- **Processos:** P12
+
+<!-- gerado:fim -->
+
+- **Faz:** Extrai o texto de um PDF, página por página.
+- **Entrada:** `bytes`: conteúdo do PDF.
+- **Saída:** O texto das páginas separado por linha em branco e limpo; vazio se não houver texto legível (ex.: PDF só de imagens).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se o PDF for cifrado (`/Encrypt` nos últimos 4 KB).
+
 ## `connectors/whatsapp/src/bridge-client.ts`
 
 ### `bridgeErrorFrom`
@@ -4591,8 +6491,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
 - **Assinatura:** `bridgeErrorFrom(status: number, body: unknown): BridgeError`
-- **Usada por:** `callBridge()`, `ensureRestored()`
-- **Processos:** P10, P11, P12, P13
+- **Usada por:** `attemptBridge()`, `ensureRestored()`
+- **Processos:** P13, P14, P15, P16
 
 <!-- gerado:fim -->
 
@@ -4608,8 +6508,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
 - **Assinatura:** `withDeadline(promise: Promise<T>, deadline: number, message: string): Promise<T>`
-- **Usada por:** `callBridge()`, `runRead()`, `runScheduledSync()`
-- **Processos:** P10, P11, P12, P14
+- **Usada por:** `attemptBridge()`, `runRead()`, `runScheduledSync()`
+- **Processos:** P13, P14, P15, P17
 
 <!-- gerado:fim -->
 
@@ -4625,8 +6525,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
 - **Assinatura:** `bridgeTimeoutMessage(path: string): string`
-- **Usada por:** `callBridge()`
-- **Processos:** P10, P11, P12
+- **Usada por:** `attemptBridge()`
+- **Processos:** P13, P14, P15
 
 <!-- gerado:fim -->
 
@@ -4643,15 +6543,15 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
 - **Assinatura:** `async callBridge(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<Response>`
 - **Usada por:** `bridgeJson()`, `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P10, P11, P12
+- **Processos:** P13, P14, P15
 
 <!-- gerado:fim -->
 
-- **Faz:** Chama a ponte dentro do prazo e devolve a resposta crua se for 2xx; senão lança `BridgeError`.
+- **Faz:** Chama a ponte dentro do prazo, esperando-a acordar (`not_ready`); 2xx devolve a resposta, o resto lança.
 - **Entrada:** `bridge`, `path` e opções (`init`, `deadline`).
 - **Saída:** `Response` 2xx da ponte.
 - **Efeitos:** Rede: requisição ao Durable Object da ponte.
-- **Erros:** Rejeita com `BridgeError` se não for 2xx, ou `Error` de tempo esgotado.
+- **Erros:** `BridgeError` com o código da ponte (depois de esgotar as novas tentativas de `not_ready`); erro de tempo esgotado.
 
 ### `bridgeJson`
 
@@ -4660,7 +6560,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
 - **Assinatura:** `async bridgeJson(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<T>`
 - **Usada por:** `connectors/whatsapp/src/pair.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`, `fetchPairStatus()`, `prepareRead()`
-- **Processos:** P10, P11, P12
+- **Processos:** P13, P14, P15
 
 <!-- gerado:fim -->
 
@@ -4677,7 +6577,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
 - **Assinatura:** `bridgePath(path: string, params: Readonly<Record<string, string | number | undefined>>): string`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`, `prepareRead()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -4694,7 +6594,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
 - **Assinatura:** `jsonPost(body: unknown): RequestInit`
 - **Usada por:** `connectors/whatsapp/src/pair.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -4703,6 +6603,40 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** `RequestInit` com método POST, `content-type` JSON e corpo.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
+
+### `shouldRetryBridge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `shouldRetryBridge(error: BridgeError, deadline: number, now: number): boolean`
+- **Usada por:** `callBridge()`
+- **Processos:** P13, P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se vale tentar de novo: a ponte ainda está iniciando e sobra prazo para mais uma tentativa.
+- **Entrada:** `error`: erro da ponte; `deadline`: prazo (ms Unix); `now`: instante atual (ms).
+- **Saída:** `true` só para `not_ready` com prazo para mais uma espera de `BRIDGE_RETRY_MS`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `attemptBridge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `async attemptBridge(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<Response>`
+- **Usada por:** `callBridge()`
+- **Processos:** P13, P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Faz uma tentativa: resposta 2xx, ou `BridgeError` com o código da ponte.
+- **Entrada:** `bridge`: fetch do Durable Object; `path`: rota com query; `options`: `init` opcional e `deadline` (ms Unix).
+- **Saída:** A resposta 2xx.
+- **Efeitos:** Rede (chamada ao Durable Object da ponte).
+- **Erros:** `BridgeError` em status ≠ 2xx; erro de tempo esgotado depois do `deadline`.
 
 ## `connectors/whatsapp/src/config.ts`
 
@@ -4713,7 +6647,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `requireEnv(env: EnvVars, key: string, how: string): string`
 - **Usada por:** `containerEnvVars()`, `readWhatsAppSettings()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -4730,7 +6664,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `readIntInRange(env: EnvVars, key: string, range: { readonly min: number; readonly max: number; readonly fallback: number }): number`
 - **Usada por:** `readSendSettings()`, `readTimingSettings()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -4747,7 +6681,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `readSleepAfter(env: EnvVars): string`
 - **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`, `readTimingSettings()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -4764,7 +6698,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `normalizePhone(raw: string): string | null`
 - **Usada por:** `allowedRecipient()`, `connectors/whatsapp/src/pair.ts (módulo)`, `readSendAllowlist()`
-- **Processos:** P10, P12, P14
+- **Processos:** P13, P15, P17
 
 <!-- gerado:fim -->
 
@@ -4781,7 +6715,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `readSendAllowlist(env: EnvVars): string[]`
 - **Usada por:** `readSendSettings()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -4798,7 +6732,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `readAllowedEmails(env: EnvVars): string[]`
 - **Usada por:** `readWhatsAppSettings()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -4815,7 +6749,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `readTimingSettings(env: EnvVars): Pick<WhatsAppSettings, 'sleepAfter' | 'toolTimeoutMs' | 'syncWaitMs'>`
 - **Usada por:** `readWhatsAppSettings()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -4832,7 +6766,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `readSendSettings(env: EnvVars): Pick<WhatsAppSettings, 'enableSend' | 'sendAllowlist' | 'sendMaxPerHour'>`
 - **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`, `readWhatsAppSettings()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -4849,7 +6783,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `readWhatsAppSettings(env: EnvVars): WhatsAppSettings`
 - **Usada por:** `createWhatsAppApps()`, `isSyncCronEnabled()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -4885,7 +6819,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/container.ts`
 - **Assinatura:** `workersFixedLength(body: ReadableStream<Uint8Array>, length: number): ReadableStream<Uint8Array>`
 - **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
@@ -4904,7 +6838,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/format.ts`
 - **Assinatura:** `isHiddenChar(char: string): boolean`
 - **Usada por:** `sanitizeText()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -4921,7 +6855,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/format.ts`
 - **Assinatura:** `sanitizeText(text: string | null | undefined, max = MAX_TEXT_CHARS): string`
 - **Usada por:** `compactChat()`, `compactContact()`, `compactMessage()`, `connectors/whatsapp/src/tools.ts (módulo)`, `mediaResult()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -4938,7 +6872,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/format.ts`
 - **Assinatura:** `untrusted(data: T): { readonly notice: string; readonly data: T }`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -4955,7 +6889,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/format.ts`
 - **Assinatura:** `compactMessage(message: BridgeMessage): Record<string, unknown>`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -4972,7 +6906,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/format.ts`
 - **Assinatura:** `compactChat(chat: BridgeChat): Record<string, unknown>`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -4989,7 +6923,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/format.ts`
 - **Assinatura:** `partialSyncWarning(status: BridgeStatus): string | null`
 - **Usada por:** `prepareRead()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5006,7 +6940,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/format.ts`
 - **Assinatura:** `compactStatus(status: BridgeStatus, pairUrl: string): Record<string, unknown>`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5025,7 +6959,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `withBridgeToken(token: string, init: RequestInit = {}): RequestInit`
 - **Usada por:** `fetchBridge()`
-- **Processos:** P11, P13
+- **Processos:** P14, P16
 
 <!-- gerado:fim -->
 
@@ -5042,7 +6976,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `fetchBridge(host: BridgeHost, path: string, init?: RequestInit): Promise<Response>`
 - **Usada por:** `ensureRestored()`, `readBridgePhase()`, `routeBridgeRequest()`, `snapshotBridge()`
-- **Processos:** P11, P13
+- **Processos:** P14, P16
 
 <!-- gerado:fim -->
 
@@ -5059,7 +6993,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `async readBridgePhase(host: BridgeHost): Promise<string>`
 - **Usada por:** `ensureRestored()`
-- **Processos:** P11, P13
+- **Processos:** P14, P16
 
 <!-- gerado:fim -->
 
@@ -5076,7 +7010,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `async restoreRequestInit(host: BridgeHost): Promise<RequestInit>`
 - **Usada por:** `ensureRestored()`
-- **Processos:** P11, P13
+- **Processos:** P14, P16
 
 <!-- gerado:fim -->
 
@@ -5093,7 +7027,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `async ensureRestored(host: BridgeHost): Promise<void>`
 - **Usada por:** `routeBridgeRequest()`
-- **Processos:** P11, P13
+- **Processos:** P14, P16
 
 <!-- gerado:fim -->
 
@@ -5110,7 +7044,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `async snapshotBridge(host: BridgeHost, force = false): Promise<SnapshotOutcome>`
 - **Usada por:** `connectors/whatsapp/src/lifecycle.ts (módulo)`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
@@ -5127,7 +7061,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `planSend(history: readonly number[], now: number, maxPerHour: number): { readonly allowed: boolean; readonly history: number[]; readonly retryAfterSeconds: number }`
 - **Usada por:** `guardSend()`
-- **Processos:** P11, P14
+- **Processos:** P14, P17
 
 <!-- gerado:fim -->
 
@@ -5144,7 +7078,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `async guardSend(host: BridgeHost): Promise<Response | null>`
 - **Usada por:** `routeBridgeRequest()`
-- **Processos:** P11, P14
+- **Processos:** P14, P17
 
 <!-- gerado:fim -->
 
@@ -5161,7 +7095,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `forwardInit(request: Request): RequestInit`
 - **Usada por:** `routeBridgeRequest()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5178,7 +7112,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `createBridgeLifecycle(host: BridgeHost): BridgeLifecycle`
 - **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5195,7 +7129,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `async logSnapshotFailure(run: Promise<SnapshotOutcome>): Promise<void>`
 - **Usada por:** `connectors/whatsapp/src/lifecycle.ts (módulo)`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
@@ -5212,7 +7146,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `async resetBridge(host: BridgeHost): Promise<Response>`
 - **Usada por:** `routeBridgeRequest()`
-- **Processos:** P11, P12
+- **Processos:** P14, P15
 
 <!-- gerado:fim -->
 
@@ -5229,7 +7163,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
 - **Assinatura:** `async routeBridgeRequest(router: BridgeRouter, request: Request): Promise<Response>`
 - **Usada por:** `createBridgeLifecycle()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5248,7 +7182,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
 - **Assinatura:** `describePairStatus(status: BridgeStatus | null): string`
 - **Usada por:** `renderPairPage()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5265,7 +7199,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
 - **Assinatura:** `pairForm(action: string, csrf: string, body: string): string`
 - **Usada por:** `maintenanceSection()`, `pairingSection()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5282,7 +7216,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
 - **Assinatura:** `pairingSection(view: PairPageView): string`
 - **Usada por:** `renderPairPage()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5299,7 +7233,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
 - **Assinatura:** `maintenanceSection(view: PairPageView): string`
 - **Usada por:** `renderPairPage()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5316,7 +7250,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
 - **Assinatura:** `alertHtml(view: PairPageView): string`
 - **Usada por:** `renderPairPage()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5333,7 +7267,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
 - **Assinatura:** `renderPairPage(view: PairPageView): string`
 - **Usada por:** `pairPage()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5352,7 +7286,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `parseCookies(header: string | null): Record<string, string>`
 - **Usada por:** `isValidPairLogin()`, `readPairSession()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5369,7 +7303,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `redirectWithCookies(location: string, cookies: readonly string[]): Response`
 - **Usada por:** `handlePairPost()`, `openPairSession()`, `routePairPost()`, `startPairLogin()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5386,7 +7320,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `readPairSession(app: PairApp, request: Request): string | null`
 - **Usada por:** `routePairRequest()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5403,7 +7337,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `issuePairCsrf(app: PairApp, email: string): string`
 - **Usada por:** `pairPage()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5420,7 +7354,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `isTrustedPost(app: PairApp, request: Request, input: { csrf: string; email: string }): boolean`
 - **Usada por:** `handlePairPost()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5437,7 +7371,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `startPairLogin(app: PairApp): Response`
 - **Usada por:** `routePairRequest()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5454,7 +7388,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `isValidPairLogin(app: PairApp, request: Request): boolean`
 - **Usada por:** `handlePairCallback()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5471,7 +7405,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `openPairSession(app: PairApp, email: string): Response`
 - **Usada por:** `handlePairCallback()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5488,7 +7422,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `async handlePairCallback(app: PairApp, request: Request): Promise<Response>`
 - **Usada por:** `routePairRequest()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5505,7 +7439,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `pairDeadline(app: PairApp): number`
 - **Usada por:** `connectors/whatsapp/src/pair.ts (módulo)`, `fetchPairStatus()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5522,7 +7456,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `async fetchPairStatus(app: PairApp): Promise<BridgeStatus | null>`
 - **Usada por:** `pairPage()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5539,7 +7473,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `async pairPage(app: PairApp, email: string, extra: Partial<PairPageView> = {}): Promise<Response>`
 - **Usada por:** `handlePairPost()`, `routePairRequest()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5556,7 +7490,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `async handlePairPost(app: PairApp, request: Request, email: string): Promise<Response>`
 - **Usada por:** `routePairPost()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5573,7 +7507,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `routePairPost(app: PairApp, request: Request, email: string | null): Promise<Response>`
 - **Usada por:** `routePairRequest()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5590,7 +7524,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `isPairPath(path: string): boolean`
 - **Usada por:** `routePairRequest()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5607,7 +7541,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `async routePairRequest(app: PairApp, request: Request): Promise<Response | null>`
 - **Usada por:** `handleWhatsAppFetch()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5624,7 +7558,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `pairCookie(name: string, value: string, maxAge: number): string`
 - **Usada por:** `handlePairPost()`, `openPairSession()`, `startPairLogin()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5641,7 +7575,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/pair.ts`
 - **Assinatura:** `pairActionError(error: unknown): Partial<PairPageView>`
 - **Usada por:** `handlePairPost()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -5660,7 +7594,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
 - **Assinatura:** `storedGeneration(meta: Pick<SnapshotObject, 'customMetadata'> | null): number`
 - **Usada por:** `storeSnapshot()`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
@@ -5677,7 +7611,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
 - **Assinatura:** `readUploadHeaders(headers: Headers): { readonly length: number; readonly generation: number } | null`
 - **Usada por:** `acceptSnapshotPush()`, `storeSnapshotResponse()`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
@@ -5694,7 +7628,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
 - **Assinatura:** `async storeSnapshot(bucket: SnapshotBucket, upload: SnapshotUpload, fixedLength: FixedLength): Promise<SnapshotOutcome>`
 - **Usada por:** `acceptSnapshotPush()`, `storeSnapshotResponse()`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
@@ -5711,13 +7645,13 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
 - **Assinatura:** `async storeSnapshotResponse(bucket: SnapshotBucket, res: Response, fixedLength: FixedLength): Promise<SnapshotOutcome>`
 - **Usada por:** `snapshotBridge()`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
 - **Faz:** Grava a resposta de `GET /snapshot` da ponte: 204 é `unchanged`; headers inválidos lançam.
 - **Entrada:** `bucket`, a resposta da ponte e `fixedLength`.
-- **Saída:** `saved`, `unchanged` ou `stale`.
+- **Saída:** `saved`, `stale` ou `unchanged` (204 sem mudança, ou 503 com a ponte ainda iniciando).
 - **Efeitos:** Grava no R2; cancela o corpo se inválido.
 - **Erros:** Rejeita com `Error` se a resposta não for 2xx ou os headers forem inválidos.
 
@@ -5728,7 +7662,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
 - **Assinatura:** `async archiveSnapshot(bucket: SnapshotBucket, now: Date, fixedLength: FixedLength): Promise<boolean>`
 - **Usada por:** `resetBridge()`
-- **Processos:** P11, P12
+- **Processos:** P14, P15
 
 <!-- gerado:fim -->
 
@@ -5745,7 +7679,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
 - **Assinatura:** `sameSecret(given: string, expected: string): boolean`
 - **Usada por:** `acceptSnapshotPush()`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
@@ -5762,7 +7696,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
 - **Assinatura:** `async acceptSnapshotPush(bucket: SnapshotBucket, request: Request, options: { readonly token: string; readonly fixedLength: FixedLength }): Promise<Response>`
 - **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`
-- **Processos:** P13
+- **Processos:** P16
 
 <!-- gerado:fim -->
 
@@ -5781,7 +7715,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `toolDeadline(ctx: WhatsAppToolContext): number`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`, `runRead()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5798,7 +7732,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `syncWaitBudget(ctx: WhatsAppToolContext, deadline: number): number`
 - **Usada por:** `prepareRead()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5815,7 +7749,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `async prepareRead(ctx: WhatsAppToolContext, deadline: number): Promise<string | null>`
 - **Usada por:** `runRead()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5832,7 +7766,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `async runRead(ctx: WhatsAppToolContext, query: (deadline: number) => Promise<T>): Promise<T | { readonly warning: string; readonly result: T }>`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5849,7 +7783,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `compactContact(contact: Readonly<Record<string, string | null>>): Record<string, unknown>`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5866,7 +7800,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `mediaResult(res: Response, bytes: Uint8Array, messageId: string): RawToolResult`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5883,7 +7817,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `allowedRecipient(settings: WhatsAppSettings, recipient: string): string`
 - **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
-- **Processos:** P14
+- **Processos:** P17
 
 <!-- gerado:fim -->
 
@@ -5900,7 +7834,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `whatsappTools(settings: WhatsAppSettings): ToolSpec<WhatsAppToolContext>[]`
 - **Usada por:** `createWhatsAppMcpServer()`
-- **Processos:** P10, P11
+- **Processos:** P13, P14
 
 <!-- gerado:fim -->
 
@@ -5917,7 +7851,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `createWhatsAppMcpServer(ctx: WhatsAppToolContext): McpServer`
 - **Usada por:** `whatsappRemoteConnector()`
-- **Processos:** P10, P11
+- **Processos:** P13, P14
 
 <!-- gerado:fim -->
 
@@ -5934,7 +7868,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/tools.ts`
 - **Assinatura:** `decodeHeaderText(value: string | null): string`
 - **Usada por:** `mediaResult()`
-- **Processos:** P11
+- **Processos:** P14
 
 <!-- gerado:fim -->
 
@@ -5953,7 +7887,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker-env.ts`
 - **Assinatura:** `bridgeStub(env: WhatsAppEnv): BridgeStub`
 - **Usada por:** `handleWhatsAppFetch()`, `runScheduledSync()`
-- **Processos:** P10, P11, P14
+- **Processos:** P13, P14, P17
 
 <!-- gerado:fim -->
 
@@ -5970,7 +7904,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker-env.ts`
 - **Assinatura:** `bridgeFetchFor(stub: BridgeStub): BridgeFetch`
 - **Usada por:** `handleWhatsAppFetch()`, `runScheduledSync()`
-- **Processos:** P10, P11, P14
+- **Processos:** P13, P14, P17
 
 <!-- gerado:fim -->
 
@@ -5989,7 +7923,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker.ts`
 - **Assinatura:** `unixNow(): number`
 - **Usada por:** `createWhatsAppApps()`
-- **Processos:** P10
+- **Processos:** P13
 
 <!-- gerado:fim -->
 
@@ -6006,7 +7940,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker.ts`
 - **Assinatura:** `githubSettingsFrom(settings: WhatsAppSettings): GithubLoginSettings`
 - **Usada por:** `createWhatsAppApps()`, `whatsappRemoteConnector()`
-- **Processos:** P10
+- **Processos:** P13
 
 <!-- gerado:fim -->
 
@@ -6023,7 +7957,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker.ts`
 - **Assinatura:** `whatsappRemoteConnector(settings: WhatsAppSettings, bridge: BridgeFetch, issuer: string): RemoteConnector`
 - **Usada por:** `createWhatsAppApps()`
-- **Processos:** P10
+- **Processos:** P13
 
 <!-- gerado:fim -->
 
@@ -6040,7 +7974,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker.ts`
 - **Assinatura:** `createWhatsAppApps(vars: EnvVars, bridge: BridgeFetch, origin: string): WhatsAppApps`
 - **Usada por:** `handleWhatsAppFetch()`
-- **Processos:** P10
+- **Processos:** P13
 
 <!-- gerado:fim -->
 
@@ -6057,7 +7991,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker.ts`
 - **Assinatura:** `async handleWhatsAppFetch(request: Request, env: WhatsAppEnv): Promise<Response>`
 - **Usada por:** `connectors/whatsapp/src/worker.ts (módulo)`
-- **Processos:** P10
+- **Processos:** P13
 
 <!-- gerado:fim -->
 
@@ -6074,7 +8008,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker.ts`
 - **Assinatura:** `isSyncCronEnabled(vars: EnvVars, cron: string): boolean`
 - **Usada por:** `runScheduledSync()`
-- **Processos:** P14
+- **Processos:** P17
 
 <!-- gerado:fim -->
 
@@ -6091,7 +8025,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `connectors/whatsapp/src/worker.ts`
 - **Assinatura:** `async runScheduledSync(env: WhatsAppEnv, cron: string): Promise<string>`
 - **Usada por:** `connectors/whatsapp/src/worker.ts (módulo)`
-- **Processos:** P14
+- **Processos:** P17
 
 <!-- gerado:fim -->
 
@@ -6110,7 +8044,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/github-login.ts`
 - **Assinatura:** `githubAuthorizeUrl(settings: GithubLoginSettings, state: string, callbackUrl: string): string`
 - **Usada por:** `githubUpstreamLogin()`, `startPairLogin()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -6127,7 +8061,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/github-login.ts`
 - **Assinatura:** `parseEmailList(raw: string | null): string[]`
 - **Usada por:** `readAllowedEmails()`
-- **Processos:** P10, P14
+- **Processos:** P13, P17
 
 <!-- gerado:fim -->
 
@@ -6144,7 +8078,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/github-login.ts`
 - **Assinatura:** `pickAllowedEmail(emails: readonly GithubEmail[], allowed: readonly string[]): string | null`
 - **Usada por:** `finishGithubLogin()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -6161,7 +8095,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/github-login.ts`
 - **Assinatura:** `async exchangeGithubCode(settings: GithubLoginSettings, code: string, callbackUrl: string): Promise<string>`
 - **Usada por:** `finishGithubLogin()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -6178,7 +8112,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/github-login.ts`
 - **Assinatura:** `async fetchGithubEmails(settings: GithubLoginSettings, token: string): Promise<GithubEmail[]>`
 - **Usada por:** `finishGithubLogin()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -6195,7 +8129,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/github-login.ts`
 - **Assinatura:** `async finishGithubLogin(settings: GithubLoginSettings, query: URLSearchParams, callbackUrl: string): Promise<string>`
 - **Usada por:** `githubUpstreamLogin()`, `handlePairCallback()`
-- **Processos:** P10, P12
+- **Processos:** P13, P15
 
 <!-- gerado:fim -->
 
@@ -6212,7 +8146,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/github-login.ts`
 - **Assinatura:** `githubUpstreamLogin(settings: GithubLoginSettings): UpstreamLogin`
 - **Usada por:** `whatsappRemoteConnector()`
-- **Processos:** P10
+- **Processos:** P13
 
 <!-- gerado:fim -->
 
@@ -6224,78 +8158,116 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 ## Dados e constantes
 
-| Nome                       | Arquivo                                           | O que é                                                                                                                     |
-| -------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `CANVAS_USER_AGENT`        | `connectors/canvas-puc/src/remote.ts`             | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                                     |
-| `TOKEN_RENEWAL_SECONDS`    | `connectors/canvas-puc/src/remote.ts`             | Quanto cada renovação estende o token do Canvas: 30 dias menos 1 hora (o Canvas recusa mais de 30 dias à frente).           |
-| `TEST_EXCEPTIONS`          | `src/test-exceptions.ts`                          | Lista única de funções sem teste automatizado, com motivo e teste manual.                                                   |
-| `DEFAULT_DOCS_CONFIG`      | `tools/docs/config.ts`                            | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                                        |
-| `MODULE_SCOPE_SUFFIX`      | `tools/docs/ast.ts`                               | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                                   |
-| `WALK_IGNORED_DIRS`        | `tools/docs/inventory.ts`                         | Pastas puladas ao percorrer o disco sem git.                                                                                |
-| `GENERATED_START`          | `tools/docs/markdown.ts`                          | Marcador de início do bloco gerado em FUNCTIONS.md.                                                                         |
-| `GENERATED_END`            | `tools/docs/markdown.ts`                          | Marcador de fim do bloco gerado.                                                                                            |
-| `INDEX_START`              | `tools/docs/markdown.ts`                          | Marcador de início do índice por módulo.                                                                                    |
-| `INDEX_END`                | `tools/docs/markdown.ts`                          | Marcador de fim do índice por módulo.                                                                                       |
-| `PLACEHOLDER`              | `tools/docs/markdown.ts`                          | Texto `_preencher_` deixado nos campos manuais novos.                                                                       |
-| `MANUAL_FIELDS`            | `tools/docs/render.ts`                            | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                                        |
-| `HTML_TEXT_REPLACEMENTS`   | `src/core/html.ts`                                | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                          |
-| `CFB_SIGNATURE`            | `src/core/cfb.ts`                                 | Os 8 bytes iniciais de todo arquivo OLE/CFB (o contêiner do .doc).                                                          |
-| `CP1252_HIGH`              | `src/core/word.ts`                                | Caracteres de 0x80 a 0x9F do Windows-1252, usados ao decodificar o texto de 8 bits do .doc.                                 |
-| `WORD_TEXT_REPLACEMENTS`   | `src/core/word.ts`                                | Substituições (regex → texto) aplicadas em ordem por `cleanWordText` às marcas do Word.                                     |
-| `MAX_DOWNLOAD_BYTES`       | `connectors/canvas-puc/src/files.ts`              | Maior arquivo que `baixar_arquivo` traz para a conversa (10 MB).                                                            |
-| `MAX_TEXT_CHARS`           | `connectors/canvas-puc/src/files.ts`              | Maior texto devolvido por `ler_arquivo_texto` (100 000 caracteres).                                                         |
-| `CONNECTORS_DIR`           | `tools/pack/pack.ts`                              | Pasta dos conectores relativa à raiz (`connectors`).                                                                        |
-| `PACK_OUT_DIR`             | `tools/pack/pack.ts`                              | Pasta de saída dos pacotes `.mcpb` (`dist/connectors`).                                                                     |
-| `RUNTIME_EXTERNALS`        | `tools/pack/pack.ts`                              | Dependências que o esbuild não une e vão para `node_modules` do pacote.                                                     |
-| `PLAYWRIGHT_VERSION`       | `connectors/canvas-puc/src/playwright-runtime.ts` | Versão do playwright-core instalada sob demanda; um teste garante que é a mesma do `package.json`.                          |
-| `RUNTIME_FILES`            | `tools/pack/pack.ts`                              | Arquivos de runtime de cada conector (manifesto, `package.json`, lockfile e bundle), versionados e copiados para o `.mcpb`. |
-| `CONNECTOR_ENTRY`          | `tools/pack/pack.ts`                              | Arquivo de entrada de cada conector (`src/main.ts`).                                                                        |
-| `BUNDLE_PATH`              | `tools/pack/pack.ts`                              | Caminho do bundle dentro do pacote (`server/index.js`).                                                                     |
-| `LOGIN_TIMEOUT_MS`         | `connectors/canvas-puc/src/browser-login.ts`      | Tempo máximo de espera do login por modo (`silent` 25 s, `window` 5 min).                                                   |
-| `BROWSER_CHANNELS`         | `connectors/canvas-puc/src/browser-login.ts`      | Navegadores tentados em ordem no login (`chrome`, `msedge`).                                                                |
-| `CANVAS_PAGE_SIZE`         | `connectors/canvas-puc/src/client.ts`             | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                             |
-| `DEFAULT_MAX_ITEMS`        | `connectors/canvas-puc/src/client.ts`             | Limite padrão de itens somados entre páginas em `getAll`.                                                                   |
-| `DEFAULT_CANVAS_URL`       | `connectors/canvas-puc/src/config.ts`             | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                                    |
-| `DEFAULT_LOGIN_BUTTON`     | `connectors/canvas-puc/src/config.ts`             | Trecho do texto do botão da instituição na tela de login, usado sem `CANVAS_LOGIN_BUTTON`.                                  |
-| `MAX_TEXT_LENGTH`          | `connectors/canvas-puc/src/format.ts`             | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                                                       |
-| `ASSIGNMENT_BUCKETS`       | `connectors/canvas-puc/src/helpers.ts`            | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                                               |
-| `CANVAS_READ_TOOLS`        | `connectors/canvas-puc/src/tools-read.ts`         | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                                 |
-| `CANVAS_WRITE_TOOLS`       | `connectors/canvas-puc/src/tools-write.ts`        | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`.                             |
-| `CANVAS_ACCOUNT_TOOLS`     | `connectors/canvas-puc/src/tools.ts`              | Ferramentas MCP de conexão: `conectar_canvas` e `desconectar_canvas`.                                                       |
-| `CANVAS_SERVER_INFO`       | `connectors/canvas-puc/src/tools.ts`              | Nome e versão anunciados pelo servidor MCP do Canvas (stdio e remoto).                                                      |
-| `REMOTE_ENTRY`             | `tools/pack/pack.ts`                              | Entrada opcional do servidor remoto de um conector (`src/remote-main.ts`).                                                  |
-| `REMOTE_BUNDLE_PATH`       | `tools/pack/pack.ts`                              | Bundle do servidor remoto (`server/remote.js`), usado pelo Dockerfile.                                                      |
-| `SEAL_KEY_BYTES`           | `src/remote/seal.ts`                              | Tamanho da `SEAL_KEY` (32 bytes, AES-256).                                                                                  |
-| `CLIENT_TTL_SECONDS`       | `src/remote/oauth.ts`                             | Validade do `client_id` registrado (10 anos).                                                                               |
-| `PENDING_TTL_SECONDS`      | `src/remote/tokens.ts`                            | Validade do pedido selado no formulário de login (15 minutos).                                                              |
-| `CODE_TTL_SECONDS`         | `src/remote/tokens.ts`                            | Validade do código de autorização (5 minutos).                                                                              |
-| `ACCESS_TTL_SECONDS`       | `src/remote/tokens.ts`                            | Validade do access token (1 hora).                                                                                          |
-| `REFRESH_TTL_SECONDS`      | `src/remote/tokens.ts`                            | Validade do refresh token (30 dias, como o token da PUC).                                                                   |
-| `LOGIN_PAGE_CSS`           | `src/remote/login-page.ts`                        | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                             |
-| `CORS_HEADERS`             | `src/remote/handler.ts`                           | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                                       |
-| `REMOTE_ROUTES`            | `src/remote/handler.ts`                           | Tabela `MÉTODO caminho` → função do servidor remoto.                                                                        |
-| `DEFAULT_REDIRECT_HOSTS`   | `src/remote/oauth.ts`                             | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                                         |
-| `MAX_BODY_BYTES`           | `src/remote/node-server.ts`                       | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                               |
-| `GITHUB_USER_AGENT`        | `src/remote/github-login.ts`                      | User-Agent das chamadas ao GitHub (a API recusa requisições sem ele e o `fetch` do Workers não manda um).                   |
-| `UPSTREAM_CALLBACK_PATH`   | `src/remote/handler.ts`                           | Caminho do retorno do login delegado (`/oauth/callback`), cadastrado no provedor de identidade.                             |
-| `BRIDGE_ERROR_MESSAGES`    | `connectors/whatsapp/src/bridge-client.ts`        | Mensagens ao usuário, em português, para os códigos de erro conhecidos da ponte.                                            |
-| `WHATSAPP_DEFAULTS`        | `connectors/whatsapp/src/config.ts`               | Padrões do conector: dormir em 5 min, 25 s por ferramenta, 8 s esperando o sync, 10 envios por hora.                        |
-| `BRIDGE_ENV_KEYS`          | `connectors/whatsapp/src/config.ts`               | Variáveis repassadas do Worker para o container da ponte (`bridge/API.md`).                                                 |
-| `SNAPSHOT_PUSH_URL`        | `connectors/whatsapp/src/config.ts`               | Endereço interno, interceptado pelo Worker, para onde a ponte envia o snapshot no `SIGTERM`.                                |
-| `UNTRUSTED_NOTICE`         | `connectors/whatsapp/src/format.ts`               | Aviso de dado de terceiros não confiável que acompanha todo resultado com mensagens ou contatos.                            |
-| `HIDDEN_CHAR_RANGES`       | `connectors/whatsapp/src/format.ts`               | Faixas de caracteres invisíveis (controle, largura zero, bidi, BOM) removidas por `sanitizeText`.                           |
-| `SNAPSHOT_INTERVAL_MS`     | `connectors/whatsapp/src/lifecycle.ts`            | Intervalo mínimo entre snapshots disparados por uso (1 minuto).                                                             |
-| `SNAPSHOT_AFTER_PATHS`     | `connectors/whatsapp/src/lifecycle.ts`            | Rotas da ponte depois das quais o banco pode ter mudado e vale tentar um snapshot.                                          |
-| `SEND_HISTORY_KEY`         | `connectors/whatsapp/src/lifecycle.ts`            | Chave, no armazenamento do Durable Object, dos instantes dos envios recentes (limite por hora).                             |
-| `PAIR_PAGE_CSS`            | `connectors/whatsapp/src/pair-page.ts`            | Acréscimos de estilo da página `/pair` (código grande, QR, botões secundários e de perigo).                                 |
-| `PAIR_SESSION_COOKIE`      | `connectors/whatsapp/src/pair.ts`                 | Nome do cookie (`__Host-`) da sessão selada do `/pair`.                                                                     |
-| `PAIR_NONCE_COOKIE`        | `connectors/whatsapp/src/pair.ts`                 | Nome do cookie (`__Host-`) do nonce que amarra o login do `/pair` ao navegador.                                             |
-| `PAIR_SESSION_TTL_SECONDS` | `connectors/whatsapp/src/pair.ts`                 | Validade da sessão do `/pair` e do token anti-CSRF (30 minutos).                                                            |
-| `PAIR_LOGIN_TTL_SECONDS`   | `connectors/whatsapp/src/pair.ts`                 | Validade do login do `/pair` em andamento (10 minutos).                                                                     |
-| `PAIR_CALLBACK_PATH`       | `connectors/whatsapp/src/pair.ts`                 | Caminho do retorno do GitHub para o `/pair` (subcaminho do retorno do OAuth App).                                           |
-| `PAIR_ACTIONS`             | `connectors/whatsapp/src/pair.ts`                 | Ações do `/pair` por caminho: código, QR, desvincular e recomeçar do zero.                                                  |
-| `SNAPSHOT_KEY_NAME`        | `connectors/whatsapp/src/snapshots.ts`            | Chave do snapshot atual no bucket R2 (`whatsapp/snapshot.was1`).                                                            |
-| `WHATSAPP_INSTRUCTIONS`    | `connectors/whatsapp/src/tools.ts`                | Instruções do servidor MCP: o que é o conector e a regra sobre conteúdo não confiável.                                      |
-| `READ_TOOLS`               | `connectors/whatsapp/src/tools.ts`                | Ferramentas de leitura (fase 1), sempre ativas.                                                                             |
-| `BRIDGE_INSTANCE_NAME`     | `connectors/whatsapp/src/worker-env.ts`           | Nome fixo da única instância do Durable Object da ponte (instância única = sessão única).                                   |
-| `WHATSAPP_WORKER_HANDLERS` | `connectors/whatsapp/src/worker.ts`               | Handlers do Worker (`fetch` e `scheduled`), exportados pelo `index.ts` com o Durable Object.                                |
+| Nome                        | Arquivo                                    | O que é                                                                                                           |
+| --------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `CANVAS_USER_AGENT`         | `connectors/canvas-puc/src/remote.ts`      | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                           |
+| `TOKEN_RENEWAL_SECONDS`     | `connectors/canvas-puc/src/remote.ts`      | Quanto cada renovação estende o token do Canvas: 30 dias menos 1 hora (o Canvas recusa mais de 30 dias à frente). |
+| `TEST_EXCEPTIONS`           | `src/test-exceptions.ts`                   | Lista única de funções sem teste automatizado, com motivo e teste manual.                                         |
+| `DEFAULT_DOCS_CONFIG`       | `tools/docs/config.ts`                     | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                              |
+| `MODULE_SCOPE_SUFFIX`       | `tools/docs/ast.ts`                        | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                         |
+| `WALK_IGNORED_DIRS`         | `tools/docs/inventory.ts`                  | Pastas puladas ao percorrer o disco sem git.                                                                      |
+| `GENERATED_START`           | `tools/docs/markdown.ts`                   | Marcador de início do bloco gerado em FUNCTIONS.md.                                                               |
+| `GENERATED_END`             | `tools/docs/markdown.ts`                   | Marcador de fim do bloco gerado.                                                                                  |
+| `INDEX_START`               | `tools/docs/markdown.ts`                   | Marcador de início do índice por módulo.                                                                          |
+| `INDEX_END`                 | `tools/docs/markdown.ts`                   | Marcador de fim do índice por módulo.                                                                             |
+| `PLACEHOLDER`               | `tools/docs/markdown.ts`                   | Texto `_preencher_` deixado nos campos manuais novos.                                                             |
+| `MANUAL_FIELDS`             | `tools/docs/render.ts`                     | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                              |
+| `HTML_TEXT_REPLACEMENTS`    | `src/core/html.ts`                         | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                |
+| `CFB_SIGNATURE`             | `src/core/cfb.ts`                          | Os 8 bytes iniciais de todo arquivo OLE/CFB (o contêiner do .doc).                                                |
+| `CP1252_HIGH`               | `src/core/word.ts`                         | Caracteres de 0x80 a 0x9F do Windows-1252, usados ao decodificar o texto de 8 bits do .doc.                       |
+| `WORD_TEXT_REPLACEMENTS`    | `src/core/word.ts`                         | Substituições (regex → texto) aplicadas em ordem por `cleanWordText` às marcas do Word.                           |
+| `MAX_DOWNLOAD_BYTES`        | `connectors/canvas-puc/src/files.ts`       | Maior arquivo que `baixar_arquivo` traz para a conversa (10 MB).                                                  |
+| `MAX_TEXT_CHARS`            | `connectors/canvas-puc/src/files.ts`       | Maior texto devolvido por `ler_arquivo_texto` (100 000 caracteres).                                               |
+| `CONNECTORS_DIR`            | `tools/bundle/bundle.ts`                   | Pasta dos conectores relativa à raiz (`connectors`).                                                              |
+| `PLUGIN_MANIFEST_PATH`      | `tools/bundle/bundle.ts`                   | Manifesto do plugin em cada conector (`.claude-plugin/plugin.json`); marca a pasta como conector.                 |
+| `PLUGIN_MCP_CONFIG_PATH`    | `tools/bundle/bundle.ts`                   | Configuração MCP do plugin (`.mcp.json`), com a URL do servidor remoto.                                           |
+| `CANVAS_PAGE_SIZE`          | `connectors/canvas-puc/src/client.ts`      | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                   |
+| `DEFAULT_MAX_ITEMS`         | `connectors/canvas-puc/src/client.ts`      | Limite padrão de itens somados entre páginas em `getAll`.                                                         |
+| `DEFAULT_CANVAS_URL`        | `connectors/canvas-puc/src/remote.ts`      | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                          |
+| `MAX_TEXT_LENGTH`           | `connectors/canvas-puc/src/format.ts`      | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                                             |
+| `ASSIGNMENT_BUCKETS`        | `connectors/canvas-puc/src/helpers.ts`     | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                                     |
+| `CANVAS_READ_TOOLS`         | `connectors/canvas-puc/src/tools-read.ts`  | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                       |
+| `CANVAS_WRITE_TOOLS`        | `connectors/canvas-puc/src/tools-write.ts` | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`.                   |
+| `CANVAS_SERVER_INFO`        | `connectors/canvas-puc/src/tools.ts`       | Nome e versão anunciados pelo servidor MCP do Canvas.                                                             |
+| `REMOTE_ENTRY`              | `tools/bundle/bundle.ts`                   | Entrada do servidor remoto em Node de um conector (`src/remote-main.ts`).                                         |
+| `REMOTE_BUNDLE_PATH`        | `tools/bundle/bundle.ts`                   | Bundle do servidor remoto (`server/remote.js`), usado pelo Dockerfile.                                            |
+| `SEAL_KEY_BYTES`            | `src/remote/seal.ts`                       | Tamanho da `SEAL_KEY` (32 bytes, AES-256).                                                                        |
+| `CLIENT_TTL_SECONDS`        | `src/remote/oauth.ts`                      | Validade do `client_id` registrado (10 anos).                                                                     |
+| `PENDING_TTL_SECONDS`       | `src/remote/tokens.ts`                     | Validade do pedido selado no formulário de login (15 minutos).                                                    |
+| `CODE_TTL_SECONDS`          | `src/remote/tokens.ts`                     | Validade do código de autorização (5 minutos).                                                                    |
+| `ACCESS_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Validade do access token (1 hora).                                                                                |
+| `REFRESH_TTL_SECONDS`       | `src/remote/tokens.ts`                     | Validade do refresh token (30 dias, como o token da PUC).                                                         |
+| `LOGIN_PAGE_CSS`            | `src/remote/login-page.ts`                 | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                   |
+| `CORS_HEADERS`              | `src/remote/handler.ts`                    | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                             |
+| `REMOTE_ROUTES`             | `src/remote/handler.ts`                    | Tabela `MÉTODO caminho` → função do servidor remoto.                                                              |
+| `DEFAULT_REDIRECT_HOSTS`    | `src/remote/oauth.ts`                      | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                               |
+| `MAX_BODY_BYTES`            | `src/remote/node-server.ts`                | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                     |
+| `PDF_ESCAPES`               | `src/core/pdf.ts`                          | Escapes de letra das strings literais do PDF (`\n`, `\t`...).                                                     |
+| `TJ_SPACE_THRESHOLD`        | `src/core/pdf.ts`                          | Ajuste do `TJ` a partir do qual conta como espaço entre palavras.                                                 |
+| `PDF_TEXT_OPERATORS`        | `src/core/pdf.ts`                          | Operador de texto do PDF → texto que ele produz.                                                                  |
+| `ACCESS_TOKEN_MARGIN_MS`    | `connectors/gmail/src/access-token.ts`     | Margem antes do vencimento em que o access token do Google é renovado.                                            |
+| `MAX_ATTACHMENT_BYTES`      | `connectors/gmail/src/attachments.ts`      | Maior anexo lido como texto (5 MB).                                                                               |
+| `MAX_ATTACHMENT_CHARS`      | `connectors/gmail/src/attachments.ts`      | Maior texto devolvido de um anexo.                                                                                |
+| `GMAIL_READONLY_SCOPE`      | `connectors/gmail/src/config.ts`           | Escopo `gmail.readonly`, o único escopo de dados pedido.                                                          |
+| `GMAIL_LINK_SCOPES`         | `connectors/gmail/src/config.ts`           | Escopos do vínculo de conta (`openid email` + Gmail só leitura).                                                  |
+| `SIGN_IN_SCOPES`            | `connectors/gmail/src/config.ts`           | Escopos do login do dono (`openid email`).                                                                        |
+| `MIN_CONSENT_SECRET_CHARS`  | `connectors/gmail/src/config.ts`           | Tamanho mínimo de `CONSENT_SECRET`.                                                                               |
+| `UPSTREAM_USER_AGENT`       | `connectors/gmail/src/context.ts`          | User-Agent enviado ao Google e à Gmail API.                                                                       |
+| `GMAIL_API_BASE`            | `connectors/gmail/src/gmail-api.ts`        | Base da Gmail API para a conta do token.                                                                          |
+| `GMAIL_STATUS_MESSAGES`     | `connectors/gmail/src/gmail-api.ts`        | Mensagem acionável por status HTTP da Gmail API.                                                                  |
+| `GOOGLE_AUTHORIZE_URL`      | `connectors/gmail/src/google-oauth.ts`     | Endpoint de autorização do Google.                                                                                |
+| `GOOGLE_TOKEN_URL`          | `connectors/gmail/src/google-oauth.ts`     | Endpoint de tokens do Google.                                                                                     |
+| `GOOGLE_CALLBACK_PATH`      | `connectors/gmail/src/google-oauth.ts`     | Caminho do retorno do Google (`/google/callback`).                                                                |
+| `GOOGLE_JWKS_URL`           | `connectors/gmail/src/id-token.ts`         | Chaves públicas que assinam os `id_token` do Google.                                                              |
+| `GOOGLE_ISSUERS`            | `connectors/gmail/src/id-token.ts`         | Emissores aceitos no `id_token`.                                                                                  |
+| `CLOCK_SKEW_SECONDS`        | `connectors/gmail/src/id-token.ts`         | Folga de relógio aceita na validade do `id_token`.                                                                |
+| `LINK_STATE_PREFIX`         | `connectors/gmail/src/link-flow.ts`        | Prefixo do `state` do vínculo de conta (`link.`).                                                                 |
+| `LINK_COOKIE`               | `connectors/gmail/src/link-flow.ts`        | Cookie `__Host-` que prende o vínculo ao navegador.                                                               |
+| `LINK_TTL_SECONDS`          | `connectors/gmail/src/link-flow.ts`        | Validade do pedido de vínculo (10 minutos).                                                                       |
+| `LINK_REQUEST_TYP`          | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do pedido de vínculo.                                                                                |
+| `MAX_MESSAGE_CHARS`         | `connectors/gmail/src/message-format.ts`   | Maior corpo de mensagem devolvido.                                                                                |
+| `MAX_THREAD_CHARS`          | `connectors/gmail/src/message-format.ts`   | Maior soma dos corpos de uma conversa.                                                                            |
+| `MIN_MESSAGE_CHARS`         | `connectors/gmail/src/message-format.ts`   | Menor fatia por mensagem numa conversa longa.                                                                     |
+| `MESSAGE_HEADERS`           | `connectors/gmail/src/message-format.ts`   | Cabeçalhos devolvidos de cada mensagem.                                                                           |
+| `UNTRUSTED_NOTICE`          | `connectors/gmail/src/message-format.ts`   | Aviso de conteúdo de e-mail não confiável (prompt injection).                                                     |
+| `GOOGLE_ACCOUNTS_ORIGIN`    | `connectors/gmail/src/pages.ts`            | Origem do Google liberada no `form-action` do consentimento.                                                      |
+| `RATE_LIMIT_RETRY_SECONDS`  | `connectors/gmail/src/rate-limit.ts`       | Segundos do `Retry-After` na resposta 429.                                                                        |
+| `LINKED_ACCOUNT_TYP`        | `connectors/gmail/src/token-store.ts`      | Tipo do selo da conta vinculada.                                                                                  |
+| `LINKED_ACCOUNT_EXP`        | `connectors/gmail/src/token-store.ts`      | Validade técnica do selo da conta (ano 2100).                                                                     |
+| `GMAIL_ID`                  | `connectors/gmail/src/tools.ts`            | Esquema zod de id da Gmail API (só caracteres seguros na URL).                                                    |
+| `listAccountsTool`          | `connectors/gmail/src/tools.ts`            | Ferramenta `list_accounts`.                                                                                       |
+| `searchThreadsTool`         | `connectors/gmail/src/tools.ts`            | Ferramenta `search_threads`.                                                                                      |
+| `getThreadTool`             | `connectors/gmail/src/tools.ts`            | Ferramenta `get_thread`.                                                                                          |
+| `getMessageTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `get_message`.                                                                                         |
+| `listLabelsTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `list_labels`.                                                                                         |
+| `getAttachmentTextTool`     | `connectors/gmail/src/tools.ts`            | Ferramenta `get_attachment_text`.                                                                                 |
+| `GMAIL_TOOLS`               | `connectors/gmail/src/tools.ts`            | Todas as ferramentas do Gmail, na ordem mostrada ao Claude.                                                       |
+| `GMAIL_SERVER_INFO`         | `connectors/gmail/src/worker.ts`           | Nome e versão do servidor MCP do Gmail.                                                                           |
+| `GMAIL_SERVER_INSTRUCTIONS` | `connectors/gmail/src/worker.ts`           | Instruções do servidor MCP (contas e conteúdo não confiável).                                                     |
+| `ACCESS_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`           | Validade do access token emitido ao Claude (1 hora).                                                              |
+| `REFRESH_TOKEN_TTL_SECONDS` | `connectors/gmail/src/worker.ts`           | Validade do refresh token emitido ao Claude (30 dias).                                                            |
+| `GMAIL_ROUTES`              | `connectors/gmail/src/worker.ts`           | Rotas próprias do Worker: `MÉTODO caminho` → atendimento.                                                         |
+| `BRIDGE_ERROR_MESSAGES`     | `connectors/whatsapp/src/bridge-client.ts` | Mensagens ao usuário, em português, para os códigos de erro conhecidos da ponte.                                  |
+| `WHATSAPP_DEFAULTS`         | `connectors/whatsapp/src/config.ts`        | Padrões do conector: dormir em 5 min, 25 s por ferramenta, 8 s esperando o sync, 10 envios por hora.              |
+| `BRIDGE_ENV_KEYS`           | `connectors/whatsapp/src/config.ts`        | Variáveis repassadas do Worker para o container da ponte (`bridge/API.md`).                                       |
+| `SNAPSHOT_PUSH_URL`         | `connectors/whatsapp/src/config.ts`        | Endereço interno, interceptado pelo Worker, para onde a ponte envia o snapshot no `SIGTERM`.                      |
+| `UNTRUSTED_NOTICE`          | `connectors/whatsapp/src/format.ts`        | Aviso de dado de terceiros não confiável que acompanha todo resultado com mensagens ou contatos.                  |
+| `HIDDEN_CHAR_RANGES`        | `connectors/whatsapp/src/format.ts`        | Faixas de caracteres invisíveis (controle, largura zero, bidi, BOM) removidas por `sanitizeText`.                 |
+| `SNAPSHOT_INTERVAL_MS`      | `connectors/whatsapp/src/lifecycle.ts`     | Intervalo mínimo entre snapshots disparados por uso (1 minuto).                                                   |
+| `SNAPSHOT_AFTER_PATHS`      | `connectors/whatsapp/src/lifecycle.ts`     | Rotas da ponte depois das quais o banco pode ter mudado e vale tentar um snapshot.                                |
+| `SEND_HISTORY_KEY`          | `connectors/whatsapp/src/lifecycle.ts`     | Chave, no armazenamento do Durable Object, dos instantes dos envios recentes (limite por hora).                   |
+| `PAIR_PAGE_CSS`             | `connectors/whatsapp/src/pair-page.ts`     | Acréscimos de estilo da página `/pair` (código grande, QR, botões secundários e de perigo).                       |
+| `PAIR_SESSION_COOKIE`       | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) da sessão selada do `/pair`.                                                           |
+| `PAIR_NONCE_COOKIE`         | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) do nonce que amarra o login do `/pair` ao navegador.                                   |
+| `PAIR_SESSION_TTL_SECONDS`  | `connectors/whatsapp/src/pair.ts`          | Validade da sessão do `/pair` e do token anti-CSRF (30 minutos).                                                  |
+| `PAIR_LOGIN_TTL_SECONDS`    | `connectors/whatsapp/src/pair.ts`          | Validade do login do `/pair` em andamento (10 minutos).                                                           |
+| `PAIR_CALLBACK_PATH`        | `connectors/whatsapp/src/pair.ts`          | Caminho do retorno do GitHub para o `/pair` (subcaminho do retorno do OAuth App).                                 |
+| `PAIR_ACTIONS`              | `connectors/whatsapp/src/pair.ts`          | Ações do `/pair` por caminho: código, QR, desvincular e recomeçar do zero.                                        |
+| `SNAPSHOT_KEY_NAME`         | `connectors/whatsapp/src/snapshots.ts`     | Chave do snapshot atual no bucket R2 (`whatsapp/snapshot.was1`).                                                  |
+| `WHATSAPP_INSTRUCTIONS`     | `connectors/whatsapp/src/tools.ts`         | Instruções do servidor MCP: o que é o conector e a regra sobre conteúdo não confiável.                            |
+| `READ_TOOLS`                | `connectors/whatsapp/src/tools.ts`         | Ferramentas de leitura (fase 1), sempre ativas.                                                                   |
+| `BRIDGE_INSTANCE_NAME`      | `connectors/whatsapp/src/worker-env.ts`    | Nome fixo da única instância do Durable Object da ponte (instância única = sessão única).                         |
+| `WHATSAPP_WORKER_HANDLERS`  | `connectors/whatsapp/src/worker.ts`        | Handlers do Worker (`fetch` e `scheduled`), exportados pelo `index.ts` com o Durable Object.                      |
+| `GITHUB_USER_AGENT`         | `src/remote/github-login.ts`               | User-Agent das chamadas ao GitHub (a API recusa requisições sem ele).                                             |
+| `UPSTREAM_CALLBACK_PATH`    | `src/remote/handler.ts`                    | Caminho do retorno do login delegado (`/oauth/callback`), cadastrado no provedor.                                 |
+| `BRIDGE_RETRY_MS`           | `connectors/whatsapp/src/bridge-client.ts` | Espera entre tentativas enquanto a ponte acorda (750 ms).                                                         |

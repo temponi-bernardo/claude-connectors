@@ -73,8 +73,16 @@ export function bridgeTimeoutMessage(path: string): string {
   return `Tempo esgotado esperando o WhatsApp (${route}). O container pode estar acordando: tente de novo em instantes.`;
 }
 
-/** Chama a ponte dentro do prazo e devolve a resposta crua se for 2xx; senão lança `BridgeError`. */
-export async function callBridge(
+/** Espera entre tentativas enquanto a ponte acorda (ms). */
+export const BRIDGE_RETRY_MS = 750;
+
+/** Diz se vale tentar de novo: a ponte ainda está iniciando e sobra prazo para mais uma tentativa. */
+export function shouldRetryBridge(error: BridgeError, deadline: number, now: number): boolean {
+  return error.code === 'not_ready' && now + BRIDGE_RETRY_MS < deadline;
+}
+
+/** Faz uma tentativa: resposta 2xx, ou `BridgeError` com o código da ponte. */
+export async function attemptBridge(
   bridge: BridgeFetch,
   path: string,
   options: { readonly init?: RequestInit; readonly deadline: number },
@@ -87,6 +95,26 @@ export async function callBridge(
   if (res.ok) return res;
   const body: unknown = await res.json().catch(() => null);
   throw bridgeErrorFrom(res.status, body);
+}
+
+/** Chama a ponte dentro do prazo, esperando-a acordar (`not_ready`); 2xx devolve a resposta, o resto lança. */
+export async function callBridge(
+  bridge: BridgeFetch,
+  path: string,
+  options: { readonly init?: RequestInit; readonly deadline: number },
+): Promise<Response> {
+  for (;;) {
+    try {
+      return await attemptBridge(bridge, path, options);
+    } catch (error) {
+      if (
+        !(error instanceof BridgeError) ||
+        !shouldRetryBridge(error, options.deadline, Date.now())
+      )
+        throw error;
+      await new Promise((resolve) => setTimeout(resolve, BRIDGE_RETRY_MS));
+    }
+  }
 }
 
 /** Chama a ponte e lê o JSON da resposta. */

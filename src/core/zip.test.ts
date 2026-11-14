@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { deflateSync } from 'node:zlib';
 import { describe, expect, it } from 'vitest';
 import {
   findEndOfCentralDirectory,
+  decompressBytes,
   inflateRaw,
   listZipEntries,
   readZipEntry,
@@ -85,5 +87,14 @@ describe('readZipEntry', () => {
 
   it('recusa métodos de compressão desconhecidos', async () => {
     await expect(readZipEntry(storedZip('a', 'b', 12), 'a')).rejects.toThrow('método 12');
+  });
+});
+
+describe('decompressBytes', () => {
+  it('descomprime dados com cabeçalho zlib (formato deflate)', async () => {
+    const compressed = deflateSync(Buffer.from('fluxo de PDF'));
+    expect(new TextDecoder().decode(await decompressBytes(compressed, 'deflate'))).toBe(
+      'fluxo de PDF',
+    );
   });
 });

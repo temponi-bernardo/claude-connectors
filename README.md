@@ -1,30 +1,37 @@
 # claude-connectors
 
-Conectores MCP para o Claude, empacotados como extensões .mcpb, começando pelo Canvas da PUC Minas.
+Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace de plugins, começando pelo Canvas da PUC Minas.
 
 ## Conectores
 
-| Conector                                        | O que faz                                                           |
-| ----------------------------------------------- | ------------------------------------------------------------------- |
-| [`canvas-puc`](connectors/canvas-puc/README.md) | Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, arquivos |
+| Conector                                        | O que faz                                                                 |
+| ----------------------------------------------- | ------------------------------------------------------------------------- |
+| [`canvas-puc`](connectors/canvas-puc/README.md) | Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, arquivos       |
+| [`gmail`](connectors/gmail/README.md)           | Gmail multi-conta só leitura: busca, conversas, rótulos e texto de anexos |
 
-## Começando
+## Instalar no Claude
+
+No Claude (claude.ai, Cowork ou Claude Code), **Adicionar marketplace** → `temponi-bernardo/claude-connectors`
+e instale o plugin desejado. Nada é instalado no computador: o plugin aponta para o servidor remoto do
+conector, e o login acontece na primeira vez, numa página de OAuth ([ADR 0013](docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
+
+## Desenvolver
 
 ```bash
-nvm use                         # Node 22 (.nvmrc)
-npm install                     # instala e ativa os git hooks
-npm run check                   # formato, lint, tipos, testes, docs, segredos
-npm run pack -- canvas-puc      # gera dist/connectors/canvas-puc-<versão>.mcpb
+nvm use            # Node 22 (.nvmrc)
+npm install        # instala e ativa os git hooks
+npm run check      # formato, lint, tipos, testes, docs, segredos
+npm run build      # valida o plugin (só remoto) e gera server/remote.js
+npm run worker:deploy   # publica o servidor remoto no Cloudflare Workers
 ```
 
-### Instalar no Claude
+Requisitos: Node 22 e gitleaks (`winget install Gitleaks.Gitleaks`; na nuvem do Claude Code ele é instalado
+sozinho pelo Go, com `scripts/install-gitleaks.sh`).
 
-- **Como plugin (recomendado):** no Claude, **Adicionar marketplace** → `temponi-bernardo/claude-connectors`
-  e instale o plugin desejado. O repo é privado: o PC precisa ter acesso git ao GitHub (SSH ou
-  `gh auth setup-git`).
-- **Como extensão:** `npm run pack -- <conector>` e instale o `.mcpb` em **Configurações → Extensões**.
+## Site
 
-Requisitos: Node 22, Chrome ou Edge (login dos conectores) e gitleaks (`winget install Gitleaks.Gitleaks`).
+Página pública do serviço, política de privacidade e termos: <https://temponi-bernardo.github.io/claude-connectors/>
+(GitHub Pages servido de `docs/`, ADR 0012).
 
 ## Sem GitHub Actions
 

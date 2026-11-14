@@ -3,8 +3,8 @@
 # (ADR 0006 — nenhum custo de Actions). Roda o que os jobs de CI rodavam:
 #   1. npm run check (formato, lint, tipos, testes com cobertura, docs, duplicação, gitleaks)
 #   2. npm run bridge:test (ponte Go do WhatsApp: gofmt, vet, testes) e npm run whatsapp:build (bundle do Worker)
-#   3. npm run pack:all (todos os conectores compilam e empacotam em .mcpb) e confere que o runtime
-#      versionado de cada conector (server/, package.json, package-lock.json) está commitado e atual
+#   3. npm run build (o plugin de cada conector aponta para um servidor remoto e o bundle compila) e
+#      confere que o bundle versionado (server/remote.js) está commitado e atual
 #   4. commitlint em todos os commits da branch desde a main
 #   5. commitlint no título do PR (vira o commit da main no squash)
 # Uso: npm run pr:check -- "feat(canvas): título do PR"
@@ -21,10 +21,10 @@ echo "→ ponte Go do WhatsApp"
 npm run -s bridge:test
 echo "→ bundle do Worker do WhatsApp"
 npm run -s whatsapp:build >/dev/null
-echo "→ empacotamento dos conectores"
-npm run -s pack:all
+echo "→ build dos conectores"
+npm run -s build
 if ! git diff --quiet -- connectors || [ -n "$(git ls-files --others --exclude-standard connectors)" ]; then
-  echo "[pr:check] o runtime dos conectores mudou com o pack:all: commite server/, package.json e package-lock.json." >&2
+  echo "[pr:check] o bundle dos conectores mudou com o build: commite server/remote.js." >&2
   git status --short connectors >&2
   exit 1
 fi

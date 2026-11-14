@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   CANVAS_USER_AGENT,
+  DEFAULT_CANVAS_URL,
   TOKEN_RENEWAL_SECONDS,
   canvasTokenApi,
   matchesVisibleToken,
@@ -9,9 +10,7 @@ import {
   withCanvasUserAgent,
   canvasLoginText,
   canvasRemoteConnector,
-  createTokenAuthProvider,
   readCanvasRemoteSettings,
-  remoteUnauthorizedMessage,
   verifyCanvasToken,
   type CanvasRemoteSettings,
 } from './remote.js';
@@ -29,6 +28,7 @@ describe('readCanvasRemoteSettings', () => {
   it('usa o Canvas da PUC e a escrita desligada por padrão', () => {
     const settings = readCanvasRemoteSettings({});
     expect(settings.baseUrl).toBe(BASE);
+    expect(DEFAULT_CANVAS_URL).toBe(BASE);
     expect(settings.allowWrite).toBe(false);
   });
 
@@ -74,26 +74,6 @@ describe('withCanvasUserAgent', () => {
       body: '{}',
       headers: { authorization: 'Bearer t', 'user-agent': CANVAS_USER_AGENT },
     });
-  });
-});
-
-describe('createTokenAuthProvider', () => {
-  it('usa sempre o token e não renova nem abre login', async () => {
-    const auth = createTokenAuthProvider('abc');
-    expect(auth.current()).toEqual({ kind: 'token', token: 'abc' });
-    expect(await auth.renew()).toBeNull();
-    await expect(auth.connect()).rejects.toThrow(/configurações do Claude/);
-    expect(() => {
-      auth.disconnect();
-    }).not.toThrow();
-  });
-});
-
-describe('remoteUnauthorizedMessage', () => {
-  it('manda gerar outro token e reconectar no Claude', () => {
-    const message = remoteUnauthorizedMessage(null, BASE);
-    expect(message).toContain(`${BASE}/profile/settings`);
-    expect(message).toContain('reconecte');
   });
 });
 

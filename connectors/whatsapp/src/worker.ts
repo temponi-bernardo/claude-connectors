@@ -1,5 +1,5 @@
 /**
- * Entrada do conector WhatsApp no Cloudflare Workers (ADR 0012): servidor MCP remoto com OAuth (login do dono pelo
+ * Entrada do conector WhatsApp no Cloudflare Workers (ADR 0015): servidor MCP remoto com OAuth (login do dono pelo
  * GitHub), página `/pair` e o Durable Object `WhatsAppBridge`, dono do container da ponte. O sync periódico só
  * roda se `SYNC_CRON` estiver definido e igual ao cron que disparou (desligado por padrão).
  */

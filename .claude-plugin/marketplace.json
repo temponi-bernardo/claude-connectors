@@ -4,13 +4,18 @@
     "name": "Bernardo Temponi"
   },
   "metadata": {
-    "description": "Conectores MCP para o Claude: Canvas da PUC Minas e WhatsApp pessoal (self-host)."
+    "description": "Conectores MCP para o Claude: Canvas da PUC Minas, Gmail multi-conta e WhatsApp pessoal (self-host)."
   },
   "plugins": [
     {
       "name": "canvas-puc",
       "source": "./connectors/canvas-puc",
-      "description": "Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, módulos, arquivos e fóruns, com login pelo navegador."
+      "description": "Canvas LMS da PUC Minas na nuvem: entregas, tarefas, notas, avisos, módulos, arquivos e fóruns. Nada é instalado no computador."
+    },
+    {
+      "name": "gmail",
+      "source": "./connectors/gmail",
+      "description": "Gmail multi-conta só leitura na nuvem: busca, conversas, rótulos e texto de anexos de várias contas. Nada é instalado no computador."
     },
     {
       "name": "whatsapp",

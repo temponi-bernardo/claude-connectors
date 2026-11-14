@@ -6,16 +6,35 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ## [Não lançado]
 
+### Alterado
+
+- Canvas (v2.0.0): o conector roda só na nuvem. O plugin do marketplace aponta para o servidor remoto
+  (`https://canvas-puc-remote.bftemponi.workers.dev/mcp`) e o login é pela página de OAuth, colando o token
+  do Canvas uma vez. Funciona igual no claude.ai, no Cowork, no celular e no Claude Code (ADR 0013).
+- `npm run pack`/`pack:all` viraram `npm run build`: valida que o `.mcp.json` de cada conector é remoto
+  (`http` com `https://`) e gera o `server/remote.js` usado pelo Dockerfile.
+
 ### Adicionado
 
-- Conector **WhatsApp pessoal** (`connectors/whatsapp`, template self-host no Cloudflare Workers + Containers):
-  `whatsapp_status`, `list_chats`, `get_messages`, `search_messages`, `search_contacts` e `get_media`; envio
-  (`send_message`) atrás de `ENABLE_SEND`, desligado, com allowlist e limite por hora. Container sob demanda
-  (dorme após 5 min), sessão em backup cifrado no R2, página `/pair` com código de pareamento ou QR e login do dono
-  pelo GitHub (ADR 0012).
-- Conector remoto: login delegado a um provedor de identidade (GitHub, com `ALLOWED_EMAILS`) além do login por
+- Conector **WhatsApp pessoal** (`connectors/whatsapp`, template self-host no Cloudflare Workers + Containers,
+  ADR 0015): `whatsapp_status`, `list_chats`, `get_messages`, `search_messages`, `search_contacts` e `get_media`;
+  envio (`send_message`) atrás de `ENABLE_SEND`, desligado, com allowlist e limite por hora. Container sob demanda
+  (dorme após 5 min), sessão em backup cifrado no R2, página `/pair` com código ou QR e login do dono pelo GitHub.
+- Conector remoto: login delegado a um provedor de identidade (GitHub com `ALLOWED_EMAILS`), além do login por
   credencial colada (`src/remote/github-login.ts`).
 
+- **Conector Gmail remoto** (`connectors/gmail`, ADR 0014): lê duas ou mais contas Gmail no claude.ai, no
+  Cowork e no celular, só leitura. Ferramentas `list_accounts`, `search_threads`, `get_thread`, `get_message`,
+  `list_labels` e `get_attachment_text` (PDF, Word, HTML e texto), com `account` (`all` onde faz sentido).
+  OAuth 2.1 com `@cloudflare/workers-oauth-provider`, login no Google restrito a `ALLOWED_EMAILS`, vínculo
+  de contas em `/accounts/link` com refresh token cifrado (AES-256-GCM) no Workers KV, limite de 120
+  requisições por minuto por sessão. Roda só sob demanda (`npm run gmail:deploy`).
+- `src/core/pdf.ts`: extração de texto de PDF sem dependências (fluxos comprimidos, fluxos de objetos e
+  mapas ToUnicode).
+
+- Site público no GitHub Pages (`https://temponi-bernardo.github.io/claude-connectors/`) com página inicial,
+  política de privacidade e termos de uso, para usar como link do serviço em produção; o manifesto do Canvas
+  aponta para ele (ADR 0013).
 - Canvas: o plugin agora funciona nas sessões do Claude Code na nuvem. O `.mcp.json` liga
   `NODE_USE_ENV_PROXY=1`, e o Node passa a usar o proxy do ambiente, que injeta o token do Canvas. Basta
   preencher o campo "Token de acesso" do plugin com qualquer texto (ex.: `proxy`).
@@ -47,4 +66,7 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Removido
 
+- Canvas: toda a parte local. Saíram o servidor stdio (`server/index.js`), a extensão `.mcpb`, o login pelo
+  navegador (`playwright-core`, sessão em `~/.canvas-puc/`) e as ferramentas `conectar_canvas` e
+  `desconectar_canvas`. Também saiu o formulário de configuração do plugin.
 - GitHub Actions (CI, CodeQL, release-please em workflow): checagens e release rodam localmente, sem custo.

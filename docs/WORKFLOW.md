@@ -31,8 +31,8 @@
 | `chore`    | Manutenção que não se encaixa acima       | —                       |
 | `revert`   | Reverte um commit                         | —                       |
 
-Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `pack`, `docs`, `tools`, `ci`, `deps`,
-`skills`, `release`, `config`, `remote`, `whatsapp`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
+Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `bundle`, `docs`, `tools`, `ci`, `deps`,
+`skills`, `release`, `config`, `remote`, `site`, `gmail`, `whatsapp`. Conector novo ganha um escopo com o nome dele. Ao criar uma camada ou módulo novo, adicione o escopo lá **e** aqui no mesmo PR.
 
 `BREAKING CHANGE:` no rodapé (ou `!` após o tipo) gera major. O hook `commit-msg` valida localmente; o
 `pr:check` valida o **título do PR**, porque com squash merge é ele que vira o commit da `main`.
@@ -44,7 +44,7 @@ Escopos permitidos (`commitlint.config.js`): `core`, `mcp`, `canvas`, `pack`, `d
 3. Preencha o template: o que mudou, como testar, checklist de documentação (cada doc marcado ou "não se
    aplica: motivo").
 4. `npm run pr:check -- "<título do PR>"` verde é obrigatório antes de abrir e de mergear: check completo,
-   pacotes `.mcpb`, runtime dos conectores commitado e atual, commitlint dos commits e do título. Corrija em vez de pular (`--no-verify` é
+   build dos conectores (plugin só remoto, `server/remote.js` commitado e atual), commitlint dos commits e do título. Corrija em vez de pular (`--no-verify` é
    proibido e barrado pelo Claude Code).
 5. **Quem mergeia:** o Claude, com `pr:check` verde, sem pedir confirmação, inclusive o PR de release
    (decisão do dono, 2026-11-05).
@@ -73,12 +73,16 @@ O Claude trabalha em contextos pequenos: uma tarefa por sessão. O ciclo, susten
 `.claude/settings.json` (decisões em [ADR 0004](adr/0004-handoff-de-contexto-em-state-md-com-hooks.md) e
 [ADR 0005](adr/0005-state-md-local-por-clone.md)):
 
-1. `SessionStart` injeta `docs/STATE.md` (handoff) e a próxima tarefa do roadmap.
+1. `SessionStart` injeta `docs/STATE.md` (handoff) e a próxima tarefa do roadmap. Na nuvem, `session-tools.sh`
+   também instala o gitleaks e as dependências do npm.
 2. Durante a tarefa, trabalho que pode ser isolado vai para subagents; só o resumo volta ao contexto.
 3. Ao concluir, `/handoff` sobrescreve `docs/STATE.md`, que é local de cada clone (está no `.gitignore` e
    nunca vai para commit). Se houver commit seu novo sem handoff, o hook `Stop` bloqueia o encerramento e
    pede o handoff; commits trazidos por `git pull` não contam.
-4. O Claude avisa; o usuário roda `/clear`. Se o contexto estourar antes, `PreCompact` gera um handoff
+4. Se a branch alterou plugin (`connectors/` ou `.claude-plugin/`) sem tocar documentação (`docs/`,
+   `CHANGELOG.md`, `README.md` ou o README do conector), o hook `Stop` `stop-plugin-docs.sh` bloqueia o
+   encerramento e pede a skill `/atualizar-docs`: toda mudança em plugin documenta tudo o que foi feito.
+5. O Claude avisa; o usuário roda `/clear`. Se o contexto estourar antes, `PreCompact` gera um handoff
    automático via `claude -p` (desligue com `CLAUDE_HANDOFF_AUTOGEN=0`).
 
 ## Versão e release
@@ -93,19 +97,22 @@ release-please). O fluxo é da skill `/lancar-versao`:
 4. O Claude mergeia o PR de release, como qualquer PR. A confirmação humana fica em publicar o rascunho. Depois, a mesma CLI cria a tag `vX.Y.Z` e um
    **rascunho** de release: `npx release-please github-release --draft --token "$(gh auth token)" --repo-url
 temponi-bernardo/claude-connectors`.
-5. Publicar o rascunho quando quiser, anexando os `.mcpb` de `dist/connectors/`.
+5. Publicar o rascunho quando quiser. Não há anexo: o plugin aponta para o servidor remoto (ADR 0013).
 
 O **conector remoto** (ADR 0010) não depende de release: depois de um merge que mexe no conector, rode
 `npm run worker:deploy` na `main` (precisa de `CLOUDFLARE_API_TOKEN`). Para testar antes, `npm run worker:dev`.
-
-O **WhatsApp** (ADR 0012) também é publicado à mão, por quem hospeda: `npm run whatsapp:deploy` (precisa de
-Docker para construir a imagem da ponte). O `pr:check` roda `npm run bridge:test` (Go 1.26+; com
-`GOTOOLCHAIN=auto` o Go baixa o toolchain) e `npm run whatsapp:build` (bundle sem publicar).
+O **Gmail remoto** (ADR 0014) segue o mesmo caminho com `npm run gmail:deploy` / `npm run gmail:dev`; o
+primeiro deploy (KV, secrets, Google Cloud) está em [connectors/gmail/README.md](../connectors/gmail/README.md).
+O **WhatsApp** (ADR 0015) é publicado por quem hospeda: `npm run whatsapp:deploy` (precisa de Docker para a imagem
+da ponte). O `pr:check` roda `npm run bridge:test` (Go 1.26+; com `GOTOOLCHAIN=auto` o Go baixa o toolchain) e
+`npm run whatsapp:build` (bundle e imagem, sem publicar).
 
 ## Segurança no fluxo
 
 - `gitleaks` roda no `secrets:check` (dentro do `check`, do `pre-push` e do `pr:check`). Sem CI, ele é a única
-  barreira: sem gitleaks instalado o `secrets:check` falha (`winget install Gitleaks.Gitleaks`).
+  barreira: sem gitleaks instalado o `secrets:check` falha (`winget install Gitleaks.Gitleaks`). Na nuvem do
+  Claude Code, ele instala sozinho a versão 8.28.0 pelo Go (`scripts/install-gitleaks.sh`): o download direto do
+  GitHub é bloqueado pelo proxy e o apt traz uma versão antiga, sem `gitleaks git`/`dir`.
 - Dependabot semanal para npm, agrupado (gratuito, não usa minutos de Actions). PR do Dependabot passa pelo
   mesmo `pr:check` antes do merge.
 - Sem CodeQL e sem `dependency-review` (exigiam Actions). Antes de adicionar dependência nova, confira

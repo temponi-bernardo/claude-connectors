@@ -1,0 +1,64 @@
+---
+layout: site
+title: Início
+description: Conectores MCP que ligam o Claude aos sistemas do dia a dia, começando pelo Canvas da PUC Minas.
+---
+
+<h1>Claude Connectors</h1>
+<p class="lead">
+  Conectores MCP que ligam o Claude aos sistemas do dia a dia. O primeiro é o
+  <strong>Canvas PUC Minas</strong>: prazos, tarefas, notas, avisos e materiais das disciplinas
+  direto na conversa.
+</p>
+
+<section class="card" aria-labelledby="canvas">
+  <h2 id="canvas">Canvas PUC Minas</h2>
+  <p>
+    Pergunte ao Claude o que vence nesta semana, peça o enunciado de uma tarefa com a rubrica,
+    confira as notas ou leia o material de um módulo, sem abrir o site do Canvas.
+  </p>
+  <ul class="tools">
+    <li>Próximas entregas de todos os cursos</li>
+    <li>Tarefas com enunciado, rubrica e feedback</li>
+    <li>Notas por curso e por tarefa</li>
+    <li>Avisos recentes</li>
+    <li>Módulos, páginas e arquivos</li>
+    <li>Leitura de PDF, slides e documentos do Word</li>
+    <li>Fóruns e calendário</li>
+    <li>Busca em todo o conteúdo do curso</li>
+  </ul>
+  <p>
+    Entregar uma tarefa em texto ou responder a um fórum só acontece com a opção de envios ligada, e
+    o Claude sempre pede confirmação antes.
+  </p>
+</section>
+
+<section aria-labelledby="como-funciona">
+  <h2 id="como-funciona">Como funciona</h2>
+  <ul>
+    <li>
+      <strong>Instalação:</strong> no Claude, adicione o marketplace
+      <code>temponi-bernardo/claude-connectors</code> e instale o plugin <code>canvas-puc</code>.
+      Nada é instalado no seu computador: o conector roda na nuvem e funciona igual na web, no
+      Cowork, no celular e no Claude Code.
+    </li>
+    <li>
+      <strong>Login:</strong> na primeira vez, você autoriza colando um token de acesso do Canvas. O
+      servidor não tem banco de dados e não grava o token; ele viaja cifrado dentro do acesso
+      entregue ao Claude.
+    </li>
+  </ul>
+  <p>
+    Cada pessoa só acessa a própria conta do Canvas, com as permissões que ela já tem. Detalhes na
+    <a href="{{ '/privacidade.html' | relative_url }}">política de privacidade</a>.
+  </p>
+</section>
+
+<section aria-labelledby="links">
+  <h2 id="links">Links</h2>
+  <ul>
+    <li><a href="{{ '/privacidade.html' | relative_url }}">Política de privacidade</a></li>
+    <li><a href="{{ '/termos.html' | relative_url }}">Termos de uso</a></li>
+    <li><a href="https://github.com/temponi-bernardo">Autor no GitHub</a></li>
+  </ul>
+</section>

@@ -5,7 +5,7 @@ Conector MCP **remoto** que deixa o Claude (claude.ai, app, Cowork e Claude Code
 
 É um **template self-host**: cada pessoa publica na **própria conta Cloudflare** e pareia o **próprio número**.
 Não existe servidor central nem serviço hospedado por terceiros. Decisões em
-[ADR 0012](../../docs/adr/0012-whatsapp-no-cloudflare-containers.md).
+[ADR 0015](../../docs/adr/0015-whatsapp-no-cloudflare-containers.md).
 
 > ⚠️ O WhatsApp não tem API oficial para contas pessoais. Este conector usa o
 > [whatsmeow](https://github.com/tulir/whatsmeow), que se conecta como um "aparelho conectado" (como o WhatsApp

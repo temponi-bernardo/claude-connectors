@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  attemptBridge,
   BRIDGE_ERROR_MESSAGES,
+  BRIDGE_RETRY_MS,
   BridgeError,
   bridgeErrorFrom,
   bridgeJson,
@@ -8,6 +10,7 @@ import {
   bridgeTimeoutMessage,
   callBridge,
   jsonPost,
+  shouldRetryBridge,
   withDeadline,
   type BridgeFetch,
 } from './bridge-client.js';
@@ -75,6 +78,40 @@ describe('callBridge e bridgeJson', () => {
       callBridge(hang, '/chats?query=segredo', { deadline: Date.now() + 10 }),
     ).rejects.toThrow(bridgeTimeoutMessage('/chats?query=segredo'));
     expect(bridgeTimeoutMessage('/chats?query=segredo')).not.toContain('segredo');
+  });
+});
+
+describe('espera da ponte acordando', () => {
+  it('shouldRetryBridge só repete not_ready com prazo sobrando', () => {
+    const notReady = bridgeErrorFrom(503, { error: 'not_ready' });
+    expect(shouldRetryBridge(notReady, 10_000, 0)).toBe(true);
+    expect(shouldRetryBridge(notReady, BRIDGE_RETRY_MS, 0)).toBe(false);
+    expect(shouldRetryBridge(bridgeErrorFrom(404, { error: 'not_found' }), 10_000, 0)).toBe(false);
+  });
+
+  it('callBridge tenta de novo enquanto a ponte inicia e devolve quando fica pronta', async () => {
+    let calls = 0;
+    const bridge: BridgeFetch = vi.fn(() => {
+      calls += 1;
+      return Promise.resolve(
+        calls < 2
+          ? Response.json({ error: 'not_ready' }, { status: 503 })
+          : Response.json({ ok: true }),
+      );
+    });
+    const res = await callBridge(bridge, '/status', { deadline: Date.now() + 5000 });
+    expect(await res.json()).toEqual({ ok: true });
+    expect(calls).toBe(2);
+  });
+
+  it('attemptBridge não repete', async () => {
+    const bridge: BridgeFetch = vi.fn(() =>
+      Promise.resolve(Response.json({ error: 'not_ready' }, { status: 503 })),
+    );
+    await expect(attemptBridge(bridge, '/x', { deadline: Date.now() + 5000 })).rejects.toThrow(
+      BRIDGE_ERROR_MESSAGES.not_ready,
+    );
+    expect(bridge).toHaveBeenCalledOnce();
   });
 });
 

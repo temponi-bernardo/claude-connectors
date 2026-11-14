@@ -17,7 +17,7 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
 2. **Marque a tarefa como 🟨** no ROADMAP.
 3. **Branch** a partir da `main` atualizada: `git switch -c <tipo>/<id>-<descricao>` (ver
    `docs/WORKFLOW.md`). Num worktree novo (`.claude/worktrees/...`), rode `npm ci` antes: sem `node_modules`
-   próprio, o teste de `PLAYWRIGHT_VERSION` falha e o `check` não fica verde.
+   próprio, o `check` e o `build` não rodam.
 4. **Implemente com `/testes-primeiro`**: teste → falhar → código mínimo → refatorar, uma função por vez,
    respeitando `docs/CODING-STANDARDS.md`. Antes de criar função, procure equivalente em FUNCTIONS.md.
 5. **Documente com `/atualizar-docs`** no mesmo conjunto de mudanças.
@@ -28,9 +28,12 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
    (não há CI, ADR 0006); corrija até ficar verde; responda comentários.
 9. **Merge:** o Claude mergeia com `pr:check` verde (`docs/WORKFLOW.md`). Rode o `pr:check` de novo na
    branch final e então `gh pr merge --squash --delete-branch`. Se o PR mexeu no conector Canvas, publique
-   o remoto na `main` atualizada: `npm run worker:deploy` (precisa de `CLOUDFLARE_API_TOKEN`, ADR 0010).
+   o remoto na `main` atualizada: `npm run worker:deploy` (precisa de `CLOUDFLARE_API_TOKEN`, ADR 0010). Se
+   mexeu no conector Gmail, `npm run gmail:deploy` (ADR 0014); sem token na sessão, passe o comando ao usuário.
+   Antes de entregar um Worker, rode `npm run gmail:dev` (ou `worker:dev`) e faça um `curl` em `/`: o runtime
+   real recusa o que os testes em Node aceitam (ex.: export nomeado não-função no módulo principal).
    Se mexeu no WhatsApp (`connectors/whatsapp/`), o `pr:check` já roda `bridge:test` (Go 1.26+) e
-   `whatsapp:build`; o deploy (`npm run whatsapp:deploy`, com Docker) é de quem hospeda (ADR 0012).
+   `whatsapp:build`; o deploy (`npm run whatsapp:deploy`, com Docker) é de quem hospeda (ADR 0015).
 10. **Feche a tarefa:** ✅ no ROADMAP, "Próxima tarefa" atualizada, entrada no CHANGELOG se visível ao
     usuário. Isso pode ir no mesmo PR (preferido) ou em um PR `docs(docs): ...` imediato.
 11. **`/melhorar-skills`**: algo se repetiu ou mudou? Atualize a skill no mesmo PR.

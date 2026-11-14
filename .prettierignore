@@ -5,9 +5,5 @@ package-lock.json
 CHANGELOG.md
 tools/**/fixtures/**
 
-# Runtime gerado dos conectores (npm run pack), versionado para o plugin do Claude Code
+# Bundle gerado do servidor remoto (npm run build), versionado para o Dockerfile
 connectors/*/server/
-connectors/*/package.json
-connectors/*/package-lock.json
-connectors/*/.claude-plugin/
-connectors/*/.mcp.json

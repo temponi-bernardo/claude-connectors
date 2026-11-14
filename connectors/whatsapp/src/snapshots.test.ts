@@ -72,6 +72,11 @@ describe('storeSnapshotResponse', () => {
     expect(await storeSnapshotResponse(bucket, snapshotResponse('abc', 1), identity)).toBe('saved');
   });
 
+  it('ponte ainda iniciando (503) não é falha: nada a salvar', async () => {
+    const starting = Response.json({ error: 'not_ready' }, { status: 503 });
+    expect(await storeSnapshotResponse(memoryBucket(), starting, identity)).toBe('unchanged');
+  });
+
   it('recusa resposta sem headers ou com erro', async () => {
     const bucket = memoryBucket();
     await expect(storeSnapshotResponse(bucket, new Response('x'), identity)).rejects.toThrow(
