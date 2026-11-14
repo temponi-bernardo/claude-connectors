@@ -23,6 +23,18 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
   forward, send/update/delete draft, trash and unlink, WhatsApp `send_message`). Tool descriptions and error
   messages are in English, and each MCP server announces the version of its `plugin.json`.
 
+- Canvas: when the Canvas token behind a refresh token was deleted or expired in Canvas, the OAuth refresh now
+  answers `invalid_grant` instead of new tokens that fail on every tool call, so Claude asks to connect again.
+  Canvas outages (network errors, 5xx) still keep the session.
+- Gmail: the protected resource metadata `resource_name` is now "Gmail (multi-account)" (it still said
+  read-only).
+- Privacy policy: corrected what Gmail stores and sends to Google, added a WhatsApp (self-host) section and the
+  GitHub issues contact. Connectors Directory readiness is documented in `docs/DIRECTORY-LISTING.md`.
+- Plugins: each `plugin.json` now has an explicit `version` (`canvas-puc` 3.0.0, `gmail` 1.0.0, `whatsapp` 1.0.0),
+  `license`, `keywords`, `homepage`, `author.url`, `privacyPolicyUrl` and a 512 px icon (`.claude-plugin/icon.png`);
+  descriptions are in English. Marketplace entries gain `category` and `tags`. release-please manages each plugin
+  as its own package and bumps the `plugin.json` version; `pr:check` runs `claude plugin validate --strict` on the
+  marketplace and every plugin (ADR 0022).
 - Plugins: each marketplace entry now points at `connectors/<name>/plugin/`, which holds only the manifest,
   `.mcp.json`, skills and a short README. Server code, tests, `Dockerfile` and bundles no longer reach the
   user's plugin cache (ADR 0020). Update the marketplace once to pick it up.

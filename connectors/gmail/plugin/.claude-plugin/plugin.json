@@ -1,10 +1,14 @@
 {
   "name": "gmail",
   "version": "1.0.0",
-  "description": "Gmail de várias contas, direto da nuvem: busca, leitura, texto de anexos, envio, respostas, encaminhamento, rascunhos, marcadores, arquivo e lixeira (sem exclusão definitiva). O Claude pede confirmação antes de enviar ou apagar. Entre com o Google na primeira vez; peça ao Claude um link para vincular mais contas.",
+  "description": "Multi-account Gmail, straight from the cloud: search, read, attachment text, send, reply, forward, drafts, labels, archive and trash (no permanent delete). Claude asks for confirmation before sending or deleting. Sign in with Google the first time; ask Claude for a link to add more accounts.",
   "author": {
-    "name": "Bernardo Temponi"
+    "name": "Bernardo Temponi",
+    "url": "https://github.com/temponi-bernardo"
   },
   "homepage": "https://temponi-bernardo.github.io/claude-connectors/",
-  "repository": "https://github.com/temponi-bernardo/claude-connectors"
+  "repository": "https://github.com/temponi-bernardo/claude-connectors",
+  "license": "MIT",
+  "keywords": ["gmail", "email", "google", "multi-account", "inbox"],
+  "privacyPolicyUrl": "https://temponi-bernardo.github.io/claude-connectors/privacidade.html"
 }

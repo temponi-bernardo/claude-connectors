@@ -157,7 +157,7 @@ export function createGmailProvider(origin: string): OAuthProvider<GmailWorkerEn
       resource: `${origin}/mcp`,
       authorization_servers: [origin],
       bearer_methods_supported: ['header'],
-      resource_name: 'Gmail (read-only, multi-account)',
+      resource_name: 'Gmail (multi-account)',
     },
     apiRoute: '/mcp',
     apiHandler: { fetch: handleMcpApi },

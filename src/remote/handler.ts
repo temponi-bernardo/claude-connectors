@@ -38,13 +38,16 @@ export interface UpstreamLogin {
   readonly finish: (query: URLSearchParams, callbackUrl: string) => Promise<string>;
 }
 
+/** Outcome of renewing the credential: `revoked` when the service refused it (the refresh becomes `invalid_grant`). */
+export type SecretRenewal = 'kept' | 'revoked';
+
 /** O que um conector entrega ao servidor remoto. */
 export interface RemoteConnector {
   readonly login: SecretLogin | UpstreamLogin;
   /** Cria o servidor MCP com as ferramentas ligadas à credencial do usuário. */
   readonly createServer: (secret: string) => McpServer;
   /** Opcional: estende a validade da credencial no serviço a cada refresh do OAuth. */
-  readonly renewSecret?: (secret: string) => Promise<void>;
+  readonly renewSecret?: (secret: string) => Promise<SecretRenewal>;
   /** Opcional: confere a cada `/mcp` se o segredo ainda vale (ex.: e-mail ainda na lista do dono). */
   readonly acceptsSecret?: (secret: string) => boolean;
 }
@@ -219,23 +222,35 @@ export async function handleAuthorizeSubmit(app: RemoteApp, request: Request): P
 export async function renewSecretQuietly(
   connector: RemoteConnector,
   secret: string,
-): Promise<void> {
+): Promise<SecretRenewal> {
   try {
-    await connector.renewSecret?.(secret);
+    return (await connector.renewSecret?.(secret)) ?? 'kept';
   } catch (error) {
     console.warn(
       'Não consegui renovar a credencial:',
       error instanceof Error ? error.message : error,
     );
+    return 'kept';
   }
 }
+
+/** Error description when the service revoked the credential sealed in a refresh token. */
+export const REVOKED_SECRET_DESCRIPTION =
+  'The service no longer accepts the credential behind this refresh token (revoked or expired): connect the connector again.';
 
 /** `POST /token`: troca código ou refresh token por tokens; no refresh, renova a credencial. */
 export async function handleToken(app: RemoteApp, request: Request): Promise<Response> {
   const result = redeemTokenRequest(await readForm(request), app.settings, app.now());
   if (!result.ok)
     return jsonResponse({ error: result.error, error_description: result.description }, 400);
-  if (result.value.refreshed) await renewSecretQuietly(app.connector, result.value.secret);
+  const revoked =
+    result.value.refreshed &&
+    (await renewSecretQuietly(app.connector, result.value.secret)) === 'revoked';
+  if (revoked)
+    return jsonResponse(
+      { error: 'invalid_grant', error_description: REVOKED_SECRET_DESCRIPTION },
+      400,
+    );
   return jsonResponse(result.value.tokens);
 }
 

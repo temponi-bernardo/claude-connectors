@@ -4,23 +4,29 @@
     "name": "Bernardo Temponi"
   },
   "metadata": {
-    "description": "Conectores MCP para o Claude: Canvas da PUC Minas, Gmail multi-conta e WhatsApp pessoal (self-host)."
+    "description": "MCP connectors for Claude: PUC Minas Canvas, multi-account Gmail and personal WhatsApp (self-hosted)."
   },
   "plugins": [
     {
       "name": "canvas-puc",
       "source": "./connectors/canvas-puc/plugin",
-      "description": "Canvas LMS da PUC Minas na nuvem: entregas, tarefas, notas, avisos, módulos, arquivos e fóruns. Nada é instalado no computador."
+      "description": "PUC Minas Canvas LMS in the cloud: due dates, assignments, grades, announcements, modules, files and discussions. Nothing is installed on your computer.",
+      "category": "education",
+      "tags": ["canvas", "lms", "education", "puc-minas"]
     },
     {
       "name": "gmail",
       "source": "./connectors/gmail/plugin",
-      "description": "Gmail multi-conta na nuvem: ler, buscar, enviar, responder, encaminhar, rascunhos, marcadores, arquivar e lixeira, com confirmação antes de enviar ou apagar. Nada é instalado no computador."
+      "description": "Multi-account Gmail in the cloud: read, search, send, reply, forward, drafts, labels, archive and trash, with confirmation before sending or deleting. Nothing is installed on your computer.",
+      "category": "productivity",
+      "tags": ["gmail", "email", "google", "productivity"]
     },
     {
       "name": "whatsapp",
       "source": "./connectors/whatsapp/plugin",
-      "description": "WhatsApp pessoal (leitura e envio com confirmação) por um servidor seu no Cloudflare Workers + Containers. Requer publicar o template antes (README do conector)."
+      "description": "Personal WhatsApp (read and send with confirmation) through your own server on Cloudflare Workers + Containers. Requires deploying the template first (see the connector README).",
+      "category": "communication",
+      "tags": ["whatsapp", "messaging", "self-hosted", "communication"]
     }
   ]
 }

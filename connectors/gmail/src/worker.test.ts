@@ -359,6 +359,116 @@ describe('login de quem instalou e /mcp', () => {
   });
 });
 
+/** POST to `/token` with a form body. */
+function tokenForm(browser: Browser, fields: Record<string, string>): Promise<Response> {
+  return browser.fetch('/token', {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(fields).toString(),
+  });
+}
+
+/** `/authorize` path for the client with some PKCE parameters changed or removed. */
+function pkcePath(clientId: string, changes: Record<string, string | null>): string {
+  const url = new URL(authorizePath(clientId), ORIGIN);
+  for (const [name, value] of Object.entries(changes)) {
+    if (value === null) url.searchParams.delete(name);
+    else url.searchParams.set(name, value);
+  }
+  return `${url.pathname}${url.search}`;
+}
+
+describe('Connectors Directory requirements (Gmail, via workers-oauth-provider)', () => {
+  it('PKCE: plain or missing code_challenge never reaches Google nor issues a code', async () => {
+    const browser = new Browser(workerEnv());
+    const clientId = await register(browser);
+    const variants = [
+      { code_challenge_method: 'plain', code_challenge: VERIFIER },
+      { code_challenge: null, code_challenge_method: null },
+    ];
+    for (const changes of variants) {
+      const res = await browser.fetch(pkcePath(clientId, changes));
+      const location = res.headers.get('location');
+      if (location === null) {
+        expect(res.status).toBe(400);
+        continue;
+      }
+      const back = new URL(location);
+      expect(back.origin + back.pathname).toBe(REDIRECT);
+      expect(back.searchParams.get('error')).toBe('invalid_request');
+      expect(back.searchParams.get('code')).toBeNull();
+    }
+  });
+
+  it('discovery: 401 points to resource metadata whose resource is the server URL', async () => {
+    const browser = new Browser(workerEnv());
+    const res = await browser.fetch('/mcp', { method: 'POST' });
+    expect(res.status).toBe(401);
+    const header = res.headers.get('www-authenticate') ?? '';
+    expect(header).toMatch(/^Bearer /);
+    const metadataUrl = new URL(/resource_metadata="([^"]+)"/.exec(header)?.[1] ?? '');
+    expect(metadataUrl.origin).toBe(ORIGIN);
+    expect(metadataUrl.pathname.startsWith('/.well-known/oauth-protected-resource')).toBe(true);
+    const resource = (await (await browser.fetch(metadataUrl.pathname)).json()) as {
+      resource: string;
+      resource_name: string;
+    };
+    expect(resource.resource).toBe(`${ORIGIN}/mcp`);
+    expect(resource.resource_name).not.toMatch(/read-only/i);
+    const server = (await (
+      await browser.fetch('/.well-known/oauth-authorization-server')
+    ).json()) as Record<string, unknown>;
+    expect(server).toMatchObject({ issuer: ORIGIN, token_endpoint: `${ORIGIN}/token` });
+  });
+
+  it('dynamic client registration accepts the claude.ai callback', async () => {
+    const browser = new Browser(workerEnv());
+    expect(await register(browser)).not.toBe('');
+  });
+
+  it('token endpoint answers invalid_grant for dead refresh tokens', async () => {
+    const browser = new Browser(workerEnv());
+    const clientId = await register(browser);
+    const res = await tokenForm(browser, {
+      grant_type: 'refresh_token',
+      refresh_token: 'user:grant:dead',
+      client_id: clientId,
+    });
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string; error_description: string };
+    expect(body.error).toBe('invalid_grant');
+    expect(body.error_description).not.toBe('');
+  });
+
+  it('token endpoint takes form bodies and refuses JSON with an explanation', async () => {
+    const browser = new Browser(workerEnv());
+    const json = await browser.fetch('/token', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ grant_type: 'refresh_token', refresh_token: 'x' }),
+    });
+    expect(json.status).toBe(400);
+    expect(((await json.json()) as { error_description: string }).error_description).toContain(
+      'application/x-www-form-urlencoded',
+    );
+    expect(await signIn(browser)).not.toBe('');
+  });
+
+  it('never accepts the access token in the query string', async () => {
+    const browser = new Browser(workerEnv());
+    const token = await signIn(browser);
+    const res = await browser.fetch(`/mcp?access_token=${encodeURIComponent(token)}`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'ping' }),
+    });
+    expect(res.status).toBe(401);
+  });
+});
+
 describe('rotas públicas', () => {
   it('/accounts/link sem ticket mostra link inválido', async () => {
     const response = await new Browser(workerEnv()).fetch('/accounts/link');

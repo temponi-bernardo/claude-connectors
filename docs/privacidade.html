@@ -9,12 +9,14 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
 
 <p>
   Esta política vale para os conectores do projeto Claude Connectors, mantido por Bernardo Temponi,
-  hoje os conectores <strong>Canvas PUC Minas</strong> e <strong>Gmail</strong>. Eles rodam só na
-  nuvem e são usados pelo plugin do marketplace ou como conector personalizado no claude.ai, no
-  Cowork, no app do celular e no Claude Code.
+  hoje os conectores <strong>Canvas PUC Minas</strong>, <strong>Gmail</strong> e
+  <strong>WhatsApp</strong>. Eles rodam só na nuvem e são usados pelo plugin do marketplace ou como
+  conector personalizado no claude.ai, no Cowork, no app do celular e no Claude Code. Canvas e Gmail
+  rodam no servidor do projeto; o WhatsApp roda num servidor que cada pessoa publica na própria
+  conta (veja a seção WhatsApp).
 </p>
 
-<h2>Que dados são acessados</h2>
+<h2>Que dados são acessados no Canvas</h2>
 <p>
   Só os dados da sua própria conta no Canvas, e só quando você pede algo ao Claude: perfil, cursos,
   tarefas, entregas, notas, avisos, módulos, páginas, arquivos, fóruns e calendário. O conector não
@@ -28,14 +30,29 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
     <strong>O que é acessado:</strong> as contas Gmail que você mesmo vincula, com o escopo
     <code>gmail.modify</code>, só quando você pede algo ao Claude: busca, conversas, mensagens,
     rótulos e texto de anexos; e, se você pedir, envio, resposta, encaminhamento, rascunhos,
-    marcadores, arquivar e lixeira. O Claude pede sua confirmação antes de enviar ou apagar. O
-    conector não faz exclusão definitiva (esse escopo nem permite).
+    marcadores, arquivar e lixeira. O conector instrui o Claude a mostrar destinatários e conteúdo e
+    pedir sua confirmação antes de enviar, mandar para a lixeira ou apagar um rascunho. O conector
+    não faz exclusão definitiva de e-mails (esse escopo nem permite).
   </li>
   <li>
-    <strong>O que é guardado:</strong> por pessoa que usa o conector, o identificador da conta
-    Google usada no login e, para cada conta Gmail vinculada, o e-mail e o refresh token do Google,
-    cifrados com AES-256-GCM no Cloudflare Workers KV. O conteúdo dos e-mails não é gravado: ele vai
-    direto do Google para a conversa.
+    <strong>O que é guardado</strong> (no Cloudflare Workers KV), por pessoa que usa o conector:
+    <ul>
+      <li>
+        as contas Gmail vinculadas: e-mail, refresh token do Google, escopo concedido, data do
+        vínculo e se o acesso foi revogado, num único registro cifrado com AES-256-GCM e guardado
+        sob um hash do identificador da conta Google do login;
+      </li>
+      <li>
+        a autorização dada ao Claude: o identificador da conta Google do login e, cifrados, o e-mail
+        do login e um identificador de sessão. Os tokens entregues ao Claude ficam guardados só como
+        hash; o acesso vale 1 hora e a renovação vence após 30 dias sem uso;
+      </li>
+      <li>
+        enquanto você vincula uma conta, um pedido temporário cifrado, apagado ao terminar ou em até
+        15 minutos.
+      </li>
+    </ul>
+    O conteúdo dos e-mails e dos anexos não é gravado: ele vai direto do Google para a conversa.
   </li>
   <li><strong>Isolamento:</strong> cada pessoa só vê as contas que ela vinculou.</li>
   <li>
@@ -49,16 +66,45 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
   </li>
 </ul>
 
-<h2>Credenciais</h2>
+<h2>WhatsApp</h2>
+<ul>
+  <li>
+    <strong>Self-host:</strong> não existe servidor do projeto para o WhatsApp. Cada pessoa publica
+    o conector na própria conta Cloudflare (um Worker e um Container) e pareia o próprio número.
+    Nada do seu WhatsApp, nem as credenciais, chega ao mantenedor do projeto.
+  </li>
+  <li>
+    <strong>O que é acessado:</strong> conversas, mensagens, contatos e mídias do número pareado, e
+    o envio de texto quando você pede (uma mensagem por vez, com sua confirmação e limite por hora).
+  </li>
+  <li>
+    <strong>O que é guardado:</strong> a sessão do WhatsApp e o banco de mensagens ficam no disco do
+    Container e, quando ele dorme, viram um backup cifrado (AES-256-GCM, com a chave
+    <code>SNAPSHOT_KEY</code> que só você tem) no bucket R2 da sua conta Cloudflare.
+  </li>
+  <li>
+    <strong>Quem entra:</strong> o acesso do Claude e a página de pareamento exigem login no GitHub
+    com um e-mail da lista que você configurou (<code>ALLOWED_EMAILS</code>); só o dono entra.
+  </li>
+  <li>
+    <strong>Como apagar:</strong> na página <code>/pair</code>, desvincule o aparelho ou recomece do
+    zero; ou apague o Worker e o bucket R2 na sua conta Cloudflare. No celular, remova o aparelho em
+    WhatsApp → Aparelhos conectados.
+  </li>
+</ul>
+
+<h2>Credenciais do Canvas</h2>
 <ul>
   <li>
     O token que você cola na página de autorização é conferido no Canvas e depois viaja apenas
-    cifrado (AES-256-GCM) dentro dos tokens de acesso entregues ao Claude. O servidor não tem banco
-    de dados e não grava o token nem as respostas do Canvas.
+    cifrado (AES-256-GCM) dentro dos tokens de acesso entregues ao Claude. O servidor do Canvas não
+    tem banco de dados e não grava o token nem as respostas do Canvas.
   </li>
   <li>
     Para que você não precise reconectar todo mês, o conector estende a validade do próprio token no
     Canvas, no máximo uma vez por dia, quando o Claude renova o acesso. Nenhum token novo é criado.
+    Se o token foi apagado ou venceu no Canvas, a renovação é recusada e o Claude pede para conectar
+    de novo.
   </li>
 </ul>
 
@@ -69,8 +115,12 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
     no site.
   </li>
   <li>
-    <strong>Google (Gmail):</strong> recebe as chamadas de leitura feitas em seu nome e o login com
-    a sua conta Google.
+    <strong>Google (Gmail):</strong> recebe o login com a sua conta Google e as chamadas feitas em
+    seu nome (leitura e, quando você pede, envio e organização da caixa).
+  </li>
+  <li>
+    <strong>WhatsApp (Meta) e GitHub:</strong> no WhatsApp self-host, o seu servidor conversa com o
+    WhatsApp como um aparelho conectado, e o GitHub recebe o seu login de dono.
   </li>
   <li>
     <strong>Anthropic (Claude):</strong> recebe o resultado de cada ferramenta que você usa na
@@ -78,7 +128,8 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
   </li>
   <li>
     <strong>Provedor de hospedagem do conector</strong> (hoje, Cloudflare Workers): processa as
-    requisições e pode manter registros técnicos, como endereço IP e horário.
+    requisições e pode manter registros técnicos, como endereço IP e horário. O conector Gmail usa o
+    endereço IP só para limitar o número de requisições, sem gravá-lo.
   </li>
 </ul>
 <p>Os dados não são vendidos, não alimentam anúncios e não são usados para nenhum outro fim.</p>
@@ -88,8 +139,8 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
 
 <h2>Envios em seu nome</h2>
 <p>
-  Entregar tarefa e responder fórum só existem com a opção de envios ligada, e o Claude pede sua
-  confirmação antes de cada envio.
+  Canvas: entregar tarefa e responder fórum só existem com a opção de envios ligada, e o Claude pede
+  sua confirmação antes de cada envio. Gmail: veja acima.
 </p>
 
 <h2>Segurança</h2>
@@ -105,12 +156,15 @@ description: Que dados os conectores do Claude Connectors acessam, onde ficam e 
 </p>
 <p>
   Gmail: peça ao Claude para desvincular a conta (ferramenta <code>unlink_account</code>), que apaga
-  o token guardado e revoga o acesso no Google. Você também pode revogar a qualquer momento em
+  o token guardado e revoga o acesso no Google; ao desvincular a última conta, o registro inteiro é
+  apagado. Você também pode revogar a qualquer momento em
   <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.
 </p>
 
 <h2>Mudanças e contato</h2>
 <p>
-  Mudanças nesta política aparecem nesta página, com a data acima atualizada. Dúvidas:
-  <a href="https://github.com/temponi-bernardo">github.com/temponi-bernardo</a>.
+  Mudanças nesta política aparecem nesta página, com a data acima atualizada. Dúvidas e pedidos:
+  <a href="https://github.com/temponi-bernardo/claude-connectors/issues"
+    >github.com/temponi-bernardo/claude-connectors/issues</a
+  >.
 </p>

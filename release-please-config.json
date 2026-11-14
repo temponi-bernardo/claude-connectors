@@ -7,20 +7,91 @@
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,
   "changelog-sections": [
-    { "type": "feat", "section": "Adicionado" },
-    { "type": "fix", "section": "Corrigido" },
-    { "type": "perf", "section": "Alterado" },
-    { "type": "revert", "section": "Removido" },
-    { "type": "refactor", "section": "Alterado", "hidden": true },
-    { "type": "docs", "section": "Documentação", "hidden": true },
-    { "type": "test", "hidden": true },
-    { "type": "chore", "hidden": true },
-    { "type": "ci", "hidden": true },
-    { "type": "build", "hidden": true }
+    {
+      "type": "feat",
+      "section": "Adicionado"
+    },
+    {
+      "type": "fix",
+      "section": "Corrigido"
+    },
+    {
+      "type": "perf",
+      "section": "Alterado"
+    },
+    {
+      "type": "revert",
+      "section": "Removido"
+    },
+    {
+      "type": "refactor",
+      "section": "Alterado",
+      "hidden": true
+    },
+    {
+      "type": "docs",
+      "section": "Documentação",
+      "hidden": true
+    },
+    {
+      "type": "test",
+      "hidden": true
+    },
+    {
+      "type": "chore",
+      "hidden": true
+    },
+    {
+      "type": "ci",
+      "hidden": true
+    },
+    {
+      "type": "build",
+      "hidden": true
+    }
   ],
   "packages": {
     ".": {
       "package-name": "claude-connectors"
+    },
+    "connectors/canvas-puc": {
+      "package-name": "canvas-puc",
+      "component": "canvas-puc",
+      "release-type": "simple",
+      "include-component-in-tag": true,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "plugin/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    },
+    "connectors/gmail": {
+      "package-name": "gmail",
+      "component": "gmail",
+      "release-type": "simple",
+      "include-component-in-tag": true,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "plugin/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    },
+    "connectors/whatsapp": {
+      "package-name": "whatsapp",
+      "component": "whatsapp",
+      "release-type": "simple",
+      "include-component-in-tag": true,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "plugin/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        }
+      ]
     }
   }
 }

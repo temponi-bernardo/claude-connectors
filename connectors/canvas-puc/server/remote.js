@@ -14603,19 +14603,26 @@ async function handleAuthorizeSubmit(app, request) {
 }
 async function renewSecretQuietly(connector, secret) {
   try {
-    await connector.renewSecret?.(secret);
+    return await connector.renewSecret?.(secret) ?? "kept";
   } catch (error2) {
     console.warn(
       "N\xE3o consegui renovar a credencial:",
       error2 instanceof Error ? error2.message : error2
     );
+    return "kept";
   }
 }
+var REVOKED_SECRET_DESCRIPTION = "The service no longer accepts the credential behind this refresh token (revoked or expired): connect the connector again.";
 async function handleToken(app, request) {
   const result = redeemTokenRequest(await readForm(request), app.settings, app.now());
   if (!result.ok)
     return jsonResponse({ error: result.error, error_description: result.description }, 400);
-  if (result.value.refreshed) await renewSecretQuietly(app.connector, result.value.secret);
+  const revoked = result.value.refreshed && await renewSecretQuietly(app.connector, result.value.secret) === "revoked";
+  if (revoked)
+    return jsonResponse(
+      { error: "invalid_grant", error_description: REVOKED_SECRET_DESCRIPTION },
+      400
+    );
   return jsonResponse(result.value.tokens);
 }
 function handleMcp(app, request) {
@@ -23946,13 +23953,16 @@ function canvasLoginText(baseUrl) {
     submit: "Conectar"
   };
 }
+function fetchCanvasSelf(settings, token) {
+  return settings.fetchFn(`${settings.baseUrl}/api/v1/users/self`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+  });
+}
 async function verifyCanvasToken(settings, token) {
   if (!token.trim()) throw new Error("Cole o token de acesso do Canvas.");
   let res;
   try {
-    res = await settings.fetchFn(`${settings.baseUrl}/api/v1/users/self`, {
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
-    });
+    res = await fetchCanvasSelf(settings, token);
   } catch {
     throw new Error("N\xE3o consegui falar com o Canvas. Tente de novo em instantes.");
   }
@@ -23999,6 +24009,18 @@ async function renewCanvasToken(settings, token, now) {
     body: { token: { expires_at: plan.expiresAt } }
   });
 }
+async function isCanvasTokenAlive(settings, token) {
+  try {
+    return (await fetchCanvasSelf(settings, token)).status !== 401;
+  } catch {
+    return true;
+  }
+}
+async function renewCanvasSecret(settings, token, now) {
+  if (!await isCanvasTokenAlive(settings, token)) return "revoked";
+  await renewCanvasToken(settings, token, now);
+  return "kept";
+}
 function canvasRemoteConnector(settings) {
   return {
     login: {
@@ -24006,7 +24028,7 @@ function canvasRemoteConnector(settings) {
       text: canvasLoginText(settings.baseUrl),
       verify: (secret) => verifyCanvasToken(settings, secret)
     },
-    renewSecret: (secret) => renewCanvasToken(settings, secret, /* @__PURE__ */ new Date()),
+    renewSecret: (secret) => renewCanvasSecret(settings, secret, /* @__PURE__ */ new Date()),
     createServer: (secret) => {
       const client = createCanvasClient({
         baseUrl: settings.baseUrl,

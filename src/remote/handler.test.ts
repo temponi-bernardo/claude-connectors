@@ -24,6 +24,7 @@ import {
   withCors,
   type RemoteApp,
   type RemoteConnector,
+  type SecretRenewal,
 } from './handler.js';
 import { pkceChallenge } from './oauth.js';
 import { issueTokenSet } from './tokens.js';
@@ -230,6 +231,118 @@ describe('createRemoteHandler — /mcp', () => {
   });
 });
 
+/** `/authorize` query for a registered client, with extra or missing parameters. */
+function authorizeQuery(clientId: string, changes: Record<string, string | null>): string {
+  const query = new URLSearchParams({
+    response_type: 'code',
+    client_id: clientId,
+    redirect_uri: CALLBACK,
+    code_challenge: pkceChallenge(VERIFIER),
+    code_challenge_method: 'S256',
+  });
+  for (const [name, value] of Object.entries(changes)) {
+    if (value === null) query.delete(name);
+    else query.set(name, value);
+  }
+  return `${ISSUER}/authorize?${query.toString()}`;
+}
+
+describe('Connectors Directory requirements (Canvas and every shared-handler connector)', () => {
+  it('PKCE: rejects plain and a missing code_challenge without redirecting', async () => {
+    const handle = createRemoteHandler(makeApp());
+    const clientId = await register(handle);
+    const variants = [
+      { code_challenge_method: 'plain', code_challenge: VERIFIER },
+      { code_challenge: null },
+      { code_challenge_method: null },
+    ];
+    for (const changes of variants) {
+      const res = await handle(new Request(authorizeQuery(clientId, changes)));
+      expect(res.status).toBe(400);
+      expect(res.headers.get('location')).toBeNull();
+      expect(await res.text()).toContain('S256');
+    }
+  });
+
+  it('discovery: 401 points to resource metadata whose resource is the server URL', async () => {
+    const handle = createRemoteHandler(makeApp());
+    const res = await handle(rpc(null, { jsonrpc: '2.0', id: 1, method: 'tools/list' }));
+    expect(res.status).toBe(401);
+    const header = res.headers.get('www-authenticate') ?? '';
+    expect(header).toMatch(/^Bearer /);
+    const metadataUrl = /resource_metadata="([^"]+)"/.exec(header)?.[1] ?? '';
+    expect(metadataUrl.startsWith(`${ISSUER}/.well-known/oauth-protected-resource`)).toBe(true);
+    const resource = (await (await handle(new Request(metadataUrl))).json()) as {
+      resource: string;
+      authorization_servers: string[];
+    };
+    expect(resource.resource).toBe(`${ISSUER}/mcp`);
+    const root = await handle(new Request(`${ISSUER}/.well-known/oauth-protected-resource`));
+    expect(await root.json()).toEqual(resource);
+    const asUrl = `${resource.authorization_servers[0] ?? ''}/.well-known/oauth-authorization-server`;
+    expect(await (await handle(new Request(asUrl))).json()).toMatchObject({
+      issuer: ISSUER,
+      code_challenge_methods_supported: ['S256'],
+      token_endpoint_auth_methods_supported: ['none'],
+    });
+  });
+
+  it('dynamic client registration accepts the claude.ai callback', async () => {
+    const handle = createRemoteHandler(makeApp());
+    const res = await handle(
+      post('/register', JSON.stringify({ redirect_uris: [CALLBACK], client_name: 'Claude' }), {
+        'content-type': 'application/json',
+      }),
+    );
+    expect(res.status).toBe(201);
+    expect(await res.json()).toMatchObject({
+      redirect_uris: [CALLBACK],
+      token_endpoint_auth_method: 'none',
+    });
+  });
+
+  it('token endpoint takes form bodies and answers invalid_grant for dead refresh tokens', async () => {
+    const app = makeApp();
+    const handle = createRemoteHandler(app);
+    expect(await accessToken(handle)).not.toBe('');
+    const expired = issueTokenSet('bom', app.settings, app.now() - 31 * 24 * 3600);
+    for (const refresh_token of ['garbage', expired.refresh_token]) {
+      const res = await handle(form('/token', { grant_type: 'refresh_token', refresh_token }));
+      expect(res.status).toBe(400);
+      const body = (await res.json()) as { error: string; error_description: string };
+      expect(body.error).toBe('invalid_grant');
+      expect(body.error_description).not.toBe('');
+    }
+  });
+
+  it('never accepts the access token in the query string', async () => {
+    const handle = createRemoteHandler(makeApp());
+    const token = await accessToken(handle);
+    const res = await handle(
+      new Request(`${ISSUER}/mcp?access_token=${encodeURIComponent(token)}`, {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json, text/event-stream',
+        },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+      }),
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it('OAuth errors carry a code and a description that says what to do', async () => {
+    const handle = createRemoteHandler(makeApp());
+    const bad = await handle(form('/token', { grant_type: 'password' }));
+    expect(await bad.json()).toMatchObject({
+      error: 'unsupported_grant_type',
+      error_description: expect.stringContaining('authorization_code') as unknown,
+    });
+    const page = await handle(new Request(authorizeQuery('fake-client', {})));
+    expect(await page.text()).toMatch(/registre o conector de novo|register the connector/i);
+  });
+});
+
 describe('auxiliares do roteador', () => {
   const request = {
     clientId: 'c',
@@ -299,7 +412,7 @@ describe('auxiliares do roteador', () => {
 });
 
 describe('handleToken — renovação da credencial', () => {
-  function refreshApp(renewSecret: (secret: string) => Promise<void>) {
+  function refreshApp(renewSecret: (secret: string) => Promise<SecretRenewal>) {
     const app = makeApp();
     const withRenew: RemoteApp = { ...app, connector: { ...connector, renewSecret } };
     const { refresh_token } = issueTokenSet('bom', app.settings, app.now());
@@ -310,7 +423,7 @@ describe('handleToken — renovação da credencial', () => {
   }
 
   it('no refresh, pede ao conector para renovar a credencial e devolve os tokens', async () => {
-    const renew = vi.fn(() => Promise.resolve());
+    const renew = vi.fn(() => Promise.resolve<SecretRenewal>('kept'));
     const { app, refresh } = refreshApp(renew);
     const res = await handleToken(app, refresh);
     expect(res.status).toBe(200);
@@ -323,8 +436,17 @@ describe('handleToken — renovação da credencial', () => {
     expect((await handleToken(app, refresh)).status).toBe(200);
   });
 
+  it('answers invalid_grant when the service says the credential was revoked', async () => {
+    const { app, refresh } = refreshApp(() => Promise.resolve('revoked'));
+    const res = await handleToken(app, refresh);
+    expect(res.status).toBe(400);
+    const body = (await res.json()) as { error: string; error_description: string };
+    expect(body.error).toBe('invalid_grant');
+    expect(body.error_description).toMatch(/connect/i);
+  });
+
   it('a troca do código não renova a credencial', async () => {
-    const renew = vi.fn(() => Promise.resolve());
+    const renew = vi.fn(() => Promise.resolve<SecretRenewal>('kept'));
     const handle = createRemoteHandler({
       ...makeApp(),
       connector: { ...connector, renewSecret: renew },
@@ -336,9 +458,11 @@ describe('handleToken — renovação da credencial', () => {
 
 describe('renewSecretQuietly', () => {
   it('ignora conector sem renovação e engole a falha dela', async () => {
-    await expect(renewSecretQuietly(connector, 'bom')).resolves.toBeUndefined();
+    await expect(renewSecretQuietly(connector, 'bom')).resolves.toBe('kept');
     const failing = { ...connector, renewSecret: () => Promise.reject(new Error('x')) };
-    await expect(renewSecretQuietly(failing, 'bom')).resolves.toBeUndefined();
+    await expect(renewSecretQuietly(failing, 'bom')).resolves.toBe('kept');
+    const revoked = { ...connector, renewSecret: () => Promise.resolve<SecretRenewal>('revoked') };
+    await expect(renewSecretQuietly(revoked, 'bom')).resolves.toBe('revoked');
   });
 });
 

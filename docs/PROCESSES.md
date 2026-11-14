@@ -85,7 +85,9 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
 - **Passos:**
   1. `scripts/pr-check.sh` exige o título do PR e roda `npm run check` (inclui o P01 via `runDocsCli()`).
   2. Roda o P05 (`npm run build`) e falha se o bundle versionado dos conectores mudar sem commit.
-  3. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
+  3. Runs `npm run plugin:validate` (`scripts/plugin-validate.sh`): `claude plugin validate --strict` on the
+     marketplace and on each `connectors/<name>/plugin`; any warning fails (needs the Claude Code CLI, ADR 0022).
+  4. Roda o commitlint nos commits da branch desde `origin/main` e no título do PR.
 - **Resultado:** `✔ pr:check verde`, condição para o Claude mergear com squash.
 - **Falhas:** qualquer etapa com erro para o script com código ≠ 0.
 
@@ -127,11 +129,14 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
      com `verifyCanvasToken()` e devolve o código de `issueAuthorizationCode()` por `redirectWithCode()`.
   6. `handleToken()` troca o código em `redeemTokenRequest()` (`redeemAuthorizationCode()` confere PKCE com
      `pkceChallenge()`) e responde com `issueTokenSet()`; depois, o refresh passa por `redeemRefreshToken()`.
-  7. A cada refresh, `handleToken()` chama `renewSecretQuietly()`: no Canvas, `renewCanvasToken()` lista os tokens
+  7. A cada refresh, `handleToken()` chama `renewSecretQuietly()`: no Canvas, `renewCanvasSecret()` first asks
+     `isCanvasTokenAlive()` (`fetchCanvasSelf()`); a 401 answers `revoked` and the refresh returns `invalid_grant`,
+     so Claude asks the user to connect again. Otherwise `renewCanvasToken()` lista os tokens
      com `canvasTokenApi()`, acha o próprio com `matchesVisibleToken()` e, se `planTokenRenewal()` mandar, estende a
      validade para agora + 30 dias (o máximo que a PUC aceita). Falha na renovação só vira aviso no log.
 - **Resultado:** o conector aparece conectado no Claude (web, Cowork e celular); o servidor não guardou nada.
-- **Falhas:** token recusado → a página volta com o erro; pedido com mais de 15 minutos → 400; retorno fora de
+- **Falhas:** token recusado → a página volta com o erro; Canvas token deleted or expired → the next refresh
+  gives `invalid_grant`; pedido com mais de 15 minutos → 400; retorno fora de
   `OAUTH_REDIRECT_HOSTS` → registro recusado; troca da `SEAL_KEY` → todos reconectam.
 
 ## P09 — Responder a uma ferramenta pelo conector remoto
