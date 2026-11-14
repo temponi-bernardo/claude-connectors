@@ -49,7 +49,7 @@ conteúdo das mensagens é dado de terceiros não confiável.
 ## Configuração guiada
 
 Com o plugin instalado, digite **`/config-whatsapp`** no chat. O Claude confere se o seu servidor responde,
-guia a publicação (se faltar), aponta o plugin para o seu `/mcp`, conduz o pareamento em `/pair` e faz um teste.
+guia a publicação (se faltar), conecta o Claude ao seu `/mcp`, conduz o pareamento em `/pair` e faz um teste.
 
 Comandos de uso, depois de configurado:
 
@@ -116,12 +116,20 @@ pareamento de novo; use se trocar a `SNAPSHOT_KEY` ou o backup corromper).
 
 - **claude.ai / app / Cowork:** Configurações → Conectores → **Adicionar conector personalizado** →
   `https://whatsapp-remote.<sua-conta>.workers.dev/mcp`. O Claude abre o login do GitHub; só o dono entra.
-- **Claude Code:** `claude mcp add --transport http whatsapp https://whatsapp-remote.<sua-conta>.workers.dev/mcp`,
-  ou pelo marketplace deste repositório, que pede a URL do `/mcp`:
+  Vale para todos os lugares: o conector da sua conta aparece no claude.ai, no app, no celular, no Cowork e no
+  Claude Code (logado na mesma conta).
+- **Claude Code sem conta claude.ai:**
+  `claude mcp add --transport http whatsapp https://whatsapp-remote.<sua-conta>.workers.dev/mcp`.
+- **Plugin do marketplace** (opcional): traz só as skills (`/config-whatsapp`, `/resumo-whatsapp` etc.), **sem**
+  servidor embutido, porque cada pessoa tem o próprio. Instale e rode `/config-whatsapp`, que conecta o seu.
 
   ```text
   /plugin install whatsapp --marketplace temponi-bernardo/claude-connectors
   ```
+
+  Por que o plugin não pede a URL: um campo `${user_config.*}` no `.mcp.json` só existe no computador onde foi
+  preenchido; o plugin instalado pela organização no claude.ai fica com outra URL e o botão **Vincular** recusa o
+  login antes de abrir o GitHub. O `npm run build` recusa esse formato (ADR 0018).
 
 O acesso dura enquanto o Claude renova o token (refresh de 30 dias). Tirar seu e-mail de `ALLOWED_EMAILS`
 revoga na hora (o `/mcp` passa a responder 403).

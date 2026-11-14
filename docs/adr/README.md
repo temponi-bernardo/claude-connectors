@@ -22,3 +22,4 @@ marca o antigo como "Substituído por NNNN". Modelo em [0000-modelo.md](0000-mod
 | [0015](0015-whatsapp-no-cloudflare-containers.md)         | WhatsApp pessoal no Cloudflare Workers + Containers, sob demanda | Aceito                               | 2026-11-14 |
 | [0016](0016-gmail-multiusuario-publico.md)                | Gmail remoto público e multiusuário                              | Aceito                               | 2026-11-14 |
 | [0017](0017-handoff-automatico-no-session-end.md)         | Handoff automático no SessionEnd                                 | Aceito                               | 2026-11-14 |
+| [0018](0018-whatsapp-plugin-sem-servidor-embutido.md)     | Plugin do WhatsApp sem servidor embutido                         | Aceito                               | 2026-11-14 |

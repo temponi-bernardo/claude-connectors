@@ -15,11 +15,14 @@ import {
   pluginMcpProblems,
 } from './bundle.js';
 
-/** Confere o `.mcp.json` do conector e gera o bundle remoto, se o conector tiver um. */
+/** Confere o `.mcp.json` (se houver; self-host não tem) e gera o bundle remoto, se o conector tiver um. */
 async function buildConnector(root: string, name: string): Promise<void> {
   const dir = join(root, CONNECTORS_DIR, name);
-  const config: unknown = JSON.parse(readFileSync(join(dir, PLUGIN_MCP_CONFIG_PATH), 'utf8'));
-  const problems = pluginMcpProblems(config);
+  const configFile = join(dir, PLUGIN_MCP_CONFIG_PATH);
+  const config: unknown = existsSync(configFile)
+    ? JSON.parse(readFileSync(configFile, 'utf8'))
+    : null;
+  const problems = config === null ? [] : pluginMcpProblems(config);
   if (problems.length > 0)
     throw new Error(`${name}/${PLUGIN_MCP_CONFIG_PATH}:\n${problems.join('\n')}`);
   if (existsSync(join(dir, REMOTE_ENTRY))) {
