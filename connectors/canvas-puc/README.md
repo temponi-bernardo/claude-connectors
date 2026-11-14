@@ -5,6 +5,9 @@ rubrica, notas, avisos, módulos, páginas, arquivos, fóruns e calendário.
 
 ## Instalar
 
+Depois de instalar o plugin, digite **`/config-canvas`** no chat: o Claude abre a página de tokens do Canvas,
+guia a conexão e faz um teste. O passo a passo manual é este:
+
 O conector roda só na nuvem. Nada é instalado no computador ([ADR 0013](../../docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
 
 1. No Claude (claude.ai, Cowork ou Claude Code), **Adicionar marketplace** → `temponi-bernardo/claude-connectors`.

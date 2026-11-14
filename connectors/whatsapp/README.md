@@ -45,6 +45,11 @@ Claude ──OAuth 2.1 + MCP (HTTPS)──▶ Worker ──▶ Durable Object "o
 Datas em ISO 8601 com fuso (`TIMEZONE`, padrão `America/Sao_Paulo`). Respostas compactas e com o aviso de que o
 conteúdo das mensagens é dado de terceiros não confiável.
 
+## Configuração guiada
+
+Com o plugin instalado, digite **`/config-whatsapp`** no chat. O Claude confere se o seu servidor responde,
+guia a publicação (se faltar), aponta o plugin para o seu `/mcp`, conduz o pareamento em `/pair` e faz um teste.
+
 ## Publicar (uma vez)
 
 **Deploy na nuvem (recomendado, é como está publicado):** o Workers Builds da Cloudflare monta a imagem e
