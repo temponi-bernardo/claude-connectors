@@ -61,7 +61,7 @@ resultado volta como texto JSON. Detalhe em [PROCESSES.md](PROCESSES.md) (P03–
 | Servidor (Cloudflare Worker) | `npm run worker:deploy` compila `src/worker.ts` e publica                   | ADR 0010 |
 | Servidor em Node (Docker)    | Alternativa: `npm run build` gera `server/remote.js`, usado pelo Dockerfile | ADR 0009 |
 
-O plugin tem só `.claude-plugin/plugin.json` e `.mcp.json` (servidor `http` com a URL do Worker). `npm run build`
+The plugin lives in `connectors/<name>/plugin/` (ADR 0020) and has only `.claude-plugin/plugin.json`, skills and `.mcp.json` (an `http` server with the Worker URL). `npm run build`
 (P05) recusa qualquer `.mcp.json` com servidor local.
 
 ## Serviços externos

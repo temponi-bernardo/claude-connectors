@@ -9600,8 +9600,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `MAX_DOWNLOAD_BYTES`        | `connectors/canvas-puc/src/files.ts`       | Maior arquivo que `baixar_arquivo` traz para a conversa (10 MB).                                                  |
 | `MAX_TEXT_CHARS`            | `connectors/canvas-puc/src/files.ts`       | Maior texto devolvido por `ler_arquivo_texto` (100 000 caracteres).                                               |
 | `CONNECTORS_DIR`            | `tools/bundle/bundle.ts`                   | Pasta dos conectores relativa à raiz (`connectors`).                                                              |
-| `PLUGIN_MANIFEST_PATH`      | `tools/bundle/bundle.ts`                   | Manifesto do plugin em cada conector (`.claude-plugin/plugin.json`); marca a pasta como conector.                 |
-| `PLUGIN_MCP_CONFIG_PATH`    | `tools/bundle/bundle.ts`                   | Configuração MCP do plugin (`.mcp.json`), com a URL do servidor remoto.                                           |
+| `PLUGIN_DIR`                | `tools/bundle/bundle.ts`                   | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                            |
+| `PLUGIN_MANIFEST_PATH`      | `tools/bundle/bundle.ts`                   | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.         |
+| `PLUGIN_MCP_CONFIG_PATH`    | `tools/bundle/bundle.ts`                   | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                |
 | `CANVAS_PAGE_SIZE`          | `connectors/canvas-puc/src/client.ts`      | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                   |
 | `DEFAULT_MAX_ITEMS`         | `connectors/canvas-puc/src/client.ts`      | Limite padrão de itens somados entre páginas em `getAll`.                                                         |
 | `DEFAULT_CANVAS_URL`        | `connectors/canvas-puc/src/remote.ts`      | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                          |

@@ -1,9 +1,10 @@
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
   CONNECTORS_DIR,
+  PLUGIN_DIR,
   PLUGIN_MANIFEST_PATH,
   PLUGIN_MCP_CONFIG_PATH,
   bundleOptions,
@@ -29,7 +30,7 @@ describe('listConnectors', () => {
   it('lista só pastas com manifesto de plugin, em ordem', () => {
     const root = tempRoot();
     for (const name of ['zeta', 'alfa', 'sem-plugin'])
-      mkdirSync(join(root, 'connectors', name, '.claude-plugin'), { recursive: true });
+      mkdirSync(join(root, 'connectors', name, dirname(PLUGIN_MANIFEST_PATH)), { recursive: true });
     writeFileSync(join(root, 'connectors', 'zeta', PLUGIN_MANIFEST_PATH), '{}');
     writeFileSync(join(root, 'connectors', 'alfa', PLUGIN_MANIFEST_PATH), '{}');
     writeFileSync(join(root, 'connectors', 'arquivo.txt'), '');
@@ -95,6 +96,26 @@ describe('pluginMcpProblems', () => {
       true,
     );
     expect(existsSync(join(REPO_ROOT, CONNECTORS_DIR, 'gmail', PLUGIN_MCP_CONFIG_PATH))).toBe(true);
+  });
+});
+
+describe('plugin folder (ADR 0020)', () => {
+  it('every marketplace entry points at the connector plugin subfolder', () => {
+    const file = join(REPO_ROOT, '.claude-plugin', 'marketplace.json');
+    const market = JSON.parse(readFileSync(file, 'utf8')) as {
+      plugins: { name: string; source: string }[];
+    };
+    for (const entry of market.plugins) {
+      expect(entry.source).toBe(`./${CONNECTORS_DIR}/${entry.name}/${PLUGIN_DIR}`);
+    }
+  });
+
+  it('the plugin subfolder ships no server code', () => {
+    for (const name of listConnectors(REPO_ROOT)) {
+      const dir = join(REPO_ROOT, CONNECTORS_DIR, name, PLUGIN_DIR);
+      for (const item of ['src', 'server', 'bridge', 'Dockerfile', 'wrangler.toml', 'package.json'])
+        expect(existsSync(join(dir, item))).toBe(false);
+    }
   });
 });
 

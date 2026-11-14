@@ -2,8 +2,8 @@
 
 Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace de plugins, começando pelo Canvas da PUC Minas.
 
-Cada conector vive em `connectors/<nome>/` e é um plugin do marketplace que aponta para o servidor remoto dele
-(ADR 0013); código compartilhado fica em `src/`. Não há GitHub Actions: o portão de PR é `npm run pr:check` (ADR 0006).
+Each connector lives in `connectors/<name>/` (server code) with its marketplace plugin in `connectors/<name>/plugin/`
+(ADR 0013, ADR 0020); código compartilhado fica em `src/`. Não há GitHub Actions: o portão de PR é `npm run pr:check` (ADR 0006).
 
 A documentação em `docs/` é a fonte da verdade. **Antes de mexer em código, leia `docs/README.md`** e siga
 o "quero... → leia...". Não varra o código para descobrir o que existe: `docs/FUNCTIONS.md`,

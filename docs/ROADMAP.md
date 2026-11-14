@@ -2,7 +2,7 @@
 
 ## Próxima tarefa
 
-**F4.2 — Move plugin content to `connectors/<name>/plugin/`** (ADR 0020). Phase 4 follows Anthropic's plugin
+**F4.3 — Complete manifests and add `claude plugin validate --strict` to `pr:check`** (ADR 0022). Phase 4 follows Anthropic's plugin
 standard; F3.2 (WhatsApp: publish on the owner's account and pair the number) still applies.
 
 ## Como ler
@@ -66,7 +66,7 @@ Plan from the 2026-11-14 marketplace review. One PR per task, in order; each end
 | Id   | Tarefa                                                                                          | Estado | Pronto quando                                                                                                                                                       |
 | ---- | ----------------------------------------------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | F4.1 | Decisions: plugin subfolder, English, version per plugin (ADR 0020–0022)                        | ✅     | ADRs accepted; CLAUDE.md rules 8 and 10 in English                                                                                                                  |
-| F4.2 | Move plugin content to `connectors/<name>/plugin/` (ADR 0020)                                   | ⬜     | Marketplace `source` points at `plugin/`; installed cache holds only manifests, `.mcp.json`, skills                                                                 |
+| F4.2 | Move plugin content to `connectors/<name>/plugin/` (ADR 0020)                                   | ✅     | Marketplace `source` points at `plugin/`; installed cache holds only manifests, `.mcp.json`, skills                                                                 |
 | F4.3 | Complete manifests and add `claude plugin validate --strict` to `pr:check` (ADR 0022)           | ⬜     | `version`, `license`, `keywords`, `homepage`, `author.url`; entries with `category`/`tags`; validate green                                                          |
 | F4.4 | Required `title` and read-only/destructive hints in `src/mcp/tools.ts`; Canvas tools in English | ⬜     | Typecheck fails without annotations; 18 Canvas tools and fields renamed; all three servers deployed                                                                 |
 | F4.5 | Plugin skills renamed and written in English                                                    | ⬜     | 12 skills with English names and content citing the new tool names                                                                                                  |

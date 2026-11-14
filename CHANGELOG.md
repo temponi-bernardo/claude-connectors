@@ -8,6 +8,9 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Alterado
 
+- Plugins: each marketplace entry now points at `connectors/<name>/plugin/`, which holds only the manifest,
+  `.mcp.json`, skills and a short README. Server code, tests, `Dockerfile` and bundles no longer reach the
+  user's plugin cache (ADR 0020). Update the marketplace once to pick it up.
 - WhatsApp: **envio ligado** (`ENABLE_SEND = "true"` no `wrangler.toml`) para qualquer contato ou grupo;
   `SEND_ALLOWLIST` virou opcional (vazia = qualquer destinatário). Continuam a confirmação explícita a cada
   mensagem (`confirmed_by_user`) e o limite por hora (`SEND_MAX_PER_HOUR`). Envio de mídia fica de fora (ADR 0015).
