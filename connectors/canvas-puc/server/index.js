@@ -22113,9 +22113,12 @@ function zipEntryBytes(bytes, entry) {
   const start = entry.localOffset + 30 + view.getUint16(entry.localOffset + 26, true) + view.getUint16(entry.localOffset + 28, true);
   return bytes.subarray(start, start + entry.compressedSize);
 }
-async function inflateRaw(data) {
-  const stream = new Blob([new Uint8Array(data)]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+async function decompressBytes(data, format) {
+  const stream = new Blob([new Uint8Array(data)]).stream().pipeThrough(new DecompressionStream(format));
   return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+function inflateRaw(data) {
+  return decompressBytes(data, "deflate-raw");
 }
 async function readZipEntry(bytes, name) {
   const entry = listZipEntries(bytes).find((e) => e.name === name);

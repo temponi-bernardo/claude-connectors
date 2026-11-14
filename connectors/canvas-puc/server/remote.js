@@ -14278,14 +14278,14 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 var SEAL_KEY_BYTES = 32;
 var IV_BYTES = 12;
 var TAG_BYTES = 16;
-function parseSealKey(raw) {
+function parseSealKey(raw, name = "SEAL_KEY") {
   if (!raw) {
     throw new Error(
-      "Defina SEAL_KEY com 32 bytes aleat\xF3rios em base64: `node -e \"console.log(crypto.randomBytes(32).toString('base64'))\"`."
+      `Defina ${name} com 32 bytes aleat\xF3rios em base64: \`node -e "console.log(crypto.randomBytes(32).toString('base64'))"\`.`
     );
   }
   const key = Buffer.from(raw, "base64");
-  if (key.length !== SEAL_KEY_BYTES) throw new Error("SEAL_KEY precisa ter 32 bytes em base64.");
+  if (key.length !== SEAL_KEY_BYTES) throw new Error(`${name} precisa ter 32 bytes em base64.`);
   return key;
 }
 function sealPayload(payload, key) {
@@ -23185,9 +23185,12 @@ function zipEntryBytes(bytes, entry) {
   const start = entry.localOffset + 30 + view.getUint16(entry.localOffset + 26, true) + view.getUint16(entry.localOffset + 28, true);
   return bytes.subarray(start, start + entry.compressedSize);
 }
-async function inflateRaw(data) {
-  const stream = new Blob([new Uint8Array(data)]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+async function decompressBytes(data, format) {
+  const stream = new Blob([new Uint8Array(data)]).stream().pipeThrough(new DecompressionStream(format));
   return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+function inflateRaw(data) {
+  return decompressBytes(data, "deflate-raw");
 }
 async function readZipEntry(bytes, name) {
   const entry = listZipEntries(bytes).find((e) => e.name === name);
