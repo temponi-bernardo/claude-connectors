@@ -9,9 +9,12 @@ Guia e modelos: `docs/DOCUMENTATION.md`. Índice do que existe: `docs/README.md`
 
 ## Passos
 
-1. **Levante o diff:** `git diff main...HEAD --stat` e `git diff main...HEAD -- src tools` (ou o
+1. **Levante o diff:** `git diff main...HEAD --stat` e `git diff main...HEAD -- src tools connectors .claude-plugin` (ou o
    intervalo da tarefa). Liste: funções criadas/renomeadas/removidas, assinaturas alteradas, constantes
    exportadas novas, pastas novas, componentes de UI novos, fluxos alterados, dependências novas.
+   Mudança em plugin (`connectors/`, `.claude-plugin/`: manifesto, versão, ferramentas, `.mcp.json`,
+   deploy) sempre gera documentação: README do conector, CHANGELOG e o que mais a tabela pedir. O hook
+   `Stop` `stop-plugin-docs.sh` bloqueia o encerramento enquanto não houver.
 2. **Classifique** cada item pela tabela "Mudança → qual doc atualizar" de `docs/DOCUMENTATION.md`.
 3. **Aplique nesta ordem:**
    1. `npm run docs:generate` (índice, blocos gerados, seções novas em FUNCTIONS.md).
