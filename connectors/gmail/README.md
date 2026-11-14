@@ -25,6 +25,15 @@ ou desvincula contas e faz um teste. O passo a passo manual é este:
 Enquanto o app do Google não for verificado, a tela de login mostra o aviso **"O Google não verificou este
 app"**: clique em **Avançado → Acessar**. O Google limita apps não verificados com Gmail a 100 usuários.
 
+## Comandos do plugin
+
+- **`/config-gmail`** — configuração guiada (conexão, contas e teste).
+- **`/triagem-email`** — caixa de entrada de todas as contas por prioridade.
+- **`/achar-documento`** — boletos, faturas, recibos e contratos, com os dados do anexo.
+- **`/resumir-conversa`** — resumo de uma thread, pendências e rascunho de resposta.
+
+Também dá para pedir em linguagem natural ("tem e-mail pra responder?"): o Claude usa a skill certa.
+
 ## Ferramentas
 
 | Ferramenta            | Parâmetros                                                 | Observação                                    |
