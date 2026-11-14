@@ -91,7 +91,7 @@ describe('auxiliares', () => {
   it('resolveSingleAccount recusa "all"', async () => {
     const deps = await linkedTestDeps([]);
     expect((await resolveSingleAccount(deps, 'musica')).alias).toBe('musica');
-    await expect(resolveSingleAccount(deps, 'all')).rejects.toThrow(/conta específica/);
+    await expect(resolveSingleAccount(deps, 'all')).rejects.toThrow(/one specific account/);
   });
 
   it('withUntrustedNotice põe o aviso primeiro', () => {
@@ -115,7 +115,7 @@ describe('escrita', () => {
     expect((await resolveWritableAccount(deps, 'dono')).alias).toBe('dono');
     const accounts = [testAccount('dono@example.com', { scope: READONLY_SCOPE })];
     await saveOwnerAccounts(deps.kv, TEST_TOKEN_KEY, { owner: TEST_OWNER, accounts });
-    await expect(resolveWritableAccount(deps, 'dono')).rejects.toThrow(/só para leitura/);
+    await expect(resolveWritableAccount(deps, 'dono')).rejects.toThrow(/read-only/);
   });
 });
 

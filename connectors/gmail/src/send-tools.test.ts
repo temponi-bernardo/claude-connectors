@@ -20,7 +20,7 @@ import {
   sendEmailTool,
 } from './send-tools.js';
 import { saveOwnerAccounts } from './token-store.js';
-import { SEND_HINTS } from './tools.js';
+import { SEND_HINTS } from '../../../src/mcp/annotations.js';
 
 const ORIGINAL = gmailRoute({
   'messages/m1': RECEIPT,
@@ -45,7 +45,7 @@ beforeEach(() => {
 describe('ferramentas de envio', () => {
   it('todas pedem confirmação (destructiveHint) e não são idempotentes', () => {
     for (const tool of [sendEmailTool, replyEmailTool, replyAllEmailTool, forwardEmailTool]) {
-      expect(tool.annotations).toEqual(SEND_HINTS);
+      expect(tool.annotations).toMatchObject(SEND_HINTS);
       expect(tool.description).toMatch(/confirmation/);
     }
   });
@@ -66,7 +66,7 @@ describe('ferramentas de envio', () => {
   it('send_email recusa "all" e listas vazias', async () => {
     const deps = await writableDeps([]);
     const args = { account: 'all', to: ['a@x.com'], subject: '', body: '' };
-    await expect(sendEmailTool.run(deps, args)).rejects.toThrow(/conta específica/);
+    await expect(sendEmailTool.run(deps, args)).rejects.toThrow(/one specific account/);
     await expect(sendEmailTool.run(deps, { ...args, account: 'dono', to: [] })).rejects.toThrow();
   });
 
@@ -80,7 +80,7 @@ describe('ferramentas de envio', () => {
   });
 
   it('replyTool monta a ferramenta com o nome dado', () => {
-    expect(replyTool({ name: 'x', replyAll: true, description: 'd' }).name).toBe('x');
+    expect(replyTool({ name: 'x', title: 'X', replyAll: true, description: 'd' }).name).toBe('x');
   });
 
   it('forward_email leva os anexos originais', async () => {
@@ -104,7 +104,7 @@ describe('ferramentas de envio', () => {
     await saveOwnerAccounts(deps.kv, TEST_TOKEN_KEY, { owner: TEST_OWNER, accounts });
     await expect(
       replyEmailTool.run(deps, { account: 'dono', message_id: 'm1', body: 'x' }),
-    ).rejects.toThrow(/só para leitura.*link_account/s);
+    ).rejects.toThrow(/read-only.*link_account/s);
     expect(writes).toHaveLength(0);
   });
 });

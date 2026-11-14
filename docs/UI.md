@@ -4,7 +4,7 @@
 require components. The only screen is the **remote connector's authorization page** (ADR 0009): static HTML,
 no script, produced by `renderLoginPage()` in `src/remote/login-page.ts`, styled by `LOGIN_PAGE_CSS` and the
 tokens below (light and dark via `prefers-color-scheme`). The GitHub Pages **public site** (ADR 0012:
-`docs/index.html`, `privacidade.html`, `termos.html`) uses the same tokens in `docs/site.css`, with no script. The Gmail
+`docs/index.html`, `privacy.html`, `terms.html`; `privacidade.html` and `termos.html` only redirect) uses the same tokens in `docs/site.css`, with no script. The Gmail
 connector's pages (consent and link result, `connectors/gmail/src/pages.ts`) use the same `LOGIN_PAGE_CSS`. WhatsApp's
 `/pair` page (`renderPairPage()` in `connectors/whatsapp/src/pair-page.ts`, ADR 0015) uses `LOGIN_PAGE_CSS` plus
 `PAIR_PAGE_CSS` (pairing code in a large mono font, QR on a white background, `secondary` and `danger` buttons).

@@ -8,12 +8,12 @@ description: Monta material de estudo a partir do Canvas da PUC Minas — percor
 ## 1. Escopo
 
 Pergunte (se não estiver claro) qual disciplina e qual recorte: módulos específicos, "até a prova" ou tudo.
-Use `listar_cursos` para achar o curso e `calendario` para descobrir a data da próxima prova, se houver.
+Use `list_courses` para achar o curso e `get_calendar` para descobrir a data da próxima prova, se houver.
 
 ## 2. Ler o conteúdo
 
-1. `modulos` do curso para ver a sequência das aulas.
-2. Para cada item do recorte: `ver_pagina` nas páginas e `ler_arquivo_texto` nos arquivos (slides, PDFs,
+1. `list_modules` do curso para ver a sequência das aulas.
+2. Para cada item do recorte: `get_page` nas páginas e `read_file_text` nos arquivos (slides, PDFs,
    documentos). Leia no máximo o necessário; se o volume for grande, combine com a pessoa por onde começar.
 3. Anote o que não abriu (vídeos, imagens, PDF sem texto) para a pessoa ver por conta própria.
 

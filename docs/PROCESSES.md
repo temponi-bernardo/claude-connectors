@@ -37,21 +37,22 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#process).
 
 ## P03 — Responder a uma ferramenta do Canvas (chamada do Claude)
 
-- **Gatilho:** o Claude chama uma ferramenta do conector `canvas-puc` (ex.: `proximas_entregas`).
+- **Gatilho:** o Claude chama uma ferramenta do conector `canvas-puc` (ex.: `upcoming_assignments`).
 - **Passos:**
   1. A cada requisição em `/mcp` (P09), `canvasRemoteConnector()` cria o cliente com `createCanvasClient()` e o
      token do usuário, escolhe as ferramentas com `canvasTools()` e as registra com `registerToolSpecs()` dentro de
-     `createCanvasMcpServer()`.
+     `createCanvasMcpServer()`, que anuncia a versão de `plugin.json` (`manifestVersion()`). Cada ferramenta leva
+     `title` e dicas de `toolAnnotations()`: as de leitura são `readOnlyHint`, as de escrita `destructiveHint`.
   2. A chamada passa por `runToolSafely()`; a `ToolSpec` criada por `defineTool()` valida os argumentos.
   3. A ferramenta usa o cliente: `requestCanvas()` envia a requisição com `sendCanvasRequest()`
      (`buildUrl()` + `Authorization: Bearer`); listagens seguem as páginas com `collectPages()` e `parseNextLink()`.
      Apoios como `activeCourses()`, `fetchOwnSubmission()` e `getAllOrEmpty()` compõem buscas.
-  4. As respostas viram objetos enxutos em português (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
+  4. As respostas viram objetos enxutos com chaves em inglês (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
      etc.), com HTML convertido por `htmlToText()`.
-  5. Arquivos: `ler_arquivo_texto` usa `readCanvasFileText()`, que baixa texto com `fetchPlainText()` ou, para
+  5. Arquivos: `read_file_text` usa `readCanvasFileText()`, que baixa texto com `fetchPlainText()` ou, para
      Word (`wordKind()`), os bytes com `fetchFileBytes()` e extrai o texto com `wordToText()` (`docxToText()`
      sobre `readZipEntry()`; `docToText()` sobre `openCfb()`/`readCfbStream()` e `parsePieceTable()`).
-     `baixar_arquivo` usa `downloadCanvasFile()`: `downloadRefusal()` recusa arquivo sem link ou acima de 10 MB;
+     `download_file` usa `downloadCanvasFile()`: `downloadRefusal()` recusa arquivo sem link ou acima de 10 MB;
      senão `downloadedFileResult()` embute o conteúdo com `fileContentBlock()` e o marca com `rawToolResult()`.
   6. `toToolResult()` devolve o JSON (via `textResult()`) ou o resultado pronto ao Claude; qualquer erro vira
      `errorResult()` com a mensagem.
@@ -326,7 +327,8 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
 - **Gatilho:** o Claude chama uma ferramenta de escrita (`send_email`, `reply_email`, `reply_all_email`,
   `forward_email`, `create_draft`, `update_draft`, `send_draft`, `delete_draft`, `mark_read`, `archive`, `star`,
   `update_labels`, `trash`, `untrash`) em `POST /mcp`, depois de mostrar o conteúdo ao usuário e receber a
-  confirmação (as anotações MCP de envio e de exclusão têm `destructiveHint`; ADR 0019).
+  confirmação (as anotações MCP de envio e de exclusão têm `destructiveHint`; ADR 0019). Toda ferramenta dos três
+  conectores tem `title` e dicas obrigatórias (`toolAnnotations()` em `src/mcp/annotations.ts`; o typecheck falha sem elas).
 - **Passos:**
   1. Os passos 1 e 2 de P12; a conta vem de `resolveWritableAccount()`, que exige o escopo com
      `requireWriteAccess()` (`hasModifyScope()`) antes de qualquer chamada ao Gmail.

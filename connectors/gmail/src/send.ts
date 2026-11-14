@@ -52,9 +52,9 @@ export const MAX_FORWARD_BYTES = 18 * 1024 * 1024;
 /** Lança erro se o e-mail não tiver destinatário ou passar do limite. */
 export function checkRecipientLimit(email: OutgoingEmail): void {
   const total = email.to.length + email.cc.length + email.bcc.length;
-  if (email.to.length === 0) throw new Error('Informe ao menos um destinatário em "to".');
+  if (email.to.length === 0) throw new Error('Give at least one recipient in "to".');
   if (total > MAX_RECIPIENTS) {
-    throw new Error(`Use no máximo ${MAX_RECIPIENTS} destinatários por e-mail (To, Cc e Bcc).`);
+    throw new Error(`Use at most ${MAX_RECIPIENTS} recipients per email (To, Cc and Bcc).`);
   }
 }
 
@@ -117,7 +117,7 @@ export async function forwardAttachments(
   const total = infos.reduce((sum, info) => sum + info.size, 0);
   if (total > MAX_FORWARD_BYTES) {
     const mb = (total / 1024 / 1024).toFixed(1);
-    throw new Error(`Os anexos somam ${mb} MB, acima do limite de 18 MB para encaminhar.`);
+    throw new Error(`The attachments add up to ${mb} MB, above the 18 MB forwarding limit.`);
   }
   return Promise.all(
     infos.map(async (info) => {

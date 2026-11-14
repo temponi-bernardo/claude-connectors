@@ -111,7 +111,7 @@ describe('destinatários da resposta', () => {
 
   it('sem destinatário possível lança erro', () => {
     const onlySelf = headerValues([{ name: 'From', value: SELF }]);
-    expect(() => replyRecipients(onlySelf, SELF, true)).toThrow(/destinatário/);
+    expect(() => replyRecipients(onlySelf, SELF, true)).toThrow(/recipient/);
   });
 });
 

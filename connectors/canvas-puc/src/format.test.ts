@@ -34,10 +34,10 @@ describe('toProfile', () => {
       toProfile({ id: 1, name: 'A', primary_email: 'a@x', login_id: 'l', time_zone: 'tz' }),
     ).toEqual({
       id: 1,
-      nome: 'A',
+      name: 'A',
       email: 'a@x',
       login: 'l',
-      fuso: 'tz',
+      time_zone: 'tz',
     });
   });
 });
@@ -53,19 +53,19 @@ describe('toCourse', () => {
     });
     expect(c).toEqual({
       id: 1,
-      nome: 'N',
-      codigo: 'C',
-      periodo: 'T',
-      nota_atual: 9,
-      conceito_atual: 'A',
+      name: 'N',
+      code: 'C',
+      term: 'T',
+      current_score: 9,
+      current_grade: 'A',
     });
   });
 
   it('usa null sem matrícula', () => {
     expect(toCourse({ id: 1 })).toMatchObject({
-      nota_atual: null,
-      conceito_atual: null,
-      periodo: undefined,
+      current_score: null,
+      current_grade: null,
+      term: undefined,
     });
   });
 });
@@ -77,10 +77,10 @@ describe('toSubmissionFlags', () => {
     expect(
       toSubmissionFlags({ submitted: true, late: false, missing: false, graded: true }),
     ).toEqual({
-      entregue: true,
-      atrasado: false,
-      faltando: false,
-      corrigido: true,
+      submitted: true,
+      late: false,
+      missing: false,
+      graded: true,
     });
   });
 });
@@ -96,17 +96,17 @@ describe('toPlannerItem', () => {
       'https://x.test',
     );
     expect(item).toMatchObject({
-      tipo: 'assignment',
-      titulo: 'P2',
-      pontos: 30,
+      type: 'assignment',
+      title: 'P2',
+      points: 30,
       url: 'https://x.test/c/1',
-      entrega: null,
+      submission: null,
     });
     expect(toPlannerItem({ plannable: { name: 'Ev' } }, 'b')).toMatchObject({
-      titulo: 'Ev',
+      title: 'Ev',
       url: undefined,
     });
-    expect(toPlannerItem({}, 'b')).toMatchObject({ titulo: undefined, pontos: undefined });
+    expect(toPlannerItem({}, 'b')).toMatchObject({ title: undefined, points: undefined });
   });
 });
 
@@ -119,19 +119,19 @@ describe('toAssignmentSummary', () => {
     });
     expect(a).toMatchObject({
       id: 1,
-      nome: 'T',
+      name: 'T',
       status: 'graded',
-      nota: 8,
-      atrasada: true,
-      faltando: false,
+      score: 8,
+      late: true,
+      missing: false,
     });
   });
 
   it('usa null sem entrega', () => {
     expect(toAssignmentSummary({ id: 1 })).toMatchObject({
-      nota: null,
-      atrasada: null,
-      faltando: null,
+      score: null,
+      late: null,
+      missing: null,
     });
   });
 });
@@ -145,11 +145,11 @@ describe('toRubricCriterion', () => {
         ratings: [{ points: 5, description: 'ótimo' }],
       }),
     ).toEqual({
-      criterio: 'C',
-      pontos: 5,
-      niveis: ['5: ótimo'],
+      criterion: 'C',
+      points: 5,
+      ratings: ['5: ótimo'],
     });
-    expect(toRubricCriterion({})).toMatchObject({ niveis: [] });
+    expect(toRubricCriterion({})).toMatchObject({ ratings: [] });
   });
 });
 
@@ -164,12 +164,12 @@ describe('toFileInfo', () => {
         url: 'u',
       }),
     ).toMatchObject({
-      nome: 'a.pdf',
-      tamanho_kb: 2,
-      tipo: 'application/pdf',
+      name: 'a.pdf',
+      size_kb: 2,
+      content_type: 'application/pdf',
       download: 'u',
     });
-    expect(toFileInfo({})).toMatchObject({ tamanho_kb: 0 });
+    expect(toFileInfo({})).toMatchObject({ size_kb: 0 });
   });
 });
 
@@ -181,21 +181,21 @@ describe('toSubmissionDetail', () => {
       attachments: [{ display_name: 'a.txt' }],
     });
     expect(s).toMatchObject({
-      comentarios: [{ autor: 'Prof', texto: 'bom', data: 'd' }],
-      avaliacao_rubrica: null,
+      comments: [{ author: 'Prof', text: 'bom', date: 'd' }],
+      rubric_assessment: null,
     });
-    expect(s.anexos as unknown[]).toHaveLength(1);
-    expect(toSubmissionDetail({})).toMatchObject({ comentarios: [], anexos: [] });
+    expect(s.attachments as unknown[]).toHaveLength(1);
+    expect(toSubmissionDetail({})).toMatchObject({ comments: [], attachments: [] });
   });
 });
 
 describe('toAssignmentDetail', () => {
   it('converte o enunciado e inclui a entrega quando houver', () => {
     const a = { id: 1, description: '<p>Faça</p>', rubric: [{ description: 'C' }] };
-    expect(toAssignmentDetail(a, null)).toMatchObject({ enunciado: 'Faça', entrega: null });
+    expect(toAssignmentDetail(a, null)).toMatchObject({ description: 'Faça', submission: null });
     expect(toAssignmentDetail({ id: 2 }, { score: 7 })).toMatchObject({
-      rubrica: [],
-      entrega: { nota: 7 },
+      rubric: [],
+      submission: { score: 7 },
     });
   });
 });
@@ -209,11 +209,11 @@ describe('toGradeRow', () => {
         assignment: { id: 1, name: 'T', points_possible: 10 },
       }),
     ).toMatchObject({
-      tarefa: 'T',
-      nota: 7,
-      de: 10,
+      assignment: 'T',
+      score: 7,
+      points_possible: 10,
     });
-    expect(toGradeRow({})).toMatchObject({ tarefa: undefined, de: undefined });
+    expect(toGradeRow({})).toMatchObject({ assignment: undefined, points_possible: undefined });
   });
 });
 
@@ -223,13 +223,13 @@ describe('toEnrollmentGrade', () => {
     expect(
       toEnrollmentGrade({ course_id: 5, grades: { current_score: 80, final_score: 70 } }, names),
     ).toMatchObject({
-      curso: 'Curso',
-      nota_atual: 80,
-      nota_final: 70,
+      course: 'Curso',
+      current_score: 80,
+      final_score: 70,
     });
     expect(toEnrollmentGrade({ course_id: 6 }, names)).toMatchObject({
-      curso: undefined,
-      nota_atual: undefined,
+      course: undefined,
+      current_score: undefined,
     });
   });
 });
@@ -243,31 +243,31 @@ describe('toAnnouncement', () => {
         author: { display_name: 'A' },
         user_name: 'B',
       }),
-    ).toMatchObject({ autor: 'A', texto: 'oi' });
-    expect(toAnnouncement({ id: 1, user_name: 'B' })).toMatchObject({ autor: 'B', texto: '' });
+    ).toMatchObject({ author: 'A', text: 'oi' });
+    expect(toAnnouncement({ id: 1, user_name: 'B' })).toMatchObject({ author: 'B', text: '' });
   });
 });
 
 describe('toModule e toModuleItem', () => {
   it('traduz itens e conclusão', () => {
     expect(toModuleItem({ id: 1, completion_requirement: { completed: true } })).toMatchObject({
-      concluido: true,
+      completed: true,
     });
-    expect(toModuleItem({ id: 1 })).toMatchObject({ concluido: null });
+    expect(toModuleItem({ id: 1 })).toMatchObject({ completed: null });
     expect(toModule({ id: 1, name: 'M', items: [{ id: 2, title: 'Aula' }] })).toMatchObject({
-      nome: 'M',
-      itens: [{ titulo: 'Aula' }],
+      name: 'M',
+      items: [{ title: 'Aula' }],
     });
-    expect(toModule({ id: 1 })).toMatchObject({ itens: [] });
+    expect(toModule({ id: 1 })).toMatchObject({ items: [] });
   });
 });
 
 describe('toDiscussionSummary', () => {
   it('traz o prazo da tarefa vinculada ou null', () => {
     expect(toDiscussionSummary({ id: 1, assignment: { due_at: 'd' } })).toMatchObject({
-      prazo: 'd',
+      due_at: 'd',
     });
-    expect(toDiscussionSummary({ id: 1 })).toMatchObject({ prazo: null });
+    expect(toDiscussionSummary({ id: 1 })).toMatchObject({ due_at: null });
   });
 });
 
@@ -279,8 +279,8 @@ describe('flattenDiscussion', () => {
       names,
     );
     expect(flat).toEqual([
-      { nivel: 0, autor: 'Ana', data: undefined, texto: 'a' },
-      { nivel: 1, autor: undefined, data: undefined, texto: 'b' },
+      { depth: 0, author: 'Ana', date: undefined, text: 'a' },
+      { depth: 1, author: undefined, date: undefined, text: 'b' },
     ]);
     expect(flattenDiscussion(undefined, names)).toEqual([]);
   });
@@ -289,7 +289,7 @@ describe('flattenDiscussion', () => {
 describe('toCalendarEvent', () => {
   it('limita a descrição a 1000 caracteres', () => {
     expect(
-      (toCalendarEvent({ title: 'E', description: 'x'.repeat(2000) }).descricao as string).length,
+      (toCalendarEvent({ title: 'E', description: 'x'.repeat(2000) }).description as string).length,
     ).toBe(1000);
   });
 });

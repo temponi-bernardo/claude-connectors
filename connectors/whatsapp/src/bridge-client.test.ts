@@ -30,7 +30,7 @@ describe('bridgeErrorFrom', () => {
   it('usa a mensagem da ponte ou o status quando o código é desconhecido', () => {
     expect(bridgeErrorFrom(400, { error: 'x', message: 'Explicação' }).message).toBe('Explicação');
     const fallback = bridgeErrorFrom(502, null);
-    expect([fallback.message, fallback.code]).toEqual(['A ponte respondeu 502.', 'http_502']);
+    expect([fallback.message, fallback.code]).toEqual(['The bridge answered 502.', 'http_502']);
   });
 });
 

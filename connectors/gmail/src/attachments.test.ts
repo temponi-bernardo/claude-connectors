@@ -65,7 +65,7 @@ describe('attachmentBytesToText', () => {
 
   it('recusa tipos não suportados', async () => {
     await expect(attachmentBytesToText(Uint8Array.of(0xff, 0xd8, 0, 1))).rejects.toThrow(
-      /não suportado/,
+      /Unsupported/,
     );
   });
 });
@@ -91,7 +91,7 @@ describe('readAttachmentText', () => {
     const pdf = tinyPdf('');
     const route = gmailRoute({ 'messages/m1/attachments/a1': { data: b64(pdf) } });
     const deps = await linkedTestDeps([route]);
-    expect((await readAttachmentText(deps, OWNER, ids)).text).toMatch(/escaneado/);
+    expect((await readAttachmentText(deps, OWNER, ids)).text).toMatch(/scanned/);
   });
 
   it('recusa anexos acima de 5 MB', async () => {
@@ -99,7 +99,7 @@ describe('readAttachmentText', () => {
       'messages/m1/attachments/a1': { size: MAX_ATTACHMENT_BYTES + 1, data: '' },
     });
     const deps = await linkedTestDeps([route]);
-    await expect(readAttachmentText(deps, OWNER, ids)).rejects.toThrow(/acima do limite de 5 MB/);
+    await expect(readAttachmentText(deps, OWNER, ids)).rejects.toThrow(/above the 5 MB/);
   });
 });
 

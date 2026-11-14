@@ -31,7 +31,7 @@ export function clearAccessTokenCache(): void {
 /** Erro acionável de conta que perdeu o acesso ao Gmail. */
 export function relinkError(alias: string): Error {
   return new Error(
-    `A conta "${alias}" perdeu o acesso ao Gmail (revogado ou expirado). Use link_account e entre com ela de novo.`,
+    `Account "${alias}" lost access to Gmail (revoked or expired). Use link_account and sign in with it again.`,
   );
 }
 

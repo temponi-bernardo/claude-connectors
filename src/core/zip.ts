@@ -24,7 +24,7 @@ export function findEndOfCentralDirectory(bytes: Uint8Array): number {
   for (let pos = bytes.length - 22; pos >= 0; pos--) {
     if (view.getUint32(pos, true) === EOCD_SIGNATURE) return pos;
   }
-  throw new Error('Arquivo ZIP inválido: diretório central não encontrado.');
+  throw new Error('Invalid ZIP file: central directory not found.');
 }
 
 /** Lê as entradas do diretório central. */
@@ -81,5 +81,5 @@ export async function readZipEntry(bytes: Uint8Array, name: string): Promise<Uin
   const data = zipEntryBytes(bytes, entry);
   if (entry.method === 0) return data;
   if (entry.method === 8) return inflateRaw(data);
-  throw new Error(`Compressão ZIP não suportada (método ${entry.method}).`);
+  throw new Error(`Unsupported ZIP compression (method ${entry.method}).`);
 }

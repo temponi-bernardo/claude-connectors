@@ -33,7 +33,7 @@ describe('auxiliares', () => {
   });
 
   it('relinkError manda usar link_account', () => {
-    expect(relinkError('dono').message).toMatch(/"dono" perdeu o acesso.*link_account/);
+    expect(relinkError('dono').message).toMatch(/"dono" lost access.*link_account/);
   });
 });
 
@@ -53,14 +53,14 @@ describe('getAccessToken', () => {
     const calls: RecordedCall[] = [];
     const deps = testDeps(fakeFetch([], calls));
     const revoked = { ...REF, account: { ...REF.account, status: 'revoked' as const } };
-    await expect(getAccessToken(deps, revoked)).rejects.toThrow(/perdeu o acesso/);
+    await expect(getAccessToken(deps, revoked)).rejects.toThrow(/lost access/);
     expect(calls).toHaveLength(0);
   });
 
   it('invalid_grant marca a conta como revogada no registro do usuário', async () => {
     const deps = await linkedTestDeps([]);
     const ref = { ...REF, account: { ...REF.account, refreshToken: 'revogado-1' } };
-    await expect(getAccessToken(deps, ref)).rejects.toThrow(/perdeu o acesso/);
+    await expect(getAccessToken(deps, ref)).rejects.toThrow(/lost access/);
     const accounts = await loadOwnerAccounts(deps.kv, TEST_TOKEN_KEY, TEST_OWNER);
     expect(accounts.find((a) => a.email === 'dono@example.com')?.status).toBe('revoked');
     expect(accounts.find((a) => a.email === 'musica@example.com')?.status).toBe('active');

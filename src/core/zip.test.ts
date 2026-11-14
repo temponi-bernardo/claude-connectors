@@ -44,7 +44,7 @@ function storedZip(name: string, content: string, method = 0): Uint8Array {
 describe('findEndOfCentralDirectory', () => {
   it('acha o EOCD ou falha em arquivo que não é ZIP', () => {
     expect(findEndOfCentralDirectory(docx)).toBeGreaterThan(0);
-    expect(() => findEndOfCentralDirectory(new Uint8Array(30))).toThrow('ZIP inválido');
+    expect(() => findEndOfCentralDirectory(new Uint8Array(30))).toThrow('Invalid ZIP');
   });
 });
 
@@ -86,7 +86,7 @@ describe('readZipEntry', () => {
   });
 
   it('recusa métodos de compressão desconhecidos', async () => {
-    await expect(readZipEntry(storedZip('a', 'b', 12), 'a')).rejects.toThrow('método 12');
+    await expect(readZipEntry(storedZip('a', 'b', 12), 'a')).rejects.toThrow('method 12');
   });
 });
 

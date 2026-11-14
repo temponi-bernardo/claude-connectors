@@ -78,14 +78,14 @@ docker build -t canvas-puc-remote connectors/canvas-puc
 docker run -p 8080:8080 -e PUBLIC_URL=https://seu-dominio -e SEAL_KEY=<32 bytes em base64> -e CANVAS_ALLOW_WRITE=true canvas-puc-remote
 ```
 
-| Variável               | Padrão                             | Para quê                                                        |
-| ---------------------- | ---------------------------------- | --------------------------------------------------------------- |
-| `PUBLIC_URL`           | — (no Worker: o próprio endereço)  | Endereço público em https (obrigatório no Docker)               |
-| `SEAL_KEY`             | —                                  | Chave dos selos OAuth; trocar desconecta todo mundo             |
-| `PORT`                 | `8080`                             | Porta HTTP                                                      |
-| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Para onde o OAuth pode devolver o acesso                        |
-| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | Canvas fixo do servidor                                         |
-| `CANVAS_ALLOW_WRITE`   | desligado                          | `true` registra `entregar_tarefa_texto` e `responder_discussao` |
+| Variável               | Padrão                             | Para quê                                                         |
+| ---------------------- | ---------------------------------- | ---------------------------------------------------------------- |
+| `PUBLIC_URL`           | — (no Worker: o próprio endereço)  | Endereço público em https (obrigatório no Docker)                |
+| `SEAL_KEY`             | —                                  | Chave dos selos OAuth; trocar desconecta todo mundo              |
+| `PORT`                 | `8080`                             | Porta HTTP                                                       |
+| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Para onde o OAuth pode devolver o acesso                         |
+| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | Canvas fixo do servidor                                          |
+| `CANVAS_ALLOW_WRITE`   | desligado                          | `true` registra `submit_text_assignment` e `reply_to_discussion` |
 
 **Problemas comuns:**
 
@@ -97,26 +97,26 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://seu-dominio -e SEAL_KEY=<32 bytes 
 
 ## Ferramentas
 
-| Ferramenta              | Faz                                                                    |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `quem_sou_eu`           | Perfil (teste de conexão)                                              |
-| `listar_cursos`         | Cursos com nota atual                                                  |
-| `proximas_entregas`     | O que vence nos próximos dias, em todos os cursos                      |
-| `listar_tarefas`        | Tarefas de um curso com status (filtros: futuras, atrasadas...)        |
-| `ver_tarefa`            | Enunciado, rubrica, prazos e feedback                                  |
-| `notas`                 | Resumo de notas ou notas por tarefa                                    |
-| `avisos`                | Avisos recentes                                                        |
-| `modulos`               | Módulos e itens                                                        |
-| `ver_pagina`            | Conteúdo de uma página                                                 |
-| `arquivos`              | Arquivos com link de download                                          |
-| `ler_arquivo_texto`     | Conteúdo de arquivos de texto/código, inclusive `.doc` e `.docx`       |
-| `baixar_arquivo`        | Traz PDF, slides ou imagem (até 10 MB) para a conversa                 |
-| `discussoes`            | Fóruns do curso                                                        |
-| `ver_discussao`         | Postagens de um fórum                                                  |
-| `calendario`            | Eventos do calendário                                                  |
-| `buscar`                | Busca em tarefas, páginas, arquivos e módulos                          |
-| `entregar_tarefa_texto` | Entrega texto/link (só com envios permitidos; o Claude confirma antes) |
-| `responder_discussao`   | Responde fórum (só com envios permitidos; o Claude confirma antes)     |
+| Ferramenta               | Faz                                                                    |
+| ------------------------ | ---------------------------------------------------------------------- |
+| `whoami`                 | Perfil (teste de conexão)                                              |
+| `list_courses`           | Cursos com nota atual                                                  |
+| `upcoming_assignments`   | O que vence nos próximos dias, em todos os cursos                      |
+| `list_assignments`       | Tarefas de um curso com status (filtros: upcoming, overdue...)         |
+| `get_assignment`         | Enunciado, rubrica, prazos e feedback                                  |
+| `get_grades`             | Resumo de notas ou notas por tarefa                                    |
+| `list_announcements`     | Avisos recentes                                                        |
+| `list_modules`           | Módulos e itens                                                        |
+| `get_page`               | Conteúdo de uma página                                                 |
+| `list_files`             | Arquivos com link de download                                          |
+| `read_file_text`         | Conteúdo de arquivos de texto/código, inclusive `.doc` e `.docx`       |
+| `download_file`          | Traz PDF, slides ou imagem (até 10 MB) para a conversa                 |
+| `list_discussions`       | Fóruns do curso                                                        |
+| `get_discussion`         | Postagens de um fórum                                                  |
+| `get_calendar`           | Eventos do calendário                                                  |
+| `search`                 | Busca em tarefas, páginas, arquivos e módulos                          |
+| `submit_text_assignment` | Entrega texto/link (só com envios permitidos; o Claude confirma antes) |
+| `reply_to_discussion`    | Responde fórum (só com envios permitidos; o Claude confirma antes)     |
 
 Fluxos internos: [PROCESSES.md](../../docs/PROCESSES.md). Decisão de arquitetura:
 [ADR 0013](../../docs/adr/0013-remote-only-connector-via-marketplace.md).

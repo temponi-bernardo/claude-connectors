@@ -69,14 +69,14 @@ describe('checkRecipientLimit', () => {
     }).not.toThrow();
     expect(() => {
       checkRecipientLimit({ ...email, to: [] });
-    }).toThrow(/ao menos um/);
+    }).toThrow(/at least one/);
     const many = Array.from({ length: MAX_RECIPIENTS + 1 }, (_, i) => ({
       name: '',
       email: `p${i}@x.com`,
     }));
     expect(() => {
       checkRecipientLimit({ ...email, to: many });
-    }).toThrow(/no máximo/);
+    }).toThrow(/at most/);
   });
 });
 
@@ -179,6 +179,6 @@ describe('resposta e encaminhamento', () => {
     expect(prepared.email.attachments).toHaveLength(1);
     await expect(
       prepareForward(deps, OWNER, { messageId: 'm1', to: [], cc: [], bcc: [], note: '' }),
-    ).rejects.toThrow(/ao menos um/);
+    ).rejects.toThrow(/at least one/);
   });
 });

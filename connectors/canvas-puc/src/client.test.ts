@@ -30,7 +30,7 @@ describe('unauthorizedMessage', () => {
   it('manda gerar outro token e reconectar no Claude', () => {
     const message = unauthorizedMessage('https://x.test');
     expect(message).toContain('https://x.test/profile/settings');
-    expect(message).toContain('reconecte');
+    expect(message).toContain('reconnect');
   });
 });
 
@@ -71,7 +71,7 @@ describe('requestCanvas', () => {
   it('em 401 falha uma vez só, orientando a reconectar', async () => {
     const f = fakeFetch(json({}, { status: 401 }));
     await expect(requestCanvas(deps(f), { method: 'GET', path: '/a' })).rejects.toThrow(
-      'reconecte',
+      'reconnect',
     );
     expect(f).toHaveBeenCalledOnce();
   });
@@ -79,7 +79,7 @@ describe('requestCanvas', () => {
   it('inclui status e corpo em outros erros', async () => {
     const f = fakeFetch(new Response('proibido', { status: 403 }));
     await expect(requestCanvas(deps(f), { method: 'GET', path: '/a' })).rejects.toThrow(
-      'Canvas 403 em GET /a: proibido',
+      'Canvas 403 on GET /a: proibido',
     );
   });
 });

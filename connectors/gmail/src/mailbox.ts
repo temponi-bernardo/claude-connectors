@@ -52,9 +52,7 @@ export function mailTargets(
 ): MailTargets {
   const targets = { messageIds: messageIds ?? [], threadIds: threadIds ?? [] };
   if (targets.messageIds.length + targets.threadIds.length === 0) {
-    throw new Error(
-      'Informe message_ids ou thread_ids (ids vindos de search_threads ou get_thread).',
-    );
+    throw new Error('Give message_ids or thread_ids (ids from search_threads or get_thread).');
   }
   return targets;
 }
@@ -62,11 +60,11 @@ export function mailTargets(
 /** Lança erro se a mudança não tiver marcador ou puser e tirar o mesmo. */
 export function checkLabelChange(change: LabelChange): void {
   if (change.add.length + change.remove.length === 0) {
-    throw new Error('Informe ao menos um marcador em add_labels ou remove_labels.');
+    throw new Error('Give at least one label in add_labels or remove_labels.');
   }
   const both = change.add.find((id) => change.remove.includes(id));
   if (both !== undefined)
-    throw new Error(`O marcador "${both}" está em add_labels e remove_labels.`);
+    throw new Error(`Label "${both}" is in both add_labels and remove_labels.`);
 }
 
 /** Ids dos marcadores pedidos por id ou nome (sem maiúsculas); lança erro para os desconhecidos. */
@@ -77,7 +75,7 @@ export function resolveLabelIds(
   return wanted.map((item) => {
     const key = item.trim().toLowerCase();
     const found = labels.find((l) => l.id === item || l.name.toLowerCase() === key);
-    if (!found) throw new Error(`Marcador "${item}" não existe na conta. Use list_labels.`);
+    if (!found) throw new Error(`Label "${item}" does not exist in this account. Use list_labels.`);
     return found.id;
   });
 }

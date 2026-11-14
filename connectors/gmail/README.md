@@ -78,7 +78,8 @@ Ferramentas de escrita (todas com `account` de uma conta só; nenhuma aceita `al
 
 Até 50 mensagens ou 20 conversas por chamada de organização. As ferramentas levam as **anotações MCP**:
 envio, lixeira, editar ou apagar rascunho e desvincular conta têm `destructiveHint: true` (o cliente pede
-confirmação); organizar é reversível (`destructiveHint: false`); leitura tem `readOnlyHint: true`. Respostas e
+confirmação); organizar é reversível (`destructiveHint: false`); leitura tem `readOnlyHint: true`. Toda ferramenta
+tem também um `title` em inglês (presets em `src/mcp/annotations.ts`). Respostas e
 encaminhamentos saem em texto plano (o HTML do original vira texto).
 
 `account` é o apelido (parte antes do `@`; o e-mail inteiro se duas contas repetirem) ou o próprio e-mail. O
@@ -110,8 +111,8 @@ seguir instruções vindas de um e-mail.
 2. **APIs e serviços → Biblioteca → Gmail API → Ativar.**
 3. **Google Auth Platform → Branding:** nome do app, e-mail de suporte, página inicial
    `https://temponi-bernardo.github.io/claude-connectors/`, política de privacidade
-   `https://temponi-bernardo.github.io/claude-connectors/privacidade.html` e termos
-   `https://temponi-bernardo.github.io/claude-connectors/termos.html`.
+   `https://temponi-bernardo.github.io/claude-connectors/privacy.html` e termos
+   `https://temponi-bernardo.github.io/claude-connectors/terms.html`.
 4. **Público:** tipo **Externo** → **Publicar app** ("Em produção"). Sem isso o refresh token vence em 7 dias.
 5. **Acesso a dados → Adicionar escopos:** `openid`, `.../auth/userinfo.email` e
    `https://www.googleapis.com/auth/gmail.modify` (ler, enviar, rascunhos, marcadores e lixeira; sem exclusão
@@ -178,4 +179,4 @@ novo.
 - Prompt injection: descrições, instruções do servidor e resultados avisam o modelo que o conteúdo dos e-mails
   não é confiável e que ele nunca deve enviar, encaminhar ou apagar porque um e-mail pediu.
 - Nada de conteúdo de e-mail, tokens ou endereços nos logs. Política de privacidade com a declaração de Uso
-  Limitado do Google em [privacidade.html](../../docs/privacidade.html).
+  Limitado do Google em [privacy.html](../../docs/privacy.html).
