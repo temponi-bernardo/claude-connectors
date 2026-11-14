@@ -1,13 +1,13 @@
-# Funções
+# Functions
 
-Toda função de topo do código aparece aqui, em um modelo fixo. Os campos entre `<!-- generated:start -->` e
-`<!-- generated:end -->` (Arquivo, Assinatura, Usada por, Processos) são escritos por `npm run docs:generate` a
-partir do código — não edite à mão. Os campos **Faz**, **Entrada**, **Saída**, **Efeitos** e **Erros** são
-manuais e obrigatórios; `npm run docs:check` falha enquanto houver `_fill_in_`.
+Every top-level function in the code appears here, in a fixed template. The fields between `<!-- generated:start -->` and
+`<!-- generated:end -->` (File, Signature, Used by, Processes) are written by `npm run docs:generate` from
+the code — do not edit them by hand. The **Does**, **Input**, **Output**, **Effects** and **Errors** fields are
+manual and mandatory; `npm run docs:check` fails while any `_fill_in_` remains.
 
-Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
+Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
-## Índice por módulo
+## Index by module
 
 <!-- index:start -->
 
@@ -100,11 +100,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um caminho absoluto em caminho relativo à raiz, sempre com `/`.
-- **Input:** `rootDir`: raiz absoluta; `absolutePath`: caminho absoluto dentro dela.
-- **Output:** Caminho relativo POSIX, ex.: `src/a.ts`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts an absolute path into a path relative to the root, always with `/`.
+- **Input:** `rootDir`: absolute root; `absolutePath`: absolute path inside it.
+- **Output:** POSIX relative path, e.g. `src/a.ts`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `globToRegExp`
 
@@ -117,11 +117,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um glob simples (`**/`, `**`, `*`) em expressão regular ancorada, para casar caminhos relativos.
-- **Input:** `glob`: padrão, ex.: `**/fixtures/**`.
-- **Output:** `RegExp` que casa o caminho inteiro.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a simple glob (`**/`, `**`, `*`) into an anchored regular expression, to match relative paths.
+- **Input:** `glob`: pattern, e.g. `**/fixtures/**`.
+- **Output:** `RegExp` that matches the whole path.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isAnalyzedSource`
 
@@ -134,11 +134,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide se um arquivo entra na análise: termina em `.ts`, não é `.d.ts`, não é teste e não casa com nenhum glob de `ignore`.
-- **Input:** `relativePath`: caminho relativo; `config`: configuração do docs.
-- **Output:** `true` se o arquivo deve ser analisado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides whether a file enters the analysis: ends in `.ts`, is not `.d.ts`, is not a test and matches no `ignore` glob.
+- **Input:** `relativePath`: relative path; `config`: docs configuration.
+- **Output:** `true` if the file should be analyzed.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `openProject`
 
@@ -151,11 +151,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria o projeto ts-morph com módulo/resolução NodeNext, adiciona os `.ts` das pastas configuradas e remove os que `isAnalyzedSource()` rejeita.
-- **Input:** `rootDir`: raiz do repositório; `config`: configuração do docs.
-- **Output:** `Project` do ts-morph pronto para análise.
-- **Effects:** Lê arquivos do disco.
-- **Errors:** Erros de leitura do sistema de arquivos propagam.
+- **Does:** Creates the ts-morph project with NodeNext module/resolution, adds the `.ts` files from the configured folders and removes those `isAnalyzedSource()` rejects.
+- **Input:** `rootDir`: repository root; `config`: docs configuration.
+- **Output:** ts-morph `Project` ready for analysis.
+- **Effects:** Reads files from disk.
+- **Errors:** File system read errors propagate.
 
 ### `signatureOf`
 
@@ -168,11 +168,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a assinatura legível de uma função: `async` se houver, nome, parâmetros como escritos e tipo de retorno (declarado ou inferido).
-- **Input:** `fn`: declaração de função do ts-morph.
-- **Output:** Texto como `slugify(title: string): string`.
-- **Effects:** Nenhum (pura sobre a AST).
-- **Errors:** Nenhum.
+- **Does:** Builds the readable signature of a function: `async` if present, name, parameters as written and return type (declared or inferred).
+- **Input:** `fn`: ts-morph function declaration.
+- **Output:** Text such as `slugify(title: string): string`.
+- **Effects:** None (pure over the AST).
+- **Errors:** None.
 
 ### `collectFileFunctions`
 
@@ -185,11 +185,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista as funções de topo nomeadas de um arquivo, com arquivo relativo e assinatura.
-- **Input:** `rootDir`: raiz; `file`: arquivo-fonte do ts-morph.
-- **Output:** Lista de `FunctionInfo` na ordem do arquivo.
-- **Effects:** Nenhum (pura sobre a AST).
-- **Errors:** Nenhum.
+- **Does:** Lists the named top-level functions of a file, with relative file and signature.
+- **Input:** `rootDir`: root; `file`: ts-morph source file.
+- **Output:** List of `FunctionInfo` in file order.
+- **Effects:** None (pure over the AST).
+- **Errors:** None.
 
 ### `collectFunctions`
 
@@ -202,11 +202,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista todas as funções de topo do projeto, arquivos em ordem alfabética.
-- **Input:** `rootDir`: raiz; `project`: projeto ts-morph aberto.
-- **Output:** Lista de `FunctionInfo` (o registro de funções).
-- **Effects:** Nenhum (pura sobre a AST).
-- **Errors:** Nenhum.
+- **Does:** Lists all top-level functions of the project, files in alphabetical order.
+- **Input:** `rootDir`: root; `project`: open ts-morph project.
+- **Output:** List of `FunctionInfo` (the function registry).
+- **Effects:** None (pure over the AST).
+- **Errors:** None.
 
 ### `isDataDeclaration`
 
@@ -219,11 +219,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide se uma declaração de variável é dado/constante e não uma função atribuída a `const` (arrow ou function expression).
-- **Input:** `declaration`: declaração de variável do ts-morph.
-- **Output:** `true` para dados (inclusive sem inicializador).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides whether a variable declaration is data/a constant and not a function assigned to a `const` (arrow or function expression).
+- **Input:** `declaration`: ts-morph variable declaration.
+- **Output:** `true` for data (including without an initializer).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `collectFileConstants`
 
@@ -236,11 +236,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista as constantes exportadas de topo de um arquivo, excluindo funções atribuídas a variáveis.
-- **Input:** `rootDir`: raiz; `file`: arquivo-fonte.
-- **Output:** Lista de `ConstantInfo`.
-- **Effects:** Nenhum (pura sobre a AST).
-- **Errors:** Nenhum.
+- **Does:** Lists the exported top-level constants of a file, excluding functions assigned to variables.
+- **Input:** `rootDir`: root; `file`: source file.
+- **Output:** List of `ConstantInfo`.
+- **Effects:** None (pure over the AST).
+- **Errors:** None.
 
 ### `collectConstants`
 
@@ -253,11 +253,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista as constantes exportadas de todo o projeto, para a tabela "Data and constants".
-- **Input:** `rootDir`: raiz; `project`: projeto ts-morph.
-- **Output:** Lista de `ConstantInfo`.
-- **Effects:** Nenhum (pura sobre a AST).
-- **Errors:** Nenhum.
+- **Does:** Lists the exported constants of the whole project, for the "Data and constants" table.
+- **Input:** `rootDir`: root; `project`: ts-morph project.
+- **Output:** List of `ConstantInfo`.
+- **Effects:** None (pure over the AST).
+- **Errors:** None.
 
 ### `isIgnoredReference`
 
@@ -270,11 +270,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide se um nó de referência deve ser ignorado no índice: a própria declaração, especificadores de import/export, cláusula de import e `export default`.
-- **Input:** `node`: nó de referência retornado pelo ts-morph.
-- **Output:** `true` para ignorar.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides whether a reference node should be ignored in the index: the declaration itself, import/export specifiers, import clause and `export default`.
+- **Input:** `node`: reference node returned by ts-morph.
+- **Output:** `true` to ignore.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `ownerLabelOf`
 
@@ -287,11 +287,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Descobre quem contém uma referência: a função de topo que a envolve (`nome()`) ou, fora de função, o módulo do arquivo (`arquivo (module)`).
-- **Input:** `rootDir`: raiz; `node`: nó de referência.
-- **Output:** Rótulo usado em "Usada por".
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Finds out what contains a reference: the enclosing top-level function (`nome()`) or, outside a function, the file's module (`arquivo (module)`).
+- **Input:** `rootDir`: root; `node`: reference node.
+- **Output:** Label used in "Used by".
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `findDeclaration`
 
@@ -304,11 +304,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Localiza a declaração de uma função do registro no projeto, pelo arquivo e nome.
-- **Input:** `rootDir`: raiz; `project`: projeto; `info`: função do registro.
-- **Output:** A `FunctionDeclaration`, ou `undefined` se arquivo/função não existirem.
-- **Effects:** Nenhum.
-- **Errors:** Nenhum.
+- **Does:** Locates the declaration of a registry function in the project, by file and name.
+- **Input:** `rootDir`: root; `project`: project; `info`: registry function.
+- **Output:** The `FunctionDeclaration`, or `undefined` if the file/function does not exist.
+- **Effects:** None.
+- **Errors:** None.
 
 ### `buildReferenceIndex`
 
@@ -321,11 +321,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o índice de referências: para cada função, o conjunto de rótulos de quem a chama ou a passa como valor (via `findReferencesAsNodes`, filtrado por `isIgnoredReference()`).
-- **Input:** `rootDir`: raiz; `project`: projeto; `functions`: registro.
-- **Output:** `ReferenceIndex` (nome → rótulos).
-- **Effects:** Nenhum (pura sobre a AST).
-- **Errors:** Nenhum.
+- **Does:** Builds the reference index: for each function, the set of labels of whoever calls it or passes it as a value (via `findReferencesAsNodes`, filtered by `isIgnoredReference()`).
+- **Input:** `rootDir`: root; `project`: project; `functions`: registry.
+- **Output:** `ReferenceIndex` (name → labels).
+- **Effects:** None (pure over the AST).
+- **Errors:** None.
 
 ### `buildCallGraph`
 
@@ -338,11 +338,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Inverte o índice de referências em grafo de chamadas: função → funções do registro que ela usa. Referências do nível de módulo não geram aresta.
-- **Input:** `functions`: registro; `references`: índice de referências.
-- **Output:** `CallGraph` com uma entrada por função.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Inverts the reference index into a call graph: function → registry functions it uses. Module-level references create no edge.
+- **Input:** `functions`: registry; `references`: reference index.
+- **Output:** `CallGraph` with one entry per function.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `tools/docs/checks.ts`
 
@@ -357,11 +357,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Compara registro e seções: aponta função sem seção (`FUNCTION_UNDOCUMENTED`) e seção sem função (`DOC_WITHOUT_FUNCTION`).
-- **Input:** `functions`: registro; `sections`: seções do FUNCTIONS.md.
-- **Output:** Lista de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Compares registry and sections: flags a function without a section (`FUNCTION_UNDOCUMENTED`) and a section without a function (`DOC_WITHOUT_FUNCTION`).
+- **Input:** `functions`: registry; `sections`: FUNCTIONS.md sections.
+- **Output:** List of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkSectionModules`
 
@@ -374,11 +374,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aponta seção colocada sob o heading `## arquivo` errado (`SECTION_IN_WRONG_MODULE`).
-- **Input:** `functions`: registro; `sections`: seções.
-- **Output:** Lista de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flags a section placed under the wrong `## arquivo` heading (`SECTION_IN_WRONG_MODULE`).
+- **Input:** `functions`: registry; `sections`: sections.
+- **Output:** List of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkUniqueNames`
 
@@ -391,11 +391,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aponta nome de função definido em mais de um arquivo (`DUPLICATE_NAME`).
-- **Input:** `functions`: registro.
-- **Output:** Lista de `Issue`, uma por nome repetido.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flags a function name defined in more than one file (`DUPLICATE_NAME`).
+- **Input:** `functions`: registry.
+- **Output:** List of `Issue`, one per repeated name.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkGeneratedBlocks`
 
@@ -408,11 +408,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Recalcula o bloco gerado de cada função documentada e compara com o texto atual (`GENERATED_BLOCK_OUTDATED`), mostrando esperado e encontrado.
-- **Input:** `inventory`: inventário; `sections`: seções; `citations`: citações de processos.
-- **Output:** Lista de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Recomputes the generated block of each documented function and compares it with the current text (`GENERATED_BLOCK_OUTDATED`), showing expected and found.
+- **Input:** `inventory`: inventory; `sections`: sections; `citations`: process citations.
+- **Output:** List of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkManualFields`
 
@@ -425,11 +425,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere os cinco campos manuais de cada seção: ausente (`MANUAL_FIELD_MISSING`) ou ainda com o marcador `PLACEHOLDER` (`MANUAL_FIELD_UNFILLED`).
-- **Input:** `sections`: seções.
-- **Output:** Lista de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Checks the five manual fields of each section: missing (`MANUAL_FIELD_MISSING`) or still holding the `PLACEHOLDER` marker (`MANUAL_FIELD_UNFILLED`).
+- **Input:** `sections`: sections.
+- **Output:** List of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkProcessCitations`
 
@@ -442,11 +442,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aponta função citada em PROCESSES.md que não existe no código (`PROCESS_CITES_UNKNOWN_FUNCTION`).
-- **Input:** `functions`: registro; `citations`: citações por processo.
-- **Output:** Lista de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flags a function cited in PROCESSES.md that does not exist in the code (`PROCESS_CITES_UNKNOWN_FUNCTION`).
+- **Input:** `functions`: registry; `citations`: citations per process.
+- **Output:** List of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkStructure`
 
@@ -459,11 +459,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aponta pasta versionada ausente de STRUCTURE.md (`DIR_UNDOCUMENTED`).
-- **Input:** `versionedDirs`: pastas com barra final; `structureMarkdown`: texto do STRUCTURE.md.
-- **Output:** Lista de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flags a versioned folder missing from STRUCTURE.md (`DIR_UNDOCUMENTED`).
+- **Input:** `versionedDirs`: folders with a trailing slash; `structureMarkdown`: STRUCTURE.md text.
+- **Output:** List of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkUiComponents`
 
@@ -476,11 +476,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aponta componente de UI sem menção em UI.md (`COMPONENT_UNDOCUMENTED`) ou UI.md ausente quando há componentes (`UI_DOC_MISSING`).
-- **Input:** `components`: nomes dos componentes; `uiMarkdown`: texto do UI.md ou `null`.
-- **Output:** Lista de `Issue` (vazia sem componentes).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flags a UI component not mentioned in UI.md (`COMPONENT_UNDOCUMENTED`) or UI.md missing when there are components (`UI_DOC_MISSING`).
+- **Input:** `components`: component names; `uiMarkdown`: UI.md text or `null`.
+- **Output:** List of `Issue` (empty without components).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkTests`
 
@@ -493,11 +493,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aponta função cujo nome não aparece em nenhum arquivo de teste e não está nas exceções (`FUNCTION_UNTESTED`), e exceção que cita função inexistente (`STALE_TEST_EXCEPTION`).
-- **Input:** `inventory`: inventário.
-- **Output:** Lista de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flags a function whose name appears in no test file and is not in the exceptions (`FUNCTION_UNTESTED`), and an exception that cites a nonexistent function (`STALE_TEST_EXCEPTION`).
+- **Input:** `inventory`: inventory.
+- **Output:** List of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkConstants`
 
@@ -510,11 +510,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aponta constante exportada ausente da tabela "Data and constants" (`CONSTANT_UNDOCUMENTED`); só o trecho a partir desse heading conta.
-- **Input:** `inventory`: inventário; `functionsMarkdown`: texto do FUNCTIONS.md.
-- **Output:** Lista de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flags an exported constant missing from the "Data and constants" table (`CONSTANT_UNDOCUMENTED`); only the text from that heading on counts.
+- **Input:** `inventory`: inventory; `functionsMarkdown`: FUNCTIONS.md text.
+- **Output:** List of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `runAllChecks`
 
@@ -527,11 +527,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai as seções do FUNCTIONS.md e roda todas as checagens puras, concatenando os problemas na ordem fixa.
-- **Input:** `inventory`: inventário; `docs`: textos dos documentos; `citations`: citações de processos.
-- **Output:** Lista completa de `Issue`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Extracts the FUNCTIONS.md sections and runs all pure checks, concatenating the issues in a fixed order.
+- **Input:** `inventory`: inventory; `docs`: document texts; `citations`: process citations.
+- **Output:** Full list of `Issue`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `tools/docs/cli.ts`
 
@@ -546,11 +546,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Interpreta o comando (`check` padrão ou `generate`), executa e imprime o resultado.
-- **Input:** `args`: argumentos da linha de comando.
-- **Output:** Código de saída: 0 ok, 1 problemas, 2 comando desconhecido.
-- **Effects:** Escreve no stdout/stderr; `generate` regrava FUNCTIONS.md.
-- **Errors:** Propaga erros de configuração para o processo (sai com erro).
+- **Does:** Parses the command (`check` by default, or `generate`), runs it and prints the result.
+- **Input:** `args`: command-line arguments.
+- **Output:** Exit code: 0 ok, 1 issues, 2 unknown command.
+- **Effects:** Writes to stdout/stderr; `generate` rewrites FUNCTIONS.md.
+- **Errors:** Propagates configuration errors to the process (exits with an error).
 
 ## `tools/docs/config.ts`
 
@@ -565,11 +565,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Mescla um objeto parcial sobre `DEFAULT_DOCS_CONFIG` e valida `sourceDirs` e `uiDir`.
-- **Input:** `partial`: valor lido do JSON (qualquer tipo).
-- **Output:** `DocsConfig` completa.
-- **Effects:** Nenhum (pura).
-- **Errors:** `Error` com mensagem em português se não for objeto, se `sourceDirs` estiver vazio ou se `uiDir` tiver tipo inválido.
+- **Does:** Merges a partial object over `DEFAULT_DOCS_CONFIG` and validates `sourceDirs` and `uiDir`.
+- **Input:** `partial`: value read from the JSON (any type).
+- **Output:** Complete `DocsConfig`.
+- **Effects:** None (pure).
+- **Errors:** `Error` with a Portuguese message if it is not an object, if `sourceDirs` is empty or if `uiDir` has an invalid type.
 
 ### `loadDocsConfig`
 
@@ -582,11 +582,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê `docs.config.json` da raiz e devolve a configuração completa; sem arquivo, usa os padrões.
-- **Input:** `rootDir`: raiz do repositório.
+- **Does:** Reads `docs.config.json` from the root and returns the complete configuration; without the file, uses the defaults.
+- **Input:** `rootDir`: repository root.
 - **Output:** `DocsConfig`.
-- **Effects:** Lê um arquivo.
-- **Errors:** JSON malformado ou inválido (`mergeDocsConfig()`) lança `Error`.
+- **Effects:** Reads a file.
+- **Errors:** Malformed or invalid JSON (`mergeDocsConfig()`) throws `Error`.
 
 ## `tools/docs/inventory.ts`
 
@@ -601,11 +601,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista arquivos versionados e não ignorados via `git ls-files --cached --others --exclude-standard`.
-- **Input:** `rootDir`: raiz.
-- **Output:** Lista de caminhos relativos, ou `null` se o git falhar/não existir.
-- **Effects:** Executa o git como subprocesso.
-- **Errors:** Nenhum (falhas viram `null`).
+- **Does:** Lists versioned, non-ignored files via `git ls-files --cached --others --exclude-standard`.
+- **Input:** `rootDir`: root.
+- **Output:** List of relative paths, or `null` if git fails/does not exist.
+- **Effects:** Runs git as a subprocess.
+- **Errors:** None (failures become `null`).
 
 ### `walkFiles`
 
@@ -618,11 +618,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Percorre o disco recursivamente listando arquivos, pulando `WALK_IGNORED_DIRS`.
-- **Input:** `rootDir`: raiz; `relativeDir`: subpasta (interno, padrão vazio).
-- **Output:** Lista de caminhos relativos a `rootDir`.
-- **Effects:** Lê diretórios do disco.
-- **Errors:** Erros de leitura propagam.
+- **Does:** Walks the disk recursively listing files, skipping `WALK_IGNORED_DIRS`.
+- **Input:** `rootDir`: root; `relativeDir`: subfolder (internal, default empty).
+- **Output:** List of paths relative to `rootDir`.
+- **Effects:** Reads directories from disk.
+- **Errors:** Read errors propagate.
 
 ### `dirsFromFiles`
 
@@ -635,11 +635,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Deriva de uma lista de arquivos todas as pastas, inclusive as intermediárias, com barra final e ordenadas.
-- **Input:** `files`: caminhos relativos.
-- **Output:** Lista de pastas como `a/`, `a/b/`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Derives all folders from a list of files, including intermediate ones, with a trailing slash and sorted.
+- **Input:** `files`: relative paths.
+- **Output:** List of folders such as `a/`, `a/b/`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `listVersionedDirs`
 
@@ -652,11 +652,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista as pastas versionadas do repositório, pelo git ou, sem git, pelo disco.
-- **Input:** `rootDir`: raiz.
-- **Output:** Lista de pastas com barra final.
-- **Effects:** Git ou leitura de disco.
-- **Errors:** Erros de leitura propagam.
+- **Does:** Lists the repository's versioned folders, via git or, without git, from disk.
+- **Input:** `rootDir`: root.
+- **Output:** List of folders with a trailing slash.
+- **Effects:** Git or disk reads.
+- **Errors:** Read errors propagate.
 
 ### `readTestFilesText`
 
@@ -669,11 +669,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Concatena o conteúdo de todos os arquivos de teste das pastas de código (pelo sufixo configurado).
-- **Input:** `rootDir`: raiz; `config`: configuração.
-- **Output:** Texto único com todos os testes.
-- **Effects:** Lê arquivos do disco.
-- **Errors:** Erros de leitura propagam.
+- **Does:** Concatenates the content of all test files in the code folders (by the configured suffix).
+- **Input:** `rootDir`: root; `config`: configuration.
+- **Output:** Single text with all the tests.
+- **Effects:** Reads files from disk.
+- **Errors:** Read errors propagate.
 
 ### `listUiComponents`
 
@@ -686,11 +686,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista nomes de componentes de UI: arquivos `.tsx` da pasta `uiDir`, sem os de teste, ordenados.
-- **Input:** `rootDir`: raiz; `config`: configuração.
-- **Output:** Lista de nomes (vazia se `uiDir` for `null` ou não existir).
-- **Effects:** Lê diretórios do disco.
-- **Errors:** Nenhum.
+- **Does:** Lists UI component names: `.tsx` files in the `uiDir` folder, excluding tests, sorted.
+- **Input:** `rootDir`: root; `config`: configuration.
+- **Output:** List of names (empty if `uiDir` is `null` or does not exist).
+- **Effects:** Reads directories from disk.
+- **Errors:** None.
 
 ### `loadTestExceptions`
 
@@ -703,11 +703,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Importa dinamicamente o arquivo de exceções de teste e devolve `TEST_EXCEPTIONS`.
-- **Input:** `rootDir`: raiz; `config`: configuração.
-- **Output:** Promise com a lista de exceções (vazia se o arquivo não existir).
-- **Effects:** Importa um módulo em tempo de execução.
-- **Errors:** `Error` se `TEST_EXCEPTIONS` não for uma lista.
+- **Does:** Dynamically imports the test exceptions file and returns `TEST_EXCEPTIONS`.
+- **Input:** `rootDir`: root; `config`: configuration.
+- **Output:** Promise with the list of exceptions (empty if the file does not exist).
+- **Effects:** Imports a module at runtime.
+- **Errors:** `Error` if `TEST_EXCEPTIONS` is not a list.
 
 ### `buildInventory`
 
@@ -720,11 +720,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o inventário completo: funções, constantes, referências, grafo de chamadas, pastas versionadas, texto dos testes, componentes de UI e exceções.
-- **Input:** `rootDir`: raiz; `config`: configuração.
-- **Output:** Promise com `Inventory`.
-- **Effects:** Lê disco, executa git, importa módulo.
-- **Errors:** Propaga erros das etapas.
+- **Does:** Builds the full inventory: functions, constants, references, call graph, versioned folders, test text, UI components and exceptions.
+- **Input:** `rootDir`: root; `config`: configuration.
+- **Output:** Promise with `Inventory`.
+- **Effects:** Reads disk, runs git, imports a module.
+- **Errors:** Propagates errors from the steps.
 
 ## `tools/docs/markdown.ts`
 
@@ -739,11 +739,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Devolve o primeiro grupo de captura de um match de regex, ou string vazia.
-- **Input:** `match`: resultado de `exec`/`matchAll`.
-- **Output:** Texto do grupo 1.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Returns the first capture group of a regex match, or an empty string.
+- **Input:** `match`: result of `exec`/`matchAll`.
+- **Output:** Text of group 1.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `stripCodeBlocks`
 
@@ -756,11 +756,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Remove blocos de código cercados por ``` ou ~~~ para que exemplos não contem como citações.
-- **Input:** `markdown`: texto.
-- **Output:** Texto sem os blocos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Removes code blocks fenced by ``` or ~~~ so that examples do not count as citations.
+- **Input:** `markdown`: text.
+- **Output:** Text without the blocks.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `extractCalledNames`
 
@@ -773,11 +773,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai nomes citados como `` `nome()` `` fora de blocos de código.
+- **Does:** Extracts names cited as `` `nome()` `` outside code blocks.
 - **Input:** `text`: markdown.
-- **Output:** `Set` de nomes.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** `Set` of names.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `sliceBetween`
 
@@ -790,11 +790,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o texto entre dois marcadores, sem espaços nas pontas.
-- **Input:** `text`; `start` e `end`: marcadores.
-- **Output:** Miolo, ou `null` se algum marcador faltar.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Extracts the text between two markers, trimmed.
+- **Input:** `text`; `start` and `end`: markers.
+- **Output:** Inner text, or `null` if either marker is missing.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `replaceBetween`
 
@@ -807,11 +807,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Substitui o conteúdo entre dois marcadores, mantendo-os; sem marcadores devolve o texto intacto.
-- **Input:** `text`; `markers`: par início/fim; `content`: novo miolo.
-- **Output:** Texto atualizado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Replaces the content between two markers, keeping them; without markers returns the text untouched.
+- **Input:** `text`; `markers`: start/end pair; `content`: new inner text.
+- **Output:** Updated text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `extractFunctionSections`
 
@@ -824,11 +824,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Divide o markdown em seções `### \`nome\``, registrando o heading `## ...` acima de cada uma, o bloco gerado e o texto manual; ignora blocos de código.
-- **Input:** `markdown`: texto do FUNCTIONS.md.
-- **Output:** Lista de `FunctionSection`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Splits the markdown into `### \`nome\``sections, recording the`## ...` heading above each one, the generated block and the manual text; ignores code blocks.
+- **Input:** `markdown`: FUNCTIONS.md text.
+- **Output:** List of `FunctionSection`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `buildSection`
 
@@ -841,11 +841,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta uma `FunctionSection` a partir do texto bruto de uma seção, separando bloco gerado e texto manual.
-- **Input:** `name`; `moduleHeading` (ou `null`); `raw`: texto da seção.
+- **Does:** Builds a `FunctionSection` from the raw text of a section, separating the generated block and the manual text.
+- **Input:** `name`; `moduleHeading` (or `null`); `raw`: section text.
 - **Output:** `FunctionSection`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `extractProcessCitations`
 
@@ -858,11 +858,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê PROCESSES.md: para cada heading `## Pnn ...`, as funções citadas como `` `nome()` ``.
-- **Input:** `markdown`: texto do PROCESSES.md.
-- **Output:** `ProcessCitations` (id → nomes).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads PROCESSES.md: for each `## Pnn ...` heading, the functions cited as `` `nome()` ``.
+- **Input:** `markdown`: PROCESSES.md text.
+- **Output:** `ProcessCitations` (id → names).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `extractDocumentedDirs`
 
@@ -875,11 +875,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê as pastas documentadas em STRUCTURE.md: trechos em crase terminados em `/`.
-- **Input:** `markdown`: texto do STRUCTURE.md.
-- **Output:** `Set` de pastas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the folders documented in STRUCTURE.md: backticked snippets ending in `/`.
+- **Input:** `markdown`: STRUCTURE.md text.
+- **Output:** `Set` of folders.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `extractBacktickedNames`
 
@@ -892,11 +892,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê identificadores simples em crase (`` `Nome` ``) fora de blocos de código.
-- **Input:** `markdown`: texto.
-- **Output:** `Set` de nomes.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads simple backticked identifiers (`` `Nome` ``) outside code blocks.
+- **Input:** `markdown`: text.
+- **Output:** `Set` of names.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `tools/docs/render.ts`
 
@@ -911,11 +911,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Formata uma lista para markdown: itens em crase separados por vírgula, ou `—` se vazia.
-- **Input:** `items`: textos.
-- **Output:** Texto formatado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Formats a list for markdown: backticked items separated by commas, or `—` if empty.
+- **Input:** `items`: texts.
+- **Output:** Formatted text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `renderGeneratedBlock`
 
@@ -928,11 +928,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Renderiza as quatro linhas do bloco gerado (Arquivo, Assinatura, Usada por, Processos).
-- **Input:** `info`: função; `data`: usada-por e processos calculados.
-- **Output:** Texto do bloco, sem os marcadores.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Renders the four lines of the generated block (File, Signature, Used by, Processes).
+- **Input:** `info`: function; `data`: computed used-by and processes.
+- **Output:** Block text, without the markers.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `renderNewSection`
 
@@ -945,11 +945,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Renderiza uma seção nova completa: heading, bloco gerado com marcadores e campos manuais com o marcador `PLACEHOLDER`.
-- **Input:** `info`: função; `data`: dados gerados.
-- **Output:** Texto da seção.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Renders a complete new section: heading, generated block with markers and manual fields with the `PLACEHOLDER` marker.
+- **Input:** `info`: function; `data`: generated data.
+- **Output:** Section text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `renderModuleIndex`
 
@@ -962,11 +962,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Renderiza o índice por módulo: uma linha por arquivo com links para suas funções.
-- **Input:** `functions`: registro.
-- **Output:** Texto do índice.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Renders the index by module: one line per file with links to its functions.
+- **Input:** `functions`: registry.
+- **Output:** Index text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `computeGeneratedData`
 
@@ -979,11 +979,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula "Usada por" e "Processos" de uma função, ordenados, a partir do índice de referências e do mapa função → processos.
+- **Does:** Computes a function's "Used by" and "Processes", sorted, from the reference index and the function → processes map.
 - **Input:** `name`; `references`; `processesByFunction`.
 - **Output:** `GeneratedData`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `closureOf`
 
@@ -996,11 +996,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Fecho transitivo em um grafo: as raízes mais tudo o que elas chamam, direta ou indiretamente.
-- **Input:** `graph`: grafo de chamadas; `roots`: nomes iniciais.
-- **Output:** `Set` com todos os alcançados (inclui raízes).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Transitive closure over a graph: the roots plus everything they call, directly or indirectly.
+- **Input:** `graph`: call graph; `roots`: starting names.
+- **Output:** `Set` with everything reached (includes the roots).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `processesByFunction`
 
@@ -1013,11 +1013,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Inverte as citações: para cada processo, expande o fecho das funções citadas e registra o processo em cada uma.
-- **Input:** `citations`: processo → citadas; `graph`: grafo de chamadas.
-- **Output:** `Map` função → ids de processo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Inverts the citations: for each process, expands the closure of the cited functions and records the process on each one.
+- **Input:** `citations`: process → cited; `graph`: call graph.
+- **Output:** `Map` function → process ids.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `replaceSectionBlock`
 
@@ -1030,11 +1030,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Substitui o bloco gerado da seção de uma função específica.
-- **Input:** `markdown`; `name`; `block`: novo conteúdo.
-- **Output:** Texto atualizado (intacto se a seção não existir).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Replaces the generated block of a specific function's section.
+- **Input:** `markdown`; `name`; `block`: new content.
+- **Output:** Updated text (untouched if the section does not exist).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `appendSection`
 
@@ -1047,11 +1047,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Acrescenta uma seção nova sob o heading `## arquivo` da função, antes do próximo heading; cria o heading antes da tabela de dados se faltar.
-- **Input:** `markdown`; `info`: função; `section`: texto da seção.
-- **Output:** Texto atualizado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Appends a new section under the function's `## arquivo` heading, before the next heading; creates the heading before the data table if missing.
+- **Input:** `markdown`; `info`: function; `section`: section text.
+- **Output:** Updated text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `insertBeforeDataTable`
 
@@ -1064,11 +1064,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Insere texto antes de `## Data and constants`, ou no fim se a tabela não existir.
+- **Does:** Inserts text before `## Data and constants`, or at the end if the table does not exist.
 - **Input:** `markdown`; `text`.
-- **Output:** Texto atualizado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** Updated text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `applyGenerated`
 
@@ -1081,11 +1081,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aplica o gerador ao FUNCTIONS.md: atualiza o índice, substitui blocos gerados existentes e acrescenta seções para funções novas.
-- **Input:** `markdown`: texto atual; `functions`: registro; `dataOf`: função que calcula os dados gerados por nome.
-- **Output:** Novo texto do FUNCTIONS.md.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Applies the generator to FUNCTIONS.md: updates the index, replaces existing generated blocks and appends sections for new functions.
+- **Input:** `markdown`: current text; `functions`: registry; `dataOf`: function that computes the generated data by name.
+- **Output:** New FUNCTIONS.md text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `removeSection`
 
@@ -1098,11 +1098,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Remove a seção da função (heading `###` com o nome) inteira, do heading até o próximo heading `##`/`###` ou o fim do texto.
-- **Input:** `markdown`: texto do FUNCTIONS.md; `name`: nome da função.
-- **Output:** Markdown sem a seção (intacto se ela não existir).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Removes the function's whole section (`###` heading with the name), from the heading to the next `##`/`###` heading or the end of the text.
+- **Input:** `markdown`: FUNCTIONS.md text; `name`: function name.
+- **Output:** Markdown without the section (untouched if it does not exist).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `removeEmptyModules`
 
@@ -1115,11 +1115,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Remove headings de módulo (`##` com o caminho do arquivo) sem nenhuma seção abaixo e normaliza para uma única quebra de linha final.
-- **Input:** `markdown`: texto do FUNCTIONS.md.
-- **Output:** Markdown sem módulos vazios.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Removes module headings (`##` with the file path) that have no section below and normalizes to a single trailing newline.
+- **Input:** `markdown`: FUNCTIONS.md text.
+- **Output:** Markdown without empty modules.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pruneOrphanSections`
 
@@ -1132,11 +1132,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Remove as seções de funções que não existem mais no código e, se removeu alguma, os módulos que ficaram vazios.
-- **Input:** `markdown`: texto do FUNCTIONS.md; `functions`: funções do inventário.
-- **Output:** Markdown podado (o mesmo texto se não houver órfãs).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Removes the sections of functions that no longer exist in the code and, if it removed any, the modules left empty.
+- **Input:** `markdown`: FUNCTIONS.md text; `functions`: inventory functions.
+- **Output:** Pruned markdown (the same text if there are no orphans).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `tools/docs/run.ts`
 
@@ -1151,11 +1151,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê um arquivo de texto relativo à raiz, ou `null` se não existir.
+- **Does:** Reads a text file relative to the root, or `null` if it does not exist.
 - **Input:** `rootDir`; `relativePath`.
-- **Output:** Conteúdo ou `null`.
-- **Effects:** Lê um arquivo.
-- **Errors:** Erros de leitura (fora de "não existe") propagam.
+- **Output:** Content or `null`.
+- **Effects:** Reads a file.
+- **Errors:** Read errors (other than "does not exist") propagate.
 
 ### `readDocsTexts`
 
@@ -1168,11 +1168,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê FUNCTIONS, PROCESSES, STRUCTURE (vazios se ausentes) e UI (`null` se ausente).
+- **Does:** Reads FUNCTIONS, PROCESSES, STRUCTURE (empty if missing) and UI (`null` if missing).
 - **Input:** `rootDir`; `config`.
 - **Output:** `DocsTexts`.
-- **Effects:** Lê arquivos.
-- **Errors:** Erros de leitura propagam.
+- **Effects:** Reads files.
+- **Errors:** Read errors propagate.
 
 ### `formatIssues`
 
@@ -1185,11 +1185,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Formata os problemas para o terminal: `✔` sem problemas, ou lista numerada `[CODIGO] mensagem`.
-- **Input:** `issues`: lista de `Issue`.
-- **Output:** Texto pronto para imprimir.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Formats the issues for the terminal: `✔` with no issues, or a numbered list `[CODIGO] mensagem`.
+- **Input:** `issues`: list of `Issue`.
+- **Output:** Text ready to print.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `runCheck`
 
@@ -1202,11 +1202,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Executa a checagem completa: carrega configuração, inventário e documentos e roda `runAllChecks()`.
-- **Input:** `rootDir`: raiz.
-- **Output:** Promise com a lista de `Issue`.
-- **Effects:** Lê disco, executa git, importa módulo.
-- **Errors:** Propaga erros de configuração.
+- **Does:** Runs the full check: loads configuration, inventory and documents and runs `runAllChecks()`.
+- **Input:** `rootDir`: root.
+- **Output:** Promise with the list of `Issue`.
+- **Effects:** Reads disk, runs git, imports a module.
+- **Errors:** Propagates configuration errors.
 
 ### `generateFunctionsDoc`
 
@@ -1219,11 +1219,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula o novo texto do FUNCTIONS.md a partir do inventário e dos documentos atuais.
-- **Input:** `inventory`; `docs`: textos.
-- **Output:** Novo texto do FUNCTIONS.md.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Computes the new FUNCTIONS.md text from the inventory and the current documents.
+- **Input:** `inventory`; `docs`: texts.
+- **Output:** New FUNCTIONS.md text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `runGenerate`
 
@@ -1236,11 +1236,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Regrava o FUNCTIONS.md com índice, blocos gerados e seções novas, só se houver mudança.
-- **Input:** `rootDir`: raiz.
-- **Output:** Promise com `true` se o arquivo mudou.
-- **Effects:** Lê e grava `docs/FUNCTIONS.md`.
-- **Errors:** Propaga erros de configuração e de escrita.
+- **Does:** Rewrites FUNCTIONS.md with the index, generated blocks and new sections, only if something changed.
+- **Input:** `rootDir`: root.
+- **Output:** Promise with `true` if the file changed.
+- **Effects:** Reads and writes `docs/FUNCTIONS.md`.
+- **Errors:** Propagates configuration and write errors.
 
 ## `connectors/canvas-puc/src/client.ts`
 
@@ -1255,11 +1255,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a mensagem de erro para 401: o token venceu ou foi revogado.
-- **Input:** `baseUrl`: URL base do Canvas (para o link de gerar token).
-- **Output:** Texto pedindo para gerar outro token e reconectar o conector nas configurações do Claude.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the error message for 401: the token expired or was revoked.
+- **Input:** `baseUrl`: Canvas base URL (for the token generation link).
+- **Output:** Text asking to generate another token and reconnect the connector in Claude's settings.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `sendCanvasRequest`
 
@@ -1272,11 +1272,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Envia uma requisição à API do Canvas com o token (`Authorization: Bearer`), sem tratar o status.
-- **Input:** `deps`: URL base, token e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional.
-- **Output:** Promise com a `Response` crua.
-- **Effects:** Rede (via `deps.fetchFn`).
-- **Errors:** Propaga a rejeição de `fetchFn`.
+- **Does:** Sends a request to the Canvas API with the token (`Authorization: Bearer`), without handling the status.
+- **Input:** `deps`: base URL, token and `fetchFn`; `req`: method, path, parameters and optional body.
+- **Output:** Promise with the raw `Response`.
+- **Effects:** Network (via `deps.fetchFn`).
+- **Errors:** Propagates the rejection of `fetchFn`.
 
 ### `collectPages`
 
@@ -1289,11 +1289,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Busca todas as páginas de uma listagem seguindo o header `Link`, até `max` itens.
-- **Input:** `deps`: dependências do cliente; `first`: primeira requisição; `max`: limite de itens.
-- **Output:** Promise com até `max` itens (resposta não-lista vira um item); lista vazia se não houver.
-- **Effects:** Rede (uma requisição por página).
-- **Errors:** Propaga erros de `requestCanvas()` e de JSON inválido.
+- **Does:** Fetches all pages of a listing by following the `Link` header, up to `max` items.
+- **Input:** `deps`: client dependencies; `first`: first request; `max`: item limit.
+- **Output:** Promise with up to `max` items (a non-list response becomes one item); empty list if there are none.
+- **Effects:** Network (one request per page).
+- **Errors:** Propagates errors from `requestCanvas()` and from invalid JSON.
 
 ### `fetchPlainText`
 
@@ -1306,11 +1306,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Baixa um arquivo de texto por URL direta.
-- **Input:** `fetchFn`: função `fetch`; `url`: link de download (já autorizado pelo Canvas).
-- **Output:** Promise com o conteúdo do arquivo.
-- **Effects:** Rede.
-- **Errors:** Rejeita com "Falha ao baixar o arquivo (<status>)" se a resposta não for ok.
+- **Does:** Downloads a text file from a direct URL.
+- **Input:** `fetchFn`: `fetch` function; `url`: download link (already authorized by Canvas).
+- **Output:** Promise with the file content.
+- **Effects:** Network.
+- **Errors:** Rejects with "Falha ao baixar o arquivo (<status>)" if the response is not ok.
 
 ### `createCanvasClient`
 
@@ -1323,11 +1323,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria o cliente do Canvas usado pelas ferramentas.
-- **Input:** `deps`: URL base, token e `fetchFn`.
-- **Output:** `CanvasClient` com `get`, `getAll` (página de `CANVAS_PAGE_SIZE`, limite `DEFAULT_MAX_ITEMS`), `post` e `fetchText`.
-- **Effects:** Nenhum na criação; os métodos fazem rede.
-- **Errors:** Nenhum na criação; os métodos propagam erros das requisições.
+- **Does:** Creates the Canvas client used by the tools.
+- **Input:** `deps`: base URL, token and `fetchFn`.
+- **Output:** `CanvasClient` with `get`, `getAll` (page of `CANVAS_PAGE_SIZE`, limit `DEFAULT_MAX_ITEMS`), `post` and `fetchText`.
+- **Effects:** None on creation; the methods do network calls.
+- **Errors:** None on creation; the methods propagate request errors.
 
 ### `fetchDownload`
 
@@ -1340,11 +1340,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Baixa um link direto do Canvas e confere o status.
-- **Input:** `fetchFn`: função `fetch`; `url`: link de download (já autorizado pelo Canvas).
-- **Output:** Promise com a `Response` ok.
-- **Effects:** Rede.
-- **Errors:** Rejeita com "Falha ao baixar o arquivo (<status>)" se a resposta não for ok.
+- **Does:** Downloads a direct Canvas link and checks the status.
+- **Input:** `fetchFn`: `fetch` function; `url`: download link (already authorized by Canvas).
+- **Output:** Promise with the ok `Response`.
+- **Effects:** Network.
+- **Errors:** Rejects with "Falha ao baixar o arquivo (<status>)" if the response is not ok.
 
 ### `fetchFileBytes`
 
@@ -1357,11 +1357,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Baixa um arquivo binário por URL direta.
+- **Does:** Downloads a binary file from a direct URL.
 - **Input:** `fetchFn`; `url`.
-- **Output:** Promise com os bytes.
-- **Effects:** Rede.
-- **Errors:** Repassa o erro de `fetchDownload`.
+- **Output:** Promise with the bytes.
+- **Effects:** Network.
+- **Errors:** Passes on the error from `fetchDownload`.
 
 ### `requestCanvas`
 
@@ -1374,11 +1374,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Envia uma requisição à API do Canvas com o token e confere o status.
-- **Input:** `deps`: URL base, token e `fetchFn`; `req`: método, caminho, parâmetros e corpo opcional.
-- **Output:** Promise com a `Response` 2xx.
-- **Effects:** Rede (via `deps.fetchFn`).
-- **Errors:** Rejeita com `unauthorizedMessage()` em 401 e com "Canvas <status> em <método> <caminho>: <corpo>" em outro status fora de 2xx.
+- **Does:** Sends a request to the Canvas API with the token and checks the status.
+- **Input:** `deps`: base URL, token and `fetchFn`; `req`: method, path, parameters and optional body.
+- **Output:** Promise with the 2xx `Response`.
+- **Effects:** Network (via `deps.fetchFn`).
+- **Errors:** Rejects with `unauthorizedMessage()` on 401 and with "Canvas <status> em <método> <caminho>: <corpo>" on any other non-2xx status.
 
 ## `connectors/canvas-puc/src/format.ts`
 
@@ -1393,11 +1393,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte HTML em texto cortado em `MAX_TEXT_LENGTH` caracteres.
-- **Input:** `html`: HTML, `null` ou `undefined`.
-- **Output:** Texto de até `MAX_TEXT_LENGTH` caracteres; `''` para entrada vazia.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts HTML into text cut at `MAX_TEXT_LENGTH` characters.
+- **Input:** `html`: HTML, `null` or `undefined`.
+- **Output:** Text of up to `MAX_TEXT_LENGTH` characters; `''` for empty input.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toProfile`
 
@@ -1410,11 +1410,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o perfil do Canvas em visualização enxuta.
-- **Input:** `p`: perfil do usuário da API.
-- **Output:** `View` com `id`, `name`, `email`, `login` e `time_zone`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts the Canvas profile into a lean view.
+- **Input:** `p`: user profile from the API.
+- **Output:** `View` with `id`, `name`, `email`, `login` and `time_zone`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toCourse`
 
@@ -1427,11 +1427,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um curso em visualização com a nota atual da matrícula do aluno.
-- **Input:** `c`: curso da API (com `enrollments` e `term` opcionais).
-- **Output:** `View` com `id`, `name`, `code`, `term`, `current_score` e `current_grade` (`null` sem matrícula).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a course into a view with the current grade of the student's enrollment.
+- **Input:** `c`: course from the API (with optional `enrollments` and `term`).
+- **Output:** `View` with `id`, `name`, `code`, `term`, `current_score` and `current_grade` (`null` without enrollment).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toSubmissionFlags`
 
@@ -1444,11 +1444,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o status de entrega de um item da agenda.
-- **Input:** `flags`: status da API, `false` ou `undefined`.
-- **Output:** `View` com `submitted`, `late`, `missing` e `graded`; `null` se o item não tem entrega.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts the submission status of a planner item.
+- **Input:** `flags`: status from the API, `false` or `undefined`.
+- **Output:** `View` with `submitted`, `late`, `missing` and `graded`; `null` if the item has no submission.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toPlannerItem`
 
@@ -1461,11 +1461,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um item da agenda do aluno em visualização com link absoluto.
-- **Input:** `i`: item do planner; `baseUrl`: URL base do Canvas.
-- **Output:** `View` com `type`, `title`, `course`, `course_id`, `id`, `date`, `points`, `submission` e `url` (`undefined` sem `html_url`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts an item from the student's planner into a view with an absolute link.
+- **Input:** `i`: planner item; `baseUrl`: Canvas base URL.
+- **Output:** `View` with `type`, `title`, `course`, `course_id`, `id`, `date`, `points`, `submission` and `url` (`undefined` without `html_url`).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toAssignmentSummary`
 
@@ -1478,11 +1478,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte uma tarefa de listagem em visualização com status e nota da entrega.
-- **Input:** `a`: tarefa da API (com `submission` opcional).
-- **Output:** `View` com `id`, `name`, `due_at`, `points`, `submission_types`, `status`, `score`, `late` e `missing` (`null` sem entrega).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a listed assignment into a view with the submission status and grade.
+- **Input:** `a`: assignment from the API (with optional `submission`).
+- **Output:** `View` with `id`, `name`, `due_at`, `points`, `submission_types`, `status`, `score`, `late` and `missing` (`null` without a submission).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toRubricCriterion`
 
@@ -1495,11 +1495,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um critério de rubrica com seus níveis como `pontos: descrição`.
-- **Input:** `r`: critério da API.
-- **Output:** `View` com `criterion`, `points` e `ratings` (lista vazia sem níveis).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a rubric criterion with its ratings as `pontos: descrição`.
+- **Input:** `r`: criterion from the API.
+- **Output:** `View` with `criterion`, `points` and `ratings` (empty list without ratings).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toFileInfo`
 
@@ -1512,11 +1512,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um anexo em visualização com tamanho em KB.
-- **Input:** `f`: anexo/arquivo da API.
-- **Output:** `View` com `id`, `name`, `content_type`, `size_kb` (0 sem tamanho), `updated_at` e `download`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts an attachment into a view with the size in KB.
+- **Input:** `f`: attachment/file from the API.
+- **Output:** `View` with `id`, `name`, `content_type`, `size_kb` (0 without a size), `updated_at` and `download`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toSubmissionDetail`
 
@@ -1529,11 +1529,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte uma entrega do aluno com nota, comentários, rubrica e anexos.
-- **Input:** `s`: entrega da API.
-- **Output:** `View` com `status`, `submitted_at`, `score`, `grade`, `late`, `comments`, `rubric_assessment` (`null` se ausente) e `attachments`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a student submission with grade, comments, rubric and attachments.
+- **Input:** `s`: submission from the API.
+- **Output:** `View` with `status`, `submitted_at`, `score`, `grade`, `late`, `comments`, `rubric_assessment` (`null` if absent) and `attachments`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toAssignmentDetail`
 
@@ -1546,11 +1546,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte uma tarefa completa com enunciado em texto, datas, rubrica e entrega.
-- **Input:** `a`: tarefa da API; `submission`: entrega do aluno ou `null`.
-- **Output:** `View` com datas (`due_at`, `unlock_at`, `lock_at`), `points`, `description`, `rubric` e `submission` (`null` sem entrega).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a full assignment with its description as text, dates, rubric and submission.
+- **Input:** `a`: assignment from the API; `submission`: the student's submission or `null`.
+- **Output:** `View` with dates (`due_at`, `unlock_at`, `lock_at`), `points`, `description`, `rubric` and `submission` (`null` without a submission).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toGradeRow`
 
@@ -1563,11 +1563,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte uma entrega (com `assignment` incluído) em linha de nota.
-- **Input:** `s`: entrega de `students/submissions` com `include[]=assignment`.
-- **Output:** `View` com `assignment`, `assignment_id`, `score`, `points_possible`, `grade`, `status` e `due_at`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a submission (with `assignment` included) into a grade row.
+- **Input:** `s`: submission from `students/submissions` with `include[]=assignment`.
+- **Output:** `View` with `assignment`, `assignment_id`, `score`, `points_possible`, `grade`, `status` and `due_at`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toEnrollmentGrade`
 
@@ -1580,11 +1580,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o resumo de notas de uma matrícula, com o nome do curso.
-- **Input:** `e`: matrícula da API; `courseNames`: mapa id → nome do curso.
-- **Output:** `View` com `course_id`, `course` (`undefined` se fora do mapa), `current_score`, `current_grade` e `final_score`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts the grade summary of an enrollment, with the course name.
+- **Input:** `e`: enrollment from the API; `courseNames`: map id → course name.
+- **Output:** `View` with `course_id`, `course` (`undefined` if not in the map), `current_score`, `current_grade` and `final_score`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toAnnouncement`
 
@@ -1597,11 +1597,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um aviso do curso com o texto convertido e cortado.
-- **Input:** `a`: aviso da API.
-- **Output:** `View` com `id`, `title`, `course`, `author`, `posted_at`, `text` (via `shortText()`) e `url`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a course announcement with its text converted and cut.
+- **Input:** `a`: announcement from the API.
+- **Output:** `View` with `id`, `title`, `course`, `author`, `posted_at`, `text` (via `shortText()`) and `url`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toModuleItem`
 
@@ -1614,11 +1614,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um item de módulo em visualização.
-- **Input:** `i`: item de módulo da API.
-- **Output:** `View` com `id`, `type`, `title`, `content_id`, `page_url`, `external_url` e `completed` (`null` sem requisito).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a module item into a view.
+- **Input:** `i`: module item from the API.
+- **Output:** `View` with `id`, `type`, `title`, `content_id`, `page_url`, `external_url` and `completed` (`null` without a requirement).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toModule`
 
@@ -1631,11 +1631,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um módulo com seus itens.
-- **Input:** `m`: módulo da API.
-- **Output:** `View` com `id`, `name` e `items` (lista vazia sem itens).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a module with its items.
+- **Input:** `m`: module from the API.
+- **Output:** `View` with `id`, `name` and `items` (empty list without items).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toDiscussionSummary`
 
@@ -1648,11 +1648,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um fórum de discussão de listagem em visualização.
-- **Input:** `d`: tópico de discussão da API.
-- **Output:** `View` com `id`, `title`, `due_at` (`null` sem tarefa), `reply_count`, `unread_count`, `last_reply_at` e `url`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a listed discussion forum into a view.
+- **Input:** `d`: discussion topic from the API.
+- **Output:** `View` with `id`, `title`, `due_at` (`null` without an assignment), `reply_count`, `unread_count`, `last_reply_at` and `url`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `flattenDiscussion`
 
@@ -1665,11 +1665,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Achata a árvore de postagens de um fórum, marcando o nível de cada resposta.
-- **Input:** `entries`: postagens (ou `undefined`); `names`: mapa id → nome do autor; `depth`: nível inicial (padrão 0).
-- **Output:** Lista em pré-ordem de `{ depth, author, date, text }`; vazia sem postagens.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flattens a forum's post tree, marking the level of each reply.
+- **Input:** `entries`: posts (or `undefined`); `names`: map id → author name; `depth`: starting level (default 0).
+- **Output:** Pre-order list of `{ depth, author, date, text }`; empty without posts.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toCalendarEvent`
 
@@ -1682,11 +1682,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um evento do calendário com descrição em texto curto.
-- **Input:** `e`: evento da API.
-- **Output:** `View` com `title`, `start_at`, `end_at`, `location`, `course` e `description` de até 1000 caracteres.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a calendar event with its description as short text.
+- **Input:** `e`: event from the API.
+- **Output:** `View` with `title`, `start_at`, `end_at`, `location`, `course` and `description` of up to 1000 characters.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/canvas-puc/src/helpers.ts`
 
@@ -1701,11 +1701,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula a data/hora ISO `days` dias depois de `now`.
-- **Input:** `now`: data de referência; `days`: número de dias (negativo vai para trás).
-- **Output:** Texto ISO 8601 em UTC.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Computes the ISO date/time `days` days after `now`.
+- **Input:** `now`: reference date; `days`: number of days (negative goes backwards).
+- **Output:** ISO 8601 text in UTC.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `dateOnly`
 
@@ -1718,11 +1718,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai a parte `AAAA-MM-DD` de uma data ISO.
-- **Input:** `iso`: data ISO.
-- **Output:** Os 10 primeiros caracteres.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Extracts the `AAAA-MM-DD` part of an ISO date.
+- **Input:** `iso`: ISO date.
+- **Output:** The first 10 characters.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `courseContextCodes`
 
@@ -1735,11 +1735,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta os códigos de contexto `course_<id>` usados por avisos e calendário.
-- **Input:** `ids`: ids de curso.
-- **Output:** Lista de códigos na mesma ordem; vazia para lista vazia.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the `course_<id>` context codes used by announcements and the calendar.
+- **Input:** `ids`: course ids.
+- **Output:** List of codes in the same order; empty for an empty list.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `courseNameMap`
 
@@ -1752,11 +1752,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o mapa id → nome dos cursos.
-- **Input:** `courses`: cursos da API.
-- **Output:** `Map` com id em texto e nome (`''` sem nome).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the id → name map of the courses.
+- **Input:** `courses`: courses from the API.
+- **Output:** `Map` with the id as text and the name (`''` without a name).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `participantNames`
 
@@ -1769,11 +1769,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o mapa id → nome dos participantes de um fórum.
-- **Input:** `view`: visão completa da discussão.
-- **Output:** `Map` com id em texto e nome (`''` sem nome); vazio sem participantes.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the id → name map of a forum's participants.
+- **Input:** `view`: full view of the discussion.
+- **Output:** `Map` with the id as text and the name (`''` without a name); empty without participants.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isTextFile`
 
@@ -1786,11 +1786,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide se um arquivo pode ser lido como texto, pelo tipo MIME ou pela extensão.
-- **Input:** `contentType`: tipo MIME; `name`: nome do arquivo.
-- **Output:** `true` para MIME `text/`, json, xml, javascript, csv ou extensões de texto/código; senão `false`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides whether a file can be read as text, by MIME type or by extension.
+- **Input:** `contentType`: MIME type; `name`: file name.
+- **Output:** `true` for MIME `text/`, json, xml, javascript, csv or text/code extensions; otherwise `false`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `matchModuleItems`
 
@@ -1803,11 +1803,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Encontra os itens de módulo cujo título contém o termo, sem diferenciar maiúsculas.
-- **Input:** `modules`: módulos com itens; `term`: termo buscado.
-- **Output:** Lista de `ModuleMatch` (`module`, `title`, `type`); vazia sem resultados.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Finds the module items whose title contains the term, case-insensitively.
+- **Input:** `modules`: modules with items; `term`: search term.
+- **Output:** List of `ModuleMatch` (`module`, `title`, `type`); empty without results.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `activeCourses`
 
@@ -1820,11 +1820,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Busca os cursos ativos do aluno.
-- **Input:** `client`: cliente do Canvas.
-- **Output:** Promise com a lista de cursos (`enrollment_state=active`).
-- **Effects:** Rede.
-- **Errors:** Propaga erros do cliente.
+- **Does:** Fetches the student's active courses.
+- **Input:** `client`: Canvas client.
+- **Output:** Promise with the list of courses (`enrollment_state=active`).
+- **Effects:** Network.
+- **Errors:** Propagates client errors.
 
 ### `fetchOwnSubmission`
 
@@ -1837,11 +1837,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Busca a entrega do próprio aluno numa tarefa, com comentários e rubrica.
-- **Input:** `client`: cliente do Canvas; `courseId`: id do curso; `assignmentId`: id da tarefa.
-- **Output:** Promise com a `CanvasSubmission`; `null` se a busca falhar (sem acesso).
-- **Effects:** Rede.
-- **Errors:** Nenhum (falhas viram `null`).
+- **Does:** Fetches the student's own submission for an assignment, with comments and rubric.
+- **Input:** `client`: Canvas client; `courseId`: course id; `assignmentId`: assignment id.
+- **Output:** Promise with the `CanvasSubmission`; `null` if the fetch fails (no access).
+- **Effects:** Network.
+- **Errors:** None (failures become `null`).
 
 ### `getAllOrEmpty`
 
@@ -1854,11 +1854,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Busca uma listagem paginada, trocando falha por lista vazia.
-- **Input:** `client`: cliente do Canvas; `path`: caminho da API; `params`: parâmetros de query.
-- **Output:** Promise com os itens; lista vazia se a busca falhar.
-- **Effects:** Rede.
-- **Errors:** Nenhum (falhas viram `[]`).
+- **Does:** Fetches a paginated listing, replacing failure with an empty list.
+- **Input:** `client`: Canvas client; `path`: API path; `params`: query parameters.
+- **Output:** Promise with the items; empty list if the fetch fails.
+- **Effects:** Network.
+- **Errors:** None (failures become `[]`).
 
 ## `connectors/canvas-puc/src/tools-write.ts`
 
@@ -1873,11 +1873,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o corpo de entrega para o tipo escolhido.
-- **Input:** `kind`: `text` (HTML aceito) ou `url`; `content`: texto ou link.
-- **Output:** `{ submission }` com `online_text_entry` e `body`, ou `online_url` e `url`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the submission body for the chosen type.
+- **Input:** `kind`: `text` (HTML accepted) or `url`; `content`: text or link.
+- **Output:** `{ submission }` with `online_text_entry` and `body`, or `online_url` and `url`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/canvas-puc/src/tools.ts`
 
@@ -1892,11 +1892,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Seleciona as ferramentas do Canvas a registrar.
-- **Input:** `allowWrite`: se as ferramentas de escrita entram.
-- **Output:** `CANVAS_READ_TOOLS`, mais `CANVAS_WRITE_TOOLS` quando `allowWrite` é `true`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Selects the Canvas tools to register.
+- **Input:** `allowWrite`: whether the write tools are included.
+- **Output:** `CANVAS_READ_TOOLS`, plus `CANVAS_WRITE_TOOLS` when `allowWrite` is `true`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `createCanvasMcpServer`
 
@@ -1909,11 +1909,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria o `McpServer` do Canvas com as ferramentas ligadas ao contexto.
-- **Input:** `specs`: ferramentas; `ctx`: cliente e relógio.
-- **Output:** Servidor MCP ainda não conectado.
-- **Effects:** Nenhum além de criar o objeto.
-- **Errors:** Nenhum.
+- **Does:** Creates the Canvas `McpServer` with the tools bound to the context.
+- **Input:** `specs`: tools; `ctx`: client and clock.
+- **Output:** MCP server not yet connected.
+- **Effects:** None beyond creating the object.
+- **Errors:** None.
 
 ## `src/core/env.ts`
 
@@ -1928,11 +1928,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma variável de ambiente, tratando vazio ou placeholder `${...}` como ausente.
-- **Input:** `env`: variáveis de ambiente; `key`: nome da variável.
-- **Output:** Valor sem espaços nas pontas; `null` se ausente, vazio ou começando com `${`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads an environment variable, treating empty or a `${...}` placeholder as absent.
+- **Input:** `env`: environment variables; `key`: variable name.
+- **Output:** Trimmed value; `null` if absent, empty or starting with `${`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseFlag`
 
@@ -1945,11 +1945,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Interpreta uma opção liga/desliga.
-- **Input:** `value`: texto da opção ou `null`.
-- **Output:** `true` para `1`, `true`, `sim` ou `yes` (sem diferenciar maiúsculas); senão `false`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Parses an on/off option.
+- **Input:** `value`: option text or `null`.
+- **Output:** `true` for `1`, `true`, `sim` or `yes` (case-insensitive); otherwise `false`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toEnvVars`
 
@@ -1962,11 +1962,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o ambiente do Worker em variáveis de texto.
-- **Input:** `env`: variáveis, secrets e bindings do Worker.
-- **Output:** Só as entradas cujo valor é texto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts the Worker environment into text variables.
+- **Input:** `env`: Worker variables, secrets and bindings.
+- **Output:** Only the entries whose value is text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/core/html.ts`
 
@@ -1981,11 +1981,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte HTML em texto simples, preservando parágrafos e listas como quebras de linha.
-- **Input:** `html`: HTML, `null` ou `undefined`.
-- **Output:** Texto sem tags, com entidades decodificadas e sem espaços nas pontas; `''` para entrada vazia.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts HTML into plain text, preserving paragraphs and lists as line breaks.
+- **Input:** `html`: HTML, `null` or `undefined`.
+- **Output:** Text without tags, with entities decoded and trimmed; `''` for empty input.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/core/http.ts`
 
@@ -2000,11 +2000,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a URL de uma requisição a partir de base, caminho e parâmetros.
-- **Input:** `base`: URL base; `path`: caminho relativo ou URL absoluta (`http...`); `params`: query (padrão `{}`).
-- **Output:** `URL` com parâmetros; listas viram `chave[]=...`; `null`/`undefined` são omitidos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `TypeError` se a URL resultante for inválida.
+- **Does:** Builds a request URL from base, path and parameters.
+- **Input:** `base`: base URL; `path`: relative path or absolute URL (`http...`); `params`: query (default `{}`).
+- **Output:** `URL` with parameters; lists become `chave[]=...`; `null`/`undefined` are omitted.
+- **Effects:** None (pure).
+- **Errors:** Throws `TypeError` if the resulting URL is invalid.
 
 ### `parseNextLink`
 
@@ -2017,11 +2017,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai a URL `rel="next"` de um header `Link` de paginação.
-- **Input:** `linkHeader`: valor do header ou `null`.
-- **Output:** URL da próxima página; `null` se não houver header ou `next`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Extracts the `rel="next"` URL from a pagination `Link` header.
+- **Input:** `linkHeader`: header value or `null`.
+- **Output:** URL of the next page; `null` if there is no header or `next`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/mcp/tools.ts`
 
@@ -2036,11 +2036,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria uma `ToolSpec` que valida os argumentos com o `shape` antes de chamar `run`.
-- **Input:** `def`: nome, descrição, `shape` zod, `annotations` obrigatórias (`title` e dicas, de `toolAnnotations`) e `run` tipado.
-- **Output:** `ToolSpec` com `run` que aceita argumentos crus (`undefined` vira `{}`).
-- **Effects:** Nenhum na criação.
-- **Errors:** O `run` devolvido rejeita com `ZodError` para argumentos inválidos e propaga erros de `def.run`.
+- **Does:** Creates a `ToolSpec` that validates the arguments with the `shape` before calling `run`.
+- **Input:** `def`: name, description, zod `shape`, mandatory `annotations` (`title` and hints, from `toolAnnotations`) and typed `run`.
+- **Output:** `ToolSpec` with a `run` that accepts raw arguments (`undefined` becomes `{}`).
+- **Effects:** None on creation.
+- **Errors:** The returned `run` rejects with `ZodError` for invalid arguments and propagates errors from `def.run`.
 
 ### `textResult`
 
@@ -2053,11 +2053,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o retorno de uma ferramenta em resultado MCP de texto.
-- **Input:** `data`: texto ou valor serializável; `notes`: textos extras (padrão vazio).
-- **Output:** `CallToolResult` com um bloco de texto (JSON indentado se não for string) mais um por nota.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança se `data` não for serializável em JSON (ex.: referência circular).
+- **Does:** Converts a tool's return value into a text MCP result.
+- **Input:** `data`: text or serializable value; `notes`: extra texts (default empty).
+- **Output:** `CallToolResult` with one text block (indented JSON if not a string) plus one per note.
+- **Effects:** None (pure).
+- **Errors:** Throws if `data` is not JSON-serializable (e.g. circular reference).
 
 ### `errorResult`
 
@@ -2070,11 +2070,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um erro em resultado MCP com `isError`.
-- **Input:** `error`: qualquer valor lançado.
-- **Output:** `CallToolResult` com `isError: true` e a mensagem do erro (ou `String(error)`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts an error into an MCP result with `isError`.
+- **Input:** `error`: any thrown value.
+- **Output:** `CallToolResult` with `isError: true` and the error message (or `String(error)`).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `runToolSafely`
 
@@ -2087,11 +2087,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Executa uma ferramenta convertendo sucesso ou falha em resultado MCP.
-- **Input:** `spec`: ferramenta; `ctx`: contexto do conector; `rawArgs`: argumentos crus.
-- **Output:** Promise com `textResult()` no sucesso ou `errorResult()` na falha.
-- **Effects:** Os efeitos da própria ferramenta.
-- **Errors:** Nenhum (erros viram `errorResult`).
+- **Does:** Runs a tool, converting success or failure into an MCP result.
+- **Input:** `spec`: tool; `ctx`: connector context; `rawArgs`: raw arguments.
+- **Output:** Promise with `textResult()` on success or `errorResult()` on failure.
+- **Effects:** The tool's own effects.
+- **Errors:** None (errors become `errorResult`).
 
 ### `registerToolSpecs`
 
@@ -2105,10 +2105,10 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- generated:end -->
 
 - **Does:** Registers each `ToolSpec` on the MCP server, with its title and annotations, bound to the connector context.
-- **Input:** `server`: servidor MCP; `specs`: ferramentas; `ctx`: contexto passado a cada execução.
-- **Output:** Nada.
-- **Effects:** Altera o servidor (registra as ferramentas).
-- **Errors:** Propaga erros do SDK (ex.: nome repetido).
+- **Input:** `server`: MCP server; `specs`: tools; `ctx`: context passed to each run.
+- **Output:** Nothing.
+- **Effects:** Mutates the server (registers the tools).
+- **Errors:** Propagates SDK errors (e.g. repeated name).
 
 ### `rawToolResult`
 
@@ -2121,11 +2121,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Embrulha um resultado MCP pronto (imagem, recurso embutido) para a ferramenta devolver sem conversão para texto.
+- **Does:** Wraps a ready MCP result (image, embedded resource) for the tool to return without converting it to text.
 - **Input:** `result`: `CallToolResult`.
 - **Output:** `RawToolResult`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toToolResult`
 
@@ -2138,11 +2138,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o retorno de uma ferramenta em resultado MCP: o embrulhado por `rawToolResult` passa direto, o resto vira `textResult`.
-- **Input:** `data`: retorno da ferramenta.
+- **Does:** Converts a tool's return value into an MCP result: whatever `rawToolResult` wrapped passes straight through, the rest becomes `textResult`.
+- **Input:** `data`: tool return value.
 - **Output:** `CallToolResult`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `binaryContentBlock`
 
@@ -2155,11 +2155,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Bloco MCP com um conteúdo binário: imagem, áudio ou, para o resto, recurso embutido com o `uri` dado.
-- **Input:** `mimeType`, `bytes` do arquivo e `uri` do recurso.
-- **Output:** Bloco `image`, `audio` ou `resource` com os bytes em base64.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** MCP block with binary content: image, audio or, for anything else, an embedded resource with the given `uri`.
+- **Input:** `mimeType`, file `bytes` and resource `uri`.
+- **Output:** `image`, `audio` or `resource` block with the bytes in base64.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/canvas-puc/src/remote-main.ts`
 
@@ -2174,11 +2174,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Sobe o servidor HTTP do conector Canvas remoto.
-- **Input:** Nenhuma (lê o ambiente do processo).
-- **Output:** Nada.
-- **Effects:** Abre a porta HTTP e escreve no stdout.
-- **Errors:** Lança se `PUBLIC_URL` ou `SEAL_KEY` faltarem ou forem inválidas.
+- **Does:** Starts the HTTP server of the remote Canvas connector.
+- **Input:** None (reads the process environment).
+- **Output:** Nothing.
+- **Effects:** Opens the HTTP port and writes to stdout.
+- **Errors:** Throws if `PUBLIC_URL` or `SEAL_KEY` is missing or invalid.
 
 ## `connectors/canvas-puc/src/remote.ts`
 
@@ -2193,11 +2193,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a configuração do modo remoto (`CANVAS_BASE_URL`, `CANVAS_ALLOW_WRITE`).
-- **Input:** `env`: variáveis de ambiente.
-- **Output:** `CanvasRemoteSettings` com URL sem barra final, escrita desligada por padrão e o `fetch` global com o `User-Agent` do conector (`withCanvasUserAgent`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the remote-mode configuration (`CANVAS_BASE_URL`, `CANVAS_ALLOW_WRITE`).
+- **Input:** `env`: environment variables.
+- **Output:** `CanvasRemoteSettings` with the URL without trailing slash, writes off by default and the global `fetch` with the connector's `User-Agent` (`withCanvasUserAgent`).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `canvasLoginText`
 
@@ -2210,11 +2210,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta os textos da página de autorização do Canvas.
-- **Input:** `baseUrl`: endereço do Canvas.
-- **Output:** `LoginPageText` com a ajuda apontando para `/profile/settings`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the texts of the Canvas authorization page.
+- **Input:** `baseUrl`: Canvas address.
+- **Output:** `LoginPageText` with the help pointing to `/profile/settings`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `verifyCanvasToken`
 
@@ -2227,11 +2227,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere o token chamando `/api/v1/users/self` no Canvas.
-- **Input:** `settings`: Canvas e `fetch`; `token`: token colado pelo usuário.
-- **Output:** Promessa vazia se o token serve.
-- **Effects:** Rede (uma requisição ao Canvas).
-- **Errors:** Rejeita com mensagem ao usuário: token vazio, 401, outro status ou falha de rede.
+- **Does:** Checks the token by calling `/api/v1/users/self` on Canvas.
+- **Input:** `settings`: Canvas and `fetch`; `token`: token pasted by the user.
+- **Output:** Empty promise if the token works.
+- **Effects:** Network (one request to Canvas).
+- **Errors:** Rejects with a user-facing message: empty token, 401, other status or network failure.
 
 ### `canvasRemoteConnector`
 
@@ -2244,11 +2244,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o `RemoteConnector` do Canvas para o servidor HTTP.
-- **Input:** `settings`: configuração do modo remoto.
-- **Output:** Textos da página, verificação do token, fábrica de `McpServer` por token e renovação da validade (`renewCanvasToken()`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the Canvas `RemoteConnector` for the HTTP server.
+- **Input:** `settings`: remote-mode configuration.
+- **Output:** Page texts, token verification, per-token `McpServer` factory and expiry renewal (`renewCanvasToken()`).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `withCanvasUserAgent`
 
@@ -2261,11 +2261,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Soma o `User-Agent` do conector (`CANVAS_USER_AGENT`) às opções do `fetch`; sem ele o Canvas responde 403, e o `fetch` do Workers não manda um.
-- **Input:** `init`: opções do `fetch` (ou `undefined`).
-- **Output:** Cópia das opções com os headers originais (nomes em minúsculas) mais `user-agent`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Adds the connector's `User-Agent` (`CANVAS_USER_AGENT`) to the `fetch` options; without it Canvas answers 403, and the Workers `fetch` does not send one.
+- **Input:** `init`: `fetch` options (or `undefined`).
+- **Output:** Copy of the options with the original headers (lowercase names) plus `user-agent`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `matchesVisibleToken`
 
@@ -2278,11 +2278,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se o começo visível de um token do Canvas (`visible_token`, ex.: `11748~abcd...`) é o do token dado.
-- **Input:** `visible` (campo da lista de tokens) e o token completo.
-- **Output:** `true` se o token começa pelo prefixo visível sem as reticências; `false` com prefixo vazio.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Says whether the visible start of a Canvas token (`visible_token`, e.g. `11748~abcd...`) belongs to the given token.
+- **Input:** `visible` (field from the token list) and the full token.
+- **Output:** `true` if the token starts with the visible prefix minus the ellipsis; `false` with an empty prefix.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `planTokenRenewal`
 
@@ -2295,11 +2295,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide se o token do Canvas precisa ter a validade estendida e para quando (agora + `TOKEN_RENEWAL_SECONDS`).
-- **Input:** Lista de `user_generated_tokens`, o token e o instante atual.
-- **Output:** `{ id, expiresAt }`, ou nulo se o token não está na lista, não tem validade ou já vence a menos de um dia do limite.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides whether the Canvas token needs its expiry extended and until when (now + `TOKEN_RENEWAL_SECONDS`).
+- **Input:** List of `user_generated_tokens`, the token and the current time.
+- **Output:** `{ id, expiresAt }`, or null if the token is not in the list, has no expiry or already expires less than a day from the limit.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `canvasTokenApi`
 
@@ -2312,11 +2312,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Chama a API do Canvas com o token do usuário (`Bearer`), enviando corpo JSON se houver.
-- **Input:** Configuração remota, token e `CanvasTokenRequest` (`path`, `method` opcional, `body` opcional).
-- **Output:** O JSON da resposta.
-- **Effects:** Requisição HTTP ao Canvas.
-- **Errors:** Rejeita com o status se a resposta não for 2xx; repassa falha de rede.
+- **Does:** Calls the Canvas API with the user's token (`Bearer`), sending a JSON body if there is one.
+- **Input:** Remote configuration, token and `CanvasTokenRequest` (`path`, optional `method`, optional `body`).
+- **Output:** The response JSON.
+- **Effects:** HTTP request to Canvas.
+- **Errors:** Rejects with the status if the response is not 2xx; passes network failures through.
 
 ### `renewCanvasToken`
 
@@ -2329,11 +2329,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Estende a validade do próprio token no Canvas (Access Tokens API) quando ele está perto de vencer; o Canvas da PUC aceita no máximo 30 dias à frente.
-- **Input:** Configuração remota, token e instante atual.
-- **Output:** Nada.
-- **Effects:** `GET /api/v1/users/self/user_generated_tokens` e, se `planTokenRenewal()` mandar, `PUT /api/v1/users/self/tokens/:id` com `expires_at`.
-- **Errors:** Rejeita como `canvasTokenApi()` (quem chama, `renewSecretQuietly()`, só registra o aviso).
+- **Does:** Extends the expiry of the token itself on Canvas (Access Tokens API) when it is close to expiring; PUC's Canvas accepts at most 30 days ahead.
+- **Input:** Remote configuration, token and current time.
+- **Output:** Nothing.
+- **Effects:** `GET /api/v1/users/self/user_generated_tokens` and, if `planTokenRenewal()` says so, `PUT /api/v1/users/self/tokens/:id` with `expires_at`.
+- **Errors:** Rejects like `canvasTokenApi()` (the caller, `renewSecretQuietly()`, only logs the warning).
 
 ### `fetchCanvasSelf`
 
@@ -2399,11 +2399,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta uma resposta JSON sem cache.
-- **Input:** `data`: valor; `status`: padrão 200.
+- **Does:** Builds an uncached JSON response.
+- **Input:** `data`: value; `status`: defaults to 200.
 - **Output:** `Response`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `htmlResponse`
 
@@ -2416,11 +2416,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta uma resposta HTML sem cache, com CSP restrita.
-- **Input:** `html`: página; `status`: padrão 200; `formTarget`: origem do retorno liberada no `form-action` (padrão `null`).
+- **Does:** Builds an uncached HTML response with a strict CSP.
+- **Input:** `html`: page; `status`: defaults to 200; `formTarget`: return origin allowed in `form-action` (defaults to `null`).
 - **Output:** `Response`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readForm`
 
@@ -2433,11 +2433,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o corpo de um formulário urlencoded.
+- **Does:** Reads the body of a urlencoded form.
 - **Input:** `request`.
 - **Output:** `URLSearchParams`.
-- **Effects:** Consome o corpo da requisição.
-- **Errors:** Nenhum.
+- **Effects:** Consumes the request body.
+- **Errors:** None.
 
 ### `readJsonBody`
 
@@ -2450,11 +2450,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o corpo JSON da requisição.
+- **Does:** Reads the request's JSON body.
 - **Input:** `request`.
-- **Output:** Valor lido; `null` se não for JSON válido.
-- **Effects:** Consome o corpo da requisição.
-- **Errors:** Nenhum (JSON inválido vira `null`).
+- **Output:** Parsed value; `null` if it is not valid JSON.
+- **Effects:** Consumes the request body.
+- **Errors:** None (invalid JSON becomes `null`).
 
 ### `loginPageFor`
 
@@ -2467,11 +2467,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a página de login de um pedido validado.
-- **Input:** `app`; `request`: pedido; `error`: mensagem ou nulo.
-- **Output:** `Response` HTML com o pedido selado.
-- **Effects:** Gera bytes aleatórios (selo).
-- **Errors:** Nenhum.
+- **Does:** Builds the login page for a validated request.
+- **Input:** `app`; `request`: request; `error`: message or null.
+- **Output:** HTML `Response` with the sealed request.
+- **Effects:** Generates random bytes (seal).
+- **Errors:** None.
 
 ### `redirectWithCode`
 
@@ -2484,11 +2484,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Redireciona ao cliente com o código e o `state`.
-- **Input:** `request`: pedido; `code`: código selado.
-- **Output:** `Response` 302.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Redirects to the client with the code and the `state`.
+- **Input:** `request`: request; `code`: sealed code.
+- **Output:** 302 `Response`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `handleRegister`
 
@@ -2501,11 +2501,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende `POST /register` (registro dinâmico).
+- **Does:** Handles `POST /register` (dynamic registration).
 - **Input:** `app`; `request`.
-- **Output:** 201 com o cliente, ou 400 com erro OAuth.
-- **Effects:** Consome o corpo.
-- **Errors:** Nenhum.
+- **Output:** 201 with the client, or 400 with an OAuth error.
+- **Effects:** Consumes the body.
+- **Errors:** None.
 
 ### `handleAuthorizePage`
 
@@ -2518,11 +2518,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende `GET /authorize`: valida e mostra a página de login.
+- **Does:** Handles `GET /authorize`: validates and shows the login page.
 - **Input:** `app`; `request`.
-- **Output:** Página HTML, ou 400 sem redirecionar quando o pedido é inválido.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** HTML page, or 400 without redirecting when the request is invalid.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `handleAuthorizeSubmit`
 
@@ -2535,11 +2535,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende `POST /authorize`: confere a credencial e devolve o código.
-- **Input:** `app`; `request`: formulário com `pending` e `secret`.
-- **Output:** 302 para o cliente; página com erro se a credencial falhar; 400 se o pedido venceu.
-- **Effects:** Rede (via `verifySecret` do conector).
-- **Errors:** Nenhum.
+- **Does:** Handles `POST /authorize`: checks the credential and returns the code.
+- **Input:** `app`; `request`: form with `pending` and `secret`.
+- **Output:** 302 to the client; page with an error if the credential fails; 400 if the request expired.
+- **Effects:** Network (via the connector's `verifySecret`).
+- **Errors:** None.
 
 ### `handleToken`
 
@@ -2552,11 +2552,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende `POST /token`; no refresh, chama `renewSecretQuietly()` antes de responder.
-- **Input:** `app`; `request`: formulário OAuth.
-- **Output:** 200 com tokens, ou 400 com erro OAuth; 400 `invalid_grant` (`REVOKED_SECRET_DESCRIPTION`) when the connector says the credential was revoked.
-- **Effects:** Consome o corpo; no refresh, a renovação da credencial do conector.
-- **Errors:** Nenhum.
+- **Does:** Handles `POST /token`; on refresh, calls `renewSecretQuietly()` before answering.
+- **Input:** `app`; `request`: OAuth form.
+- **Output:** 200 with tokens, or 400 with an OAuth error; 400 `invalid_grant` (`REVOKED_SECRET_DESCRIPTION`) when the connector says the credential was revoked.
+- **Effects:** Consumes the body; on refresh, the connector's credential renewal.
+- **Errors:** None.
 
 ### `handleMcp`
 
@@ -2569,11 +2569,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende `/mcp` exigindo o access token.
+- **Does:** Handles `/mcp`, requiring the access token.
 - **Input:** `app`; `request`.
-- **Output:** Resposta MCP, ou 401 que inicia o OAuth.
-- **Effects:** Executa ferramentas do conector (rede).
-- **Errors:** Repassa erros do transporte MCP.
+- **Output:** MCP response, or a 401 that starts OAuth.
+- **Effects:** Runs connector tools (network).
+- **Errors:** Passes MCP transport errors through.
 
 ### `withCors`
 
@@ -2586,11 +2586,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Acrescenta os headers CORS a uma resposta.
+- **Does:** Adds the CORS headers to a response.
 - **Input:** `response`.
-- **Output:** A mesma resposta, com `CORS_HEADERS`.
-- **Effects:** Altera os headers da resposta recebida.
-- **Errors:** Nenhum.
+- **Output:** The same response, with `CORS_HEADERS`.
+- **Effects:** Mutates the headers of the given response.
+- **Errors:** None.
 
 ### `routeRemoteRequest`
 
@@ -2603,11 +2603,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Escolhe a rota pelo método e caminho.
+- **Does:** Picks the route by method and path.
 - **Input:** `app`; `request`.
-- **Output:** Resposta da rota com CORS; 204 no preflight; 404 em caminho desconhecido.
-- **Effects:** Os da rota escolhida.
-- **Errors:** Repassa erros da rota.
+- **Output:** Route response with CORS; 204 on preflight; 404 on an unknown path.
+- **Effects:** Those of the chosen route.
+- **Errors:** Passes route errors through.
 
 ### `createRemoteHandler`
 
@@ -2620,11 +2620,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria o handler HTTP do conector remoto.
-- **Input:** `app`: configuração OAuth, conector e relógio.
-- **Output:** Função `(Request) => Promise<Response>`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Creates the HTTP handler of the remote connector.
+- **Input:** `app`: OAuth configuration, connector and clock.
+- **Output:** Function `(Request) => Promise<Response>`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pageSecurityPolicy`
 
@@ -2637,11 +2637,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a CSP das páginas HTML; o `form-action` inclui a origem do retorno do OAuth, porque o navegador aplica o `form-action` também ao 302 que segue o envio do formulário.
-- **Input:** `formTarget`: origem liberada para o envio (ex. `https://claude.ai`) ou `null`.
-- **Output:** Texto do header `content-security-policy`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the CSP of the HTML pages; `form-action` includes the OAuth return origin, because the browser also applies `form-action` to the 302 that follows the form submission.
+- **Input:** `formTarget`: origin allowed for the submission (e.g. `https://claude.ai`) or `null`.
+- **Output:** Text of the `content-security-policy` header.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `renewSecretQuietly`
 
@@ -2654,11 +2654,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Pede ao conector para renovar a credencial (`renewSecret`), sem deixar a falha derrubar o refresh.
-- **Input:** Conector remoto e o segredo do usuário.
+- **Does:** Asks the connector to renew the credential (`renewSecret`), without letting a failure break the refresh.
+- **Input:** Remote connector and the user's secret.
 - **Output:** `SecretRenewal`: what `renewSecret` answered, or `'kept'` when the connector has none or it failed.
-- **Effects:** O que o `renewSecret` do conector fizer; `console.warn` se ele falhar.
-- **Errors:** Nenhum (a falha vira aviso no log).
+- **Effects:** Whatever the connector's `renewSecret` does; `console.warn` if it fails.
+- **Errors:** None (the failure becomes a log warning).
 
 ### `redirectToUpstream`
 
@@ -2671,11 +2671,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Redireciona o navegador ao provedor de identidade com o pedido selado no `state`.
-- **Input:** `app`, o login delegado (`UpstreamLogin`) e o pedido de autorização validado.
-- **Output:** Resposta 302 para a URL de login do provedor.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Redirects the browser to the identity provider with the request sealed in `state`.
+- **Input:** `app`, the delegated login (`UpstreamLogin`) and the validated authorization request.
+- **Output:** 302 response to the provider's login URL.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `handleUpstreamCallback`
 
@@ -2688,11 +2688,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** `GET /oauth/callback`: conclui o login delegado e devolve o código ao cliente, ou explica a recusa.
-- **Input:** `app` e a requisição de retorno do provedor (`state`, `code`).
-- **Output:** 302 com o código ao `redirect_uri`; HTML 404 (login não delegado), 400 (pedido expirado) ou 403 (login recusado).
-- **Effects:** O que o `finish` do login fizer (ex.: `fetch` ao GitHub).
-- **Errors:** Nenhum (a falha do `finish` vira página 403).
+- **Does:** `GET /oauth/callback`: completes the delegated login and returns the code to the client, or explains the refusal.
+- **Input:** `app` and the provider's return request (`state`, `code`).
+- **Output:** 302 with the code to `redirect_uri`; HTML 404 (login not delegated), 400 (expired request) or 403 (login refused).
+- **Effects:** Whatever the login's `finish` does (e.g. `fetch` to GitHub).
+- **Errors:** None (a `finish` failure becomes a 403 page).
 
 ## `src/remote/login-page.ts`
 
@@ -2707,11 +2707,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Escapa texto para HTML (conteúdo e atributos).
-- **Input:** `value`: texto.
-- **Output:** Texto com `& < > " '` trocados por entidades.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Escapes text for HTML (content and attributes).
+- **Input:** `value`: text.
+- **Output:** Text with `& < > " '` replaced by entities.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `renderLoginPage`
 
@@ -2724,11 +2724,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Gera a página HTML de autorização.
-- **Input:** `view`: textos, pedido selado, host do cliente e erro opcional.
-- **Output:** HTML completo, sem script.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Generates the HTML authorization page.
+- **Input:** `view`: texts, sealed request, client host and optional error.
+- **Output:** Complete HTML, without scripts.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/remote/mcp-endpoint.ts`
 
@@ -2743,11 +2743,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende uma requisição MCP sem sessão, com resposta JSON.
-- **Input:** `server`: `McpServer` do usuário; `request`: requisição HTTP.
-- **Output:** `Response` do transporte.
-- **Effects:** Conecta e fecha o servidor MCP (executa a ferramenta chamada).
-- **Errors:** Repassa erros do transporte.
+- **Does:** Handles a sessionless MCP request with a JSON response.
+- **Input:** `server`: the user's `McpServer`; `request`: HTTP request.
+- **Output:** Transport `Response`.
+- **Effects:** Connects and closes the MCP server (runs the called tool).
+- **Errors:** Passes transport errors through.
 
 ### `mcpUnauthorizedResponse`
 
@@ -2760,11 +2760,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o 401 que inicia o OAuth no cliente MCP.
-- **Input:** `issuer`: URL pública.
-- **Output:** `Response` 401 com `WWW-Authenticate` apontando os metadados do recurso.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the 401 that starts OAuth in the MCP client.
+- **Input:** `issuer`: public URL.
+- **Output:** 401 `Response` with `WWW-Authenticate` pointing to the resource metadata.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/remote/node-server.ts`
 
@@ -2779,11 +2779,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a URL pública do servidor (`PUBLIC_URL`).
-- **Input:** `env`: variáveis de ambiente.
-- **Output:** URL sem barra final.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança se ausente, inválida ou sem https fora de localhost.
+- **Does:** Reads the server's public URL (`PUBLIC_URL`).
+- **Input:** `env`: environment variables.
+- **Output:** URL without trailing slash.
+- **Effects:** None (pure).
+- **Errors:** Throws if missing, invalid or not https outside localhost.
 
 ### `readRemoteServerConfig`
 
@@ -2796,11 +2796,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a configuração do servidor remoto a partir do ambiente.
-- **Input:** `env`: variáveis de ambiente.
-- **Output:** `RemoteServerConfig` com porta (padrão 8080) e `OAuthSettings`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Os de `readPublicUrl` e `parseSealKey`.
+- **Does:** Builds the remote server configuration from the environment.
+- **Input:** `env`: environment variables.
+- **Output:** `RemoteServerConfig` with port (default 8080) and `OAuthSettings`.
+- **Effects:** None (pure).
+- **Errors:** Those of `readPublicUrl` and `parseSealKey`.
 
 ### `readNodeBody`
 
@@ -2813,11 +2813,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o corpo de uma requisição do Node.
-- **Input:** `req`: requisição.
-- **Output:** `Buffer`; `null` se passar de `MAX_BODY_BYTES`.
-- **Effects:** Consome o stream da requisição.
-- **Errors:** Nenhum.
+- **Does:** Reads the body of a Node request.
+- **Input:** `req`: request.
+- **Output:** `Buffer`; `null` if it exceeds `MAX_BODY_BYTES`.
+- **Effects:** Consumes the request stream.
+- **Errors:** None.
 
 ### `toWebRequest`
 
@@ -2830,11 +2830,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte a requisição do Node em `Request` com a origem pública.
-- **Input:** `req`; `body`: corpo lido; `origin`: URL pública.
-- **Output:** `Request` (sem corpo em GET/HEAD).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts the Node request into a `Request` with the public origin.
+- **Input:** `req`; `body`: body read; `origin`: public URL.
+- **Output:** `Request` (no body on GET/HEAD).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `writeWebResponse`
 
@@ -2847,11 +2847,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Escreve um `Response` na resposta do Node.
-- **Input:** `res`: resposta do Node; `response`.
-- **Output:** Promessa vazia.
-- **Effects:** Escreve status, headers e corpo no socket.
-- **Errors:** Nenhum.
+- **Does:** Writes a `Response` to the Node response.
+- **Input:** `res`: Node response; `response`.
+- **Output:** Empty promise.
+- **Effects:** Writes status, headers and body to the socket.
+- **Errors:** None.
 
 ### `serveNodeRequest`
 
@@ -2864,11 +2864,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende uma requisição do Node com o handler.
-- **Input:** `options`: handler e origem; `req`; `res`.
-- **Output:** Promessa vazia.
-- **Effects:** Lê o corpo, escreve a resposta; registra erros no stderr.
-- **Errors:** Nenhum: corpo grande vira 413 e erro do handler vira 500.
+- **Does:** Handles a Node request with the handler.
+- **Input:** `options`: handler and origin; `req`; `res`.
+- **Output:** Empty promise.
+- **Effects:** Reads the body, writes the response; logs errors to stderr.
+- **Errors:** None: a large body becomes 413 and a handler error becomes 500.
 
 ### `startRemoteHttpServer`
 
@@ -2881,11 +2881,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Sobe o servidor `node:http` com o handler.
-- **Input:** `options`: handler, origem pública e porta (0 = livre).
-- **Output:** O `Server` escutando.
-- **Effects:** Abre uma porta TCP.
-- **Errors:** Nenhum.
+- **Does:** Starts the `node:http` server with the handler.
+- **Input:** `options`: handler, public origin and port (0 = any free one).
+- **Output:** The listening `Server`.
+- **Effects:** Opens a TCP port.
+- **Errors:** None.
 
 ## `src/remote/oauth.ts`
 
@@ -2900,11 +2900,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta um resultado de erro OAuth.
-- **Input:** `error`: código OAuth; `description`: explicação.
-- **Output:** `OAuthResult` com `ok: false`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds an OAuth error result.
+- **Input:** `error`: OAuth code; `description`: explanation.
+- **Output:** `OAuthResult` with `ok: false`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `authorizationServerMetadata`
 
@@ -2917,11 +2917,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta os metadados do servidor de autorização (RFC 8414).
-- **Input:** `issuer`: URL pública.
-- **Output:** Objeto com endpoints, PKCE S256 e cliente público.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the authorization server metadata (RFC 8414).
+- **Input:** `issuer`: public URL.
+- **Output:** Object with endpoints, PKCE S256 and public client.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `protectedResourceMetadata`
 
@@ -2934,11 +2934,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta os metadados do recurso protegido `/mcp` (RFC 9728).
-- **Input:** `issuer`: URL pública.
-- **Output:** Objeto com `resource` e `authorization_servers`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the protected resource metadata for `/mcp` (RFC 9728).
+- **Input:** `issuer`: public URL.
+- **Output:** Object with `resource` and `authorization_servers`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isAllowedRedirect`
 
@@ -2951,11 +2951,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se um endereço de retorno do OAuth é aceito.
-- **Input:** `uri`: endereço; `hosts`: hosts permitidos.
-- **Output:** `true` para https num host listado (ou subdomínio) ou http em localhost/127.0.0.1 quando `localhost` está na lista.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Says whether an OAuth return address is accepted.
+- **Input:** `uri`: address; `hosts`: allowed hosts.
+- **Output:** `true` for https on a listed host (or subdomain), or http on localhost/127.0.0.1 when `localhost` is in the list.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pkceChallenge`
 
@@ -2968,11 +2968,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula o desafio PKCE S256 de um verificador.
+- **Does:** Computes the PKCE S256 challenge of a verifier.
 - **Input:** `verifier`: `code_verifier`.
-- **Output:** SHA-256 em base64url.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** SHA-256 in base64url.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readRedirectUris`
 
@@ -2985,11 +2985,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai `redirect_uris` de um objeto.
-- **Input:** `body`: corpo do registro ou conteúdo selado.
-- **Output:** Lista de textos; `null` se ausente, vazia ou com itens que não são texto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Extracts `redirect_uris` from an object.
+- **Input:** `body`: registration body or sealed content.
+- **Output:** List of strings; `null` if missing, empty or with non-string items.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `registerClient`
 
@@ -3002,11 +3002,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Registra um cliente OAuth selando os endereços de retorno no `client_id`.
-- **Input:** `body`: corpo JSON do registro; `settings`; `now`: segundos Unix.
-- **Output:** `ClientRegistration`, ou erro `invalid_redirect_uri`.
-- **Effects:** Gera bytes aleatórios (selo).
-- **Errors:** Nenhum.
+- **Does:** Registers an OAuth client by sealing the return addresses into the `client_id`.
+- **Input:** `body`: JSON registration body; `settings`; `now`: Unix seconds.
+- **Output:** `ClientRegistration`, or an `invalid_redirect_uri` error.
+- **Effects:** Generates random bytes (seal).
+- **Errors:** None.
 
 ### `clientRedirectUris`
 
@@ -3019,11 +3019,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê os endereços de retorno de um `client_id` deste servidor.
+- **Does:** Reads the return addresses of a `client_id` from this server.
 - **Input:** `clientId`; `settings`; `now`.
-- **Output:** Lista de endereços; `null` se o cliente não é deste servidor ou venceu.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** List of addresses; `null` if the client is not from this server or has expired.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseAuthorizeQuery`
 
@@ -3036,11 +3036,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida a query do `/authorize`.
-- **Input:** `query`: parâmetros; `settings`; `now`.
-- **Output:** `AuthorizeRequest`, ou erro `invalid_client`, `invalid_request` ou `unsupported_response_type`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Validates the `/authorize` query.
+- **Input:** `query`: parameters; `settings`; `now`.
+- **Output:** `AuthorizeRequest`, or an `invalid_client`, `invalid_request` or `unsupported_response_type` error.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readCodeChallenge`
 
@@ -3053,11 +3053,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere `response_type=code` e PKCE S256 da query.
-- **Input:** `query`: parâmetros do `/authorize`.
-- **Output:** O `code_challenge`, ou erro OAuth.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Checks `response_type=code` and PKCE S256 in the query.
+- **Input:** `query`: `/authorize` parameters.
+- **Output:** The `code_challenge`, or an OAuth error.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readOAuthSettings`
 
@@ -3070,11 +3070,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a configuração OAuth do ambiente com o emissor dado.
-- **Input:** `env`: variáveis (`SEAL_KEY`, `OAUTH_REDIRECT_HOSTS`); `issuer`: URL pública.
-- **Output:** `OAuthSettings`; hosts padrão `DEFAULT_REDIRECT_HOSTS` se a variável não vier.
-- **Effects:** Nenhum (pura).
-- **Errors:** Os de `parseSealKey` (chave ausente ou de tamanho errado).
+- **Does:** Builds the OAuth configuration from the environment with the given issuer.
+- **Input:** `env`: variables (`SEAL_KEY`, `OAUTH_REDIRECT_HOSTS`); `issuer`: public URL.
+- **Output:** `OAuthSettings`; default hosts `DEFAULT_REDIRECT_HOSTS` if the variable is not set.
+- **Effects:** None (pure).
+- **Errors:** Those of `parseSealKey` (missing key or wrong size).
 
 ### `resolveIssuer`
 
@@ -3087,11 +3087,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Emissor OAuth: `PUBLIC_URL` sem barra final ou, sem ela, a origem da requisição (ex.: `*.workers.dev`).
-- **Input:** `env` e a origem da requisição.
-- **Output:** URL do emissor, sem barra final.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** OAuth issuer: `PUBLIC_URL` without trailing slash or, without it, the request origin (e.g. `*.workers.dev`).
+- **Input:** `env` and the request origin.
+- **Output:** Issuer URL, without trailing slash.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/remote/seal.ts`
 
@@ -3106,11 +3106,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica a `SEAL_KEY` (base64 ou base64url) e exige 32 bytes.
-- **Input:** `raw`: valor da variável (ou nulo).
-- **Output:** `Buffer` de 32 bytes.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança se ausente (com o comando para gerar) ou de tamanho errado.
+- **Does:** Decodes the `SEAL_KEY` (base64 or base64url) and requires 32 bytes.
+- **Input:** `raw`: the variable's value (or null).
+- **Output:** 32-byte `Buffer`.
+- **Effects:** None (pure).
+- **Errors:** Throws if missing (with the command to generate one) or of the wrong size.
 
 ### `sealPayload`
 
@@ -3123,11 +3123,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Sela um valor JSON com AES-256-GCM.
-- **Input:** `payload`: valor serializável; `key`: chave de 32 bytes.
-- **Output:** Texto base64url com `iv + tag + cifra`.
-- **Effects:** Gera bytes aleatórios (IV).
-- **Errors:** Nenhum.
+- **Does:** Seals a JSON value with AES-256-GCM.
+- **Input:** `payload`: serializable value; `key`: 32-byte key.
+- **Output:** base64url text with `iv + tag + cifra`.
+- **Effects:** Generates random bytes (IV).
+- **Errors:** None.
 
 ### `unsealPayload`
 
@@ -3140,11 +3140,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Abre um selo e devolve o objeto dentro.
-- **Input:** `sealed`: texto selado; `key`: chave.
-- **Output:** Objeto; `null` se a chave não confere, o texto foi alterado ou não é objeto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum (erros de decifragem viram `null`).
+- **Does:** Opens a seal and returns the object inside.
+- **Input:** `sealed`: sealed text; `key`: key.
+- **Output:** Object; `null` if the key does not match, the text was tampered with or it is not an object.
+- **Effects:** None (pure).
+- **Errors:** None (decryption errors become `null`).
 
 ### `openSealed`
 
@@ -3157,11 +3157,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Abre um selo do tipo esperado que ainda não venceu.
-- **Input:** `sealed`; `key`; `expected`: `typ` e instante `now` (segundos Unix).
-- **Output:** `SealedClaims`; `null` se inválido, de outro tipo, sem `exp` numérico ou vencido.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Opens a not-yet-expired seal of the expected type.
+- **Input:** `sealed`; `key`; `expected`: `typ` and instant `now` (Unix seconds).
+- **Output:** `SealedClaims`; `null` if invalid, of another type, without a numeric `exp` or expired.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/remote/tokens.ts`
 
@@ -3176,11 +3176,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Sela o pedido de autorização para o formulário de login (15 minutos).
-- **Input:** `request`: pedido validado; `settings`; `now`.
-- **Output:** Texto selado do tipo `pending`.
-- **Effects:** Gera bytes aleatórios (selo).
-- **Errors:** Nenhum.
+- **Does:** Seals the authorization request for the login form (15 minutes).
+- **Input:** `request`: validated request; `settings`; `now`.
+- **Output:** Sealed text of type `pending`.
+- **Effects:** Generates random bytes (seal).
+- **Errors:** None.
 
 ### `openAuthorizeRequest`
 
@@ -3193,11 +3193,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Abre o pedido selado vindo do formulário.
+- **Does:** Opens the sealed request coming from the form.
 - **Input:** `sealed`; `settings`; `now`.
-- **Output:** `AuthorizeRequest`; `null` se inválido ou vencido.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** `AuthorizeRequest`; `null` if invalid or expired.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `issueAuthorizationCode`
 
@@ -3210,11 +3210,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Emite o código de autorização (5 minutos) amarrado a cliente, retorno e PKCE.
-- **Input:** `grant`: pedido + segredo; `settings`; `now`.
-- **Output:** Código selado do tipo `code`.
-- **Effects:** Gera bytes aleatórios (selo).
-- **Errors:** Nenhum.
+- **Does:** Issues the authorization code (5 minutes) bound to client, return address and PKCE.
+- **Input:** `grant`: request + secret; `settings`; `now`.
+- **Output:** Sealed code of type `code`.
+- **Effects:** Generates random bytes (seal).
+- **Errors:** None.
 
 ### `issueTokenSet`
 
@@ -3227,11 +3227,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Emite access token (1 hora) e refresh token (30 dias) para um segredo.
-- **Input:** `secret`: credencial do usuário; `settings`; `now`.
-- **Output:** `TokenSet` do tipo Bearer.
-- **Effects:** Gera bytes aleatórios (selos).
-- **Errors:** Nenhum.
+- **Does:** Issues an access token (1 hour) and a refresh token (30 days) for a secret.
+- **Input:** `secret`: user credential; `settings`; `now`.
+- **Output:** Bearer-type `TokenSet`.
+- **Effects:** Generates random bytes (seals).
+- **Errors:** None.
 
 ### `redeemAuthorizationCode`
 
@@ -3244,11 +3244,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere o código contra cliente, retorno e verificador PKCE.
-- **Input:** `form`: corpo do `/token`; `settings`; `now`.
-- **Output:** O segredo selado, ou erro `invalid_grant`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Checks the code against client, return address and PKCE verifier.
+- **Input:** `form`: `/token` body; `settings`; `now`.
+- **Output:** The sealed secret, or an `invalid_grant` error.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `redeemRefreshToken`
 
@@ -3261,11 +3261,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere o refresh token.
-- **Input:** `form`: corpo do `/token`; `settings`; `now`.
-- **Output:** O segredo selado, ou erro `invalid_grant`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Checks the refresh token.
+- **Input:** `form`: `/token` body; `settings`; `now`.
+- **Output:** The sealed secret, or an `invalid_grant` error.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `redeemTokenRequest`
 
@@ -3278,11 +3278,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende o `/token` conforme o `grant_type`.
-- **Input:** `form`: corpo do `/token`; `settings`; `now`.
-- **Output:** `RedeemedGrant` (novo `TokenSet`, o segredo e se veio de refresh), ou erro `invalid_grant`/`unsupported_grant_type`.
-- **Effects:** Gera bytes aleatórios (selos).
-- **Errors:** Nenhum.
+- **Does:** Handles `/token` according to `grant_type`.
+- **Input:** `form`: `/token` body; `settings`; `now`.
+- **Output:** `RedeemedGrant` (new `TokenSet`, the secret and whether it came from a refresh), or an `invalid_grant`/`unsupported_grant_type` error.
+- **Effects:** Generates random bytes (seals).
+- **Errors:** None.
 
 ### `readAccessSecret`
 
@@ -3295,11 +3295,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o segredo de um header `Authorization: Bearer`.
-- **Input:** `authorization`: header (ou nulo); `settings`; `now`.
-- **Output:** O segredo; `null` sem Bearer, com token de outro tipo ou vencido.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the secret from an `Authorization: Bearer` header.
+- **Input:** `authorization`: header (or null); `settings`; `now`.
+- **Output:** The secret; `null` without Bearer, with a token of another type or expired.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/canvas-puc/src/worker.ts`
 
@@ -3314,11 +3314,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o app remoto do Canvas para o Worker.
-- **Input:** `env`: variáveis de texto; `origin`: origem da requisição (emissor sem `PUBLIC_URL`).
-- **Output:** `RemoteApp` com OAuth, conector do Canvas e relógio em segundos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Os de `readOAuthSettings` (sem `SEAL_KEY`).
+- **Does:** Builds the remote Canvas app for the Worker.
+- **Input:** `env`: text variables; `origin`: request origin (issuer when there is no `PUBLIC_URL`).
+- **Output:** `RemoteApp` with OAuth, the Canvas connector and a clock in seconds.
+- **Effects:** None (pure).
+- **Errors:** Those of `readOAuthSettings` (no `SEAL_KEY`).
 
 ### `handleWorkerFetch`
 
@@ -3331,11 +3331,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende uma requisição no Cloudflare Workers.
-- **Input:** `request`; `env`: ambiente do Worker.
-- **Output:** Resposta do handler remoto; 500 com a explicação se a configuração for inválida.
-- **Effects:** Os do handler remoto (rede para o Canvas).
-- **Errors:** Nenhum: configuração inválida vira 500.
+- **Does:** Handles a request on Cloudflare Workers.
+- **Input:** `request`; `env`: Worker environment.
+- **Output:** Response from the remote handler; 500 with the explanation if the configuration is invalid.
+- **Effects:** Those of the remote handler (network to Canvas).
+- **Errors:** None: an invalid configuration becomes 500.
 
 ## `connectors/canvas-puc/src/files.ts`
 
@@ -3350,11 +3350,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o bloco MCP com o conteúdo do arquivo: `image` para `image/*`, `resource` embutido (blob) para o resto.
-- **Input:** `file`: arquivo do Canvas; `bytes`: conteúdo.
-- **Output:** Bloco de conteúdo MCP.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the MCP block with the file content: `image` for `image/*`, embedded `resource` (blob) for the rest.
+- **Input:** `file`: Canvas file; `bytes`: content.
+- **Output:** MCP content block.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `downloadedFileResult`
 
@@ -3367,11 +3367,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o resultado de `download_file`: uma linha com nome, tipo, tamanho e link, e o bloco com o conteúdo.
+- **Does:** Builds the `download_file` result: one line with name, type, size and link, and the content block.
 - **Input:** `file`; `bytes`.
 - **Output:** `RawToolResult`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `downloadRefusal`
 
@@ -3384,11 +3384,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide se o arquivo não pode ser trazido à conversa: sem link ou acima de `MAX_DOWNLOAD_BYTES`.
-- **Input:** `file`: arquivo do Canvas.
-- **Output:** Mensagem em português com o motivo (e o link, se houver), ou `null` se pode baixar.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides whether the file cannot be brought into the conversation: no link or above `MAX_DOWNLOAD_BYTES`.
+- **Input:** `file`: Canvas file.
+- **Output:** Message in Portuguese with the reason (and the link, if any), or `null` if it can be downloaded.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `downloadCanvasFile`
 
@@ -3401,11 +3401,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Baixa o arquivo e devolve seu conteúdo para a conversa, ou o motivo de não baixar.
-- **Input:** `client`: cliente do Canvas; `file`: metadados de `/files/:id`.
-- **Output:** Promise com `RawToolResult` ou mensagem.
-- **Effects:** Rede (download do arquivo).
-- **Errors:** Repassa os erros do download.
+- **Does:** Downloads the file and returns its content to the conversation, or the reason for not downloading it.
+- **Input:** `client`: Canvas client; `file`: metadata from `/files/:id`.
+- **Output:** Promise with a `RawToolResult` or a message.
+- **Effects:** Network (file download).
+- **Errors:** Passes download errors through.
 
 ### `readCanvasFileText`
 
@@ -3418,11 +3418,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê um arquivo do Canvas como texto: texto puro, HTML (convertido) ou Word (.doc/.docx); outros tipos devolvem o link e sugerem `download_file`.
-- **Input:** `client`; `file`: metadados de `/files/:id`.
-- **Output:** Promise com `# nome` e o texto (até `MAX_TEXT_CHARS`), ou a mensagem com o link.
-- **Effects:** Rede (download do arquivo).
-- **Errors:** Repassa os erros do download e da extração do Word.
+- **Does:** Reads a Canvas file as text: plain text, HTML (converted) or Word (.doc/.docx); other types return the link and suggest `download_file`.
+- **Input:** `client`; `file`: metadata from `/files/:id`.
+- **Output:** Promise with `# nome` and the text (up to `MAX_TEXT_CHARS`), or the message with the link.
+- **Effects:** Network (file download).
+- **Errors:** Passes through download and Word extraction errors.
 
 ## `src/core/cfb.ts`
 
@@ -3437,11 +3437,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se os bytes começam com a assinatura OLE/CFB (`CFB_SIGNATURE`).
-- **Input:** `bytes`: arquivo.
-- **Output:** `true` se for CFB.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Says whether the bytes start with the OLE/CFB signature (`CFB_SIGNATURE`).
+- **Input:** `bytes`: file.
+- **Output:** `true` if it is CFB.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readCfbHeader`
 
@@ -3454,11 +3454,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê do cabeçalho de 512 bytes os tamanhos de setor, o início do diretório, da mini FAT e da DIFAT.
-- **Input:** `bytes`: arquivo CFB.
+- **Does:** Reads from the 512-byte header the sector sizes and the start of the directory, the mini FAT and the DIFAT.
+- **Input:** `bytes`: CFB file.
 - **Output:** `CfbHeader`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança "Arquivo não é um documento do Office (OLE)." sem a assinatura.
+- **Effects:** None (pure).
+- **Errors:** Throws "Arquivo não é um documento do Office (OLE)." without the signature.
 
 ### `cfbSector`
 
@@ -3471,11 +3471,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Recorta um setor regular pelo id (o setor 0 vem logo após o cabeçalho).
-- **Input:** `bytes`; `header`; `id`: número do setor.
-- **Output:** `Uint8Array` do setor.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Slices a regular sector by id (sector 0 comes right after the header).
+- **Input:** `bytes`; `header`; `id`: sector number.
+- **Output:** The sector's `Uint8Array`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `sectorWords`
 
@@ -3488,11 +3488,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê um setor como lista de inteiros de 32 bits little-endian (FAT, DIFAT, mini FAT).
+- **Does:** Reads a sector as a list of 32-bit little-endian integers (FAT, DIFAT, mini FAT).
 - **Input:** `sector`: bytes.
-- **Output:** Lista de números.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** List of numbers.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `fatSectorIds`
 
@@ -3505,11 +3505,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista os setores que guardam a FAT: os 109 do cabeçalho e os da cadeia DIFAT.
+- **Does:** Lists the sectors that hold the FAT: the 109 in the header and those in the DIFAT chain.
 - **Input:** `bytes`; `header`.
-- **Output:** Ids válidos (sem marcas de livre/fim).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** Valid ids (without free/end markers).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `followChain`
 
@@ -3522,11 +3522,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Segue uma cadeia de setores na tabela até o fim de cadeia, sem entrar em laço.
-- **Input:** `table`: FAT ou mini FAT; `start`: primeiro setor.
-- **Output:** Ids na ordem da cadeia (vazia se `start` for fim de cadeia).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Follows a sector chain in the table up to end of chain, without looping.
+- **Input:** `table`: FAT or mini FAT; `start`: first sector.
+- **Output:** Ids in chain order (empty if `start` is end of chain).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readRegularChain`
 
@@ -3539,11 +3539,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê os bytes de uma cadeia de setores regulares.
-- **Input:** `file`: bytes, cabeçalho e FAT; `start`: primeiro setor.
-- **Output:** Bytes concatenados (múltiplo do tamanho do setor).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the bytes of a chain of regular sectors.
+- **Input:** `file`: bytes, header and FAT; `start`: first sector.
+- **Output:** Concatenated bytes (a multiple of the sector size).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseDirectory`
 
@@ -3556,11 +3556,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê as entradas de 128 bytes do diretório CFB.
-- **Input:** `dir`: bytes do diretório.
-- **Output:** Lista de `CfbEntry` (nome, primeiro setor, tamanho).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the 128-byte entries of the CFB directory.
+- **Input:** `dir`: directory bytes.
+- **Output:** List of `CfbEntry` (name, first sector, size).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `openCfb`
 
@@ -3573,11 +3573,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Abre um arquivo CFB: cabeçalho, FAT completa e diretório.
-- **Input:** `bytes`: arquivo .doc (ou outro CFB).
+- **Does:** Opens a CFB file: header, full FAT and directory.
+- **Input:** `bytes`: .doc file (or another CFB).
 - **Output:** `CfbFile`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Repassa o erro de `readCfbHeader`.
+- **Effects:** None (pure).
+- **Errors:** Passes through the `readCfbHeader` error.
 
 ### `readMiniStream`
 
@@ -3590,11 +3590,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê um stream pequeno pelo mini stream (setores de 64 bytes guardados na entrada raiz), seguindo a mini FAT.
-- **Input:** `file`: CFB aberto; `entry`: o stream.
-- **Output:** Bytes (com sobra do último mini setor).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads a small stream through the mini stream (64-byte sectors stored in the root entry), following the mini FAT.
+- **Input:** `file`: open CFB; `entry`: the stream.
+- **Output:** Bytes (with the leftover of the last mini sector).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readCfbStream`
 
@@ -3607,11 +3607,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê um stream pelo nome, pelo mini stream ou pela FAT conforme o tamanho.
-- **Input:** `file`: CFB aberto; `name`: nome do stream (ex.: `WordDocument`).
-- **Output:** Bytes do stream no tamanho exato, ou `null` se não existir.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads a stream by name, through the mini stream or the FAT depending on its size.
+- **Input:** `file`: open CFB; `name`: stream name (e.g. `WordDocument`).
+- **Output:** Stream bytes at the exact size, or `null` if it does not exist.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/core/word.ts`
 
@@ -3626,11 +3626,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o XML do corpo do .docx em texto: junta os `w:t`, troca `w:tab` por tabulação, `w:br`/`w:cr` e fim de parágrafo por quebra de linha e decodifica as entidades.
-- **Input:** `xml`: conteúdo de `word/document.xml`.
-- **Output:** Texto sem espaços nas pontas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts the .docx body XML into text: joins the `w:t`, turns `w:tab` into a tab, `w:br`/`w:cr` and paragraph ends into line breaks, and decodes the entities.
+- **Input:** `xml`: content of `word/document.xml`.
+- **Output:** Text trimmed at both ends.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `docxToText`
 
@@ -3643,11 +3643,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o texto de um .docx (abre o ZIP e lê `word/document.xml`).
-- **Input:** `bytes`: arquivo .docx.
-- **Output:** Promise com o texto.
-- **Effects:** Nenhum (só CPU).
-- **Errors:** Rejeita com "Arquivo .docx sem word/document.xml." ou com os erros do ZIP.
+- **Does:** Extracts the text of a .docx (opens the ZIP and reads `word/document.xml`).
+- **Input:** `bytes`: .docx file.
+- **Output:** Promise with the text.
+- **Effects:** None (CPU only).
+- **Errors:** Rejects with "Arquivo .docx sem word/document.xml." or with the ZIP errors.
 
 ### `cp1252ToString`
 
@@ -3660,11 +3660,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica bytes em Windows-1252 (texto de 8 bits do .doc).
+- **Does:** Decodes bytes as Windows-1252 (8-bit .doc text).
 - **Input:** `bytes`.
-- **Output:** Texto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** Text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parsePieceTable`
 
@@ -3677,11 +3677,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a tabela de peças (PlcPcd) do Clx do .doc, pulando os blocos de formatação (Prc).
-- **Input:** `table`: stream 0Table/1Table; `fcClx`: posição do Clx (do FIB).
-- **Output:** Lista de `DocPiece`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança "Documento .doc com tabela de texto inválida." se o Clx não tiver a tabela.
+- **Does:** Reads the piece table (PlcPcd) from the .doc's Clx, skipping the formatting blocks (Prc).
+- **Input:** `table`: 0Table/1Table stream; `fcClx`: Clx position (from the FIB).
+- **Output:** List of `DocPiece`.
+- **Effects:** None (pure).
+- **Errors:** Throws "Documento .doc com tabela de texto inválida." if the Clx has no table.
 
 ### `pieceText`
 
@@ -3694,11 +3694,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica uma peça do texto: Windows-1252 se o bit "compressed" estiver ligado, senão UTF-16LE.
-- **Input:** `wordDoc`: stream WordDocument; `piece`.
-- **Output:** Texto da peça.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decodes a text piece: Windows-1252 if the "compressed" bit is set, otherwise UTF-16LE.
+- **Input:** `wordDoc`: WordDocument stream; `piece`.
+- **Output:** Piece text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `cleanWordText`
 
@@ -3711,11 +3711,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Troca as marcas do Word por texto com `WORD_TEXT_REPLACEMENTS`: tira o código dos campos (fica o resultado), parágrafos viram quebras, células viram tabulação.
-- **Input:** `raw`: texto bruto das peças.
-- **Output:** Texto limpo, sem espaços nas pontas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Replaces Word marks with text using `WORD_TEXT_REPLACEMENTS`: strips field codes (keeping the result), paragraphs become line breaks, cells become tabs.
+- **Input:** `raw`: raw text of the pieces.
+- **Output:** Clean text, trimmed at both ends.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `docToText`
 
@@ -3728,11 +3728,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o texto principal de um .doc (Word 97-2003): abre o CFB, lê o FIB, a tabela de peças e decodifica cada peça, cortando em `ccpText` (sem rodapés e cabeçalhos).
-- **Input:** `bytes`: arquivo .doc.
-- **Output:** Texto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança "O .doc está protegido por senha.", "Arquivo .doc sem o stream WordDocument.", "Arquivo .doc sem o stream de tabela." ou os erros de `openCfb`/`parsePieceTable`.
+- **Does:** Extracts the main text of a .doc (Word 97-2003): opens the CFB, reads the FIB and the piece table and decodes each piece, cutting at `ccpText` (no footers or headers).
+- **Input:** `bytes`: .doc file.
+- **Output:** Text.
+- **Effects:** None (pure).
+- **Errors:** Throws "O .doc está protegido por senha.", "Arquivo .doc sem o stream WordDocument.", "Arquivo .doc sem o stream de tabela." or the errors of `openCfb`/`parsePieceTable`.
 
 ### `wordKind`
 
@@ -3745,11 +3745,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide se o arquivo é documento do Word pelo nome ou pelo MIME.
-- **Input:** `contentType`: MIME; `name`: nome do arquivo.
-- **Output:** `docx`, `doc` ou `null`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides whether the file is a Word document by name or MIME type.
+- **Input:** `contentType`: MIME; `name`: file name.
+- **Output:** `docx`, `doc` or `null`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `wordToText`
 
@@ -3762,11 +3762,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o texto de um documento do Word conforme o tipo.
-- **Input:** `kind`: `docx` ou `doc`; `bytes`.
-- **Output:** Promise com o texto.
-- **Effects:** Nenhum (só CPU).
-- **Errors:** Repassa os erros de `docxToText`/`docToText`.
+- **Does:** Extracts the text of a Word document according to its type.
+- **Input:** `kind`: `docx` or `doc`; `bytes`.
+- **Output:** Promise with the text.
+- **Effects:** None (CPU only).
+- **Errors:** Passes through the errors of `docxToText`/`docToText`.
 
 ## `src/core/zip.ts`
 
@@ -3781,11 +3781,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Acha o registro de fim do diretório central (EOCD) do ZIP, procurando de trás para frente.
-- **Input:** `bytes`: arquivo ZIP.
-- **Output:** Posição do EOCD.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança "Arquivo ZIP inválido: diretório central não encontrado.".
+- **Does:** Finds the ZIP end of central directory (EOCD) record, searching backwards.
+- **Input:** `bytes`: ZIP file.
+- **Output:** EOCD position.
+- **Effects:** None (pure).
+- **Errors:** Throws "Arquivo ZIP inválido: diretório central não encontrado.".
 
 ### `listZipEntries`
 
@@ -3798,11 +3798,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê as entradas do diretório central do ZIP.
-- **Input:** `bytes`: arquivo ZIP.
-- **Output:** Lista de `ZipEntry`; para na primeira entrada corrompida.
-- **Effects:** Nenhum (pura).
-- **Errors:** Repassa o erro de `findEndOfCentralDirectory`.
+- **Does:** Reads the entries of the ZIP central directory.
+- **Input:** `bytes`: ZIP file.
+- **Output:** List of `ZipEntry`; stops at the first corrupted entry.
+- **Effects:** None (pure).
+- **Errors:** Passes through the `findEndOfCentralDirectory` error.
 
 ### `zipEntryBytes`
 
@@ -3815,11 +3815,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Recorta os bytes comprimidos de uma entrada, pulando o cabeçalho local.
-- **Input:** `bytes`: ZIP; `entry`: entrada.
-- **Output:** `Uint8Array` comprimido.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Slices the compressed bytes of an entry, skipping the local header.
+- **Input:** `bytes`: ZIP; `entry`: entry.
+- **Output:** Compressed `Uint8Array`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `inflateRaw`
 
@@ -3832,11 +3832,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Descomprime DEFLATE puro com `DecompressionStream` (Node 22 e Workers).
-- **Input:** `data`: bytes comprimidos.
-- **Output:** Promise com os bytes descomprimidos.
-- **Effects:** Nenhum (só CPU).
-- **Errors:** Rejeita se os dados não forem DEFLATE válido.
+- **Does:** Decompresses raw DEFLATE with `DecompressionStream` (Node 22 and Workers).
+- **Input:** `data`: compressed bytes.
+- **Output:** Promise with the decompressed bytes.
+- **Effects:** None (CPU only).
+- **Errors:** Rejects if the data is not valid DEFLATE.
 
 ### `readZipEntry`
 
@@ -3849,11 +3849,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê e descompacta uma entrada do ZIP pelo nome (métodos 0 e 8).
-- **Input:** `bytes`: ZIP; `name`: caminho da entrada.
-- **Output:** Promise com os bytes, ou `null` se a entrada não existir.
-- **Effects:** Nenhum (só CPU).
-- **Errors:** Rejeita com "Compressão ZIP não suportada (método N)." para outros métodos.
+- **Does:** Reads and decompresses a ZIP entry by name (methods 0 and 8).
+- **Input:** `bytes`: ZIP; `name`: entry path.
+- **Output:** Promise with the bytes, or `null` if the entry does not exist.
+- **Effects:** None (CPU only).
+- **Errors:** Rejects with "Compressão ZIP não suportada (método N)." for other methods.
 
 ### `decompressBytes`
 
@@ -3866,11 +3866,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Descomprime dados com `DecompressionStream` no formato dado.
-- **Input:** `data`: bytes comprimidos. `format`: `deflate-raw` (DEFLATE puro) ou `deflate` (com cabeçalho zlib).
-- **Output:** Os bytes descomprimidos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Propaga o erro do `DecompressionStream` se os dados estiverem corrompidos.
+- **Does:** Decompresses data with `DecompressionStream` in the given format.
+- **Input:** `data`: compressed bytes. `format`: `deflate-raw` (raw DEFLATE) or `deflate` (with zlib header).
+- **Output:** The decompressed bytes.
+- **Effects:** None (pure).
+- **Errors:** Propagates the `DecompressionStream` error if the data is corrupted.
 
 ## `src/core/bytes.ts`
 
@@ -3885,11 +3885,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria uma `DataView` sobre exatamente a fatia de bytes dada (respeita `byteOffset`).
-- **Input:** `bytes`: buffer ou fatia.
-- **Output:** `DataView` para leituras little-endian.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Creates a `DataView` over exactly the given byte slice (honors `byteOffset`).
+- **Input:** `bytes`: buffer or slice.
+- **Output:** `DataView` for little-endian reads.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `concatBytes`
 
@@ -3902,11 +3902,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Junta vários pedaços de bytes num buffer novo, em ordem.
-- **Input:** `parts`: lista de `Uint8Array`.
-- **Output:** `Uint8Array` com todos os bytes.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Joins several byte chunks into a new buffer, in order.
+- **Input:** `parts`: list of `Uint8Array`.
+- **Output:** `Uint8Array` with all the bytes.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `utf16leToString`
 
@@ -3919,11 +3919,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica UTF-16LE sem `TextDecoder` (portável para o Workers).
-- **Input:** `bytes`: texto em UTF-16LE.
-- **Output:** Texto; um byte solto no fim é ignorado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decodes UTF-16LE without `TextDecoder` (portable to Workers).
+- **Input:** `bytes`: UTF-16LE text.
+- **Output:** Text; a stray trailing byte is ignored.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `bytesToBase64`
 
@@ -3936,11 +3936,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Codifica bytes em base64 em blocos de 32 KB, sem `Buffer` (Node e Workers).
+- **Does:** Encodes bytes as base64 in 32 KB chunks, without `Buffer` (Node and Workers).
 - **Input:** `bytes`.
-- **Output:** Texto base64.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** base64 text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `tools/bundle/bundle.ts`
 
@@ -3955,11 +3955,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista os conectores com manifesto de plugin (`.claude-plugin/plugin.json`) em `connectors/`.
-- **Input:** `rootDir`: raiz do repositório.
-- **Output:** Nomes das subpastas em ordem alfabética; vazia se `connectors/` não existe.
-- **Effects:** Lê o disco.
-- **Errors:** Propaga erros de leitura da pasta.
+- **Does:** Lists the connectors with a plugin manifest (`.claude-plugin/plugin.json`) in `connectors/`.
+- **Input:** `rootDir`: repository root.
+- **Output:** Subfolder names in alphabetical order; empty if `connectors/` does not exist.
+- **Effects:** Reads the disk.
+- **Errors:** Propagates folder read errors.
 
 ### `bundleOptions`
 
@@ -3972,11 +3972,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta as opções do esbuild para unir o servidor remoto num ESM para Node 22.
-- **Input:** `entry`: arquivo de entrada; `outfile`: arquivo de saída.
-- **Output:** `BuildOptions` com bundle, `node22`, sem dependências externas, e banner que define `require`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the esbuild options to bundle the remote server into an ESM for Node 22.
+- **Input:** `entry`: entry file; `outfile`: output file.
+- **Output:** `BuildOptions` with bundle, `node22`, no external dependencies, and a banner that defines `require`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `mcpServerProblems`
 
@@ -3989,11 +3989,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere um servidor do `.mcp.json` do plugin: tem de ser remoto (`type: "http"`, URL `https://`, sem `command`).
-- **Input:** `name`: nome do servidor; `server`: valor lido do JSON.
-- **Output:** Lista de problemas em português; vazia se o servidor está certo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Checks a server in the plugin's `.mcp.json`: it must be remote (`type: "http"`, `https://` URL, no `command`).
+- **Input:** `name`: server name; `server`: value read from the JSON.
+- **Output:** List of problems in Portuguese; empty if the server is correct.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pluginMcpProblems`
 
@@ -4006,11 +4006,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere o `.mcp.json` inteiro de um plugin: ao menos um servidor, todos remotos.
-- **Input:** `config`: conteúdo do `.mcp.json` já lido como JSON.
-- **Output:** Lista de problemas; vazia se a configuração está certa.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Checks a plugin's whole `.mcp.json`: at least one server, all remote.
+- **Input:** `config`: content of `.mcp.json` already parsed as JSON.
+- **Output:** List of problems; empty if the configuration is correct.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isRemoteMcpUrl`
 
@@ -4023,11 +4023,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se a URL é remota e fixa (`https://`); recusa `${user_config.*}`, que quebra o Vincular (ADR 0018).
-- **Input:** `url`: valor do campo `url` do servidor no `.mcp.json`.
-- **Output:** `true` para `https://...` sem `${`; `false` para o resto (inclusive placeholders `${user_config.*}`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Says whether the URL is remote and fixed (`https://`); rejects `${user_config.*}`, which breaks Connect (ADR 0018).
+- **Input:** `url`: value of the server's `url` field in `.mcp.json`.
+- **Output:** `true` for `https://...` without `${`; `false` for everything else (including `${user_config.*}` placeholders).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `tools/bundle/cli.ts`
 
@@ -4042,11 +4042,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida o `.mcp.json` do conector, se houver (plugin self-host não tem), e gera o bundle `server/remote.js`, se houver `src/remote-main.ts`.
-- **Input:** `root`: raiz do repositório; `name`: pasta do conector.
-- **Output:** Promise vazia.
-- **Effects:** Lê o `.mcp.json`; roda o esbuild e grava `server/remote.js`.
-- **Errors:** Rejeita listando os problemas de `pluginMcpProblems()`; propaga erros de leitura e do esbuild.
+- **Does:** Validates the connector's `.mcp.json`, if any (a self-host plugin has none), and generates the `server/remote.js` bundle, if there is a `src/remote-main.ts`.
+- **Input:** `root`: repository root; `name`: connector folder.
+- **Output:** Empty promise.
+- **Effects:** Reads `.mcp.json`; runs esbuild and writes `server/remote.js`.
+- **Errors:** Rejects listing the problems from `pluginMcpProblems()`; propagates read and esbuild errors.
 
 ### `runBuildCli`
 
@@ -4059,11 +4059,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Ponto de entrada de `npm run build`: faz o build de todos os conectores.
-- **Input:** Nenhuma.
-- **Output:** Promise vazia; imprime "✔ <conector>" por conector.
-- **Effects:** Os de `buildConnector()`; escreve no terminal.
-- **Errors:** Propaga erros de `buildConnector()`.
+- **Does:** Entry point of `npm run build`: builds all connectors.
+- **Input:** None.
+- **Output:** Empty promise; prints "✔ <conector>" per connector.
+- **Effects:** Those of `buildConnector()`; writes to the terminal.
+- **Errors:** Propagates errors from `buildConnector()`.
 
 ## `connectors/gmail/src/access-token.ts`
 
@@ -4078,11 +4078,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Esquece o access token guardado de uma conta de um usuário.
-- **Input:** `owner`: usuário. `email`: conta Gmail.
-- **Output:** Nada.
-- **Effects:** Memória do isolate: remove a entrada do cache.
-- **Errors:** Nenhum.
+- **Does:** Forgets a user's stored access token for an account.
+- **Input:** `owner`: user. `email`: Gmail account.
+- **Output:** Nothing.
+- **Effects:** Isolate memory: removes the cache entry.
+- **Errors:** None.
 
 ### `clearAccessTokenCache`
 
@@ -4095,11 +4095,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Esquece todos os access tokens guardados.
-- **Input:** Nenhuma.
-- **Output:** Nada.
-- **Effects:** Memória do isolate: esvazia o cache de access tokens.
-- **Errors:** Nenhum.
+- **Does:** Forgets all stored access tokens.
+- **Input:** None.
+- **Output:** Nothing.
+- **Effects:** Isolate memory: empties the access token cache.
+- **Errors:** None.
 
 ### `relinkError`
 
@@ -4112,11 +4112,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o erro de conta que perdeu o acesso ao Gmail.
-- **Input:** `alias`: apelido da conta.
-- **Output:** `Error` que orienta a usar `link_account` e entrar de novo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the error for an account that lost Gmail access.
+- **Input:** `alias`: account alias.
+- **Output:** `Error` telling the user to use `link_account` and sign in again.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `renewAccessToken`
 
@@ -4129,11 +4129,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Renova o access token da conta pelo refresh token.
-- **Input:** `deps`: dependências com o usuário. `ref`: conta com apelido.
-- **Output:** O access token novo.
-- **Effects:** Rede: endpoint de tokens do Google. Memória do isolate: guarda o token até 1 min antes de vencer. KV: marca a conta como revogada em `invalid_grant`.
-- **Errors:** Lança `relinkError()` em `invalid_grant`; propaga outros `GoogleTokenError` e erros de rede.
+- **Does:** Renews the account's access token with the refresh token.
+- **Input:** `deps`: dependencies with the user. `ref`: account with alias.
+- **Output:** The new access token.
+- **Effects:** Network: Google token endpoint. Isolate memory: stores the token until 1 min before it expires. KV: marks the account as revoked on `invalid_grant`.
+- **Errors:** Throws `relinkError()` on `invalid_grant`; propagates other `GoogleTokenError`s and network errors.
 
 ### `getAccessToken`
 
@@ -4146,11 +4146,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Devolve um access token válido da conta.
-- **Input:** `deps`: dependências com o usuário. `ref`: conta com apelido.
-- **Output:** Access token da memória, ou renovado.
-- **Effects:** Os de `renewAccessToken()` quando não há token válido na memória.
-- **Errors:** Lança `relinkError()` se a conta já está revogada; propaga os de `renewAccessToken()`.
+- **Does:** Returns a valid access token for the account.
+- **Input:** `deps`: dependencies with the user. `ref`: account with alias.
+- **Output:** Access token from memory, or renewed.
+- **Effects:** Those of `renewAccessToken()` when there is no valid token in memory.
+- **Errors:** Throws `relinkError()` if the account is already revoked; propagates those of `renewAccessToken()`.
 
 ### `accessTokenKey`
 
@@ -4163,11 +4163,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a chave do cache de access tokens por usuário e conta.
-- **Input:** `owner`: usuário (`sub`). `email`: conta Gmail.
-- **Output:** Texto que separa usuário e conta.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the access token cache key per user and account.
+- **Input:** `owner`: user (`sub`). `email`: Gmail account.
+- **Output:** Text that separates user and account.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `markAccountRevoked`
 
@@ -4180,11 +4180,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Marca a conta do usuário como revogada no KV.
-- **Input:** `deps`: dependências com o usuário. `email`: conta a marcar.
-- **Output:** Nada.
-- **Effects:** KV: lê e regrava o registro do usuário.
-- **Errors:** Propaga falhas do KV.
+- **Does:** Marks the user's account as revoked in KV.
+- **Input:** `deps`: dependencies with the user. `email`: account to mark.
+- **Output:** Nothing.
+- **Effects:** KV: reads and rewrites the user's record.
+- **Errors:** Propagates KV failures.
 
 ## `connectors/gmail/src/attachments.ts`
 
@@ -4199,11 +4199,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se o texto parece texto de verdade (sem caracteres de controle além de espaços e quebras).
-- **Input:** `text`: texto decodificado; só os primeiros 4096 caracteres são examinados.
-- **Output:** Verdadeiro se a amostra não é vazia e tem menos de 1% de caracteres de controle ou de substituição; falso no resto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether the text looks like real text (no control characters besides spaces and line breaks).
+- **Input:** `text`: decoded text; only the first 4096 characters are examined.
+- **Output:** True if the sample is not empty and has less than 1% control or replacement characters; false otherwise.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `detectAttachmentKind`
 
@@ -4216,11 +4216,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Detecta o tipo do anexo pelos primeiros bytes ou pelo conteúdo.
-- **Input:** `bytes`: conteúdo bruto do anexo.
-- **Output:** `pdf`, `docx`, `doc`, `html` ou `text`; nulo se não for um tipo reconhecido.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Detects the attachment type from its first bytes or its content.
+- **Input:** `bytes`: raw attachment content.
+- **Output:** `pdf`, `docx`, `doc`, `html` or `text`; null if it is not a recognized type.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `attachmentBytesToText`
 
@@ -4233,11 +4233,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte os bytes do anexo em texto conforme o tipo detectado.
-- **Input:** `bytes`: conteúdo bruto do anexo.
-- **Output:** O texto extraído; pode ser vazio (ex.: PDF escaneado).
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se o tipo não for PDF, Word, HTML ou texto. Propaga os erros de `pdfToText()` e `wordToText()`.
+- **Does:** Converts the attachment bytes to text according to the detected type.
+- **Input:** `bytes`: raw attachment content.
+- **Output:** The extracted text; may be empty (e.g. a scanned PDF).
+- **Effects:** None (pure).
+- **Errors:** Throws if the type is not PDF, Word, HTML or text. Propagates the errors of `pdfToText()` and `wordToText()`.
 
 ### `readAttachmentText`
 
@@ -4250,11 +4250,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Baixa um anexo do Gmail como texto limitado.
-- **Input:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `ids`: `messageId` da mensagem e `attachmentId` do anexo.
-- **Output:** Objeto com `account`, `message_id`, `size` e `text` (truncado em 50.000 caracteres; aviso de texto não extraível quando vazio).
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança erro se o anexo passar de 5 MB. Propaga os erros de `gmailGet()` e `attachmentBytesToText()`.
+- **Does:** Downloads a Gmail attachment as bounded text.
+- **Input:** `deps`: connector dependencies (settings, KV, network, clock). `account`: allowed account. `ids`: the message's `messageId` and the attachment's `attachmentId`.
+- **Output:** Object with `account`, `message_id`, `size` and `text` (truncated at 50,000 characters; a notice of non-extractable text when empty).
+- **Effects:** Network: Gmail API (and Google token endpoint, if renewing). KV and isolate memory for the access token.
+- **Errors:** Throws if the attachment exceeds 5 MB. Propagates the errors of `gmailGet()` and `attachmentBytesToText()`.
 
 ### `downloadAttachment`
 
@@ -4267,11 +4267,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Baixa os bytes de um anexo com o tamanho informado pelo Gmail.
-- **Input:** `deps`, `ref`: conta; `ids`: mensagem e anexo.
-- **Output:** `{ size, bytes }` (size é o do Gmail ou o dos bytes).
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Propaga os erros de `gmailGet()`.
+- **Does:** Downloads an attachment's bytes with the size reported by Gmail.
+- **Input:** `deps`, `ref`: account; `ids`: message and attachment.
+- **Output:** `{ size, bytes }` (size is Gmail's or the bytes' length).
+- **Effects:** Network: Gmail API (and Google token endpoint, if renewing). KV and isolate memory for the access token.
+- **Errors:** Propagates the errors of `gmailGet()`.
 
 ## `connectors/gmail/src/config.ts`
 
@@ -4286,11 +4286,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se o texto parece um e-mail simples (`nome@dominio.tld`, sem espaços).
-- **Input:** `text`: texto a conferir.
-- **Output:** Verdadeiro se tem o formato de e-mail; falso no resto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether the text looks like a simple email address (`nome@dominio.tld`, no spaces).
+- **Input:** `text`: text to check.
+- **Output:** True if it has the email format; false otherwise.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseAllowedEmails`
 
@@ -4303,11 +4303,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a lista opcional `ALLOWED_EMAILS`.
-- **Input:** `raw`: valor do secret (vírgulas), ou nulo.
-- **Output:** E-mails em minúsculas; nulo se vazio (modo público).
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se algum item não for e-mail.
+- **Does:** Reads the optional `ALLOWED_EMAILS` list.
+- **Input:** `raw`: secret value (comma-separated), or null.
+- **Output:** Lowercase emails; null if empty (public mode).
+- **Effects:** None (pure).
+- **Errors:** Throws if any item is not an email.
 
 ### `requiredSecret`
 
@@ -4320,11 +4320,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma variável obrigatória do Worker.
-- **Input:** `env`: variáveis de texto do Worker. `name`: nome da variável.
-- **Output:** O valor da variável, sem espaços nas pontas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro com o comando `wrangler secret put` se a variável faltar, estiver vazia ou for um placeholder.
+- **Does:** Reads a required Worker variable.
+- **Input:** `env`: Worker text variables. `name`: variable name.
+- **Output:** The variable's value, trimmed.
+- **Effects:** None (pure).
+- **Errors:** Throws with the `wrangler secret put` command if the variable is missing, empty or a placeholder.
 
 ### `readConsentSecret`
 
@@ -4337,11 +4337,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o segredo do consentimento lembrado com o tamanho mínimo exigido.
-- **Input:** `env`: variáveis de texto do Worker.
-- **Output:** O valor de `CONSENT_SECRET`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se o segredo tiver menos de 32 caracteres. Propaga o erro de `requiredSecret()`.
+- **Does:** Reads the remembered-consent secret with the required minimum length.
+- **Input:** `env`: Worker text variables.
+- **Output:** The value of `CONSENT_SECRET`.
+- **Effects:** None (pure).
+- **Errors:** Throws if the secret has fewer than 32 characters. Propagates the error of `requiredSecret()`.
 
 ### `readGmailSettings`
 
@@ -4354,11 +4354,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a configuração a partir dos secrets do Worker.
-- **Input:** `env`: variáveis e secrets em texto.
-- **Output:** `GmailSettings` com cliente Google, chave de cifra, allowlist opcional e segredo do consentimento.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro dizendo qual secret falta ou está inválido.
+- **Does:** Builds the settings from the Worker secrets.
+- **Input:** `env`: text variables and secrets.
+- **Output:** `GmailSettings` with Google client, encryption key, optional allowlist and consent secret.
+- **Effects:** None (pure).
+- **Errors:** Throws saying which secret is missing or invalid.
 
 ### `isEmailAllowed`
 
@@ -4371,11 +4371,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se o e-mail pode entrar no conector.
-- **Input:** `settings`: configuração. `email`: e-mail verificado do login.
-- **Output:** `true` no modo público; no privado, só para os e-mails de `ALLOWED_EMAILS`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether the email may enter the connector.
+- **Input:** `settings`: settings. `email`: verified sign-in email.
+- **Output:** `true` in public mode; in private mode, only for the emails in `ALLOWED_EMAILS`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `hasModifyScope`
 
@@ -4388,11 +4388,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se os escopos concedidos incluem `gmail.modify`.
-- **Input:** `scope`: escopos separados por espaço.
-- **Output:** `true` se tiver `gmail.modify` exato.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether the granted scopes include `gmail.modify`.
+- **Input:** `scope`: space-separated scopes.
+- **Output:** `true` if it has exactly `gmail.modify`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/gmail-api.ts`
 
@@ -4407,11 +4407,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a URL de um caminho da Gmail API com os parâmetros dados.
-- **Input:** `path`: caminho relativo à base da conta (ex.: `messages/<id>`). `params`: parâmetros opcionais; listas viram o parâmetro repetido.
-- **Output:** A URL completa; parâmetros nulos, indefinidos ou vazios são omitidos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the URL of a Gmail API path with the given parameters.
+- **Input:** `path`: path relative to the account base (e.g. `messages/<id>`). `params`: optional parameters; lists become a repeated parameter.
+- **Output:** The full URL; null, undefined or empty parameters are omitted.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `gmailHttpError`
 
@@ -4424,11 +4424,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o erro acionável de uma falha da Gmail API.
-- **Input:** `status`: status HTTP. `alias`: apelido da conta.
-- **Output:** `Error` com a conta e a orientação.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the actionable error for a Gmail API failure.
+- **Input:** `status`: HTTP status. `alias`: account alias.
+- **Output:** `Error` with the account and the guidance.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `gmailGet`
 
@@ -4441,11 +4441,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê um recurso da Gmail API como JSON, com nova tentativa depois de 401.
-- **Input:** `deps`: dependências com o usuário. `ref`: conta. `url`: URL da Gmail API.
-- **Output:** O corpo JSON.
-- **Effects:** Rede: Gmail API e, se renovar, Google. Memória do isolate: esquece o token depois de 401.
-- **Errors:** Lança `gmailHttpError()` se a resposta final falhar; propaga os de `getAccessToken()`.
+- **Does:** Reads a Gmail API resource as JSON, retrying after a 401.
+- **Input:** `deps`: dependencies with the user. `ref`: account. `url`: Gmail API URL.
+- **Output:** The JSON body.
+- **Effects:** Network: Gmail API and, if renewing, Google. Isolate memory: forgets the token after a 401.
+- **Errors:** Throws `gmailHttpError()` if the final response fails; propagates those of `getAccessToken()`.
 
 ### `gmailErrorDetail`
 
@@ -4458,11 +4458,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê `error.message` de uma resposta de erro da Gmail API, limitado a 200 caracteres.
-- **Input:** `response`: resposta de falha.
-- **Output:** O detalhe, ou nulo.
-- **Effects:** Consome o corpo da resposta.
-- **Errors:** Nenhum: corpo inválido vira nulo.
+- **Does:** Reads `error.message` from a Gmail API error response, limited to 200 characters.
+- **Input:** `response`: failed response.
+- **Output:** The detail, or null.
+- **Effects:** Consumes the response body.
+- **Errors:** None: an invalid body becomes null.
 
 ### `sendGmailRequest`
 
@@ -4475,11 +4475,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Envia um pedido autenticado à Gmail API (método, corpo JSON, token, User-Agent).
-- **Input:** `deps`; `request`: URL, método e corpo; `token`: access token.
-- **Output:** A `Response`.
-- **Effects:** Rede: Gmail API.
-- **Errors:** Propaga falhas de rede.
+- **Does:** Sends an authenticated request to the Gmail API (method, JSON body, token, User-Agent).
+- **Input:** `deps`; `request`: URL, method and body; `token`: access token.
+- **Output:** The `Response`.
+- **Effects:** Network: Gmail API.
+- **Errors:** Propagates network failures.
 
 ### `readGmailJson`
 
@@ -4492,11 +4492,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o JSON de uma resposta de sucesso; corpo vazio vira objeto vazio.
-- **Input:** `response`: resposta 2xx.
-- **Output:** O JSON tipado, ou `{}`.
-- **Effects:** Consome o corpo da resposta.
-- **Errors:** Lança erro se o corpo não for JSON.
+- **Does:** Reads the JSON of a successful response; an empty body becomes an empty object.
+- **Input:** `response`: 2xx response.
+- **Output:** The typed JSON, or `{}`.
+- **Effects:** Consumes the response body.
+- **Errors:** Throws if the body is not JSON.
 
 ### `gmailCall`
 
@@ -4509,11 +4509,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Faz um pedido à Gmail API e lê o JSON; depois de 401 renova o token e tenta mais uma vez.
-- **Input:** `deps`, `ref`: conta; `request`: URL, método e corpo.
-- **Output:** O JSON da resposta.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança `gmailHttpError()` (com o detalhe do Gmail) em falha HTTP; propaga os de `getAccessToken()`.
+- **Does:** Makes a Gmail API request and reads the JSON; after a 401 it renews the token and tries once more.
+- **Input:** `deps`, `ref`: account; `request`: URL, method and body.
+- **Output:** The response JSON.
+- **Effects:** Network: Gmail API (and Google token endpoint, if renewing). KV and isolate memory for the access token.
+- **Errors:** Throws `gmailHttpError()` (with the Gmail detail) on HTTP failure; propagates those of `getAccessToken()`.
 
 ### `gmailWrite`
 
@@ -4526,11 +4526,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Escreve na Gmail API exigindo antes o escopo `gmail.modify` da conta.
-- **Input:** `deps`, `ref`: conta; `request`: pedido de escrita.
-- **Output:** O JSON da resposta.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+- **Does:** Writes to the Gmail API, first requiring the account's `gmail.modify` scope.
+- **Input:** `deps`, `ref`: account; `request`: write request.
+- **Output:** The response JSON.
+- **Effects:** Network: Gmail API (and Google token endpoint, if renewing). KV and isolate memory for the access token.
+- **Errors:** Throws `writeAccessError()` for a read-only account; propagates the errors of `gmailCall()`.
 
 ## `connectors/gmail/src/google-oauth.ts`
 
@@ -4545,11 +4545,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o endereço de retorno do Google para a origem do Worker.
-- **Input:** `origin`: origem pública do Worker, sem barra no fim.
-- **Output:** A URL `<origin>/google/callback`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the Google redirect URI for the Worker origin.
+- **Input:** `origin`: public Worker origin, without trailing slash.
+- **Output:** The URL `<origin>/google/callback`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `googleAuthorizeUrl`
 
@@ -4562,11 +4562,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a URL de autorização do Google.
-- **Input:** `params`: cliente, endereço de retorno, escopos, `state`, desafio PKCE, `nonce` e `offline` (pede refresh token e novo consentimento).
-- **Output:** A URL de autorização com PKCE S256 e escolha de conta.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the Google authorization URL.
+- **Input:** `params`: client, redirect URI, scopes, `state`, PKCE challenge, `nonce` and `offline` (requests a refresh token and new consent).
+- **Output:** The authorization URL with PKCE S256 and account selection.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `randomToken`
 
@@ -4579,11 +4579,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Gera um texto aleatório em base64url (state, nonce, verificador PKCE).
-- **Input:** `bytes`: bytes de entropia; padrão 32.
-- **Output:** O texto aleatório em base64url.
-- **Effects:** Lê o gerador aleatório criptográfico.
-- **Errors:** Nenhum.
+- **Does:** Generates a random base64url string (state, nonce, PKCE verifier).
+- **Input:** `bytes`: entropy bytes; default 32.
+- **Output:** The random base64url string.
+- **Effects:** Reads the cryptographic random generator.
+- **Errors:** None.
 
 ### `parseGoogleTokens`
 
@@ -4596,11 +4596,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida o JSON de sucesso do endpoint de tokens do Google.
-- **Input:** `body`: corpo JSON da resposta, de qualquer forma.
-- **Output:** Os tokens; `expiresIn` vale 3600 se faltar, refresh token e `id_token` nulos se faltarem, escopo vazio se faltar.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `GoogleTokenError` (`invalid_response`) se faltar o access token.
+- **Does:** Validates the success JSON from the Google token endpoint.
+- **Input:** `body`: response JSON body, of any shape.
+- **Output:** The tokens; `expiresIn` is 3600 if missing, refresh token and `id_token` null if missing, empty scope if missing.
+- **Effects:** None (pure).
+- **Errors:** Throws `GoogleTokenError` (`invalid_response`) if the access token is missing.
 
 ### `googleErrorCode`
 
@@ -4613,11 +4613,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o código de erro OAuth de uma resposta de falha do Google.
-- **Input:** `response`: resposta HTTP de falha.
-- **Output:** O campo `error` do corpo; `http_<status>` se o corpo não for JSON ou não tiver `error`.
-- **Effects:** Consome o corpo da resposta.
-- **Errors:** Nenhum.
+- **Does:** Extracts the OAuth error code from a Google failure response.
+- **Input:** `response`: failed HTTP response.
+- **Output:** The body's `error` field; `http_<status>` if the body is not JSON or has no `error`.
+- **Effects:** Consumes the response body.
+- **Errors:** None.
 
 ### `postGoogleToken`
 
@@ -4630,11 +4630,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Envia um formulário ao endpoint de tokens do Google com as credenciais do cliente.
-- **Input:** `deps`: dependências do conector (configuração, rede). `form`: campos do pedido (tipo de concessão e dados dela).
-- **Output:** Os tokens validados.
-- **Effects:** Rede: endpoint de tokens do Google.
-- **Errors:** Lança `GoogleTokenError` com o código do Google se a resposta não for de sucesso. Propaga os erros de `parseGoogleTokens()` e de rede.
+- **Does:** Sends a form to the Google token endpoint with the client credentials.
+- **Input:** `deps`: connector dependencies (settings, network). `form`: request fields (grant type and its data).
+- **Output:** The validated tokens.
+- **Effects:** Network: Google token endpoint.
+- **Errors:** Throws `GoogleTokenError` with Google's code if the response is not successful. Propagates the errors of `parseGoogleTokens()` and network errors.
 
 ### `exchangeGoogleCode`
 
@@ -4647,11 +4647,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Troca o código de autorização do Google (com o verificador PKCE) por tokens.
-- **Input:** `deps`: dependências do conector (configuração, origem, rede). `code`: código recebido no retorno. `verifier`: verificador PKCE da autorização.
-- **Output:** Os tokens validados.
-- **Effects:** Rede: endpoint de tokens do Google.
-- **Errors:** Propaga os erros de `postGoogleToken()`.
+- **Does:** Exchanges the Google authorization code (with the PKCE verifier) for tokens.
+- **Input:** `deps`: connector dependencies (settings, origin, network). `code`: code received on the callback. `verifier`: PKCE verifier from the authorization.
+- **Output:** The validated tokens.
+- **Effects:** Network: Google token endpoint.
+- **Errors:** Propagates the errors of `postGoogleToken()`.
 
 ### `refreshGoogleToken`
 
@@ -4664,11 +4664,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Renova o access token com o refresh token guardado.
-- **Input:** `deps`: dependências do conector (configuração, rede). `refreshToken`: refresh token da conta.
-- **Output:** Os tokens validados.
-- **Effects:** Rede: endpoint de tokens do Google.
-- **Errors:** Propaga os erros de `postGoogleToken()` (`invalid_grant` quando o acesso foi revogado).
+- **Does:** Renews the access token with the stored refresh token.
+- **Input:** `deps`: connector dependencies (settings, network). `refreshToken`: the account's refresh token.
+- **Output:** The validated tokens.
+- **Effects:** Network: Google token endpoint.
+- **Errors:** Propagates the errors of `postGoogleToken()` (`invalid_grant` when access was revoked).
 
 ### `revokeGoogleToken`
 
@@ -4681,11 +4681,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Revoga o refresh token no Google.
-- **Input:** `deps`: dependências. `token`: refresh token.
-- **Output:** `true` se o Google confirmou; `false` se recusou ou a rede falhou.
-- **Effects:** Rede: endpoint de revogação do Google.
-- **Errors:** Nenhum (falha devolve `false`).
+- **Does:** Revokes the refresh token at Google.
+- **Input:** `deps`: dependencies. `token`: refresh token.
+- **Output:** `true` if Google confirmed; `false` if it refused or the network failed.
+- **Effects:** Network: Google revocation endpoint.
+- **Errors:** None (a failure returns `false`).
 
 ## `connectors/gmail/src/id-token.ts`
 
@@ -4700,11 +4700,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica um pedaço base64url de JSON em objeto.
-- **Input:** `part`: cabeçalho ou payload do JWT em base64url.
-- **Output:** O objeto decodificado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se o JSON não for objeto. Propaga o `SyntaxError` de JSON inválido.
+- **Does:** Decodes a base64url JSON segment into an object.
+- **Input:** `part`: JWT header or payload in base64url.
+- **Output:** The decoded object.
+- **Effects:** None (pure).
+- **Errors:** Throws if the JSON is not an object. Propagates the `SyntaxError` of invalid JSON.
 
 ### `decodeJwt`
 
@@ -4717,11 +4717,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Separa e decodifica um JWT (`header.payload.assinatura`).
-- **Input:** `token`: JWT compacto.
-- **Output:** Cabeçalho, payload, texto assinado e bytes da assinatura.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se o token não tiver três partes. Propaga os erros de `decodeJwtJson()`.
+- **Does:** Splits and decodes a JWT (`header.payload.assinatura`).
+- **Input:** `token`: compact JWT.
+- **Output:** Header, payload, signed text and signature bytes.
+- **Effects:** None (pure).
+- **Errors:** Throws if the token does not have three parts. Propagates the errors of `decodeJwtJson()`.
 
 ### `idTokenProblems`
 
@@ -4734,11 +4734,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista as verificações do `id_token` que falharam.
-- **Input:** `payload`: claims do `id_token`. `expected`: cliente, `nonce` e instante atual em segundos Unix.
-- **Output:** Nomes das verificações que falharam (emissor, audiência, validade, nonce, e-mail verificado); vazio quando todas passam.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Lists the `id_token` checks that failed.
+- **Input:** `payload`: `id_token` claims. `expected`: client, `nonce` and current instant in Unix seconds.
+- **Output:** Names of the failed checks (issuer, audience, expiry, nonce, verified email); empty when all pass.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `checkIdTokenClaims`
 
@@ -4751,11 +4751,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere as claims do `id_token`.
-- **Input:** `payload`: claims. `expected`: cliente, `nonce` e instante atual.
-- **Output:** `GoogleIdentity` com `sub` e e-mail em minúsculas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro listando as verificações que falharam.
+- **Does:** Checks the `id_token` claims.
+- **Input:** `payload`: claims. `expected`: client, `nonce` and current instant.
+- **Output:** `GoogleIdentity` with `sub` and lowercase email.
+- **Effects:** None (pure).
+- **Errors:** Throws listing the checks that failed.
 
 ### `fetchGoogleKey`
 
@@ -4768,11 +4768,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Busca a chave pública do Google com o `kid` dado.
-- **Input:** `deps`: dependências do conector (rede). `kid`: identificador da chave no cabeçalho do JWT.
-- **Output:** A chave pública em formato JWK.
-- **Effects:** Rede: JWKS do Google.
-- **Errors:** Lança erro se a resposta não for de sucesso ou se a chave não existir. Propaga as falhas de rede.
+- **Does:** Fetches the Google public key with the given `kid`.
+- **Input:** `deps`: connector dependencies (network). `kid`: key identifier in the JWT header.
+- **Output:** The public key in JWK format.
+- **Effects:** Network: Google JWKS.
+- **Errors:** Throws if the response is not successful or the key does not exist. Propagates network failures.
 
 ### `verifyRs256`
 
@@ -4785,11 +4785,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere a assinatura RS256 do JWT com a chave pública dada.
-- **Input:** `jwt`: JWT decodificado. `jwk`: chave pública RSA em formato JWK.
-- **Output:** Verdadeiro se a assinatura confere; falso no resto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Propaga o erro de `crypto.subtle.importKey` se a chave for inválida.
+- **Does:** Checks the JWT's RS256 signature with the given public key.
+- **Input:** `jwt`: decoded JWT. `jwk`: RSA public key in JWK format.
+- **Output:** True if the signature matches; false otherwise.
+- **Effects:** None (pure).
+- **Errors:** Propagates the error of `crypto.subtle.importKey` if the key is invalid.
 
 ### `verifyGoogleIdToken`
 
@@ -4802,11 +4802,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida o `id_token` do Google.
-- **Input:** `deps`: dependências. `idToken`: JWT. `nonce`: valor esperado.
-- **Output:** `GoogleIdentity` verificada.
-- **Effects:** Rede: JWKS do Google.
-- **Errors:** Lança erro de algoritmo, chave, assinatura ou claims inválidas.
+- **Does:** Validates the Google `id_token`.
+- **Input:** `deps`: dependencies. `idToken`: JWT. `nonce`: expected value.
+- **Output:** Verified `GoogleIdentity`.
+- **Effects:** Network: Google JWKS.
+- **Errors:** Throws on invalid algorithm, key, signature or claims.
 
 ## `connectors/gmail/src/link-flow.ts`
 
@@ -4821,11 +4821,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a chave do pedido de vínculo no KV.
-- **Input:** `state`: `state` do vínculo recebido ou gerado.
-- **Output:** Texto `link:<sha256 do state>`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the KV key of the link request.
+- **Input:** `state`: link `state`, received or generated.
+- **Output:** Text `link:<sha256 do state>`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readCookie`
 
@@ -4838,11 +4838,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o valor de um cookie do header `Cookie`.
-- **Input:** `header`: valor do header `Cookie`, ou nulo. `name`: nome exato do cookie.
-- **Output:** Valor do cookie (pode conter `=`), ou nulo se o header faltar ou não tiver o cookie.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads a cookie value from the `Cookie` header.
+- **Input:** `header`: `Cookie` header value, or null. `name`: exact cookie name.
+- **Output:** Cookie value (may contain `=`), or null if the header is missing or lacks the cookie.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `linkCookie`
 
@@ -4855,11 +4855,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o header `Set-Cookie` do vínculo.
-- **Input:** `value`: valor do cookie, ou nulo para apagá-lo.
-- **Output:** Texto do `Set-Cookie` de `__Host-gmail-link` (`Secure`, `HttpOnly`, `SameSite=Lax`), com `Max-Age` de 600 s ou 0 quando `value` é nulo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the link `Set-Cookie` header.
+- **Input:** `value`: cookie value, or null to delete it.
+- **Output:** `Set-Cookie` text for `__Host-gmail-link` (`Secure`, `HttpOnly`, `SameSite=Lax`), with `Max-Age` of 600 s, or 0 when `value` is null.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `startAccountLink`
 
@@ -4872,11 +4872,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resgata o ticket e manda o navegador ao Google para vincular a conta.
-- **Input:** `deps`: dependências. `request`: requisição de `/accounts/link?ticket=...`.
-- **Output:** 302 ao Google com cookie de vínculo; página 400 sem ticket válido.
-- **Effects:** KV: marca o ticket e grava o pedido selado (10 minutos). Define o cookie `__Host-gmail-link`.
-- **Errors:** Propaga falhas do KV.
+- **Does:** Redeems the ticket and sends the browser to Google to link the account.
+- **Input:** `deps`: dependencies. `request`: request to `/accounts/link?ticket=...`.
+- **Output:** 302 to Google with the link cookie; 400 page without a valid ticket.
+- **Effects:** KV: marks the ticket and stores the sealed request (10 minutes). Sets the `__Host-gmail-link` cookie.
+- **Errors:** Propagates KV failures.
 
 ### `takeLinkRequest`
 
@@ -4889,11 +4889,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Recupera e apaga o pedido de vínculo da volta do Google.
-- **Input:** `deps`: dependências. `request`: volta do Google com `state` e cookie.
-- **Output:** Usuário, verificador e `nonce`; nulo se ausente, vencido ou de outro navegador.
-- **Effects:** KV: lê e apaga o pedido (uso único).
-- **Errors:** Propaga falhas do KV.
+- **Does:** Retrieves and deletes the link request on the return from Google.
+- **Input:** `deps`: dependencies. `request`: Google callback with `state` and cookie.
+- **Output:** User, verifier and `nonce`; null if absent, expired or from another browser.
+- **Effects:** KV: reads and deletes the request (single use).
+- **Errors:** Propagates KV failures.
 
 ### `linkFromCode`
 
@@ -4906,11 +4906,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Troca o código do Google e grava a conta no usuário do ticket.
-- **Input:** `deps`: dependências. `code`: código do Google. `link`: pedido recuperado (usuário, verificador, `nonce`).
-- **Output:** Página de sucesso, ou página 400 sem `id_token` ou sem permissão do Gmail.
-- **Effects:** Rede: tokens e JWKS do Google. KV: grava a conta.
-- **Errors:** Propaga falhas da troca, do `id_token` e do limite de contas (tratadas por `linkSafely()`).
+- **Does:** Exchanges the Google code and stores the account under the ticket's user.
+- **Input:** `deps`: dependencies. `code`: Google code. `link`: retrieved request (user, verifier, `nonce`).
+- **Output:** Success page, or 400 page without `id_token` or without Gmail permission.
+- **Effects:** Network: Google tokens and JWKS. KV: stores the account.
+- **Errors:** Propagates failures of the exchange, the `id_token` and the account limit (handled by `linkSafely()`).
 
 ### `linkSafely`
 
@@ -4923,11 +4923,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Roda `linkFromCode()` convertendo falhas em página de erro.
-- **Input:** `deps`: dependências do conector. `code`: código do Google. `link`: pedido de vínculo recuperado.
-- **Output:** A página de `linkFromCode()`, ou página 400 com a mensagem do erro.
-- **Effects:** Os de `linkFromCode()` (rede com o Google; grava a conta no KV quando permitida).
-- **Errors:** Nenhum: qualquer falha vira página 400 e nada é gravado.
+- **Does:** Runs `linkFromCode()`, turning failures into an error page.
+- **Input:** `deps`: connector dependencies. `code`: Google code. `link`: retrieved link request.
+- **Output:** The page from `linkFromCode()`, or a 400 page with the error message.
+- **Effects:** Those of `linkFromCode()` (network with Google; stores the account in KV when allowed).
+- **Errors:** None: any failure becomes a 400 page and nothing is stored.
 
 ### `finishAccountLink`
 
@@ -4940,11 +4940,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende a volta do Google no vínculo de conta.
-- **Input:** `deps`: dependências. `request`: volta com `state`, `code` ou `error` e o cookie.
-- **Output:** Página do resultado, sempre com o cookie de vínculo apagado.
-- **Effects:** Os de `takeLinkRequest()` e `linkSafely()`; apaga o cookie.
-- **Errors:** Nenhum: falhas viram página 400.
+- **Does:** Handles the Google callback in account linking.
+- **Input:** `deps`: dependencies. `request`: callback with `state`, `code` or `error` and the cookie.
+- **Output:** Result page, always with the link cookie deleted.
+- **Effects:** Those of `takeLinkRequest()` and `linkSafely()`; deletes the cookie.
+- **Errors:** None: failures become a 400 page.
 
 ### `nowSeconds`
 
@@ -4957,11 +4957,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o relógio das dependências em segundos Unix.
-- **Input:** `deps`: dependências.
-- **Output:** Segundos inteiros.
-- **Effects:** Lê o relógio injetado.
-- **Errors:** Nenhum.
+- **Does:** Converts the dependencies' clock to Unix seconds.
+- **Input:** `deps`: dependencies.
+- **Output:** Whole seconds.
+- **Effects:** Reads the injected clock.
+- **Errors:** None.
 
 ### `issueLinkUrl`
 
@@ -4974,11 +4974,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Gera o link de vínculo de uso único do usuário.
-- **Input:** `deps`: dependências com o usuário.
-- **Output:** `<origem>/accounts/link?ticket=<selo>`, válido por 10 minutos.
-- **Effects:** Nenhum (só sela; não grava nada).
-- **Errors:** Nenhum.
+- **Does:** Generates the user's single-use link URL.
+- **Input:** `deps`: dependencies with the user.
+- **Output:** `<origem>/accounts/link?ticket=<selo>`, valid for 10 minutes.
+- **Effects:** None (only seals; stores nothing).
+- **Errors:** None.
 
 ### `redeemLinkTicket`
 
@@ -4991,11 +4991,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resgata o ticket de vínculo uma única vez.
-- **Input:** `deps`: dependências. `ticket`: selo do link.
-- **Output:** O usuário do ticket; nulo se inválido, vencido ou já usado.
-- **Effects:** KV: lê e grava a marca de uso do `jti` (validade de 10 minutos).
-- **Errors:** Propaga falhas do KV.
+- **Does:** Redeems the link ticket only once.
+- **Input:** `deps`: dependencies. `ticket`: link seal.
+- **Output:** The ticket's user; null if invalid, expired or already used.
+- **Effects:** KV: reads and writes the `jti` usage mark (valid for 10 minutes).
+- **Errors:** Propagates KV failures.
 
 ### `invalidTicketPage`
 
@@ -5008,11 +5008,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a página de link de vínculo inválido.
-- **Input:** Nenhuma.
-- **Output:** Página 400 que orienta a pedir outro link com `link_account`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the invalid link URL page.
+- **Input:** None.
+- **Output:** 400 page telling the user to request another link with `link_account`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `linkRefusalReason`
 
@@ -5025,11 +5025,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz por que os tokens não servem para ler o Gmail.
-- **Input:** `tokens`: resposta do Google.
-- **Output:** Mensagem se faltar o escopo do Gmail ou o refresh token; nulo se servem.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells why the tokens cannot be used to read Gmail.
+- **Input:** `tokens`: Google response.
+- **Output:** Message if the Gmail scope or the refresh token is missing; null if they are usable.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `storeGoogleAccount`
 
@@ -5042,11 +5042,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Grava a conta Google nas contas do usuário.
-- **Input:** `deps`: dependências com o usuário. `email`: conta verificada. `tokens`: tokens do Google com refresh token.
-- **Output:** Nada.
-- **Effects:** KV: lê e regrava o registro do usuário. Memória do isolate: esquece o access token antigo.
-- **Errors:** Lança o erro de limite de `upsertAccount()`; propaga falhas do KV.
+- **Does:** Stores the Google account among the user's accounts.
+- **Input:** `deps`: dependencies with the user. `email`: verified account. `tokens`: Google tokens with refresh token.
+- **Output:** Nothing.
+- **Effects:** KV: reads and rewrites the user's record. Isolate memory: forgets the old access token.
+- **Errors:** Throws the limit error of `upsertAccount()`; propagates KV failures.
 
 ## `connectors/gmail/src/message-format.ts`
 
@@ -5061,11 +5061,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica base64url em bytes.
-- **Input:** `data`: texto em base64url (corpo ou anexo da Gmail API).
-- **Output:** Bytes decodificados; vazio para texto vazio (caracteres inválidos são ignorados).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decodes base64url into bytes.
+- **Input:** `data`: base64url text (Gmail API body or attachment).
+- **Output:** Decoded bytes; empty for empty text (invalid characters are ignored).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `partCharset`
 
@@ -5078,11 +5078,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o charset declarado no `Content-Type` de uma parte.
-- **Input:** `part`: parte MIME da Gmail API.
-- **Output:** Charset em minúsculas, ou `utf-8` se não houver.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the charset declared in a part's `Content-Type`.
+- **Input:** `part`: Gmail API MIME part.
+- **Output:** Lowercase charset, or `utf-8` if there is none.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `decodePartBody`
 
@@ -5095,11 +5095,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o corpo de uma parte MIME em texto.
-- **Input:** `part`: parte MIME da Gmail API (corpo em base64url).
-- **Output:** Texto do corpo: Windows-1252 para charsets latinos e `us-ascii`, UTF-8 nos demais; vazio sem corpo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a MIME part's body to text.
+- **Input:** `part`: Gmail API MIME part (base64url body).
+- **Output:** Body text: Windows-1252 for Latin charsets and `us-ascii`, UTF-8 for the rest; empty without a body.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `headerValues`
 
@@ -5112,11 +5112,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Indexa cabeçalhos pelo nome em minúsculas.
-- **Input:** `headers`: lista de cabeçalhos `{ name, value }`.
-- **Output:** Mapa nome em minúsculas → valor, com o primeiro de cada nome; vazio para lista vazia.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Indexes headers by lowercase name.
+- **Input:** `headers`: list of `{ name, value }` headers.
+- **Output:** Map of lowercase name → value, with the first of each name; empty for an empty list.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `flattenParts`
 
@@ -5129,11 +5129,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Achata a árvore MIME em profundidade.
-- **Input:** `part`: raiz da árvore MIME, ou indefinida. `depth`: profundidade atual (padrão 0; acima de 20 para).
-- **Output:** Todas as partes, a raiz primeiro; vazio sem raiz ou além da profundidade 20.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Flattens the MIME tree depth-first.
+- **Input:** `part`: root of the MIME tree, or undefined. `depth`: current depth (default 0; stops above 20).
+- **Output:** All parts, root first; empty without a root or beyond depth 20.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isBodyPart`
 
@@ -5146,11 +5146,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se a parte é corpo do tipo dado.
-- **Input:** `part`: parte MIME. `mimeType`: tipo esperado (ex.: `text/plain`).
-- **Output:** Verdadeiro se o tipo bate, não há nome de arquivo e há dados no corpo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether the part is a body of the given type.
+- **Input:** `part`: MIME part. `mimeType`: expected type (e.g. `text/plain`).
+- **Output:** True if the type matches, there is no filename and the body has data.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `messageBodyText`
 
@@ -5163,11 +5163,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o corpo da mensagem em texto plano.
-- **Input:** `payload`: raiz MIME da mensagem, ou indefinida.
-- **Output:** Partes `text/plain` unidas; sem elas, as `text/html` convertidas em texto; vazio sem corpo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Extracts the message body as plain text.
+- **Input:** `payload`: message MIME root, or undefined.
+- **Output:** `text/plain` parts joined; without them, the `text/html` parts converted to text; empty without a body.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `messageAttachments`
 
@@ -5180,11 +5180,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista os anexos de uma mensagem.
-- **Input:** `payload`: raiz MIME da mensagem, ou indefinida.
-- **Output:** Anexos (`attachment_id`, `filename`, `mime_type`, `size`) das partes com nome e `attachmentId`; vazio se não houver.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Lists a message's attachments.
+- **Input:** `payload`: message MIME root, or undefined.
+- **Output:** Attachments (`attachment_id`, `filename`, `mime_type`, `size`) from parts with a name and `attachmentId`; empty if there are none.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `truncateText`
 
@@ -5197,11 +5197,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Corta um texto no limite de caracteres.
-- **Input:** `text`: texto a limitar. `max`: maior número de caracteres mantidos.
-- **Output:** O texto intacto se couber; senão os `max` primeiros caracteres e um aviso de quantos ficaram de fora.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Cuts a text at the character limit.
+- **Input:** `text`: text to limit. `max`: maximum number of characters kept.
+- **Output:** The text intact if it fits; otherwise the first `max` characters and a notice of how many were left out.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `internalDateIso`
 
@@ -5214,11 +5214,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte `internalDate` da Gmail API em data ISO 8601.
-- **Input:** `internalDate`: milissegundos Unix em texto, ou indefinido.
-- **Output:** Data ISO 8601, ou nulo se vazio ou não numérico.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts the Gmail API `internalDate` to an ISO 8601 date.
+- **Input:** `internalDate`: Unix milliseconds as text, or undefined.
+- **Output:** ISO 8601 date, or null if empty or non-numeric.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pickHeaders`
 
@@ -5231,11 +5231,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Separa os cabeçalhos úteis da mensagem.
-- **Input:** `payload`: raiz MIME da mensagem, ou indefinida.
-- **Output:** Objeto com `from`, `to`, `cc`, `date` e `subject` presentes; vazio se não houver.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Picks out the message's useful headers.
+- **Input:** `payload`: message MIME root, or undefined.
+- **Output:** Object with the `from`, `to`, `cc`, `date` and `subject` present; empty if there are none.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `formatMessage`
 
@@ -5248,11 +5248,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte uma mensagem da Gmail API em objeto enxuto.
-- **Input:** `message`: mensagem da Gmail API. `format`: `text` (com corpo) ou `minimal`. `maxChars`: limite do corpo (padrão 20.000).
-- **Output:** Ids, data, cabeçalhos, rótulos, resumo e anexos; no formato `text`, também o corpo cortado no limite. Campos ausentes viram nulo ou vazio.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a Gmail API message into a lean object.
+- **Input:** `message`: Gmail API message. `format`: `text` (with body) or `minimal`. `maxChars`: body limit (default 20,000).
+- **Output:** Ids, date, headers, labels, snippet and attachments; in `text` format, also the body cut at the limit. Missing fields become null or empty.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `perMessageLimit`
 
@@ -5265,11 +5265,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula o limite de corpo por mensagem numa conversa.
-- **Input:** `count`: número de mensagens da conversa (0 conta como 1).
-- **Output:** 60.000 dividido por `count`, entre 2.000 e 20.000 caracteres.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Computes the per-message body limit in a thread.
+- **Input:** `count`: number of messages in the thread (0 counts as 1).
+- **Output:** 60,000 divided by `count`, between 2,000 and 20,000 characters.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `formatThread`
 
@@ -5282,11 +5282,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte uma conversa da Gmail API em objeto enxuto.
-- **Input:** `thread`: conversa da Gmail API. `format`: `text` (com corpos) ou `minimal`.
-- **Output:** `thread_id`, `message_count` e as mensagens formatadas, com o limite de corpo dividido entre elas; lista vazia sem mensagens.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a Gmail API thread into a lean object.
+- **Input:** `thread`: Gmail API thread. `format`: `text` (with bodies) or `minimal`.
+- **Output:** `thread_id`, `message_count` and the formatted messages, with the body limit split among them; empty list without messages.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `summarizeThread`
 
@@ -5299,11 +5299,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resume uma conversa para a busca.
-- **Input:** `thread`: conversa da Gmail API (só cabeçalhos basta). `account`: apelido da conta.
-- **Output:** Conta, `thread_id`, assunto da primeira mensagem, remetente, data, resumo e rótulos da última, e `message_count`; texto vazio ou nulo onde faltar dado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Summarizes a thread for search.
+- **Input:** `thread`: Gmail API thread (headers only is enough). `account`: account alias.
+- **Output:** Account, `thread_id`, subject of the first message, sender, date, snippet and labels of the last one, and `message_count`; empty text or null where data is missing.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/pages.ts`
 
@@ -5318,11 +5318,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o documento HTML completo de uma página.
-- **Input:** `title`: título (escapado aqui). `body`: corpo HTML já escapado por quem chama.
-- **Output:** HTML com `lang="pt-BR"`, título e estilo inline.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds a page's full HTML document.
+- **Input:** `title`: title (escaped here). `body`: HTML body already escaped by the caller.
+- **Output:** HTML with `lang="pt-BR"`, title and inline style.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `messagePage`
 
@@ -5335,11 +5335,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta uma página simples de aviso.
-- **Input:** `title`: título em texto. `message`: mensagem em texto. `status`: código HTTP (padrão 200).
-- **Output:** Resposta HTML com o status dado, CSP restritiva e `no-store`; título e mensagem escapados.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds a simple notice page.
+- **Input:** `title`: plain-text title. `message`: plain-text message. `status`: HTTP code (default 200).
+- **Output:** HTML response with the given status, restrictive CSP and `no-store`; title and message escaped.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `consentPageBody`
 
@@ -5352,11 +5352,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o corpo HTML da página de consentimento.
-- **Input:** `details`: descrição do cliente OAuth (nome, destino, se é loopback). `handle`: identificador da transação de consentimento.
-- **Output:** HTML com quem pede, para onde vai o acesso, aviso de loopback quando houver e o formulário Permitir/Negar; tudo escapado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the HTML body of the consent page.
+- **Input:** `details`: OAuth client description (name, destination, whether it is loopback). `handle`: consent transaction identifier.
+- **Output:** HTML with who is asking, where the access goes, a loopback notice when applicable and the Allow/Deny form; all escaped.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `copyConsentHeaders`
 
@@ -5369,11 +5369,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Copia para a resposta os headers da transação de consentimento.
-- **Input:** `response`: resposta da página. `headers`: headers da biblioteca OAuth (cookies e anti-frame).
-- **Output:** A mesma resposta com os cookies acrescentados e os demais headers copiados, exceto `content-type`, CSP e `set-cookie`.
-- **Effects:** Altera os headers da resposta recebida.
-- **Errors:** Nenhum.
+- **Does:** Copies the consent transaction headers into the response.
+- **Input:** `response`: page response. `headers`: OAuth library headers (cookies and anti-framing).
+- **Output:** The same response with the cookies appended and the other headers copied, except `content-type`, CSP and `set-cookie`.
+- **Effects:** Mutates the headers of the received response.
+- **Errors:** None.
 
 ### `consentPage`
 
@@ -5386,11 +5386,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a página de consentimento do conector.
-- **Input:** `details`: descrição do cliente OAuth. `handle`: identificador da transação. `headers`: headers da transação de consentimento.
-- **Output:** Página HTML 200 com CSP que só libera o formulário para o Google e a origem do retorno do cliente, mais os headers da transação.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `TypeError` se `details.redirectUri` não for URL válida.
+- **Does:** Builds the connector's consent page.
+- **Input:** `details`: OAuth client description. `handle`: transaction identifier. `headers`: consent transaction headers.
+- **Output:** HTML 200 page with a CSP that only allows the form to target Google and the client's redirect origin, plus the transaction headers.
+- **Effects:** None (pure).
+- **Errors:** Throws `TypeError` if `details.redirectUri` is not a valid URL.
 
 ### `redirectWith`
 
@@ -5403,11 +5403,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta um redirecionamento 302 com os headers dados.
-- **Input:** `location`: destino. `headers`: headers a manter, como cookies da transação (padrão vazio).
-- **Output:** Resposta 302 sem corpo, com `Location` e `cache-control: no-store`.
-- **Effects:** Altera o objeto `headers` recebido.
-- **Errors:** Nenhum.
+- **Does:** Builds a 302 redirect with the given headers.
+- **Input:** `location`: destination. `headers`: headers to keep, such as transaction cookies (default empty).
+- **Output:** Bodiless 302 response, with `Location` and `cache-control: no-store`.
+- **Effects:** Mutates the received `headers` object.
+- **Errors:** None.
 
 ## `connectors/gmail/src/rate-limit.ts`
 
@@ -5422,11 +5422,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se a sessão passou do limite de requisições.
-- **Input:** `limiter`: binding de rate limiting do Workers, ou indefinido. `key`: chave da sessão (id da sessão OAuth).
-- **Output:** Verdadeiro se o binding recusou; falso se aceitou ou se não há binding.
-- **Effects:** Conta a requisição no binding de rate limiting.
-- **Errors:** Nenhum próprio; falhas do binding propagam.
+- **Does:** Tells whether the session exceeded the request limit.
+- **Input:** `limiter`: Workers rate limiting binding, or undefined. `key`: session key (OAuth session id).
+- **Output:** True if the binding refused; false if it accepted or there is no binding.
+- **Effects:** Counts the request in the rate limiting binding.
+- **Errors:** None of its own; binding failures propagate.
 
 ### `rateLimitedResponse`
 
@@ -5439,11 +5439,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a resposta de excesso de requisições.
-- **Input:** Nenhuma.
-- **Output:** Resposta 429 em JSON (`rate_limited`) com `Retry-After: 60`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the too-many-requests response.
+- **Input:** None.
+- **Output:** 429 JSON response (`rate_limited`) with `Retry-After: 60`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/search.ts`
 
@@ -5458,11 +5458,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Codifica os `page_token` de várias contas num só texto.
-- **Input:** `tokens`: `page_token` por apelido de conta.
-- **Output:** Base64url do JSON dos tokens, ou nulo se não houver nenhum.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Encodes the `page_token`s of several accounts into a single string.
+- **Input:** `tokens`: `page_token` per account alias.
+- **Output:** Base64url of the tokens' JSON, or null if there are none.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `decodeMultiPageToken`
 
@@ -5475,11 +5475,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica o `page_token` de várias contas.
-- **Input:** `token`: `next_page_token` de uma busca anterior com `all`.
-- **Output:** `page_token` por apelido; entradas que não são texto são descartadas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro acionável ("page_token inválido") se o texto não for base64url de um objeto JSON.
+- **Does:** Decodes the multi-account `page_token`.
+- **Input:** `token`: `next_page_token` from a previous search with `all`.
+- **Output:** `page_token` per alias; non-string entries are discarded.
+- **Effects:** None (pure).
+- **Errors:** Throws an actionable error ("page_token inválido") if the text is not base64url of a JSON object.
 
 ### `fetchThreadMetadata`
 
@@ -5492,11 +5492,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma conversa só com os cabeçalhos úteis.
-- **Input:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `threadId`: id da conversa.
-- **Output:** Conversa da Gmail API em `format=metadata`, com `From`, `To`, `Cc`, `Date` e `Subject`.
-- **Effects:** Rede (Gmail API e, se preciso, renovação do token no Google); pode marcar a conta como revogada no KV.
-- **Errors:** Propaga os erros de `gmailGet`: HTTP da Gmail API, conta sem vínculo ou revogada, falha na renovação do token.
+- **Does:** Reads a thread with only the useful headers.
+- **Input:** `deps`: connector dependencies (settings, KV, network, clock). `account`: allowed account. `threadId`: thread id.
+- **Output:** Gmail API thread in `format=metadata`, with `From`, `To`, `Cc`, `Date` and `Subject`.
+- **Effects:** Network (Gmail API and, if needed, token renewal at Google); may mark the account as revoked in KV.
+- **Errors:** Propagates the errors of `gmailGet`: Gmail API HTTP, unlinked or revoked account, token renewal failure.
 
 ### `searchAccount`
 
@@ -5509,11 +5509,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Busca conversas numa conta.
-- **Input:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida. `request`: consulta, máximo de resultados e `page_token`.
-- **Output:** Resumos das conversas encontradas e o próximo `page_token`, ou nulo; lista vazia sem resultados.
-- **Effects:** Rede (Gmail API, uma leitura por conversa em paralelo, e renovação do token no Google); pode marcar a conta como revogada no KV.
-- **Errors:** Propaga os erros de `gmailGet`: HTTP da Gmail API, conta sem vínculo ou revogada, falha na renovação do token.
+- **Does:** Searches threads in one account.
+- **Input:** `deps`: connector dependencies (settings, KV, network, clock). `account`: allowed account. `request`: query, maximum results and `page_token`.
+- **Output:** Summaries of the threads found and the next `page_token`, or null; empty list without results.
+- **Effects:** Network (Gmail API, one read per thread in parallel, and token renewal at Google); may mark the account as revoked in KV.
+- **Errors:** Propagates the errors of `gmailGet`: Gmail API HTTP, unlinked or revoked account, token renewal failure.
 
 ### `threadDate`
 
@@ -5526,11 +5526,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a data ISO de um resumo de conversa.
-- **Input:** `thread`: resumo de conversa.
-- **Output:** O campo `date` se for texto; senão texto vazio.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the ISO date of a thread summary.
+- **Input:** `thread`: thread summary.
+- **Output:** The `date` field if it is a string; otherwise empty text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `sortByDateDesc`
 
@@ -5543,11 +5543,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Ordena resumos de conversas da mais recente para a mais antiga.
-- **Input:** `threads`: resumos de conversas.
-- **Output:** Nova lista ordenada por data decrescente; sem data vão para o fim.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Sorts thread summaries from newest to oldest.
+- **Input:** `threads`: thread summaries.
+- **Output:** New list sorted by descending date; those without a date go to the end.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pagesToFetch`
 
@@ -5560,11 +5560,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide quais contas consultar e com qual token.
-- **Input:** `accounts`: contas da busca. `pageToken`: `page_token` de várias contas, ou nulo na primeira página.
-- **Output:** Pares conta → token: todas as contas com nulo na primeira página; senão só as que têm token.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança o erro de `page_token` inválido de `decodeMultiPageToken`.
+- **Does:** Decides which accounts to query and with which token.
+- **Input:** `accounts`: search accounts. `pageToken`: multi-account `page_token`, or null on the first page.
+- **Output:** Account → token pairs: all accounts with null on the first page; otherwise only those that have a token.
+- **Effects:** None (pure).
+- **Errors:** Throws the invalid `page_token` error of `decodeMultiPageToken`.
 
 ### `searchThreads`
 
@@ -5577,11 +5577,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Busca conversas em uma ou várias contas.
-- **Input:** `deps`: dependências do conector (configuração, KV, rede, relógio). `accounts`: contas resolvidas. `request`: consulta, máximo por conta e `page_token`.
-- **Output:** `threads` (por data decrescente quando há várias contas) e `next_page_token`: o da conta, ou o combinado das contas; nulo quando acabou.
-- **Effects:** Rede (Gmail API em paralelo por conta e renovação do token no Google); pode marcar contas como revogadas no KV.
-- **Errors:** Lança erro de `page_token` inválido; propaga os erros de `gmailGet` de qualquer conta.
+- **Does:** Searches threads in one or several accounts.
+- **Input:** `deps`: connector dependencies (settings, KV, network, clock). `accounts`: resolved accounts. `request`: query, maximum per account and `page_token`.
+- **Output:** `threads` (by descending date when there are several accounts) and `next_page_token`: the account's, or the combined one of the accounts; null when finished.
+- **Effects:** Network (Gmail API in parallel per account and token renewal at Google); may mark accounts as revoked in KV.
+- **Errors:** Throws an invalid `page_token` error; propagates the errors of `gmailGet` from any account.
 
 ## `connectors/gmail/src/sign-in.ts`
 
@@ -5596,11 +5596,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um erro de autorização em resposta.
-- **Input:** `error`: erro capturado no fluxo de autorização.
-- **Output:** Redirecionamento 302 ao cliente se o `AuthorizationError` diz para onde; senão página 400 com a descrição do erro ou mensagem genérica.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts an authorization error into a response.
+- **Input:** `error`: error caught in the authorization flow.
+- **Output:** 302 redirect to the client if the `AuthorizationError` says where to; otherwise a 400 page with the error description or a generic message.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `beginGoogleSignIn`
 
@@ -5614,10 +5614,10 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- generated:end -->
 
 - **Does:** Starts the Google sign-in asking for identity and Gmail (`gmail.modify`) with a refresh token.
-- **Input:** `deps`: dependências. `oauth`: helpers da biblioteca. `approved`: pedido do Claude aprovado e headers.
-- **Output:** 302 ao Google pedindo `openid email gmail.modify` com acesso offline.
-- **Effects:** KV `OAUTH_KV` (pela biblioteca): grava a transação com verificador e `nonce`; define o cookie `__Host-`.
-- **Errors:** Propaga os erros da biblioteca.
+- **Input:** `deps`: dependencies. `oauth`: library helpers. `approved`: approved Claude request and headers.
+- **Output:** 302 to Google requesting `openid email gmail.modify` with offline access.
+- **Effects:** KV `OAUTH_KV` (via the library): stores the transaction with verifier and `nonce`; sets the `__Host-` cookie.
+- **Errors:** Propagates the library's errors.
 
 ### `showAuthorize`
 
@@ -5630,11 +5630,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Mostra o consentimento do `GET /authorize`.
-- **Input:** `deps`: dependências do conector (configuração, origem). `oauth`: `OAuthHelpers` da biblioteca. `request`: pedido de autorização do Claude.
-- **Output:** Página de consentimento 200; ou redirecionamento 302 ao Google se o consentimento já foi lembrado.
-- **Effects:** Lê o pedido e o cliente via `OAuthHelpers` (KV OAUTH_KV); abre a transação de consentimento ou a ida ao Google; define cookies.
-- **Errors:** Nenhum: erros de autorização viram página 400 ou redirecionamento.
+- **Does:** Shows the `GET /authorize` consent.
+- **Input:** `deps`: connector dependencies (settings, origin). `oauth`: the library's `OAuthHelpers`. `request`: Claude's authorization request.
+- **Output:** 200 consent page; or 302 redirect to Google if consent was already remembered.
+- **Effects:** Reads the request and the client via `OAuthHelpers` (KV OAUTH_KV); opens the consent transaction or the trip to Google; sets cookies.
+- **Errors:** None: authorization errors become a 400 page or a redirect.
 
 ### `submitAuthorize`
 
@@ -5647,11 +5647,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende a decisão do `POST /authorize`.
-- **Input:** `deps`: dependências do conector (configuração, origem). `oauth`: `OAuthHelpers` da biblioteca. `request`: formulário com `handle` e `decision`.
-- **Output:** Ao aprovar, redirecionamento 302 ao Google; ao negar, 302 de volta ao cliente.
-- **Effects:** Fecha a transação de consentimento via `OAuthHelpers` (KV OAUTH_KV), lembrando a aprovação por 30 dias; define cookies.
-- **Errors:** Nenhum: erros de autorização viram página 400 ou redirecionamento.
+- **Does:** Handles the `POST /authorize` decision.
+- **Input:** `deps`: connector dependencies (settings, origin). `oauth`: the library's `OAuthHelpers`. `request`: form with `handle` and `decision`.
+- **Output:** On approval, 302 redirect to Google; on denial, 302 back to the client.
+- **Effects:** Closes the consent transaction via `OAuthHelpers` (KV OAUTH_KV), remembering the approval for 30 days; sets cookies.
+- **Errors:** None: authorization errors become a 400 page or a redirect.
 
 ### `completeSignIn`
 
@@ -5664,11 +5664,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida o login no Google e conclui a autorização do Claude.
-- **Input:** `deps`: dependências. `oauth`: helpers da biblioteca. `resumed`: pedido do Claude, verificador e `nonce`, código do Google.
-- **Output:** URL de retorno ao Claude; nulo se o e-mail não pode entrar (modo privado).
-- **Effects:** Rede: Google. KV: vincula a conta e grava o grant (`OAUTH_KV`) com `props` de usuário, e-mail e sessão.
-- **Errors:** Lança erro sem `id_token`; propaga os da troca e da validação do `id_token`.
+- **Does:** Validates the Google sign-in and completes Claude's authorization.
+- **Input:** `deps`: dependencies. `oauth`: library helpers. `resumed`: Claude request, verifier and `nonce`, Google code.
+- **Output:** Redirect URL back to Claude; null if the email may not enter (private mode).
+- **Effects:** Network: Google. KV: links the account and stores the grant (`OAUTH_KV`) with `props` for user, email and session.
+- **Errors:** Throws without `id_token`; propagates those of the exchange and of the `id_token` validation.
 
 ### `finishSignIn`
 
@@ -5681,11 +5681,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende a volta do Google no login do dono.
-- **Input:** `deps`: dependências do conector (configuração, rede, relógio). `oauth`: `OAuthHelpers` da biblioteca. `request`: volta do Google com `state` e `code` ou erro.
-- **Output:** Redirecionamento 302 ao Claude com o código; 302 com `access_denied` se o Google recusou; página 403 se o e-mail não está na allowlist.
-- **Effects:** Lê e consome o `state` via `OAuthHelpers` (KV OAUTH_KV); rede (Google); grava a concessão quando permitida; define cookies.
-- **Errors:** Nenhum: erros de autorização, troca do código e `id_token` viram página 400 ou redirecionamento.
+- **Does:** Handles the Google callback in the owner's sign-in.
+- **Input:** `deps`: connector dependencies (settings, network, clock). `oauth`: the library's `OAuthHelpers`. `request`: Google callback with `state` and `code` or error.
+- **Output:** 302 redirect to Claude with the code; 302 with `access_denied` if Google refused; 403 page if the email is not on the allowlist.
+- **Effects:** Reads and consumes the `state` via `OAuthHelpers` (KV OAUTH_KV); network (Google); stores the grant when allowed; sets cookies.
+- **Errors:** None: authorization, code exchange and `id_token` errors become a 400 page or a redirect.
 
 ### `linkSignedInAccount`
 
@@ -5698,11 +5698,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Vincula a conta que acabou de entrar no login.
-- **Input:** `deps`: dependências. `identity`: `sub` e e-mail verificados. `tokens`: tokens do Google.
-- **Output:** `true` se vinculou; `false` sem Gmail, sem refresh token ou se a gravação falhar.
-- **Effects:** KV: grava a conta no registro do usuário.
-- **Errors:** Nenhum: falha não impede o login.
+- **Does:** Links the account that just signed in.
+- **Input:** `deps`: dependencies. `identity`: verified `sub` and email. `tokens`: Google tokens.
+- **Output:** `true` if it linked; `false` without Gmail, without refresh token or if the write fails.
+- **Effects:** KV: stores the account in the user's record.
+- **Errors:** None: a failure does not block sign-in.
 
 ### `accessDeniedPage`
 
@@ -5715,11 +5715,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a página 403 do modo privado.
-- **Input:** Nenhuma.
-- **Output:** Página 403 para conta fora de `ALLOWED_EMAILS`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the private-mode 403 page.
+- **Input:** None.
+- **Output:** 403 page for an account outside `ALLOWED_EMAILS`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/tools.ts`
 
@@ -5734,11 +5734,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resolve `account` exigindo uma única conta.
-- **Input:** `deps`: dependências com o usuário. `requested`: apelido ou e-mail.
-- **Output:** A conta pedida.
-- **Effects:** KV: uma leitura.
-- **Errors:** Lança erro para `all`; os de `resolveAccounts()`.
+- **Does:** Resolves `account`, requiring a single account.
+- **Input:** `deps`: dependencies with the user. `requested`: alias or email.
+- **Output:** The requested account.
+- **Effects:** KV: one read.
+- **Errors:** Throws for `all`; those of `resolveAccounts()`.
 
 ### `accountStatus`
 
@@ -5751,11 +5751,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o status de uma conta para `list_accounts`.
-- **Input:** `deps`: dependências com o usuário. `ref`: conta.
-- **Output:** Apelido, e-mail, data do vínculo e status `ok`, `needs_relink` ou `token_error` (com a mensagem).
-- **Effects:** Os de `getAccessToken()` (rede e cache).
-- **Errors:** Nenhum: falhas viram `token_error`.
+- **Does:** Builds an account's status for `list_accounts`.
+- **Input:** `deps`: dependencies with the user. `ref`: account.
+- **Output:** Alias, email, link date and status `ok`, `needs_relink` or `token_error` (with the message).
+- **Effects:** Those of `getAccessToken()` (network and cache).
+- **Errors:** None: failures become `token_error`.
 
 ### `withUntrustedNotice`
 
@@ -5768,11 +5768,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Acrescenta o aviso de conteúdo não confiável a um resultado.
-- **Input:** `data`: resultado com conteúdo de e-mail.
-- **Output:** Novo objeto com `notice` primeiro e os campos de `data`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Adds the untrusted-content notice to a result.
+- **Input:** `data`: result with email content.
+- **Output:** New object with `notice` first and the fields of `data`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `accountLabels`
 
@@ -5785,11 +5785,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista os rótulos de uma conta.
-- **Input:** `deps`: dependências do conector (configuração, KV, rede, relógio). `account`: conta permitida.
-- **Output:** Apelido da conta e rótulos (`id`, `name`, `type`, com `user` por padrão); lista vazia se não houver.
-- **Effects:** Rede (Gmail API e, se preciso, renovação do token no Google); pode marcar a conta como revogada no KV.
-- **Errors:** Propaga os erros de `gmailGet`: HTTP da Gmail API, conta sem vínculo ou revogada, falha na renovação do token.
+- **Does:** Lists an account's labels.
+- **Input:** `deps`: connector dependencies (settings, KV, network, clock). `account`: allowed account.
+- **Output:** Account alias and labels (`id`, `name`, `type`, with `user` by default); empty list if there are none.
+- **Effects:** Network (Gmail API and, if needed, token renewal at Google); may mark the account as revoked in KV.
+- **Errors:** Propagates the errors of `gmailGet`: Gmail API HTTP, unlinked or revoked account, token renewal failure.
 
 ### `ownerRefs`
 
@@ -5802,11 +5802,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê as contas vinculadas do usuário com apelidos.
-- **Input:** `deps`: dependências com o usuário.
-- **Output:** Lista de `AccountRef` (vazia sem contas).
-- **Effects:** KV: uma leitura.
-- **Errors:** Propaga falhas do KV.
+- **Does:** Reads the user's linked accounts with aliases.
+- **Input:** `deps`: dependencies with the user.
+- **Output:** List of `AccountRef` (empty without accounts).
+- **Effects:** KV: one read.
+- **Errors:** Propagates KV failures.
 
 ### `resolveOwnerAccounts`
 
@@ -5819,11 +5819,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resolve `account` nas contas do usuário.
-- **Input:** `deps`: dependências com o usuário. `requested`: apelido, e-mail ou `all`.
-- **Output:** As contas pedidas.
-- **Effects:** KV: uma leitura.
-- **Errors:** Os de `resolveAccounts()`.
+- **Does:** Resolves `account` among the user's accounts.
+- **Input:** `deps`: dependencies with the user. `requested`: alias, email or `all`.
+- **Output:** The requested accounts.
+- **Effects:** KV: one read.
+- **Errors:** Those of `resolveAccounts()`.
 
 ### `resolveWritableAccount`
 
@@ -5836,11 +5836,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resolve `account` numa conta só e exige o escopo de escrita antes de tocar o Gmail.
-- **Input:** `deps`; `requested`: apelido ou e-mail.
-- **Output:** A conta.
-- **Effects:** KV: uma leitura.
-- **Errors:** Os de `resolveSingleAccount()` e `requireWriteAccess()`.
+- **Does:** Resolves `account` to a single account and requires the write scope before touching Gmail.
+- **Input:** `deps`; `requested`: alias or email.
+- **Output:** The account.
+- **Effects:** KV: one read.
+- **Errors:** Those of `resolveSingleAccount()` and `requireWriteAccess()`.
 
 ### `accountBase`
 
@@ -5853,11 +5853,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Dados fixos de uma conta em `list_accounts`, com `write_access` e a dica de novo vínculo.
-- **Input:** `ref`: conta.
-- **Output:** Objeto com apelido, e-mail, data, `write_access` e `hint` quando só leitura.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Fixed data of an account in `list_accounts`, with `write_access` and the relink hint.
+- **Input:** `ref`: account.
+- **Output:** Object with alias, email, date, `write_access` and `hint` when read-only.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/worker.ts`
 
@@ -5872,11 +5872,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta as dependências da requisição a partir do ambiente do Worker.
-- **Input:** `env`: variáveis, secrets e bindings do Worker. `origin`: origem pública do conector.
-- **Output:** Dependências com configuração lida, KV `GMAIL_KV`, `fetch`, relógio e origem.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se `ALLOWED_EMAILS` faltar ou for inválido, ou se faltar um secret obrigatório.
+- **Does:** Builds the request dependencies from the Worker environment.
+- **Input:** `env`: Worker variables, secrets and bindings. `origin`: the connector's public origin.
+- **Output:** Dependencies with the loaded settings, KV `GMAIL_KV`, `fetch`, clock and origin.
+- **Effects:** None (pure).
+- **Errors:** Throws if `ALLOWED_EMAILS` is missing or invalid, or if a required secret is missing.
 
 ### `createGmailServer`
 
@@ -5889,11 +5889,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria o servidor MCP com as ferramentas do Gmail do usuário.
-- **Input:** `deps`: dependências com o usuário.
-- **Output:** `McpServer` com `GMAIL_TOOLS` registradas.
-- **Effects:** Nenhum.
-- **Errors:** Nenhum.
+- **Does:** Creates the MCP server with the user's Gmail tools.
+- **Input:** `deps`: dependencies with the user.
+- **Output:** `McpServer` with `GMAIL_TOOLS` registered.
+- **Effects:** None.
+- **Errors:** None.
 
 ### `configErrorResponse`
 
@@ -5906,11 +5906,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a resposta de configuração inválida do Worker.
-- **Input:** `error`: erro lançado ao ler a configuração.
-- **Output:** Resposta 500 em texto com a mensagem do erro (nunca o valor de um secret).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the Worker's invalid-configuration response.
+- **Input:** `error`: error thrown while reading the settings.
+- **Output:** 500 plain-text response with the error message (never a secret's value).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `handleMcpApi`
 
@@ -5923,11 +5923,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende o `/mcp` já autenticado pela biblioteca.
-- **Input:** `request`: requisição MCP. `env`: bindings e secrets. `ctx`: contexto com `props` (usuário, e-mail, sessão).
-- **Output:** Resposta MCP; 429 acima do limite da sessão; 500 com configuração inválida.
-- **Effects:** Binding de rate limiting por sessão; as ferramentas usam KV e rede.
-- **Errors:** Nenhum: configuração inválida vira 500 e erros de ferramenta viram resultado MCP de erro.
+- **Does:** Handles `/mcp`, already authenticated by the library.
+- **Input:** `request`: MCP request. `env`: bindings and secrets. `ctx`: context with `props` (user, email, session).
+- **Output:** MCP response; 429 above the session limit; 500 with invalid configuration.
+- **Effects:** Per-session rate limiting binding; the tools use KV and network.
+- **Errors:** None: invalid configuration becomes 500 and tool errors become an MCP error result.
 
 ### `handleDefaultRequest`
 
@@ -5940,11 +5940,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende as rotas próprias do conector fora do `/mcp`.
-- **Input:** `request`: requisição recebida. `env`: variáveis, secrets e bindings do Worker, com `OAUTH_PROVIDER` injetado pela biblioteca.
-- **Output:** 200 `ok` em `GET /`; a resposta da rota encontrada; página 404 se a rota não existe ou falta `OAUTH_PROVIDER`; 500 se a configuração é inválida.
-- **Effects:** Os da rota atendida: KV, `OAuthHelpers` (KV OAUTH_KV), rede (Google) e cookies.
-- **Errors:** Nenhum: configuração inválida vira 500; propaga só os erros não tratados da rota de vínculo (troca do código e `id_token`).
+- **Does:** Handles the connector's own routes outside `/mcp`.
+- **Input:** `request`: received request. `env`: Worker variables, secrets and bindings, with `OAUTH_PROVIDER` injected by the library.
+- **Output:** 200 `ok` on `GET /`; the response of the matched route; 404 page if the route does not exist or `OAUTH_PROVIDER` is missing; 500 if the configuration is invalid.
+- **Effects:** Those of the handled route: KV, `OAuthHelpers` (KV OAUTH_KV), network (Google) and cookies.
+- **Errors:** None: invalid configuration becomes 500; only propagates the unhandled errors of the link route (code exchange and `id_token`).
 
 ### `checkClientRegistration`
 
@@ -5957,11 +5957,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide se o registro dinâmico de um cliente é aceito.
-- **Input:** `options`: metadados do cliente que pede registro.
-- **Output:** Indefinido se todos os endereços de retorno são do Claude ou localhost; senão erro `invalid_redirect_uri` com status 400.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides whether a client's dynamic registration is accepted.
+- **Input:** `options`: metadata of the client requesting registration.
+- **Output:** Undefined if all redirect URIs are Claude's or localhost; otherwise an `invalid_redirect_uri` error with status 400.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `publicOrigin`
 
@@ -5974,11 +5974,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula a origem pública canônica do conector.
-- **Input:** `env`: variáveis do Worker (`PUBLIC_URL` opcional). `request`: requisição recebida.
-- **Output:** Origem de `PUBLIC_URL` sem barra final; sem ela, a origem da requisição.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `TypeError` se `PUBLIC_URL` não for URL válida.
+- **Does:** Computes the connector's canonical public origin.
+- **Input:** `env`: Worker variables (optional `PUBLIC_URL`). `request`: received request.
+- **Output:** Origin of `PUBLIC_URL` without trailing slash; without it, the request's origin.
+- **Effects:** None (pure).
+- **Errors:** Throws `TypeError` if `PUBLIC_URL` is not a valid URL.
 
 ### `createGmailProvider`
 
@@ -5991,11 +5991,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria o provedor OAuth que embrulha o Worker.
-- **Input:** `origin`: origem pública do conector.
-- **Output:** `OAuthProvider` com `/mcp` como recurso, endpoints `/authorize`, `/token` e `/register`, TTLs de 1 hora e 30 dias e a checagem de registro.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Creates the OAuth provider that wraps the Worker.
+- **Input:** `origin`: the connector's public origin.
+- **Output:** `OAuthProvider` with `/mcp` as the resource, `/authorize`, `/token` and `/register` endpoints, TTLs of 1 hour and 30 days and the registration check.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `handleGmailWorkerFetch`
 
@@ -6008,11 +6008,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende uma requisição do Worker.
-- **Input:** `request`: requisição. `env`: bindings e secrets. `ctx`: contexto de execução.
-- **Output:** 429 se o IP passou do limite fora do `/mcp`; senão a resposta do provedor OAuth.
-- **Effects:** Binding de rate limiting por IP; os do provedor e das rotas.
-- **Errors:** Propaga os da biblioteca OAuth.
+- **Does:** Handles a Worker request.
+- **Input:** `request`: request. `env`: bindings and secrets. `ctx`: execution context.
+- **Output:** 429 if the IP exceeded the limit outside `/mcp`; otherwise the OAuth provider's response.
+- **Effects:** Per-IP rate limiting binding; those of the provider and the routes.
+- **Errors:** Propagates those of the OAuth library.
 
 ### `clientIpKey`
 
@@ -6025,11 +6025,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a chave do limite público pelo IP do cliente.
-- **Input:** `request`: requisição.
-- **Output:** `ip:<cf-connecting-ip>` ou `ip:unknown`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the public limit key from the client IP.
+- **Input:** `request`: request.
+- **Output:** `ip:<cf-connecting-ip>` or `ip:unknown`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isMcpPath`
 
@@ -6042,11 +6042,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se a rota é o `/mcp` protegido por token.
-- **Input:** `request`: requisição.
-- **Output:** `true` para `/mcp` e subcaminhos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether the route is the token-protected `/mcp`.
+- **Input:** `request`: request.
+- **Output:** `true` for `/mcp` and subpaths.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/core/pdf.ts`
 
@@ -6061,11 +6061,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte bytes em texto de um caractere por byte (latin1), para achar palavras-chave sem perder offsets.
-- **Input:** `bytes`: conteúdo binário qualquer.
-- **Output:** Texto com um caractere por byte; vazio se não houver bytes.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts bytes to text with one character per byte (latin1), to find keywords without losing offsets.
+- **Input:** `bytes`: any binary content.
+- **Output:** Text with one character per byte; empty if there are no bytes.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isPdf`
 
@@ -6078,11 +6078,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se os bytes começam como um PDF (`%PDF-`).
-- **Input:** `bytes`: conteúdo do arquivo.
-- **Output:** `true` se os cinco primeiros bytes são `%PDF-`; `false` caso contrário (inclusive arquivo curto).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether the bytes start like a PDF (`%PDF-`).
+- **Input:** `bytes`: file content.
+- **Output:** `true` if the first five bytes are `%PDF-`; `false` otherwise (including a short file).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `streamDataStart`
 
@@ -6095,11 +6095,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula o início dos dados de um fluxo, depois de `stream` e da quebra de linha (CRLF ou LF).
-- **Input:** `text`: PDF em latin1. `keywordAt`: posição da palavra `stream`.
-- **Output:** Posição do primeiro byte de dados; logo após `stream` se não houver quebra de linha.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Computes where a stream's data starts, after `stream` and the line break (CRLF or LF).
+- **Input:** `text`: PDF in latin1. `keywordAt`: position of the `stream` keyword.
+- **Output:** Position of the first data byte; right after `stream` if there is no line break.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `trimStreamEol`
 
@@ -6112,11 +6112,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula o fim dos dados de um fluxo sem a quebra de linha que precede `endstream`.
-- **Input:** `text`: PDF em latin1. `dataStart`: início dos dados. `streamEnd`: posição de `endstream`.
-- **Output:** Posição final dos dados, recuada de CRLF, LF ou CR; nunca antes de `dataStart`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Computes where a stream's data ends, excluding the line break that precedes `endstream`.
+- **Input:** `text`: PDF in latin1. `dataStart`: start of the data. `streamEnd`: position of `endstream`.
+- **Output:** End position of the data, moved back past CRLF, LF or CR; never before `dataStart`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readRawObject`
 
@@ -6129,11 +6129,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o objeto que começa em `start`, logo após `N G obj`.
-- **Input:** `text`: PDF em latin1. `bytes`: o mesmo PDF em bytes. `start`: posição logo após `N G obj`.
-- **Output:** `{ dict, stream, end }`: dicionário em texto, bytes do fluxo ainda comprimido (`null` se não houver) e onde a busca pelo próximo objeto continua; sem `endobj`, vai até o fim do texto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the object that starts at `start`, right after `N G obj`.
+- **Input:** `text`: PDF in latin1. `bytes`: the same PDF as bytes. `start`: position right after `N G obj`.
+- **Output:** `{ dict, stream, end }`: dictionary as text, still-compressed stream bytes (`null` if none) and where the search for the next object resumes; without `endobj`, runs to the end of the text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `listRawObjects`
 
@@ -6146,11 +6146,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista os objetos `N G obj ... endobj` do arquivo, na ordem em que aparecem.
-- **Input:** `bytes`: conteúdo do PDF.
-- **Output:** Lista de objetos crus com número, dicionário e fluxo comprimido (`null` sem fluxo); vazia se não houver objetos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Lists the file's `N G obj ... endobj` objects, in the order they appear.
+- **Input:** `bytes`: PDF content.
+- **Output:** List of raw objects with number, dictionary and compressed stream (`null` without a stream); empty if there are no objects.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `decodePdfStream`
 
@@ -6163,11 +6163,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Descomprime o fluxo conforme o `/Filter` do dicionário.
-- **Input:** `dict`: dicionário do objeto. `stream`: bytes do fluxo como estão no arquivo.
-- **Output:** Os próprios bytes sem `/Filter`; os bytes inflados com FlateDecode; `null` para outro filtro ou fluxo corrompido.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum (fluxo corrompido devolve `null`).
+- **Does:** Decompresses the stream according to the dictionary's `/Filter`.
+- **Input:** `dict`: object dictionary. `stream`: stream bytes as stored in the file.
+- **Output:** The bytes themselves without `/Filter`; the inflated bytes with FlateDecode; `null` for another filter or a corrupt stream.
+- **Effects:** None (pure).
+- **Errors:** None (a corrupt stream returns `null`).
 
 ### `splitObjectStream`
 
@@ -6180,11 +6180,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Separa os objetos guardados num fluxo de objetos (`/Type /ObjStm`).
-- **Input:** `dict`: dicionário do fluxo de objetos, com `/First`. `data`: fluxo já descomprimido.
-- **Output:** Pares [número, objeto] com o dicionário de cada objeto e `data` nulo; vazia se faltar `/First`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Splits out the objects stored in an object stream (`/Type /ObjStm`).
+- **Input:** `dict`: object stream dictionary, with `/First`. `data`: already decompressed stream.
+- **Output:** [number, object] pairs with each object's dictionary and null `data`; empty if `/First` is missing.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `storePdfObject`
 
@@ -6197,11 +6197,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Guarda um objeto lido e, se ele for um fluxo de objetos, os objetos de dentro sem sobrescrever.
-- **Input:** `objects`: mapa de objetos em construção. `num`: número do objeto. `obj`: dicionário e fluxo descomprimido.
-- **Output:** Nada.
-- **Effects:** Altera `objects`.
-- **Errors:** Nenhum.
+- **Does:** Stores a parsed object and, if it is an object stream, the objects inside it without overwriting.
+- **Input:** `objects`: object map being built. `num`: object number. `obj`: dictionary and decompressed stream.
+- **Output:** Nothing.
+- **Effects:** Mutates `objects`.
+- **Errors:** None.
 
 ### `readPdfObjects`
 
@@ -6214,11 +6214,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê todos os objetos do PDF, descomprimindo fluxos e abrindo os fluxos de objetos.
-- **Input:** `bytes`: conteúdo do PDF.
-- **Output:** Mapa número → objeto; fluxo com filtro desconhecido ou corrompido fica com `data` nulo; mapa vazio se não houver objetos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum (fluxo corrompido fica com `data` nulo).
+- **Does:** Reads all PDF objects, decompressing streams and opening object streams.
+- **Input:** `bytes`: PDF content.
+- **Output:** Map number → object; a stream with an unknown or corrupt filter gets null `data`; empty map if there are no objects.
+- **Effects:** None (pure).
+- **Errors:** None (a corrupt stream gets null `data`).
 
 ### `pdfRefs`
 
@@ -6231,11 +6231,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista os números de objeto citados como referência (`N 0 R`) num trecho.
-- **Input:** `text`: trecho de dicionário do PDF.
-- **Output:** Números dos objetos referenciados, na ordem; vazia se não houver referência.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Lists the object numbers cited as references (`N 0 R`) in a snippet.
+- **Input:** `text`: PDF dictionary snippet.
+- **Output:** Referenced object numbers, in order; empty if there is no reference.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `dictRefs`
 
@@ -6248,11 +6248,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o valor de uma chave que pode ser referência única ou lista de referências.
-- **Input:** `dict`: dicionário do objeto. `key`: nome da chave sem a barra (ex.: `Kids`, `Contents`).
-- **Output:** Números dos objetos referenciados; vazia se a chave não existir ou não for referência.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the value of a key that may be a single reference or a list of references.
+- **Input:** `dict`: object dictionary. `key`: key name without the slash (e.g. `Kids`, `Contents`).
+- **Output:** Referenced object numbers; empty if the key does not exist or is not a reference.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `collectPdfPages`
 
@@ -6265,11 +6265,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Acrescenta a `pages` as páginas sob o nó `num` da árvore de páginas, em ordem.
-- **Input:** `objects`: objetos do PDF. `num`: nó da árvore de páginas. `pages`: lista que recebe as páginas; a descida para em 10 000 páginas.
-- **Output:** Nada.
-- **Effects:** Altera `pages`.
-- **Errors:** Nenhum.
+- **Does:** Appends to `pages` the pages under node `num` of the page tree, in order.
+- **Input:** `objects`: PDF objects. `num`: page tree node. `pages`: list that receives the pages; the descent stops at 10 000 pages.
+- **Output:** Nothing.
+- **Effects:** Mutates `pages`.
+- **Errors:** None.
 
 ### `orderedPages`
 
@@ -6282,11 +6282,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista as páginas na ordem de leitura, percorrendo a árvore `/Pages` a partir da raiz.
-- **Input:** `objects`: objetos do PDF.
-- **Output:** Números dos objetos de página em ordem; vazia se não houver raiz `/Pages`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Lists the pages in reading order, walking the `/Pages` tree from the root.
+- **Input:** `objects`: PDF objects.
+- **Output:** Page object numbers in order; empty if there is no `/Pages` root.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `utf16beHexToString`
 
@@ -6299,11 +6299,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica hexadecimal UTF-16BE (destino de um mapa ToUnicode) em texto.
-- **Input:** `hex`: dígitos hexadecimais; dois dígitos valem como um byte.
-- **Output:** O texto decodificado; dígitos que sobram fora de grupos de quatro são ignorados; vazio se `hex` for vazio.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decodes UTF-16BE hexadecimal (the target of a ToUnicode map) into text.
+- **Input:** `hex`: hexadecimal digits; two digits count as one byte.
+- **Output:** The decoded text; leftover digits outside groups of four are ignored; empty if `hex` is empty.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readBfChars`
 
@@ -6316,11 +6316,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê as linhas `<orig> <destino>` dos blocos `beginbfchar` de um mapa ToUnicode.
-- **Input:** `text`: mapa ToUnicode em texto. `map`: mapa código → texto que recebe as entradas.
-- **Output:** Nada.
-- **Effects:** Altera `map`.
-- **Errors:** Nenhum.
+- **Does:** Reads the `<orig> <destino>` lines of a ToUnicode map's `beginbfchar` blocks.
+- **Input:** `text`: ToUnicode map as text. `map`: code → text map that receives the entries.
+- **Output:** Nothing.
+- **Effects:** Mutates `map`.
+- **Errors:** None.
 
 ### `readBfRanges`
 
@@ -6333,11 +6333,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê os blocos `beginbfrange` de um mapa ToUnicode.
-- **Input:** `text`: mapa ToUnicode em texto. `map`: mapa código → texto que recebe as entradas; cada faixa é limitada a 65 536 códigos.
-- **Output:** Nada.
-- **Effects:** Altera `map`.
-- **Errors:** Nenhum.
+- **Does:** Reads a ToUnicode map's `beginbfrange` blocks.
+- **Input:** `text`: ToUnicode map as text. `map`: code → text map that receives the entries; each range is capped at 65 536 codes.
+- **Output:** Nothing.
+- **Effects:** Mutates `map`.
+- **Errors:** None.
 
 ### `rangeTarget`
 
@@ -6350,11 +6350,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula o destino de um código num `bfrange`.
-- **Input:** `targets`: destinos em hexadecimal (um inicial ou uma lista). `offset`: distância do código ao início da faixa.
-- **Output:** O item da lista, ou o destino inicial com o último caractere somado ao deslocamento; vazio se o destino for vazio ou faltar.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Computes the target of a code in a `bfrange`.
+- **Input:** `targets`: hexadecimal targets (a starting one or a list). `offset`: distance from the code to the start of the range.
+- **Output:** The list item, or the starting target with the offset added to its last character; empty if the target is empty or missing.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseToUnicodeCMap`
 
@@ -6367,11 +6367,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Interpreta um mapa ToUnicode com seus códigos de 1 ou 2 bytes.
-- **Input:** `text`: mapa ToUnicode em texto.
-- **Output:** `{ map, bytes }`: código → texto e o tamanho do código (2 se o `codespacerange` tiver 4+ dígitos, senão 1); mapa vazio se não houver blocos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Parses a ToUnicode map with its 1- or 2-byte codes.
+- **Input:** `text`: ToUnicode map as text.
+- **Output:** `{ map, bytes }`: code → text and the code size (2 if the `codespacerange` has 4+ digits, otherwise 1); empty map if there are no blocks.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `addFontRefs`
 
@@ -6384,11 +6384,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Acrescenta a `fonts` os pares nome → objeto (`/F1 5 0 R`) de um dicionário de fontes.
-- **Input:** `fonts`: mapa nome → objeto que recebe os pares. `text`: conteúdo do dicionário de fontes.
-- **Output:** Nada.
-- **Effects:** Altera `fonts` (não sobrescreve nomes já presentes).
-- **Errors:** Nenhum.
+- **Does:** Appends to `fonts` the name → object pairs (`/F1 5 0 R`) of a font dictionary.
+- **Input:** `fonts`: name → object map that receives the pairs. `text`: font dictionary content.
+- **Output:** Nothing.
+- **Effects:** Mutates `fonts` (does not overwrite names already present).
+- **Errors:** None.
 
 ### `fontResourceRefs`
 
@@ -6401,11 +6401,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Junta os nomes de fonte (`/F1`) e seus objetos de todos os dicionários `/Font` dos recursos.
-- **Input:** `objects`: objetos do PDF.
-- **Output:** Mapa nome → número do objeto da fonte; o primeiro encontrado vence; vazio sem fontes.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Collects the font names (`/F1`) and their objects from all `/Font` dictionaries in the resources.
+- **Input:** `objects`: PDF objects.
+- **Output:** Map name → font object number; the first one found wins; empty without fonts.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `fontCMaps`
 
@@ -6418,11 +6418,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta os mapas ToUnicode por nome de fonte, para as fontes que têm `/ToUnicode`.
-- **Input:** `objects`: objetos do PDF.
-- **Output:** Mapa nome da fonte → mapa ToUnicode; fontes sem `/ToUnicode` legível ficam de fora.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the ToUnicode maps by font name, for fonts that have `/ToUnicode`.
+- **Input:** `objects`: PDF objects.
+- **Output:** Map font name → ToUnicode map; fonts without a readable `/ToUnicode` are left out.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `decodePdfText`
 
@@ -6435,11 +6435,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica os bytes de uma string de texto pela fonte atual (ToUnicode).
-- **Input:** `raw`: string crua (um caractere por byte). `cmap`: mapa ToUnicode da fonte, ou `undefined`.
-- **Output:** O texto decodificado; sem mapa, a própria string (latin1); códigos sem entrada no mapa somem.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decodes the bytes of a text string using the current font (ToUnicode).
+- **Input:** `raw`: raw string (one character per byte). `cmap`: the font's ToUnicode map, or `undefined`.
+- **Output:** The decoded text; without a map, the string itself (latin1); codes with no map entry are dropped.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readLiteralString`
 
@@ -6452,11 +6452,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma string literal `( ... )` a partir do `(`.
-- **Input:** `src`: fluxo de conteúdo. `start`: posição do `(`.
-- **Output:** [texto cru com escapes resolvidos, posição seguinte]; sem `)` de fechamento, vai até o fim.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads a literal string `( ... )` starting at the `(`.
+- **Input:** `src`: content stream. `start`: position of the `(`.
+- **Output:** [raw text with escapes resolved, next position]; without a closing `)`, runs to the end.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readEscape`
 
@@ -6469,11 +6469,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o escape que vem depois de `\` numa string literal.
-- **Input:** `src`: fluxo de conteúdo. `pos`: posição logo após a `\`.
-- **Output:** [texto do escape, posição seguinte]: octal de até 3 dígitos, letra conhecida, vazio para quebra de linha ou o próprio caractere.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the escape that follows `\` in a literal string.
+- **Input:** `src`: content stream. `pos`: position right after the `\`.
+- **Output:** [escape text, next position]: octal of up to 3 digits, a known letter, empty for a line break, or the character itself.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readHexString`
 
@@ -6486,11 +6486,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma string hexadecimal `<...>` a partir do `<`.
-- **Input:** `src`: fluxo de conteúdo. `start`: posição do `<`.
-- **Output:** [texto cru, posição seguinte]; ignora não-hexadecimais e completa dígito ímpar com 0; sem `>`, vai até o fim.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads a hexadecimal string `<...>` starting at the `<`.
+- **Input:** `src`: content stream. `start`: position of the `<`.
+- **Output:** [raw text, next position]; ignores non-hexadecimal characters and pads an odd digit with 0; without `>`, runs to the end.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `skipPdfSpace`
 
@@ -6503,11 +6503,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Acha a posição do próximo caractere que não é espaço, a partir de `pos`.
-- **Input:** `src`: fluxo de conteúdo. `pos`: posição inicial.
-- **Output:** A posição do próximo caractere não branco, ou o fim do texto.
-- **Effects:** Altera o `lastIndex` da regex do módulo `PDF_SPACE`.
-- **Errors:** Nenhum.
+- **Does:** Finds the position of the next non-whitespace character, starting at `pos`.
+- **Input:** `src`: content stream. `pos`: starting position.
+- **Output:** The position of the next non-whitespace character, or the end of the text.
+- **Effects:** Mutates the `lastIndex` of the module regex `PDF_SPACE`.
+- **Errors:** None.
 
 ### `nextPdfToken`
 
@@ -6520,11 +6520,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o próximo item do fluxo de conteúdo a partir de `pos`.
-- **Input:** `src`: fluxo de conteúdo. `pos`: posição inicial.
-- **Output:** [item, posição seguinte]; `null` no fim do texto.
-- **Effects:** Altera o `lastIndex` das regex do módulo `PDF_SPACE` e `PDF_WORD`.
-- **Errors:** Nenhum.
+- **Does:** Reads the next token of the content stream starting at `pos`.
+- **Input:** `src`: content stream. `pos`: starting position.
+- **Output:** [token, next position]; `null` at the end of the text.
+- **Effects:** Mutates the `lastIndex` of the module regexes `PDF_SPACE` and `PDF_WORD`.
+- **Errors:** None.
 
 ### `readPdfWord`
 
@@ -6537,11 +6537,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma palavra (nome, número, operador, `<<`/`>>` ou comentário) a partir de `at`.
-- **Input:** `src`: fluxo de conteúdo. `at`: posição de um caractere não branco.
-- **Output:** [item classificado, posição seguinte].
-- **Effects:** Altera o `lastIndex` da regex do módulo `PDF_WORD`.
-- **Errors:** Nenhum.
+- **Does:** Reads a word (name, number, operator, `<<`/`>>` or comment) starting at `at`.
+- **Input:** `src`: content stream. `at`: position of a non-whitespace character.
+- **Output:** [classified token, next position].
+- **Effects:** Mutates the `lastIndex` of the module regex `PDF_WORD`.
+- **Errors:** None.
 
 ### `wrapString`
 
@@ -6554,11 +6554,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Embrulha o resultado de uma leitura de string num item `string`.
-- **Input:** `[value, next]`: texto lido e posição seguinte.
-- **Output:** [item `string` com o texto, posição seguinte].
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Wraps the result of a string read in a `string` token.
+- **Input:** `[value, next]`: text read and next position.
+- **Output:** [`string` token with the text, next position].
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `classifyWord`
 
@@ -6571,11 +6571,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Classifica uma palavra do fluxo como nome (`/F1`), número ou operador.
-- **Input:** `word`: palavra lida do fluxo.
-- **Output:** Item `name` sem a barra, `number` com o valor, ou `op` com a palavra.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Classifies a stream word as a name (`/F1`), number or operator.
+- **Input:** `word`: word read from the stream.
+- **Output:** A `name` token without the slash, a `number` with the value, or an `op` with the word.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `showArrayText`
 
@@ -6588,11 +6588,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o texto de um operando de `TJ`, com espaços onde o ajuste é grande.
-- **Input:** `items`: itens da lista do `TJ`. `font`: mapa ToUnicode da fonte atual, ou `undefined`.
-- **Output:** Strings decodificadas, com espaço para ajuste menor que `TJ_SPACE_THRESHOLD`; vazio se não houver strings.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the text of a `TJ` operand, with spaces where the adjustment is large.
+- **Input:** `items`: items of the `TJ` list. `font`: current font's ToUnicode map, or `undefined`.
+- **Output:** Decoded strings, with a space for an adjustment below `TJ_SPACE_THRESHOLD`; empty if there are no strings.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `lastOperandText`
 
@@ -6605,11 +6605,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica o texto da última string dos operandos pela fonte atual.
-- **Input:** `state`: estado do intérprete de texto.
-- **Output:** O texto decodificado; vazio se o último operando não for string ou não houver operandos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decodes the text of the last string operand using the current font.
+- **Input:** `state`: text interpreter state.
+- **Output:** The decoded text; empty if the last operand is not a string or there are no operands.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `moveText`
 
@@ -6622,11 +6622,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide o que um `Td`/`TD` produz no texto.
-- **Input:** `state`: estado do intérprete, com os operandos do operador.
-- **Output:** Quebra de linha se o último operando (ty) for número diferente de zero; senão um espaço.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides what a `Td`/`TD` produces in the text.
+- **Input:** `state`: interpreter state, with the operator's operands.
+- **Output:** A line break if the last operand (ty) is a non-zero number; otherwise a space.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `applyTextOperator`
 
@@ -6639,11 +6639,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aplica um operador de texto ao estado do intérprete.
-- **Input:** `state`: estado do intérprete. `op`: nome do operador. `cmaps`: mapas ToUnicode por nome de fonte.
-- **Output:** Nada.
-- **Effects:** Altera `state` (troca a fonte em `Tf` ou acrescenta texto em `out`); operador desconhecido não muda nada.
-- **Errors:** Nenhum.
+- **Does:** Applies a text operator to the interpreter state.
+- **Input:** `state`: interpreter state. `op`: operator name. `cmaps`: ToUnicode maps by font name.
+- **Output:** Nothing.
+- **Effects:** Mutates `state` (switches the font on `Tf` or appends text to `out`); an unknown operator changes nothing.
+- **Errors:** None.
 
 ### `feedPdfToken`
 
@@ -6656,11 +6656,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Consome um item no intérprete de texto.
-- **Input:** `state`: estado do intérprete. `token`: item lido do fluxo. `cmaps`: mapas ToUnicode por nome de fonte.
-- **Output:** Nada.
-- **Effects:** Altera `state` (lista aberta, operandos e texto produzido).
-- **Errors:** Nenhum.
+- **Does:** Consumes a token in the text interpreter.
+- **Input:** `state`: interpreter state. `token`: token read from the stream. `cmaps`: ToUnicode maps by font name.
+- **Output:** Nothing.
+- **Effects:** Mutates `state` (open list, operands and produced text).
+- **Errors:** None.
 
 ### `contentStreamText`
 
@@ -6673,11 +6673,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o texto de um fluxo de conteúdo de página.
-- **Input:** `content`: fluxo de conteúdo em latin1. `cmaps`: mapas ToUnicode por nome de fonte.
-- **Output:** O texto produzido pelos operadores de texto; vazio se não houver nenhum.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Extracts the text of a page content stream.
+- **Input:** `content`: content stream in latin1. `cmaps`: ToUnicode maps by font name.
+- **Output:** The text produced by the text operators; empty if there is none.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `tidyPdfText`
 
@@ -6690,11 +6690,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Limpa o texto extraído de espaços repetidos, linhas em branco em excesso e pontas.
-- **Input:** `text`: texto extraído do PDF.
-- **Output:** O texto com espaços colapsados, no máximo uma linha em branco seguida e sem espaços nas pontas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Cleans repeated spaces, excess blank lines and leading/trailing whitespace from extracted text.
+- **Input:** `text`: text extracted from the PDF.
+- **Output:** The text with collapsed spaces, at most one consecutive blank line and no leading/trailing whitespace.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pdfToText`
 
@@ -6707,11 +6707,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o texto de um PDF, página por página.
-- **Input:** `bytes`: conteúdo do PDF.
-- **Output:** O texto das páginas separado por linha em branco e limpo; vazio se não houver texto legível (ex.: PDF só de imagens).
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se o PDF for cifrado (`/Encrypt` nos últimos 4 KB).
+- **Does:** Extracts the text of a PDF, page by page.
+- **Input:** `bytes`: PDF content.
+- **Output:** The cleaned page text separated by blank lines; empty if there is no readable text (e.g. an image-only PDF).
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if the PDF is encrypted (`/Encrypt` in the last 4 KB).
 
 ## `connectors/whatsapp/src/bridge-client.ts`
 
@@ -6726,11 +6726,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Traduz uma resposta de erro da ponte em `BridgeError` com mensagem em português.
-- **Input:** `status` HTTP e o corpo JSON da resposta (qualquer valor).
-- **Output:** `BridgeError` com mensagem de `BRIDGE_ERROR_MESSAGES` (ou a da ponte), status e código.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum (devolve o erro, não lança).
+- **Does:** Translates a bridge error response into a `BridgeError` with a Portuguese message.
+- **Input:** HTTP `status` and the response's JSON body (any value).
+- **Output:** `BridgeError` with the message from `BRIDGE_ERROR_MESSAGES` (or the bridge's own), status and code.
+- **Effects:** None (pure).
+- **Errors:** None (returns the error, does not throw).
 
 ### `withDeadline`
 
@@ -6743,11 +6743,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Espera uma promessa até o instante `deadline` (ms Unix); depois disso rejeita com a mensagem dada.
-- **Input:** `promise`, `deadline` (ms Unix) e a mensagem de tempo esgotado.
-- **Output:** Promessa com o valor da original.
-- **Effects:** Agenda e limpa um `setTimeout`.
-- **Errors:** Rejeita com `Error(message)` se o prazo passar (ou já passou); repassa a rejeição da original.
+- **Does:** Awaits a promise until the `deadline` instant (Unix ms); after that, rejects with the given message.
+- **Input:** `promise`, `deadline` (Unix ms) and the timeout message.
+- **Output:** Promise with the original's value.
+- **Effects:** Schedules and clears a `setTimeout`.
+- **Errors:** Rejects with `Error(message)` if the deadline passes (or has already passed); forwards the original's rejection.
 
 ### `bridgeTimeoutMessage`
 
@@ -6760,11 +6760,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Mensagem de tempo esgotado de uma chamada à ponte.
-- **Input:** `path` da chamada (com ou sem query).
-- **Output:** Texto em português com a rota sem query.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Timeout message for a bridge call.
+- **Input:** `path` of the call (with or without query).
+- **Output:** Portuguese text with the route without the query.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `callBridge`
 
@@ -6777,11 +6777,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Chama a ponte dentro do prazo, esperando-a acordar (`not_ready`); 2xx devolve a resposta, o resto lança.
-- **Input:** `bridge`, `path` e opções (`init`, `deadline`).
-- **Output:** `Response` 2xx da ponte.
-- **Effects:** Rede: requisição ao Durable Object da ponte.
-- **Errors:** `BridgeError` com o código da ponte (depois de esgotar as novas tentativas de `not_ready`); erro de tempo esgotado.
+- **Does:** Calls the bridge within the deadline, waiting for it to wake up (`not_ready`); 2xx returns the response, anything else throws.
+- **Input:** `bridge`, `path` and options (`init`, `deadline`).
+- **Output:** The bridge's 2xx `Response`.
+- **Effects:** Network: request to the bridge's Durable Object.
+- **Errors:** `BridgeError` with the bridge's code (after exhausting the `not_ready` retries); timeout error.
 
 ### `bridgeJson`
 
@@ -6794,11 +6794,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Chama a ponte e lê o JSON da resposta.
-- **Input:** `bridge`, `path` e opções (`init`, `deadline`).
-- **Output:** Corpo JSON tipado como `T`.
-- **Effects:** Rede: requisição ao Durable Object da ponte.
-- **Errors:** Os de `callBridge`; rejeita se o corpo não for JSON.
+- **Does:** Calls the bridge and reads the response JSON.
+- **Input:** `bridge`, `path` and options (`init`, `deadline`).
+- **Output:** JSON body typed as `T`.
+- **Effects:** Network: request to the bridge's Durable Object.
+- **Errors:** Those of `callBridge`; rejects if the body is not JSON.
 
 ### `bridgePath`
 
@@ -6811,11 +6811,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta `caminho?query` só com os parâmetros definidos.
-- **Input:** `path` e os parâmetros (indefinidos e vazios são ignorados).
-- **Output:** Caminho com a query, ou só o caminho.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds `caminho?query` with only the defined parameters.
+- **Input:** `path` and the parameters (undefined and empty ones are ignored).
+- **Output:** Path with the query, or just the path.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `jsonPost`
 
@@ -6828,11 +6828,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Corpo JSON de um POST para a ponte.
-- **Input:** `body`: valor a serializar.
-- **Output:** `RequestInit` com método POST, `content-type` JSON e corpo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** JSON body of a POST to the bridge.
+- **Input:** `body`: value to serialize.
+- **Output:** `RequestInit` with POST method, JSON `content-type` and body.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `shouldRetryBridge`
 
@@ -6845,11 +6845,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se vale tentar de novo: a ponte ainda está iniciando e sobra prazo para mais uma tentativa.
-- **Input:** `error`: erro da ponte; `deadline`: prazo (ms Unix); `now`: instante atual (ms).
-- **Output:** `true` só para `not_ready` com prazo para mais uma espera de `BRIDGE_RETRY_MS`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether a retry is worthwhile: the bridge is still starting and there is time left for another attempt.
+- **Input:** `error`: bridge error; `deadline`: deadline (Unix ms); `now`: current instant (ms).
+- **Output:** `true` only for `not_ready` with enough time left for another `BRIDGE_RETRY_MS` wait.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `attemptBridge`
 
@@ -6862,11 +6862,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Faz uma tentativa: resposta 2xx, ou `BridgeError` com o código da ponte.
-- **Input:** `bridge`: fetch do Durable Object; `path`: rota com query; `options`: `init` opcional e `deadline` (ms Unix).
-- **Output:** A resposta 2xx.
-- **Effects:** Rede (chamada ao Durable Object da ponte).
-- **Errors:** `BridgeError` em status ≠ 2xx; erro de tempo esgotado depois do `deadline`.
+- **Does:** Makes one attempt: a 2xx response, or a `BridgeError` with the bridge's code.
+- **Input:** `bridge`: Durable Object fetch; `path`: route with query; `options`: optional `init` and `deadline` (Unix ms).
+- **Output:** The 2xx response.
+- **Effects:** Network (call to the bridge's Durable Object).
+- **Errors:** `BridgeError` on status ≠ 2xx; timeout error after the `deadline`.
 
 ## `connectors/whatsapp/src/config.ts`
 
@@ -6881,11 +6881,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma variável obrigatória ou lança dizendo como defini-la.
-- **Input:** `env`, a chave e a instrução de como defini-la.
-- **Output:** Valor da variável.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se a variável estiver ausente ou vazia.
+- **Does:** Reads a required variable or throws explaining how to set it.
+- **Input:** `env`, the key and the instruction on how to set it.
+- **Output:** The variable's value.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if the variable is missing or empty.
 
 ### `readIntInRange`
 
@@ -6898,11 +6898,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê um inteiro dentro de um intervalo; ausente vale o padrão, fora do intervalo lança.
-- **Input:** `env`, a chave e o intervalo (`min`, `max`, `fallback`).
-- **Output:** O inteiro lido ou o padrão.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se não for inteiro ou estiver fora do intervalo.
+- **Does:** Reads an integer within a range; missing yields the default, out of range throws.
+- **Input:** `env`, the key and the range (`min`, `max`, `fallback`).
+- **Output:** The integer read or the default.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if it is not an integer or is out of range.
 
 ### `readSleepAfter`
 
@@ -6915,11 +6915,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida `SLEEP_AFTER` (`30s` a `60m`, ou `1h`); ausente vale `5m`.
+- **Does:** Validates `SLEEP_AFTER` (`30s` to `60m`, or `1h`); missing yields `5m`.
 - **Input:** `env`.
-- **Output:** A duração no formato do `Container` (ex. `5m`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se o formato for inválido ou a duração estiver fora de 30 s a 1 h.
+- **Output:** The duration in the `Container` format (e.g. `5m`).
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if the format is invalid or the duration is outside 30 s to 1 h.
 
 ### `normalizePhone`
 
@@ -6932,11 +6932,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Normaliza um número de telefone ou JID de contato para só dígitos; nulo se não parecer um número.
-- **Input:** `raw`: número ou JID (`...@s.whatsapp.net`).
-- **Output:** De 8 a 15 dígitos, ou `null`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Normalizes a phone number or contact JID to digits only; null if it does not look like a number.
+- **Input:** `raw`: number or JID (`...@s.whatsapp.net`).
+- **Output:** 8 to 15 digits, or `null`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readSendAllowlist`
 
@@ -6949,11 +6949,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê `SEND_ALLOWLIST` (números ou JIDs separados por vírgula; vazia = qualquer destinatário); item inválido lança.
+- **Does:** Reads `SEND_ALLOWLIST` (comma-separated numbers or JIDs; empty = any recipient); an invalid item throws.
 - **Input:** `env`.
-- **Output:** Lista de JIDs normalizados (vazia se ausente).
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` com o item inválido.
+- **Output:** List of normalized JIDs (empty if missing).
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` naming the invalid item.
 
 ### `readAllowedEmails`
 
@@ -6966,11 +6966,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a lista de donos (`ALLOWED_EMAILS`); vazia lança, porque ninguém conseguiria entrar.
+- **Does:** Reads the owner list (`ALLOWED_EMAILS`); empty throws, because nobody could sign in.
 - **Input:** `env`.
-- **Output:** Lista de e-mails em minúsculas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se a lista estiver vazia.
+- **Output:** List of lowercase e-mails.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if the list is empty.
 
 ### `readTimingSettings`
 
@@ -6983,11 +6983,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê os prazos: sono do container, teto por ferramenta e espera do sync.
+- **Does:** Reads the timeouts: container sleep, per-tool cap and sync wait.
 - **Input:** `env`.
-- **Output:** `sleepAfter`, `toolTimeoutMs` e `syncWaitMs`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Os de `readSleepAfter` e `readIntInRange`.
+- **Output:** `sleepAfter`, `toolTimeoutMs` and `syncWaitMs`.
+- **Effects:** None (pure).
+- **Errors:** Those of `readSleepAfter` and `readIntInRange`.
 
 ### `readSendSettings`
 
@@ -7000,11 +7000,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a configuração de envio: ligado ou não, allowlist opcional e limite por hora.
+- **Does:** Reads the send configuration: enabled or not, optional allowlist and hourly limit.
 - **Input:** `env`.
-- **Output:** `enableSend`, `sendAllowlist` e `sendMaxPerHour`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Os de `readSendAllowlist` e `readIntInRange`.
+- **Output:** `enableSend`, `sendAllowlist` and `sendMaxPerHour`.
+- **Effects:** None (pure).
+- **Errors:** Those of `readSendAllowlist` and `readIntInRange`.
 
 ### `readWhatsAppSettings`
 
@@ -7017,11 +7017,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê e valida a configuração do conector a partir do ambiente do Worker.
-- **Input:** `env`: variáveis de texto do Worker.
-- **Output:** `WhatsAppSettings` completo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` explicando a variável ausente ou inválida.
+- **Does:** Reads and validates the connector configuration from the Worker environment.
+- **Input:** `env`: the Worker's text variables.
+- **Output:** Complete `WhatsAppSettings`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` explaining the missing or invalid variable.
 
 ### `containerEnvVars`
 
@@ -7034,11 +7034,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o ambiente do container: só as chaves da ponte, mais o endereço do snapshot de saída.
-- **Input:** `env`: variáveis de texto do Worker.
-- **Output:** Variáveis de `BRIDGE_ENV_KEYS` presentes, mais `SNAPSHOT_PUSH_URL`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se faltar `BRIDGE_TOKEN` (ou tiver menos de 32 caracteres) ou `SNAPSHOT_KEY`.
+- **Does:** Builds the container environment: only the bridge keys, plus the outbound snapshot address.
+- **Input:** `env`: the Worker's text variables.
+- **Output:** The `BRIDGE_ENV_KEYS` variables that are present, plus `SNAPSHOT_PUSH_URL`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if `BRIDGE_TOKEN` is missing (or shorter than 32 characters) or `SNAPSHOT_KEY` is missing.
 
 ### `normalizeRecipient`
 
@@ -7051,11 +7051,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Normaliza um destinatário de envio para JID: número (com ou sem `+`, espaços, traços) vira `<dígitos>@s.whatsapp.net`; JIDs de contato, LID e grupo (`@g.us`, inclusive `criador-timestamp`) passam como estão. Pura.
-- **Input:** `raw`: número ou JID digitado.
-- **Output:** JID normalizado, ou `null` se não for contato nem grupo (ex.: `status@broadcast`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Normalizes a send recipient to a JID: a number (with or without `+`, spaces, dashes) becomes `<dígitos>@s.whatsapp.net`; contact, LID and group JIDs (`@g.us`, including `criador-timestamp`) pass through as is. Pure.
+- **Input:** `raw`: typed number or JID.
+- **Output:** Normalized JID, or `null` if it is neither a contact nor a group (e.g. `status@broadcast`).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/whatsapp/src/container.ts`
 
@@ -7070,11 +7070,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Fluxo de tamanho fixo do Workers para gravar no R2 sem carregar o arquivo na memória.
-- **Input:** `body`: fluxo de bytes; `length`: tamanho total.
-- **Output:** Fluxo legível do `FixedLengthStream`.
-- **Effects:** Copia `body` para o `FixedLengthStream` com `pumpInto()` (em segundo plano).
-- **Errors:** Nenhum (falha do encadeamento não é observada aqui).
+- **Does:** Workers fixed-length stream for writing to R2 without loading the file into memory.
+- **Input:** `body`: byte stream; `length`: total size.
+- **Output:** Readable stream of the `FixedLengthStream`.
+- **Effects:** Copies `body` into the `FixedLengthStream` with `pumpInto()` (in the background).
+- **Errors:** None (a failure of the piping is not observed here).
 
 ## `connectors/whatsapp/src/format.ts`
 
@@ -7089,11 +7089,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se um caractere é invisível ou de controle (pode esconder texto do usuário).
-- **Input:** `char`: um caractere.
-- **Output:** `true` se cai em `HIDDEN_CHAR_RANGES`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether a character is invisible or a control character (it may hide text from the user).
+- **Input:** `char`: a character.
+- **Output:** `true` if it falls within `HIDDEN_CHAR_RANGES`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `sanitizeText`
 
@@ -7106,11 +7106,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Limpa um texto de terceiros: tira caracteres invisíveis/de controle e corta no teto.
-- **Input:** `text` (pode ser nulo) e `max` (padrão `MAX_TEXT_CHARS`).
-- **Output:** Texto limpo, com aviso `[truncated N chars]` se cortado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Cleans third-party text: strips invisible/control characters and truncates at the cap.
+- **Input:** `text` (may be null) and `max` (default `MAX_TEXT_CHARS`).
+- **Output:** Clean text, with a `[truncated N chars]` notice if truncated.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `untrusted`
 
@@ -7123,11 +7123,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Embrulha dados com conteúdo de terceiros sob o aviso de não confiável.
-- **Input:** `data`: qualquer valor.
+- **Does:** Wraps data with third-party content under the untrusted notice.
+- **Input:** `data`: any value.
 - **Output:** `{ notice: UNTRUSTED_NOTICE, data }`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `compactMessage`
 
@@ -7140,11 +7140,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Mensagem compacta: só campos úteis, textos limpos, sem campos vazios.
-- **Input:** `message`: mensagem da ponte.
-- **Output:** Objeto com `id`, `chat`, `from`, `at` e, se houver, nome, tipo, texto e mídia.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Compact message: only useful fields, cleaned texts, no empty fields.
+- **Input:** `message`: bridge message.
+- **Output:** Object with `id`, `chat`, `from`, `at` and, when present, name, type, text and media.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `compactChat`
 
@@ -7157,11 +7157,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Conversa compacta, com a prévia da última mensagem limpa e curta.
-- **Input:** `chat`: conversa da ponte.
-- **Output:** Objeto com `jid`, `name`, `last_at` e, se houver, `group` e `last`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Compact chat, with a short, cleaned preview of the last message.
+- **Input:** `chat`: bridge chat.
+- **Output:** Object with `jid`, `name`, `last_at` and, when present, `group` and `last`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `partialSyncWarning`
 
@@ -7174,11 +7174,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aviso de resultado parcial quando o sync de pendências não terminou a tempo.
-- **Input:** `status`: status da ponte.
-- **Output:** Aviso (sincronizando ou desconectado) ou `null` se não é parcial.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Partial-result warning when the pending-message sync did not finish in time.
+- **Input:** `status`: bridge status.
+- **Output:** Warning (syncing or disconnected) or `null` if not partial.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `compactStatus`
 
@@ -7191,11 +7191,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Status compacto para `whatsapp_status`.
-- **Input:** `status` da ponte e `pairUrl` da página de pareamento.
-- **Output:** Objeto com conexão, pareamento (e `pair_at` se preciso), sync, contagens e envio.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Compact status for `whatsapp_status`.
+- **Input:** The bridge's `status` and the pairing page's `pairUrl`.
+- **Output:** Object with connection, pairing (and `pair_at` if needed), sync, counts and sending.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/whatsapp/src/lifecycle.ts`
 
@@ -7210,11 +7210,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Junta o `Authorization` da ponte às opções de uma requisição.
-- **Input:** `token` da ponte e `init` (opcional).
-- **Output:** `RequestInit` com `authorization: Bearer <token>`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Adds the bridge's `Authorization` to a request's options.
+- **Input:** The bridge `token` and `init` (optional).
+- **Output:** `RequestInit` with `authorization: Bearer <token>`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `fetchBridge`
 
@@ -7227,11 +7227,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Faz uma requisição à ponte dentro do container, já autenticada.
-- **Input:** `host`, `path` e `init` opcional.
-- **Output:** Resposta da ponte.
-- **Effects:** Rede: `containerFetch` (pode acordar o container).
-- **Errors:** Repassa a rejeição do `containerFetch`.
+- **Does:** Makes an already-authenticated request to the bridge inside the container.
+- **Input:** `host`, `path` and optional `init`.
+- **Output:** The bridge's response.
+- **Effects:** Network: `containerFetch` (may wake the container).
+- **Errors:** Forwards the `containerFetch` rejection.
 
 ### `readBridgePhase`
 
@@ -7244,11 +7244,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a fase da ponte (`GET /health`).
-- **Input:** `host`: porta do Durable Object.
-- **Output:** Fase (ex. `awaiting_restore`) ou `unknown`.
-- **Effects:** Rede: `GET /health` no container.
-- **Errors:** Rejeita se a chamada falhar ou o corpo não for JSON.
+- **Does:** Reads the bridge phase (`GET /health`).
+- **Input:** `host`: Durable Object port.
+- **Output:** Phase (e.g. `awaiting_restore`) or `unknown`.
+- **Effects:** Network: `GET /health` on the container.
+- **Errors:** Rejects if the call fails or the body is not JSON.
 
 ### `restoreRequestInit`
 
@@ -7261,11 +7261,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Opções do `POST /restore`: o snapshot do bucket em fluxo, ou `X-Snapshot: none` se não houver.
-- **Input:** `host`: porta do Durable Object.
-- **Output:** `RequestInit` do POST, com o snapshot como corpo ou o header `x-snapshot: none`.
-- **Effects:** Lê o snapshot no R2.
-- **Errors:** Repassa a rejeição do R2.
+- **Does:** `POST /restore` options: the bucket snapshot as a stream, or `X-Snapshot: none` if there is none.
+- **Input:** `host`: Durable Object port.
+- **Output:** The POST's `RequestInit`, with the snapshot as the body or the `x-snapshot: none` header.
+- **Effects:** Reads the snapshot from R2.
+- **Errors:** Forwards the R2 rejection.
 
 ### `ensureRestored`
 
@@ -7278,11 +7278,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Restaura a ponte se ela acabou de acordar; snapshot recusado lança (nunca recomeça do zero sozinho).
-- **Input:** `host`: porta do Durable Object.
-- **Output:** Nada.
-- **Effects:** Rede: `/health` e `/restore` no container; lê o snapshot no R2.
-- **Errors:** Lança `BridgeError` se o restore falhar (exceto 409, outra requisição já restaurou).
+- **Does:** Restores the bridge if it has just woken up; a rejected snapshot throws (it never starts from scratch on its own).
+- **Input:** `host`: Durable Object port.
+- **Output:** Nothing.
+- **Effects:** Network: `/health` and `/restore` on the container; reads the snapshot from R2.
+- **Errors:** Throws `BridgeError` if the restore fails (except 409, another request already restored).
 
 ### `snapshotBridge`
 
@@ -7295,11 +7295,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Pede o snapshot à ponte e grava no bucket.
-- **Input:** `host`: porta do Durable Object; `force`: pede `?force=1` (depois de uma gravação que falhou).
-- **Output:** `SnapshotOutcome` (`saved`, `unchanged` ou `stale`).
-- **Effects:** Rede: `GET /snapshot` no container; grava no R2.
-- **Errors:** Os de `storeSnapshotResponse`.
+- **Does:** Requests the snapshot from the bridge and writes it to the bucket.
+- **Input:** `host`: Durable Object port; `force`: requests `?force=1` (after a failed write).
+- **Output:** `SnapshotOutcome` (`saved`, `unchanged` or `stale`).
+- **Effects:** Network: `GET /snapshot` on the container; writes to R2.
+- **Errors:** Those of `storeSnapshotResponse`.
 
 ### `planSend`
 
@@ -7312,11 +7312,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decide um envio: permitido (e o histórico novo) ou recusado com quantos segundos esperar. Pura.
-- **Input:** `history` (ms dos envios), `now` (ms) e `maxPerHour`.
-- **Output:** `allowed`, o histórico da última hora e `retryAfterSeconds`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Decides a send: allowed (with the new history) or refused with how many seconds to wait. Pure.
+- **Input:** `history` (ms of the sends), `now` (ms) and `maxPerHour`.
+- **Output:** `allowed`, the last hour's history and `retryAfterSeconds`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `guardSend`
 
@@ -7329,11 +7329,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aplica o limite de envios; devolve a resposta 429 se estourou, ou nulo (e registra o envio) se pode.
-- **Input:** `host`: porta do Durable Object.
-- **Output:** Resposta 429 `rate_limited` ou `null`.
-- **Effects:** Lê e grava `SEND_HISTORY_KEY` no armazenamento do Durable Object.
-- **Errors:** Repassa a rejeição do armazenamento.
+- **Does:** Enforces the send limit; returns the 429 response if exceeded, or null (and records the send) if allowed.
+- **Input:** `host`: Durable Object port.
+- **Output:** 429 `rate_limited` response or `null`.
+- **Effects:** Reads and writes `SEND_HISTORY_KEY` in the Durable Object storage.
+- **Errors:** Forwards the storage rejection.
 
 ### `forwardInit`
 
@@ -7346,11 +7346,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Opções para repassar uma requisição recebida à ponte (método, tipo e corpo).
-- **Input:** `request`: requisição recebida.
-- **Output:** `RequestInit` com método, `content-type` e corpo (fora de GET/HEAD).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Options for forwarding an incoming request to the bridge (method, type and body).
+- **Input:** `request`: incoming request.
+- **Output:** `RequestInit` with method, `content-type` and body (except for GET/HEAD).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `createBridgeLifecycle`
 
@@ -7363,11 +7363,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o ciclo de vida da ponte para um Durable Object.
-- **Input:** `host`: porta do Durable Object.
+- **Does:** Builds the bridge lifecycle for a Durable Object.
+- **Input:** `host`: Durable Object port.
 - **Output:** `BridgeLifecycle` (`handle`, `snapshotNow`, `snapshotQuietly`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `logSnapshotFailure`
 
@@ -7380,11 +7380,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Espera um snapshot e só registra a falha no log (sem dados de mensagens).
-- **Input:** `run`: promessa do snapshot.
-- **Output:** Nada.
-- **Effects:** `console.warn` se o snapshot falhar.
-- **Errors:** Nenhum (a falha vira aviso no log).
+- **Does:** Awaits a snapshot and only logs the failure (without message data).
+- **Input:** `run`: snapshot promise.
+- **Output:** Nothing.
+- **Effects:** `console.warn` if the snapshot fails.
+- **Errors:** None (the failure becomes a log warning).
 
 ### `resetBridge`
 
@@ -7397,11 +7397,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Recomeça do zero: arquiva o snapshot atual e para o container (o próximo uso sobe vazio).
-- **Input:** `host`: porta do Durable Object.
+- **Does:** Starts from scratch: archives the current snapshot and stops the container (the next use starts empty).
+- **Input:** `host`: Durable Object port.
 - **Output:** JSON `{ reset: true, archived }`.
-- **Effects:** Copia e apaga o snapshot no R2; para o container.
-- **Errors:** Repassa a rejeição do R2 ou do `stop`.
+- **Effects:** Copies and deletes the snapshot in R2; stops the container.
+- **Errors:** Forwards the rejection from R2 or from `stop`.
 
 ### `routeBridgeRequest`
 
@@ -7414,11 +7414,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende uma requisição do Worker: rotas internas (`/__snapshot`, `/__reset`) ou repasse à ponte.
-- **Input:** `router` (host e agendador de snapshots) e a requisição.
-- **Output:** Resposta da ponte, da rota interna ou 429 do limite de envio.
-- **Effects:** Rede ao container; R2; armazenamento do Durable Object; pode agendar snapshot.
-- **Errors:** Os de `ensureRestored`, `fetchBridge` e do snapshot/reset.
+- **Does:** Handles a Worker request: internal routes (`/__snapshot`, `/__reset`) or forwarding to the bridge.
+- **Input:** `router` (host and snapshot scheduler) and the request.
+- **Output:** Response from the bridge, from the internal route, or 429 from the send limit.
+- **Effects:** Network to the container; R2; Durable Object storage; may schedule a snapshot.
+- **Errors:** Those of `ensureRestored`, `fetchBridge` and of the snapshot/reset.
 
 ## `connectors/whatsapp/src/pair-page.ts`
 
@@ -7433,11 +7433,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Frase de status para o dono.
-- **Input:** `status` da ponte ou `null`.
-- **Output:** Frase em português (sem status, precisa parear, conectando ou conectado).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Status sentence for the owner.
+- **Input:** The bridge's `status` or `null`.
+- **Output:** Sentence in Portuguese (no status, needs pairing, connecting or connected).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pairForm`
 
@@ -7450,11 +7450,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Formulário POST com o token anti-CSRF e campos extras.
-- **Input:** `action`, `csrf` e o HTML dos campos.
-- **Output:** HTML do `<form>`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** POST form with the anti-CSRF token and extra fields.
+- **Input:** `action`, `csrf` and the fields' HTML.
+- **Output:** HTML of the `<form>`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pairingSection`
 
@@ -7467,11 +7467,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Bloco de pareamento: pedir código pelo número ou mostrar o QR.
-- **Input:** `view`: dados da página.
-- **Output:** HTML com o código ou QR (se houver) e os formulários.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Pairing block: request a code by phone number or show the QR.
+- **Input:** `view`: page data.
+- **Output:** HTML with the code or QR (if any) and the forms.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `maintenanceSection`
 
@@ -7484,11 +7484,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Bloco de manutenção: deslogar, recomeçar do zero (apaga o backup) e sair.
-- **Input:** `view`: dados da página.
-- **Output:** HTML dos três formulários.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Maintenance block: log out, start from scratch (deletes the backup) and sign out.
+- **Input:** `view`: page data.
+- **Output:** HTML of the three forms.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `alertHtml`
 
@@ -7501,11 +7501,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aviso do resultado da última ação: erro, mensagem ou nada.
-- **Input:** `view`: dados da página.
-- **Output:** HTML do aviso, ou texto vazio.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Notice with the result of the last action: error, message or nothing.
+- **Input:** `view`: page data.
+- **Output:** HTML of the notice, or empty text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `renderPairPage`
 
@@ -7518,11 +7518,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Renderiza a página `/pair` completa.
-- **Input:** `view`: e-mail, CSRF, status e resultado da ação.
-- **Output:** HTML da página (com refresh de 20 s se mostra código ou QR).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Renders the complete `/pair` page.
+- **Input:** `view`: e-mail, CSRF, status and action result.
+- **Output:** Page HTML (with a 20 s refresh if it shows a code or QR).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/whatsapp/src/pair.ts`
 
@@ -7537,11 +7537,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê os cookies de um header `Cookie`.
-- **Input:** `header` (pode ser nulo).
-- **Output:** Mapa nome → valor.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the cookies of a `Cookie` header.
+- **Input:** `header` (may be null).
+- **Output:** Map name → value.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `redirectWithCookies`
 
@@ -7554,11 +7554,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Redirecionamento com cookies.
-- **Input:** `location` e a lista de `Set-Cookie`.
-- **Output:** Resposta 302 `no-store` com os cookies.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Redirect with cookies.
+- **Input:** `location` and the list of `Set-Cookie`.
+- **Output:** 302 `no-store` response with the cookies.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readPairSession`
 
@@ -7571,11 +7571,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** E-mail da sessão do `/pair` no cookie; nulo se ausente, vencida ou de quem saiu da lista.
-- **Input:** `app` e a requisição.
-- **Output:** E-mail da sessão ou `null`.
-- **Effects:** Nenhum (pura; lê o cookie da requisição).
-- **Errors:** Nenhum.
+- **Does:** The `/pair` session e-mail from the cookie; null if missing, expired or belonging to someone removed from the list.
+- **Input:** `app` and the request.
+- **Output:** Session e-mail or `null`.
+- **Effects:** None (pure; reads the request cookie).
+- **Errors:** None.
 
 ### `issuePairCsrf`
 
@@ -7588,11 +7588,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Token anti-CSRF amarrado ao e-mail da sessão.
-- **Input:** `app` e o e-mail.
-- **Output:** Token selado `pair_csrf` com validade da sessão.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Anti-CSRF token bound to the session e-mail.
+- **Input:** `app` and the e-mail.
+- **Output:** Sealed `pair_csrf` token valid for the session's lifetime.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isTrustedPost`
 
@@ -7605,11 +7605,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere o token anti-CSRF do formulário e a origem da requisição.
-- **Input:** `app`, a requisição e `{ csrf, email }`.
-- **Output:** `true` se o token vale para o e-mail e o `Origin` é o do emissor.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Checks the form's anti-CSRF token and the request origin.
+- **Input:** `app`, the request and `{ csrf, email }`.
+- **Output:** `true` if the token is valid for the e-mail and the `Origin` matches the issuer's.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `startPairLogin`
 
@@ -7622,11 +7622,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Começa o login do `/pair`: manda ao GitHub com `state` selado e amarra o navegador por um nonce em cookie.
-- **Input:** `app`: dependências do `/pair`.
-- **Output:** 302 ao GitHub com o cookie do nonce.
-- **Effects:** Gera um nonce aleatório (`crypto.randomUUID`).
-- **Errors:** Nenhum.
+- **Does:** Starts the `/pair` login: redirects to GitHub with a sealed `state` and binds the browser with a nonce cookie.
+- **Input:** `app`: `/pair` dependencies.
+- **Output:** 302 to GitHub with the nonce cookie.
+- **Effects:** Generates a random nonce (`crypto.randomUUID`).
+- **Errors:** None.
 
 ### `isValidPairLogin`
 
@@ -7639,11 +7639,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Confere o `state` do retorno do GitHub e o nonce do cookie deste navegador.
-- **Input:** `app` e a requisição de retorno.
-- **Output:** `true` se o `state` é válido e o nonce bate com o cookie.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Checks the `state` from the GitHub callback and this browser's nonce cookie.
+- **Input:** `app` and the callback request.
+- **Output:** `true` if the `state` is valid and the nonce matches the cookie.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `openPairSession`
 
@@ -7656,11 +7656,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Abre a sessão do `/pair` para o e-mail aceito e volta à página.
-- **Input:** `app` e o e-mail aceito.
-- **Output:** 302 para `/pair` com o cookie da sessão e o do nonce apagado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Opens the `/pair` session for the accepted e-mail and returns to the page.
+- **Input:** `app` and the accepted e-mail.
+- **Output:** 302 to `/pair` with the session cookie and the nonce cookie cleared.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `handlePairCallback`
 
@@ -7673,11 +7673,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Retorno do GitHub no `/pair`: confere `state` e nonce, conclui o login e abre a sessão.
-- **Input:** `app` e a requisição de retorno.
-- **Output:** 302 com a sessão; HTML 400 (login expirado ou de outro navegador) ou 403 (login recusado).
-- **Effects:** Rede: `fetch` ao GitHub (token e e-mails).
-- **Errors:** Nenhum (a falha do login vira página 403).
+- **Does:** GitHub callback on `/pair`: checks `state` and nonce, completes the login and opens the session.
+- **Input:** `app` and the callback request.
+- **Output:** 302 with the session; HTML 400 (login expired or from another browser) or 403 (login refused).
+- **Effects:** Network: `fetch` to GitHub (token and e-mails).
+- **Errors:** None (a login failure becomes a 403 page).
 
 ### `pairDeadline`
 
@@ -7690,11 +7690,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Prazo (ms Unix) de uma chamada do `/pair` à ponte.
+- **Does:** Deadline (Unix ms) for a `/pair` call to the bridge.
 - **Input:** `app`.
-- **Output:** `Date.now()` mais `timeoutMs`.
-- **Effects:** Lê o relógio.
-- **Errors:** Nenhum.
+- **Output:** `Date.now()` plus `timeoutMs`.
+- **Effects:** Reads the clock.
+- **Errors:** None.
 
 ### `fetchPairStatus`
 
@@ -7707,11 +7707,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o status da ponte; nulo se ela não responder a tempo.
+- **Does:** Reads the bridge status; null if it does not respond in time.
 - **Input:** `app`.
-- **Output:** `BridgeStatus` ou `null`.
-- **Effects:** Rede: `GET /status` na ponte.
-- **Errors:** Nenhum (qualquer falha devolve `null`).
+- **Output:** `BridgeStatus` or `null`.
+- **Effects:** Network: `GET /status` on the bridge.
+- **Errors:** None (any failure returns `null`).
 
 ### `pairPage`
 
@@ -7724,11 +7724,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Mostra a página com o status atual e o resultado de uma ação (código, QR, mensagem ou erro).
-- **Input:** `app`, o e-mail e o resultado da ação (opcional).
-- **Output:** Resposta HTML da página `/pair`.
-- **Effects:** Rede: `GET /status` na ponte.
-- **Errors:** Nenhum (status indisponível vira `null`).
+- **Does:** Shows the page with the current status and the result of an action (code, QR, message or error).
+- **Input:** `app`, the e-mail and the action result (optional).
+- **Output:** HTML response of the `/pair` page.
+- **Effects:** Network: `GET /status` on the bridge.
+- **Errors:** None (an unavailable status becomes `null`).
 
 ### `handlePairPost`
 
@@ -7741,11 +7741,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende um POST do `/pair` já autenticado: sair, ou executar a ação e mostrar a página.
-- **Input:** `app`, a requisição e o e-mail da sessão.
-- **Output:** Página com o resultado; 302 ao sair; HTML 403 (formulário inválido) ou 404.
-- **Effects:** Lê o corpo; rede à ponte pela ação; apaga o cookie ao sair.
-- **Errors:** Nenhum (falha da ação vira erro na página).
+- **Does:** Handles an already-authenticated `/pair` POST: sign out, or run the action and show the page.
+- **Input:** `app`, the request and the session e-mail.
+- **Output:** Page with the result; 302 on sign-out; HTML 403 (invalid form) or 404.
+- **Effects:** Reads the body; network to the bridge for the action; clears the cookie on sign-out.
+- **Errors:** None (an action failure becomes an error on the page).
 
 ### `routePairPost`
 
@@ -7758,11 +7758,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Roteia um POST do `/pair`: sem sessão volta ao login; com sessão, executa a ação.
-- **Input:** `app`, a requisição e o e-mail da sessão (ou `null`).
-- **Output:** 302 para `/pair` ou a resposta de `handlePairPost`.
-- **Effects:** Os de `handlePairPost`.
-- **Errors:** Nenhum.
+- **Does:** Routes a `/pair` POST: without a session, goes back to login; with a session, runs the action.
+- **Input:** `app`, the request and the session e-mail (or `null`).
+- **Output:** 302 to `/pair` or the response from `handlePairPost`.
+- **Effects:** Those of `handlePairPost`.
+- **Errors:** None.
 
 ### `isPairPath`
 
@@ -7775,11 +7775,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se o caminho pertence ao `/pair`.
-- **Input:** `path`: caminho da URL.
-- **Output:** `true` para `/pair`, `/pair/*` e o retorno do GitHub do `/pair`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Tells whether the path belongs to `/pair`.
+- **Input:** `path`: URL path.
+- **Output:** `true` for `/pair`, `/pair/*` and the `/pair` GitHub callback.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `routePairRequest`
 
@@ -7792,11 +7792,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Roteia as requisições do `/pair`; nulo se o caminho não é do `/pair`.
-- **Input:** `app` e a requisição.
-- **Output:** Resposta da rota, HTML 404 ou `null` fora do `/pair`.
-- **Effects:** Os das rotas (rede ao GitHub e à ponte, cookies).
-- **Errors:** Nenhum.
+- **Does:** Routes `/pair` requests; null if the path is not part of `/pair`.
+- **Input:** `app` and the request.
+- **Output:** Route response, HTML 404 or `null` outside `/pair`.
+- **Effects:** Those of the routes (network to GitHub and the bridge, cookies).
+- **Errors:** None.
 
 ### `pairCookie`
 
@@ -7809,11 +7809,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta um `Set-Cookie` seguro (HttpOnly, Secure, SameSite=Lax); `maxAge` 0 apaga.
-- **Input:** `name`, `value` e `maxAge` (segundos).
-- **Output:** Valor do header `Set-Cookie`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds a secure `Set-Cookie` (HttpOnly, Secure, SameSite=Lax); `maxAge` 0 deletes it.
+- **Input:** `name`, `value` and `maxAge` (seconds).
+- **Output:** Value of the `Set-Cookie` header.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pairActionError`
 
@@ -7826,11 +7826,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Mensagem de erro de uma ação.
-- **Input:** `error`: qualquer valor lançado.
+- **Does:** Error message of an action.
+- **Input:** `error`: any thrown value.
 - **Output:** `{ error: mensagem }`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/whatsapp/src/snapshots.ts`
 
@@ -7845,11 +7845,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê a geração gravada nos metadados de um objeto; 0 se ausente ou inválida.
-- **Input:** `meta`: objeto do bucket (ou `null`).
-- **Output:** Geração (inteiro positivo) ou 0.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads the generation stored in an object's metadata; 0 if missing or invalid.
+- **Input:** `meta`: bucket object (or `null`).
+- **Output:** Generation (positive integer) or 0.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `readUploadHeaders`
 
@@ -7862,11 +7862,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê tamanho e geração dos headers de uma resposta de snapshot; nulo se faltarem ou forem inválidos.
-- **Input:** `headers`: `content-length` e `x-snapshot-generation`.
-- **Output:** `{ length, generation }` ou `null`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads size and generation from a snapshot response's headers; null if missing or invalid.
+- **Input:** `headers`: `content-length` and `x-snapshot-generation`.
+- **Output:** `{ length, generation }` or `null`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `storeSnapshot`
 
@@ -7879,11 +7879,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Grava o snapshot se a geração for mais nova que a do bucket; senão descarta o fluxo e diz `stale`.
-- **Input:** `bucket`, `upload` (corpo, tamanho, geração) e `fixedLength`.
-- **Output:** `saved` ou `stale`.
-- **Effects:** Lê os metadados e grava no R2; cancela o fluxo se velho.
-- **Errors:** Repassa a rejeição do R2.
+- **Does:** Writes the snapshot if its generation is newer than the bucket's; otherwise discards the stream and reports `stale`.
+- **Input:** `bucket`, `upload` (body, size, generation) and `fixedLength`.
+- **Output:** `saved` or `stale`.
+- **Effects:** Reads the metadata and writes to R2; cancels the stream if outdated.
+- **Errors:** Forwards the R2 rejection.
 
 ### `storeSnapshotResponse`
 
@@ -7896,11 +7896,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Grava a resposta de `GET /snapshot` da ponte: 204 é `unchanged`; headers inválidos lançam.
-- **Input:** `bucket`, a resposta da ponte e `fixedLength`.
-- **Output:** `saved`, `stale` ou `unchanged` (204 sem mudança, ou 503 com a ponte ainda iniciando).
-- **Effects:** Grava no R2; cancela o corpo se inválido.
-- **Errors:** Rejeita com `Error` se a resposta não for 2xx ou os headers forem inválidos.
+- **Does:** Stores the bridge's `GET /snapshot` response: 204 is `unchanged`; invalid headers throw.
+- **Input:** `bucket`, the bridge response and `fixedLength`.
+- **Output:** `saved`, `stale` or `unchanged` (204 with no change, or 503 while the bridge is still starting).
+- **Effects:** Writes to R2; cancels the body if invalid.
+- **Errors:** Rejects with `Error` if the response is not 2xx or the headers are invalid.
 
 ### `archiveSnapshot`
 
@@ -7913,11 +7913,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Tira o snapshot atual do caminho (guarda uma cópia com data) para recomeçar do zero.
-- **Input:** `bucket`, `now` (data do arquivo) e `fixedLength`.
-- **Output:** `true` se havia snapshot para arquivar.
-- **Effects:** Lê, copia para `whatsapp/archive/` e apaga no R2.
-- **Errors:** Repassa a rejeição do R2.
+- **Does:** Moves the current snapshot out of the way (keeps a dated copy) to start from scratch.
+- **Input:** `bucket`, `now` (file date) and `fixedLength`.
+- **Output:** `true` if there was a snapshot to archive.
+- **Effects:** Reads, copies to `whatsapp/archive/` and deletes in R2.
+- **Errors:** Forwards the R2 rejection.
 
 ### `sameSecret`
 
@@ -7930,11 +7930,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Compara dois textos em tempo constante (para tokens).
-- **Input:** `given` e `expected`.
-- **Output:** `true` se iguais e `expected` não vazio.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Compares two strings in constant time (for tokens).
+- **Input:** `given` and `expected`.
+- **Output:** `true` if equal and `expected` is not empty.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `acceptSnapshotPush`
 
@@ -7947,11 +7947,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Recebe o snapshot que a ponte envia sozinha no `SIGTERM` (melhor esforço): confere o token e grava.
-- **Input:** `bucket`, a requisição PUT e opções (`token`, `fixedLength`).
-- **Output:** JSON `{ outcome }`; 403 sem token válido ou não PUT; 400 sem headers ou corpo.
-- **Effects:** Grava no R2.
-- **Errors:** Repassa a rejeição do R2.
+- **Does:** Receives the snapshot the bridge sends on its own on `SIGTERM` (best effort): checks the token and writes it.
+- **Input:** `bucket`, the PUT request and options (`token`, `fixedLength`).
+- **Output:** JSON `{ outcome }`; 403 without a valid token or if not PUT; 400 without headers or body.
+- **Effects:** Writes to R2.
+- **Errors:** Forwards the R2 rejection.
 
 ### `pumpInto`
 
@@ -7964,11 +7964,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Copia um fluxo para outro bloco a bloco, sem `pipeTo` (que o Workers recusa entre fluxos internos, o que impedia o snapshot de chegar ao R2).
-- **Input:** `source`: fluxo de origem (corpo da ponte); `writable`: destino (lado de escrita do `FixedLengthStream`).
-- **Output:** Promessa que resolve quando a cópia termina ou falha.
-- **Effects:** Lê `source` e escreve em `writable`; fecha o destino no fim.
-- **Errors:** Nunca rejeita: erro de um lado aborta o destino e cancela a origem, e quem lê o destino (o `put` do R2) recebe o erro.
+- **Does:** Copies one stream to another chunk by chunk, without `pipeTo` (which Workers refuses between internal streams, which kept the snapshot from reaching R2).
+- **Input:** `source`: source stream (bridge body); `writable`: destination (write side of the `FixedLengthStream`).
+- **Output:** Promise that resolves when the copy finishes or fails.
+- **Effects:** Reads `source` and writes to `writable`; closes the destination at the end.
+- **Errors:** Never rejects: an error on either side aborts the destination and cancels the source, and whoever reads the destination (the R2 `put`) receives the error.
 
 ## `connectors/whatsapp/src/tools.ts`
 
@@ -7983,11 +7983,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Prazo final (ms Unix) de uma chamada que começa agora.
-- **Input:** `ctx`: contexto das ferramentas.
-- **Output:** `now()` mais `toolTimeoutMs`.
-- **Effects:** Lê o relógio do contexto.
-- **Errors:** Nenhum.
+- **Does:** Final deadline (Unix ms) for a call that starts now.
+- **Input:** `ctx`: tool context.
+- **Output:** `now()` plus `toolTimeoutMs`.
+- **Effects:** Reads the context clock.
+- **Errors:** None.
 
 ### `syncWaitBudget`
 
@@ -8000,11 +8000,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Quanto pedir à ponte para esperar o sync, sem invadir a folga da consulta.
-- **Input:** `ctx` e o `deadline` (ms Unix).
-- **Output:** Milissegundos (0 ou mais, até `syncWaitMs`).
-- **Effects:** Lê o relógio do contexto.
-- **Errors:** Nenhum.
+- **Does:** How long to ask the bridge to wait for the sync, without eating into the query's slack.
+- **Input:** `ctx` and the `deadline` (Unix ms).
+- **Output:** Milliseconds (0 or more, up to `syncWaitMs`).
+- **Effects:** Reads the context clock.
+- **Errors:** None.
 
 ### `prepareRead`
 
@@ -8017,11 +8017,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Espera o sync dentro do orçamento; lança se precisa parear e devolve o aviso de resultado parcial.
-- **Input:** `ctx` e o `deadline` (ms Unix).
-- **Output:** Aviso de resultado parcial ou `null`.
-- **Effects:** Rede: `POST /sync/wait` na ponte.
-- **Errors:** Rejeita se o WhatsApp não está pareado; os de `bridgeJson`.
+- **Does:** Waits for the sync within the budget; throws if pairing is needed and returns the partial-result warning.
+- **Input:** `ctx` and the `deadline` (Unix ms).
+- **Output:** Partial-result warning or `null`.
+- **Effects:** Network: `POST /sync/wait` on the bridge.
+- **Errors:** Rejects if WhatsApp is not paired; those of `bridgeJson`.
 
 ### `runRead`
 
@@ -8034,11 +8034,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Roda uma leitura com prazo total: espera o sync, consulta a ponte e junta o aviso (se houver).
-- **Input:** `ctx` e a consulta (recebe o prazo).
-- **Output:** Resultado da consulta, ou `{ warning, result }`.
-- **Effects:** Rede: chamadas à ponte.
-- **Errors:** Rejeita se o prazo total esgotar; repassa os de `prepareRead` e da consulta.
+- **Does:** Runs a read with an overall deadline: waits for the sync, queries the bridge and attaches the warning (if any).
+- **Input:** `ctx` and the query (receives the deadline).
+- **Output:** Query result, or `{ warning, result }`.
+- **Effects:** Network: calls to the bridge.
+- **Errors:** Rejects if the overall deadline runs out; forwards those of `prepareRead` and of the query.
 
 ### `compactContact`
 
@@ -8051,11 +8051,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Contato compacto, com nomes limpos.
-- **Input:** `contact`: contato da ponte.
-- **Output:** Objeto com `jid`, `name` e, se houver, `phone`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Compact contact, with cleaned names.
+- **Input:** `contact`: bridge contact.
+- **Output:** Object with `jid`, `name` and, when present, `phone`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `mediaResult`
 
@@ -8068,11 +8068,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resultado de `get_media`: uma linha de descrição e o arquivo como bloco MCP.
-- **Input:** Resposta da ponte (headers), os bytes e o id da mensagem.
-- **Output:** `RawToolResult` com o texto e o bloco binário.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** `get_media` result: a description line and the file as an MCP block.
+- **Input:** Bridge response (headers), the bytes and the message id.
+- **Output:** `RawToolResult` with the text and the binary block.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `allowedRecipient`
 
@@ -8085,11 +8085,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida o destinatário (`normalizeRecipient()`) e, se a `SEND_ALLOWLIST` tiver itens, exige que ele esteja nela; vazia libera qualquer contato ou grupo.
-- **Input:** `settings` e o destinatário (número ou JID).
-- **Output:** JID normalizado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se o destinatário for inválido ou estiver fora de uma allowlist não vazia.
+- **Does:** Validates the recipient (`normalizeRecipient()`) and, if `SEND_ALLOWLIST` has items, requires it to be on the list; empty allows any contact or group.
+- **Input:** `settings` and the recipient (number or JID).
+- **Output:** Normalized JID.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if the recipient is invalid or not on a non-empty allowlist.
 
 ### `whatsappTools`
 
@@ -8102,11 +8102,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Ferramentas ativas: as de leitura e, só com `ENABLE_SEND`, a de envio.
+- **Does:** Active tools: the read tools and, only with `ENABLE_SEND`, the send tool.
 - **Input:** `settings`.
-- **Output:** Lista de `ToolSpec`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** List of `ToolSpec`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `createWhatsAppMcpServer`
 
@@ -8119,11 +8119,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria o servidor MCP do WhatsApp com as ferramentas ativas.
-- **Input:** `ctx`: contexto das ferramentas.
-- **Output:** `McpServer` com instruções e ferramentas registradas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Creates the WhatsApp MCP server with the active tools.
+- **Input:** `ctx`: tool context.
+- **Output:** `McpServer` with instructions and registered tools.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `decodeHeaderText`
 
@@ -8136,11 +8136,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Decodifica um header em UTF-8 percent-encoded (como a ponte manda o nome do arquivo); inválido fica como veio.
-- **Input:** `value`: valor do header ou nulo.
-- **Output:** Texto decodificado; `""` se nulo/vazio; o valor original se a codificação for inválida.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum (erro de `decodeURIComponent` é capturado).
+- **Does:** Decodes a percent-encoded UTF-8 header (how the bridge sends the file name); invalid values stay as received.
+- **Input:** `value`: header value or null.
+- **Output:** Decoded text; `""` if null/empty; the original value if the encoding is invalid.
+- **Effects:** None (pure).
+- **Errors:** None (the `decodeURIComponent` error is caught).
 
 ## `connectors/whatsapp/src/worker-env.ts`
 
@@ -8155,11 +8155,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Devolve o stub da instância única da ponte.
-- **Input:** `env`: bindings do Worker.
-- **Output:** Stub do Durable Object de nome `BRIDGE_INSTANCE_NAME`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Returns the stub of the bridge's single instance.
+- **Input:** `env`: Worker bindings.
+- **Output:** Stub of the Durable Object named `BRIDGE_INSTANCE_NAME`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `bridgeFetchFor`
 
@@ -8172,11 +8172,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Função que fala com a ponte pelo stub, com caminhos relativos (`/status`, `/chats?...`).
-- **Input:** `stub` do Durable Object.
+- **Does:** Function that talks to the bridge through the stub, with relative paths (`/status`, `/chats?...`).
+- **Input:** Durable Object `stub`.
 - **Output:** `BridgeFetch`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/whatsapp/src/worker.ts`
 
@@ -8191,11 +8191,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Relógio em segundos Unix.
-- **Input:** Nada.
-- **Output:** Segundos Unix inteiros.
-- **Effects:** Lê o relógio.
-- **Errors:** Nenhum.
+- **Does:** Clock in Unix seconds.
+- **Input:** Nothing.
+- **Output:** Integer Unix seconds.
+- **Effects:** Reads the clock.
+- **Errors:** None.
 
 ### `githubSettingsFrom`
 
@@ -8208,11 +8208,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Configuração do login do dono pelo GitHub a partir da configuração do conector.
-- **Input:** `settings` do conector.
-- **Output:** `GithubLoginSettings` com o `fetch` global.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Owner GitHub login configuration derived from the connector configuration.
+- **Input:** Connector `settings`.
+- **Output:** `GithubLoginSettings` with the global `fetch`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `whatsappRemoteConnector`
 
@@ -8225,11 +8225,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o conector remoto do WhatsApp: login pelo GitHub e servidor MCP ligado à ponte.
-- **Input:** `settings`, `bridge` e o `issuer`.
+- **Does:** Builds the WhatsApp remote connector: GitHub login and an MCP server wired to the bridge.
+- **Input:** `settings`, `bridge` and the `issuer`.
 - **Output:** `RemoteConnector`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `createWhatsAppApps`
 
@@ -8242,11 +8242,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta os apps do Worker a partir do ambiente, da ponte e da origem da requisição.
-- **Input:** `vars`, `bridge` e a origem da requisição.
-- **Output:** `WhatsAppApps` (`remote` e `pair`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se a configuração do ambiente for inválida.
+- **Does:** Builds the Worker apps from the environment, the bridge and the request origin.
+- **Input:** `vars`, `bridge` and the request origin.
+- **Output:** `WhatsAppApps` (`remote` and `pair`).
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if the environment configuration is invalid.
 
 ### `handleWhatsAppFetch`
 
@@ -8259,11 +8259,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Atende uma requisição: `/pair` primeiro, depois OAuth e `/mcp`; configuração inválida vira 500 explicado.
-- **Input:** A requisição e o ambiente do Worker.
-- **Output:** Resposta HTTP.
-- **Effects:** Rede (ponte, GitHub), cookies e o que o handler remoto fizer.
-- **Errors:** Nenhum (configuração inválida vira resposta 500).
+- **Does:** Handles a request: `/pair` first, then OAuth and `/mcp`; invalid configuration becomes an explained 500.
+- **Input:** The request and the Worker environment.
+- **Output:** HTTP response.
+- **Effects:** Network (bridge, GitHub), cookies and whatever the remote handler does.
+- **Errors:** None (invalid configuration becomes a 500 response).
 
 ### `isSyncCronEnabled`
 
@@ -8276,11 +8276,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se o cron que disparou é o sync opcional configurado em `SYNC_CRON`.
-- **Input:** `vars` e o cron que disparou.
-- **Output:** `true` se `SYNC_CRON` está definido e é igual.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `Error` se a configuração do ambiente for inválida.
+- **Does:** Tells whether the cron that fired is the optional sync configured in `SYNC_CRON`.
+- **Input:** `vars` and the cron that fired.
+- **Output:** `true` if `SYNC_CRON` is set and equal.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` if the environment configuration is invalid.
 
 ### `runScheduledSync`
 
@@ -8293,11 +8293,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Sync periódico opcional: acorda a ponte, espera as pendências (até 20 s), guarda o snapshot e deixa dormir.
-- **Input:** O ambiente do Worker e o cron que disparou.
-- **Output:** `disabled` ou o resultado do snapshot (`saved`, `unchanged`, `stale`, `unknown`).
-- **Effects:** Rede: `/sync/wait` e `/__snapshot` na ponte (que grava no R2).
-- **Errors:** Rejeita se o prazo de 50 s esgotar ou a configuração for inválida.
+- **Does:** Optional periodic sync: wakes the bridge, waits for pending messages (up to 20 s), stores the snapshot and lets it sleep.
+- **Input:** The Worker environment and the cron that fired.
+- **Output:** `disabled` or the snapshot result (`saved`, `unchanged`, `stale`, `unknown`).
+- **Effects:** Network: `/sync/wait` and `/__snapshot` on the bridge (which writes to R2).
+- **Errors:** Rejects if the 50 s deadline runs out or the configuration is invalid.
 
 ## `src/remote/github-login.ts`
 
@@ -8312,11 +8312,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Endereço da tela de autorização do GitHub, pedindo só a leitura dos e-mails.
-- **Input:** `settings`, `state` e `callbackUrl`.
-- **Output:** URL de `github.com/login/oauth/authorize` com escopo `user:email`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Address of GitHub's authorization screen, requesting read access to emails only.
+- **Input:** `settings`, `state` and `callbackUrl`.
+- **Output:** URL of `github.com/login/oauth/authorize` with scope `user:email`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseEmailList`
 
@@ -8329,11 +8329,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma lista de e-mails separada por vírgula, em minúsculas e sem vazios.
-- **Input:** `raw` (pode ser nulo).
-- **Output:** Lista de e-mails (só itens com `@`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads a comma-separated list of emails, lowercased and without empties.
+- **Input:** `raw` (may be null).
+- **Output:** List of emails (only items with `@`).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `pickAllowedEmail`
 
@@ -8346,11 +8346,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Escolhe o primeiro e-mail verificado que está na lista; nulo se nenhum serve.
-- **Input:** `emails` do GitHub e a lista permitida.
-- **Output:** E-mail em minúsculas ou `null`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Picks the first verified email that is on the list; null if none qualifies.
+- **Input:** GitHub `emails` and the allowed list.
+- **Output:** Lowercased email or `null`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `exchangeGithubCode`
 
@@ -8363,11 +8363,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Troca o código do GitHub por um token de acesso; rejeita com mensagem ao usuário se falhar.
-- **Input:** `settings`, `code` e `callbackUrl`.
-- **Output:** Token de acesso do GitHub.
-- **Effects:** Rede: `POST` a `github.com/login/oauth/access_token`.
-- **Errors:** Rejeita com `Error` se a resposta não for 2xx ou não trouxer `access_token`.
+- **Does:** Exchanges the GitHub code for an access token; rejects with a user-facing message on failure.
+- **Input:** `settings`, `code` and `callbackUrl`.
+- **Output:** GitHub access token.
+- **Effects:** Network: `POST` to `github.com/login/oauth/access_token`.
+- **Errors:** Rejects with `Error` if the response is not 2xx or lacks `access_token`.
 
 ### `fetchGithubEmails`
 
@@ -8380,11 +8380,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê os e-mails da conta do GitHub com o token de acesso.
-- **Input:** `settings` e o token.
-- **Output:** Lista de `GithubEmail` (vazia se o corpo não for lista).
-- **Effects:** Rede: `GET api.github.com/user/emails`.
-- **Errors:** Rejeita com `Error` se o GitHub não responder 2xx.
+- **Does:** Reads the GitHub account's emails with the access token.
+- **Input:** `settings` and the token.
+- **Output:** List of `GithubEmail` (empty if the body is not a list).
+- **Effects:** Network: `GET api.github.com/user/emails`.
+- **Errors:** Rejects with `Error` if GitHub does not answer 2xx.
 
 ### `finishGithubLogin`
 
@@ -8397,11 +8397,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Conclui o login: confere o retorno do GitHub e devolve o e-mail aceito, ou rejeita explicando.
-- **Input:** `settings`, a query do retorno e `callbackUrl`.
-- **Output:** E-mail aceito, em minúsculas.
-- **Effects:** Rede: troca do código e leitura dos e-mails no GitHub.
-- **Errors:** Rejeita com `Error` se não houver `code`, a troca falhar ou nenhum e-mail verificado estiver na lista.
+- **Does:** Finishes the login: checks GitHub's callback and returns the accepted email, or rejects with an explanation.
+- **Input:** `settings`, the callback query and `callbackUrl`.
+- **Output:** Accepted email, lowercased.
+- **Effects:** Network: code exchange and email read on GitHub.
+- **Errors:** Rejects with `Error` if there is no `code`, the exchange fails or no verified email is on the list.
 
 ### `githubUpstreamLogin`
 
@@ -8414,11 +8414,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Login do conector remoto pelo GitHub, no formato que o servidor remoto espera.
-- **Input:** `settings` do login.
-- **Output:** `UpstreamLogin` com `start` e `finish`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** GitHub login for the remote connector, in the format the remote server expects.
+- **Input:** Login `settings`.
+- **Output:** `UpstreamLogin` with `start` and `finish`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/accounts.ts`
 
@@ -8433,11 +8433,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Dá a cada conta vinculada o apelido usado nas ferramentas.
-- **Input:** `accounts`: contas vinculadas do usuário.
-- **Output:** Lista de `AccountRef`: apelido é a parte antes do `@`, ou o e-mail inteiro quando duas contas a repetem.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Gives each linked account the alias used in the tools.
+- **Input:** `accounts`: the user's linked accounts.
+- **Output:** List of `AccountRef`: the alias is the part before `@`, or the whole email when two accounts share it.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `noAccountsError`
 
@@ -8450,11 +8450,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o erro de quem ainda não vinculou nenhuma conta.
-- **Input:** Nenhuma.
-- **Output:** `Error` que orienta a usar `link_account`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the error for a user who has not linked any account yet.
+- **Input:** None.
+- **Output:** `Error` that points to `link_account`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `accountAlias`
 
@@ -8467,11 +8467,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Extrai o apelido de um e-mail: a parte antes do `@`, em minúsculas.
-- **Input:** `email`: endereço completo.
-- **Output:** O apelido (ex.: `musica.nova`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Extracts the alias from an email: the part before `@`, lowercased.
+- **Input:** `email`: full address.
+- **Output:** The alias (e.g. `musica.nova`).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `resolveAccounts`
 
@@ -8484,11 +8484,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resolve o parâmetro `account` nas contas do usuário.
-- **Input:** `refs`: contas com apelido. `requested`: apelido, e-mail ou `all` (sem diferenciar maiúsculas).
-- **Output:** Todas as contas para `all`; senão a lista com a conta encontrada.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `noAccountsError()` sem contas; lança erro com os apelidos válidos se nenhuma conta casar.
+- **Does:** Resolves the `account` parameter against the user's accounts.
+- **Input:** `refs`: accounts with alias. `requested`: alias, email or `all` (case-insensitive).
+- **Output:** All accounts for `all`; otherwise the list with the matching account.
+- **Effects:** None (pure).
+- **Errors:** Throws `noAccountsError()` with no accounts; throws an error listing the valid aliases if no account matches.
 
 ### `writeAccessError`
 
@@ -8501,11 +8501,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o erro de conta vinculada só para leitura, pedindo novo vínculo por `link_account`.
-- **Input:** `alias`: apelido da conta.
-- **Output:** `Error` acionável.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the error for an account linked read-only, asking to relink via `link_account`.
+- **Input:** `alias`: account alias.
+- **Output:** Actionable `Error`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `requireWriteAccess`
 
@@ -8518,11 +8518,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Exige o escopo `gmail.modify` no token da conta.
-- **Input:** `ref`: conta vinculada.
-- **Output:** Nada.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança `writeAccessError()` se a conta foi vinculada só para leitura.
+- **Does:** Requires the `gmail.modify` scope on the account's token.
+- **Input:** `ref`: linked account.
+- **Output:** Nothing.
+- **Effects:** None (pure).
+- **Errors:** Throws `writeAccessError()` if the account was linked read-only.
 
 ## `connectors/gmail/src/token-store.ts`
 
@@ -8537,11 +8537,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a chave do registro do usuário no KV.
-- **Input:** `owner`: usuário (`sub` do Google).
-- **Output:** `owner:<sha256>`, sem o id em claro.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the KV key of the user's record.
+- **Input:** `owner`: user (Google `sub`).
+- **Output:** `owner:<sha256>`, without the id in clear text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toLinkedAccount`
 
@@ -8554,11 +8554,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte um item do selo em conta vinculada.
-- **Input:** `value`: item lido do registro.
-- **Output:** `LinkedAccount` com padrões para campos ausentes; nulo sem e-mail ou refresh token.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Converts a sealed item into a linked account.
+- **Input:** `value`: item read from the record.
+- **Output:** `LinkedAccount` with defaults for missing fields; null without email or refresh token.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `sealOwnerAccounts`
 
@@ -8571,11 +8571,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Sela as contas de um usuário para gravar no KV.
-- **Input:** `owner`: usuário. `accounts`: contas. `key`: `TOKEN_ENC_KEY`.
-- **Output:** Selo AES-256-GCM em base64url.
-- **Effects:** Nenhum (pura, exceto o IV aleatório).
-- **Errors:** Nenhum.
+- **Does:** Seals a user's accounts to store in KV.
+- **Input:** `owner`: user. `accounts`: accounts. `key`: `TOKEN_ENC_KEY`.
+- **Output:** AES-256-GCM seal in base64url.
+- **Effects:** None (pure, except the random IV).
+- **Errors:** None.
 
 ### `openOwnerAccounts`
 
@@ -8588,11 +8588,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Abre o registro do usuário conferindo o dono.
-- **Input:** `sealed`: selo do KV. `key`: `TOKEN_ENC_KEY`. `owner`: usuário esperado.
-- **Output:** Contas válidas; vazio se a chave, o conteúdo ou o dono não conferem.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Opens the user's record, checking the owner.
+- **Input:** `sealed`: KV seal. `key`: `TOKEN_ENC_KEY`. `owner`: expected user.
+- **Output:** Valid accounts; empty if the key, content or owner do not match.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `loadOwnerAccounts`
 
@@ -8605,11 +8605,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê as contas vinculadas do usuário.
-- **Input:** `kv`: KV. `key`: `TOKEN_ENC_KEY`. `owner`: usuário.
-- **Output:** Contas do usuário; vazio se ele ainda não vinculou nenhuma.
-- **Effects:** KV: uma leitura.
-- **Errors:** Propaga falhas do KV.
+- **Does:** Reads the user's linked accounts.
+- **Input:** `kv`: KV. `key`: `TOKEN_ENC_KEY`. `owner`: user.
+- **Output:** The user's accounts; empty if none linked yet.
+- **Effects:** KV: one read.
+- **Errors:** Propagates KV failures.
 
 ### `saveOwnerAccounts`
 
@@ -8622,11 +8622,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Grava as contas do usuário no KV.
-- **Input:** `kv`: KV. `key`: `TOKEN_ENC_KEY`. `record`: usuário e contas.
-- **Output:** Nada.
-- **Effects:** KV: grava o registro selado, ou apaga quando não sobra conta.
-- **Errors:** Propaga falhas do KV.
+- **Does:** Stores the user's accounts in KV.
+- **Input:** `kv`: KV. `key`: `TOKEN_ENC_KEY`. `record`: user and accounts.
+- **Output:** Nothing.
+- **Effects:** KV: writes the sealed record, or deletes it when no account is left.
+- **Errors:** Propagates KV failures.
 
 ### `upsertAccount`
 
@@ -8639,11 +8639,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Põe ou troca a conta na lista pelo e-mail.
-- **Input:** `accounts`: contas atuais. `account`: conta nova ou renovada.
-- **Output:** Lista nova com a conta no fim.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se passaria de `MAX_LINKED_ACCOUNTS`.
+- **Does:** Adds or replaces the account in the list by email.
+- **Input:** `accounts`: current accounts. `account`: new or renewed account.
+- **Output:** New list with the account at the end.
+- **Effects:** None (pure).
+- **Errors:** Throws if it would exceed `MAX_LINKED_ACCOUNTS`.
 
 ### `sha256Hex`
 
@@ -8656,11 +8656,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula o SHA-256 em hexadecimal.
-- **Input:** `text`: texto a resumir.
-- **Output:** 64 caracteres hexadecimais.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Computes SHA-256 in hexadecimal.
+- **Input:** `text`: text to hash.
+- **Output:** 64 hexadecimal characters.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/compose.ts`
 
@@ -8675,11 +8675,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Põe `Re:` ou `Fwd:` no assunto sem repetir o prefixo.
-- **Input:** `subject`; `prefix`: `Re` ou `Fwd`.
-- **Output:** O assunto.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Adds `Re:` or `Fwd:` to the subject without repeating the prefix.
+- **Input:** `subject`; `prefix`: `Re` or `Fwd`.
+- **Output:** The subject.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `threadingHeaders`
 
@@ -8692,11 +8692,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula `In-Reply-To` e `References` da resposta a partir do original.
-- **Input:** `headers`: cabeçalhos do original em minúsculas.
-- **Output:** `{ inReplyTo, references }` (nulos se não houver).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Computes the reply's `In-Reply-To` and `References` from the original.
+- **Input:** `headers`: original's headers, lowercased.
+- **Output:** `{ inReplyTo, references }` (null if absent).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `uniqueAddresses`
 
@@ -8709,11 +8709,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Tira endereços repetidos e os excluídos, sem diferenciar maiúsculas.
-- **Input:** `addresses`; `exclude`: e-mails em minúsculas.
-- **Output:** Lista sem repetidos.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Removes repeated and excluded addresses, case-insensitively.
+- **Input:** `addresses`; `exclude`: lowercased emails.
+- **Output:** List without repeats.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `replyToList`
 
@@ -8726,11 +8726,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Candidatos a `To` da resposta: remetente (ou `Reply-To`), mais o `To` com `replyAll`, ou os destinatários se a original foi enviada pela conta.
-- **Input:** `headers`; `self`: e-mail da conta em minúsculas; `replyAll`.
-- **Output:** Lista de endereços.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reply `To` candidates: sender (or `Reply-To`), plus `To` with `replyAll`, or the recipients if the original was sent by the account.
+- **Input:** `headers`; `self`: account email, lowercased; `replyAll`.
+- **Output:** List of addresses.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `replyRecipients`
 
@@ -8743,11 +8743,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Calcula `To` e `Cc` da resposta, sem a própria conta e sem repetir.
+- **Does:** Computes the reply's `To` and `Cc`, without the account itself and without repeats.
 - **Input:** `headers`; `selfEmail`; `replyAll`.
 - **Output:** `{ to, cc }`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se não sobrar destinatário.
+- **Effects:** None (pure).
+- **Errors:** Throws if no recipient is left.
 
 ### `quotedText`
 
@@ -8760,11 +8760,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cita o original com `> ` depois de "Em <data>, <remetente> escreveu:".
-- **Input:** `message`: original no formato `full`.
-- **Output:** Texto citado (até 20 mil caracteres do original).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Quotes the original with `> ` after "Em <data>, <remetente> escreveu:".
+- **Input:** `message`: original in `full` format.
+- **Output:** Quoted text (up to 20 thousand characters of the original).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `forwardedText`
 
@@ -8777,11 +8777,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Bloco do e-mail encaminhado: separador, cabeçalhos e corpo do original.
+- **Does:** Forwarded email block: separator, headers and body of the original.
 - **Input:** `message`: original.
-- **Output:** Texto do bloco.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** Block text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `replyEmail`
 
@@ -8794,11 +8794,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a resposta: destinatários, `Re:`, conversa mantida e original citado.
-- **Input:** `message`: original; `options`: texto, `replyAll` e e-mail da conta.
-- **Output:** `PreparedEmail` com o `threadId` do original.
-- **Effects:** Nenhum (pura).
-- **Errors:** Os de `replyRecipients()`.
+- **Does:** Builds the reply: recipients, `Re:`, kept thread and quoted original.
+- **Input:** `message`: original; `options`: text, `replyAll` and account email.
+- **Output:** `PreparedEmail` with the original's `threadId`.
+- **Effects:** None (pure).
+- **Errors:** Those of `replyRecipients()`.
 
 ### `forwardEmail`
 
@@ -8811,11 +8811,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o encaminhamento: `Fwd:`, nota, bloco do original e anexos, em conversa nova.
-- **Input:** `message`: original; `options`: destinatários, nota e anexos.
-- **Output:** `PreparedEmail` sem `threadId`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the forward: `Fwd:`, note, original block and attachments, in a new thread.
+- **Input:** `message`: original; `options`: recipients, note and attachments.
+- **Output:** `PreparedEmail` without `threadId`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/draft-tools.ts`
 
@@ -8830,11 +8830,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte os parâmetros das ferramentas de rascunho no formato interno.
-- **Input:** `args`: parâmetros validados.
+- **Does:** Converts the draft tools' parameters into the internal format.
+- **Input:** `args`: validated parameters.
 - **Output:** `DraftArgs`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/drafts.ts`
 
@@ -8849,11 +8849,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resume um rascunho para `list_drafts`.
-- **Input:** `draft`: rascunho da Gmail API.
-- **Output:** Ids, to, cc, assunto, data e trecho.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Summarizes a draft for `list_drafts`.
+- **Input:** `draft`: Gmail API draft.
+- **Output:** Ids, to, cc, subject, date and snippet.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `listDrafts`
 
@@ -8866,11 +8866,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lista os rascunhos da conta e lê os cabeçalhos de cada um.
+- **Does:** Lists the account's drafts and reads each one's headers.
 - **Input:** `deps`, `ref`; `maxResults`.
 - **Output:** `{ account, drafts }`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Propaga os de `gmailGet()`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Propagates `gmailGet()` errors.
 
 ### `prepareDraftEmail`
 
@@ -8883,11 +8883,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o e-mail do rascunho: resposta ao original ou e-mail novo.
-- **Input:** `deps`, `ref`; `args`: conteúdo e `replyToMessageId`.
+- **Does:** Builds the draft email: a reply to the original or a new email.
+- **Input:** `deps`, `ref`; `args`: content and `replyToMessageId`.
 - **Output:** `PreparedEmail`.
-- **Effects:** Rede só quando é resposta (lê o original).
-- **Errors:** Os de `composeEmail()` ou `prepareReply()`.
+- **Effects:** Network only for a reply (reads the original).
+- **Errors:** Those of `composeEmail()` or `prepareReply()`.
 
 ### `draftIds`
 
@@ -8900,11 +8900,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Ids devolvidos por uma operação de rascunho.
+- **Does:** Ids returned by a draft operation.
 - **Input:** `draft`.
-- **Output:** `{ draft_id, message_id, thread_id }` (nulos se faltarem).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** `{ draft_id, message_id, thread_id }` (null if missing).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `createDraft`
 
@@ -8917,11 +8917,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cria um rascunho com o e-mail pronto.
+- **Does:** Creates a draft with the prepared email.
 - **Input:** `deps`, `ref`; `prepared`.
 - **Output:** `{ account, draft_id, message_id, thread_id }`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Throws `writeAccessError()` for a read-only account; propagates `gmailCall()` errors.
 
 ### `updateDraft`
 
@@ -8934,11 +8934,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Substitui todo o conteúdo de um rascunho.
-- **Input:** `deps`, `ref`; `change`: id do rascunho e e-mail pronto.
-- **Output:** Ids do rascunho.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+- **Does:** Replaces all content of a draft.
+- **Input:** `deps`, `ref`; `change`: draft id and prepared email.
+- **Output:** Draft ids.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Throws `writeAccessError()` for a read-only account; propagates `gmailCall()` errors.
 
 ### `sendDraft`
 
@@ -8951,11 +8951,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Envia um rascunho existente.
+- **Does:** Sends an existing draft.
 - **Input:** `deps`, `ref`; `draftId`.
-- **Output:** Resultado de `sentResult()`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token. O e-mail sai da conta.
-- **Errors:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+- **Output:** Result of `sentResult()`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token. The email leaves the account.
+- **Errors:** Throws `writeAccessError()` for a read-only account; propagates `gmailCall()` errors.
 
 ### `deleteDraft`
 
@@ -8968,11 +8968,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Apaga um rascunho (mensagens enviadas não são tocadas).
+- **Does:** Deletes a draft (sent messages are not touched).
 - **Input:** `deps`, `ref`; `draftId`.
 - **Output:** `{ account, deleted_draft }`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Throws `writeAccessError()` for a read-only account; propagates `gmailCall()` errors.
 
 ## `connectors/gmail/src/mailbox-tools.ts`
 
@@ -8987,11 +8987,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Escolhe a ação ligada ou desligada pelo parâmetro booleano.
+- **Does:** Picks the on or off action by the boolean parameter.
 - **Input:** `on`; `onAction`; `offAction`.
-- **Output:** A ação.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** The action.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `writableTargets`
 
@@ -9004,11 +9004,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Resolve a conta com escrita e os alvos: começo comum das ferramentas de organização.
-- **Input:** `deps`; `args`: account, message_ids e thread_ids.
+- **Does:** Resolves the writable account and the targets: the common start of the organizing tools.
+- **Input:** `deps`; `args`: account, message_ids and thread_ids.
 - **Output:** `{ ref, targets }`.
-- **Effects:** KV: uma leitura.
-- **Errors:** Os de `resolveWritableAccount()` e `mailTargets()`.
+- **Effects:** KV: one read.
+- **Errors:** Those of `resolveWritableAccount()` and `mailTargets()`.
 
 ### `runMailboxAction`
 
@@ -9021,11 +9021,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aplica uma ação pronta (lido, arquivar, estrela) nos alvos dos argumentos.
+- **Does:** Applies a ready action (read, archive, star) to the arguments' targets.
 - **Input:** `deps`; `args`; `action`.
-- **Output:** Resultado de `applyLabelChange()`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Os de `writableTargets()` e `applyLabelChange()`.
+- **Output:** Result of `applyLabelChange()`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Those of `writableTargets()` and `applyLabelChange()`.
 
 ## `connectors/gmail/src/mailbox.ts`
 
@@ -9040,11 +9040,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta os alvos de uma alteração (mensagens e conversas).
-- **Input:** `messageIds`, `threadIds` (opcionais).
+- **Does:** Builds the targets of a change (messages and threads).
+- **Input:** `messageIds`, `threadIds` (optional).
 - **Output:** `MailTargets`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se não houver nenhum id.
+- **Effects:** None (pure).
+- **Errors:** Throws if there is no id.
 
 ### `checkLabelChange`
 
@@ -9057,11 +9057,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida uma mudança de marcadores.
-- **Input:** `change`: add e remove.
-- **Output:** Nada.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro se não houver marcador ou se o mesmo estiver nos dois lados.
+- **Does:** Validates a label change.
+- **Input:** `change`: add and remove.
+- **Output:** Nothing.
+- **Effects:** None (pure).
+- **Errors:** Throws if there is no label or the same one is on both sides.
 
 ### `resolveLabelIds`
 
@@ -9074,11 +9074,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte marcadores pedidos por id ou nome (sem maiúsculas) em ids.
-- **Input:** `labels`: marcadores da conta; `wanted`: ids ou nomes.
-- **Output:** Lista de ids.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro para marcador desconhecido, sugerindo `list_labels`.
+- **Does:** Converts labels requested by id or name (case-insensitive) into ids.
+- **Input:** `labels`: the account's labels; `wanted`: ids or names.
+- **Output:** List of ids.
+- **Effects:** None (pure).
+- **Errors:** Throws for an unknown label, suggesting `list_labels`.
 
 ### `fetchLabels`
 
@@ -9091,11 +9091,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê os marcadores da conta.
+- **Does:** Reads the account's labels.
 - **Input:** `deps`, `ref`.
-- **Output:** Lista de `GmailLabel` (vazia sem campo).
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Propaga os de `gmailGet()`.
+- **Output:** List of `GmailLabel` (empty without the field).
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Propagates `gmailGet()` errors.
 
 ### `applyLabelChange`
 
@@ -9108,11 +9108,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Põe e tira marcadores: `batchModify` nas mensagens e `modify` em cada conversa.
-- **Input:** `deps`, `ref`; `request`: alvos e mudança.
-- **Output:** Contagens e marcadores alterados.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+- **Does:** Adds and removes labels: `batchModify` on messages and `modify` on each thread.
+- **Input:** `deps`, `ref`; `request`: targets and change.
+- **Output:** Counts and changed labels.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Throws `writeAccessError()` for a read-only account; propagates `gmailCall()` errors.
 
 ### `targetCounts`
 
@@ -9125,11 +9125,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Conta e quantidade de mensagens e conversas alteradas.
+- **Does:** Counts the changed messages and threads.
 - **Input:** `alias`; `targets`.
 - **Output:** `{ account, messages, threads }`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `moveToTrash`
 
@@ -9142,11 +9142,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Manda mensagens e conversas para a lixeira ou as restaura (sem exclusão definitiva).
-- **Input:** `deps`, `ref`; `request`: alvos e `restore`.
-- **Output:** Contagens e a ação (`trash`/`untrash`).
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+- **Does:** Moves messages and threads to the trash or restores them (no permanent deletion).
+- **Input:** `deps`, `ref`; `request`: targets and `restore`.
+- **Output:** Counts and the action (`trash`/`untrash`).
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Throws `writeAccessError()` for a read-only account; propagates `gmailCall()` errors.
 
 ## `connectors/gmail/src/mime.ts`
 
@@ -9161,11 +9161,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Separa uma lista de endereços por vírgula ou ponto e vírgula, fora de aspas e de `<...>`.
-- **Input:** `text`: lista.
-- **Output:** Itens aparados, sem vazios.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Splits an address list by comma or semicolon, outside quotes and `<...>`.
+- **Input:** `text`: list.
+- **Output:** Trimmed items, without empties.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseMailAddress`
 
@@ -9178,11 +9178,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê `Nome <e-mail>`, `"Nome" <e-mail>` ou `e-mail` e valida o e-mail.
-- **Input:** `item`: um endereço.
-- **Output:** `{ name, email }`, ou nulo se inválido (inclusive com quebra de linha).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Reads `Nome <e-mail>`, `"Nome" <e-mail>` or `e-mail` and validates the email.
+- **Input:** `item`: one address.
+- **Output:** `{ name, email }`, or null if invalid (including with a line break).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseAddressList`
 
@@ -9195,11 +9195,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Endereços válidos de um cabeçalho, descartando os inválidos.
-- **Input:** `text`: valor do cabeçalho.
-- **Output:** Lista de `MailAddress`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Valid addresses of a header, discarding invalid ones.
+- **Input:** `text`: header value.
+- **Output:** List of `MailAddress`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `parseRecipients`
 
@@ -9212,11 +9212,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida os destinatários pedidos num campo.
-- **Input:** `items`: endereços (um item pode ter vários); `field`: nome do campo.
-- **Output:** Lista de `MailAddress`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro com o campo e o item inválido.
+- **Does:** Validates the recipients requested in a field.
+- **Input:** `items`: addresses (one item may hold several); `field`: field name.
+- **Output:** List of `MailAddress`.
+- **Effects:** None (pure).
+- **Errors:** Throws with the field and the invalid item.
 
 ### `cleanHeaderText`
 
@@ -9229,11 +9229,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Troca quebras de linha e tabs por espaço (impede injeção de cabeçalho).
+- **Does:** Replaces line breaks and tabs with spaces (prevents header injection).
 - **Input:** `text`.
-- **Output:** Texto numa linha só, aparado.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** Single-line text, trimmed.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `isPrintableAscii`
 
@@ -9246,11 +9246,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Diz se o texto só tem ASCII imprimível.
+- **Does:** Tells whether the text has only printable ASCII.
 - **Input:** `text`.
-- **Output:** Booleano.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** Boolean.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `encodeHeaderWord`
 
@@ -9263,11 +9263,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Codifica texto não ASCII em palavras RFC 2047 `=?UTF-8?B?...?=` de até 75 caracteres.
+- **Does:** Encodes non-ASCII text into RFC 2047 `=?UTF-8?B?...?=` words of up to 75 characters.
 - **Input:** `text`.
-- **Output:** O texto (ASCII) ou as palavras codificadas, dobradas com CRLF + espaço.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** The text (ASCII) or the encoded words, folded with CRLF + space.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `formatMailAddress`
 
@@ -9280,11 +9280,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Formata um endereço para o cabeçalho (nome entre aspas ou codificado).
+- **Does:** Formats an address for the header (name quoted or encoded).
 - **Input:** `address`.
-- **Output:** `"Nome" <e-mail>`, `=?UTF-8?B?...?= <e-mail>` ou só o e-mail.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** `"Nome" <e-mail>`, `=?UTF-8?B?...?= <e-mail>` or just the email.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `addressHeader`
 
@@ -9297,11 +9297,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a linha de um cabeçalho de endereços.
-- **Input:** `name`: To, Cc ou Bcc; `addresses`.
-- **Output:** Uma linha, ou nenhuma se a lista for vazia.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds an address header line.
+- **Input:** `name`: To, Cc or Bcc; `addresses`.
+- **Output:** One line, or none if the list is empty.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `messageIdList`
 
@@ -9314,11 +9314,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Guarda só os ids `<...>` de um `Message-ID`/`References`.
-- **Input:** `text`: valor do cabeçalho (ou nada).
-- **Output:** Ids separados por espaço, ou nulo.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Keeps only the `<...>` ids of a `Message-ID`/`References`.
+- **Input:** `text`: header value (or nothing).
+- **Output:** Space-separated ids, or null.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `mimeHeaderLines`
 
@@ -9331,11 +9331,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Cabeçalhos do e-mail: versão MIME, destinatários, assunto e conversa.
-- **Input:** `email`: e-mail a enviar.
-- **Output:** Lista de linhas.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Email headers: MIME version, recipients, subject and thread.
+- **Input:** `email`: email to send.
+- **Output:** List of lines.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `wrapBase64`
 
@@ -9348,11 +9348,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Codifica bytes em base64 com linhas de 76 caracteres.
+- **Does:** Encodes bytes in base64 with 76-character lines.
 - **Input:** `bytes`.
-- **Output:** Texto base64 com CRLF.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** Base64 text with CRLF.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `textPart`
 
@@ -9365,11 +9365,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Parte de texto plano UTF-8 em base64, com quebras CRLF.
-- **Input:** `body`: texto.
-- **Output:** Linhas da parte (cabeçalhos, linha vazia e conteúdo).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** UTF-8 plain-text part in base64, with CRLF breaks.
+- **Input:** `body`: text.
+- **Output:** Part lines (headers, empty line and content).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `safeMimeType`
 
@@ -9382,11 +9382,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Aceita só tipos MIME no formato `tipo/subtipo`.
+- **Does:** Accepts only MIME types in `tipo/subtipo` form.
 - **Input:** `mimeType`.
-- **Output:** O tipo, ou `application/octet-stream`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** The type, or `application/octet-stream`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `attachmentPart`
 
@@ -9399,11 +9399,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Parte MIME de um anexo, com nome limpo e codificado.
-- **Input:** `attachment`: nome, tipo e bytes.
-- **Output:** Linhas da parte.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** MIME part of an attachment, with a cleaned and encoded name.
+- **Input:** `attachment`: name, type and bytes.
+- **Output:** Lines of the part.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `buildMimeMessage`
 
@@ -9416,11 +9416,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a mensagem MIME completa; com anexos vira `multipart/mixed`.
-- **Input:** `email`; `boundary`: fronteira das partes.
-- **Output:** Texto MIME com CRLF.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the full MIME message; with attachments it becomes `multipart/mixed`.
+- **Input:** `email`; `boundary`: part boundary.
+- **Output:** MIME text with CRLF.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ### `toRawMessage`
 
@@ -9433,11 +9433,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Codifica a mensagem MIME em base64url (campo `raw` da Gmail API).
+- **Does:** Encodes the MIME message in base64url (the Gmail API `raw` field).
 - **Input:** `mime`.
-- **Output:** Texto base64url.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Output:** Base64url text.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/send-tools.ts`
 
@@ -9452,11 +9452,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta a ferramenta de resposta (ao remetente ou a todos) com as anotações de envio.
-- **Input:** `options`: nome, título, `replyAll` e descrição.
+- **Does:** Builds the reply tool (to the sender or to all) with the send annotations.
+- **Input:** `options`: name, title, `replyAll` and description.
 - **Output:** `ToolSpec`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/gmail/src/send.ts`
 
@@ -9471,11 +9471,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Exige ao menos um destinatário em `to` e no máximo 100 no total.
+- **Does:** Requires at least one recipient in `to` and at most 100 in total.
 - **Input:** `email`.
-- **Output:** Nada.
-- **Effects:** Nenhum (pura).
-- **Errors:** Lança erro acionável nos dois casos.
+- **Output:** Nothing.
+- **Effects:** None (pure).
+- **Errors:** Throws an actionable error in both cases.
 
 ### `composeEmail`
 
@@ -9488,11 +9488,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta um e-mail novo, sem conversa, a partir dos argumentos da ferramenta.
-- **Input:** `args`: to, cc, bcc, assunto e corpo.
+- **Does:** Builds a new email, without a thread, from the tool arguments.
+- **Input:** `args`: to, cc, bcc, subject and body.
 - **Output:** `PreparedEmail`.
-- **Effects:** Nenhum (pura).
-- **Errors:** Os de `parseRecipients()` e `checkRecipientLimit()`.
+- **Effects:** None (pure).
+- **Errors:** Those of `parseRecipients()` and `checkRecipientLimit()`.
 
 ### `mimeBoundary`
 
@@ -9505,11 +9505,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Gera uma fronteira MIME aleatória que não colide com base64.
-- **Input:** Nenhuma.
+- **Does:** Generates a random MIME boundary that does not collide with base64.
+- **Input:** None.
 - **Output:** `=_part_<aleatório>`.
-- **Effects:** Lê o gerador aleatório.
-- **Errors:** Nenhum.
+- **Effects:** Reads the random generator.
+- **Errors:** None.
 
 ### `gmailMessageResource`
 
@@ -9522,11 +9522,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Converte o e-mail pronto no recurso da Gmail API (`raw` e `threadId`).
+- **Does:** Converts the prepared email into the Gmail API resource (`raw` and `threadId`).
 - **Input:** `prepared`.
 - **Output:** `{ raw, threadId? }`.
-- **Effects:** Lê o gerador aleatório (fronteira).
-- **Errors:** Nenhum.
+- **Effects:** Reads the random generator (boundary).
+- **Errors:** None.
 
 ### `fetchFullMessage`
 
@@ -9539,11 +9539,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê uma mensagem inteira (formato `full`) para responder ou encaminhar.
+- **Does:** Reads a whole message (`full` format) to reply or forward.
 - **Input:** `deps`, `ref`; `messageId`.
-- **Output:** A `GmailMessage`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Propaga os de `gmailGet()`.
+- **Output:** The `GmailMessage`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Propagates `gmailGet()` errors.
 
 ### `prepareReply`
 
@@ -9556,11 +9556,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Lê o original e monta a resposta (ao remetente ou a todos).
-- **Input:** `deps`, `ref`; `request`: id, texto e `replyAll`.
+- **Does:** Reads the original and builds the reply (to the sender or to all).
+- **Input:** `deps`, `ref`; `request`: id, text and `replyAll`.
 - **Output:** `PreparedEmail`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Os de `fetchFullMessage()`, `replyEmail()` e `checkRecipientLimit()`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Those of `fetchFullMessage()`, `replyEmail()` and `checkRecipientLimit()`.
 
 ### `forwardAttachments`
 
@@ -9573,11 +9573,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Baixa os anexos do original para encaminhar.
+- **Does:** Downloads the original's attachments for forwarding.
 - **Input:** `deps`, `ref`; `message`: original.
-- **Output:** Lista de `MailAttachment`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Lança erro se a soma passar de 18 MB (antes de baixar); propaga os de `downloadAttachment()`.
+- **Output:** List of `MailAttachment`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Throws if the total exceeds 18 MB (before downloading); propagates those of `downloadAttachment()`.
 
 ### `prepareForward`
 
@@ -9590,11 +9590,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Valida os destinatários, lê o original e baixa os anexos dele para encaminhar.
-- **Input:** `deps`, `ref`; `request`: id, destinatários e nota.
+- **Does:** Validates the recipients, reads the original and downloads its attachments for forwarding.
+- **Input:** `deps`, `ref`; `request`: id, recipients and note.
 - **Output:** `PreparedEmail`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token.
-- **Errors:** Os de `composeEmail()`, `fetchFullMessage()` e `forwardAttachments()`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token.
+- **Errors:** Those of `composeEmail()`, `fetchFullMessage()` and `forwardAttachments()`.
 
 ### `sendPrepared`
 
@@ -9607,11 +9607,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Envia o e-mail pronto em `messages/send`.
+- **Does:** Sends the prepared email via `messages/send`.
 - **Input:** `deps`, `ref`; `prepared`.
-- **Output:** Resultado de `sentResult()`.
-- **Effects:** Rede: Gmail API (e endpoint de tokens do Google, se renovar). KV e memória do isolate pelo access token. O e-mail sai da conta.
-- **Errors:** Lança `writeAccessError()` para conta só leitura; propaga os erros de `gmailCall()`.
+- **Output:** Result of `sentResult()`.
+- **Effects:** Network: Gmail API (and Google's token endpoint, on renewal). KV and isolate memory for the access token. The email leaves the account.
+- **Errors:** Throws `writeAccessError()` for a read-only account; propagates `gmailCall()` errors.
 
 ### `sentResult`
 
@@ -9624,11 +9624,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- generated:end -->
 
-- **Does:** Monta o resultado de um envio.
-- **Input:** `alias`; `sent`: resposta do Gmail.
-- **Output:** `{ account, sent, message_id, thread_id }` (ids nulos se faltarem).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Does:** Builds the result of a send.
+- **Input:** `alias`; `sent`: Gmail response.
+- **Output:** `{ account, sent, message_id, thread_id }` (null ids if missing).
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/mcp/annotations.ts`
 
@@ -9646,8 +9646,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Does:** Joins a tool title with a hint preset.
 - **Input:** `title`: human-readable tool title (English); `hints`: a preset from `src/mcp/annotations.ts` (`READ_ONLY_HINTS`, `SEND_HINTS`, `DESTRUCTIVE_HINTS`, `ORGANIZE_HINTS`, `CREATE_HINTS`).
 - **Output:** `RequiredToolAnnotations`: `{ title, ...hints }`, the annotations every `defineTool` call must have (read-only, or writing with an explicit `destructiveHint`).
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `src/mcp/server-version.ts`
 
@@ -9665,166 +9665,166 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Does:** The manifest `version`, or `FALLBACK_SERVER_VERSION` when it is missing or not a non-empty string.
 - **Input:** `manifest`: the parsed `plugin.json` of the connector (JSON import), or anything else.
 - **Output:** The version string announced by the MCP server (`serverInfo.version`); `0.0.0` as fallback.
-- **Effects:** Nenhum (pura).
-- **Errors:** Nenhum (a missing or invalid version falls back).
+- **Effects:** None (pure).
+- **Errors:** None (a missing or invalid version falls back).
 
 ## Data and constants
 
-| Nome                         | Arquivo                                    | O que é                                                                                                                 |
-| ---------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `CANVAS_USER_AGENT`          | `connectors/canvas-puc/src/remote.ts`      | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                                 |
-| `TOKEN_RENEWAL_SECONDS`      | `connectors/canvas-puc/src/remote.ts`      | Quanto cada renovação estende o token do Canvas: 30 dias menos 1 hora (o Canvas recusa mais de 30 dias à frente).       |
-| `TEST_EXCEPTIONS`            | `src/test-exceptions.ts`                   | Lista única de funções sem teste automatizado, com motivo e teste manual.                                               |
-| `DEFAULT_DOCS_CONFIG`        | `tools/docs/config.ts`                     | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                                    |
-| `MODULE_SCOPE_SUFFIX`        | `tools/docs/ast.ts`                        | Sufixo do rótulo de referência feita fora de função (`arquivo (module)`).                                               |
-| `WALK_IGNORED_DIRS`          | `tools/docs/inventory.ts`                  | Pastas puladas ao percorrer o disco sem git.                                                                            |
-| `GENERATED_START`            | `tools/docs/markdown.ts`                   | Marcador de início do bloco gerado em FUNCTIONS.md.                                                                     |
-| `GENERATED_END`              | `tools/docs/markdown.ts`                   | Marcador de fim do bloco gerado.                                                                                        |
-| `INDEX_START`                | `tools/docs/markdown.ts`                   | Marcador de início do índice por módulo.                                                                                |
-| `INDEX_END`                  | `tools/docs/markdown.ts`                   | Marcador de fim do índice por módulo.                                                                                   |
-| `PLACEHOLDER`                | `tools/docs/markdown.ts`                   | Texto `_fill_in_` deixado nos campos manuais novos.                                                                     |
-| `MANUAL_FIELDS`              | `tools/docs/render.ts`                     | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                                    |
-| `HTML_TEXT_REPLACEMENTS`     | `src/core/html.ts`                         | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                      |
-| `CFB_SIGNATURE`              | `src/core/cfb.ts`                          | Os 8 bytes iniciais de todo arquivo OLE/CFB (o contêiner do .doc).                                                      |
-| `CP1252_HIGH`                | `src/core/word.ts`                         | Caracteres de 0x80 a 0x9F do Windows-1252, usados ao decodificar o texto de 8 bits do .doc.                             |
-| `WORD_TEXT_REPLACEMENTS`     | `src/core/word.ts`                         | Substituições (regex → texto) aplicadas em ordem por `cleanWordText` às marcas do Word.                                 |
-| `MAX_DOWNLOAD_BYTES`         | `connectors/canvas-puc/src/files.ts`       | Maior arquivo que `download_file` traz para a conversa (10 MB).                                                         |
-| `MAX_TEXT_CHARS`             | `connectors/canvas-puc/src/files.ts`       | Maior texto devolvido por `read_file_text` (100 000 caracteres).                                                        |
-| `CONNECTORS_DIR`             | `tools/bundle/bundle.ts`                   | Pasta dos conectores relativa à raiz (`connectors`).                                                                    |
-| `PLUGIN_DIR`                 | `tools/bundle/bundle.ts`                   | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                                  |
-| `PLUGIN_MANIFEST_PATH`       | `tools/bundle/bundle.ts`                   | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.               |
-| `PLUGIN_MCP_CONFIG_PATH`     | `tools/bundle/bundle.ts`                   | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                      |
-| `CANVAS_PAGE_SIZE`           | `connectors/canvas-puc/src/client.ts`      | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                         |
-| `DEFAULT_MAX_ITEMS`          | `connectors/canvas-puc/src/client.ts`      | Limite padrão de itens somados entre páginas em `getAll`.                                                               |
-| `DEFAULT_CANVAS_URL`         | `connectors/canvas-puc/src/remote.ts`      | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                                |
-| `MAX_TEXT_LENGTH`            | `connectors/canvas-puc/src/format.ts`      | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                                                   |
-| `ASSIGNMENT_BUCKETS`         | `connectors/canvas-puc/src/helpers.ts`     | Filtros de `list_assignments` → `bucket` da API do Canvas (`all` não filtra).                                           |
-| `CANVAS_READ_TOOLS`          | `connectors/canvas-puc/src/tools-read.ts`  | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                             |
-| `CANVAS_WRITE_TOOLS`         | `connectors/canvas-puc/src/tools-write.ts` | Ferramentas MCP de escrita (`submit_text_assignment`, `reply_to_discussion`), só com `CANVAS_ALLOW_WRITE`; destrutivas. |
-| `CANVAS_SERVER_INFO`         | `connectors/canvas-puc/src/tools.ts`       | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                |
-| `REMOTE_ENTRY`               | `tools/bundle/bundle.ts`                   | Entrada do servidor remoto em Node de um conector (`src/remote-main.ts`).                                               |
-| `REMOTE_BUNDLE_PATH`         | `tools/bundle/bundle.ts`                   | Bundle do servidor remoto (`server/remote.js`), usado pelo Dockerfile.                                                  |
-| `SEAL_KEY_BYTES`             | `src/remote/seal.ts`                       | Tamanho da `SEAL_KEY` (32 bytes, AES-256).                                                                              |
-| `CLIENT_TTL_SECONDS`         | `src/remote/oauth.ts`                      | Validade do `client_id` registrado (10 anos).                                                                           |
-| `PENDING_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Validade do pedido selado no formulário de login (15 minutos).                                                          |
-| `CODE_TTL_SECONDS`           | `src/remote/tokens.ts`                     | Validade do código de autorização (5 minutos).                                                                          |
-| `ACCESS_TTL_SECONDS`         | `src/remote/tokens.ts`                     | Validade do access token (1 hora).                                                                                      |
-| `REFRESH_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Validade do refresh token (30 dias, como o token da PUC).                                                               |
-| `REVOKED_SECRET_DESCRIPTION` | `src/remote/handler.ts`                    | `error_description` of the `invalid_grant` answered when the connector says the credential was revoked.                 |
-| `LOGIN_PAGE_CSS`             | `src/remote/login-page.ts`                 | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                         |
-| `CORS_HEADERS`               | `src/remote/handler.ts`                    | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                                   |
-| `REMOTE_ROUTES`              | `src/remote/handler.ts`                    | Tabela `MÉTODO caminho` → função do servidor remoto.                                                                    |
-| `DEFAULT_REDIRECT_HOSTS`     | `src/remote/oauth.ts`                      | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                                     |
-| `MAX_BODY_BYTES`             | `src/remote/node-server.ts`                | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                           |
-| `PDF_ESCAPES`                | `src/core/pdf.ts`                          | Escapes de letra das strings literais do PDF (`\n`, `\t`...).                                                           |
-| `TJ_SPACE_THRESHOLD`         | `src/core/pdf.ts`                          | Ajuste do `TJ` a partir do qual conta como espaço entre palavras.                                                       |
-| `PDF_TEXT_OPERATORS`         | `src/core/pdf.ts`                          | Operador de texto do PDF → texto que ele produz.                                                                        |
-| `ACCESS_TOKEN_MARGIN_MS`     | `connectors/gmail/src/access-token.ts`     | Margem antes do vencimento em que o access token do Google é renovado.                                                  |
-| `MAX_ATTACHMENT_BYTES`       | `connectors/gmail/src/attachments.ts`      | Maior anexo lido como texto (5 MB).                                                                                     |
-| `MAX_ATTACHMENT_CHARS`       | `connectors/gmail/src/attachments.ts`      | Maior texto devolvido de um anexo.                                                                                      |
-| `GMAIL_MODIFY_SCOPE`         | `connectors/gmail/src/config.ts`           | Escopo `gmail.modify`, o único escopo de dados pedido (ler, enviar, organizar; sem exclusão definitiva).                |
-| `MIN_CONSENT_SECRET_CHARS`   | `connectors/gmail/src/config.ts`           | Tamanho mínimo de `CONSENT_SECRET`.                                                                                     |
-| `UPSTREAM_USER_AGENT`        | `connectors/gmail/src/context.ts`          | User-Agent enviado ao Google e à Gmail API.                                                                             |
-| `GMAIL_API_BASE`             | `connectors/gmail/src/gmail-api.ts`        | Base da Gmail API para a conta do token.                                                                                |
-| `GMAIL_STATUS_MESSAGES`      | `connectors/gmail/src/gmail-api.ts`        | Mensagem acionável por status HTTP da Gmail API.                                                                        |
-| `GOOGLE_AUTHORIZE_URL`       | `connectors/gmail/src/google-oauth.ts`     | Endpoint de autorização do Google.                                                                                      |
-| `GOOGLE_TOKEN_URL`           | `connectors/gmail/src/google-oauth.ts`     | Endpoint de tokens do Google.                                                                                           |
-| `GOOGLE_CALLBACK_PATH`       | `connectors/gmail/src/google-oauth.ts`     | Caminho do retorno do Google (`/google/callback`).                                                                      |
-| `GOOGLE_JWKS_URL`            | `connectors/gmail/src/id-token.ts`         | Chaves públicas que assinam os `id_token` do Google.                                                                    |
-| `GOOGLE_ISSUERS`             | `connectors/gmail/src/id-token.ts`         | Emissores aceitos no `id_token`.                                                                                        |
-| `CLOCK_SKEW_SECONDS`         | `connectors/gmail/src/id-token.ts`         | Folga de relógio aceita na validade do `id_token`.                                                                      |
-| `LINK_STATE_PREFIX`          | `connectors/gmail/src/link-flow.ts`        | Prefixo do `state` do vínculo de conta (`link.`).                                                                       |
-| `LINK_COOKIE`                | `connectors/gmail/src/link-flow.ts`        | Cookie `__Host-` que prende o vínculo ao navegador.                                                                     |
-| `LINK_TTL_SECONDS`           | `connectors/gmail/src/link-flow.ts`        | Validade do pedido de vínculo (10 minutos).                                                                             |
-| `LINK_REQUEST_TYP`           | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do pedido de vínculo.                                                                                      |
-| `MAX_MESSAGE_CHARS`          | `connectors/gmail/src/message-format.ts`   | Maior corpo de mensagem devolvido.                                                                                      |
-| `MAX_THREAD_CHARS`           | `connectors/gmail/src/message-format.ts`   | Maior soma dos corpos de uma conversa.                                                                                  |
-| `MIN_MESSAGE_CHARS`          | `connectors/gmail/src/message-format.ts`   | Menor fatia por mensagem numa conversa longa.                                                                           |
-| `MESSAGE_HEADERS`            | `connectors/gmail/src/message-format.ts`   | Cabeçalhos devolvidos de cada mensagem.                                                                                 |
-| `UNTRUSTED_NOTICE`           | `connectors/gmail/src/message-format.ts`   | Aviso de conteúdo de e-mail não confiável (prompt injection).                                                           |
-| `GOOGLE_ACCOUNTS_ORIGIN`     | `connectors/gmail/src/pages.ts`            | Origem do Google liberada no `form-action` do consentimento.                                                            |
-| `RATE_LIMIT_RETRY_SECONDS`   | `connectors/gmail/src/rate-limit.ts`       | Segundos do `Retry-After` na resposta 429.                                                                              |
-| `GMAIL_ID`                   | `connectors/gmail/src/tools.ts`            | Esquema zod de id da Gmail API (só caracteres seguros na URL).                                                          |
-| `listAccountsTool`           | `connectors/gmail/src/tools.ts`            | Ferramenta `list_accounts`.                                                                                             |
-| `searchThreadsTool`          | `connectors/gmail/src/tools.ts`            | Ferramenta `search_threads`.                                                                                            |
-| `getThreadTool`              | `connectors/gmail/src/tools.ts`            | Ferramenta `get_thread`.                                                                                                |
-| `getMessageTool`             | `connectors/gmail/src/tools.ts`            | Ferramenta `get_message`.                                                                                               |
-| `listLabelsTool`             | `connectors/gmail/src/tools.ts`            | Ferramenta `list_labels`.                                                                                               |
-| `getAttachmentTextTool`      | `connectors/gmail/src/tools.ts`            | Ferramenta `get_attachment_text`.                                                                                       |
-| `GMAIL_TOOLS`                | `connectors/gmail/src/tool-list.ts`        | Todas as ferramentas do Gmail, na ordem mostrada ao Claude.                                                             |
-| `MAX_QUOTED_CHARS`           | `connectors/gmail/src/compose.ts`          | Maior trecho do original citado numa resposta (20 mil caracteres).                                                      |
-| `FORWARD_SEPARATOR`          | `connectors/gmail/src/compose.ts`          | Linha que abre o bloco do e-mail encaminhado.                                                                           |
-| `DRAFT_SHAPE`                | `connectors/gmail/src/draft-tools.ts`      | Parâmetros do conteúdo de um rascunho (criar e substituir).                                                             |
-| `listDraftsTool`             | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `list_drafts`.                                                                                               |
-| `createDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `create_draft`.                                                                                              |
-| `updateDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `update_draft`.                                                                                              |
-| `sendDraftTool`              | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `send_draft`.                                                                                                |
-| `deleteDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `delete_draft`.                                                                                              |
-| `MAX_GMAIL_ERROR_DETAIL`     | `connectors/gmail/src/gmail-api.ts`        | Maior detalhe de erro do Gmail repassado ao modelo (200 caracteres).                                                    |
-| `TARGET_SHAPE`               | `connectors/gmail/src/mailbox-tools.ts`    | Parâmetros de alvo das ferramentas de organização (`message_ids`, `thread_ids`).                                        |
-| `markReadTool`               | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `mark_read`.                                                                                                 |
-| `archiveTool`                | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `archive`.                                                                                                   |
-| `starTool`                   | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `star`.                                                                                                      |
-| `updateLabelsTool`           | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `update_labels`.                                                                                             |
-| `trashTool`                  | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `trash`.                                                                                                     |
-| `untrashTool`                | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `untrash`.                                                                                                   |
-| `MAX_TARGET_MESSAGES`        | `connectors/gmail/src/mailbox.ts`          | Mais mensagens por chamada das ferramentas de organização (50).                                                         |
-| `MAX_TARGET_THREADS`         | `connectors/gmail/src/mailbox.ts`          | Mais conversas por chamada das ferramentas de organização (20).                                                         |
-| `MAILBOX_ACTIONS`            | `connectors/gmail/src/mailbox.ts`          | Marcadores de sistema que cada ação põe e tira (lido, arquivar, estrela).                                               |
-| `MAX_ENCODED_WORD_BYTES`     | `connectors/gmail/src/mime.ts`             | Maior trecho UTF-8 de uma palavra RFC 2047 (45 bytes, palavra ≤ 75).                                                    |
-| `MAX_BODY_CHARS`             | `connectors/gmail/src/send-tools.ts`       | Maior corpo de e-mail aceito (100 mil caracteres).                                                                      |
-| `RECIPIENTS`                 | `connectors/gmail/src/send-tools.ts`       | Esquema zod de lista de destinatários.                                                                                  |
-| `BODY`                       | `connectors/gmail/src/send-tools.ts`       | Esquema zod do corpo em texto plano.                                                                                    |
-| `SUBJECT`                    | `connectors/gmail/src/send-tools.ts`       | Esquema zod do assunto (até 998 caracteres).                                                                            |
-| `sendEmailTool`              | `connectors/gmail/src/send-tools.ts`       | Ferramenta `send_email`.                                                                                                |
-| `replyEmailTool`             | `connectors/gmail/src/send-tools.ts`       | Ferramenta `reply_email`.                                                                                               |
-| `replyAllEmailTool`          | `connectors/gmail/src/send-tools.ts`       | Ferramenta `reply_all_email`.                                                                                           |
-| `forwardEmailTool`           | `connectors/gmail/src/send-tools.ts`       | Ferramenta `forward_email`.                                                                                             |
-| `MAX_RECIPIENTS`             | `connectors/gmail/src/send.ts`             | Mais destinatários (To + Cc + Bcc) num e-mail (100).                                                                    |
-| `MAX_FORWARD_BYTES`          | `connectors/gmail/src/send.ts`             | Maior soma de anexos num encaminhamento (18 MB).                                                                        |
-| `ONE_ACCOUNT`                | `connectors/gmail/src/tools.ts`            | Esquema zod do parâmetro `account` de uma conta só.                                                                     |
-| `CONFIRM_HINT`               | `connectors/gmail/src/tools.ts`            | Frase das ferramentas de escrita: confirmar com o usuário e nunca agir por pedido de um e-mail.                         |
-| `GMAIL_SERVER_INFO`          | `connectors/gmail/src/worker.ts`           | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                |
-| `GMAIL_SERVER_INSTRUCTIONS`  | `connectors/gmail/src/worker.ts`           | Instruções do servidor MCP (contas e conteúdo não confiável).                                                           |
-| `ACCESS_TOKEN_TTL_SECONDS`   | `connectors/gmail/src/worker.ts`           | Validade do access token emitido ao Claude (1 hora).                                                                    |
-| `REFRESH_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`           | Validade do refresh token emitido ao Claude (30 dias).                                                                  |
-| `GMAIL_ROUTES`               | `connectors/gmail/src/worker.ts`           | Rotas próprias do Worker: `MÉTODO caminho` → atendimento.                                                               |
-| `BRIDGE_ERROR_MESSAGES`      | `connectors/whatsapp/src/bridge-client.ts` | User-facing messages (English) for the bridge's known error codes.                                                      |
-| `WHATSAPP_DEFAULTS`          | `connectors/whatsapp/src/config.ts`        | Padrões do conector: dormir em 5 min, 25 s por ferramenta, 8 s esperando o sync, 10 envios por hora.                    |
-| `BRIDGE_ENV_KEYS`            | `connectors/whatsapp/src/config.ts`        | Variáveis repassadas do Worker para o container da ponte (`bridge/API.md`).                                             |
-| `SNAPSHOT_PUSH_URL`          | `connectors/whatsapp/src/config.ts`        | Endereço interno, interceptado pelo Worker, para onde a ponte envia o snapshot no `SIGTERM`.                            |
-| `UNTRUSTED_NOTICE`           | `connectors/whatsapp/src/format.ts`        | Aviso de dado de terceiros não confiável que acompanha todo resultado com mensagens ou contatos.                        |
-| `HIDDEN_CHAR_RANGES`         | `connectors/whatsapp/src/format.ts`        | Faixas de caracteres invisíveis (controle, largura zero, bidi, BOM) removidas por `sanitizeText`.                       |
-| `SNAPSHOT_INTERVAL_MS`       | `connectors/whatsapp/src/lifecycle.ts`     | Intervalo mínimo entre snapshots disparados por uso (1 minuto).                                                         |
-| `SNAPSHOT_AFTER_PATHS`       | `connectors/whatsapp/src/lifecycle.ts`     | Rotas da ponte depois das quais o banco pode ter mudado e vale tentar um snapshot.                                      |
-| `SEND_HISTORY_KEY`           | `connectors/whatsapp/src/lifecycle.ts`     | Chave, no armazenamento do Durable Object, dos instantes dos envios recentes (limite por hora).                         |
-| `PAIR_PAGE_CSS`              | `connectors/whatsapp/src/pair-page.ts`     | Acréscimos de estilo da página `/pair` (código grande, QR, botões secundários e de perigo).                             |
-| `PAIR_SESSION_COOKIE`        | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) da sessão selada do `/pair`.                                                                 |
-| `PAIR_NONCE_COOKIE`          | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) do nonce que amarra o login do `/pair` ao navegador.                                         |
-| `PAIR_SESSION_TTL_SECONDS`   | `connectors/whatsapp/src/pair.ts`          | Validade da sessão do `/pair` e do token anti-CSRF (30 minutos).                                                        |
-| `PAIR_LOGIN_TTL_SECONDS`     | `connectors/whatsapp/src/pair.ts`          | Validade do login do `/pair` em andamento (10 minutos).                                                                 |
-| `PAIR_CALLBACK_PATH`         | `connectors/whatsapp/src/pair.ts`          | Caminho do retorno do GitHub para o `/pair` (subcaminho do retorno do OAuth App).                                       |
-| `PAIR_ACTIONS`               | `connectors/whatsapp/src/pair.ts`          | Ações do `/pair` por caminho: código, QR, desvincular e recomeçar do zero.                                              |
-| `SNAPSHOT_KEY_NAME`          | `connectors/whatsapp/src/snapshots.ts`     | Chave do snapshot atual no bucket R2 (`whatsapp/snapshot.was1`).                                                        |
-| `WHATSAPP_INSTRUCTIONS`      | `connectors/whatsapp/src/tools.ts`         | Instruções do servidor MCP: o que é o conector e a regra sobre conteúdo não confiável.                                  |
-| `WHATSAPP_SERVER_INFO`       | `connectors/whatsapp/src/tools.ts`         | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                |
-| `READ_TOOLS`                 | `connectors/whatsapp/src/tools.ts`         | Ferramentas de leitura (fase 1), sempre ativas.                                                                         |
-| `BRIDGE_INSTANCE_NAME`       | `connectors/whatsapp/src/worker-env.ts`    | Nome fixo da única instância do Durable Object da ponte (instância única = sessão única).                               |
-| `WHATSAPP_WORKER_HANDLERS`   | `connectors/whatsapp/src/worker.ts`        | Handlers do Worker (`fetch` e `scheduled`), exportados pelo `index.ts` com o Durable Object.                            |
-| `GITHUB_USER_AGENT`          | `src/remote/github-login.ts`               | User-Agent das chamadas ao GitHub (a API recusa requisições sem ele).                                                   |
-| `READ_ONLY_HINTS`            | `src/mcp/annotations.ts`                   | Hints of a read-only tool (`readOnlyHint: true`, idempotent, open world).                                               |
-| `SEND_HINTS`                 | `src/mcp/annotations.ts`                   | Hints of a tool that sends or publishes (email, message, submission): destructive, not idempotent.                      |
-| `DESTRUCTIVE_HINTS`          | `src/mcp/annotations.ts`                   | Hints of a tool that deletes or overwrites (trash, draft, account link): destructive, idempotent.                       |
-| `ORGANIZE_HINTS`             | `src/mcp/annotations.ts`                   | Hints of a reversible organizing tool (read, archive, star, labels, restore): writes, not destructive.                  |
-| `CREATE_HINTS`               | `src/mcp/annotations.ts`                   | Hints of a tool that creates something without deleting (draft, link): writes, not destructive.                         |
-| `FALLBACK_SERVER_VERSION`    | `src/mcp/server-version.ts`                | Version announced when the plugin manifest has none (`0.0.0`).                                                          |
-| `UPSTREAM_CALLBACK_PATH`     | `src/remote/handler.ts`                    | Caminho do retorno do login delegado (`/oauth/callback`), cadastrado no provedor.                                       |
-| `BRIDGE_RETRY_MS`            | `connectors/whatsapp/src/bridge-client.ts` | Espera entre tentativas enquanto a ponte acorda (750 ms).                                                               |
-| `GMAIL_SCOPES`               | `connectors/gmail/src/config.ts`           | Escopos do login e do vínculo (`openid email` + Gmail só leitura).                                                      |
-| `GOOGLE_REVOKE_URL`          | `connectors/gmail/src/google-oauth.ts`     | Endpoint de revogação de tokens do Google.                                                                              |
-| `LINK_TICKET_TYP`            | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do ticket de vínculo emitido por `link_account`.                                                           |
-| `OWNER_RECORD_TYP`           | `connectors/gmail/src/token-store.ts`      | Tipo do selo do registro de contas de um usuário.                                                                       |
-| `OWNER_RECORD_EXP`           | `connectors/gmail/src/token-store.ts`      | Validade técnica do selo do registro (ano 2100).                                                                        |
-| `MAX_LINKED_ACCOUNTS`        | `connectors/gmail/src/token-store.ts`      | Mais contas Gmail que um usuário pode vincular (10).                                                                    |
-| `linkAccountTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `link_account`.                                                                                              |
-| `unlinkAccountTool`          | `connectors/gmail/src/tools.ts`            | Ferramenta `unlink_account`.                                                                                            |
+| Name                         | File                                       | What it is                                                                                                      |
+| ---------------------------- | ------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| `CANVAS_USER_AGENT`          | `connectors/canvas-puc/src/remote.ts`      | User-Agent of the remote mode's calls to Canvas (Canvas returns 403 without a User-Agent).                      |
+| `TOKEN_RENEWAL_SECONDS`      | `connectors/canvas-puc/src/remote.ts`      | How much each renewal extends the Canvas token: 30 days minus 1 hour (Canvas refuses more than 30 days ahead).  |
+| `TEST_EXCEPTIONS`            | `src/test-exceptions.ts`                   | Single list of functions without automated tests, with reason and manual test.                                  |
+| `DEFAULT_DOCS_CONFIG`        | `tools/docs/config.ts`                     | Default `docs:check` configuration; `docs.config.json` overrides it.                                            |
+| `MODULE_SCOPE_SUFFIX`        | `tools/docs/ast.ts`                        | Suffix of the label for a reference made outside a function (`arquivo (module)`).                               |
+| `WALK_IGNORED_DIRS`          | `tools/docs/inventory.ts`                  | Folders skipped when walking the disk without git.                                                              |
+| `GENERATED_START`            | `tools/docs/markdown.ts`                   | Start marker of the generated block in FUNCTIONS.md.                                                            |
+| `GENERATED_END`              | `tools/docs/markdown.ts`                   | End marker of the generated block.                                                                              |
+| `INDEX_START`                | `tools/docs/markdown.ts`                   | Start marker of the per-module index.                                                                           |
+| `INDEX_END`                  | `tools/docs/markdown.ts`                   | End marker of the per-module index.                                                                             |
+| `PLACEHOLDER`                | `tools/docs/markdown.ts`                   | `_fill_in_` text left in new manual fields.                                                                     |
+| `MANUAL_FIELDS`              | `tools/docs/render.ts`                     | Fixed order of the manual fields (Does, Input, Output, Effects, Errors).                                        |
+| `HTML_TEXT_REPLACEMENTS`     | `src/core/html.ts`                         | Replacements (regex → text) applied in order by `htmlToText`.                                                   |
+| `CFB_SIGNATURE`              | `src/core/cfb.ts`                          | The first 8 bytes of every OLE/CFB file (the .doc container).                                                   |
+| `CP1252_HIGH`                | `src/core/word.ts`                         | Windows-1252 characters 0x80 to 0x9F, used when decoding the .doc's 8-bit text.                                 |
+| `WORD_TEXT_REPLACEMENTS`     | `src/core/word.ts`                         | Replacements (regex → text) applied in order by `cleanWordText` to Word marks.                                  |
+| `MAX_DOWNLOAD_BYTES`         | `connectors/canvas-puc/src/files.ts`       | Largest file `download_file` brings into the conversation (10 MB).                                              |
+| `MAX_TEXT_CHARS`             | `connectors/canvas-puc/src/files.ts`       | Largest text returned by `read_file_text` (100,000 characters).                                                 |
+| `CONNECTORS_DIR`             | `tools/bundle/bundle.ts`                   | Connectors folder relative to the root (`connectors`).                                                          |
+| `PLUGIN_DIR`                 | `tools/bundle/bundle.ts`                   | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                          |
+| `PLUGIN_MANIFEST_PATH`       | `tools/bundle/bundle.ts`                   | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.       |
+| `PLUGIN_MCP_CONFIG_PATH`     | `tools/bundle/bundle.ts`                   | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                              |
+| `CANVAS_PAGE_SIZE`           | `connectors/canvas-puc/src/client.ts`      | Items per page requested from Canvas (`per_page`, the API maximum).                                             |
+| `DEFAULT_MAX_ITEMS`          | `connectors/canvas-puc/src/client.ts`      | Default limit of items summed across pages in `getAll`.                                                         |
+| `DEFAULT_CANVAS_URL`         | `connectors/canvas-puc/src/remote.ts`      | PUC Minas Canvas URL, used without `CANVAS_BASE_URL`.                                                           |
+| `MAX_TEXT_LENGTH`            | `connectors/canvas-puc/src/format.ts`      | Maximum length of long texts returned to the model by `shortText`.                                              |
+| `ASSIGNMENT_BUCKETS`         | `connectors/canvas-puc/src/helpers.ts`     | `list_assignments` filters → Canvas API `bucket` (`all` does not filter).                                       |
+| `CANVAS_READ_TOOLS`          | `connectors/canvas-puc/src/tools-read.ts`  | Canvas read MCP tools (courses, assignments, grades, announcements etc.).                                       |
+| `CANVAS_WRITE_TOOLS`         | `connectors/canvas-puc/src/tools-write.ts` | Write MCP tools (`submit_text_assignment`, `reply_to_discussion`), only with `CANVAS_ALLOW_WRITE`; destructive. |
+| `CANVAS_SERVER_INFO`         | `connectors/canvas-puc/src/tools.ts`       | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                        |
+| `REMOTE_ENTRY`               | `tools/bundle/bundle.ts`                   | Entry of a connector's Node remote server (`src/remote-main.ts`).                                               |
+| `REMOTE_BUNDLE_PATH`         | `tools/bundle/bundle.ts`                   | Remote server bundle (`server/remote.js`), used by the Dockerfile.                                              |
+| `SEAL_KEY_BYTES`             | `src/remote/seal.ts`                       | Size of `SEAL_KEY` (32 bytes, AES-256).                                                                         |
+| `CLIENT_TTL_SECONDS`         | `src/remote/oauth.ts`                      | Lifetime of the registered `client_id` (10 years).                                                              |
+| `PENDING_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Lifetime of the request sealed in the login form (15 minutes).                                                  |
+| `CODE_TTL_SECONDS`           | `src/remote/tokens.ts`                     | Lifetime of the authorization code (5 minutes).                                                                 |
+| `ACCESS_TTL_SECONDS`         | `src/remote/tokens.ts`                     | Lifetime of the access token (1 hour).                                                                          |
+| `REFRESH_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Lifetime of the refresh token (30 days, like the PUC token).                                                    |
+| `REVOKED_SECRET_DESCRIPTION` | `src/remote/handler.ts`                    | `error_description` of the `invalid_grant` answered when the connector says the credential was revoked.         |
+| `LOGIN_PAGE_CSS`             | `src/remote/login-page.ts`                 | Style of the authorization page, with the tokens from `docs/UI.md`.                                             |
+| `CORS_HEADERS`               | `src/remote/handler.ts`                    | CORS headers of the remote endpoints (any origin; there are no cookies).                                        |
+| `REMOTE_ROUTES`              | `src/remote/handler.ts`                    | Table `MÉTODO caminho` → remote server function.                                                                |
+| `DEFAULT_REDIRECT_HOSTS`     | `src/remote/oauth.ts`                      | OAuth redirect hosts accepted by default (`claude.ai`, `claude.com`, `localhost`).                              |
+| `MAX_BODY_BYTES`             | `src/remote/node-server.ts`                | Largest request body accepted by the remote server (1 MB).                                                      |
+| `PDF_ESCAPES`                | `src/core/pdf.ts`                          | Letter escapes of PDF literal strings (`\n`, `\t`...).                                                          |
+| `TJ_SPACE_THRESHOLD`         | `src/core/pdf.ts`                          | `TJ` adjustment from which it counts as a space between words.                                                  |
+| `PDF_TEXT_OPERATORS`         | `src/core/pdf.ts`                          | PDF text operator → the text it produces.                                                                       |
+| `ACCESS_TOKEN_MARGIN_MS`     | `connectors/gmail/src/access-token.ts`     | Margin before expiry at which the Google access token is renewed.                                               |
+| `MAX_ATTACHMENT_BYTES`       | `connectors/gmail/src/attachments.ts`      | Largest attachment read as text (5 MB).                                                                         |
+| `MAX_ATTACHMENT_CHARS`       | `connectors/gmail/src/attachments.ts`      | Largest text returned from an attachment.                                                                       |
+| `GMAIL_MODIFY_SCOPE`         | `connectors/gmail/src/config.ts`           | The `gmail.modify` scope, the only data scope requested (read, send, organize; no permanent deletion).          |
+| `MIN_CONSENT_SECRET_CHARS`   | `connectors/gmail/src/config.ts`           | Minimum length of `CONSENT_SECRET`.                                                                             |
+| `UPSTREAM_USER_AGENT`        | `connectors/gmail/src/context.ts`          | User-Agent sent to Google and the Gmail API.                                                                    |
+| `GMAIL_API_BASE`             | `connectors/gmail/src/gmail-api.ts`        | Gmail API base for the token's account.                                                                         |
+| `GMAIL_STATUS_MESSAGES`      | `connectors/gmail/src/gmail-api.ts`        | Actionable message per Gmail API HTTP status.                                                                   |
+| `GOOGLE_AUTHORIZE_URL`       | `connectors/gmail/src/google-oauth.ts`     | Google authorization endpoint.                                                                                  |
+| `GOOGLE_TOKEN_URL`           | `connectors/gmail/src/google-oauth.ts`     | Google token endpoint.                                                                                          |
+| `GOOGLE_CALLBACK_PATH`       | `connectors/gmail/src/google-oauth.ts`     | Google callback path (`/google/callback`).                                                                      |
+| `GOOGLE_JWKS_URL`            | `connectors/gmail/src/id-token.ts`         | Public keys that sign Google's `id_token`.                                                                      |
+| `GOOGLE_ISSUERS`             | `connectors/gmail/src/id-token.ts`         | Issuers accepted in the `id_token`.                                                                             |
+| `CLOCK_SKEW_SECONDS`         | `connectors/gmail/src/id-token.ts`         | Clock skew tolerated in the `id_token` validity.                                                                |
+| `LINK_STATE_PREFIX`          | `connectors/gmail/src/link-flow.ts`        | Prefix of the account-link `state` (`link.`).                                                                   |
+| `LINK_COOKIE`                | `connectors/gmail/src/link-flow.ts`        | `__Host-` cookie that binds the link to the browser.                                                            |
+| `LINK_TTL_SECONDS`           | `connectors/gmail/src/link-flow.ts`        | Lifetime of the link request (10 minutes).                                                                      |
+| `LINK_REQUEST_TYP`           | `connectors/gmail/src/link-flow.ts`        | Seal type of the link request.                                                                                  |
+| `MAX_MESSAGE_CHARS`          | `connectors/gmail/src/message-format.ts`   | Largest message body returned.                                                                                  |
+| `MAX_THREAD_CHARS`           | `connectors/gmail/src/message-format.ts`   | Largest sum of a thread's bodies.                                                                               |
+| `MIN_MESSAGE_CHARS`          | `connectors/gmail/src/message-format.ts`   | Smallest slice per message in a long thread.                                                                    |
+| `MESSAGE_HEADERS`            | `connectors/gmail/src/message-format.ts`   | Headers returned for each message.                                                                              |
+| `UNTRUSTED_NOTICE`           | `connectors/gmail/src/message-format.ts`   | Notice of untrusted email content (prompt injection).                                                           |
+| `GOOGLE_ACCOUNTS_ORIGIN`     | `connectors/gmail/src/pages.ts`            | Google origin allowed in the consent page's `form-action`.                                                      |
+| `RATE_LIMIT_RETRY_SECONDS`   | `connectors/gmail/src/rate-limit.ts`       | `Retry-After` seconds in the 429 response.                                                                      |
+| `GMAIL_ID`                   | `connectors/gmail/src/tools.ts`            | Zod schema of a Gmail API id (only URL-safe characters).                                                        |
+| `listAccountsTool`           | `connectors/gmail/src/tools.ts`            | The `list_accounts` tool.                                                                                       |
+| `searchThreadsTool`          | `connectors/gmail/src/tools.ts`            | The `search_threads` tool.                                                                                      |
+| `getThreadTool`              | `connectors/gmail/src/tools.ts`            | The `get_thread` tool.                                                                                          |
+| `getMessageTool`             | `connectors/gmail/src/tools.ts`            | The `get_message` tool.                                                                                         |
+| `listLabelsTool`             | `connectors/gmail/src/tools.ts`            | The `list_labels` tool.                                                                                         |
+| `getAttachmentTextTool`      | `connectors/gmail/src/tools.ts`            | The `get_attachment_text` tool.                                                                                 |
+| `GMAIL_TOOLS`                | `connectors/gmail/src/tool-list.ts`        | All Gmail tools, in the order shown to Claude.                                                                  |
+| `MAX_QUOTED_CHARS`           | `connectors/gmail/src/compose.ts`          | Largest excerpt of the original quoted in a reply (20 thousand characters).                                     |
+| `FORWARD_SEPARATOR`          | `connectors/gmail/src/compose.ts`          | Line that opens the forwarded email block.                                                                      |
+| `DRAFT_SHAPE`                | `connectors/gmail/src/draft-tools.ts`      | Parameters of a draft's content (create and replace).                                                           |
+| `listDraftsTool`             | `connectors/gmail/src/draft-tools.ts`      | The `list_drafts` tool.                                                                                         |
+| `createDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | The `create_draft` tool.                                                                                        |
+| `updateDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | The `update_draft` tool.                                                                                        |
+| `sendDraftTool`              | `connectors/gmail/src/draft-tools.ts`      | The `send_draft` tool.                                                                                          |
+| `deleteDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | The `delete_draft` tool.                                                                                        |
+| `MAX_GMAIL_ERROR_DETAIL`     | `connectors/gmail/src/gmail-api.ts`        | Largest Gmail error detail passed to the model (200 characters).                                                |
+| `TARGET_SHAPE`               | `connectors/gmail/src/mailbox-tools.ts`    | Target parameters of the organizing tools (`message_ids`, `thread_ids`).                                        |
+| `markReadTool`               | `connectors/gmail/src/mailbox-tools.ts`    | The `mark_read` tool.                                                                                           |
+| `archiveTool`                | `connectors/gmail/src/mailbox-tools.ts`    | The `archive` tool.                                                                                             |
+| `starTool`                   | `connectors/gmail/src/mailbox-tools.ts`    | The `star` tool.                                                                                                |
+| `updateLabelsTool`           | `connectors/gmail/src/mailbox-tools.ts`    | The `update_labels` tool.                                                                                       |
+| `trashTool`                  | `connectors/gmail/src/mailbox-tools.ts`    | The `trash` tool.                                                                                               |
+| `untrashTool`                | `connectors/gmail/src/mailbox-tools.ts`    | The `untrash` tool.                                                                                             |
+| `MAX_TARGET_MESSAGES`        | `connectors/gmail/src/mailbox.ts`          | Maximum messages per call of the organizing tools (50).                                                         |
+| `MAX_TARGET_THREADS`         | `connectors/gmail/src/mailbox.ts`          | Maximum threads per call of the organizing tools (20).                                                          |
+| `MAILBOX_ACTIONS`            | `connectors/gmail/src/mailbox.ts`          | System labels each action adds and removes (read, archive, star).                                               |
+| `MAX_ENCODED_WORD_BYTES`     | `connectors/gmail/src/mime.ts`             | Largest UTF-8 chunk of an RFC 2047 word (45 bytes, word ≤ 75).                                                  |
+| `MAX_BODY_CHARS`             | `connectors/gmail/src/send-tools.ts`       | Largest email body accepted (100 thousand characters).                                                          |
+| `RECIPIENTS`                 | `connectors/gmail/src/send-tools.ts`       | Zod schema of a recipient list.                                                                                 |
+| `BODY`                       | `connectors/gmail/src/send-tools.ts`       | Zod schema of the plain-text body.                                                                              |
+| `SUBJECT`                    | `connectors/gmail/src/send-tools.ts`       | Zod schema of the subject (up to 998 characters).                                                               |
+| `sendEmailTool`              | `connectors/gmail/src/send-tools.ts`       | The `send_email` tool.                                                                                          |
+| `replyEmailTool`             | `connectors/gmail/src/send-tools.ts`       | The `reply_email` tool.                                                                                         |
+| `replyAllEmailTool`          | `connectors/gmail/src/send-tools.ts`       | The `reply_all_email` tool.                                                                                     |
+| `forwardEmailTool`           | `connectors/gmail/src/send-tools.ts`       | The `forward_email` tool.                                                                                       |
+| `MAX_RECIPIENTS`             | `connectors/gmail/src/send.ts`             | Maximum recipients (To + Cc + Bcc) in an email (100).                                                           |
+| `MAX_FORWARD_BYTES`          | `connectors/gmail/src/send.ts`             | Largest sum of attachments in a forward (18 MB).                                                                |
+| `ONE_ACCOUNT`                | `connectors/gmail/src/tools.ts`            | Zod schema of the single-account `account` parameter.                                                           |
+| `CONFIRM_HINT`               | `connectors/gmail/src/tools.ts`            | Sentence of the write tools: confirm with the user and never act on an email's request.                         |
+| `GMAIL_SERVER_INFO`          | `connectors/gmail/src/worker.ts`           | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                        |
+| `GMAIL_SERVER_INSTRUCTIONS`  | `connectors/gmail/src/worker.ts`           | MCP server instructions (accounts and untrusted content).                                                       |
+| `ACCESS_TOKEN_TTL_SECONDS`   | `connectors/gmail/src/worker.ts`           | Lifetime of the access token issued to Claude (1 hour).                                                         |
+| `REFRESH_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`           | Lifetime of the refresh token issued to Claude (30 days).                                                       |
+| `GMAIL_ROUTES`               | `connectors/gmail/src/worker.ts`           | The Worker's own routes: `MÉTODO caminho` → handler.                                                            |
+| `BRIDGE_ERROR_MESSAGES`      | `connectors/whatsapp/src/bridge-client.ts` | User-facing messages (English) for the bridge's known error codes.                                              |
+| `WHATSAPP_DEFAULTS`          | `connectors/whatsapp/src/config.ts`        | Connector defaults: sleep after 5 min, 25 s per tool, 8 s waiting for sync, 10 sends per hour.                  |
+| `BRIDGE_ENV_KEYS`            | `connectors/whatsapp/src/config.ts`        | Variables passed from the Worker to the bridge container (`bridge/API.md`).                                     |
+| `SNAPSHOT_PUSH_URL`          | `connectors/whatsapp/src/config.ts`        | Internal address, intercepted by the Worker, to which the bridge sends the snapshot on `SIGTERM`.               |
+| `UNTRUSTED_NOTICE`           | `connectors/whatsapp/src/format.ts`        | Notice of untrusted third-party data that accompanies every result with messages or contacts.                   |
+| `HIDDEN_CHAR_RANGES`         | `connectors/whatsapp/src/format.ts`        | Ranges of invisible characters (control, zero-width, bidi, BOM) removed by `sanitizeText`.                      |
+| `SNAPSHOT_INTERVAL_MS`       | `connectors/whatsapp/src/lifecycle.ts`     | Minimum interval between usage-triggered snapshots (1 minute).                                                  |
+| `SNAPSHOT_AFTER_PATHS`       | `connectors/whatsapp/src/lifecycle.ts`     | Bridge routes after which the database may have changed and a snapshot is worth trying.                         |
+| `SEND_HISTORY_KEY`           | `connectors/whatsapp/src/lifecycle.ts`     | Key, in the Durable Object storage, of the recent send timestamps (hourly limit).                               |
+| `PAIR_PAGE_CSS`              | `connectors/whatsapp/src/pair-page.ts`     | Style additions of the `/pair` page (large code, QR, secondary and danger buttons).                             |
+| `PAIR_SESSION_COOKIE`        | `connectors/whatsapp/src/pair.ts`          | Name of the `__Host-` cookie of the sealed `/pair` session.                                                     |
+| `PAIR_NONCE_COOKIE`          | `connectors/whatsapp/src/pair.ts`          | Name of the `__Host-` cookie of the nonce that binds the `/pair` login to the browser.                          |
+| `PAIR_SESSION_TTL_SECONDS`   | `connectors/whatsapp/src/pair.ts`          | Lifetime of the `/pair` session and the anti-CSRF token (30 minutes).                                           |
+| `PAIR_LOGIN_TTL_SECONDS`     | `connectors/whatsapp/src/pair.ts`          | Lifetime of the in-progress `/pair` login (10 minutes).                                                         |
+| `PAIR_CALLBACK_PATH`         | `connectors/whatsapp/src/pair.ts`          | GitHub callback path for `/pair` (a subpath of the OAuth App callback).                                         |
+| `PAIR_ACTIONS`               | `connectors/whatsapp/src/pair.ts`          | `/pair` actions by path: code, QR, unlink and start over from scratch.                                          |
+| `SNAPSHOT_KEY_NAME`          | `connectors/whatsapp/src/snapshots.ts`     | Key of the current snapshot in the R2 bucket (`whatsapp/snapshot.was1`).                                        |
+| `WHATSAPP_INSTRUCTIONS`      | `connectors/whatsapp/src/tools.ts`         | MCP server instructions: what the connector is and the rule about untrusted content.                            |
+| `WHATSAPP_SERVER_INFO`       | `connectors/whatsapp/src/tools.ts`         | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                        |
+| `READ_TOOLS`                 | `connectors/whatsapp/src/tools.ts`         | Read tools (phase 1), always active.                                                                            |
+| `BRIDGE_INSTANCE_NAME`       | `connectors/whatsapp/src/worker-env.ts`    | Fixed name of the bridge's single Durable Object instance (single instance = single session).                   |
+| `WHATSAPP_WORKER_HANDLERS`   | `connectors/whatsapp/src/worker.ts`        | Worker handlers (`fetch` and `scheduled`), exported by `index.ts` with the Durable Object.                      |
+| `GITHUB_USER_AGENT`          | `src/remote/github-login.ts`               | User-Agent of the calls to GitHub (the API refuses requests without it).                                        |
+| `READ_ONLY_HINTS`            | `src/mcp/annotations.ts`                   | Hints of a read-only tool (`readOnlyHint: true`, idempotent, open world).                                       |
+| `SEND_HINTS`                 | `src/mcp/annotations.ts`                   | Hints of a tool that sends or publishes (email, message, submission): destructive, not idempotent.              |
+| `DESTRUCTIVE_HINTS`          | `src/mcp/annotations.ts`                   | Hints of a tool that deletes or overwrites (trash, draft, account link): destructive, idempotent.               |
+| `ORGANIZE_HINTS`             | `src/mcp/annotations.ts`                   | Hints of a reversible organizing tool (read, archive, star, labels, restore): writes, not destructive.          |
+| `CREATE_HINTS`               | `src/mcp/annotations.ts`                   | Hints of a tool that creates something without deleting (draft, link): writes, not destructive.                 |
+| `FALLBACK_SERVER_VERSION`    | `src/mcp/server-version.ts`                | Version announced when the plugin manifest has none (`0.0.0`).                                                  |
+| `UPSTREAM_CALLBACK_PATH`     | `src/remote/handler.ts`                    | Callback path of the delegated login (`/oauth/callback`), registered with the provider.                         |
+| `BRIDGE_RETRY_MS`            | `connectors/whatsapp/src/bridge-client.ts` | Wait between attempts while the bridge wakes up (750 ms).                                                       |
+| `GMAIL_SCOPES`               | `connectors/gmail/src/config.ts`           | Login and link scopes (`openid email` + Gmail read-only).                                                       |
+| `GOOGLE_REVOKE_URL`          | `connectors/gmail/src/google-oauth.ts`     | Google token revocation endpoint.                                                                               |
+| `LINK_TICKET_TYP`            | `connectors/gmail/src/link-flow.ts`        | Seal type of the link ticket issued by `link_account`.                                                          |
+| `OWNER_RECORD_TYP`           | `connectors/gmail/src/token-store.ts`      | Seal type of a user's accounts record.                                                                          |
+| `OWNER_RECORD_EXP`           | `connectors/gmail/src/token-store.ts`      | Technical expiry of the record's seal (year 2100).                                                              |
+| `MAX_LINKED_ACCOUNTS`        | `connectors/gmail/src/token-store.ts`      | Maximum Gmail accounts a user can link (10).                                                                    |
+| `linkAccountTool`            | `connectors/gmail/src/tools.ts`            | The `link_account` tool.                                                                                        |
+| `unlinkAccountTool`          | `connectors/gmail/src/tools.ts`            | The `unlink_account` tool.                                                                                      |
