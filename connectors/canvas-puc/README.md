@@ -65,7 +65,7 @@ Também dá para adicioná-lo direto como conector personalizado no claude.ai, c
 `wrangler.toml` já liga os envios (`CANVAS_ALLOW_WRITE=true`). O Worker não dorme: responde na hora.
 Para testar local antes: `npm run worker:dev` (precisa de `SEAL_KEY`, ex.: `--var SEAL_KEY:<chave>`).
 
-**2. Atualizar o plugin:** se o endereço do Worker mudar, troque a `url` em `.mcp.json` e rode `npm run build`
+**2. Atualizar o plugin:** se o endereço do Worker mudar, troque a `url` em `plugin/.mcp.json` e rode `npm run build`
 (ele recusa servidor que não seja `http` com `https://`).
 
 **Outros hosts (Docker):**

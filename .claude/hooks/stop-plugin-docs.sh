@@ -23,9 +23,9 @@ changed_files() {
 }
 
 files="$(changed_files | sort -u)"
-plugin="$(printf '%s\n' "$files" | grep -E '^(connectors/|\.claude-plugin/)' | grep -vE '^connectors/[^/]+/README\.md$' || true)"
+plugin="$(printf '%s\n' "$files" | grep -E '^(connectors/|\.claude-plugin/)' | grep -vE '^connectors/[^/]+/(plugin/)?README\.md$' || true)"
 [ -z "$plugin" ] && exit 0
-docs="$(printf '%s\n' "$files" | grep -E '^(docs/|CHANGELOG\.md$|README\.md$|connectors/[^/]+/README\.md$)' || true)"
+docs="$(printf '%s\n' "$files" | grep -E '^(docs/|CHANGELOG\.md$|README\.md$|connectors/[^/]+/(plugin/)?README\.md$)' || true)"
 [ -n "$docs" ] && exit 0
 
 reason="Plugin alterado sem documentação na mesma mudança: $(printf '%s' "$plugin" | head -5 | paste -sd ',' - | sed 's/,/, /g'). "

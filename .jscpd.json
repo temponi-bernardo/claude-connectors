@@ -15,8 +15,7 @@
     "docs/adr/**",
     "connectors/*/server/**",
     "connectors/*/package-lock.json",
-    "connectors/*/.claude-plugin/**",
-    "connectors/*/.mcp.json"
+    "connectors/*/plugin/**"
   ],
   "format": ["typescript", "javascript", "markdown", "json", "yaml"],
   "gitignore": true,

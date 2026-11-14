@@ -9,17 +9,17 @@
   "plugins": [
     {
       "name": "canvas-puc",
-      "source": "./connectors/canvas-puc",
+      "source": "./connectors/canvas-puc/plugin",
       "description": "Canvas LMS da PUC Minas na nuvem: entregas, tarefas, notas, avisos, módulos, arquivos e fóruns. Nada é instalado no computador."
     },
     {
       "name": "gmail",
-      "source": "./connectors/gmail",
+      "source": "./connectors/gmail/plugin",
       "description": "Gmail multi-conta na nuvem: ler, buscar, enviar, responder, encaminhar, rascunhos, marcadores, arquivar e lixeira, com confirmação antes de enviar ou apagar. Nada é instalado no computador."
     },
     {
       "name": "whatsapp",
-      "source": "./connectors/whatsapp",
+      "source": "./connectors/whatsapp/plugin",
       "description": "WhatsApp pessoal (leitura e envio com confirmação) por um servidor seu no Cloudflare Workers + Containers. Requer publicar o template antes (README do conector)."
     }
   ]

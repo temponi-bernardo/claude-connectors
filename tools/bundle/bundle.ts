@@ -9,11 +9,14 @@ import type { BuildOptions } from 'esbuild';
 /** Pasta dos conectores, relativa à raiz do repositório. */
 export const CONNECTORS_DIR = 'connectors';
 
-/** Manifesto do plugin do Claude dentro da pasta de cada conector. */
-export const PLUGIN_MANIFEST_PATH = join('.claude-plugin', 'plugin.json');
+/** Plugin subfolder of each connector: only plugin content, no server code (ADR 0020). */
+export const PLUGIN_DIR = 'plugin';
 
-/** Configuração MCP do plugin: o endereço do servidor remoto. */
-export const PLUGIN_MCP_CONFIG_PATH = '.mcp.json';
+/** Claude plugin manifest, relative to the connector folder. */
+export const PLUGIN_MANIFEST_PATH = join(PLUGIN_DIR, '.claude-plugin', 'plugin.json');
+
+/** Plugin MCP config (the remote server address), relative to the connector folder. */
+export const PLUGIN_MCP_CONFIG_PATH = join(PLUGIN_DIR, '.mcp.json');
 
 /** Entrada do servidor remoto em Node (HTTP + OAuth, ADR 0009) e caminho do bundle gerado. */
 export const REMOTE_ENTRY = join('src', 'remote-main.ts');

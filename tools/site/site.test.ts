@@ -65,7 +65,7 @@ describe('site do GitHub Pages', () => {
   it('o plugin do Canvas aponta para o site', () => {
     const plugin = JSON.parse(
       readFileSync(
-        join(DOCS, '..', 'connectors', 'canvas-puc', '.claude-plugin', 'plugin.json'),
+        join(DOCS, '..', 'connectors', 'canvas-puc', 'plugin', '.claude-plugin', 'plugin.json'),
         'utf8',
       ),
     ) as { homepage?: string };

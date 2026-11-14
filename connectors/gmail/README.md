@@ -144,7 +144,7 @@ curl https://gmail-remote.<sua-conta>.workers.dev/   # responde "ok"
 ```
 
 Os secrets valem na hora, sem novo deploy. Se o subdomínio `workers.dev` não for `bftemponi`, ajuste a URL em
-`connectors/gmail/.mcp.json`. **Guarde a `TOKEN_ENC_KEY`:** trocá-la obriga todo mundo a vincular as contas de
+`connectors/gmail/plugin/.mcp.json`. **Guarde a `TOKEN_ENC_KEY`:** trocá-la obriga todo mundo a vincular as contas de
 novo.
 
 ### 3. Atualizar um Worker que já estava no ar (só leitura → gerenciamento)
