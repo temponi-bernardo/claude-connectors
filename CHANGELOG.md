@@ -8,6 +8,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Alterado
 
+- **BREAKING** — Plugins: the 12 plugin skills have English names and content, so their slash commands changed
+  (no aliases, ADR 0021). Canvas: `/config-canvas` → `/setup-canvas`, `/resumo-semana` → `/weekly-summary`,
+  `/preparar-entrega` → `/prepare-submission`, `/estudar-disciplina` → `/study-course`. Gmail: `/config-gmail` →
+  `/setup-gmail`, `/triagem-email` → `/triage-inbox`, `/achar-documento` → `/find-document`, `/resumir-conversa`
+  → `/summarize-thread`. WhatsApp: `/config-whatsapp` → `/setup-whatsapp`, `/resumo-whatsapp` →
+  `/whatsapp-summary`, `/pendencias-whatsapp` → `/whatsapp-pending`, `/buscar-whatsapp` → `/search-whatsapp`.
+  Canvas skills cite the English tool names (`whoami`, `upcoming_assignments`...); skills still answer in the
+  user's language and trigger on Portuguese requests.
 - **BREAKING** Canvas: the 18 tools are renamed to English, with no aliases: `quem_sou_eu` → `whoami`,
   `listar_cursos` → `list_courses`, `proximas_entregas` → `upcoming_assignments`, `listar_tarefas` →
   `list_assignments`, `ver_tarefa` → `get_assignment`, `notas` → `get_grades`, `avisos` → `list_announcements`,

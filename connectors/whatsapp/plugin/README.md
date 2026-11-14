@@ -9,3 +9,10 @@ live one folder up, in [`connectors/whatsapp/`](../README.md).
 ```
 /plugin install whatsapp --marketplace temponi-bernardo/claude-connectors
 ```
+
+## Skills
+
+- `/setup-whatsapp` — guided setup (own server, connector, pairing and test).
+- `/whatsapp-summary` — what happened in chats and groups in the period.
+- `/whatsapp-pending` — chats waiting for your reply.
+- `/search-whatsapp` — address, PIX key, link, document or media in the messages.
