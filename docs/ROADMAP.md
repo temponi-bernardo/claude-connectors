@@ -3,7 +3,7 @@
 ## Próxima tarefa
 
 **F4.2 — Move plugin content to `connectors/<name>/plugin/`** (ADR 0020). Phase 4 follows Anthropic's plugin
-standard; pending deploy steps of F2.12 and F3.2 still apply.
+standard; F3.2 (WhatsApp: publish on the owner's account and pair the number) still applies.
 
 ## Como ler
 
@@ -46,8 +46,8 @@ O MVP é o conector do Canvas instalado pelo marketplace e usado no dia a dia, s
 | F2.8  | Renovação automática do token do Canvas no refresh do OAuth                          | ✅     | Refresh do OAuth estende a validade do token na PUC (ADR 0011)                                                     |
 | F2.9  | Site público no GitHub Pages: início, privacidade e termos (ADR 0012)                | ✅     | Páginas em `docs/` montadas pelo Jekyll, sem os `.md` internos; manifesto aponta o site                            |
 | F2.10 | Remover o modo local: plugin do marketplace aponta para o Worker                     | ✅     | Sem stdio, `.mcpb` e login pelo navegador; `.mcp.json` só `http` (ADR 0013)                                        |
-| F2.11 | Gmail remoto público, multiusuário e só leitura (ADR 0014, 0016)                     | 🟨     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai                             |
-| F2.12 | Gmail com gerenciamento completo: enviar, responder, rascunhos, organizar (ADR 0019) | 🟨     | Código, testes e docs no PR; escopo `gmail.modify` no Google, deploy e contas revinculadas enviando pelo claude.ai |
+| F2.11 | Gmail remoto público, multiusuário e só leitura (ADR 0014, 0016)                     | ✅     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai                             |
+| F2.12 | Gmail com gerenciamento completo: enviar, responder, rascunhos, organizar (ADR 0019) | ✅     | Código, testes e docs no PR; escopo `gmail.modify` no Google, deploy e contas revinculadas enviando pelo claude.ai |
 
 ## Fase 3 — WhatsApp pessoal (self-host)
 
