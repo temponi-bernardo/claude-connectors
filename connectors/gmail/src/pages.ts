@@ -4,6 +4,7 @@
  */
 import type { ConsentDescription } from '@cloudflare/workers-oauth-provider';
 import { htmlResponse } from '../../../src/remote/handler.js';
+import { escapeHtml, LOGIN_PAGE_CSS } from '../../../src/remote/login-page.js';
 
 /** Origem do Google para onde o formulário de consentimento redireciona. */
 export const GOOGLE_ACCOUNTS_ORIGIN = 'https://accounts.google.com';
@@ -11,18 +12,9 @@ export const GOOGLE_ACCOUNTS_ORIGIN = 'https://accounts.google.com';
 /** Headers da biblioteca OAuth que a resposta da página não deve herdar (a página define os seus). */
 const PAGE_OWNED_HEADERS = new Set(['content-type', 'content-security-policy', 'set-cookie']);
 
-/** Estilo único das páginas (inline: a CSP não libera folhas externas). */
-const PAGE_STYLE =
-  'body{font-family:system-ui,sans-serif;max-width:32rem;margin:3rem auto;padding:0 1rem;line-height:1.5}button{padding:.5rem 1rem;margin-right:.5rem}';
-
-/** Escapa texto para HTML (nomes de cliente e escopos vêm de terceiros). */
-export function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, (char) => `&#${char.charCodeAt(0)};`);
-}
-
 /** Documento HTML completo com título e corpo já escapados por quem chama. */
 export function pageDocument(title: string, body: string): string {
-  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(title)}</title><style>${PAGE_STYLE}</style></head><body>${body}</body></html>`;
+  return `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escapeHtml(title)}</title><style>${LOGIN_PAGE_CSS}</style></head><body><main>${body}</main></body></html>`;
 }
 
 /** Página simples de aviso (título e mensagem em texto, escapados aqui). */

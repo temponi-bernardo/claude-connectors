@@ -5,7 +5,7 @@ import {
   applyTextOperator,
   bytesToLatin1,
   classifyWord,
-  collectPages,
+  collectPdfPages,
   contentStreamText,
   decodePdfStream,
   decodePdfText,
@@ -199,11 +199,11 @@ describe('referências e páginas', () => {
     expect(dictRefs('/Outro 1 0 R', 'Kids')).toEqual([]);
   });
 
-  it('orderedPages e collectPages seguem /Kids', async () => {
+  it('orderedPages e collectPdfPages seguem /Kids', async () => {
     const objects = await readPdfObjects(receiptPdf());
     expect(orderedPages(objects)).toEqual([5, 3]);
     const pages: number[] = [];
-    collectPages(objects, 99, pages);
+    collectPdfPages(objects, 99, pages);
     expect(pages).toEqual([]);
   });
 });

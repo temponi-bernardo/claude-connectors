@@ -17,6 +17,7 @@ import {
   linkCookie,
   linkFromCode,
   linkRefusal,
+  linkSafely,
   linkRequestKey,
   readCookie,
   sha256Hex,
@@ -165,7 +166,7 @@ describe('linkFromCode e finishAccountLink', () => {
       callback({ state: started.state, code: 'c' }, started.cookie),
     );
     expect(response.status).toBe(200);
-    expect(await response.text()).toContain('&#34;musica&#34; foi vinculada');
+    expect(await response.text()).toContain('&quot;musica&quot; foi vinculada');
     expect(response.headers.getSetCookie().at(-1)).toContain('Max-Age=0');
     expect(await loadLinkedAccount(deps.kv, TEST_TOKEN_KEY, TEST_ACCOUNTS[1]!)).toMatchObject({
       refreshToken: 'novo-refresh',
@@ -199,5 +200,13 @@ describe('linkFromCode e finishAccountLink', () => {
       callback({ state: started.state, error: 'access_denied' }, started.cookie),
     );
     expect(await denied.text()).toContain('Vínculo cancelado');
+  });
+
+  it('linkSafely converte falha do Google em página 400', async () => {
+    const deps = testDeps(() => Promise.resolve(new Response('', { status: 503 })));
+    const response = await linkSafely(deps, 'c', { verifier: 'v', nonce: 'n', bindingHash: 'h' });
+    expect(response.status).toBe(400);
+    expect(await response.text()).toContain('Nada foi gravado');
+    expect([...deps.kv.entries.keys()]).toEqual([]);
   });
 });

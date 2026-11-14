@@ -176,6 +176,20 @@ export async function linkFromCode(
   );
 }
 
+/** Roda `linkFromCode` convertendo falhas (Google fora, `id_token` inválido) em página 400 sem gravar nada. */
+export async function linkSafely(
+  deps: GmailDeps,
+  code: string,
+  link: LinkRequest,
+): Promise<Response> {
+  try {
+    return await linkFromCode(deps, code, link);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    return messagePage('Falha no vínculo', `${message} Nada foi gravado; tente de novo.`, 400);
+  }
+}
+
 /** Volta do Google no vínculo: confere o pedido, trata recusa e erros e apaga o cookie. */
 export async function finishAccountLink(deps: GmailDeps, request: Request): Promise<Response> {
   const params = new URL(request.url).searchParams;
@@ -194,7 +208,7 @@ export async function finishAccountLink(deps: GmailDeps, request: Request): Prom
       400,
     );
   } else {
-    response = await linkFromCode(deps, params.get('code') ?? '', link);
+    response = await linkSafely(deps, params.get('code') ?? '', link);
   }
   response.headers.append('set-cookie', linkCookie(null));
   return response;

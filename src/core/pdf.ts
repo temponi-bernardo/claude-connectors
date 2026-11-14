@@ -150,11 +150,11 @@ export function dictRefs(dict: string, key: string): number[] {
 }
 
 /** Acrescenta a `pages` as páginas sob o nó `num` da árvore de páginas, em ordem (profundidade limitada). */
-export function collectPages(objects: PdfObjects, num: number, pages: number[]): void {
+export function collectPdfPages(objects: PdfObjects, num: number, pages: number[]): void {
   const dict = objects.get(num)?.dict ?? '';
   if (/\/Type\s*\/Page\b/.test(dict)) pages.push(num);
   else if (pages.length < 10_000)
-    for (const kid of dictRefs(dict, 'Kids')) collectPages(objects, kid, pages);
+    for (const kid of dictRefs(dict, 'Kids')) collectPdfPages(objects, kid, pages);
 }
 
 /** Páginas na ordem de leitura, percorrendo a árvore `/Pages` → `/Kids` a partir da raiz. */
@@ -162,7 +162,7 @@ export function orderedPages(objects: PdfObjects): number[] {
   const pages: number[] = [];
   for (const [num, obj] of objects) {
     if (/\/Type\s*\/Pages\b/.test(obj.dict) && !/\/Parent\b/.test(obj.dict))
-      collectPages(objects, num, pages);
+      collectPdfPages(objects, num, pages);
   }
   return pages;
 }
