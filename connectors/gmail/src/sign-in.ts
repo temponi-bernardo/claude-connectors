@@ -53,7 +53,7 @@ export function authorizationErrorResponse(error: unknown): Response {
   return messagePage('Não foi possível conectar', message, 400);
 }
 
-/** Inicia a ida ao Google pedindo identidade e Gmail só leitura com refresh token. */
+/** Starts the Google sign-in asking for identity and Gmail (`gmail.modify`) with a refresh token. */
 export async function beginGoogleSignIn(
   deps: GmailDeps,
   oauth: OAuthHelpers,

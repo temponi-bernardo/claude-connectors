@@ -4,8 +4,11 @@ import {
   DEFAULT_CANVAS_URL,
   TOKEN_RENEWAL_SECONDS,
   canvasTokenApi,
+  fetchCanvasSelf,
+  isCanvasTokenAlive,
   matchesVisibleToken,
   planTokenRenewal,
+  renewCanvasSecret,
   renewCanvasToken,
   withCanvasUserAgent,
   canvasLoginText,
@@ -119,9 +122,9 @@ describe('canvasRemoteConnector', () => {
   });
 
   it('renova a validade do token pelo Canvas', async () => {
-    const settings = settingsWith(new Response('[]'));
-    await expect(canvasRemoteConnector(settings).renewSecret?.('abc')).resolves.toBeUndefined();
-    expect(settings.fetchFn).toHaveBeenCalledOnce();
+    const settings = settingsWith(new Response('{}'), new Response('[]'));
+    await expect(canvasRemoteConnector(settings).renewSecret?.('abc')).resolves.toBe('kept');
+    expect(settings.fetchFn).toHaveBeenCalledTimes(2);
   });
 });
 
@@ -207,5 +210,53 @@ describe('renewCanvasToken', () => {
     const settings = settingsWith(new Response(JSON.stringify([tokenInfo(null)])));
     await renewCanvasToken(settings, TOKEN, NOW);
     expect(settings.fetchFn).toHaveBeenCalledOnce();
+  });
+});
+
+describe('fetchCanvasSelf', () => {
+  it('asks /users/self with the token', async () => {
+    const settings = settingsWith(new Response('{"id":1}'));
+    expect((await fetchCanvasSelf(settings, TOKEN)).status).toBe(200);
+    expect(settings.fetchFn).toHaveBeenCalledWith(`${BASE}/api/v1/users/self`, {
+      headers: { Authorization: `Bearer ${TOKEN}`, Accept: 'application/json' },
+    });
+  });
+});
+
+describe('isCanvasTokenAlive', () => {
+  it('is false only when Canvas answers 401 (revoked or expired token)', async () => {
+    expect(await isCanvasTokenAlive(settingsWith(new Response('', { status: 401 })), TOKEN)).toBe(
+      false,
+    );
+    expect(await isCanvasTokenAlive(settingsWith(new Response('{}')), TOKEN)).toBe(true);
+    expect(await isCanvasTokenAlive(settingsWith(new Response('', { status: 503 })), TOKEN)).toBe(
+      true,
+    );
+  });
+
+  it('counts a network failure as alive (the refresh must not fail because Canvas is down)', async () => {
+    const settings = {
+      baseUrl: BASE,
+      allowWrite: false,
+      fetchFn: vi.fn<typeof fetch>(() => Promise.reject(new TypeError('offline'))),
+    };
+    expect(await isCanvasTokenAlive(settings, TOKEN)).toBe(true);
+  });
+});
+
+describe('renewCanvasSecret', () => {
+  it('answers revoked without renewing when Canvas refuses the token', async () => {
+    const settings = settingsWith(new Response('', { status: 401 }));
+    expect(await renewCanvasSecret(settings, TOKEN, NOW)).toBe('revoked');
+    expect(settings.fetchFn).toHaveBeenCalledOnce();
+  });
+
+  it('renews a live token and answers kept', async () => {
+    const settings = settingsWith(
+      new Response('{}'),
+      new Response(JSON.stringify([tokenInfo(null)])),
+    );
+    expect(await renewCanvasSecret(settings, TOKEN, NOW)).toBe('kept');
+    expect(settings.fetchFn).toHaveBeenCalledTimes(2);
   });
 });
