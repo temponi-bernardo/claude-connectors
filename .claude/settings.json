@@ -107,6 +107,15 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-tools.sh",
+            "timeout": 600
+          }
+        ]
       }
     ],
     "PreCompact": [

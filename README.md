@@ -25,7 +25,8 @@ npm run build      # valida o plugin (só remoto) e gera server/remote.js
 npm run worker:deploy   # publica o servidor remoto no Cloudflare Workers
 ```
 
-Requisitos: Node 22 e gitleaks (`winget install Gitleaks.Gitleaks`).
+Requisitos: Node 22 e gitleaks (`winget install Gitleaks.Gitleaks`; na nuvem do Claude Code ele é instalado
+sozinho pelo Go, com `scripts/install-gitleaks.sh`).
 
 ## Site
 
