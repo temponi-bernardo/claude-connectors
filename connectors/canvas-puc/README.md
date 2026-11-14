@@ -5,7 +5,7 @@ rubrica, notas, avisos, módulos, páginas, arquivos, fóruns e calendário.
 
 ## Instalar
 
-Depois de instalar o plugin, digite **`/config-canvas`** no chat: o Claude abre a página de tokens do Canvas,
+Depois de instalar o plugin, digite **`/setup-canvas`** no chat: o Claude abre a página de tokens do Canvas,
 guia a conexão e faz um teste. O passo a passo manual é este:
 
 O conector roda só na nuvem. Nada é instalado no computador ([ADR 0013](../../docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
@@ -31,10 +31,10 @@ Qualquer pessoa com um token válido do Canvas pode usar o servidor, mas só ace
 
 ## Comandos do plugin
 
-- **`/config-canvas`** — configuração guiada (token, conexão e teste).
-- **`/resumo-semana`** — entregas, atrasos, avisos e notas da semana.
-- **`/preparar-entrega`** — enunciado, rubrica, checklist, plano e revisão; envia só com confirmação.
-- **`/estudar-disciplina`** — resumo dos módulos, conceitos, questões de revisão e plano até a prova.
+- **`/setup-canvas`** — configuração guiada (token, conexão e teste).
+- **`/weekly-summary`** — entregas, atrasos, avisos e notas da semana.
+- **`/prepare-submission`** — enunciado, rubrica, checklist, plano e revisão; envia só com confirmação.
+- **`/study-course`** — resumo dos módulos, conceitos, questões de revisão e plano até a prova.
 
 Também dá para pedir em linguagem natural ("o que vence essa semana?"): o Claude usa a skill certa.
 

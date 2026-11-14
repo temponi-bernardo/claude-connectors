@@ -8,6 +8,14 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Alterado
 
+- **BREAKING** — Plugins: the 12 plugin skills have English names and content, so their slash commands changed
+  (no aliases, ADR 0021). Canvas: `/config-canvas` → `/setup-canvas`, `/resumo-semana` → `/weekly-summary`,
+  `/preparar-entrega` → `/prepare-submission`, `/estudar-disciplina` → `/study-course`. Gmail: `/config-gmail` →
+  `/setup-gmail`, `/triagem-email` → `/triage-inbox`, `/achar-documento` → `/find-document`, `/resumir-conversa`
+  → `/summarize-thread`. WhatsApp: `/config-whatsapp` → `/setup-whatsapp`, `/resumo-whatsapp` →
+  `/whatsapp-summary`, `/pendencias-whatsapp` → `/whatsapp-pending`, `/buscar-whatsapp` → `/search-whatsapp`.
+  Canvas skills cite the English tool names (`whoami`, `upcoming_assignments`...); skills still answer in the
+  user's language and trigger on Portuguese requests.
 - Canvas: when the Canvas token behind a refresh token was deleted or expired in Canvas, the OAuth refresh now
   answers `invalid_grant` instead of new tokens that fail on every tool call, so Claude asks to connect again.
   Canvas outages (network errors, 5xx) still keep the session.
