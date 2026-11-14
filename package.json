@@ -16,6 +16,10 @@
     "worker:deploy": "wrangler deploy --config connectors/canvas-puc/wrangler.toml",
     "gmail:dev": "wrangler dev --config connectors/gmail/wrangler.toml",
     "gmail:deploy": "wrangler deploy --config connectors/gmail/wrangler.toml",
+    "whatsapp:dev": "wrangler dev --config connectors/whatsapp/wrangler.toml",
+    "whatsapp:deploy": "wrangler deploy --config connectors/whatsapp/wrangler.toml",
+    "whatsapp:build": "wrangler deploy --dry-run --config connectors/whatsapp/wrangler.toml",
+    "bridge:test": "sh scripts/bridge-test.sh",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --check .",
@@ -61,6 +65,7 @@
   },
   "dependencies": {
     "@cloudflare/workers-oauth-provider": "^1.2.4",
+    "@cloudflare/containers": "0.3.7",
     "@modelcontextprotocol/sdk": "^1.32.2",
     "zod": "^3.25.76"
   }

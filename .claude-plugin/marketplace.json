@@ -4,7 +4,7 @@
     "name": "Bernardo Temponi"
   },
   "metadata": {
-    "description": "Conectores MCP para o Claude: Canvas da PUC Minas e Gmail multi-conta."
+    "description": "Conectores MCP para o Claude: Canvas da PUC Minas, Gmail multi-conta e WhatsApp pessoal (self-host)."
   },
   "plugins": [
     {
@@ -16,6 +16,11 @@
       "name": "gmail",
       "source": "./connectors/gmail",
       "description": "Gmail multi-conta só leitura na nuvem: busca, conversas, rótulos e texto de anexos de várias contas. Nada é instalado no computador."
+    },
+    {
+      "name": "whatsapp",
+      "source": "./connectors/whatsapp",
+      "description": "WhatsApp pessoal (leitura; envio opcional) por um servidor seu no Cloudflare Workers + Containers. Requer publicar o template antes (README do conector)."
     }
   ]
 }

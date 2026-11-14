@@ -45,7 +45,15 @@ O MVP é o conector do Canvas instalado pelo marketplace e usado no dia a dia, s
 | F2.8  | Renovação automática do token do Canvas no refresh do OAuth            | ✅     | Refresh do OAuth estende a validade do token na PUC (ADR 0011)                           |
 | F2.9  | Site público no GitHub Pages: início, privacidade e termos (ADR 0012)  | ✅     | Páginas em `docs/` montadas pelo Jekyll, sem os `.md` internos; manifesto aponta o site  |
 | F2.10 | Remover o modo local: plugin do marketplace aponta para o Worker       | ✅     | Sem stdio, `.mcpb` e login pelo navegador; `.mcp.json` só `http` (ADR 0013)              |
-| F2.11 | Gmail remoto público, multiusuário e só leitura (ADR 0014, 0015)       | 🟨     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai   |
+| F2.11 | Gmail remoto público, multiusuário e só leitura (ADR 0014, 0016)       | 🟨     | Código, testes e docs no PR; Worker publicado e as duas contas vinculadas no claude.ai   |
+
+## Fase 3 — WhatsApp pessoal (self-host)
+
+| Id   | Tarefa                                                                          | Estado | Pronto quando                                                                                 |
+| ---- | ------------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------- |
+| F3.1 | Conector `whatsapp`: Worker + OAuth GitHub, ponte Go no container, snapshots R2 | ✅     | `pr:check` verde com leitura completa, `/pair`, envio atrás de flag e ADR 0015 com a medição  |
+| F3.2 | Publicar na conta do dono e parear o número                                     | ⬜     | `list_chats` respondendo no claude.ai; RSS real do history sync registrado na ADR             |
+| F3.3 | Restringir a saída do container aos hosts do WhatsApp (`allowedHosts`)          | ⬜     | Ponte conecta com `enableInternet = false` e só hosts do WhatsApp, ou ADR dizendo por que não |
 
 ## Fases seguintes
 

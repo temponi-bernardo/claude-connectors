@@ -5,6 +5,7 @@ import {
   authorizationServerMetadata,
   clientRedirectUris,
   readOAuthSettings,
+  resolveIssuer,
   isAllowedRedirect,
   oauthError,
   parseAuthorizeQuery,
@@ -175,6 +176,13 @@ describe('auxiliares do OAuth', () => {
     });
     expect(readCodeChallenge(ok)).toEqual({ ok: true, value: 'c' });
     expect(readCodeChallenge(new URLSearchParams())).toMatchObject({ ok: false });
+  });
+});
+
+describe('resolveIssuer', () => {
+  it('prefere PUBLIC_URL sem barra final; sem ela, usa a origem', () => {
+    expect(resolveIssuer({ PUBLIC_URL: 'https://a.dev//' }, 'https://b.dev')).toBe('https://a.dev');
+    expect(resolveIssuer({}, 'https://b.dev')).toBe('https://b.dev');
   });
 });
 

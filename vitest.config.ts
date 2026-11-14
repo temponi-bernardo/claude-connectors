@@ -31,6 +31,10 @@ export default defineConfig({
         '**/*.d.ts',
         // Ponto de entrada do servidor Node: exceção em src/test-exceptions.ts
         'connectors/*/src/remote-main.ts',
+        // Runtime do Cloudflare (Durable Object/Container e entrada do Worker): exceções em src/test-exceptions.ts
+        'connectors/*/src/container.ts',
+        'connectors/*/src/index.ts',
+        'connectors/*/src/*.d.ts',
       ],
       thresholds: { lines: 90, functions: 90, branches: 90, statements: 90 },
       reporter: ['text', 'lcov'],

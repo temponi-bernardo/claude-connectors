@@ -5,7 +5,12 @@ não cobra componentes. A única tela é a **página de autorização do conecto
 sem script, gerado por `renderLoginPage()` em `src/remote/login-page.ts`, com o estilo em `LOGIN_PAGE_CSS` e os
 tokens abaixo (claro e escuro por `prefers-color-scheme`). O **site público** do GitHub Pages (ADR 0012:
 `docs/index.html`, `privacidade.html`, `termos.html`) usa os mesmos tokens em `docs/site.css`, sem script. As páginas do conector
-Gmail (consentimento e resultado do vínculo, `connectors/gmail/src/pages.ts`) usam o mesmo `LOGIN_PAGE_CSS`.
+Gmail (consentimento e resultado do vínculo, `connectors/gmail/src/pages.ts`) usam o mesmo `LOGIN_PAGE_CSS`. A página `/pair` do
+WhatsApp (`renderPairPage()` em `connectors/whatsapp/src/pair-page.ts`, ADR 0015) usa `LOGIN_PAGE_CSS` mais
+`PAIR_PAGE_CSS` (código de pareamento em fonte mono grande, QR com fundo branco, botões `secondary` e `danger`).
+Estados: precisa parear (formulários de código e QR), conectando, conectado, sem resposta da ponte, erro
+(`role="alert"`) e mensagem (`role="status"`); com código ou QR na tela, recarrega a cada 20 s; a CSP libera só
+`img-src data:` para o QR.
 
 ## Quando houver interface
 

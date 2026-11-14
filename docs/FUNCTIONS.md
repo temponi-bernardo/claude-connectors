@@ -12,7 +12,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- indice:inicio -->
 
 - `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`requestCanvas`](#requestcanvas), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`createCanvasClient`](#createcanvasclient)
-- `connectors/canvas-puc/src/files.ts`: [`bytesToBase64`](#bytestobase64), [`fileContentBlock`](#filecontentblock), [`downloadedFileResult`](#downloadedfileresult), [`downloadRefusal`](#downloadrefusal), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
+- `connectors/canvas-puc/src/files.ts`: [`fileContentBlock`](#filecontentblock), [`downloadedFileResult`](#downloadedfileresult), [`downloadRefusal`](#downloadrefusal), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
@@ -36,7 +36,18 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/gmail/src/token-store.ts`: [`sha256Hex`](#sha256hex), [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
 - `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
 - `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
-- `src/core/bytes.ts`: [`byteView`](#byteview), [`concatBytes`](#concatbytes), [`utf16leToString`](#utf16letostring)
+- `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
+- `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
+- `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
+- `connectors/whatsapp/src/format.ts`: [`isHiddenChar`](#ishiddenchar), [`sanitizeText`](#sanitizetext), [`untrusted`](#untrusted), [`compactMessage`](#compactmessage), [`compactChat`](#compactchat), [`partialSyncWarning`](#partialsyncwarning), [`compactStatus`](#compactstatus)
+- `connectors/whatsapp/src/lifecycle.ts`: [`withBridgeToken`](#withbridgetoken), [`fetchBridge`](#fetchbridge), [`readBridgePhase`](#readbridgephase), [`restoreRequestInit`](#restorerequestinit), [`ensureRestored`](#ensurerestored), [`snapshotBridge`](#snapshotbridge), [`planSend`](#plansend), [`guardSend`](#guardsend), [`forwardInit`](#forwardinit), [`createBridgeLifecycle`](#createbridgelifecycle), [`logSnapshotFailure`](#logsnapshotfailure), [`resetBridge`](#resetbridge), [`routeBridgeRequest`](#routebridgerequest)
+- `connectors/whatsapp/src/pair-page.ts`: [`describePairStatus`](#describepairstatus), [`pairForm`](#pairform), [`pairingSection`](#pairingsection), [`maintenanceSection`](#maintenancesection), [`alertHtml`](#alerthtml), [`renderPairPage`](#renderpairpage)
+- `connectors/whatsapp/src/pair.ts`: [`parseCookies`](#parsecookies), [`pairCookie`](#paircookie), [`redirectWithCookies`](#redirectwithcookies), [`readPairSession`](#readpairsession), [`issuePairCsrf`](#issuepaircsrf), [`isTrustedPost`](#istrustedpost), [`startPairLogin`](#startpairlogin), [`isValidPairLogin`](#isvalidpairlogin), [`openPairSession`](#openpairsession), [`handlePairCallback`](#handlepaircallback), [`pairDeadline`](#pairdeadline), [`fetchPairStatus`](#fetchpairstatus), [`pairPage`](#pairpage), [`pairActionError`](#pairactionerror), [`handlePairPost`](#handlepairpost), [`routePairPost`](#routepairpost), [`isPairPath`](#ispairpath), [`routePairRequest`](#routepairrequest)
+- `connectors/whatsapp/src/snapshots.ts`: [`storedGeneration`](#storedgeneration), [`readUploadHeaders`](#readuploadheaders), [`storeSnapshot`](#storesnapshot), [`storeSnapshotResponse`](#storesnapshotresponse), [`archiveSnapshot`](#archivesnapshot), [`sameSecret`](#samesecret), [`acceptSnapshotPush`](#acceptsnapshotpush)
+- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
+- `connectors/whatsapp/src/worker-env.ts`: [`bridgeStub`](#bridgestub), [`bridgeFetchFor`](#bridgefetchfor)
+- `connectors/whatsapp/src/worker.ts`: [`unixNow`](#unixnow), [`githubSettingsFrom`](#githubsettingsfrom), [`whatsappRemoteConnector`](#whatsappremoteconnector), [`createWhatsAppApps`](#createwhatsappapps), [`handleWhatsAppFetch`](#handlewhatsappfetch), [`isSyncCronEnabled`](#issynccronenabled), [`runScheduledSync`](#runscheduledsync)
+- `src/core/bytes.ts`: [`byteView`](#byteview), [`concatBytes`](#concatbytes), [`utf16leToString`](#utf16letostring), [`bytesToBase64`](#bytestobase64)
 - `src/core/cfb.ts`: [`isCfb`](#iscfb), [`readCfbHeader`](#readcfbheader), [`cfbSector`](#cfbsector), [`sectorWords`](#sectorwords), [`fatSectorIds`](#fatsectorids), [`followChain`](#followchain), [`readRegularChain`](#readregularchain), [`parseDirectory`](#parsedirectory), [`openCfb`](#opencfb), [`readMiniStream`](#readministream), [`readCfbStream`](#readcfbstream)
 - `src/core/env.ts`: [`envValue`](#envvalue), [`parseFlag`](#parseflag), [`toEnvVars`](#toenvvars)
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
@@ -44,15 +55,16 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `src/core/pdf.ts`: [`bytesToLatin1`](#bytestolatin1), [`isPdf`](#ispdf), [`streamDataStart`](#streamdatastart), [`trimStreamEol`](#trimstreameol), [`readRawObject`](#readrawobject), [`listRawObjects`](#listrawobjects), [`decodePdfStream`](#decodepdfstream), [`splitObjectStream`](#splitobjectstream), [`storePdfObject`](#storepdfobject), [`readPdfObjects`](#readpdfobjects), [`pdfRefs`](#pdfrefs), [`dictRefs`](#dictrefs), [`collectPdfPages`](#collectpdfpages), [`orderedPages`](#orderedpages), [`utf16beHexToString`](#utf16behextostring), [`readBfChars`](#readbfchars), [`readBfRanges`](#readbfranges), [`rangeTarget`](#rangetarget), [`parseToUnicodeCMap`](#parsetounicodecmap), [`addFontRefs`](#addfontrefs), [`fontResourceRefs`](#fontresourcerefs), [`fontCMaps`](#fontcmaps), [`decodePdfText`](#decodepdftext), [`readLiteralString`](#readliteralstring), [`readEscape`](#readescape), [`readHexString`](#readhexstring), [`skipPdfSpace`](#skippdfspace), [`nextPdfToken`](#nextpdftoken), [`readPdfWord`](#readpdfword), [`wrapString`](#wrapstring), [`classifyWord`](#classifyword), [`showArrayText`](#showarraytext), [`lastOperandText`](#lastoperandtext), [`moveText`](#movetext), [`applyTextOperator`](#applytextoperator), [`feedPdfToken`](#feedpdftoken), [`contentStreamText`](#contentstreamtext), [`tidyPdfText`](#tidypdftext), [`pdfToText`](#pdftotext)
 - `src/core/word.ts`: [`docxXmlToText`](#docxxmltotext), [`docxToText`](#docxtotext), [`cp1252ToString`](#cp1252tostring), [`parsePieceTable`](#parsepiecetable), [`pieceText`](#piecetext), [`cleanWordText`](#cleanwordtext), [`docToText`](#doctotext), [`wordKind`](#wordkind), [`wordToText`](#wordtotext)
 - `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`decompressBytes`](#decompressbytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
-- `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`rawToolResult`](#rawtoolresult), [`toToolResult`](#totoolresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs)
-- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`handleAuthorizePage`](#handleauthorizepage), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
+- `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`rawToolResult`](#rawtoolresult), [`toToolResult`](#totoolresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs), [`binaryContentBlock`](#binarycontentblock)
+- `src/remote/github-login.ts`: [`githubAuthorizeUrl`](#githubauthorizeurl), [`parseEmailList`](#parseemaillist), [`pickAllowedEmail`](#pickallowedemail), [`exchangeGithubCode`](#exchangegithubcode), [`fetchGithubEmails`](#fetchgithubemails), [`finishGithubLogin`](#finishgithublogin), [`githubUpstreamLogin`](#githubupstreamlogin)
+- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
 - `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage)
 - `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
-- `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
+- `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`resolveIssuer`](#resolveissuer), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
 - `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed)
 - `src/remote/tokens.ts`: [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessSecret`](#readaccesssecret)
-- `tools/bundle/bundle.ts`: [`listConnectors`](#listconnectors), [`mcpServerProblems`](#mcpserverproblems), [`pluginMcpProblems`](#pluginmcpproblems), [`bundleOptions`](#bundleoptions)
+- `tools/bundle/bundle.ts`: [`listConnectors`](#listconnectors), [`isRemoteMcpUrl`](#isremotemcpurl), [`mcpServerProblems`](#mcpserverproblems), [`pluginMcpProblems`](#pluginmcpproblems), [`bundleOptions`](#bundleoptions)
 - `tools/bundle/cli.ts`: [`buildConnector`](#buildconnector), [`runBuildCli`](#runbuildcli)
 - `tools/docs/ast.ts`: [`toPosixRelative`](#toposixrelative), [`globToRegExp`](#globtoregexp), [`isAnalyzedSource`](#isanalyzedsource), [`openProject`](#openproject), [`signatureOf`](#signatureof), [`collectFileFunctions`](#collectfilefunctions), [`collectFunctions`](#collectfunctions), [`isDataDeclaration`](#isdatadeclaration), [`collectFileConstants`](#collectfileconstants), [`collectConstants`](#collectconstants), [`isIgnoredReference`](#isignoredreference), [`ownerLabelOf`](#ownerlabelof), [`findDeclaration`](#finddeclaration), [`buildReferenceIndex`](#buildreferenceindex), [`buildCallGraph`](#buildcallgraph)
 - `tools/docs/checks.ts`: [`checkFunctionsDocumented`](#checkfunctionsdocumented), [`checkSectionModules`](#checksectionmodules), [`checkUniqueNames`](#checkuniquenames), [`checkGeneratedBlocks`](#checkgeneratedblocks), [`checkManualFields`](#checkmanualfields), [`checkProcessCitations`](#checkprocesscitations), [`checkStructure`](#checkstructure), [`checkUiComponents`](#checkuicomponents), [`checkTests`](#checktests), [`checkConstants`](#checkconstants), [`runAllChecks`](#runallchecks)
@@ -1901,8 +1913,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/env.ts`
 - **Assinatura:** `envValue(env: EnvVars, key: string): string | null`
-- **Usada por:** `createWorkerApp()`, `publicOrigin()`, `readCanvasRemoteSettings()`, `readGmailSettings()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `requiredSecret()`
-- **Processos:** P08, P10, P12
+- **Usada por:** `containerEnvVars()`, `publicOrigin()`, `readAllowedEmails()`, `readCanvasRemoteSettings()`, `readGmailSettings()`, `readIntInRange()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `readSendAllowlist()`, `readSendSettings()`, `readSleepAfter()`, `readWhatsAppSettings()`, `requiredSecret()`, `requireEnv()`, `resolveIssuer()`
+- **Processos:** P08, P10, P12, P13, P17
 
 <!-- gerado:fim -->
 
@@ -1918,8 +1930,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/env.ts`
 - **Assinatura:** `parseFlag(value: string | null): boolean`
-- **Usada por:** `readCanvasRemoteSettings()`
-- **Processos:** P08
+- **Usada por:** `readCanvasRemoteSettings()`, `readSendSettings()`
+- **Processos:** P08, P13, P17
 
 <!-- gerado:fim -->
 
@@ -1935,8 +1947,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/core/env.ts`
 - **Assinatura:** `toEnvVars(env: Readonly<Record<string, unknown>>): EnvVars`
-- **Usada por:** `createGmailDeps()`, `handleWorkerFetch()`, `publicOrigin()`
-- **Processos:** P08, P10, P12
+- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`, `createGmailDeps()`, `handleWhatsAppFetch()`, `handleWorkerFetch()`, `publicOrigin()`, `runScheduledSync()`
+- **Processos:** P08, P10, P12, P13, P17
 
 <!-- gerado:fim -->
 
@@ -2009,7 +2021,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `defineTool(def: ToolDefinition<C, S>): ToolSpec<C>`
-- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/gmail/src/tools.ts (módulo)`
+- **Usada por:** `connectors/canvas-puc/src/tools-read.ts (módulo)`, `connectors/canvas-puc/src/tools-write.ts (módulo)`, `connectors/gmail/src/tools.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`
 - **Processos:** P03
 
 <!-- gerado:fim -->
@@ -2027,7 +2039,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `textResult(data: unknown, notes: readonly string[] = []): CallToolResult`
 - **Usada por:** `toToolResult()`
-- **Processos:** P03, P08, P09, P10, P12
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2044,7 +2056,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `errorResult(error: unknown): CallToolResult`
 - **Usada por:** `runToolSafely()`
-- **Processos:** P03, P08, P09, P10, P12
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2061,7 +2073,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `async runToolSafely(spec: ToolSpec<C>, ctx: C, rawArgs: unknown): Promise<CallToolResult>`
 - **Usada por:** `registerToolSpecs()`
-- **Processos:** P03, P08, P09, P10, P12
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2077,8 +2089,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `registerToolSpecs(server: McpServer, specs: readonly ToolSpec<C>[], ctx: C): void`
-- **Usada por:** `createCanvasMcpServer()`, `createGmailServer()`
-- **Processos:** P03, P08, P09, P10, P12
+- **Usada por:** `createCanvasMcpServer()`, `createGmailServer()`, `createWhatsAppMcpServer()`
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
@@ -2094,8 +2106,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `rawToolResult(result: CallToolResult): RawToolResult`
-- **Usada por:** `downloadedFileResult()`
-- **Processos:** P03
+- **Usada por:** `downloadedFileResult()`, `mediaResult()`
+- **Processos:** P03, P14
 
 <!-- gerado:fim -->
 
@@ -2112,13 +2124,30 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/mcp/tools.ts`
 - **Assinatura:** `toToolResult(data: unknown): CallToolResult`
 - **Usada por:** `runToolSafely()`
-- **Processos:** P03, P08, P09, P10, P12
+- **Processos:** P03, P08, P09, P10, P12, P13, P14
 
 <!-- gerado:fim -->
 
 - **Faz:** Converte o retorno de uma ferramenta em resultado MCP: o embrulhado por `rawToolResult` passa direto, o resto vira `textResult`.
 - **Entrada:** `data`: retorno da ferramenta.
 - **Saída:** `CallToolResult`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `binaryContentBlock`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/mcp/tools.ts`
+- **Assinatura:** `binaryContentBlock(mimeType: string, bytes: Uint8Array, uri: string): CallToolResult['content'][number]`
+- **Usada por:** `fileContentBlock()`, `mediaResult()`
+- **Processos:** P03, P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Bloco MCP com um conteúdo binário: imagem, áudio ou, para o resto, recurso embutido com o `uri` dado.
+- **Entrada:** `mimeType`, `bytes` do arquivo e `uri` do recurso.
+- **Saída:** Bloco `image`, `audio` ou `resource` com os bytes em base64.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -2304,8 +2333,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `jsonResponse(data: unknown, status = 200): Response`
-- **Usada por:** `handleRegister()`, `handleToken()`, `src/remote/handler.ts (módulo)`
-- **Processos:** P08
+- **Usada por:** `handleMcp()`, `handleRegister()`, `handleToken()`, `src/remote/handler.ts (módulo)`
+- **Processos:** P08, P09, P14
 
 <!-- gerado:fim -->
 
@@ -2321,8 +2350,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `htmlResponse(html: string, status = 200, formTarget: string | null = null): Response`
-- **Usada por:** `consentPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `loginPageFor()`, `messagePage()`
-- **Processos:** P08, P10, P11
+- **Usada por:** `consentPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `loginPageFor()`, `messagePage()`, `pairPage()`, `routePairRequest()`
+- **Processos:** P08, P10, P11, P13, P15
 
 <!-- gerado:fim -->
 
@@ -2338,8 +2367,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `async readForm(request: Request): Promise<URLSearchParams>`
-- **Usada por:** `handleAuthorizeSubmit()`, `handleToken()`, `submitAuthorize()`
-- **Processos:** P08, P10
+- **Usada por:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`, `submitAuthorize()`
+- **Processos:** P08, P10, P13, P15
 
 <!-- gerado:fim -->
 
@@ -2373,7 +2402,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `loginPageFor(app: RemoteApp, request: AuthorizeRequest, error: string | null): Response`
 - **Usada por:** `handleAuthorizePage()`, `handleAuthorizeSubmit()`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2389,8 +2418,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `redirectWithCode(request: AuthorizeRequest, code: string): Response`
-- **Usada por:** `handleAuthorizeSubmit()`
-- **Processos:** P08
+- **Usada por:** `handleAuthorizeSubmit()`, `handleUpstreamCallback()`
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2424,7 +2453,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `handleAuthorizePage(app: RemoteApp, request: Request): Promise<Response>`
 - **Usada por:** `src/remote/handler.ts (módulo)`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2475,7 +2504,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `handleMcp(app: RemoteApp, request: Request): Promise<Response>`
 - **Usada por:** `src/remote/handler.ts (módulo)`
-- **Processos:** P09
+- **Processos:** P09, P14
 
 <!-- gerado:fim -->
 
@@ -2492,7 +2521,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `withCors(response: Response): Response`
 - **Usada por:** `routeRemoteRequest()`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2509,7 +2538,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `async routeRemoteRequest(app: RemoteApp, request: Request): Promise<Response>`
 - **Usada por:** `createRemoteHandler()`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2525,8 +2554,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `createRemoteHandler(app: RemoteApp): (request: Request) => Promise<Response>`
-- **Usada por:** `handleWorkerFetch()`, `startCanvasRemoteServer()`
-- **Processos:** P08
+- **Usada por:** `handleWhatsAppFetch()`, `handleWorkerFetch()`, `startCanvasRemoteServer()`
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2543,7 +2572,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/handler.ts`
 - **Assinatura:** `pageSecurityPolicy(formTarget: string | null): string`
 - **Usada por:** `htmlResponse()`
-- **Processos:** P08, P10, P11
+- **Processos:** P08, P10, P11, P13, P15
 
 <!-- gerado:fim -->
 
@@ -2570,6 +2599,40 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** O que o `renewSecret` do conector fizer; `console.warn` se ele falhar.
 - **Erros:** Nenhum (a falha vira aviso no log).
 
+### `redirectToUpstream`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `redirectToUpstream(app: RemoteApp, login: UpstreamLogin, request: AuthorizeRequest): Response`
+- **Usada por:** `handleAuthorizePage()`
+- **Processos:** P08, P13
+
+<!-- gerado:fim -->
+
+- **Faz:** Redireciona o navegador ao provedor de identidade com o pedido selado no `state`.
+- **Entrada:** `app`, o login delegado (`UpstreamLogin`) e o pedido de autorização validado.
+- **Saída:** Resposta 302 para a URL de login do provedor.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `handleUpstreamCallback`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/handler.ts`
+- **Assinatura:** `async handleUpstreamCallback(app: RemoteApp, request: Request): Promise<Response>`
+- **Usada por:** `src/remote/handler.ts (módulo)`
+- **Processos:** P13
+
+<!-- gerado:fim -->
+
+- **Faz:** `GET /oauth/callback`: conclui o login delegado e devolve o código ao cliente, ou explica a recusa.
+- **Entrada:** `app` e a requisição de retorno do provedor (`state`, `code`).
+- **Saída:** 302 com o código ao `redirect_uri`; HTML 404 (login não delegado), 400 (pedido expirado) ou 403 (login recusado).
+- **Efeitos:** O que o `finish` do login fizer (ex.: `fetch` ao GitHub).
+- **Erros:** Nenhum (a falha do `finish` vira página 403).
+
 ## `src/remote/login-page.ts`
 
 ### `escapeHtml`
@@ -2578,8 +2641,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/login-page.ts`
 - **Assinatura:** `escapeHtml(value: string): string`
-- **Usada por:** `consentPageBody()`, `messagePage()`, `pageDocument()`, `renderLoginPage()`
-- **Processos:** P08, P10, P11
+- **Usada por:** `alertHtml()`, `consentPageBody()`, `handlePairCallback()`, `handleUpstreamCallback()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`
+- **Processos:** P08, P10, P11, P13, P15
 
 <!-- gerado:fim -->
 
@@ -2596,7 +2659,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/login-page.ts`
 - **Assinatura:** `renderLoginPage(view: LoginPageView): string`
 - **Usada por:** `loginPageFor()`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2615,7 +2678,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/mcp-endpoint.ts`
 - **Assinatura:** `async serveMcpRequest(server: McpServer, request: Request): Promise<Response>`
 - **Usada por:** `handleMcp()`, `handleMcpApi()`
-- **Processos:** P09, P10, P12
+- **Processos:** P09, P10, P12, P14
 
 <!-- gerado:fim -->
 
@@ -2632,7 +2695,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/mcp-endpoint.ts`
 - **Assinatura:** `mcpUnauthorizedResponse(issuer: string): Response`
 - **Usada por:** `handleMcp()`
-- **Processos:** P08, P09
+- **Processos:** P08, P09, P14
 
 <!-- gerado:fim -->
 
@@ -2772,7 +2835,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `oauthError(error: string, description: string): OAuthResult<T>`
 - **Usada por:** `parseAuthorizeQuery()`, `readCodeChallenge()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `redeemTokenRequest()`, `registerClient()`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2857,7 +2920,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `readRedirectUris(body: unknown): string[] | null`
 - **Usada por:** `checkClientRegistration()`, `clientRedirectUris()`, `registerClient()`
-- **Processos:** P08, P10
+- **Processos:** P08, P10, P13
 
 <!-- gerado:fim -->
 
@@ -2891,7 +2954,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `clientRedirectUris(clientId: string, settings: OAuthSettings, now: number): string[] | null`
 - **Usada por:** `parseAuthorizeQuery()`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2908,7 +2971,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `parseAuthorizeQuery(query: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<AuthorizeRequest>`
 - **Usada por:** `handleAuthorizePage()`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2925,7 +2988,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `readCodeChallenge(query: URLSearchParams): OAuthResult<string>`
 - **Usada por:** `parseAuthorizeQuery()`
-- **Processos:** P08
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2941,8 +3004,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/oauth.ts`
 - **Assinatura:** `readOAuthSettings(env: EnvVars, issuer: string): OAuthSettings`
-- **Usada por:** `createWorkerApp()`, `readRemoteServerConfig()`
-- **Processos:** P08
+- **Usada por:** `createWhatsAppApps()`, `createWorkerApp()`, `readRemoteServerConfig()`
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -2951,6 +3014,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** `OAuthSettings`; hosts padrão `DEFAULT_REDIRECT_HOSTS` se a variável não vier.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Os de `parseSealKey` (chave ausente ou de tamanho errado).
+
+### `resolveIssuer`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/oauth.ts`
+- **Assinatura:** `resolveIssuer(env: EnvVars, origin: string): string`
+- **Usada por:** `createWhatsAppApps()`, `createWorkerApp()`
+- **Processos:** P08, P13
+
+<!-- gerado:fim -->
+
+- **Faz:** Emissor OAuth: `PUBLIC_URL` sem barra final ou, sem ela, a origem da requisição (ex.: `*.workers.dev`).
+- **Entrada:** `env` e a origem da requisição.
+- **Saída:** URL do emissor, sem barra final.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
 
 ## `src/remote/seal.ts`
 
@@ -2961,7 +3041,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `parseSealKey(raw: string | null, name = 'SEAL_KEY'): Buffer`
 - **Usada por:** `readGmailSettings()`, `readOAuthSettings()`
-- **Processos:** P08, P10, P12
+- **Processos:** P08, P10, P12, P13
 
 <!-- gerado:fim -->
 
@@ -2977,8 +3057,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `sealPayload(payload: unknown, key: Buffer): string`
-- **Usada por:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issueTokenSet()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `startAccountLink()`
-- **Processos:** P08, P10, P11, P12
+- **Usada por:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `startAccountLink()`, `startPairLogin()`
+- **Processos:** P08, P10, P11, P12, P13, P15
 
 <!-- gerado:fim -->
 
@@ -2995,7 +3075,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `unsealPayload(sealed: string, key: Buffer): Record<string, unknown> | null`
 - **Usada por:** `openSealed()`
-- **Processos:** P08, P09, P10, P11, P12
+- **Processos:** P08, P09, P10, P11, P12, P13, P14, P15
 
 <!-- gerado:fim -->
 
@@ -3011,8 +3091,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/seal.ts`
 - **Assinatura:** `openSealed(sealed: string, key: Buffer, expected: SealExpectation): SealedClaims | null`
-- **Usada por:** `clientRedirectUris()`, `openAuthorizeRequest()`, `openOwnerAccounts()`, `readAccessSecret()`, `redeemAuthorizationCode()`, `redeemLinkTicket()`, `redeemRefreshToken()`, `takeLinkRequest()`
-- **Processos:** P08, P09, P10, P11, P12
+- **Usada por:** `clientRedirectUris()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openOwnerAccounts()`, `readAccessSecret()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemLinkTicket()`, `redeemRefreshToken()`, `takeLinkRequest()`
+- **Processos:** P08, P09, P10, P11, P12, P13, P14, P15
 
 <!-- gerado:fim -->
 
@@ -3030,8 +3110,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/tokens.ts`
 - **Assinatura:** `sealAuthorizeRequest(request: AuthorizeRequest, settings: OAuthSettings, now: number): string`
-- **Usada por:** `loginPageFor()`
-- **Processos:** P08
+- **Usada por:** `loginPageFor()`, `redirectToUpstream()`
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3047,8 +3127,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/tokens.ts`
 - **Assinatura:** `openAuthorizeRequest(sealed: string, settings: OAuthSettings, now: number): AuthorizeRequest | null`
-- **Usada por:** `handleAuthorizeSubmit()`
-- **Processos:** P08
+- **Usada por:** `handleAuthorizeSubmit()`, `handleUpstreamCallback()`
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3064,8 +3144,8 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `src/remote/tokens.ts`
 - **Assinatura:** `issueAuthorizationCode(grant: ApprovedGrant, settings: OAuthSettings, now: number): string`
-- **Usada por:** `handleAuthorizeSubmit()`
-- **Processos:** P08
+- **Usada por:** `handleAuthorizeSubmit()`, `handleUpstreamCallback()`
+- **Processos:** P08, P13
 
 <!-- gerado:fim -->
 
@@ -3150,7 +3230,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Arquivo:** `src/remote/tokens.ts`
 - **Assinatura:** `readAccessSecret(authorization: string | null, settings: OAuthSettings, now: number): string | null`
 - **Usada por:** `handleMcp()`
-- **Processos:** P09
+- **Processos:** P09, P14
 
 <!-- gerado:fim -->
 
@@ -3197,23 +3277,6 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Erros:** Nenhum: configuração inválida vira 500.
 
 ## `connectors/canvas-puc/src/files.ts`
-
-### `bytesToBase64`
-
-<!-- gerado:inicio -->
-
-- **Arquivo:** `connectors/canvas-puc/src/files.ts`
-- **Assinatura:** `bytesToBase64(bytes: Uint8Array): string`
-- **Usada por:** `fileContentBlock()`
-- **Processos:** P03
-
-<!-- gerado:fim -->
-
-- **Faz:** Codifica bytes em base64 em blocos de 32 KB, sem `Buffer` (Node e Workers).
-- **Entrada:** `bytes`.
-- **Saída:** Texto base64.
-- **Efeitos:** Nenhum (pura).
-- **Erros:** Nenhum.
 
 ### `fileContentBlock`
 
@@ -3801,6 +3864,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
+### `bytesToBase64`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/core/bytes.ts`
+- **Assinatura:** `bytesToBase64(bytes: Uint8Array): string`
+- **Usada por:** `binaryContentBlock()`
+- **Processos:** P03, P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Codifica bytes em base64 em blocos de 32 KB, sem `Buffer` (Node e Workers).
+- **Entrada:** `bytes`.
+- **Saída:** Texto base64.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
 ## `tools/bundle/bundle.ts`
 
 ### `listConnectors`
@@ -3868,6 +3948,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Faz:** Confere o `.mcp.json` inteiro de um plugin: ao menos um servidor, todos remotos.
 - **Entrada:** `config`: conteúdo do `.mcp.json` já lido como JSON.
 - **Saída:** Lista de problemas; vazia se a configuração está certa.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isRemoteMcpUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `tools/bundle/bundle.ts`
+- **Assinatura:** `isRemoteMcpUrl(url: unknown): boolean`
+- **Usada por:** `mcpServerProblems()`
+- **Processos:** P05
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se a URL é remota: `https://` fixo, ou `${user_config.<campo>}` de um template self-host (ADR 0015).
+- **Entrada:** `url`: valor do campo `url` do servidor no `.mcp.json`.
+- **Saída:** `true` para `https://...` ou um placeholder `${user_config.<campo>}` inteiro; `false` para o resto.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Nenhum.
 
@@ -6419,6 +6516,1679 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Lança `Error` se o PDF for cifrado (`/Encrypt` nos últimos 4 KB).
 
+## `connectors/whatsapp/src/bridge-client.ts`
+
+### `bridgeErrorFrom`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `bridgeErrorFrom(status: number, body: unknown): BridgeError`
+- **Usada por:** `attemptBridge()`, `ensureRestored()`
+- **Processos:** P13, P14, P15, P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Traduz uma resposta de erro da ponte em `BridgeError` com mensagem em português.
+- **Entrada:** `status` HTTP e o corpo JSON da resposta (qualquer valor).
+- **Saída:** `BridgeError` com mensagem de `BRIDGE_ERROR_MESSAGES` (ou a da ponte), status e código.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum (devolve o erro, não lança).
+
+### `withDeadline`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `withDeadline(promise: Promise<T>, deadline: number, message: string): Promise<T>`
+- **Usada por:** `attemptBridge()`, `runRead()`, `runScheduledSync()`
+- **Processos:** P13, P14, P15, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Espera uma promessa até o instante `deadline` (ms Unix); depois disso rejeita com a mensagem dada.
+- **Entrada:** `promise`, `deadline` (ms Unix) e a mensagem de tempo esgotado.
+- **Saída:** Promessa com o valor da original.
+- **Efeitos:** Agenda e limpa um `setTimeout`.
+- **Erros:** Rejeita com `Error(message)` se o prazo passar (ou já passou); repassa a rejeição da original.
+
+### `bridgeTimeoutMessage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `bridgeTimeoutMessage(path: string): string`
+- **Usada por:** `attemptBridge()`
+- **Processos:** P13, P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Mensagem de tempo esgotado de uma chamada à ponte.
+- **Entrada:** `path` da chamada (com ou sem query).
+- **Saída:** Texto em português com a rota sem query.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `callBridge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `async callBridge(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<Response>`
+- **Usada por:** `bridgeJson()`, `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P13, P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Chama a ponte dentro do prazo, esperando-a acordar (`not_ready`); 2xx devolve a resposta, o resto lança.
+- **Entrada:** `bridge`, `path` e opções (`init`, `deadline`).
+- **Saída:** `Response` 2xx da ponte.
+- **Efeitos:** Rede: requisição ao Durable Object da ponte.
+- **Erros:** `BridgeError` com o código da ponte (depois de esgotar as novas tentativas de `not_ready`); erro de tempo esgotado.
+
+### `bridgeJson`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `async bridgeJson(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<T>`
+- **Usada por:** `connectors/whatsapp/src/pair.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`, `fetchPairStatus()`, `prepareRead()`
+- **Processos:** P13, P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Chama a ponte e lê o JSON da resposta.
+- **Entrada:** `bridge`, `path` e opções (`init`, `deadline`).
+- **Saída:** Corpo JSON tipado como `T`.
+- **Efeitos:** Rede: requisição ao Durable Object da ponte.
+- **Erros:** Os de `callBridge`; rejeita se o corpo não for JSON.
+
+### `bridgePath`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `bridgePath(path: string, params: Readonly<Record<string, string | number | undefined>>): string`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`, `prepareRead()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta `caminho?query` só com os parâmetros definidos.
+- **Entrada:** `path` e os parâmetros (indefinidos e vazios são ignorados).
+- **Saída:** Caminho com a query, ou só o caminho.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `jsonPost`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `jsonPost(body: unknown): RequestInit`
+- **Usada por:** `connectors/whatsapp/src/pair.ts (módulo)`, `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Corpo JSON de um POST para a ponte.
+- **Entrada:** `body`: valor a serializar.
+- **Saída:** `RequestInit` com método POST, `content-type` JSON e corpo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `shouldRetryBridge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `shouldRetryBridge(error: BridgeError, deadline: number, now: number): boolean`
+- **Usada por:** `callBridge()`
+- **Processos:** P13, P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se vale tentar de novo: a ponte ainda está iniciando e sobra prazo para mais uma tentativa.
+- **Entrada:** `error`: erro da ponte; `deadline`: prazo (ms Unix); `now`: instante atual (ms).
+- **Saída:** `true` só para `not_ready` com prazo para mais uma espera de `BRIDGE_RETRY_MS`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `attemptBridge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/bridge-client.ts`
+- **Assinatura:** `async attemptBridge(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<Response>`
+- **Usada por:** `callBridge()`
+- **Processos:** P13, P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Faz uma tentativa: resposta 2xx, ou `BridgeError` com o código da ponte.
+- **Entrada:** `bridge`: fetch do Durable Object; `path`: rota com query; `options`: `init` opcional e `deadline` (ms Unix).
+- **Saída:** A resposta 2xx.
+- **Efeitos:** Rede (chamada ao Durable Object da ponte).
+- **Erros:** `BridgeError` em status ≠ 2xx; erro de tempo esgotado depois do `deadline`.
+
+## `connectors/whatsapp/src/config.ts`
+
+### `requireEnv`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `requireEnv(env: EnvVars, key: string, how: string): string`
+- **Usada por:** `containerEnvVars()`, `readWhatsAppSettings()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma variável obrigatória ou lança dizendo como defini-la.
+- **Entrada:** `env`, a chave e a instrução de como defini-la.
+- **Saída:** Valor da variável.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se a variável estiver ausente ou vazia.
+
+### `readIntInRange`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `readIntInRange(env: EnvVars, key: string, range: { readonly min: number; readonly max: number; readonly fallback: number }): number`
+- **Usada por:** `readSendSettings()`, `readTimingSettings()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê um inteiro dentro de um intervalo; ausente vale o padrão, fora do intervalo lança.
+- **Entrada:** `env`, a chave e o intervalo (`min`, `max`, `fallback`).
+- **Saída:** O inteiro lido ou o padrão.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se não for inteiro ou estiver fora do intervalo.
+
+### `readSleepAfter`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `readSleepAfter(env: EnvVars): string`
+- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`, `readTimingSettings()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Valida `SLEEP_AFTER` (`30s` a `60m`, ou `1h`); ausente vale `5m`.
+- **Entrada:** `env`.
+- **Saída:** A duração no formato do `Container` (ex. `5m`).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se o formato for inválido ou a duração estiver fora de 30 s a 1 h.
+
+### `normalizePhone`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `normalizePhone(raw: string): string | null`
+- **Usada por:** `allowedRecipient()`, `connectors/whatsapp/src/pair.ts (módulo)`, `readSendAllowlist()`
+- **Processos:** P13, P15, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Normaliza um número de telefone ou JID de contato para só dígitos; nulo se não parecer um número.
+- **Entrada:** `raw`: número ou JID (`...@s.whatsapp.net`).
+- **Saída:** De 8 a 15 dígitos, ou `null`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readSendAllowlist`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `readSendAllowlist(env: EnvVars): string[]`
+- **Usada por:** `readSendSettings()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê `SEND_ALLOWLIST` (números separados por vírgula); item inválido lança.
+- **Entrada:** `env`.
+- **Saída:** Lista de números normalizados (vazia se ausente).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` com o item inválido.
+
+### `readAllowedEmails`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `readAllowedEmails(env: EnvVars): string[]`
+- **Usada por:** `readWhatsAppSettings()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a lista de donos (`ALLOWED_EMAILS`); vazia lança, porque ninguém conseguiria entrar.
+- **Entrada:** `env`.
+- **Saída:** Lista de e-mails em minúsculas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se a lista estiver vazia.
+
+### `readTimingSettings`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `readTimingSettings(env: EnvVars): Pick<WhatsAppSettings, 'sleepAfter' | 'toolTimeoutMs' | 'syncWaitMs'>`
+- **Usada por:** `readWhatsAppSettings()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê os prazos: sono do container, teto por ferramenta e espera do sync.
+- **Entrada:** `env`.
+- **Saída:** `sleepAfter`, `toolTimeoutMs` e `syncWaitMs`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Os de `readSleepAfter` e `readIntInRange`.
+
+### `readSendSettings`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `readSendSettings(env: EnvVars): Pick<WhatsAppSettings, 'enableSend' | 'sendAllowlist' | 'sendMaxPerHour'>`
+- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`, `readWhatsAppSettings()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a configuração de envio (fase 2): ligado ou não, allowlist e limite por hora.
+- **Entrada:** `env`.
+- **Saída:** `enableSend`, `sendAllowlist` e `sendMaxPerHour`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Os de `readSendAllowlist` e `readIntInRange`.
+
+### `readWhatsAppSettings`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `readWhatsAppSettings(env: EnvVars): WhatsAppSettings`
+- **Usada por:** `createWhatsAppApps()`, `isSyncCronEnabled()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê e valida a configuração do conector a partir do ambiente do Worker.
+- **Entrada:** `env`: variáveis de texto do Worker.
+- **Saída:** `WhatsAppSettings` completo.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` explicando a variável ausente ou inválida.
+
+### `containerEnvVars`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `containerEnvVars(env: EnvVars): Record<string, string>`
+- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`
+- **Processos:** —
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o ambiente do container: só as chaves da ponte, mais o endereço do snapshot de saída.
+- **Entrada:** `env`: variáveis de texto do Worker.
+- **Saída:** Variáveis de `BRIDGE_ENV_KEYS` presentes, mais `SNAPSHOT_PUSH_URL`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se faltar `BRIDGE_TOKEN` (ou tiver menos de 32 caracteres) ou `SNAPSHOT_KEY`.
+
+## `connectors/whatsapp/src/container.ts`
+
+### `workersFixedLength`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/container.ts`
+- **Assinatura:** `workersFixedLength(body: ReadableStream<Uint8Array>, length: number): ReadableStream<Uint8Array>`
+- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Fluxo de tamanho fixo do Workers para gravar no R2 sem carregar o arquivo na memória.
+- **Entrada:** `body`: fluxo de bytes; `length`: tamanho total.
+- **Saída:** Fluxo legível do `FixedLengthStream`.
+- **Efeitos:** Encadeia `body` no `FixedLengthStream` (em segundo plano).
+- **Erros:** Nenhum (falha do encadeamento não é observada aqui).
+
+## `connectors/whatsapp/src/format.ts`
+
+### `isHiddenChar`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/format.ts`
+- **Assinatura:** `isHiddenChar(char: string): boolean`
+- **Usada por:** `sanitizeText()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se um caractere é invisível ou de controle (pode esconder texto do usuário).
+- **Entrada:** `char`: um caractere.
+- **Saída:** `true` se cai em `HIDDEN_CHAR_RANGES`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `sanitizeText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/format.ts`
+- **Assinatura:** `sanitizeText(text: string | null | undefined, max = MAX_TEXT_CHARS): string`
+- **Usada por:** `compactChat()`, `compactContact()`, `compactMessage()`, `connectors/whatsapp/src/tools.ts (módulo)`, `mediaResult()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Limpa um texto de terceiros: tira caracteres invisíveis/de controle e corta no teto.
+- **Entrada:** `text` (pode ser nulo) e `max` (padrão `MAX_TEXT_CHARS`).
+- **Saída:** Texto limpo, com aviso `[truncated N chars]` se cortado.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `untrusted`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/format.ts`
+- **Assinatura:** `untrusted(data: T): { readonly notice: string; readonly data: T }`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Embrulha dados com conteúdo de terceiros sob o aviso de não confiável.
+- **Entrada:** `data`: qualquer valor.
+- **Saída:** `{ notice: UNTRUSTED_NOTICE, data }`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `compactMessage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/format.ts`
+- **Assinatura:** `compactMessage(message: BridgeMessage): Record<string, unknown>`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Mensagem compacta: só campos úteis, textos limpos, sem campos vazios.
+- **Entrada:** `message`: mensagem da ponte.
+- **Saída:** Objeto com `id`, `chat`, `from`, `at` e, se houver, nome, tipo, texto e mídia.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `compactChat`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/format.ts`
+- **Assinatura:** `compactChat(chat: BridgeChat): Record<string, unknown>`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Conversa compacta, com a prévia da última mensagem limpa e curta.
+- **Entrada:** `chat`: conversa da ponte.
+- **Saída:** Objeto com `jid`, `name`, `last_at` e, se houver, `group` e `last`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `partialSyncWarning`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/format.ts`
+- **Assinatura:** `partialSyncWarning(status: BridgeStatus): string | null`
+- **Usada por:** `prepareRead()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Aviso de resultado parcial quando o sync de pendências não terminou a tempo.
+- **Entrada:** `status`: status da ponte.
+- **Saída:** Aviso (sincronizando ou desconectado) ou `null` se não é parcial.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `compactStatus`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/format.ts`
+- **Assinatura:** `compactStatus(status: BridgeStatus, pairUrl: string): Record<string, unknown>`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Status compacto para `whatsapp_status`.
+- **Entrada:** `status` da ponte e `pairUrl` da página de pareamento.
+- **Saída:** Objeto com conexão, pareamento (e `pair_at` se preciso), sync, contagens e envio.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/whatsapp/src/lifecycle.ts`
+
+### `withBridgeToken`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `withBridgeToken(token: string, init: RequestInit = {}): RequestInit`
+- **Usada por:** `fetchBridge()`
+- **Processos:** P14, P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Junta o `Authorization` da ponte às opções de uma requisição.
+- **Entrada:** `token` da ponte e `init` (opcional).
+- **Saída:** `RequestInit` com `authorization: Bearer <token>`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `fetchBridge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `fetchBridge(host: BridgeHost, path: string, init?: RequestInit): Promise<Response>`
+- **Usada por:** `ensureRestored()`, `readBridgePhase()`, `routeBridgeRequest()`, `snapshotBridge()`
+- **Processos:** P14, P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Faz uma requisição à ponte dentro do container, já autenticada.
+- **Entrada:** `host`, `path` e `init` opcional.
+- **Saída:** Resposta da ponte.
+- **Efeitos:** Rede: `containerFetch` (pode acordar o container).
+- **Erros:** Repassa a rejeição do `containerFetch`.
+
+### `readBridgePhase`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `async readBridgePhase(host: BridgeHost): Promise<string>`
+- **Usada por:** `ensureRestored()`
+- **Processos:** P14, P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a fase da ponte (`GET /health`).
+- **Entrada:** `host`: porta do Durable Object.
+- **Saída:** Fase (ex. `awaiting_restore`) ou `unknown`.
+- **Efeitos:** Rede: `GET /health` no container.
+- **Erros:** Rejeita se a chamada falhar ou o corpo não for JSON.
+
+### `restoreRequestInit`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `async restoreRequestInit(host: BridgeHost): Promise<RequestInit>`
+- **Usada por:** `ensureRestored()`
+- **Processos:** P14, P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Opções do `POST /restore`: o snapshot do bucket em fluxo, ou `X-Snapshot: none` se não houver.
+- **Entrada:** `host`: porta do Durable Object.
+- **Saída:** `RequestInit` do POST, com o snapshot como corpo ou o header `x-snapshot: none`.
+- **Efeitos:** Lê o snapshot no R2.
+- **Erros:** Repassa a rejeição do R2.
+
+### `ensureRestored`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `async ensureRestored(host: BridgeHost): Promise<void>`
+- **Usada por:** `routeBridgeRequest()`
+- **Processos:** P14, P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Restaura a ponte se ela acabou de acordar; snapshot recusado lança (nunca recomeça do zero sozinho).
+- **Entrada:** `host`: porta do Durable Object.
+- **Saída:** Nada.
+- **Efeitos:** Rede: `/health` e `/restore` no container; lê o snapshot no R2.
+- **Erros:** Lança `BridgeError` se o restore falhar (exceto 409, outra requisição já restaurou).
+
+### `snapshotBridge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `async snapshotBridge(host: BridgeHost, force = false): Promise<SnapshotOutcome>`
+- **Usada por:** `connectors/whatsapp/src/lifecycle.ts (módulo)`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Pede o snapshot à ponte e grava no bucket.
+- **Entrada:** `host`: porta do Durable Object; `force`: pede `?force=1` (depois de uma gravação que falhou).
+- **Saída:** `SnapshotOutcome` (`saved`, `unchanged` ou `stale`).
+- **Efeitos:** Rede: `GET /snapshot` no container; grava no R2.
+- **Erros:** Os de `storeSnapshotResponse`.
+
+### `planSend`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `planSend(history: readonly number[], now: number, maxPerHour: number): { readonly allowed: boolean; readonly history: number[]; readonly retryAfterSeconds: number }`
+- **Usada por:** `guardSend()`
+- **Processos:** P14, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Decide um envio: permitido (e o histórico novo) ou recusado com quantos segundos esperar. Pura.
+- **Entrada:** `history` (ms dos envios), `now` (ms) e `maxPerHour`.
+- **Saída:** `allowed`, o histórico da última hora e `retryAfterSeconds`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `guardSend`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `async guardSend(host: BridgeHost): Promise<Response | null>`
+- **Usada por:** `routeBridgeRequest()`
+- **Processos:** P14, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Aplica o limite de envios; devolve a resposta 429 se estourou, ou nulo (e registra o envio) se pode.
+- **Entrada:** `host`: porta do Durable Object.
+- **Saída:** Resposta 429 `rate_limited` ou `null`.
+- **Efeitos:** Lê e grava `SEND_HISTORY_KEY` no armazenamento do Durable Object.
+- **Erros:** Repassa a rejeição do armazenamento.
+
+### `forwardInit`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `forwardInit(request: Request): RequestInit`
+- **Usada por:** `routeBridgeRequest()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Opções para repassar uma requisição recebida à ponte (método, tipo e corpo).
+- **Entrada:** `request`: requisição recebida.
+- **Saída:** `RequestInit` com método, `content-type` e corpo (fora de GET/HEAD).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `createBridgeLifecycle`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `createBridgeLifecycle(host: BridgeHost): BridgeLifecycle`
+- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o ciclo de vida da ponte para um Durable Object.
+- **Entrada:** `host`: porta do Durable Object.
+- **Saída:** `BridgeLifecycle` (`handle`, `snapshotNow`, `snapshotQuietly`).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `logSnapshotFailure`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `async logSnapshotFailure(run: Promise<SnapshotOutcome>): Promise<void>`
+- **Usada por:** `connectors/whatsapp/src/lifecycle.ts (módulo)`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Espera um snapshot e só registra a falha no log (sem dados de mensagens).
+- **Entrada:** `run`: promessa do snapshot.
+- **Saída:** Nada.
+- **Efeitos:** `console.warn` se o snapshot falhar.
+- **Erros:** Nenhum (a falha vira aviso no log).
+
+### `resetBridge`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `async resetBridge(host: BridgeHost): Promise<Response>`
+- **Usada por:** `routeBridgeRequest()`
+- **Processos:** P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Recomeça do zero: arquiva o snapshot atual e para o container (o próximo uso sobe vazio).
+- **Entrada:** `host`: porta do Durable Object.
+- **Saída:** JSON `{ reset: true, archived }`.
+- **Efeitos:** Copia e apaga o snapshot no R2; para o container.
+- **Erros:** Repassa a rejeição do R2 ou do `stop`.
+
+### `routeBridgeRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/lifecycle.ts`
+- **Assinatura:** `async routeBridgeRequest(router: BridgeRouter, request: Request): Promise<Response>`
+- **Usada por:** `createBridgeLifecycle()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende uma requisição do Worker: rotas internas (`/__snapshot`, `/__reset`) ou repasse à ponte.
+- **Entrada:** `router` (host e agendador de snapshots) e a requisição.
+- **Saída:** Resposta da ponte, da rota interna ou 429 do limite de envio.
+- **Efeitos:** Rede ao container; R2; armazenamento do Durable Object; pode agendar snapshot.
+- **Erros:** Os de `ensureRestored`, `fetchBridge` e do snapshot/reset.
+
+## `connectors/whatsapp/src/pair-page.ts`
+
+### `describePairStatus`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
+- **Assinatura:** `describePairStatus(status: BridgeStatus | null): string`
+- **Usada por:** `renderPairPage()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Frase de status para o dono.
+- **Entrada:** `status` da ponte ou `null`.
+- **Saída:** Frase em português (sem status, precisa parear, conectando ou conectado).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pairForm`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
+- **Assinatura:** `pairForm(action: string, csrf: string, body: string): string`
+- **Usada por:** `maintenanceSection()`, `pairingSection()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Formulário POST com o token anti-CSRF e campos extras.
+- **Entrada:** `action`, `csrf` e o HTML dos campos.
+- **Saída:** HTML do `<form>`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pairingSection`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
+- **Assinatura:** `pairingSection(view: PairPageView): string`
+- **Usada por:** `renderPairPage()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Bloco de pareamento: pedir código pelo número ou mostrar o QR.
+- **Entrada:** `view`: dados da página.
+- **Saída:** HTML com o código ou QR (se houver) e os formulários.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `maintenanceSection`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
+- **Assinatura:** `maintenanceSection(view: PairPageView): string`
+- **Usada por:** `renderPairPage()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Bloco de manutenção: deslogar, recomeçar do zero (apaga o backup) e sair.
+- **Entrada:** `view`: dados da página.
+- **Saída:** HTML dos três formulários.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `alertHtml`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
+- **Assinatura:** `alertHtml(view: PairPageView): string`
+- **Usada por:** `renderPairPage()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Aviso do resultado da última ação: erro, mensagem ou nada.
+- **Entrada:** `view`: dados da página.
+- **Saída:** HTML do aviso, ou texto vazio.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `renderPairPage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair-page.ts`
+- **Assinatura:** `renderPairPage(view: PairPageView): string`
+- **Usada por:** `pairPage()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Renderiza a página `/pair` completa.
+- **Entrada:** `view`: e-mail, CSRF, status e resultado da ação.
+- **Saída:** HTML da página (com refresh de 20 s se mostra código ou QR).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/whatsapp/src/pair.ts`
+
+### `parseCookies`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `parseCookies(header: string | null): Record<string, string>`
+- **Usada por:** `isValidPairLogin()`, `readPairSession()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê os cookies de um header `Cookie`.
+- **Entrada:** `header` (pode ser nulo).
+- **Saída:** Mapa nome → valor.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `redirectWithCookies`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `redirectWithCookies(location: string, cookies: readonly string[]): Response`
+- **Usada por:** `handlePairPost()`, `openPairSession()`, `routePairPost()`, `startPairLogin()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Redirecionamento com cookies.
+- **Entrada:** `location` e a lista de `Set-Cookie`.
+- **Saída:** Resposta 302 `no-store` com os cookies.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readPairSession`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `readPairSession(app: PairApp, request: Request): string | null`
+- **Usada por:** `routePairRequest()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** E-mail da sessão do `/pair` no cookie; nulo se ausente, vencida ou de quem saiu da lista.
+- **Entrada:** `app` e a requisição.
+- **Saída:** E-mail da sessão ou `null`.
+- **Efeitos:** Nenhum (pura; lê o cookie da requisição).
+- **Erros:** Nenhum.
+
+### `issuePairCsrf`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `issuePairCsrf(app: PairApp, email: string): string`
+- **Usada por:** `pairPage()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Token anti-CSRF amarrado ao e-mail da sessão.
+- **Entrada:** `app` e o e-mail.
+- **Saída:** Token selado `pair_csrf` com validade da sessão.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `isTrustedPost`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `isTrustedPost(app: PairApp, request: Request, input: { csrf: string; email: string }): boolean`
+- **Usada por:** `handlePairPost()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere o token anti-CSRF do formulário e a origem da requisição.
+- **Entrada:** `app`, a requisição e `{ csrf, email }`.
+- **Saída:** `true` se o token vale para o e-mail e o `Origin` é o do emissor.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `startPairLogin`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `startPairLogin(app: PairApp): Response`
+- **Usada por:** `routePairRequest()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Começa o login do `/pair`: manda ao GitHub com `state` selado e amarra o navegador por um nonce em cookie.
+- **Entrada:** `app`: dependências do `/pair`.
+- **Saída:** 302 ao GitHub com o cookie do nonce.
+- **Efeitos:** Gera um nonce aleatório (`crypto.randomUUID`).
+- **Erros:** Nenhum.
+
+### `isValidPairLogin`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `isValidPairLogin(app: PairApp, request: Request): boolean`
+- **Usada por:** `handlePairCallback()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere o `state` do retorno do GitHub e o nonce do cookie deste navegador.
+- **Entrada:** `app` e a requisição de retorno.
+- **Saída:** `true` se o `state` é válido e o nonce bate com o cookie.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `openPairSession`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `openPairSession(app: PairApp, email: string): Response`
+- **Usada por:** `handlePairCallback()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Abre a sessão do `/pair` para o e-mail aceito e volta à página.
+- **Entrada:** `app` e o e-mail aceito.
+- **Saída:** 302 para `/pair` com o cookie da sessão e o do nonce apagado.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `handlePairCallback`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `async handlePairCallback(app: PairApp, request: Request): Promise<Response>`
+- **Usada por:** `routePairRequest()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Retorno do GitHub no `/pair`: confere `state` e nonce, conclui o login e abre a sessão.
+- **Entrada:** `app` e a requisição de retorno.
+- **Saída:** 302 com a sessão; HTML 400 (login expirado ou de outro navegador) ou 403 (login recusado).
+- **Efeitos:** Rede: `fetch` ao GitHub (token e e-mails).
+- **Erros:** Nenhum (a falha do login vira página 403).
+
+### `pairDeadline`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `pairDeadline(app: PairApp): number`
+- **Usada por:** `connectors/whatsapp/src/pair.ts (módulo)`, `fetchPairStatus()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Prazo (ms Unix) de uma chamada do `/pair` à ponte.
+- **Entrada:** `app`.
+- **Saída:** `Date.now()` mais `timeoutMs`.
+- **Efeitos:** Lê o relógio.
+- **Erros:** Nenhum.
+
+### `fetchPairStatus`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `async fetchPairStatus(app: PairApp): Promise<BridgeStatus | null>`
+- **Usada por:** `pairPage()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê o status da ponte; nulo se ela não responder a tempo.
+- **Entrada:** `app`.
+- **Saída:** `BridgeStatus` ou `null`.
+- **Efeitos:** Rede: `GET /status` na ponte.
+- **Erros:** Nenhum (qualquer falha devolve `null`).
+
+### `pairPage`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `async pairPage(app: PairApp, email: string, extra: Partial<PairPageView> = {}): Promise<Response>`
+- **Usada por:** `handlePairPost()`, `routePairRequest()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Mostra a página com o status atual e o resultado de uma ação (código, QR, mensagem ou erro).
+- **Entrada:** `app`, o e-mail e o resultado da ação (opcional).
+- **Saída:** Resposta HTML da página `/pair`.
+- **Efeitos:** Rede: `GET /status` na ponte.
+- **Erros:** Nenhum (status indisponível vira `null`).
+
+### `handlePairPost`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `async handlePairPost(app: PairApp, request: Request, email: string): Promise<Response>`
+- **Usada por:** `routePairPost()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende um POST do `/pair` já autenticado: sair, ou executar a ação e mostrar a página.
+- **Entrada:** `app`, a requisição e o e-mail da sessão.
+- **Saída:** Página com o resultado; 302 ao sair; HTML 403 (formulário inválido) ou 404.
+- **Efeitos:** Lê o corpo; rede à ponte pela ação; apaga o cookie ao sair.
+- **Erros:** Nenhum (falha da ação vira erro na página).
+
+### `routePairPost`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `routePairPost(app: PairApp, request: Request, email: string | null): Promise<Response>`
+- **Usada por:** `routePairRequest()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Roteia um POST do `/pair`: sem sessão volta ao login; com sessão, executa a ação.
+- **Entrada:** `app`, a requisição e o e-mail da sessão (ou `null`).
+- **Saída:** 302 para `/pair` ou a resposta de `handlePairPost`.
+- **Efeitos:** Os de `handlePairPost`.
+- **Erros:** Nenhum.
+
+### `isPairPath`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `isPairPath(path: string): boolean`
+- **Usada por:** `routePairRequest()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se o caminho pertence ao `/pair`.
+- **Entrada:** `path`: caminho da URL.
+- **Saída:** `true` para `/pair`, `/pair/*` e o retorno do GitHub do `/pair`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `routePairRequest`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `async routePairRequest(app: PairApp, request: Request): Promise<Response | null>`
+- **Usada por:** `handleWhatsAppFetch()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Roteia as requisições do `/pair`; nulo se o caminho não é do `/pair`.
+- **Entrada:** `app` e a requisição.
+- **Saída:** Resposta da rota, HTML 404 ou `null` fora do `/pair`.
+- **Efeitos:** Os das rotas (rede ao GitHub e à ponte, cookies).
+- **Erros:** Nenhum.
+
+### `pairCookie`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `pairCookie(name: string, value: string, maxAge: number): string`
+- **Usada por:** `handlePairPost()`, `openPairSession()`, `startPairLogin()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta um `Set-Cookie` seguro (HttpOnly, Secure, SameSite=Lax); `maxAge` 0 apaga.
+- **Entrada:** `name`, `value` e `maxAge` (segundos).
+- **Saída:** Valor do header `Set-Cookie`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pairActionError`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/pair.ts`
+- **Assinatura:** `pairActionError(error: unknown): Partial<PairPageView>`
+- **Usada por:** `handlePairPost()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Mensagem de erro de uma ação.
+- **Entrada:** `error`: qualquer valor lançado.
+- **Saída:** `{ error: mensagem }`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/whatsapp/src/snapshots.ts`
+
+### `storedGeneration`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
+- **Assinatura:** `storedGeneration(meta: Pick<SnapshotObject, 'customMetadata'> | null): number`
+- **Usada por:** `storeSnapshot()`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê a geração gravada nos metadados de um objeto; 0 se ausente ou inválida.
+- **Entrada:** `meta`: objeto do bucket (ou `null`).
+- **Saída:** Geração (inteiro positivo) ou 0.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `readUploadHeaders`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
+- **Assinatura:** `readUploadHeaders(headers: Headers): { readonly length: number; readonly generation: number } | null`
+- **Usada por:** `acceptSnapshotPush()`, `storeSnapshotResponse()`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê tamanho e geração dos headers de uma resposta de snapshot; nulo se faltarem ou forem inválidos.
+- **Entrada:** `headers`: `content-length` e `x-snapshot-generation`.
+- **Saída:** `{ length, generation }` ou `null`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `storeSnapshot`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
+- **Assinatura:** `async storeSnapshot(bucket: SnapshotBucket, upload: SnapshotUpload, fixedLength: FixedLength): Promise<SnapshotOutcome>`
+- **Usada por:** `acceptSnapshotPush()`, `storeSnapshotResponse()`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava o snapshot se a geração for mais nova que a do bucket; senão descarta o fluxo e diz `stale`.
+- **Entrada:** `bucket`, `upload` (corpo, tamanho, geração) e `fixedLength`.
+- **Saída:** `saved` ou `stale`.
+- **Efeitos:** Lê os metadados e grava no R2; cancela o fluxo se velho.
+- **Erros:** Repassa a rejeição do R2.
+
+### `storeSnapshotResponse`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
+- **Assinatura:** `async storeSnapshotResponse(bucket: SnapshotBucket, res: Response, fixedLength: FixedLength): Promise<SnapshotOutcome>`
+- **Usada por:** `snapshotBridge()`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Grava a resposta de `GET /snapshot` da ponte: 204 é `unchanged`; headers inválidos lançam.
+- **Entrada:** `bucket`, a resposta da ponte e `fixedLength`.
+- **Saída:** `saved`, `stale` ou `unchanged` (204 sem mudança, ou 503 com a ponte ainda iniciando).
+- **Efeitos:** Grava no R2; cancela o corpo se inválido.
+- **Erros:** Rejeita com `Error` se a resposta não for 2xx ou os headers forem inválidos.
+
+### `archiveSnapshot`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
+- **Assinatura:** `async archiveSnapshot(bucket: SnapshotBucket, now: Date, fixedLength: FixedLength): Promise<boolean>`
+- **Usada por:** `resetBridge()`
+- **Processos:** P14, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Tira o snapshot atual do caminho (guarda uma cópia com data) para recomeçar do zero.
+- **Entrada:** `bucket`, `now` (data do arquivo) e `fixedLength`.
+- **Saída:** `true` se havia snapshot para arquivar.
+- **Efeitos:** Lê, copia para `whatsapp/archive/` e apaga no R2.
+- **Erros:** Repassa a rejeição do R2.
+
+### `sameSecret`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
+- **Assinatura:** `sameSecret(given: string, expected: string): boolean`
+- **Usada por:** `acceptSnapshotPush()`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Compara dois textos em tempo constante (para tokens).
+- **Entrada:** `given` e `expected`.
+- **Saída:** `true` se iguais e `expected` não vazio.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `acceptSnapshotPush`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/snapshots.ts`
+- **Assinatura:** `async acceptSnapshotPush(bucket: SnapshotBucket, request: Request, options: { readonly token: string; readonly fixedLength: FixedLength }): Promise<Response>`
+- **Usada por:** `connectors/whatsapp/src/container.ts (módulo)`
+- **Processos:** P16
+
+<!-- gerado:fim -->
+
+- **Faz:** Recebe o snapshot que a ponte envia sozinha no `SIGTERM` (melhor esforço): confere o token e grava.
+- **Entrada:** `bucket`, a requisição PUT e opções (`token`, `fixedLength`).
+- **Saída:** JSON `{ outcome }`; 403 sem token válido ou não PUT; 400 sem headers ou corpo.
+- **Efeitos:** Grava no R2.
+- **Erros:** Repassa a rejeição do R2.
+
+## `connectors/whatsapp/src/tools.ts`
+
+### `toolDeadline`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `toolDeadline(ctx: WhatsAppToolContext): number`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`, `runRead()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Prazo final (ms Unix) de uma chamada que começa agora.
+- **Entrada:** `ctx`: contexto das ferramentas.
+- **Saída:** `now()` mais `toolTimeoutMs`.
+- **Efeitos:** Lê o relógio do contexto.
+- **Erros:** Nenhum.
+
+### `syncWaitBudget`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `syncWaitBudget(ctx: WhatsAppToolContext, deadline: number): number`
+- **Usada por:** `prepareRead()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Quanto pedir à ponte para esperar o sync, sem invadir a folga da consulta.
+- **Entrada:** `ctx` e o `deadline` (ms Unix).
+- **Saída:** Milissegundos (0 ou mais, até `syncWaitMs`).
+- **Efeitos:** Lê o relógio do contexto.
+- **Erros:** Nenhum.
+
+### `prepareRead`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `async prepareRead(ctx: WhatsAppToolContext, deadline: number): Promise<string | null>`
+- **Usada por:** `runRead()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Espera o sync dentro do orçamento; lança se precisa parear e devolve o aviso de resultado parcial.
+- **Entrada:** `ctx` e o `deadline` (ms Unix).
+- **Saída:** Aviso de resultado parcial ou `null`.
+- **Efeitos:** Rede: `POST /sync/wait` na ponte.
+- **Erros:** Rejeita se o WhatsApp não está pareado; os de `bridgeJson`.
+
+### `runRead`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `async runRead(ctx: WhatsAppToolContext, query: (deadline: number) => Promise<T>): Promise<T | { readonly warning: string; readonly result: T }>`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Roda uma leitura com prazo total: espera o sync, consulta a ponte e junta o aviso (se houver).
+- **Entrada:** `ctx` e a consulta (recebe o prazo).
+- **Saída:** Resultado da consulta, ou `{ warning, result }`.
+- **Efeitos:** Rede: chamadas à ponte.
+- **Erros:** Rejeita se o prazo total esgotar; repassa os de `prepareRead` e da consulta.
+
+### `compactContact`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `compactContact(contact: Readonly<Record<string, string | null>>): Record<string, unknown>`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Contato compacto, com nomes limpos.
+- **Entrada:** `contact`: contato da ponte.
+- **Saída:** Objeto com `jid`, `name` e, se houver, `phone`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `mediaResult`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `mediaResult(res: Response, bytes: Uint8Array, messageId: string): RawToolResult`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Resultado de `get_media`: uma linha de descrição e o arquivo como bloco MCP.
+- **Entrada:** Resposta da ponte (headers), os bytes e o id da mensagem.
+- **Saída:** `RawToolResult` com o texto e o bloco binário.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `allowedRecipient`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `allowedRecipient(settings: WhatsAppSettings, recipient: string): string`
+- **Usada por:** `connectors/whatsapp/src/tools.ts (módulo)`
+- **Processos:** P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Confere se o destinatário está na `SEND_ALLOWLIST`; devolve o número normalizado ou lança.
+- **Entrada:** `settings` e o destinatário.
+- **Saída:** Número normalizado.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se o número for inválido ou estiver fora da allowlist.
+
+### `whatsappTools`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `whatsappTools(settings: WhatsAppSettings): ToolSpec<WhatsAppToolContext>[]`
+- **Usada por:** `createWhatsAppMcpServer()`
+- **Processos:** P13, P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Ferramentas ativas: as de leitura e, só com `ENABLE_SEND`, a de envio.
+- **Entrada:** `settings`.
+- **Saída:** Lista de `ToolSpec`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `createWhatsAppMcpServer`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `createWhatsAppMcpServer(ctx: WhatsAppToolContext): McpServer`
+- **Usada por:** `whatsappRemoteConnector()`
+- **Processos:** P13, P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Cria o servidor MCP do WhatsApp com as ferramentas ativas.
+- **Entrada:** `ctx`: contexto das ferramentas.
+- **Saída:** `McpServer` com instruções e ferramentas registradas.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `decodeHeaderText`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/tools.ts`
+- **Assinatura:** `decodeHeaderText(value: string | null): string`
+- **Usada por:** `mediaResult()`
+- **Processos:** P14
+
+<!-- gerado:fim -->
+
+- **Faz:** Decodifica um header em UTF-8 percent-encoded (como a ponte manda o nome do arquivo); inválido fica como veio.
+- **Entrada:** `value`: valor do header ou nulo.
+- **Saída:** Texto decodificado; `""` se nulo/vazio; o valor original se a codificação for inválida.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum (erro de `decodeURIComponent` é capturado).
+
+## `connectors/whatsapp/src/worker-env.ts`
+
+### `bridgeStub`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker-env.ts`
+- **Assinatura:** `bridgeStub(env: WhatsAppEnv): BridgeStub`
+- **Usada por:** `handleWhatsAppFetch()`, `runScheduledSync()`
+- **Processos:** P13, P14, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Devolve o stub da instância única da ponte.
+- **Entrada:** `env`: bindings do Worker.
+- **Saída:** Stub do Durable Object de nome `BRIDGE_INSTANCE_NAME`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `bridgeFetchFor`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker-env.ts`
+- **Assinatura:** `bridgeFetchFor(stub: BridgeStub): BridgeFetch`
+- **Usada por:** `handleWhatsAppFetch()`, `runScheduledSync()`
+- **Processos:** P13, P14, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Função que fala com a ponte pelo stub, com caminhos relativos (`/status`, `/chats?...`).
+- **Entrada:** `stub` do Durable Object.
+- **Saída:** `BridgeFetch`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+## `connectors/whatsapp/src/worker.ts`
+
+### `unixNow`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker.ts`
+- **Assinatura:** `unixNow(): number`
+- **Usada por:** `createWhatsAppApps()`
+- **Processos:** P13
+
+<!-- gerado:fim -->
+
+- **Faz:** Relógio em segundos Unix.
+- **Entrada:** Nada.
+- **Saída:** Segundos Unix inteiros.
+- **Efeitos:** Lê o relógio.
+- **Erros:** Nenhum.
+
+### `githubSettingsFrom`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker.ts`
+- **Assinatura:** `githubSettingsFrom(settings: WhatsAppSettings): GithubLoginSettings`
+- **Usada por:** `createWhatsAppApps()`, `whatsappRemoteConnector()`
+- **Processos:** P13
+
+<!-- gerado:fim -->
+
+- **Faz:** Configuração do login do dono pelo GitHub a partir da configuração do conector.
+- **Entrada:** `settings` do conector.
+- **Saída:** `GithubLoginSettings` com o `fetch` global.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `whatsappRemoteConnector`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker.ts`
+- **Assinatura:** `whatsappRemoteConnector(settings: WhatsAppSettings, bridge: BridgeFetch, issuer: string): RemoteConnector`
+- **Usada por:** `createWhatsAppApps()`
+- **Processos:** P13
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta o conector remoto do WhatsApp: login pelo GitHub e servidor MCP ligado à ponte.
+- **Entrada:** `settings`, `bridge` e o `issuer`.
+- **Saída:** `RemoteConnector`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `createWhatsAppApps`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker.ts`
+- **Assinatura:** `createWhatsAppApps(vars: EnvVars, bridge: BridgeFetch, origin: string): WhatsAppApps`
+- **Usada por:** `handleWhatsAppFetch()`
+- **Processos:** P13
+
+<!-- gerado:fim -->
+
+- **Faz:** Monta os apps do Worker a partir do ambiente, da ponte e da origem da requisição.
+- **Entrada:** `vars`, `bridge` e a origem da requisição.
+- **Saída:** `WhatsAppApps` (`remote` e `pair`).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se a configuração do ambiente for inválida.
+
+### `handleWhatsAppFetch`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker.ts`
+- **Assinatura:** `async handleWhatsAppFetch(request: Request, env: WhatsAppEnv): Promise<Response>`
+- **Usada por:** `connectors/whatsapp/src/worker.ts (módulo)`
+- **Processos:** P13
+
+<!-- gerado:fim -->
+
+- **Faz:** Atende uma requisição: `/pair` primeiro, depois OAuth e `/mcp`; configuração inválida vira 500 explicado.
+- **Entrada:** A requisição e o ambiente do Worker.
+- **Saída:** Resposta HTTP.
+- **Efeitos:** Rede (ponte, GitHub), cookies e o que o handler remoto fizer.
+- **Erros:** Nenhum (configuração inválida vira resposta 500).
+
+### `isSyncCronEnabled`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker.ts`
+- **Assinatura:** `isSyncCronEnabled(vars: EnvVars, cron: string): boolean`
+- **Usada por:** `runScheduledSync()`
+- **Processos:** P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Diz se o cron que disparou é o sync opcional configurado em `SYNC_CRON`.
+- **Entrada:** `vars` e o cron que disparou.
+- **Saída:** `true` se `SYNC_CRON` está definido e é igual.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Lança `Error` se a configuração do ambiente for inválida.
+
+### `runScheduledSync`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/worker.ts`
+- **Assinatura:** `async runScheduledSync(env: WhatsAppEnv, cron: string): Promise<string>`
+- **Usada por:** `connectors/whatsapp/src/worker.ts (módulo)`
+- **Processos:** P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Sync periódico opcional: acorda a ponte, espera as pendências (até 20 s), guarda o snapshot e deixa dormir.
+- **Entrada:** O ambiente do Worker e o cron que disparou.
+- **Saída:** `disabled` ou o resultado do snapshot (`saved`, `unchanged`, `stale`, `unknown`).
+- **Efeitos:** Rede: `/sync/wait` e `/__snapshot` na ponte (que grava no R2).
+- **Erros:** Rejeita se o prazo de 50 s esgotar ou a configuração for inválida.
+
+## `src/remote/github-login.ts`
+
+### `githubAuthorizeUrl`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/github-login.ts`
+- **Assinatura:** `githubAuthorizeUrl(settings: GithubLoginSettings, state: string, callbackUrl: string): string`
+- **Usada por:** `githubUpstreamLogin()`, `startPairLogin()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Endereço da tela de autorização do GitHub, pedindo só a leitura dos e-mails.
+- **Entrada:** `settings`, `state` e `callbackUrl`.
+- **Saída:** URL de `github.com/login/oauth/authorize` com escopo `user:email`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `parseEmailList`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/github-login.ts`
+- **Assinatura:** `parseEmailList(raw: string | null): string[]`
+- **Usada por:** `readAllowedEmails()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê uma lista de e-mails separada por vírgula, em minúsculas e sem vazios.
+- **Entrada:** `raw` (pode ser nulo).
+- **Saída:** Lista de e-mails (só itens com `@`).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `pickAllowedEmail`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/github-login.ts`
+- **Assinatura:** `pickAllowedEmail(emails: readonly GithubEmail[], allowed: readonly string[]): string | null`
+- **Usada por:** `finishGithubLogin()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Escolhe o primeiro e-mail verificado que está na lista; nulo se nenhum serve.
+- **Entrada:** `emails` do GitHub e a lista permitida.
+- **Saída:** E-mail em minúsculas ou `null`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
+### `exchangeGithubCode`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/github-login.ts`
+- **Assinatura:** `async exchangeGithubCode(settings: GithubLoginSettings, code: string, callbackUrl: string): Promise<string>`
+- **Usada por:** `finishGithubLogin()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Troca o código do GitHub por um token de acesso; rejeita com mensagem ao usuário se falhar.
+- **Entrada:** `settings`, `code` e `callbackUrl`.
+- **Saída:** Token de acesso do GitHub.
+- **Efeitos:** Rede: `POST` a `github.com/login/oauth/access_token`.
+- **Erros:** Rejeita com `Error` se a resposta não for 2xx ou não trouxer `access_token`.
+
+### `fetchGithubEmails`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/github-login.ts`
+- **Assinatura:** `async fetchGithubEmails(settings: GithubLoginSettings, token: string): Promise<GithubEmail[]>`
+- **Usada por:** `finishGithubLogin()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Lê os e-mails da conta do GitHub com o token de acesso.
+- **Entrada:** `settings` e o token.
+- **Saída:** Lista de `GithubEmail` (vazia se o corpo não for lista).
+- **Efeitos:** Rede: `GET api.github.com/user/emails`.
+- **Erros:** Rejeita com `Error` se o GitHub não responder 2xx.
+
+### `finishGithubLogin`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/github-login.ts`
+- **Assinatura:** `async finishGithubLogin(settings: GithubLoginSettings, query: URLSearchParams, callbackUrl: string): Promise<string>`
+- **Usada por:** `githubUpstreamLogin()`, `handlePairCallback()`
+- **Processos:** P13, P15
+
+<!-- gerado:fim -->
+
+- **Faz:** Conclui o login: confere o retorno do GitHub e devolve o e-mail aceito, ou rejeita explicando.
+- **Entrada:** `settings`, a query do retorno e `callbackUrl`.
+- **Saída:** E-mail aceito, em minúsculas.
+- **Efeitos:** Rede: troca do código e leitura dos e-mails no GitHub.
+- **Erros:** Rejeita com `Error` se não houver `code`, a troca falhar ou nenhum e-mail verificado estiver na lista.
+
+### `githubUpstreamLogin`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `src/remote/github-login.ts`
+- **Assinatura:** `githubUpstreamLogin(settings: GithubLoginSettings): UpstreamLogin`
+- **Usada por:** `whatsappRemoteConnector()`
+- **Processos:** P13
+
+<!-- gerado:fim -->
+
+- **Faz:** Login do conector remoto pelo GitHub, no formato que o servidor remoto espera.
+- **Entrada:** `settings` do login.
+- **Saída:** `UpstreamLogin` com `start` e `finish`.
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
+
 ## `connectors/gmail/src/accounts.ts`
 
 ### `aliasAccounts`
@@ -6714,6 +8484,30 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 | `ACCESS_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`           | Validade do access token emitido ao Claude (1 hora).                                                              |
 | `REFRESH_TOKEN_TTL_SECONDS` | `connectors/gmail/src/worker.ts`           | Validade do refresh token emitido ao Claude (30 dias).                                                            |
 | `GMAIL_ROUTES`              | `connectors/gmail/src/worker.ts`           | Rotas próprias do Worker: `MÉTODO caminho` → atendimento.                                                         |
+| `BRIDGE_ERROR_MESSAGES`     | `connectors/whatsapp/src/bridge-client.ts` | Mensagens ao usuário, em português, para os códigos de erro conhecidos da ponte.                                  |
+| `WHATSAPP_DEFAULTS`         | `connectors/whatsapp/src/config.ts`        | Padrões do conector: dormir em 5 min, 25 s por ferramenta, 8 s esperando o sync, 10 envios por hora.              |
+| `BRIDGE_ENV_KEYS`           | `connectors/whatsapp/src/config.ts`        | Variáveis repassadas do Worker para o container da ponte (`bridge/API.md`).                                       |
+| `SNAPSHOT_PUSH_URL`         | `connectors/whatsapp/src/config.ts`        | Endereço interno, interceptado pelo Worker, para onde a ponte envia o snapshot no `SIGTERM`.                      |
+| `UNTRUSTED_NOTICE`          | `connectors/whatsapp/src/format.ts`        | Aviso de dado de terceiros não confiável que acompanha todo resultado com mensagens ou contatos.                  |
+| `HIDDEN_CHAR_RANGES`        | `connectors/whatsapp/src/format.ts`        | Faixas de caracteres invisíveis (controle, largura zero, bidi, BOM) removidas por `sanitizeText`.                 |
+| `SNAPSHOT_INTERVAL_MS`      | `connectors/whatsapp/src/lifecycle.ts`     | Intervalo mínimo entre snapshots disparados por uso (1 minuto).                                                   |
+| `SNAPSHOT_AFTER_PATHS`      | `connectors/whatsapp/src/lifecycle.ts`     | Rotas da ponte depois das quais o banco pode ter mudado e vale tentar um snapshot.                                |
+| `SEND_HISTORY_KEY`          | `connectors/whatsapp/src/lifecycle.ts`     | Chave, no armazenamento do Durable Object, dos instantes dos envios recentes (limite por hora).                   |
+| `PAIR_PAGE_CSS`             | `connectors/whatsapp/src/pair-page.ts`     | Acréscimos de estilo da página `/pair` (código grande, QR, botões secundários e de perigo).                       |
+| `PAIR_SESSION_COOKIE`       | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) da sessão selada do `/pair`.                                                           |
+| `PAIR_NONCE_COOKIE`         | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) do nonce que amarra o login do `/pair` ao navegador.                                   |
+| `PAIR_SESSION_TTL_SECONDS`  | `connectors/whatsapp/src/pair.ts`          | Validade da sessão do `/pair` e do token anti-CSRF (30 minutos).                                                  |
+| `PAIR_LOGIN_TTL_SECONDS`    | `connectors/whatsapp/src/pair.ts`          | Validade do login do `/pair` em andamento (10 minutos).                                                           |
+| `PAIR_CALLBACK_PATH`        | `connectors/whatsapp/src/pair.ts`          | Caminho do retorno do GitHub para o `/pair` (subcaminho do retorno do OAuth App).                                 |
+| `PAIR_ACTIONS`              | `connectors/whatsapp/src/pair.ts`          | Ações do `/pair` por caminho: código, QR, desvincular e recomeçar do zero.                                        |
+| `SNAPSHOT_KEY_NAME`         | `connectors/whatsapp/src/snapshots.ts`     | Chave do snapshot atual no bucket R2 (`whatsapp/snapshot.was1`).                                                  |
+| `WHATSAPP_INSTRUCTIONS`     | `connectors/whatsapp/src/tools.ts`         | Instruções do servidor MCP: o que é o conector e a regra sobre conteúdo não confiável.                            |
+| `READ_TOOLS`                | `connectors/whatsapp/src/tools.ts`         | Ferramentas de leitura (fase 1), sempre ativas.                                                                   |
+| `BRIDGE_INSTANCE_NAME`      | `connectors/whatsapp/src/worker-env.ts`    | Nome fixo da única instância do Durable Object da ponte (instância única = sessão única).                         |
+| `WHATSAPP_WORKER_HANDLERS`  | `connectors/whatsapp/src/worker.ts`        | Handlers do Worker (`fetch` e `scheduled`), exportados pelo `index.ts` com o Durable Object.                      |
+| `GITHUB_USER_AGENT`         | `src/remote/github-login.ts`               | User-Agent das chamadas ao GitHub (a API recusa requisições sem ele).                                             |
+| `UPSTREAM_CALLBACK_PATH`    | `src/remote/handler.ts`                    | Caminho do retorno do login delegado (`/oauth/callback`), cadastrado no provedor.                                 |
+| `BRIDGE_RETRY_MS`           | `connectors/whatsapp/src/bridge-client.ts` | Espera entre tentativas enquanto a ponte acorda (750 ms).                                                         |
 | `GMAIL_SCOPES`              | `connectors/gmail/src/config.ts`           | Escopos do login e do vínculo (`openid email` + Gmail só leitura).                                                |
 | `GOOGLE_REVOKE_URL`         | `connectors/gmail/src/google-oauth.ts`     | Endpoint de revogação de tokens do Google.                                                                        |
 | `LINK_TICKET_TYP`           | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do ticket de vínculo emitido por `link_account`.                                                     |

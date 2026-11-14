@@ -16,7 +16,13 @@ versões seguem [SemVer](https://semver.org/lang/pt-BR/). As seções de versão
 
 ### Adicionado
 
-- **Conector Gmail remoto** (`connectors/gmail`, ADR 0014 e ADR 0015): público e multiusuário. Quem instala
+- Conector **WhatsApp pessoal** (`connectors/whatsapp`, template self-host no Cloudflare Workers + Containers,
+  ADR 0015): `whatsapp_status`, `list_chats`, `get_messages`, `search_messages`, `search_contacts` e `get_media`;
+  envio (`send_message`) atrás de `ENABLE_SEND`, desligado, com allowlist e limite por hora. Container sob demanda
+  (dorme após 5 min), sessão em backup cifrado no R2, página `/pair` com código ou QR e login do dono pelo GitHub.
+- Conector remoto: login delegado a um provedor de identidade (GitHub com `ALLOWED_EMAILS`), além do login por
+  credencial colada (`src/remote/github-login.ts`).
+- **Conector Gmail remoto** (`connectors/gmail`, ADR 0014 e ADR 0016): público e multiusuário. Quem instala
   o plugin `gmail` entra com a própria conta Google (já vinculada no login) e só vê as contas que vinculou; mais
   contas entram por um link de uso único (`link_account`) e saem com `unlink_account`, que revoga o acesso no
   Google. Ferramentas de leitura `list_accounts`, `search_threads`, `get_thread`, `get_message`, `list_labels` e

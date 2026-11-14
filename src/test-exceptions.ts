@@ -38,4 +38,11 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
     reason: 'Ponto de entrada do CLI de build: só lista os conectores e chama buildConnector.',
     manualTest: 'Rodar `npm run build` e conferir uma linha "✔ <conector>" por conector.',
   },
+  {
+    name: 'workersFixedLength',
+    reason:
+      'Usa o FixedLengthStream, que só existe no runtime do Cloudflare Workers; os testes injetam um conversor falso (snapshots.test.ts).',
+    manualTest:
+      'Com o Worker publicado, usar uma ferramenta e conferir no R2 o objeto `whatsapp/snapshot.was1` com o tamanho do snapshot.',
+  },
 ];

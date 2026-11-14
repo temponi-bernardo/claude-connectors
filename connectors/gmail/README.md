@@ -5,7 +5,7 @@ de quem o instala. É público e multiusuário: cada pessoa entra com a própria
 ela mesma vinculou. Roda no Cloudflare Workers **só quando chega uma requisição**: sem Containers, Cron
 Triggers, alarms ou polling, então ficar ocioso não custa nada. Estado no Workers KV. Decisões em
 [ADR 0014](../../docs/adr/0014-gmail-remoto-sob-demanda-no-workers.md) e
-[ADR 0015](../../docs/adr/0015-gmail-multiusuario-publico.md).
+[ADR 0016](../../docs/adr/0016-gmail-multiusuario-publico.md).
 
 ## Para quem vai usar
 

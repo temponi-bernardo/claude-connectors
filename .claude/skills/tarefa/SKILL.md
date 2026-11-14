@@ -32,6 +32,8 @@ Tarefa alvo: `$ARGUMENTS` (vazio = a "Próxima tarefa" do topo de `docs/ROADMAP.
    mexeu no conector Gmail, `npm run gmail:deploy` (ADR 0014); sem token na sessão, passe o comando ao usuário.
    Antes de entregar um Worker, rode `npm run gmail:dev` (ou `worker:dev`) e faça um `curl` em `/`: o runtime
    real recusa o que os testes em Node aceitam (ex.: export nomeado não-função no módulo principal).
+   Se mexeu no WhatsApp (`connectors/whatsapp/`), o `pr:check` já roda `bridge:test` (Go 1.26+) e
+   `whatsapp:build`; o deploy (`npm run whatsapp:deploy`, com Docker) é de quem hospeda (ADR 0015).
 10. **Feche a tarefa:** ✅ no ROADMAP, "Próxima tarefa" atualizada, entrada no CHANGELOG se visível ao
     usuário. Isso pode ir no mesmo PR (preferido) ou em um PR `docs(docs): ...` imediato.
 11. **`/melhorar-skills`**: algo se repetiu ou mudou? Atualize a skill no mesmo PR.

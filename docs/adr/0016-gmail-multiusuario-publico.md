@@ -1,4 +1,4 @@
-# 0015 — Gmail remoto público e multiusuário
+# 0016 — Gmail remoto público e multiusuário
 
 - **Estado:** Aceito
 - **Data:** 2026-11-14
@@ -51,5 +51,8 @@ custo continua: o Worker só roda quando chega uma requisição e pode ficar oci
   verificado, o Google mostra o aviso de app não verificado e limita a **100 usuários**. Para abrir de verdade ao
   público é preciso a verificação do Google (política de privacidade com Uso Limitado, vídeo de demonstração) e a
   avaliação de segurança anual (CASA). Esse processo é do dono do projeto, fora do código.
+- Os tipos mínimos do runtime do Workers ficam num único `src/remote/cloudflare-workers.d.ts`, compartilhado
+  com o WhatsApp (antes `connectors/gmail/src/workers-env.d.ts`, citado no ADR 0014), porque duas declarações
+  do módulo `cloudflare:workers` colidem.
 - O que muda nos docs: PROCESSES (P10–P12), FUNCTIONS, ARCHITECTURE (segredos), README do conector, site
   (privacidade com o Gmail e a declaração de Uso Limitado), CHANGELOG, `.env.example`.

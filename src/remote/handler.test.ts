@@ -9,15 +9,18 @@ import {
   handleMcp,
   handleRegister,
   handleToken,
+  handleUpstreamCallback,
   htmlResponse,
   jsonResponse,
   loginPageFor,
   pageSecurityPolicy,
   readForm,
   readJsonBody,
+  redirectToUpstream,
   redirectWithCode,
   renewSecretQuietly,
   routeRemoteRequest,
+  UPSTREAM_CALLBACK_PATH,
   withCors,
   type RemoteApp,
   type RemoteConnector,
@@ -30,16 +33,19 @@ const CALLBACK = 'https://claude.ai/api/mcp/auth_callback';
 const VERIFIER = 'verificador-de-teste-com-entropia-0123456789';
 
 const connector: RemoteConnector = {
-  loginText: {
-    title: 'Conectar',
-    intro: 'Cole o token.',
-    secretLabel: 'Token',
-    helpUrl: 'https://exemplo.dev/ajuda',
-    helpLabel: 'Ajuda',
-    submit: 'Conectar',
+  login: {
+    kind: 'secret',
+    text: {
+      title: 'Conectar',
+      intro: 'Cole o token.',
+      secretLabel: 'Token',
+      helpUrl: 'https://exemplo.dev/ajuda',
+      helpLabel: 'Ajuda',
+      submit: 'Conectar',
+    },
+    verify: (secret) =>
+      secret === 'bom' ? Promise.resolve() : Promise.reject(new Error('Token recusado.')),
   },
-  verifySecret: (secret) =>
-    secret === 'bom' ? Promise.resolve() : Promise.reject(new Error('Token recusado.')),
   createServer: (secret) => {
     const server = new McpServer({ name: 'teste', version: '1.0.0' });
     server.registerTool('quem', { description: 'Diz o segredo' }, () => ({
@@ -333,5 +339,85 @@ describe('renewSecretQuietly', () => {
     await expect(renewSecretQuietly(connector, 'bom')).resolves.toBeUndefined();
     const failing = { ...connector, renewSecret: () => Promise.reject(new Error('x')) };
     await expect(renewSecretQuietly(failing, 'bom')).resolves.toBeUndefined();
+  });
+});
+
+const upstreamConnector: RemoteConnector = {
+  login: {
+    kind: 'upstream',
+    start: (state, callbackUrl) =>
+      `https://idp.exemplo/auth?state=${encodeURIComponent(state)}&cb=${encodeURIComponent(callbackUrl)}`,
+    finish: (query) =>
+      query.get('code') === 'ok'
+        ? Promise.resolve('dono@exemplo.dev')
+        : Promise.reject(new Error('Conta <b>recusada</b>.')),
+  },
+  createServer: connector.createServer,
+  acceptsSecret: (secret) => secret === 'dono@exemplo.dev',
+};
+
+function upstreamApp(): RemoteApp {
+  return { ...makeApp(), connector: upstreamConnector };
+}
+
+async function upstreamState(handle: (r: Request) => Promise<Response>): Promise<string> {
+  const res = await authorizePage(handle, await register(handle));
+  expect(res.res.status).toBe(302);
+  const target = new URL(res.res.headers.get('location') ?? '');
+  expect(target.searchParams.get('cb')).toBe(`${ISSUER}${UPSTREAM_CALLBACK_PATH}`);
+  return target.searchParams.get('state') ?? '';
+}
+
+describe('createRemoteHandler — login delegado (upstream)', () => {
+  it('o /authorize redireciona ao provedor com o pedido selado e o retorno do servidor', async () => {
+    const handle = createRemoteHandler(upstreamApp());
+    expect(await upstreamState(handle)).not.toBe('');
+  });
+
+  it('o retorno aceito devolve o código ao Claude e o token chega às ferramentas', async () => {
+    const handle = createRemoteHandler(upstreamApp());
+    const state = await upstreamState(handle);
+    const back = await handle(
+      new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}?code=ok&state=${encodeURIComponent(state)}`),
+    );
+    expect(back.status).toBe(302);
+    const location = new URL(back.headers.get('location') ?? '');
+    expect(location.searchParams.get('state')).toBe('st');
+    expect(location.searchParams.get('code')).toBeTruthy();
+  });
+
+  it('o retorno recusado mostra o motivo escapado; state inválido dá 400', async () => {
+    const handle = createRemoteHandler(upstreamApp());
+    const state = await upstreamState(handle);
+    const denied = await handle(
+      new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}?code=nao&state=${encodeURIComponent(state)}`),
+    );
+    expect(denied.status).toBe(403);
+    expect(await denied.text()).toContain('&lt;b&gt;recusada');
+    const bad = await handle(new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}?code=ok&state=x`));
+    expect(bad.status).toBe(400);
+  });
+
+  it('com login delegado, o formulário de segredo não existe; sem ele, o retorno não existe', async () => {
+    expect((await handleAuthorizeSubmit(upstreamApp(), form('/authorize', {}))).status).toBe(404);
+    const req = new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}`);
+    expect((await handleUpstreamCallback(makeApp(), req)).status).toBe(404);
+    const request = { clientId: 'c', redirectUri: CALLBACK, codeChallenge: 'd', state: null };
+    expect(loginPageFor(upstreamApp(), request, null).status).toBe(404);
+  });
+
+  it('redirectToUpstream manda o navegador ao endereço do provedor', () => {
+    const app = upstreamApp();
+    const request = { clientId: 'c', redirectUri: CALLBACK, codeChallenge: 'd', state: null };
+    if (app.connector.login.kind !== 'upstream') throw new Error('esperava upstream');
+    const res = redirectToUpstream(app, app.connector.login, request);
+    expect(res.headers.get('location')).toMatch(/^https:\/\/idp\.exemplo\/auth\?state=/);
+  });
+
+  it('o /mcp recusa com 403 um segredo que o conector não aceita mais', async () => {
+    const app = upstreamApp();
+    const revoked = issueTokenSet('ex-dono@exemplo.dev', app.settings, app.now()).access_token;
+    const res = await handleMcp(app, rpc(revoked, { jsonrpc: '2.0', id: 1, method: 'tools/list' }));
+    expect(res.status).toBe(403);
   });
 });
