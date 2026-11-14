@@ -143,7 +143,7 @@ export function testAccount(email: string, extra: Partial<LinkedAccount> = {}): 
   return {
     email,
     refreshToken: `r-${email.slice(0, email.indexOf('@'))}`,
-    scope: 'openid email https://www.googleapis.com/auth/gmail.readonly',
+    scope: 'openid email https://www.googleapis.com/auth/gmail.modify',
     linkedAt: '2026-11-14T00:00:00.000Z',
     status: 'active',
     ...extra,
@@ -178,3 +178,33 @@ export function countingLimiter(allowed: number): RateLimiter & { keys: string[]
 export const TEST_REFS: readonly AccountRef[] = aliasAccounts(
   TEST_EMAILS.map((email) => testAccount(email)),
 );
+
+/** Escrita registrada pela rota de escrita da Gmail API. */
+export interface GmailWrite {
+  readonly method: string;
+  readonly path: string;
+  readonly body: unknown;
+}
+
+/** Rota de escrita da Gmail API: registra POST/PUT/DELETE e responde `respond(escrita)` (nulo = 204). */
+export function gmailWriteRoute(
+  writes: GmailWrite[],
+  respond: (write: GmailWrite) => unknown = () => ({}),
+): FakeRoute {
+  return (url, init) => {
+    const method = init?.method ?? 'GET';
+    if (url.hostname !== 'gmail.googleapis.com' || method === 'GET') return undefined;
+    const text = typeof init?.body === 'string' ? init.body : '';
+    const write = {
+      method,
+      path: url.pathname.replace('/gmail/v1/users/me/', ''),
+      body: text ? (JSON.parse(text) as unknown) : null,
+    };
+    writes.push(write);
+    const reply = respond(write);
+    return reply === null ? new Response(null, { status: 204 }) : Response.json(reply);
+  };
+}
+
+/** Escopo das contas vinculadas antes do gerenciamento (só leitura). */
+export const READONLY_SCOPE = 'openid email https://www.googleapis.com/auth/gmail.readonly';

@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { accountAlias, aliasAccounts, noAccountsError, resolveAccounts } from './accounts.js';
+import {
+  accountAlias,
+  aliasAccounts,
+  noAccountsError,
+  requireWriteAccess,
+  resolveAccounts,
+  writeAccessError,
+} from './accounts.js';
 import { testAccount } from './fixtures/fake-google.js';
 
 const REFS = aliasAccounts([testAccount('dono@example.com'), testAccount('musica@example.com')]);
@@ -30,5 +37,22 @@ describe('resolveAccounts', () => {
     expect(() => resolveAccounts(REFS, 'x')).toThrow(/"dono", "musica", "all"/);
     expect(() => resolveAccounts([], 'all')).toThrow(/link_account/);
     expect(noAccountsError().message).toMatch(/Nenhuma conta/);
+  });
+});
+
+describe('acesso de escrita', () => {
+  it('requireWriteAccess passa com gmail.modify', () => {
+    expect(() => {
+      requireWriteAccess(REFS[0]!);
+    }).not.toThrow();
+  });
+
+  it('conta vinculada só para leitura pede novo vínculo pelo link_account', () => {
+    const scope = 'openid email https://www.googleapis.com/auth/gmail.readonly';
+    const [old] = aliasAccounts([testAccount('antiga@example.com', { scope })]);
+    expect(() => {
+      requireWriteAccess(old!);
+    }).toThrow(writeAccessError('antiga'));
+    expect(writeAccessError('antiga').message).toMatch(/"antiga".*só para leitura.*link_account/s);
   });
 });

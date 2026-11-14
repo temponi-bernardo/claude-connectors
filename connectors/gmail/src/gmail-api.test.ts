@@ -3,13 +3,25 @@ import { clearAccessTokenCache } from './access-token.js';
 import {
   fakeFetch,
   gmailRoute,
+  gmailWriteRoute,
   linkedTestDeps,
+  READONLY_SCOPE,
   TEST_REFS,
   testDeps,
   type FakeRoute,
+  type GmailWrite,
   type RecordedCall,
 } from './fixtures/fake-google.js';
-import { gmailGet, gmailHttpError, gmailUrl, sendGmailGet } from './gmail-api.js';
+import {
+  gmailCall,
+  gmailErrorDetail,
+  gmailGet,
+  gmailHttpError,
+  gmailUrl,
+  gmailWrite,
+  readGmailJson,
+  sendGmailRequest,
+} from './gmail-api.js';
 
 const OWNER = TEST_REFS[0]!;
 
@@ -45,6 +57,31 @@ describe('gmailHttpError', () => {
       'Conta "dono": não encontrado (id errado ou de outra conta).',
     );
     expect(gmailHttpError(500, 'dono').message).toMatch(/HTTP 500/);
+    expect(gmailHttpError(403, 'dono').message).toMatch(/link_account/);
+  });
+
+  it('acrescenta o detalhe do Gmail quando houver', () => {
+    expect(gmailHttpError(400, 'dono', 'Invalid To header').message).toBe(
+      'Conta "dono": o Gmail recusou o pedido (confira ids, busca e destinatários): Invalid To header.',
+    );
+  });
+});
+
+describe('gmailErrorDetail', () => {
+  it('lê error.message do JSON, limita o tamanho e ignora corpo inválido', async () => {
+    const json = Response.json({ error: { message: 'Invalid To header' } }, { status: 400 });
+    expect(await gmailErrorDetail(json)).toBe('Invalid To header');
+    const long = Response.json({ error: { message: 'x'.repeat(500) } }, { status: 400 });
+    expect(await gmailErrorDetail(long)).toHaveLength(200);
+    expect(await gmailErrorDetail(new Response('não é json', { status: 500 }))).toBeNull();
+    expect(await gmailErrorDetail(Response.json({ error: 'x' }))).toBeNull();
+  });
+});
+
+describe('readGmailJson', () => {
+  it('resposta vazia (204) vira objeto vazio', async () => {
+    expect(await readGmailJson(new Response(null, { status: 204 }))).toEqual({});
+    expect(await readGmailJson(Response.json({ a: 1 }))).toEqual({ a: 1 });
   });
 });
 
@@ -79,10 +116,40 @@ describe('gmailGet', () => {
     await expect(gmailGet(deps, OWNER, gmailUrl('messages/zz'))).rejects.toThrow(/não encontrado/);
   });
 
-  it('sendGmailGet usa o token dado', async () => {
+  it('sendGmailRequest usa o token dado', async () => {
     const calls: RecordedCall[] = [];
     const deps = testDeps(fakeFetch([gmailRoute({ a: {} })], calls));
-    expect((await sendGmailGet(deps, gmailUrl('a'), 'tok')).status).toBe(200);
+    expect((await sendGmailRequest(deps, { url: gmailUrl('a') }, 'tok')).status).toBe(200);
     expect((calls[0]?.init?.headers as Record<string, string>).authorization).toBe('Bearer tok');
+    expect(calls[0]?.init?.method).toBe('GET');
+  });
+});
+
+describe('gmailCall e gmailWrite', () => {
+  it('envia método e corpo JSON', async () => {
+    const writes: GmailWrite[] = [];
+    const deps = await linkedDeps([gmailWriteRoute(writes, () => ({ id: 'x' }))]);
+    const request = { url: gmailUrl('messages/send'), method: 'POST' as const, body: { raw: 'r' } };
+    expect(await gmailCall(deps, OWNER, request)).toEqual({ id: 'x' });
+    expect(writes).toEqual([{ method: 'POST', path: 'messages/send', body: { raw: 'r' } }]);
+  });
+
+  it('erro de escrita traz o detalhe do Gmail', async () => {
+    function refuse(url: URL): Response | undefined {
+      if (url.hostname !== 'gmail.googleapis.com') return undefined;
+      return Response.json({ error: { message: 'Invalid To header' } }, { status: 400 });
+    }
+    const deps = await linkedDeps([refuse]);
+    const request = { url: gmailUrl('messages/send'), method: 'POST' as const, body: {} };
+    await expect(gmailWrite(deps, OWNER, request)).rejects.toThrow(/Invalid To header/);
+  });
+
+  it('gmailWrite recusa conta vinculada só para leitura, sem chamar o Gmail', async () => {
+    const calls: RecordedCall[] = [];
+    const deps = await linkedDeps([], calls);
+    const old = { ...OWNER, account: { ...OWNER.account, scope: READONLY_SCOPE } };
+    const request = { url: gmailUrl('messages/send'), method: 'POST' as const, body: {} };
+    await expect(gmailWrite(deps, old, request)).rejects.toThrow(/só para leitura/);
+    expect(calls).toHaveLength(0);
   });
 });

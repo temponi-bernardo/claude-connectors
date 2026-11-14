@@ -32,7 +32,7 @@ import {
 } from './link-flow.js';
 import { loadOwnerAccounts, saveOwnerAccounts, sha256Hex } from './token-store.js';
 
-const SCOPE = 'openid email https://www.googleapis.com/auth/gmail.readonly';
+const SCOPE = 'openid email https://www.googleapis.com/auth/gmail.modify';
 const TOKENS: GoogleTokens = {
   accessToken: 'a',
   expiresIn: 3600,
@@ -111,6 +111,8 @@ describe('auxiliares', () => {
   it('linkRefusalReason exige o escopo do Gmail e o refresh token', () => {
     expect(linkRefusalReason(TOKENS)).toBeNull();
     expect(linkRefusalReason({ ...TOKENS, scope: 'openid email' })).toMatch(/permissão/);
+    const readOnly = 'openid email https://www.googleapis.com/auth/gmail.readonly';
+    expect(linkRefusalReason({ ...TOKENS, scope: readOnly })).toMatch(/gerenciar o Gmail/);
     expect(linkRefusalReason({ ...TOKENS, refreshToken: null })).toMatch(/refresh token/);
   });
 
@@ -158,7 +160,7 @@ describe('ticket de vínculo', () => {
 });
 
 describe('startAccountLink', () => {
-  it('pede acesso offline só leitura e guarda o pedido selado com validade', async () => {
+  it('pede acesso offline para gerenciar o Gmail e guarda o pedido selado com validade', async () => {
     const deps = testDeps(fakeFetch([]));
     const { response, google, state, cookie } = await begin(deps);
     expect(response.status).toBe(302);

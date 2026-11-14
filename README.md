@@ -4,10 +4,10 @@ Conectores MCP para o Claude, que rodam na nuvem e se instalam pelo marketplace 
 
 ## Conectores
 
-| Conector                                        | O que faz                                                                 |
-| ----------------------------------------------- | ------------------------------------------------------------------------- |
-| [`canvas-puc`](connectors/canvas-puc/README.md) | Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, arquivos       |
-| [`gmail`](connectors/gmail/README.md)           | Gmail multi-conta só leitura: busca, conversas, rótulos e texto de anexos |
+| Conector                                        | O que faz                                                                    |
+| ----------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`canvas-puc`](connectors/canvas-puc/README.md) | Canvas LMS da PUC Minas: entregas, tarefas, notas, avisos, arquivos          |
+| [`gmail`](connectors/gmail/README.md)           | Gmail multi-conta: ler, enviar, responder, encaminhar, rascunhos e organizar |
 
 ## Instalar no Claude
 

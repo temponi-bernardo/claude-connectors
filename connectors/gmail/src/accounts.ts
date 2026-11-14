@@ -1,6 +1,8 @@
 /**
- * Apelidos das contas vinculadas e resolução do parâmetro `account` das ferramentas. Pura.
+ * Apelidos das contas vinculadas, resolução do parâmetro `account` das ferramentas e conferência do
+ * escopo de escrita. Pura.
  */
+import { hasModifyScope } from './config.js';
 import type { LinkedAccount } from './token-store.js';
 
 /** Conta vinculada com o apelido usado nas ferramentas. */
@@ -44,4 +46,16 @@ export function resolveAccounts(refs: readonly AccountRef[], requested: string):
   throw new Error(
     `Conta "${requested}" não vinculada. Use ${valid}, ou link_account para vincular.`,
   );
+}
+
+/** Erro de conta vinculada antes do gerenciamento (token só com `gmail.readonly`). */
+export function writeAccessError(alias: string): Error {
+  return new Error(
+    `A conta "${alias}" foi vinculada só para leitura. Para enviar, organizar ou apagar e-mails, use link_account e entre com ela de novo, permitindo gerenciar o Gmail.`,
+  );
+}
+
+/** Lança `writeAccessError` se o token da conta não tiver o escopo `gmail.modify`. */
+export function requireWriteAccess(ref: AccountRef): void {
+  if (!hasModifyScope(ref.account.scope)) throw writeAccessError(ref.alias);
 }

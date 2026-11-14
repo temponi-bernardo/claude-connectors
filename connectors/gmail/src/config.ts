@@ -5,11 +5,19 @@
 import { envValue, type EnvVars } from '../../../src/core/env.js';
 import { parseSealKey } from '../../../src/remote/seal.js';
 
-/** Escopo do Gmail somente leitura (o único escopo de dados pedido). */
-export const GMAIL_READONLY_SCOPE = 'https://www.googleapis.com/auth/gmail.readonly';
+/**
+ * Escopo de gerenciamento do Gmail (o único escopo de dados pedido): ler, enviar, rascunhos, marcadores e
+ * lixeira. Não permite a exclusão definitiva (só `https://mail.google.com/` permitiria).
+ */
+export const GMAIL_MODIFY_SCOPE = 'https://www.googleapis.com/auth/gmail.modify';
 
-/** Escopos pedidos ao Google no login e no vínculo de conta: identidade e Gmail só leitura. */
-export const GMAIL_SCOPES: readonly string[] = ['openid', 'email', GMAIL_READONLY_SCOPE];
+/** Escopos pedidos ao Google no login e no vínculo de conta: identidade e gerenciamento do Gmail. */
+export const GMAIL_SCOPES: readonly string[] = ['openid', 'email', GMAIL_MODIFY_SCOPE];
+
+/** Diz se os escopos concedidos (separados por espaço) incluem o gerenciamento do Gmail (`gmail.modify`). */
+export function hasModifyScope(scope: string): boolean {
+  return scope.split(' ').includes(GMAIL_MODIFY_SCOPE);
+}
 
 /** Tamanho mínimo do segredo que assina o cookie de consentimento lembrado. */
 export const MIN_CONSENT_SECRET_CHARS = 32;

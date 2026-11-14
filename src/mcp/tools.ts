@@ -3,7 +3,7 @@
  * Cada conector descreve suas ferramentas como dados (`ToolSpec`) e as registra com `registerToolSpecs`.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import type { CallToolResult, ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { bytesToBase64 } from '../core/bytes.js';
 
@@ -12,6 +12,8 @@ export interface ToolSpec<C> {
   readonly name: string;
   readonly description: string;
   readonly shape: z.ZodRawShape;
+  /** Dicas MCP de comportamento (`readOnlyHint`, `destructiveHint`...): o cliente pede confirmação com elas. */
+  readonly annotations?: ToolAnnotations;
   readonly run: (ctx: C, rawArgs: unknown) => Promise<unknown>;
 }
 
@@ -20,6 +22,7 @@ export interface ToolDefinition<C, S extends z.ZodRawShape> {
   readonly name: string;
   readonly description: string;
   readonly shape: S;
+  readonly annotations?: ToolAnnotations;
   readonly run: (ctx: C, args: z.infer<z.ZodObject<S>>) => Promise<unknown>;
 }
 
@@ -30,6 +33,7 @@ export function defineTool<C, S extends z.ZodRawShape>(def: ToolDefinition<C, S>
     name: def.name,
     description: def.description,
     shape: def.shape,
+    ...(def.annotations ? { annotations: def.annotations } : {}),
     run: async (ctx, rawArgs) => def.run(ctx, schema.parse(rawArgs ?? {})),
   };
 }
@@ -89,7 +93,11 @@ export function registerToolSpecs<C>(
   for (const spec of specs) {
     server.registerTool(
       spec.name,
-      { description: spec.description, inputSchema: spec.shape },
+      {
+        description: spec.description,
+        inputSchema: spec.shape,
+        ...(spec.annotations ? { annotations: spec.annotations } : {}),
+      },
       (args: unknown) => runToolSafely(spec, ctx, args),
     );
   }

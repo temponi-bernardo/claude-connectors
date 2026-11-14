@@ -53,21 +53,37 @@ export async function attachmentBytesToText(bytes: Uint8Array): Promise<string> 
   return kind === 'html' ? htmlToText(text) : text;
 }
 
+/** Ids de um anexo: a mensagem e o anexo dentro dela. */
+export interface AttachmentIds {
+  readonly messageId: string;
+  readonly attachmentId: string;
+}
+
+/** Baixa os bytes de um anexo com o tamanho informado pelo Gmail (ou o dos bytes, se faltar). */
+export async function downloadAttachment(
+  deps: OwnerDeps,
+  ref: AccountRef,
+  ids: AttachmentIds,
+): Promise<{ size: number; bytes: Uint8Array }> {
+  const path = `messages/${ids.messageId}/attachments/${ids.attachmentId}`;
+  const body = await gmailGet<{ size?: number; data?: string }>(deps, ref, gmailUrl(path));
+  const bytes = base64UrlToBytes(body.data ?? '');
+  return { size: body.size ?? bytes.length, bytes };
+}
+
 /** Baixa um anexo e devolve o texto (limitado); recusa anexos acima de 5 MB. */
 export async function readAttachmentText(
   deps: OwnerDeps,
   ref: AccountRef,
-  ids: { readonly messageId: string; readonly attachmentId: string },
+  ids: AttachmentIds,
 ): Promise<Record<string, unknown>> {
-  const path = `messages/${ids.messageId}/attachments/${ids.attachmentId}`;
-  const body = await gmailGet<{ size?: number; data?: string }>(deps, ref, gmailUrl(path));
-  const size = body.size ?? 0;
+  const { size, bytes } = await downloadAttachment(deps, ref, ids);
   if (size > MAX_ATTACHMENT_BYTES) {
     throw new Error(
       `Anexo de ${(size / 1024 / 1024).toFixed(1)} MB, acima do limite de 5 MB para leitura.`,
     );
   }
-  const text = await attachmentBytesToText(base64UrlToBytes(body.data ?? ''));
+  const text = await attachmentBytesToText(bytes);
   return {
     account: ref.alias,
     message_id: ids.messageId,

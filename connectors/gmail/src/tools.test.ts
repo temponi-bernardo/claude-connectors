@@ -6,6 +6,7 @@ import {
   fakeFetch,
   gmailRoute,
   linkedTestDeps,
+  READONLY_SCOPE,
   TEST_OWNER,
   TEST_REFS,
   TEST_TOKEN_KEY,
@@ -19,18 +20,19 @@ import { UNTRUSTED_NOTICE } from './message-format.js';
 import { loadOwnerAccounts, saveOwnerAccounts } from './token-store.js';
 import {
   accountLabels,
+  accountBase,
   accountStatus,
   getAttachmentTextTool,
   getMessageTool,
   getThreadTool,
   GMAIL_ID,
-  GMAIL_TOOLS,
   linkAccountTool,
   listAccountsTool,
   listLabelsTool,
   ownerRefs,
   resolveOwnerAccounts,
   resolveSingleAccount,
+  resolveWritableAccount,
   searchThreadsTool,
   unlinkAccountTool,
   withUntrustedNotice,
@@ -95,18 +97,25 @@ describe('auxiliares', () => {
   it('withUntrustedNotice põe o aviso primeiro', () => {
     expect(Object.keys(withUntrustedNotice({ a: 1 }))).toEqual(['notice', 'a']);
   });
+});
 
-  it('GMAIL_TOOLS tem as oito ferramentas', () => {
-    expect(GMAIL_TOOLS.map((t) => t.name)).toEqual([
-      'list_accounts',
-      'link_account',
-      'unlink_account',
-      'search_threads',
-      'get_thread',
-      'get_message',
-      'list_labels',
-      'get_attachment_text',
-    ]);
+describe('escrita', () => {
+  it('accountBase mostra write_access e a dica de novo vínculo', () => {
+    expect(accountBase(OWNER_REF)).toMatchObject({ write_access: true });
+    expect(accountBase(OWNER_REF)).not.toHaveProperty('hint');
+    const old = { ...OWNER_REF, account: { ...OWNER_REF.account, scope: READONLY_SCOPE } };
+    expect(accountBase(old)).toMatchObject({
+      write_access: false,
+      hint: expect.stringContaining('link_account') as string,
+    });
+  });
+
+  it('resolveWritableAccount recusa conta só leitura', async () => {
+    const deps = await linkedTestDeps([]);
+    expect((await resolveWritableAccount(deps, 'dono')).alias).toBe('dono');
+    const accounts = [testAccount('dono@example.com', { scope: READONLY_SCOPE })];
+    await saveOwnerAccounts(deps.kv, TEST_TOKEN_KEY, { owner: TEST_OWNER, accounts });
+    await expect(resolveWritableAccount(deps, 'dono')).rejects.toThrow(/só para leitura/);
   });
 });
 

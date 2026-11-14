@@ -31,7 +31,7 @@ export function consentPageBody(details: ConsentDescription, handle: string): st
     ? '<p><strong>O acesso vai para um app no seu computador.</strong> Continue só se você acabou de iniciar a conexão nele.</p>'
     : '';
   return `<h1>Conectar ${escapeHtml(details.clientName)} ao Gmail?</h1>
-<p>O acesso (somente leitura) será enviado para <strong>${escapeHtml(details.redirectHost)}</strong>. O nome do app não é verificado.</p>${loopback}
+<p>O acesso (ler, enviar e organizar e-mails; sem exclusão definitiva) será enviado para <strong>${escapeHtml(details.redirectHost)}</strong>. O nome do app não é verificado.</p>${loopback}
 <p>Em seguida você entra com sua conta Google; só os e-mails autorizados são aceitos.</p>
 <form method="post" action="/authorize"><input type="hidden" name="handle" value="${escapeHtml(handle)}">
 <button name="decision" value="approve">Permitir</button><button name="decision" value="deny">Negar</button></form>`;

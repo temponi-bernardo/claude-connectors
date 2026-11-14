@@ -15,7 +15,7 @@
     {
       "name": "gmail",
       "source": "./connectors/gmail",
-      "description": "Gmail multi-conta só leitura na nuvem: busca, conversas, rótulos e texto de anexos de várias contas. Nada é instalado no computador."
+      "description": "Gmail multi-conta na nuvem: ler, buscar, enviar, responder, encaminhar, rascunhos, marcadores, arquivar e lixeira, com confirmação antes de enviar ou apagar. Nada é instalado no computador."
     },
     {
       "name": "whatsapp",

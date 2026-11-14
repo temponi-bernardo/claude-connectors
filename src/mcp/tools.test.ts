@@ -94,7 +94,35 @@ describe('registerToolSpecs', () => {
     ) => Promise<{ content: unknown[] }>;
     expect((await handler({ texto: 'z' })).content).toEqual([{ type: 'text', text: 'z' }]);
   });
+
+  it('repassa as anotações MCP quando a ferramenta tem', () => {
+    const registerTool = vi.fn();
+    const annotations = { readOnlyHint: false, destructiveHint: true };
+    const send = defineTool({ ...echoDefinition(), annotations });
+    expect(send.annotations).toEqual(annotations);
+    registerToolSpecs({ registerTool } as unknown as McpServer, [send], { prefix: '' });
+    expect(registerTool).toHaveBeenCalledWith(
+      'eco',
+      { description: 'devolve o texto', inputSchema: send.shape, annotations },
+      expect.any(Function),
+    );
+  });
 });
+
+/** Definição da ferramenta de eco, para variar só as anotações. */
+function echoDefinition(): {
+  name: string;
+  description: string;
+  shape: { texto: z.ZodString };
+  run: (ctx: { prefix: string }, args: { texto: string }) => Promise<string>;
+} {
+  return {
+    name: 'eco',
+    description: 'devolve o texto',
+    shape: { texto: z.string() },
+    run: (ctx, args) => Promise.resolve(`${ctx.prefix}${args.texto}`),
+  };
+}
 
 describe('binaryContentBlock', () => {
   it('usa imagem para image/*, áudio para audio/* e recurso embutido para o resto', () => {

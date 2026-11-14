@@ -78,7 +78,7 @@ function stubGoogle(email: string, routes: Parameters<typeof fakeFetch>[0] = [])
         Response.json({
           access_token: 'a',
           refresh_token: `r-${email.slice(0, email.indexOf('@'))}`,
-          scope: 'openid email https://www.googleapis.com/auth/gmail.readonly',
+          scope: 'openid email https://www.googleapis.com/auth/gmail.modify',
           id_token: validIdToken(email, state.nonce, { exp }),
         }),
       ),
@@ -238,8 +238,14 @@ describe('login de quem instalou e /mcp', () => {
     const token = await signIn(browser);
     const list = await mcpCall(browser, token, { jsonrpc: '2.0', id: 1, method: 'tools/list' });
     expect(list.status).toBe(200);
-    const body = (await list.json()) as { result: { tools: { name: string }[] } };
+    const body = (await list.json()) as {
+      result: { tools: { name: string; annotations?: Record<string, boolean> }[] };
+    };
     expect(body.result.tools.map((t) => t.name)).toContain('get_attachment_text');
+    const send = body.result.tools.find((t) => t.name === 'send_email');
+    expect(send?.annotations).toMatchObject({ destructiveHint: true, readOnlyHint: false });
+    const read = body.result.tools.find((t) => t.name === 'get_message');
+    expect(read?.annotations).toMatchObject({ readOnlyHint: true });
   });
 
   it('a conta do login já fica vinculada e responde às ferramentas', async () => {
