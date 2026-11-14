@@ -16,7 +16,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
-- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`canvasRemoteConnector`](#canvasremoteconnector)
+- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`fetchCanvasSelf`](#fetchcanvasself), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`isCanvasTokenAlive`](#iscanvastokenalive), [`renewCanvasSecret`](#renewcanvassecret), [`canvasRemoteConnector`](#canvasremoteconnector)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
 - `connectors/canvas-puc/src/worker.ts`: [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
@@ -2322,7 +2322,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/canvas-puc/src/remote.ts`
 - **Assinatura:** `async renewCanvasToken(settings: CanvasRemoteSettings, token: string, now: Date): Promise<void>`
-- **Usada por:** `canvasRemoteConnector()`
+- **Usada por:** `renewCanvasSecret()`
 - **Processos:** P03, P08, P09
 
 <!-- gerado:fim -->
@@ -2332,6 +2332,57 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Nada.
 - **Efeitos:** `GET /api/v1/users/self/user_generated_tokens` e, se `planTokenRenewal()` mandar, `PUT /api/v1/users/self/tokens/:id` com `expires_at`.
 - **Erros:** Rejeita como `canvasTokenApi()` (quem chama, `renewSecretQuietly()`, só registra o aviso).
+
+### `fetchCanvasSelf`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `fetchCanvasSelf(settings: CanvasRemoteSettings, token: string): Promise<Response>`
+- **Usada por:** `isCanvasTokenAlive()`, `verifyCanvasToken()`
+- **Processos:** P03, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Asks Canvas `/api/v1/users/self` with the token (rejects only on network failure).
+- **Entrada:** `settings`: Canvas address and `fetch`. `token`: the user's Canvas access token.
+- **Saída:** The raw Canvas `Response` (any status).
+- **Efeitos:** Network: one GET to Canvas.
+- **Erros:** Rejects if `fetch` fails (network).
+
+### `isCanvasTokenAlive`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `async isCanvasTokenAlive(settings: CanvasRemoteSettings, token: string): Promise<boolean>`
+- **Usada por:** `renewCanvasSecret()`
+- **Processos:** P03, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** Says whether Canvas still accepts the token: only a 401 counts as dead; network or 5xx errors count as alive.
+- **Entrada:** `settings`: Canvas address and `fetch`. `token`: the user's Canvas access token.
+- **Saída:** `false` only when `/users/self` answers 401; `true` otherwise, including network failure.
+- **Efeitos:** Network: one GET to Canvas.
+- **Erros:** None (network failure becomes `true`, so a Canvas outage never logs anyone out).
+
+### `renewCanvasSecret`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/canvas-puc/src/remote.ts`
+- **Assinatura:** `async renewCanvasSecret(settings: CanvasRemoteSettings, token: string, now: Date): Promise<SecretRenewal>`
+- **Usada por:** `canvasRemoteConnector()`
+- **Processos:** P03, P08, P09
+
+<!-- gerado:fim -->
+
+- **Faz:** On each OAuth refresh: `revoked` if Canvas refuses the token, else extends its expiry and answers `kept`.
+- **Entrada:** `settings`; `token`: the Canvas token sealed in the refresh token; `now`: current time.
+- **Saída:** `'revoked'` (Canvas answered 401) or `'kept'`.
+- **Efeitos:** Network: `isCanvasTokenAlive()` and, if alive, `renewCanvasToken()`.
+- **Erros:** Propagates `renewCanvasToken()` errors (`renewSecretQuietly()` turns them into a log warning).
 
 ## `src/remote/handler.ts`
 
@@ -2501,7 +2552,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Faz:** Atende `POST /token`; no refresh, chama `renewSecretQuietly()` antes de responder.
 - **Entrada:** `app`; `request`: formulário OAuth.
-- **Saída:** 200 com tokens, ou 400 com erro OAuth.
+- **Saída:** 200 com tokens, ou 400 com erro OAuth; 400 `invalid_grant` (`REVOKED_SECRET_DESCRIPTION`) when the connector says the credential was revoked.
 - **Efeitos:** Consome o corpo; no refresh, a renovação da credencial do conector.
 - **Erros:** Nenhum.
 
@@ -2595,7 +2646,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 <!-- gerado:inicio -->
 
 - **Arquivo:** `src/remote/handler.ts`
-- **Assinatura:** `async renewSecretQuietly(connector: RemoteConnector, secret: string): Promise<void>`
+- **Assinatura:** `async renewSecretQuietly(connector: RemoteConnector, secret: string): Promise<SecretRenewal>`
 - **Usada por:** `handleToken()`
 - **Processos:** P08
 
@@ -2603,7 +2654,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Faz:** Pede ao conector para renovar a credencial (`renewSecret`), sem deixar a falha derrubar o refresh.
 - **Entrada:** Conector remoto e o segredo do usuário.
-- **Saída:** Nada.
+- **Saída:** `SecretRenewal`: what `renewSecret` answered, or `'kept'` when the connector has none or it failed.
 - **Efeitos:** O que o `renewSecret` do conector fizer; `console.warn` se ele falhar.
 - **Erros:** Nenhum (a falha vira aviso no log).
 
@@ -5560,9 +5611,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Inicia a ida ao Google no login do conector.
+- **Faz:** Starts the Google sign-in asking for identity and Gmail (`gmail.modify`) with a refresh token.
 - **Entrada:** `deps`: dependências. `oauth`: helpers da biblioteca. `approved`: pedido do Claude aprovado e headers.
-- **Saída:** 302 ao Google pedindo `openid email gmail.readonly` com acesso offline.
+- **Saída:** 302 ao Google pedindo `openid email gmail.modify` com acesso offline.
 - **Efeitos:** KV `OAUTH_KV` (pela biblioteca): grava a transação com verificador e `nonce`; define o cookie `__Host-`.
 - **Erros:** Propaga os erros da biblioteca.
 
@@ -9579,158 +9630,159 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 ## Dados e constantes
 
-| Nome                        | Arquivo                                    | O que é                                                                                                           |
-| --------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `CANVAS_USER_AGENT`         | `connectors/canvas-puc/src/remote.ts`      | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                           |
-| `TOKEN_RENEWAL_SECONDS`     | `connectors/canvas-puc/src/remote.ts`      | Quanto cada renovação estende o token do Canvas: 30 dias menos 1 hora (o Canvas recusa mais de 30 dias à frente). |
-| `TEST_EXCEPTIONS`           | `src/test-exceptions.ts`                   | Lista única de funções sem teste automatizado, com motivo e teste manual.                                         |
-| `DEFAULT_DOCS_CONFIG`       | `tools/docs/config.ts`                     | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                              |
-| `MODULE_SCOPE_SUFFIX`       | `tools/docs/ast.ts`                        | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                         |
-| `WALK_IGNORED_DIRS`         | `tools/docs/inventory.ts`                  | Pastas puladas ao percorrer o disco sem git.                                                                      |
-| `GENERATED_START`           | `tools/docs/markdown.ts`                   | Marcador de início do bloco gerado em FUNCTIONS.md.                                                               |
-| `GENERATED_END`             | `tools/docs/markdown.ts`                   | Marcador de fim do bloco gerado.                                                                                  |
-| `INDEX_START`               | `tools/docs/markdown.ts`                   | Marcador de início do índice por módulo.                                                                          |
-| `INDEX_END`                 | `tools/docs/markdown.ts`                   | Marcador de fim do índice por módulo.                                                                             |
-| `PLACEHOLDER`               | `tools/docs/markdown.ts`                   | Texto `_preencher_` deixado nos campos manuais novos.                                                             |
-| `MANUAL_FIELDS`             | `tools/docs/render.ts`                     | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                              |
-| `HTML_TEXT_REPLACEMENTS`    | `src/core/html.ts`                         | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                |
-| `CFB_SIGNATURE`             | `src/core/cfb.ts`                          | Os 8 bytes iniciais de todo arquivo OLE/CFB (o contêiner do .doc).                                                |
-| `CP1252_HIGH`               | `src/core/word.ts`                         | Caracteres de 0x80 a 0x9F do Windows-1252, usados ao decodificar o texto de 8 bits do .doc.                       |
-| `WORD_TEXT_REPLACEMENTS`    | `src/core/word.ts`                         | Substituições (regex → texto) aplicadas em ordem por `cleanWordText` às marcas do Word.                           |
-| `MAX_DOWNLOAD_BYTES`        | `connectors/canvas-puc/src/files.ts`       | Maior arquivo que `baixar_arquivo` traz para a conversa (10 MB).                                                  |
-| `MAX_TEXT_CHARS`            | `connectors/canvas-puc/src/files.ts`       | Maior texto devolvido por `ler_arquivo_texto` (100 000 caracteres).                                               |
-| `CONNECTORS_DIR`            | `tools/bundle/bundle.ts`                   | Pasta dos conectores relativa à raiz (`connectors`).                                                              |
-| `PLUGIN_DIR`                | `tools/bundle/bundle.ts`                   | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                            |
-| `PLUGIN_MANIFEST_PATH`      | `tools/bundle/bundle.ts`                   | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.         |
-| `PLUGIN_MCP_CONFIG_PATH`    | `tools/bundle/bundle.ts`                   | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                |
-| `CANVAS_PAGE_SIZE`          | `connectors/canvas-puc/src/client.ts`      | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                   |
-| `DEFAULT_MAX_ITEMS`         | `connectors/canvas-puc/src/client.ts`      | Limite padrão de itens somados entre páginas em `getAll`.                                                         |
-| `DEFAULT_CANVAS_URL`        | `connectors/canvas-puc/src/remote.ts`      | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                          |
-| `MAX_TEXT_LENGTH`           | `connectors/canvas-puc/src/format.ts`      | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                                             |
-| `ASSIGNMENT_BUCKETS`        | `connectors/canvas-puc/src/helpers.ts`     | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                                     |
-| `CANVAS_READ_TOOLS`         | `connectors/canvas-puc/src/tools-read.ts`  | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                       |
-| `CANVAS_WRITE_TOOLS`        | `connectors/canvas-puc/src/tools-write.ts` | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`.                   |
-| `CANVAS_SERVER_INFO`        | `connectors/canvas-puc/src/tools.ts`       | Nome e versão anunciados pelo servidor MCP do Canvas.                                                             |
-| `REMOTE_ENTRY`              | `tools/bundle/bundle.ts`                   | Entrada do servidor remoto em Node de um conector (`src/remote-main.ts`).                                         |
-| `REMOTE_BUNDLE_PATH`        | `tools/bundle/bundle.ts`                   | Bundle do servidor remoto (`server/remote.js`), usado pelo Dockerfile.                                            |
-| `SEAL_KEY_BYTES`            | `src/remote/seal.ts`                       | Tamanho da `SEAL_KEY` (32 bytes, AES-256).                                                                        |
-| `CLIENT_TTL_SECONDS`        | `src/remote/oauth.ts`                      | Validade do `client_id` registrado (10 anos).                                                                     |
-| `PENDING_TTL_SECONDS`       | `src/remote/tokens.ts`                     | Validade do pedido selado no formulário de login (15 minutos).                                                    |
-| `CODE_TTL_SECONDS`          | `src/remote/tokens.ts`                     | Validade do código de autorização (5 minutos).                                                                    |
-| `ACCESS_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Validade do access token (1 hora).                                                                                |
-| `REFRESH_TTL_SECONDS`       | `src/remote/tokens.ts`                     | Validade do refresh token (30 dias, como o token da PUC).                                                         |
-| `LOGIN_PAGE_CSS`            | `src/remote/login-page.ts`                 | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                   |
-| `CORS_HEADERS`              | `src/remote/handler.ts`                    | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                             |
-| `REMOTE_ROUTES`             | `src/remote/handler.ts`                    | Tabela `MÉTODO caminho` → função do servidor remoto.                                                              |
-| `DEFAULT_REDIRECT_HOSTS`    | `src/remote/oauth.ts`                      | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                               |
-| `MAX_BODY_BYTES`            | `src/remote/node-server.ts`                | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                     |
-| `PDF_ESCAPES`               | `src/core/pdf.ts`                          | Escapes de letra das strings literais do PDF (`\n`, `\t`...).                                                     |
-| `TJ_SPACE_THRESHOLD`        | `src/core/pdf.ts`                          | Ajuste do `TJ` a partir do qual conta como espaço entre palavras.                                                 |
-| `PDF_TEXT_OPERATORS`        | `src/core/pdf.ts`                          | Operador de texto do PDF → texto que ele produz.                                                                  |
-| `ACCESS_TOKEN_MARGIN_MS`    | `connectors/gmail/src/access-token.ts`     | Margem antes do vencimento em que o access token do Google é renovado.                                            |
-| `MAX_ATTACHMENT_BYTES`      | `connectors/gmail/src/attachments.ts`      | Maior anexo lido como texto (5 MB).                                                                               |
-| `MAX_ATTACHMENT_CHARS`      | `connectors/gmail/src/attachments.ts`      | Maior texto devolvido de um anexo.                                                                                |
-| `GMAIL_MODIFY_SCOPE`        | `connectors/gmail/src/config.ts`           | Escopo `gmail.modify`, o único escopo de dados pedido (ler, enviar, organizar; sem exclusão definitiva).          |
-| `MIN_CONSENT_SECRET_CHARS`  | `connectors/gmail/src/config.ts`           | Tamanho mínimo de `CONSENT_SECRET`.                                                                               |
-| `UPSTREAM_USER_AGENT`       | `connectors/gmail/src/context.ts`          | User-Agent enviado ao Google e à Gmail API.                                                                       |
-| `GMAIL_API_BASE`            | `connectors/gmail/src/gmail-api.ts`        | Base da Gmail API para a conta do token.                                                                          |
-| `GMAIL_STATUS_MESSAGES`     | `connectors/gmail/src/gmail-api.ts`        | Mensagem acionável por status HTTP da Gmail API.                                                                  |
-| `GOOGLE_AUTHORIZE_URL`      | `connectors/gmail/src/google-oauth.ts`     | Endpoint de autorização do Google.                                                                                |
-| `GOOGLE_TOKEN_URL`          | `connectors/gmail/src/google-oauth.ts`     | Endpoint de tokens do Google.                                                                                     |
-| `GOOGLE_CALLBACK_PATH`      | `connectors/gmail/src/google-oauth.ts`     | Caminho do retorno do Google (`/google/callback`).                                                                |
-| `GOOGLE_JWKS_URL`           | `connectors/gmail/src/id-token.ts`         | Chaves públicas que assinam os `id_token` do Google.                                                              |
-| `GOOGLE_ISSUERS`            | `connectors/gmail/src/id-token.ts`         | Emissores aceitos no `id_token`.                                                                                  |
-| `CLOCK_SKEW_SECONDS`        | `connectors/gmail/src/id-token.ts`         | Folga de relógio aceita na validade do `id_token`.                                                                |
-| `LINK_STATE_PREFIX`         | `connectors/gmail/src/link-flow.ts`        | Prefixo do `state` do vínculo de conta (`link.`).                                                                 |
-| `LINK_COOKIE`               | `connectors/gmail/src/link-flow.ts`        | Cookie `__Host-` que prende o vínculo ao navegador.                                                               |
-| `LINK_TTL_SECONDS`          | `connectors/gmail/src/link-flow.ts`        | Validade do pedido de vínculo (10 minutos).                                                                       |
-| `LINK_REQUEST_TYP`          | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do pedido de vínculo.                                                                                |
-| `MAX_MESSAGE_CHARS`         | `connectors/gmail/src/message-format.ts`   | Maior corpo de mensagem devolvido.                                                                                |
-| `MAX_THREAD_CHARS`          | `connectors/gmail/src/message-format.ts`   | Maior soma dos corpos de uma conversa.                                                                            |
-| `MIN_MESSAGE_CHARS`         | `connectors/gmail/src/message-format.ts`   | Menor fatia por mensagem numa conversa longa.                                                                     |
-| `MESSAGE_HEADERS`           | `connectors/gmail/src/message-format.ts`   | Cabeçalhos devolvidos de cada mensagem.                                                                           |
-| `UNTRUSTED_NOTICE`          | `connectors/gmail/src/message-format.ts`   | Aviso de conteúdo de e-mail não confiável (prompt injection).                                                     |
-| `GOOGLE_ACCOUNTS_ORIGIN`    | `connectors/gmail/src/pages.ts`            | Origem do Google liberada no `form-action` do consentimento.                                                      |
-| `RATE_LIMIT_RETRY_SECONDS`  | `connectors/gmail/src/rate-limit.ts`       | Segundos do `Retry-After` na resposta 429.                                                                        |
-| `GMAIL_ID`                  | `connectors/gmail/src/tools.ts`            | Esquema zod de id da Gmail API (só caracteres seguros na URL).                                                    |
-| `listAccountsTool`          | `connectors/gmail/src/tools.ts`            | Ferramenta `list_accounts`.                                                                                       |
-| `searchThreadsTool`         | `connectors/gmail/src/tools.ts`            | Ferramenta `search_threads`.                                                                                      |
-| `getThreadTool`             | `connectors/gmail/src/tools.ts`            | Ferramenta `get_thread`.                                                                                          |
-| `getMessageTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `get_message`.                                                                                         |
-| `listLabelsTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `list_labels`.                                                                                         |
-| `getAttachmentTextTool`     | `connectors/gmail/src/tools.ts`            | Ferramenta `get_attachment_text`.                                                                                 |
-| `GMAIL_TOOLS`               | `connectors/gmail/src/tool-list.ts`        | Todas as ferramentas do Gmail, na ordem mostrada ao Claude.                                                       |
-| `MAX_QUOTED_CHARS`          | `connectors/gmail/src/compose.ts`          | Maior trecho do original citado numa resposta (20 mil caracteres).                                                |
-| `FORWARD_SEPARATOR`         | `connectors/gmail/src/compose.ts`          | Linha que abre o bloco do e-mail encaminhado.                                                                     |
-| `DRAFT_SHAPE`               | `connectors/gmail/src/draft-tools.ts`      | Parâmetros do conteúdo de um rascunho (criar e substituir).                                                       |
-| `listDraftsTool`            | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `list_drafts`.                                                                                         |
-| `createDraftTool`           | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `create_draft`.                                                                                        |
-| `updateDraftTool`           | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `update_draft`.                                                                                        |
-| `sendDraftTool`             | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `send_draft`.                                                                                          |
-| `deleteDraftTool`           | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `delete_draft`.                                                                                        |
-| `MAX_GMAIL_ERROR_DETAIL`    | `connectors/gmail/src/gmail-api.ts`        | Maior detalhe de erro do Gmail repassado ao modelo (200 caracteres).                                              |
-| `TARGET_SHAPE`              | `connectors/gmail/src/mailbox-tools.ts`    | Parâmetros de alvo das ferramentas de organização (`message_ids`, `thread_ids`).                                  |
-| `markReadTool`              | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `mark_read`.                                                                                           |
-| `archiveTool`               | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `archive`.                                                                                             |
-| `starTool`                  | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `star`.                                                                                                |
-| `updateLabelsTool`          | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `update_labels`.                                                                                       |
-| `trashTool`                 | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `trash`.                                                                                               |
-| `untrashTool`               | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `untrash`.                                                                                             |
-| `MAX_TARGET_MESSAGES`       | `connectors/gmail/src/mailbox.ts`          | Mais mensagens por chamada das ferramentas de organização (50).                                                   |
-| `MAX_TARGET_THREADS`        | `connectors/gmail/src/mailbox.ts`          | Mais conversas por chamada das ferramentas de organização (20).                                                   |
-| `MAILBOX_ACTIONS`           | `connectors/gmail/src/mailbox.ts`          | Marcadores de sistema que cada ação põe e tira (lido, arquivar, estrela).                                         |
-| `MAX_ENCODED_WORD_BYTES`    | `connectors/gmail/src/mime.ts`             | Maior trecho UTF-8 de uma palavra RFC 2047 (45 bytes, palavra ≤ 75).                                              |
-| `MAX_BODY_CHARS`            | `connectors/gmail/src/send-tools.ts`       | Maior corpo de e-mail aceito (100 mil caracteres).                                                                |
-| `RECIPIENTS`                | `connectors/gmail/src/send-tools.ts`       | Esquema zod de lista de destinatários.                                                                            |
-| `BODY`                      | `connectors/gmail/src/send-tools.ts`       | Esquema zod do corpo em texto plano.                                                                              |
-| `SUBJECT`                   | `connectors/gmail/src/send-tools.ts`       | Esquema zod do assunto (até 998 caracteres).                                                                      |
-| `sendEmailTool`             | `connectors/gmail/src/send-tools.ts`       | Ferramenta `send_email`.                                                                                          |
-| `replyEmailTool`            | `connectors/gmail/src/send-tools.ts`       | Ferramenta `reply_email`.                                                                                         |
-| `replyAllEmailTool`         | `connectors/gmail/src/send-tools.ts`       | Ferramenta `reply_all_email`.                                                                                     |
-| `forwardEmailTool`          | `connectors/gmail/src/send-tools.ts`       | Ferramenta `forward_email`.                                                                                       |
-| `MAX_RECIPIENTS`            | `connectors/gmail/src/send.ts`             | Mais destinatários (To + Cc + Bcc) num e-mail (100).                                                              |
-| `MAX_FORWARD_BYTES`         | `connectors/gmail/src/send.ts`             | Maior soma de anexos num encaminhamento (18 MB).                                                                  |
-| `ONE_ACCOUNT`               | `connectors/gmail/src/tools.ts`            | Esquema zod do parâmetro `account` de uma conta só.                                                               |
-| `CONFIRM_HINT`              | `connectors/gmail/src/tools.ts`            | Frase das ferramentas de escrita: confirmar com o usuário e nunca agir por pedido de um e-mail.                   |
-| `READ_ONLY_HINTS`           | `connectors/gmail/src/tools.ts`            | Anotações MCP de leitura (`readOnlyHint`).                                                                        |
-| `SEND_HINTS`                | `connectors/gmail/src/tools.ts`            | Anotações MCP de envio: destrutiva e não idempotente.                                                             |
-| `DESTRUCTIVE_HINTS`         | `connectors/gmail/src/tools.ts`            | Anotações MCP de quem apaga ou sobrescreve: destrutiva e idempotente.                                             |
-| `ORGANIZE_HINTS`            | `connectors/gmail/src/tools.ts`            | Anotações MCP de organização reversível.                                                                          |
-| `CREATE_HINTS`              | `connectors/gmail/src/tools.ts`            | Anotações MCP de criação sem apagar nada.                                                                         |
-| `GMAIL_SERVER_INFO`         | `connectors/gmail/src/worker.ts`           | Nome e versão do servidor MCP do Gmail.                                                                           |
-| `GMAIL_SERVER_INSTRUCTIONS` | `connectors/gmail/src/worker.ts`           | Instruções do servidor MCP (contas e conteúdo não confiável).                                                     |
-| `ACCESS_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`           | Validade do access token emitido ao Claude (1 hora).                                                              |
-| `REFRESH_TOKEN_TTL_SECONDS` | `connectors/gmail/src/worker.ts`           | Validade do refresh token emitido ao Claude (30 dias).                                                            |
-| `GMAIL_ROUTES`              | `connectors/gmail/src/worker.ts`           | Rotas próprias do Worker: `MÉTODO caminho` → atendimento.                                                         |
-| `BRIDGE_ERROR_MESSAGES`     | `connectors/whatsapp/src/bridge-client.ts` | Mensagens ao usuário, em português, para os códigos de erro conhecidos da ponte.                                  |
-| `WHATSAPP_DEFAULTS`         | `connectors/whatsapp/src/config.ts`        | Padrões do conector: dormir em 5 min, 25 s por ferramenta, 8 s esperando o sync, 10 envios por hora.              |
-| `BRIDGE_ENV_KEYS`           | `connectors/whatsapp/src/config.ts`        | Variáveis repassadas do Worker para o container da ponte (`bridge/API.md`).                                       |
-| `SNAPSHOT_PUSH_URL`         | `connectors/whatsapp/src/config.ts`        | Endereço interno, interceptado pelo Worker, para onde a ponte envia o snapshot no `SIGTERM`.                      |
-| `UNTRUSTED_NOTICE`          | `connectors/whatsapp/src/format.ts`        | Aviso de dado de terceiros não confiável que acompanha todo resultado com mensagens ou contatos.                  |
-| `HIDDEN_CHAR_RANGES`        | `connectors/whatsapp/src/format.ts`        | Faixas de caracteres invisíveis (controle, largura zero, bidi, BOM) removidas por `sanitizeText`.                 |
-| `SNAPSHOT_INTERVAL_MS`      | `connectors/whatsapp/src/lifecycle.ts`     | Intervalo mínimo entre snapshots disparados por uso (1 minuto).                                                   |
-| `SNAPSHOT_AFTER_PATHS`      | `connectors/whatsapp/src/lifecycle.ts`     | Rotas da ponte depois das quais o banco pode ter mudado e vale tentar um snapshot.                                |
-| `SEND_HISTORY_KEY`          | `connectors/whatsapp/src/lifecycle.ts`     | Chave, no armazenamento do Durable Object, dos instantes dos envios recentes (limite por hora).                   |
-| `PAIR_PAGE_CSS`             | `connectors/whatsapp/src/pair-page.ts`     | Acréscimos de estilo da página `/pair` (código grande, QR, botões secundários e de perigo).                       |
-| `PAIR_SESSION_COOKIE`       | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) da sessão selada do `/pair`.                                                           |
-| `PAIR_NONCE_COOKIE`         | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) do nonce que amarra o login do `/pair` ao navegador.                                   |
-| `PAIR_SESSION_TTL_SECONDS`  | `connectors/whatsapp/src/pair.ts`          | Validade da sessão do `/pair` e do token anti-CSRF (30 minutos).                                                  |
-| `PAIR_LOGIN_TTL_SECONDS`    | `connectors/whatsapp/src/pair.ts`          | Validade do login do `/pair` em andamento (10 minutos).                                                           |
-| `PAIR_CALLBACK_PATH`        | `connectors/whatsapp/src/pair.ts`          | Caminho do retorno do GitHub para o `/pair` (subcaminho do retorno do OAuth App).                                 |
-| `PAIR_ACTIONS`              | `connectors/whatsapp/src/pair.ts`          | Ações do `/pair` por caminho: código, QR, desvincular e recomeçar do zero.                                        |
-| `SNAPSHOT_KEY_NAME`         | `connectors/whatsapp/src/snapshots.ts`     | Chave do snapshot atual no bucket R2 (`whatsapp/snapshot.was1`).                                                  |
-| `WHATSAPP_INSTRUCTIONS`     | `connectors/whatsapp/src/tools.ts`         | Instruções do servidor MCP: o que é o conector e a regra sobre conteúdo não confiável.                            |
-| `READ_TOOLS`                | `connectors/whatsapp/src/tools.ts`         | Ferramentas de leitura (fase 1), sempre ativas.                                                                   |
-| `BRIDGE_INSTANCE_NAME`      | `connectors/whatsapp/src/worker-env.ts`    | Nome fixo da única instância do Durable Object da ponte (instância única = sessão única).                         |
-| `WHATSAPP_WORKER_HANDLERS`  | `connectors/whatsapp/src/worker.ts`        | Handlers do Worker (`fetch` e `scheduled`), exportados pelo `index.ts` com o Durable Object.                      |
-| `GITHUB_USER_AGENT`         | `src/remote/github-login.ts`               | User-Agent das chamadas ao GitHub (a API recusa requisições sem ele).                                             |
-| `UPSTREAM_CALLBACK_PATH`    | `src/remote/handler.ts`                    | Caminho do retorno do login delegado (`/oauth/callback`), cadastrado no provedor.                                 |
-| `BRIDGE_RETRY_MS`           | `connectors/whatsapp/src/bridge-client.ts` | Espera entre tentativas enquanto a ponte acorda (750 ms).                                                         |
-| `GMAIL_SCOPES`              | `connectors/gmail/src/config.ts`           | Escopos do login e do vínculo (`openid email` + Gmail só leitura).                                                |
-| `GOOGLE_REVOKE_URL`         | `connectors/gmail/src/google-oauth.ts`     | Endpoint de revogação de tokens do Google.                                                                        |
-| `LINK_TICKET_TYP`           | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do ticket de vínculo emitido por `link_account`.                                                     |
-| `OWNER_RECORD_TYP`          | `connectors/gmail/src/token-store.ts`      | Tipo do selo do registro de contas de um usuário.                                                                 |
-| `OWNER_RECORD_EXP`          | `connectors/gmail/src/token-store.ts`      | Validade técnica do selo do registro (ano 2100).                                                                  |
-| `MAX_LINKED_ACCOUNTS`       | `connectors/gmail/src/token-store.ts`      | Mais contas Gmail que um usuário pode vincular (10).                                                              |
-| `linkAccountTool`           | `connectors/gmail/src/tools.ts`            | Ferramenta `link_account`.                                                                                        |
-| `unlinkAccountTool`         | `connectors/gmail/src/tools.ts`            | Ferramenta `unlink_account`.                                                                                      |
+| Nome                         | Arquivo                                    | O que é                                                                                                           |
+| ---------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `CANVAS_USER_AGENT`          | `connectors/canvas-puc/src/remote.ts`      | User-Agent das chamadas do modo remoto ao Canvas (o Canvas devolve 403 sem User-Agent).                           |
+| `TOKEN_RENEWAL_SECONDS`      | `connectors/canvas-puc/src/remote.ts`      | Quanto cada renovação estende o token do Canvas: 30 dias menos 1 hora (o Canvas recusa mais de 30 dias à frente). |
+| `TEST_EXCEPTIONS`            | `src/test-exceptions.ts`                   | Lista única de funções sem teste automatizado, com motivo e teste manual.                                         |
+| `DEFAULT_DOCS_CONFIG`        | `tools/docs/config.ts`                     | Configuração padrão do `docs:check`; `docs.config.json` sobrescreve.                                              |
+| `MODULE_SCOPE_SUFFIX`        | `tools/docs/ast.ts`                        | Sufixo do rótulo de referência feita fora de função (`arquivo (módulo)`).                                         |
+| `WALK_IGNORED_DIRS`          | `tools/docs/inventory.ts`                  | Pastas puladas ao percorrer o disco sem git.                                                                      |
+| `GENERATED_START`            | `tools/docs/markdown.ts`                   | Marcador de início do bloco gerado em FUNCTIONS.md.                                                               |
+| `GENERATED_END`              | `tools/docs/markdown.ts`                   | Marcador de fim do bloco gerado.                                                                                  |
+| `INDEX_START`                | `tools/docs/markdown.ts`                   | Marcador de início do índice por módulo.                                                                          |
+| `INDEX_END`                  | `tools/docs/markdown.ts`                   | Marcador de fim do índice por módulo.                                                                             |
+| `PLACEHOLDER`                | `tools/docs/markdown.ts`                   | Texto `_preencher_` deixado nos campos manuais novos.                                                             |
+| `MANUAL_FIELDS`              | `tools/docs/render.ts`                     | Ordem fixa dos campos manuais (Faz, Entrada, Saída, Efeitos, Erros).                                              |
+| `HTML_TEXT_REPLACEMENTS`     | `src/core/html.ts`                         | Substituições (regex → texto) aplicadas em ordem por `htmlToText`.                                                |
+| `CFB_SIGNATURE`              | `src/core/cfb.ts`                          | Os 8 bytes iniciais de todo arquivo OLE/CFB (o contêiner do .doc).                                                |
+| `CP1252_HIGH`                | `src/core/word.ts`                         | Caracteres de 0x80 a 0x9F do Windows-1252, usados ao decodificar o texto de 8 bits do .doc.                       |
+| `WORD_TEXT_REPLACEMENTS`     | `src/core/word.ts`                         | Substituições (regex → texto) aplicadas em ordem por `cleanWordText` às marcas do Word.                           |
+| `MAX_DOWNLOAD_BYTES`         | `connectors/canvas-puc/src/files.ts`       | Maior arquivo que `baixar_arquivo` traz para a conversa (10 MB).                                                  |
+| `MAX_TEXT_CHARS`             | `connectors/canvas-puc/src/files.ts`       | Maior texto devolvido por `ler_arquivo_texto` (100 000 caracteres).                                               |
+| `CONNECTORS_DIR`             | `tools/bundle/bundle.ts`                   | Pasta dos conectores relativa à raiz (`connectors`).                                                              |
+| `PLUGIN_DIR`                 | `tools/bundle/bundle.ts`                   | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                            |
+| `PLUGIN_MANIFEST_PATH`       | `tools/bundle/bundle.ts`                   | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.         |
+| `PLUGIN_MCP_CONFIG_PATH`     | `tools/bundle/bundle.ts`                   | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                |
+| `CANVAS_PAGE_SIZE`           | `connectors/canvas-puc/src/client.ts`      | Itens por página pedidos ao Canvas (`per_page`, máximo da API).                                                   |
+| `DEFAULT_MAX_ITEMS`          | `connectors/canvas-puc/src/client.ts`      | Limite padrão de itens somados entre páginas em `getAll`.                                                         |
+| `DEFAULT_CANVAS_URL`         | `connectors/canvas-puc/src/remote.ts`      | URL do Canvas da PUC Minas, usada sem `CANVAS_BASE_URL`.                                                          |
+| `MAX_TEXT_LENGTH`            | `connectors/canvas-puc/src/format.ts`      | Tamanho máximo de textos longos devolvidos ao modelo por `shortText`.                                             |
+| `ASSIGNMENT_BUCKETS`         | `connectors/canvas-puc/src/helpers.ts`     | Filtros de `listar_tarefas` → `bucket` da API do Canvas (`todas` não filtra).                                     |
+| `CANVAS_READ_TOOLS`          | `connectors/canvas-puc/src/tools-read.ts`  | Ferramentas MCP de leitura do Canvas (cursos, tarefas, notas, avisos etc.).                                       |
+| `CANVAS_WRITE_TOOLS`         | `connectors/canvas-puc/src/tools-write.ts` | Ferramentas MCP de escrita (entregar tarefa, responder discussão), só com `CANVAS_ALLOW_WRITE`.                   |
+| `CANVAS_SERVER_INFO`         | `connectors/canvas-puc/src/tools.ts`       | Nome e versão anunciados pelo servidor MCP do Canvas.                                                             |
+| `REMOTE_ENTRY`               | `tools/bundle/bundle.ts`                   | Entrada do servidor remoto em Node de um conector (`src/remote-main.ts`).                                         |
+| `REMOTE_BUNDLE_PATH`         | `tools/bundle/bundle.ts`                   | Bundle do servidor remoto (`server/remote.js`), usado pelo Dockerfile.                                            |
+| `SEAL_KEY_BYTES`             | `src/remote/seal.ts`                       | Tamanho da `SEAL_KEY` (32 bytes, AES-256).                                                                        |
+| `CLIENT_TTL_SECONDS`         | `src/remote/oauth.ts`                      | Validade do `client_id` registrado (10 anos).                                                                     |
+| `PENDING_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Validade do pedido selado no formulário de login (15 minutos).                                                    |
+| `CODE_TTL_SECONDS`           | `src/remote/tokens.ts`                     | Validade do código de autorização (5 minutos).                                                                    |
+| `ACCESS_TTL_SECONDS`         | `src/remote/tokens.ts`                     | Validade do access token (1 hora).                                                                                |
+| `REFRESH_TTL_SECONDS`        | `src/remote/tokens.ts`                     | Validade do refresh token (30 dias, como o token da PUC).                                                         |
+| `REVOKED_SECRET_DESCRIPTION` | `src/remote/handler.ts`                    | `error_description` of the `invalid_grant` answered when the connector says the credential was revoked.           |
+| `LOGIN_PAGE_CSS`             | `src/remote/login-page.ts`                 | Estilo da página de autorização, com os tokens de `docs/UI.md`.                                                   |
+| `CORS_HEADERS`               | `src/remote/handler.ts`                    | Headers CORS dos endpoints remotos (qualquer origem; não há cookies).                                             |
+| `REMOTE_ROUTES`              | `src/remote/handler.ts`                    | Tabela `MÉTODO caminho` → função do servidor remoto.                                                              |
+| `DEFAULT_REDIRECT_HOSTS`     | `src/remote/oauth.ts`                      | Hosts de retorno OAuth aceitos por padrão (`claude.ai`, `claude.com`, `localhost`).                               |
+| `MAX_BODY_BYTES`             | `src/remote/node-server.ts`                | Maior corpo de requisição aceito pelo servidor remoto (1 MB).                                                     |
+| `PDF_ESCAPES`                | `src/core/pdf.ts`                          | Escapes de letra das strings literais do PDF (`\n`, `\t`...).                                                     |
+| `TJ_SPACE_THRESHOLD`         | `src/core/pdf.ts`                          | Ajuste do `TJ` a partir do qual conta como espaço entre palavras.                                                 |
+| `PDF_TEXT_OPERATORS`         | `src/core/pdf.ts`                          | Operador de texto do PDF → texto que ele produz.                                                                  |
+| `ACCESS_TOKEN_MARGIN_MS`     | `connectors/gmail/src/access-token.ts`     | Margem antes do vencimento em que o access token do Google é renovado.                                            |
+| `MAX_ATTACHMENT_BYTES`       | `connectors/gmail/src/attachments.ts`      | Maior anexo lido como texto (5 MB).                                                                               |
+| `MAX_ATTACHMENT_CHARS`       | `connectors/gmail/src/attachments.ts`      | Maior texto devolvido de um anexo.                                                                                |
+| `GMAIL_MODIFY_SCOPE`         | `connectors/gmail/src/config.ts`           | Escopo `gmail.modify`, o único escopo de dados pedido (ler, enviar, organizar; sem exclusão definitiva).          |
+| `MIN_CONSENT_SECRET_CHARS`   | `connectors/gmail/src/config.ts`           | Tamanho mínimo de `CONSENT_SECRET`.                                                                               |
+| `UPSTREAM_USER_AGENT`        | `connectors/gmail/src/context.ts`          | User-Agent enviado ao Google e à Gmail API.                                                                       |
+| `GMAIL_API_BASE`             | `connectors/gmail/src/gmail-api.ts`        | Base da Gmail API para a conta do token.                                                                          |
+| `GMAIL_STATUS_MESSAGES`      | `connectors/gmail/src/gmail-api.ts`        | Mensagem acionável por status HTTP da Gmail API.                                                                  |
+| `GOOGLE_AUTHORIZE_URL`       | `connectors/gmail/src/google-oauth.ts`     | Endpoint de autorização do Google.                                                                                |
+| `GOOGLE_TOKEN_URL`           | `connectors/gmail/src/google-oauth.ts`     | Endpoint de tokens do Google.                                                                                     |
+| `GOOGLE_CALLBACK_PATH`       | `connectors/gmail/src/google-oauth.ts`     | Caminho do retorno do Google (`/google/callback`).                                                                |
+| `GOOGLE_JWKS_URL`            | `connectors/gmail/src/id-token.ts`         | Chaves públicas que assinam os `id_token` do Google.                                                              |
+| `GOOGLE_ISSUERS`             | `connectors/gmail/src/id-token.ts`         | Emissores aceitos no `id_token`.                                                                                  |
+| `CLOCK_SKEW_SECONDS`         | `connectors/gmail/src/id-token.ts`         | Folga de relógio aceita na validade do `id_token`.                                                                |
+| `LINK_STATE_PREFIX`          | `connectors/gmail/src/link-flow.ts`        | Prefixo do `state` do vínculo de conta (`link.`).                                                                 |
+| `LINK_COOKIE`                | `connectors/gmail/src/link-flow.ts`        | Cookie `__Host-` que prende o vínculo ao navegador.                                                               |
+| `LINK_TTL_SECONDS`           | `connectors/gmail/src/link-flow.ts`        | Validade do pedido de vínculo (10 minutos).                                                                       |
+| `LINK_REQUEST_TYP`           | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do pedido de vínculo.                                                                                |
+| `MAX_MESSAGE_CHARS`          | `connectors/gmail/src/message-format.ts`   | Maior corpo de mensagem devolvido.                                                                                |
+| `MAX_THREAD_CHARS`           | `connectors/gmail/src/message-format.ts`   | Maior soma dos corpos de uma conversa.                                                                            |
+| `MIN_MESSAGE_CHARS`          | `connectors/gmail/src/message-format.ts`   | Menor fatia por mensagem numa conversa longa.                                                                     |
+| `MESSAGE_HEADERS`            | `connectors/gmail/src/message-format.ts`   | Cabeçalhos devolvidos de cada mensagem.                                                                           |
+| `UNTRUSTED_NOTICE`           | `connectors/gmail/src/message-format.ts`   | Aviso de conteúdo de e-mail não confiável (prompt injection).                                                     |
+| `GOOGLE_ACCOUNTS_ORIGIN`     | `connectors/gmail/src/pages.ts`            | Origem do Google liberada no `form-action` do consentimento.                                                      |
+| `RATE_LIMIT_RETRY_SECONDS`   | `connectors/gmail/src/rate-limit.ts`       | Segundos do `Retry-After` na resposta 429.                                                                        |
+| `GMAIL_ID`                   | `connectors/gmail/src/tools.ts`            | Esquema zod de id da Gmail API (só caracteres seguros na URL).                                                    |
+| `listAccountsTool`           | `connectors/gmail/src/tools.ts`            | Ferramenta `list_accounts`.                                                                                       |
+| `searchThreadsTool`          | `connectors/gmail/src/tools.ts`            | Ferramenta `search_threads`.                                                                                      |
+| `getThreadTool`              | `connectors/gmail/src/tools.ts`            | Ferramenta `get_thread`.                                                                                          |
+| `getMessageTool`             | `connectors/gmail/src/tools.ts`            | Ferramenta `get_message`.                                                                                         |
+| `listLabelsTool`             | `connectors/gmail/src/tools.ts`            | Ferramenta `list_labels`.                                                                                         |
+| `getAttachmentTextTool`      | `connectors/gmail/src/tools.ts`            | Ferramenta `get_attachment_text`.                                                                                 |
+| `GMAIL_TOOLS`                | `connectors/gmail/src/tool-list.ts`        | Todas as ferramentas do Gmail, na ordem mostrada ao Claude.                                                       |
+| `MAX_QUOTED_CHARS`           | `connectors/gmail/src/compose.ts`          | Maior trecho do original citado numa resposta (20 mil caracteres).                                                |
+| `FORWARD_SEPARATOR`          | `connectors/gmail/src/compose.ts`          | Linha que abre o bloco do e-mail encaminhado.                                                                     |
+| `DRAFT_SHAPE`                | `connectors/gmail/src/draft-tools.ts`      | Parâmetros do conteúdo de um rascunho (criar e substituir).                                                       |
+| `listDraftsTool`             | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `list_drafts`.                                                                                         |
+| `createDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `create_draft`.                                                                                        |
+| `updateDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `update_draft`.                                                                                        |
+| `sendDraftTool`              | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `send_draft`.                                                                                          |
+| `deleteDraftTool`            | `connectors/gmail/src/draft-tools.ts`      | Ferramenta `delete_draft`.                                                                                        |
+| `MAX_GMAIL_ERROR_DETAIL`     | `connectors/gmail/src/gmail-api.ts`        | Maior detalhe de erro do Gmail repassado ao modelo (200 caracteres).                                              |
+| `TARGET_SHAPE`               | `connectors/gmail/src/mailbox-tools.ts`    | Parâmetros de alvo das ferramentas de organização (`message_ids`, `thread_ids`).                                  |
+| `markReadTool`               | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `mark_read`.                                                                                           |
+| `archiveTool`                | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `archive`.                                                                                             |
+| `starTool`                   | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `star`.                                                                                                |
+| `updateLabelsTool`           | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `update_labels`.                                                                                       |
+| `trashTool`                  | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `trash`.                                                                                               |
+| `untrashTool`                | `connectors/gmail/src/mailbox-tools.ts`    | Ferramenta `untrash`.                                                                                             |
+| `MAX_TARGET_MESSAGES`        | `connectors/gmail/src/mailbox.ts`          | Mais mensagens por chamada das ferramentas de organização (50).                                                   |
+| `MAX_TARGET_THREADS`         | `connectors/gmail/src/mailbox.ts`          | Mais conversas por chamada das ferramentas de organização (20).                                                   |
+| `MAILBOX_ACTIONS`            | `connectors/gmail/src/mailbox.ts`          | Marcadores de sistema que cada ação põe e tira (lido, arquivar, estrela).                                         |
+| `MAX_ENCODED_WORD_BYTES`     | `connectors/gmail/src/mime.ts`             | Maior trecho UTF-8 de uma palavra RFC 2047 (45 bytes, palavra ≤ 75).                                              |
+| `MAX_BODY_CHARS`             | `connectors/gmail/src/send-tools.ts`       | Maior corpo de e-mail aceito (100 mil caracteres).                                                                |
+| `RECIPIENTS`                 | `connectors/gmail/src/send-tools.ts`       | Esquema zod de lista de destinatários.                                                                            |
+| `BODY`                       | `connectors/gmail/src/send-tools.ts`       | Esquema zod do corpo em texto plano.                                                                              |
+| `SUBJECT`                    | `connectors/gmail/src/send-tools.ts`       | Esquema zod do assunto (até 998 caracteres).                                                                      |
+| `sendEmailTool`              | `connectors/gmail/src/send-tools.ts`       | Ferramenta `send_email`.                                                                                          |
+| `replyEmailTool`             | `connectors/gmail/src/send-tools.ts`       | Ferramenta `reply_email`.                                                                                         |
+| `replyAllEmailTool`          | `connectors/gmail/src/send-tools.ts`       | Ferramenta `reply_all_email`.                                                                                     |
+| `forwardEmailTool`           | `connectors/gmail/src/send-tools.ts`       | Ferramenta `forward_email`.                                                                                       |
+| `MAX_RECIPIENTS`             | `connectors/gmail/src/send.ts`             | Mais destinatários (To + Cc + Bcc) num e-mail (100).                                                              |
+| `MAX_FORWARD_BYTES`          | `connectors/gmail/src/send.ts`             | Maior soma de anexos num encaminhamento (18 MB).                                                                  |
+| `ONE_ACCOUNT`                | `connectors/gmail/src/tools.ts`            | Esquema zod do parâmetro `account` de uma conta só.                                                               |
+| `CONFIRM_HINT`               | `connectors/gmail/src/tools.ts`            | Frase das ferramentas de escrita: confirmar com o usuário e nunca agir por pedido de um e-mail.                   |
+| `READ_ONLY_HINTS`            | `connectors/gmail/src/tools.ts`            | Anotações MCP de leitura (`readOnlyHint`).                                                                        |
+| `SEND_HINTS`                 | `connectors/gmail/src/tools.ts`            | Anotações MCP de envio: destrutiva e não idempotente.                                                             |
+| `DESTRUCTIVE_HINTS`          | `connectors/gmail/src/tools.ts`            | Anotações MCP de quem apaga ou sobrescreve: destrutiva e idempotente.                                             |
+| `ORGANIZE_HINTS`             | `connectors/gmail/src/tools.ts`            | Anotações MCP de organização reversível.                                                                          |
+| `CREATE_HINTS`               | `connectors/gmail/src/tools.ts`            | Anotações MCP de criação sem apagar nada.                                                                         |
+| `GMAIL_SERVER_INFO`          | `connectors/gmail/src/worker.ts`           | Nome e versão do servidor MCP do Gmail.                                                                           |
+| `GMAIL_SERVER_INSTRUCTIONS`  | `connectors/gmail/src/worker.ts`           | Instruções do servidor MCP (contas e conteúdo não confiável).                                                     |
+| `ACCESS_TOKEN_TTL_SECONDS`   | `connectors/gmail/src/worker.ts`           | Validade do access token emitido ao Claude (1 hora).                                                              |
+| `REFRESH_TOKEN_TTL_SECONDS`  | `connectors/gmail/src/worker.ts`           | Validade do refresh token emitido ao Claude (30 dias).                                                            |
+| `GMAIL_ROUTES`               | `connectors/gmail/src/worker.ts`           | Rotas próprias do Worker: `MÉTODO caminho` → atendimento.                                                         |
+| `BRIDGE_ERROR_MESSAGES`      | `connectors/whatsapp/src/bridge-client.ts` | Mensagens ao usuário, em português, para os códigos de erro conhecidos da ponte.                                  |
+| `WHATSAPP_DEFAULTS`          | `connectors/whatsapp/src/config.ts`        | Padrões do conector: dormir em 5 min, 25 s por ferramenta, 8 s esperando o sync, 10 envios por hora.              |
+| `BRIDGE_ENV_KEYS`            | `connectors/whatsapp/src/config.ts`        | Variáveis repassadas do Worker para o container da ponte (`bridge/API.md`).                                       |
+| `SNAPSHOT_PUSH_URL`          | `connectors/whatsapp/src/config.ts`        | Endereço interno, interceptado pelo Worker, para onde a ponte envia o snapshot no `SIGTERM`.                      |
+| `UNTRUSTED_NOTICE`           | `connectors/whatsapp/src/format.ts`        | Aviso de dado de terceiros não confiável que acompanha todo resultado com mensagens ou contatos.                  |
+| `HIDDEN_CHAR_RANGES`         | `connectors/whatsapp/src/format.ts`        | Faixas de caracteres invisíveis (controle, largura zero, bidi, BOM) removidas por `sanitizeText`.                 |
+| `SNAPSHOT_INTERVAL_MS`       | `connectors/whatsapp/src/lifecycle.ts`     | Intervalo mínimo entre snapshots disparados por uso (1 minuto).                                                   |
+| `SNAPSHOT_AFTER_PATHS`       | `connectors/whatsapp/src/lifecycle.ts`     | Rotas da ponte depois das quais o banco pode ter mudado e vale tentar um snapshot.                                |
+| `SEND_HISTORY_KEY`           | `connectors/whatsapp/src/lifecycle.ts`     | Chave, no armazenamento do Durable Object, dos instantes dos envios recentes (limite por hora).                   |
+| `PAIR_PAGE_CSS`              | `connectors/whatsapp/src/pair-page.ts`     | Acréscimos de estilo da página `/pair` (código grande, QR, botões secundários e de perigo).                       |
+| `PAIR_SESSION_COOKIE`        | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) da sessão selada do `/pair`.                                                           |
+| `PAIR_NONCE_COOKIE`          | `connectors/whatsapp/src/pair.ts`          | Nome do cookie (`__Host-`) do nonce que amarra o login do `/pair` ao navegador.                                   |
+| `PAIR_SESSION_TTL_SECONDS`   | `connectors/whatsapp/src/pair.ts`          | Validade da sessão do `/pair` e do token anti-CSRF (30 minutos).                                                  |
+| `PAIR_LOGIN_TTL_SECONDS`     | `connectors/whatsapp/src/pair.ts`          | Validade do login do `/pair` em andamento (10 minutos).                                                           |
+| `PAIR_CALLBACK_PATH`         | `connectors/whatsapp/src/pair.ts`          | Caminho do retorno do GitHub para o `/pair` (subcaminho do retorno do OAuth App).                                 |
+| `PAIR_ACTIONS`               | `connectors/whatsapp/src/pair.ts`          | Ações do `/pair` por caminho: código, QR, desvincular e recomeçar do zero.                                        |
+| `SNAPSHOT_KEY_NAME`          | `connectors/whatsapp/src/snapshots.ts`     | Chave do snapshot atual no bucket R2 (`whatsapp/snapshot.was1`).                                                  |
+| `WHATSAPP_INSTRUCTIONS`      | `connectors/whatsapp/src/tools.ts`         | Instruções do servidor MCP: o que é o conector e a regra sobre conteúdo não confiável.                            |
+| `READ_TOOLS`                 | `connectors/whatsapp/src/tools.ts`         | Ferramentas de leitura (fase 1), sempre ativas.                                                                   |
+| `BRIDGE_INSTANCE_NAME`       | `connectors/whatsapp/src/worker-env.ts`    | Nome fixo da única instância do Durable Object da ponte (instância única = sessão única).                         |
+| `WHATSAPP_WORKER_HANDLERS`   | `connectors/whatsapp/src/worker.ts`        | Handlers do Worker (`fetch` e `scheduled`), exportados pelo `index.ts` com o Durable Object.                      |
+| `GITHUB_USER_AGENT`          | `src/remote/github-login.ts`               | User-Agent das chamadas ao GitHub (a API recusa requisições sem ele).                                             |
+| `UPSTREAM_CALLBACK_PATH`     | `src/remote/handler.ts`                    | Caminho do retorno do login delegado (`/oauth/callback`), cadastrado no provedor.                                 |
+| `BRIDGE_RETRY_MS`            | `connectors/whatsapp/src/bridge-client.ts` | Espera entre tentativas enquanto a ponte acorda (750 ms).                                                         |
+| `GMAIL_SCOPES`               | `connectors/gmail/src/config.ts`           | Escopos do login e do vínculo (`openid email` + Gmail só leitura).                                                |
+| `GOOGLE_REVOKE_URL`          | `connectors/gmail/src/google-oauth.ts`     | Endpoint de revogação de tokens do Google.                                                                        |
+| `LINK_TICKET_TYP`            | `connectors/gmail/src/link-flow.ts`        | Tipo do selo do ticket de vínculo emitido por `link_account`.                                                     |
+| `OWNER_RECORD_TYP`           | `connectors/gmail/src/token-store.ts`      | Tipo do selo do registro de contas de um usuário.                                                                 |
+| `OWNER_RECORD_EXP`           | `connectors/gmail/src/token-store.ts`      | Validade técnica do selo do registro (ano 2100).                                                                  |
+| `MAX_LINKED_ACCOUNTS`        | `connectors/gmail/src/token-store.ts`      | Mais contas Gmail que um usuário pode vincular (10).                                                              |
+| `linkAccountTool`            | `connectors/gmail/src/tools.ts`            | Ferramenta `link_account`.                                                                                        |
+| `unlinkAccountTool`          | `connectors/gmail/src/tools.ts`            | Ferramenta `unlink_account`.                                                                                      |

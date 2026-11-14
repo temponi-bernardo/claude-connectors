@@ -22,6 +22,7 @@ deve encontrar tudo aqui, sem varrer o código. Quando docs e código divergem, 
 | Saber o significado de um termo                               | [GLOSSARY.md](GLOSSARY.md)                               |
 | Mexer na interface (se o projeto tiver)                       | [UI.md](UI.md)                                           |
 | Saber como reportar uma vulnerabilidade                       | [../SECURITY.md](../SECURITY.md)                         |
+| Prepare a connector for Anthropic's Connectors Directory      | [DIRECTORY-LISTING.md](DIRECTORY-LISTING.md)             |
 
 ## Quem confere o quê
 

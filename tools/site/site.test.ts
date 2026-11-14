@@ -57,6 +57,8 @@ describe('site do GitHub Pages', () => {
       'Que dados são acessados',
       'Com quem os dados são compartilhados',
       'Como apagar',
+      '<h2>Gmail</h2>',
+      '<h2>WhatsApp</h2>',
     ]) {
       expect(html).toContain(heading);
     }

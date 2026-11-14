@@ -3,7 +3,7 @@
  * página do OAuth; cada requisição MCP usa esse token, sem sessão do navegador nem arquivo em disco.
  */
 import { envValue, parseFlag, type EnvVars } from '../../../src/core/env.js';
-import type { RemoteConnector } from '../../../src/remote/handler.js';
+import type { RemoteConnector, SecretRenewal } from '../../../src/remote/handler.js';
 import type { LoginPageText } from '../../../src/remote/login-page.js';
 import { createCanvasClient } from './client.js';
 import { canvasTools, createCanvasMcpServer } from './tools.js';
@@ -52,6 +52,13 @@ export function canvasLoginText(baseUrl: string): LoginPageText {
   };
 }
 
+/** Asks Canvas `/api/v1/users/self` with the token (rejects only on network failure). */
+export function fetchCanvasSelf(settings: CanvasRemoteSettings, token: string): Promise<Response> {
+  return settings.fetchFn(`${settings.baseUrl}/api/v1/users/self`, {
+    headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+  });
+}
+
 /** Confere o token em `/api/v1/users/self`; rejeita com a orientação ao usuário se não servir. */
 export async function verifyCanvasToken(
   settings: CanvasRemoteSettings,
@@ -60,9 +67,7 @@ export async function verifyCanvasToken(
   if (!token.trim()) throw new Error('Cole o token de acesso do Canvas.');
   let res: Response;
   try {
-    res = await settings.fetchFn(`${settings.baseUrl}/api/v1/users/self`, {
-      headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
-    });
+    res = await fetchCanvasSelf(settings, token);
   } catch {
     throw new Error('Não consegui falar com o Canvas. Tente de novo em instantes.');
   }
@@ -148,6 +153,29 @@ export async function renewCanvasToken(
   });
 }
 
+/** Says whether Canvas still accepts the token: only a 401 counts as dead; network or 5xx errors count as alive. */
+export async function isCanvasTokenAlive(
+  settings: CanvasRemoteSettings,
+  token: string,
+): Promise<boolean> {
+  try {
+    return (await fetchCanvasSelf(settings, token)).status !== 401;
+  } catch {
+    return true;
+  }
+}
+
+/** On each OAuth refresh: `revoked` if Canvas refuses the token, else extends its expiry and answers `kept`. */
+export async function renewCanvasSecret(
+  settings: CanvasRemoteSettings,
+  token: string,
+  now: Date,
+): Promise<SecretRenewal> {
+  if (!(await isCanvasTokenAlive(settings, token))) return 'revoked';
+  await renewCanvasToken(settings, token, now);
+  return 'kept';
+}
+
 /** Monta o conector remoto do Canvas para o servidor HTTP. */
 export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector {
   return {
@@ -156,7 +184,7 @@ export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteCon
       text: canvasLoginText(settings.baseUrl),
       verify: (secret) => verifyCanvasToken(settings, secret),
     },
-    renewSecret: (secret) => renewCanvasToken(settings, secret, new Date()),
+    renewSecret: (secret) => renewCanvasSecret(settings, secret, new Date()),
     createServer: (secret) => {
       const client = createCanvasClient({
         baseUrl: settings.baseUrl,
