@@ -23010,6 +23010,7 @@ function defineTool(def) {
     name: def.name,
     description: def.description,
     shape: def.shape,
+    ...def.annotations ? { annotations: def.annotations } : {},
     run: async (ctx, rawArgs) => def.run(ctx, schema.parse(rawArgs ?? {}))
   };
 }
@@ -23042,7 +23043,11 @@ function registerToolSpecs(server, specs, ctx) {
   for (const spec of specs) {
     server.registerTool(
       spec.name,
-      { description: spec.description, inputSchema: spec.shape },
+      {
+        description: spec.description,
+        inputSchema: spec.shape,
+        ...spec.annotations ? { annotations: spec.annotations } : {}
+      },
       (args) => runToolSafely(spec, ctx, args)
     );
   }
