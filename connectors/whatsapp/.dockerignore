@@ -1,0 +1,10 @@
+# Só a ponte Go e o NOTICE entram no contexto; o Worker (TypeScript) e o resto ficam de fora.
+*
+!bridge/
+!NOTICE.md
+bridge/**/*_test.go
+bridge/**/*.md
+bridge/**/testdata/
+bridge/bridge
+bridge/*.db
+bridge/*.db-*

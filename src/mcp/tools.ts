@@ -5,6 +5,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
+import { bytesToBase64 } from '../core/bytes.js';
 
 /** Ferramenta já com tipos apagados, pronta para registrar. `C` é o contexto do conector (cliente etc.). */
 export interface ToolSpec<C> {
@@ -92,4 +93,16 @@ export function registerToolSpecs<C>(
       (args: unknown) => runToolSafely(spec, ctx, args),
     );
   }
+}
+
+/** Bloco MCP com um conteúdo binário: imagem, áudio ou, para o resto, recurso embutido com o `uri` dado. */
+export function binaryContentBlock(
+  mimeType: string,
+  bytes: Uint8Array,
+  uri: string,
+): CallToolResult['content'][number] {
+  const data = bytesToBase64(bytes);
+  if (mimeType.startsWith('image/')) return { type: 'image', data, mimeType };
+  if (mimeType.startsWith('audio/')) return { type: 'audio', data, mimeType };
+  return { type: 'resource', resource: { uri, mimeType, blob: data } };
 }

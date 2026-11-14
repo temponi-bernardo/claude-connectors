@@ -151,8 +151,11 @@ export async function renewCanvasToken(
 /** Monta o conector remoto do Canvas para o servidor HTTP. */
 export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector {
   return {
-    loginText: canvasLoginText(settings.baseUrl),
-    verifySecret: (secret) => verifyCanvasToken(settings, secret),
+    login: {
+      kind: 'secret',
+      text: canvasLoginText(settings.baseUrl),
+      verify: (secret) => verifyCanvasToken(settings, secret),
+    },
     renewSecret: (secret) => renewCanvasToken(settings, secret, new Date()),
     createServer: (secret) => {
       const client = createCanvasClient({

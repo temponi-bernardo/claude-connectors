@@ -4,7 +4,7 @@
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { htmlToText } from '../../../src/core/html.js';
 import { wordKind, wordToText } from '../../../src/core/word.js';
-import { rawToolResult, type RawToolResult } from '../../../src/mcp/tools.js';
+import { binaryContentBlock, rawToolResult, type RawToolResult } from '../../../src/mcp/tools.js';
 import type { CanvasAttachment } from './canvas-types.js';
 import type { CanvasClient } from './client.js';
 import { isTextFile } from './helpers.js';
@@ -15,25 +15,13 @@ export const MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
 /** Maior texto devolvido por `ler_arquivo_texto`, em caracteres. */
 export const MAX_TEXT_CHARS = 100_000;
 
-/** Codifica bytes em base64 sem `Buffer` (funciona no Node e no Workers). */
-export function bytesToBase64(bytes: Uint8Array): string {
-  let binary = '';
-  for (let pos = 0; pos < bytes.length; pos += 0x8000) {
-    binary += String.fromCharCode(...bytes.subarray(pos, pos + 0x8000));
-  }
-  return btoa(binary);
-}
-
 /** Bloco MCP com o conteúdo do arquivo: imagem para `image/*`, recurso embutido para o resto. */
 export function fileContentBlock(
   file: CanvasAttachment,
   bytes: Uint8Array,
 ): CallToolResult['content'][number] {
   const mimeType = file['content-type'] ?? 'application/octet-stream';
-  const data = bytesToBase64(bytes);
-  if (mimeType.startsWith('image/')) return { type: 'image', data, mimeType };
-  const uri = file.url ?? `canvas-file:${String(file.id)}`;
-  return { type: 'resource', resource: { uri, mimeType, blob: data } };
+  return binaryContentBlock(mimeType, bytes, file.url ?? `canvas-file:${String(file.id)}`);
 }
 
 /** Resultado de `baixar_arquivo`: uma linha de descrição e o conteúdo do arquivo. */

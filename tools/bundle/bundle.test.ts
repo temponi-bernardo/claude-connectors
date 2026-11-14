@@ -10,6 +10,7 @@ import {
   listConnectors,
   mcpServerProblems,
   pluginMcpProblems,
+  isRemoteMcpUrl,
 } from './bundle.js';
 
 const dirs: string[] = [];
@@ -40,6 +41,20 @@ describe('listConnectors', () => {
   });
 });
 
+describe('isRemoteMcpUrl', () => {
+  it('aceita https fixo e o campo de configuração do plugin (template self-host)', () => {
+    expect(isRemoteMcpUrl('https://x.dev/mcp')).toBe(true);
+    expect(isRemoteMcpUrl('${user_config.server_url}')).toBe(true);
+  });
+
+  it('recusa http, texto que só contém o campo e valores que não são texto', () => {
+    expect(isRemoteMcpUrl('http://x.dev/mcp')).toBe(false);
+    expect(isRemoteMcpUrl('http://${user_config.server_url}')).toBe(false);
+    expect(isRemoteMcpUrl('${user_config.Server}')).toBe(false);
+    expect(isRemoteMcpUrl(undefined)).toBe(false);
+  });
+});
+
 describe('mcpServerProblems', () => {
   it('aceita um servidor http com URL https', () => {
     expect(mcpServerProblems('c', { type: 'http', url: 'https://x.dev/mcp' })).toEqual([]);
@@ -48,7 +63,7 @@ describe('mcpServerProblems', () => {
   it('recusa servidor local, sem tipo http ou com URL insegura', () => {
     expect(mcpServerProblems('c', { command: 'node', args: [] })).toEqual([
       'c: "type" deve ser "http".',
-      'c: "url" deve ser um endereço https://.',
+      'c: "url" deve ser um endereço https:// (ou ${user_config.<campo>}).',
       'c: não pode ter "command" (nada roda localmente).',
     ]);
     expect(mcpServerProblems('c', { type: 'http', url: 'http://x.dev/mcp' })).toHaveLength(1);

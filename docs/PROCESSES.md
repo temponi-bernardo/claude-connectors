@@ -200,3 +200,95 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
 - **Falhas:** conta não vinculada ou revogada → `relinkError()` com o link de `linkUrl()`; `invalid_grant` marca a
   conta como revogada; erro HTTP do Gmail → `gmailHttpError()`; mais de 120 req/min → 429
   (`rateLimitedResponse()`); anexo acima de 5 MB ou tipo não suportado → erro explicando o limite.
+
+## P13 — Conectar o WhatsApp remoto (OAuth com login do dono pelo GitHub)
+
+- **Gatilho:** no Claude, adicionar o conector personalizado `https://<worker>/mcp` do WhatsApp (ADR 0015).
+- **Passos:**
+  1. `handleWhatsAppFetch()` monta os apps com `createWhatsAppApps()` (`readWhatsAppSettings()`: `readAllowedEmails()`,
+     `requireEnv()`, `readTimingSettings()`, `readSendSettings()`; `resolveIssuer()`, `readOAuthSettings()`) e,
+     como o caminho não é do `/pair`, passa a requisição a `routeRemoteRequest()`.
+  2. Descoberta e registro seguem o P08 (passos 2 e 3). O conector vem de `whatsappRemoteConnector()`, com o login
+     de `githubUpstreamLogin()` (`githubSettingsFrom()`).
+  3. `handleAuthorizePage()` valida o pedido e, por ser login delegado, `redirectToUpstream()` manda o navegador a
+     `githubAuthorizeUrl()` com o pedido selado no `state`.
+  4. No retorno, `handleUpstreamCallback()` abre o `state` com `openAuthorizeRequest()` e chama `finishGithubLogin()`:
+     `exchangeGithubCode()` troca o código, `fetchGithubEmails()` lê os e-mails e `pickAllowedEmail()` exige um
+     verificado de `ALLOWED_EMAILS` (lista de `parseEmailList()`). O token do GitHub é descartado.
+  5. O e-mail aceito vira o segredo do código (`issueAuthorizationCode()`, `redirectWithCode()`); a troca de tokens
+     segue o P08 (passo 6).
+- **Resultado:** o conector aparece conectado; o segredo selado nos tokens é só o e-mail do dono.
+- **Falhas:** login cancelado ou conta fora da lista → página 403 com o motivo (`escapeHtml()`); `state` vencido →
+  400; secret faltando → 500 explicando qual.
+
+## P14 — Responder a uma ferramenta do WhatsApp (sob demanda)
+
+- **Gatilho:** o Claude chama uma ferramenta em `POST /mcp` (ex.: `list_chats`).
+- **Passos:**
+  1. `handleMcp()` abre o access token e confere com `acceptsSecret` se o e-mail ainda está na lista; o
+     `createServer` monta `createWhatsAppMcpServer()` com `whatsappTools()` (leitura; envio só com `ENABLE_SEND`).
+  2. A ferramenta roda em `runRead()` com prazo de `toolDeadline()`: `prepareRead()` pede `POST /sync/wait` com o
+     orçamento de `syncWaitBudget()` e, se precisa parear, devolve o endereço do `/pair`. `withDeadline()` corta o
+     que passar do teto.
+  3. As chamadas à ponte passam por `bridgeJson()`/`callBridge()` (`bridgePath()`, `jsonPost()`), que usam
+     `bridgeFetchFor()` sobre o stub único de `bridgeStub()`. Erros viram texto com `bridgeErrorFrom()`;
+     estouro de prazo, `bridgeTimeoutMessage()`.
+  4. No Durable Object, `routeBridgeRequest()` (montado por `createBridgeLifecycle()`) chama `ensureRestored()`:
+     `readBridgePhase()` e, se a ponte acabou de acordar, `restoreRequestInit()` manda o snapshot do R2. Depois
+     `fetchBridge()` repassa com `withBridgeToken()` e `forwardInit()`.
+  5. A resposta é reduzida por `compactChat()`, `compactMessage()`, `compactContact()` ou `compactStatus()` (textos
+     limpos por `sanitizeText()` e `isHiddenChar()`) e embrulhada por `untrusted()`; `partialSyncWarning()` junta o
+     aviso de resultado parcial. Mídia vira bloco MCP em `mediaResult()` (`binaryContentBlock()`, `bytesToBase64()`).
+- **Resultado:** resposta compacta, com datas ISO com fuso e o aviso de conteúdo não confiável.
+- **Falhas:** cold start lento → "Tempo esgotado…, tente de novo"; snapshot que não abre → erro `bad_snapshot`
+  (a ponte nunca recomeça do zero sozinha); e-mail removido da lista → 403.
+
+## P15 — Parear o número (`/pair`)
+
+- **Gatilho:** o dono abre `https://<worker>/pair`.
+- **Passos:**
+  1. `routePairRequest()` reconhece o caminho com `isPairPath()` e lê a sessão com `readPairSession()`
+     (`parseCookies()`, `openSealed()`).
+  2. Sem sessão, `startPairLogin()` manda ao GitHub com `state` selado e um nonce em cookie (`pairCookie()`,
+     `redirectWithCookies()`). No retorno, `handlePairCallback()` confere com `isValidPairLogin()`, conclui com
+     `finishGithubLogin()` e `openPairSession()` grava a sessão.
+  3. `pairPage()` mostra `renderPairPage()` com o status de `fetchPairStatus()` (`describePairStatus()`,
+     `pairingSection()`, `maintenanceSection()`, `pairForm()`, `alertHtml()`) e um token de `issuePairCsrf()`.
+  4. Cada POST passa por `routePairPost()` e `handlePairPost()`: `isTrustedPost()` confere token e `Origin`, e a
+     ação de `PAIR_ACTIONS` chama a ponte (`/pair/code` com `normalizePhone()`, `/pair/qr`, `/logout`, ou
+     `/__reset`, que chega a `resetBridge()` e `archiveSnapshot()`), com prazo de `pairDeadline()`; falha vira
+     `pairActionError()`.
+- **Resultado:** código de pareamento (ou QR) na tela; depois de digitado no celular, a ponte fica conectada.
+- **Falhas:** formulário velho ou de outra origem → 403; número inválido → aviso na página; ponte sem resposta →
+  "Não consegui ler o status".
+
+## P16 — Guardar e restaurar a sessão (snapshots no R2)
+
+- **Gatilho:** rotas que podem mudar o banco (`SNAPSHOT_AFTER_PATHS`), o fim do `SLEEP_AFTER` e, no melhor
+  esforço, o `SIGTERM` da ponte.
+- **Passos:**
+  1. Depois do repasse, `SnapshotScheduler` agenda um snapshot se o último tem mais de `SNAPSHOT_INTERVAL_MS`;
+     os snapshots rodam em fila e falhas só vão ao log (`logSnapshotFailure()`).
+  2. `snapshotBridge()` pede `GET /snapshot` à ponte (já cifrado) e `storeSnapshotResponse()` lê
+     `readUploadHeaders()`; `storeSnapshot()` compara com `storedGeneration()` e grava em fluxo de tamanho fixo
+     (`workersFixedLength()`), descartando geração velha.
+  3. Antes de dormir, o `onActivityExpired` do `WhatsAppBridge` tira o último snapshot e para o container.
+  4. No `SIGTERM`, a ponte envia o snapshot a `snapshot.internal`, interceptado pelo Worker em
+     `acceptSnapshotPush()` (token conferido por `sameSecret()`).
+  5. No próximo boot, `ensureRestored()` devolve o snapshot à ponte (P14, passo 4).
+- **Resultado:** sessão e mensagens sobrevivem ao container dormir, sem o Worker ver o conteúdo em claro.
+- **Falhas:** snapshot recusado pela ponte → erro até "Recomeçar do zero" no `/pair`; queda abrupta sem `SIGTERM`
+  → perde só o que mudou desde o último snapshot (o WhatsApp reenvia as pendências).
+
+## P17 — Enviar uma mensagem (fase 2, `ENABLE_SEND`) e sync periódico opcional
+
+- **Gatilho:** `send_message` com `confirmed_by_user: true`; ou um Cron Trigger igual a `SYNC_CRON`.
+- **Passos:**
+  1. Envio: `allowedRecipient()` exige o número na `SEND_ALLOWLIST` (`normalizePhone()`); no Durable Object,
+     `guardSend()` aplica `planSend()` com o histórico do armazenamento antes de repassar o `/send` (a ponte confere
+     allowlist e limite de novo).
+  2. Cron: `runScheduledSync()` só age se `isSyncCronEnabled()`; acorda a ponte com `/sync/wait`, pede
+     `/__snapshot` e deixa o container dormir após `SLEEP_AFTER`.
+- **Resultado:** no máximo `SEND_MAX_PER_HOUR` envios por hora, só para a allowlist; com cron, histórico em dia
+  mesmo sem uso.
+- **Falhas:** destinatário fora da lista → recusa sem chamar a ponte; limite estourado → 429 com espera em segundos.

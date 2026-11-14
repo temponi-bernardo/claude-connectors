@@ -3,7 +3,7 @@
  * autorização com a página de login, troca de tokens e o endpoint `/mcp` protegido.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { renderLoginPage, type LoginPageText } from './login-page.js';
+import { escapeHtml, renderLoginPage, type LoginPageText } from './login-page.js';
 import { mcpUnauthorizedResponse, serveMcpRequest } from './mcp-endpoint.js';
 import {
   authorizationServerMetadata,
@@ -21,16 +21,36 @@ import {
   sealAuthorizeRequest,
 } from './tokens.js';
 
+/** Login em que o usuário cola a credencial do serviço na página do `/authorize` (ex.: token do Canvas). */
+export interface SecretLogin {
+  readonly kind: 'secret';
+  readonly text: LoginPageText;
+  /** Confere a credencial no serviço; rejeita com mensagem para o usuário se ela não servir. */
+  readonly verify: (secret: string) => Promise<void>;
+}
+
+/** Login delegado a um provedor de identidade (ex.: GitHub); o segredo selado é a identidade aceita. */
+export interface UpstreamLogin {
+  readonly kind: 'upstream';
+  /** Endereço do provedor para onde o navegador vai, levando o pedido selado em `state`. */
+  readonly start: (state: string, callbackUrl: string) => string;
+  /** Conclui o login com a query do retorno; devolve o segredo ou rejeita com mensagem ao usuário. */
+  readonly finish: (query: URLSearchParams, callbackUrl: string) => Promise<string>;
+}
+
 /** O que um conector entrega ao servidor remoto. */
 export interface RemoteConnector {
-  readonly loginText: LoginPageText;
-  /** Confere a credencial no serviço; rejeita com mensagem para o usuário se ela não servir. */
-  readonly verifySecret: (secret: string) => Promise<void>;
+  readonly login: SecretLogin | UpstreamLogin;
   /** Cria o servidor MCP com as ferramentas ligadas à credencial do usuário. */
   readonly createServer: (secret: string) => McpServer;
   /** Opcional: estende a validade da credencial no serviço a cada refresh do OAuth. */
   readonly renewSecret?: (secret: string) => Promise<void>;
+  /** Opcional: confere a cada `/mcp` se o segredo ainda vale (ex.: e-mail ainda na lista do dono). */
+  readonly acceptsSecret?: (secret: string) => boolean;
 }
+
+/** Caminho do retorno do login delegado (cadastre `<emissor>/oauth/callback` no provedor). */
+export const UPSTREAM_CALLBACK_PATH = '/oauth/callback';
 
 /** Dependências do roteador: configuração OAuth, conector e relógio em segundos Unix. */
 export interface RemoteApp {
@@ -62,7 +82,7 @@ export function jsonResponse(data: unknown, status = 200): Response {
 /** CSP das páginas; o `form-action` inclui a origem do retorno, senão o navegador barra o 302 do envio. */
 export function pageSecurityPolicy(formTarget: string | null): string {
   const formAction = formTarget ? `'self' ${formTarget}` : "'self'";
-  return `default-src 'none'; style-src 'unsafe-inline'; form-action ${formAction}; frame-ancestors 'none'`;
+  return `default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action ${formAction}; frame-ancestors 'none'`;
 }
 
 /** Resposta HTML com status, sem cache e sem ser exibida em frames de outros sites. */
@@ -102,9 +122,10 @@ export function loginPageFor(
   request: AuthorizeRequest,
   error: string | null,
 ): Response {
+  if (app.connector.login.kind !== 'secret') return htmlResponse('<p>Não encontrado.</p>', 404);
   return htmlResponse(
     renderLoginPage({
-      text: app.connector.loginText,
+      text: app.connector.login.text,
       pending: sealAuthorizeRequest(request, app.settings, app.now()),
       clientHost: new URL(request.redirectUri).host,
       error,
@@ -130,22 +151,61 @@ export async function handleRegister(app: RemoteApp, request: Request): Promise<
   return jsonResponse(result.value, 201);
 }
 
-/** `GET /authorize`: valida o pedido e mostra a página de login (erros não redirecionam). */
+/** Redireciona o navegador ao provedor de identidade com o pedido selado no `state`. */
+export function redirectToUpstream(
+  app: RemoteApp,
+  login: UpstreamLogin,
+  request: AuthorizeRequest,
+): Response {
+  const state = sealAuthorizeRequest(request, app.settings, app.now());
+  const target = login.start(state, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
+  return new Response(null, { status: 302, headers: { location: target } });
+}
+
+/** `GET /authorize`: valida o pedido e mostra a página de login ou vai ao provedor (erros não redirecionam). */
 export function handleAuthorizePage(app: RemoteApp, request: Request): Promise<Response> {
   const result = parseAuthorizeQuery(new URL(request.url).searchParams, app.settings, app.now());
   if (!result.ok) return Promise.resolve(htmlResponse(`<p>${result.description}</p>`, 400));
+  const login = app.connector.login;
+  if (login.kind === 'upstream')
+    return Promise.resolve(redirectToUpstream(app, login, result.value));
   return Promise.resolve(loginPageFor(app, result.value, null));
+}
+
+/** `GET /oauth/callback`: conclui o login delegado e devolve o código ao cliente, ou explica a recusa. */
+export async function handleUpstreamCallback(app: RemoteApp, request: Request): Promise<Response> {
+  const login = app.connector.login;
+  if (login.kind !== 'upstream') return htmlResponse('<p>Não encontrado.</p>', 404);
+  const query = new URL(request.url).searchParams;
+  const pending = openAuthorizeRequest(query.get('state') ?? '', app.settings, app.now());
+  if (!pending)
+    return htmlResponse('<p>O pedido expirou. Volte ao Claude e conecte de novo.</p>', 400);
+  let secret: string;
+  try {
+    secret = await login.finish(query, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
+  } catch (error) {
+    return htmlResponse(
+      `<p>${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`,
+      403,
+    );
+  }
+  return redirectWithCode(
+    pending,
+    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now()),
+  );
 }
 
 /** `POST /authorize`: confere a credencial e devolve o código ao cliente, ou a página com o erro. */
 export async function handleAuthorizeSubmit(app: RemoteApp, request: Request): Promise<Response> {
   const form = await readForm(request);
+  const login = app.connector.login;
+  if (login.kind !== 'secret') return htmlResponse('<p>Não encontrado.</p>', 404);
   const pending = openAuthorizeRequest(form.get('pending') ?? '', app.settings, app.now());
   if (!pending)
     return htmlResponse('<p>O pedido expirou. Volte ao Claude e conecte de novo.</p>', 400);
   const secret = (form.get('secret') ?? '').trim();
   try {
-    await app.connector.verifySecret(secret);
+    await login.verify(secret);
   } catch (error) {
     return loginPageFor(app, pending, error instanceof Error ? error.message : String(error));
   }
@@ -183,6 +243,9 @@ export async function handleToken(app: RemoteApp, request: Request): Promise<Res
 export function handleMcp(app: RemoteApp, request: Request): Promise<Response> {
   const secret = readAccessSecret(request.headers.get('authorization'), app.settings, app.now());
   if (secret === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
+  if (app.connector.acceptsSecret?.(secret) === false) {
+    return Promise.resolve(jsonResponse({ error: 'access_revoked' }, 403));
+  }
   return serveMcpRequest(app.connector.createServer(secret), request);
 }
 
@@ -199,6 +262,7 @@ export const REMOTE_ROUTES: Readonly<Record<string, RemoteRoute>> = {
   'GET /authorize': handleAuthorizePage,
   'POST /authorize': handleAuthorizeSubmit,
   'POST /token': handleToken,
+  [`GET ${UPSTREAM_CALLBACK_PATH}`]: handleUpstreamCallback,
   'GET /mcp': handleMcp,
   'POST /mcp': handleMcp,
   'DELETE /mcp': handleMcp,

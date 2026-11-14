@@ -25,6 +25,7 @@ export default {
         'remote',
         'site',
         'gmail',
+        'whatsapp',
       ],
     ],
     'scope-empty': [2, 'never'],

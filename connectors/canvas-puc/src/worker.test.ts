@@ -8,7 +8,7 @@ describe('createWorkerApp', () => {
   it('usa a origem da requisição como emissor quando PUBLIC_URL não vem', () => {
     const app = createWorkerApp({ SEAL_KEY: KEY }, 'https://canvas.contas.workers.dev');
     expect(app.settings.issuer).toBe('https://canvas.contas.workers.dev');
-    expect(app.connector.loginText.helpUrl).toBe(
+    expect(app.connector.login.kind === 'secret' && app.connector.login.text.helpUrl).toBe(
       'https://pucminas.instructure.com/profile/settings',
     );
     expect(app.now()).toBeGreaterThan(1_700_000_000);

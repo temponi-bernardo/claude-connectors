@@ -35,6 +35,11 @@ export function readOAuthSettings(env: EnvVars, issuer: string): OAuthSettings {
   };
 }
 
+/** Emissor OAuth: `PUBLIC_URL` sem barra final ou, sem ela, a origem da requisição (ex.: `*.workers.dev`). */
+export function resolveIssuer(env: EnvVars, origin: string): string {
+  return envValue(env, 'PUBLIC_URL')?.replace(/\/+$/, '') ?? origin;
+}
+
 /** Resultado de uma validação: valor, ou erro OAuth (`error` + `error_description`). */
 export type OAuthResult<T> =
   | { readonly ok: true; readonly value: T }

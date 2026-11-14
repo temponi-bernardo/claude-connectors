@@ -26,3 +26,12 @@ export function utf16leToString(bytes: Uint8Array): string {
     out += String.fromCharCode(v.getUint16(pos, true));
   return out;
 }
+
+/** Codifica bytes em base64 sem `Buffer` (funciona no Node e no Workers). */
+export function bytesToBase64(bytes: Uint8Array): string {
+  let binary = '';
+  for (let pos = 0; pos < bytes.length; pos += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(pos, pos + 0x8000));
+  }
+  return btoa(binary);
+}
