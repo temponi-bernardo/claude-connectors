@@ -47,6 +47,16 @@ conteúdo das mensagens é dado de terceiros não confiável.
 
 ## Publicar (uma vez)
 
+**Deploy na nuvem (recomendado, é como está publicado):** o Workers Builds da Cloudflare monta a imagem e
+publica, sem Docker na sua máquina. No painel: Workers & Pages → Create → **Continue with GitHub** → este
+repositório, com nome `whatsapp-remote`, deploy command
+`npx wrangler deploy --config connectors/whatsapp/wrangler.toml`, root `/`, preview builds desligados. Em
+Settings → Builds, deixe a produção na `main` e os _build watch paths_ `connectors/whatsapp/*`, `src/remote/*`,
+`src/mcp/*`, `src/core/*` e `package-lock.json`: só merges que tocam o WhatsApp publicam (e reiniciam o
+container). Os passos 3, 5 e 6 abaixo continuam valendo (bucket, OAuth App e secrets via `wrangler secret put`).
+
+**Deploy local (alternativa):**
+
 Pré-requisitos: conta Cloudflare com **Workers Paid** (US$ 5/mês, inclui Containers), Node 22+, Docker rodando
 (o `wrangler` constrói a imagem da ponte) e uma conta no GitHub.
 
