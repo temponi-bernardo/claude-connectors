@@ -70,7 +70,7 @@ O plugin tem só `.claude-plugin/plugin.json` e `.mcp.json` (servidor `http` com
 | GitHub Pages              | Site público (início, privacidade, termos) | `docs/_config.yml`, `docs/_layouts/site.html`          | Nenhum (ADR 0012)                                                |
 | Google OAuth / OIDC       | Login do dono e vínculo de contas          | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`  | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (secrets do Worker)   |
 | Gmail API (só leitura)    | Buscar e ler e-mails e anexos              | `connectors/gmail/src/gmail-api.ts`                    | Refresh token selado no KV com `TOKEN_ENC_KEY`                   |
-| Workers KV / rate limit   | Grants OAuth, contas e limite (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`, `ALLOWED_EMAILS` (secrets do Worker)           |
+| Workers KV / rate limit   | Grants OAuth, contas e limite (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`; `ALLOWED_EMAILS` opcional (modo privado)       |
 
 Nada de credencial no repositório nem no servidor: o token do Canvas só existe selado (AES-GCM com a `SEAL_KEY`)
 dentro dos tokens OAuth que o Claude guarda.

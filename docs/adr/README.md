@@ -18,4 +18,5 @@ marca o antigo como "Substituído por NNNN". Modelo em [0000-modelo.md](0000-mod
 | [0011](0011-renovacao-automatica-do-token-do-canvas.md)   | Renovação automática do token do Canvas no refresh do OAuth  | Aceito                               | 2026-11-05 |
 | [0012](0012-site-publico-no-github-pages.md)              | Site público no GitHub Pages, servido da pasta `docs/`       | Aceito                               | 2026-11-14 |
 | [0013](0013-conector-so-remoto-pelo-marketplace.md)       | Conector só remoto, instalado pelo marketplace               | Aceito                               | 2026-11-14 |
-| [0014](0014-gmail-remoto-sob-demanda-no-workers.md)       | Gmail remoto multi-conta, só leitura, sob demanda no Workers | Aceito                               | 2026-11-14 |
+| [0014](0014-gmail-remoto-sob-demanda-no-workers.md)       | Gmail remoto multi-conta, só leitura, sob demanda no Workers | Substituído em parte por 0015        | 2026-11-14 |
+| [0015](0015-gmail-multiusuario-publico.md)                | Gmail remoto público e multiusuário                          | Aceito                               | 2026-11-14 |
