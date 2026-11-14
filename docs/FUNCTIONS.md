@@ -37,7 +37,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
 - `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
 - `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
-- `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
+- `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`normalizeRecipient`](#normalizerecipient), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
 - `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
 - `connectors/whatsapp/src/format.ts`: [`isHiddenChar`](#ishiddenchar), [`sanitizeText`](#sanitizetext), [`untrusted`](#untrusted), [`compactMessage`](#compactmessage), [`compactChat`](#compactchat), [`partialSyncWarning`](#partialsyncwarning), [`compactStatus`](#compactstatus)
 - `connectors/whatsapp/src/lifecycle.ts`: [`withBridgeToken`](#withbridgetoken), [`fetchBridge`](#fetchbridge), [`readBridgePhase`](#readbridgephase), [`restoreRequestInit`](#restorerequestinit), [`ensureRestored`](#ensurerestored), [`snapshotBridge`](#snapshotbridge), [`planSend`](#plansend), [`guardSend`](#guardsend), [`forwardInit`](#forwardinit), [`createBridgeLifecycle`](#createbridgelifecycle), [`logSnapshotFailure`](#logsnapshotfailure), [`resetBridge`](#resetbridge), [`routeBridgeRequest`](#routebridgerequest)
@@ -6730,7 +6730,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 - **Arquivo:** `connectors/whatsapp/src/config.ts`
 - **Assinatura:** `normalizePhone(raw: string): string | null`
-- **Usada por:** `allowedRecipient()`, `connectors/whatsapp/src/pair.ts (módulo)`, `readSendAllowlist()`
+- **Usada por:** `connectors/whatsapp/src/pair.ts (módulo)`, `normalizeRecipient()`
 - **Processos:** P13, P15, P17
 
 <!-- gerado:fim -->
@@ -6752,9 +6752,9 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Lê `SEND_ALLOWLIST` (números separados por vírgula); item inválido lança.
+- **Faz:** Lê `SEND_ALLOWLIST` (números ou JIDs separados por vírgula; vazia = qualquer destinatário); item inválido lança.
 - **Entrada:** `env`.
-- **Saída:** Lista de números normalizados (vazia se ausente).
+- **Saída:** Lista de JIDs normalizados (vazia se ausente).
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Lança `Error` com o item inválido.
 
@@ -6803,7 +6803,7 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Lê a configuração de envio (fase 2): ligado ou não, allowlist e limite por hora.
+- **Faz:** Lê a configuração de envio: ligado ou não, allowlist opcional e limite por hora.
 - **Entrada:** `env`.
 - **Saída:** `enableSend`, `sendAllowlist` e `sendMaxPerHour`.
 - **Efeitos:** Nenhum (pura).
@@ -6842,6 +6842,23 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 - **Saída:** Variáveis de `BRIDGE_ENV_KEYS` presentes, mais `SNAPSHOT_PUSH_URL`.
 - **Efeitos:** Nenhum (pura).
 - **Erros:** Lança `Error` se faltar `BRIDGE_TOKEN` (ou tiver menos de 32 caracteres) ou `SNAPSHOT_KEY`.
+
+### `normalizeRecipient`
+
+<!-- gerado:inicio -->
+
+- **Arquivo:** `connectors/whatsapp/src/config.ts`
+- **Assinatura:** `normalizeRecipient(raw: string): string | null`
+- **Usada por:** `allowedRecipient()`, `readSendAllowlist()`
+- **Processos:** P13, P17
+
+<!-- gerado:fim -->
+
+- **Faz:** Normaliza um destinatário de envio para JID: número (com ou sem `+`, espaços, traços) vira `<dígitos>@s.whatsapp.net`; JIDs de contato, LID e grupo (`@g.us`, inclusive `criador-timestamp`) passam como estão. Pura.
+- **Entrada:** `raw`: número ou JID digitado.
+- **Saída:** JID normalizado, ou `null` se não for contato nem grupo (ex.: `status@broadcast`).
+- **Efeitos:** Nenhum (pura).
+- **Erros:** Nenhum.
 
 ## `connectors/whatsapp/src/container.ts`
 
@@ -7854,11 +7871,11 @@ Modelo e regras de escrita: [DOCUMENTATION.md](DOCUMENTATION.md#função).
 
 <!-- gerado:fim -->
 
-- **Faz:** Confere se o destinatário está na `SEND_ALLOWLIST`; devolve o número normalizado ou lança.
-- **Entrada:** `settings` e o destinatário.
-- **Saída:** Número normalizado.
+- **Faz:** Valida o destinatário (`normalizeRecipient()`) e, se a `SEND_ALLOWLIST` tiver itens, exige que ele esteja nela; vazia libera qualquer contato ou grupo.
+- **Entrada:** `settings` e o destinatário (número ou JID).
+- **Saída:** JID normalizado.
 - **Efeitos:** Nenhum (pura).
-- **Erros:** Lança `Error` se o número for inválido ou estiver fora da allowlist.
+- **Erros:** Lança `Error` se o destinatário for inválido ou estiver fora de uma allowlist não vazia.
 
 ### `whatsappTools`
 

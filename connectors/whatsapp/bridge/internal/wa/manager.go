@@ -263,23 +263,44 @@ func (m *Manager) resetDevice() {
 	go m.logConnect()
 }
 
-// SendText envia texto e grava a mensagem enviada no banco.
-func (m *Manager) SendText(ctx context.Context, to, text string) (Sent, error) {
+// Outgoing é uma mensagem de texto a enviar: destinatário (JID), texto e, opcionalmente, a mensagem citada.
+type Outgoing struct {
+	To    string
+	Text  string
+	Quote *store.Quoted
+}
+
+// buildOutgoing monta o protobuf do texto (função pura); com citação, usa ExtendedTextMessage + ContextInfo.
+func buildOutgoing(text string, q *store.Quoted, own string) *waE2E.Message {
+	if q == nil {
+		return &waE2E.Message{Conversation: proto.String(text)}
+	}
+	participant := q.SenderJID
+	if q.FromMe || participant == "" {
+		participant = own
+	}
+	return &waE2E.Message{ExtendedTextMessage: &waE2E.ExtendedTextMessage{Text: proto.String(text),
+		ContextInfo: &waE2E.ContextInfo{StanzaID: proto.String(q.ID), Participant: proto.String(participant),
+			QuotedMessage: &waE2E.Message{Conversation: proto.String(q.Text)}}}}
+}
+
+// SendText envia texto (opcionalmente citando outra mensagem) e grava a mensagem enviada no banco.
+func (m *Manager) SendText(ctx context.Context, out Outgoing) (Sent, error) {
 	cli := m.current()
 	if !cli.IsLoggedIn() {
 		return Sent{}, ErrNotConnected
 	}
-	jid, err := types.ParseJID(to)
-	if err != nil {
-		return Sent{}, err
-	}
-	resp, err := cli.SendMessage(ctx, jid, &waE2E.Message{Conversation: proto.String(text)})
+	jid, err := types.ParseJID(out.To)
 	if err != nil {
 		return Sent{}, err
 	}
 	own := cli.Store.GetJID().ToNonAD().String()
+	resp, err := cli.SendMessage(ctx, jid, buildOutgoing(out.Text, out.Quote, own))
+	if err != nil {
+		return Sent{}, err
+	}
 	saveErr := m.opts.Store.SaveMessage(ctx, store.Message{ChatJID: jid.ToNonAD().String(), ID: resp.ID, SenderJID: own,
-		FromMe: true, Timestamp: resp.Timestamp.Unix(), Type: "text", Text: text})
+		FromMe: true, Timestamp: resp.Timestamp.Unix(), Type: "text", Text: out.Text})
 	m.logErr("gravar mensagem enviada", saveErr)
 	return Sent{ID: resp.ID, Timestamp: resp.Timestamp}, nil
 }

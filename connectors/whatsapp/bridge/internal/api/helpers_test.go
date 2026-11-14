@@ -49,11 +49,15 @@ func (f *fakeWA) PairCode(context.Context, string) (string, error) {
 	return f.pairCode, f.pairErr
 }
 func (f *fakeWA) Logout(context.Context) error { return f.logoutErr }
-func (f *fakeWA) SendText(_ context.Context, to, text string) (wa.Sent, error) {
+func (f *fakeWA) SendText(_ context.Context, out wa.Outgoing) (wa.Sent, error) {
 	if f.sendErr != nil {
 		return wa.Sent{}, f.sendErr
 	}
-	f.sent = append(f.sent, to+"|"+text)
+	entry := out.To + "|" + out.Text
+	if out.Quote != nil {
+		entry += "|quote:" + out.Quote.ID
+	}
+	f.sent = append(f.sent, entry)
 	return wa.Sent{ID: "SENT1", Timestamp: time.Unix(1_763_123_400, 0)}, nil
 }
 func (f *fakeWA) Download(context.Context, store.Media) ([]byte, error) { return f.media, f.mediaErr }

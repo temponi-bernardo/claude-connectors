@@ -274,3 +274,19 @@ func TestNormalizeHeaderRejectsGarbage(t *testing.T) {
 		t.Fatal("deveria falhar")
 	}
 }
+
+func TestGetQuoted(t *testing.T) {
+	s := openTest(t)
+	seed(t, s)
+	ctx := context.Background()
+	q, err := s.GetQuoted(ctx, group, "G1")
+	if err != nil || q.ID != "G1" || q.SenderJID != joao || q.FromMe || q.Text != "no grupo_1" {
+		t.Fatal(q, err)
+	}
+	if q, err := s.GetQuoted(ctx, maria, "A2"); err != nil || !q.FromMe || q.SenderJID != "" {
+		t.Fatal(q, err)
+	}
+	if _, err := s.GetQuoted(ctx, joao, "A1"); !errors.Is(err, ErrNotFound) {
+		t.Fatal("mensagem de outra conversa deveria ser ErrNotFound", err)
+	}
+}

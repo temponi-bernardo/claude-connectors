@@ -209,7 +209,7 @@ describe('send_message e whatsappTools', () => {
   });
 
   it('recusa destinatário fora da allowlist e exige confirmação explícita', async () => {
-    expect(allowedRecipient(SETTINGS, '+55 31 99999-9999')).toBe('5531999999999');
+    expect(allowedRecipient(SETTINGS, '+55 31 99999-9999')).toBe('5531999999999@s.whatsapp.net');
     expect(() => allowedRecipient(SETTINGS, '5511888888888')).toThrow('SEND_ALLOWLIST');
     const ctx = context({ '/send': () => Response.json({ id: 'x' }) });
     await expect(
@@ -217,15 +217,58 @@ describe('send_message e whatsappTools', () => {
     ).rejects.toThrow();
   });
 
-  it('envia com o número normalizado', async () => {
+  it('com a allowlist vazia aceita qualquer contato ou grupo, mas não destinatário inválido', () => {
+    const open = { ...SETTINGS, sendAllowlist: [] };
+    expect(allowedRecipient(open, '5511888888888')).toBe('5511888888888@s.whatsapp.net');
+    expect(allowedRecipient(open, '120363000000000001@g.us')).toBe('120363000000000001@g.us');
+    expect(() => allowedRecipient(open, 'status@broadcast')).toThrow('Invalid recipient');
+  });
+
+  it('envia com o destinatário normalizado', async () => {
     const send = vi.fn((init: RequestInit | undefined) => {
-      expect(JSON.parse(init?.body as string)).toEqual({ recipient: '5531999999999', text: 'oi' });
+      expect(JSON.parse(init?.body as string)).toEqual({
+        recipient: '5531999999999@s.whatsapp.net',
+        text: 'oi',
+      });
       return Response.json({ id: 'x' });
     });
     const ctx = context({ '/send': send });
     const args = { recipient: '+55 31 99999-9999', text: 'oi', confirmed_by_user: true };
     expect(await run('send_message', ctx, args)).toEqual({ id: 'x' });
     expect(send).toHaveBeenCalledOnce();
+  });
+
+  it('responde citando uma mensagem num grupo', async () => {
+    const send = vi.fn((init: RequestInit | undefined) => {
+      expect(JSON.parse(init?.body as string)).toEqual({
+        recipient: '120363000000000001@g.us',
+        text: 'combinado',
+        reply_to: 'G1',
+      });
+      return Response.json({ id: 'y' });
+    });
+    const ctx = context({ '/send': send }, { sendAllowlist: [] });
+    const args = {
+      recipient: '120363000000000001@g.us',
+      text: 'combinado',
+      reply_to_message_id: 'G1',
+      confirmed_by_user: true,
+    };
+    expect(await run('send_message', ctx, args)).toEqual({ id: 'y' });
+  });
+
+  it('traduz citação inexistente', async () => {
+    function missing(): Response {
+      return Response.json({ error: 'quoted_not_found' }, { status: 404 });
+    }
+    const ctx = context({ '/send': missing }, { sendAllowlist: [] });
+    const args = {
+      recipient: '5531999999999',
+      text: 'oi',
+      reply_to_message_id: 'X',
+      confirmed_by_user: true,
+    };
+    await expect(run('send_message', ctx, args)).rejects.toThrow('citada');
   });
 });
 

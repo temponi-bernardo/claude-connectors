@@ -22,8 +22,10 @@ TOOL_TIMEOUT_MS = "25000"
 SYNC_WAIT_MS = "8000"
 HISTORY_DAYS = "90"
 MAX_MEDIA_BYTES = "5242880"
-# Fase 2 (envio): desligado. Para ligar, ENABLE_SEND = "true" e números em SEND_ALLOWLIST.
-ENABLE_SEND = "false"
+# Envio ligado: send_message manda uma mensagem por vez, sempre com a confirmação explícita do dono e o limite
+# SEND_MAX_PER_HOUR. SEND_ALLOWLIST vazia = qualquer contato ou grupo; para restringir, números (DDI + número) ou
+# JIDs separados por vírgula. Para desligar de vez, ENABLE_SEND = "false".
+ENABLE_SEND = "true"
 SEND_ALLOWLIST = ""
 SEND_MAX_PER_HOUR = "10"
 # Sync periódico opcional: vazio = desligado. Para ligar, ponha a MESMA expressão aqui e em [triggers].crons.

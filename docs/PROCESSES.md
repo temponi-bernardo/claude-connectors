@@ -290,15 +290,18 @@ A autenticação agora é só o OAuth do P08. O número fica reservado para não
 - **Falhas:** snapshot recusado pela ponte → erro até "Recomeçar do zero" no `/pair`; queda abrupta sem `SIGTERM`
   → perde só o que mudou desde o último snapshot (o WhatsApp reenvia as pendências).
 
-## P17 — Enviar uma mensagem (fase 2, `ENABLE_SEND`) e sync periódico opcional
+## P17 — Enviar uma mensagem (`ENABLE_SEND`) e sync periódico opcional
 
 - **Gatilho:** `send_message` com `confirmed_by_user: true`; ou um Cron Trigger igual a `SYNC_CRON`.
 - **Passos:**
-  1. Envio: `allowedRecipient()` exige o número na `SEND_ALLOWLIST` (`normalizePhone()`); no Durable Object,
-     `guardSend()` aplica `planSend()` com o histórico do armazenamento antes de repassar o `/send` (a ponte confere
-     allowlist e limite de novo).
+  1. Envio: `allowedRecipient()` normaliza o destinatário com `normalizeRecipient()` (número, contato, LID ou
+     grupo) e, se a `SEND_ALLOWLIST` tiver itens, exige que ele esteja nela; `reply_to_message_id` vira `reply_to`.
+     No Durable Object, `guardSend()` aplica `planSend()` com o histórico do armazenamento antes de repassar o
+     `/send`. A ponte confere destinatário, allowlist, busca a mensagem citada (`GetQuoted`) e aplica o limite de
+     novo antes de enviar.
   2. Cron: `runScheduledSync()` só age se `isSyncCronEnabled()`; acorda a ponte com `/sync/wait`, pede
      `/__snapshot` e deixa o container dormir após `SLEEP_AFTER`.
-- **Resultado:** no máximo `SEND_MAX_PER_HOUR` envios por hora, só para a allowlist; com cron, histórico em dia
-  mesmo sem uso.
-- **Falhas:** destinatário fora da lista → recusa sem chamar a ponte; limite estourado → 429 com espera em segundos.
+- **Resultado:** no máximo `SEND_MAX_PER_HOUR` envios por hora, para qualquer contato ou grupo (ou só a
+  allowlist, se definida), cada um confirmado pelo dono; com cron, histórico em dia mesmo sem uso.
+- **Falhas:** destinatário inválido ou fora da lista → recusa sem chamar a ponte; mensagem citada desconhecida →
+  `quoted_not_found` sem gastar a cota; limite estourado → 429 com espera em segundos.

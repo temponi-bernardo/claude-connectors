@@ -21,13 +21,13 @@ import (
 
 type stubWA struct{ disconnected bool }
 
-func (s *stubWA) State() wa.State                                           { return wa.State{} }
-func (s *stubWA) QR() (wa.QRCode, error)                                    { return wa.QRCode{}, nil }
-func (s *stubWA) PairCode(context.Context, string) (string, error)          { return "", nil }
-func (s *stubWA) Logout(context.Context) error                              { return nil }
-func (s *stubWA) SendText(context.Context, string, string) (wa.Sent, error) { return wa.Sent{}, nil }
-func (s *stubWA) Download(context.Context, store.Media) ([]byte, error)     { return nil, nil }
-func (s *stubWA) Disconnect()                                               { s.disconnected = true }
+func (s *stubWA) State() wa.State                                        { return wa.State{} }
+func (s *stubWA) QR() (wa.QRCode, error)                                 { return wa.QRCode{}, nil }
+func (s *stubWA) PairCode(context.Context, string) (string, error)       { return "", nil }
+func (s *stubWA) Logout(context.Context) error                           { return nil }
+func (s *stubWA) SendText(context.Context, wa.Outgoing) (wa.Sent, error) { return wa.Sent{}, nil }
+func (s *stubWA) Download(context.Context, store.Media) ([]byte, error)  { return nil, nil }
+func (s *stubWA) Disconnect()                                            { s.disconnected = true }
 
 var key = bytes.Repeat([]byte{3}, 32)
 
@@ -55,6 +55,20 @@ func readyBridge(t *testing.T) (*Bridge, *stubWA) {
 	}
 	t.Cleanup(func() { b.closeDatabases() })
 	return b, stub
+}
+
+// settle espera a abertura em segundo plano terminar (pronta ou de volta a awaiting_restore) e fecha os bancos,
+// para que nada grave em DATA_DIR enquanto o t.TempDir é apagado.
+func settle(t *testing.T, b *Bridge) {
+	t.Helper()
+	deadline := time.Now().Add(5 * time.Second)
+	for b.Phase() == PhaseStarting && time.Now().Before(deadline) {
+		time.Sleep(5 * time.Millisecond)
+	}
+	if b.Phase() == PhaseStarting {
+		t.Fatal("abertura não terminou")
+	}
+	b.closeDatabases()
 }
 
 func TestSnapshotRequiresReady(t *testing.T) {
@@ -109,6 +123,7 @@ func TestRestoreRejectsArchiveWithExtraFile(t *testing.T) {
 	_, _ = w.Write([]byte("lixo depois do tar"))
 	_ = w.Close()
 	restored, gen, err := b.Restore(&enc, false)
+	settle(t, b)
 	if err != nil || !restored || gen != 5 {
 		t.Fatalf("lixo após o tar é ignorado pelo tar mas entra no hash: %v %v %v", restored, gen, err)
 	}

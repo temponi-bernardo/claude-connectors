@@ -20,7 +20,7 @@
     {
       "name": "whatsapp",
       "source": "./connectors/whatsapp",
-      "description": "WhatsApp pessoal (leitura; envio opcional) por um servidor seu no Cloudflare Workers + Containers. Requer publicar o template antes (README do conector)."
+      "description": "WhatsApp pessoal (leitura e envio com confirmação) por um servidor seu no Cloudflare Workers + Containers. Requer publicar o template antes (README do conector)."
     }
   ]
 }

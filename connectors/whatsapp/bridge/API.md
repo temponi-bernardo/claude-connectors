@@ -19,8 +19,8 @@ Sem o header ou com token errado: `401 {"error":"unauthorized"}`.
 | `TIMEZONE`          | não         | `America/Sao_Paulo` | Fuso das datas ISO devolvidas (IANA; `time/tzdata` embutido)          |
 | `HISTORY_DAYS`      | não         | `90`                | Mensagens mais antigas que isso não são guardadas (sync de histórico) |
 | `MAX_MEDIA_BYTES`   | não         | `5242880`           | Limite de `GET /media`                                                |
-| `ENABLE_SEND`       | não         | `false`             | Liga `POST /send`                                                     |
-| `SEND_ALLOWLIST`    | não         | vazio               | Números (só dígitos, com DDI) ou JIDs separados por vírgula           |
+| `ENABLE_SEND`       | não         | `false`             | Liga `POST /send` (o `wrangler.toml` do Worker repassa `true`)        |
+| `SEND_ALLOWLIST`    | não         | vazio               | Números ou JIDs separados por vírgula; vazia = qualquer destinatário  |
 | `SEND_MAX_PER_HOUR` | não         | `10`                | Limite rígido de envios por hora (persistido no banco)                |
 | `SNAPSHOT_PUSH_URL` | não         | vazio               | Melhor esforço: para onde enviar o snapshot no `SIGTERM` (ver abaixo) |
 
@@ -179,12 +179,16 @@ caso a ponte reabre o pareamento e um novo QR chega em alguns segundos).
 Desloga do WhatsApp e apaga a sessão local (se o servidor não responder, apaga só a local). `{"logged_out":true}`;
 `502 {"error":"logout_failed"}` se nem a sessão local puder ser apagada. As mensagens já guardadas ficam.
 
-### `POST /send` — corpo `{"recipient":"5531999999999","text":"..."}`
+### `POST /send` — corpo `{"recipient":"5531999999999","text":"...","reply_to":"<id opcional>"}`
 
 - `ENABLE_SEND=false` → `403 {"error":"send_disabled"}`.
-- `recipient` aceita número (só dígitos, com DDI, `+` opcional) ou JID; inválido → `400`.
-- Destinatário fora de `SEND_ALLOWLIST` → `403 {"error":"recipient_not_allowed"}`.
+- `recipient` aceita número (só dígitos, com DDI, `+` opcional) ou JID de contato (`@s.whatsapp.net`, `@lid`) ou de
+  grupo (`@g.us`); qualquer outro (ex.: `status@broadcast`) → `400`.
+- `SEND_ALLOWLIST` vazia libera qualquer contato ou grupo; com itens, destinatário fora dela →
+  `403 {"error":"recipient_not_allowed"}`.
 - Texto vazio (só espaços) ou acima de 4096 caracteres → `400`.
+- `reply_to` (opcional, até 200 caracteres): id de uma mensagem **da mesma conversa** já guardada no banco; a resposta
+  sai citando essa mensagem. Id desconhecido → `404 {"error":"quoted_not_found"}`, sem gastar a cota de envios.
 - Mais de `SEND_MAX_PER_HOUR` tentativas na última hora → `429 {"error":"rate_limited","retry_after_seconds":n}` (e
   header `Retry-After`). A tentativa conta mesmo se o WhatsApp recusar depois.
 - WhatsApp desconectado → `503 not_connected`; recusa do WhatsApp → `502 {"error":"send_failed"}`.

@@ -2,7 +2,7 @@
 
 - **Estado:** Aceito
 - **Data:** 2026-11-14
-- **Relacionado:** F3.1, ADR 0009, ADR 0010, ADR 0014
+- **Relacionado:** F3.1, F3.4, ADR 0009, ADR 0010, ADR 0014
 
 ## Contexto
 
@@ -41,10 +41,35 @@ contas pessoais: o caminho é um cliente "aparelho conectado", como o [whatsmeow
 6. **Pareamento** em `/pair`, protegido pelo mesmo login do GitHub (cookie `__Host-` selado, state + nonce, CSRF e
    `Origin`), com código (PairPhone) e QR.
 7. **Envio** só com `ENABLE_SEND=true`, para `SEND_ALLOWLIST`, uma mensagem de texto por vez, `confirmed_by_user`
-   obrigatório e limite por hora no armazenamento do DO e de novo na ponte.
+   obrigatório e limite por hora no armazenamento do DO e de novo na ponte. _Atualizado em F3.4: envio ligado,
+   allowlist opcional, citação e grupos — ver "Atualização: envio ligado" abaixo._
 8. **Prompt injection:** todo resultado com conteúdo de terceiros vem sob `notice` de dado não confiável, com textos
    limpos (controle e bidi removidos, corte em 2.000 caracteres) e instruções do servidor MCP repetindo a regra.
 9. **Instância `lite`** (1/16 vCPU, 256 MiB, 2 GB). Medição abaixo.
+
+## Atualização: envio ligado (F3.4, 2026-11-14)
+
+A pedido do dono, o envio passa a ser parte do uso normal. Muda só o item 7; o resto da decisão continua valendo.
+
+- **Ligado por padrão:** `ENABLE_SEND = "true"` no `wrangler.toml` (o padrão no código continua `false`: quem
+  apagar a variável fica sem envio).
+- **Allowlist opcional:** `SEND_ALLOWLIST` vazia libera qualquer contato ou grupo; com itens (números ou JIDs),
+  restringe como antes, no Worker e na ponte.
+- **Mantidos:** `confirmed_by_user: true` a cada chamada, instrução para mostrar destinatário, texto e citação e
+  pedir confirmação daquela mensagem exata, uma mensagem de texto por chamada e `SEND_MAX_PER_HOUR` no DO e na
+  ponte.
+- **Destinatários aceitos:** número com DDI ou JID de contato (`@s.whatsapp.net`, `@lid`) ou de grupo (`@g.us`).
+  Status (`status@broadcast`), listas de transmissão e newsletters são recusados.
+- **Grupos (feito):** `client.SendMessage` do whatsmeow já cifra para grupos (sender key), sem código extra na
+  ponte; o risco é o mesmo de um envio para contato, limitado pela confirmação e pelo limite por hora.
+- **Citação (feito):** `reply_to` com o id de uma mensagem **da mesma conversa** guardada no `messages.db`. A ponte
+  monta um `ExtendedTextMessage` com `ContextInfo` (`StanzaID`, `Participant` e o texto citado). Id desconhecido
+  responde `404 quoted_not_found` antes de reservar a cota. A prévia citada leva só o texto (mídia citada aparece
+  pela legenda); o WhatsApp do destinatário localiza a original pelo `StanzaID`.
+- **Mídia (fora):** exigiria passar o arquivo em base64 no argumento da ferramenta (pesado no contexto e no teto de
+  25 s do `TOOL_TIMEOUT_MS`), checar o tipo real do arquivo, e gerar miniatura, dimensões e duração para o
+  WhatsApp exibir direito (`client.Upload` cifra, mas não gera nada disso). Mais superfície para mandar o arquivo
+  errado e mais sinal de cliente automatizado. Fica para uma tarefa própria, se houver pedido real (ROADMAP F3.5).
 
 ## Medição (ponte Go)
 

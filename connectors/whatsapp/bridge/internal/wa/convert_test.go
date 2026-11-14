@@ -16,6 +16,8 @@ import (
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/temponi-bernardo/claude-connectors/connectors/whatsapp/bridge/internal/store"
 )
 
 var (
@@ -192,5 +194,23 @@ func TestPureConverters(t *testing.T) {
 	cs := contactsFromInfo(map[types.JID]types.ContactInfo{alice: {FirstName: "A", PushName: "P"}}, identity)
 	if len(cs) != 1 || cs[0].FullName != "A" || cs[0].PushName != "P" {
 		t.Fatal(cs)
+	}
+}
+
+func TestBuildOutgoing(t *testing.T) {
+	plain := buildOutgoing("oi", nil, "me@s.whatsapp.net")
+	if plain.GetConversation() != "oi" || plain.GetExtendedTextMessage() != nil {
+		t.Fatal(plain)
+	}
+	q := &store.Quoted{ID: "G1", SenderJID: "5531999990002@s.whatsapp.net", Text: "original"}
+	ext := buildOutgoing("resposta", q, "me@s.whatsapp.net").GetExtendedTextMessage()
+	ci := ext.GetContextInfo()
+	if ext.GetText() != "resposta" || ci.GetStanzaID() != "G1" || ci.GetParticipant() != q.SenderJID ||
+		ci.GetQuotedMessage().GetConversation() != "original" {
+		t.Fatal(ext)
+	}
+	mine := buildOutgoing("x", &store.Quoted{ID: "A2", FromMe: true}, "me@s.whatsapp.net")
+	if mine.GetExtendedTextMessage().GetContextInfo().GetParticipant() != "me@s.whatsapp.net" {
+		t.Fatal(mine)
 	}
 }

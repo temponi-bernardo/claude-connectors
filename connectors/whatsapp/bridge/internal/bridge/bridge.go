@@ -29,7 +29,7 @@ type WhatsApp interface {
 	QR() (wa.QRCode, error)
 	PairCode(ctx context.Context, phone string) (string, error)
 	Logout(ctx context.Context) error
-	SendText(ctx context.Context, to, text string) (wa.Sent, error)
+	SendText(ctx context.Context, out wa.Outgoing) (wa.Sent, error)
 	Download(ctx context.Context, md store.Media) ([]byte, error)
 	Disconnect()
 }
