@@ -5,9 +5,9 @@ contas Gmail de quem o instala: buscar, ler, enviar, responder, encaminhar, rasc
 lixeira. Não existe exclusão definitiva, e o Claude pede confirmação antes de enviar ou apagar. É público e multiusuário: cada pessoa entra com a própria conta Google e só vê as contas que
 ela mesma vinculou. Roda no Cloudflare Workers **só quando chega uma requisição**: sem Containers, Cron
 Triggers, alarms ou polling, então ficar ocioso não custa nada. Estado no Workers KV. Decisões em
-[ADR 0014](../../docs/adr/0014-gmail-remoto-sob-demanda-no-workers.md) e
-[ADR 0016](../../docs/adr/0016-gmail-multiusuario-publico.md) e
-[ADR 0019](../../docs/adr/0019-gmail-gerenciamento-completo.md) (gerenciamento).
+[ADR 0014](../../docs/adr/0014-on-demand-remote-gmail-on-workers.md) e
+[ADR 0016](../../docs/adr/0016-public-multi-user-gmail.md) e
+[ADR 0019](../../docs/adr/0019-full-gmail-management.md) (gerenciamento).
 
 ## Para quem vai usar
 

@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Vulnerabilidade de segurança
+  - name: Security vulnerability
     url: ../../security/advisories/new
-    about: Não abra issue pública para vulnerabilidades; use o relatório privado.
+    about: Do not open a public issue for vulnerabilities; use the private report.

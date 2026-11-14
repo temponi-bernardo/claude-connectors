@@ -26,7 +26,7 @@ Goal: the next session (after `/clear`) starts knowing exactly where things stop
 4. If the task is closed: also update `docs/ROADMAP.md` (status and "Next task"), as `.claude/rules/docs.md`
    says.
 5. **Don't commit** STATE.md: it is local to each clone and is in `.gitignore`
-   ([ADR 0005](../../../docs/adr/0005-state-md-local-por-clone.md)). So it can be written after the merge,
+   ([ADR 0005](../../../docs/adr/0005-state-md-local-per-clone.md)). So it can be written after the merge,
    already on `main`.
 6. End the reply with: **"Handoff saved to docs/STATE.md. Run `/clear` to continue with a clean context."**
 

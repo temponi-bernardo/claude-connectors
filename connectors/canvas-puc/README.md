@@ -8,7 +8,7 @@ rubrica, notas, avisos, módulos, páginas, arquivos, fóruns e calendário.
 Depois de instalar o plugin, digite **`/setup-canvas`** no chat: o Claude abre a página de tokens do Canvas,
 guia a conexão e faz um teste. O passo a passo manual é este:
 
-O conector roda só na nuvem. Nada é instalado no computador ([ADR 0013](../../docs/adr/0013-conector-so-remoto-pelo-marketplace.md)).
+O conector roda só na nuvem. Nada é instalado no computador ([ADR 0013](../../docs/adr/0013-remote-only-connector-via-marketplace.md)).
 
 1. No Claude (claude.ai, Cowork ou Claude Code), **Adicionar marketplace** → `temponi-bernardo/claude-connectors`.
 2. Instale o plugin **canvas-puc**. Ele aponta para `https://canvas-puc-remote.bftemponi.workers.dev/mcp`.
@@ -40,11 +40,11 @@ Também dá para pedir em linguagem natural ("o que vence essa semana?"): o Clau
 
 ## Servidor remoto (mantenedor)
 
-O plugin usa o servidor HTTP com OAuth ([ADR 0009](../../docs/adr/0009-conector-remoto-http-oauth.md)),
-publicado no Cloudflare Workers ([ADR 0010](../../docs/adr/0010-conector-remoto-no-cloudflare-workers.md)).
+O plugin usa o servidor HTTP com OAuth ([ADR 0009](../../docs/adr/0009-remote-http-oauth-connector.md)),
+publicado no Cloudflare Workers ([ADR 0010](../../docs/adr/0010-remote-connector-on-cloudflare-workers.md)).
 Também dá para adicioná-lo direto como conector personalizado no claude.ai, com a mesma URL `/mcp`.
 
-**1. Publicar no Cloudflare Workers (plano grátis, [ADR 0010](../../docs/adr/0010-conector-remoto-no-cloudflare-workers.md)):**
+**1. Publicar no Cloudflare Workers (plano grátis, [ADR 0010](../../docs/adr/0010-remote-connector-on-cloudflare-workers.md)):**
 
 1. Autentique o `wrangler`: no PC, `npx wrangler login`; na nuvem do Claude Code, um token de API com o modelo
    **"Edit Cloudflare Workers"** na variável `CLOUDFLARE_API_TOKEN` das configurações do ambiente.
@@ -119,4 +119,4 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://seu-dominio -e SEAL_KEY=<32 bytes 
 | `reply_to_discussion`    | Responde fórum (só com envios permitidos; o Claude confirma antes)     |
 
 Fluxos internos: [PROCESSES.md](../../docs/PROCESSES.md). Decisão de arquitetura:
-[ADR 0013](../../docs/adr/0013-conector-so-remoto-pelo-marketplace.md).
+[ADR 0013](../../docs/adr/0013-remote-only-connector-via-marketplace.md).

@@ -1,8 +1,8 @@
 # 0021 — English across the repository
 
-- **Estado:** Aceito
-- **Data:** 2026-11-14
-- **Relacionado:** CLAUDE.md rules 8 and 10, roadmap F4.4–F4.6
+- **Status:** Accepted
+- **Date:** 2026-11-14
+- **Related:** CLAUDE.md rules 8 and 10, roadmap F4.4–F4.6
 
 ## Context
 
@@ -17,8 +17,7 @@ English is the only language of the repository: tool names, input and output fie
 messages, plugin and project skills (names and content), manifests, READMEs, the public site, `docs/` (ADRs
 included), `CLAUDE.md`, rules, hook messages, commit descriptions and the changelog. Portuguese names are
 discontinued with no aliases. New text is written in English from this ADR on; existing text is translated in
-the roadmap's F4 tasks. The ADR metadata labels (`Estado`, `Data`, `Relacionado`) stay until the docs tooling is
-translated, so old and new ADRs parse the same.
+the roadmap's F4 tasks. The ADR metadata labels are `Status`, `Date` and `Related` (no tooling parses them).
 
 ## Alternatives considered
 

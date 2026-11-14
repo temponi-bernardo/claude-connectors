@@ -4,7 +4,7 @@ Fluxos do sistema, do gatilho ao resultado. Cada passo cita as funções envolvi
 o `docs:check` usa essas citações (mais tudo o que elas chamam) para preencher o campo **Processos**
 de cada função em [FUNCTIONS.md](FUNCTIONS.md). Função citada que não existe no código é erro.
 
-Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
+Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#process).
 
 ## P01 — Checar a documentação (`npm run docs:check`)
 
@@ -62,7 +62,7 @@ Modelo de um processo: ver [DOCUMENTATION.md](DOCUMENTATION.md#processo).
 
 ## P04 — (removido) Login pelo navegador
 
-O modo local, com sessão do navegador, saiu do projeto ([ADR 0013](adr/0013-conector-so-remoto-pelo-marketplace.md)).
+O modo local, com sessão do navegador, saiu do projeto ([ADR 0013](adr/0013-remote-only-connector-via-marketplace.md)).
 A autenticação agora é só o OAuth do P08. O número fica reservado para não renumerar os outros processos.
 
 ## P05 — Build dos conectores (`npm run build`)
