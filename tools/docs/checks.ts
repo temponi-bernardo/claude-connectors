@@ -32,16 +32,16 @@ export function checkFunctionsDocumented(
   for (const fn of functions) {
     if (!documented.has(fn.name)) {
       issues.push({
-        code: 'FUNCAO_SEM_DOC',
-        message: `\`${fn.name}\` (${fn.file}) não tem seção em FUNCTIONS.md. Rode \`npm run docs:generate\` e preencha os campos.`,
+        code: 'FUNCTION_UNDOCUMENTED',
+        message: `\`${fn.name}\` (${fn.file}) has no section in FUNCTIONS.md. Run \`npm run docs:generate\` and fill in the fields.`,
       });
     }
   }
   for (const section of sections) {
     if (!inCode.has(section.name)) {
       issues.push({
-        code: 'DOC_SEM_FUNCAO',
-        message: `FUNCTIONS.md documenta \`${section.name}\`, que não existe no código. Remova a seção.`,
+        code: 'DOC_WITHOUT_FUNCTION',
+        message: `FUNCTIONS.md documents \`${section.name}\`, which does not exist in the code. Remove the section.`,
       });
     }
   }
@@ -61,8 +61,8 @@ export function checkSectionModules(
     const expected = `\`${file}\``;
     if (section.moduleHeading !== expected) {
       issues.push({
-        code: 'SECAO_NO_MODULO_ERRADO',
-        message: `\`${section.name}\` está sob "## ${section.moduleHeading ?? '(nenhum)'}" mas pertence a "## ${expected}".`,
+        code: 'SECTION_IN_WRONG_MODULE',
+        message: `\`${section.name}\` is under "## ${section.moduleHeading ?? '(none)'}" but belongs to "## ${expected}".`,
       });
     }
   }
@@ -76,12 +76,12 @@ export function checkUniqueNames(functions: readonly FunctionInfo[]): Issue[] {
   return [...files.entries()]
     .filter(([, list]) => list.length > 1)
     .map(([name, list]) => ({
-      code: 'NOME_DUPLICADO',
-      message: `\`${name}\` está definida em mais de um arquivo: ${list.join(', ')}. Nomes de função são únicos no repositório.`,
+      code: 'DUPLICATE_NAME',
+      message: `\`${name}\` is defined in more than one file: ${list.join(', ')}. Function names are unique in the repository.`,
     }));
 }
 
-/** Bloco gerado (Arquivo, Assinatura, Usada por, Processos) diferente do calculado a partir do código. */
+/** Bloco gerado (File, Signature, Used by, Processes) diferente do calculado a partir do código. */
 export function checkGeneratedBlocks(
   inventory: Inventory,
   sections: readonly FunctionSection[],
@@ -99,15 +99,15 @@ export function checkGeneratedBlocks(
     );
     if (section.generatedBlock !== expected) {
       issues.push({
-        code: 'BLOCO_GERADO_DESATUALIZADO',
-        message: `Bloco gerado de \`${fn.name}\` difere do código. Esperado:\n${expected}\nEncontrado:\n${section.generatedBlock ?? '(sem bloco gerado)'}\nRode \`npm run docs:generate\`.`,
+        code: 'GENERATED_BLOCK_OUTDATED',
+        message: `Generated block of \`${fn.name}\` differs from the code. Expected:\n${expected}\nFound:\n${section.generatedBlock ?? '(no generated block)'}\nRun \`npm run docs:generate\`.`,
       });
     }
   }
   return issues;
 }
 
-/** Campos manuais faltando ou ainda com o marcador `_preencher_`. */
+/** Campos manuais faltando ou ainda com o marcador `_fill_in_`. */
 export function checkManualFields(sections: readonly FunctionSection[]): Issue[] {
   const issues: Issue[] = [];
   for (const section of sections) {
@@ -115,13 +115,13 @@ export function checkManualFields(sections: readonly FunctionSection[]): Issue[]
       const line = new RegExp(`^- \\*\\*${field}:\\*\\* (.+)$`, 'm').exec(section.manualText);
       if (line === null) {
         issues.push({
-          code: 'CAMPO_MANUAL_FALTANDO',
-          message: `\`${section.name}\`: falta o campo **${field}** em FUNCTIONS.md.`,
+          code: 'MANUAL_FIELD_MISSING',
+          message: `\`${section.name}\`: the **${field}** field is missing in FUNCTIONS.md.`,
         });
       } else if (firstGroup(line).includes(PLACEHOLDER)) {
         issues.push({
-          code: 'CAMPO_MANUAL_VAZIO',
-          message: `\`${section.name}\`: o campo **${field}** ainda está como ${PLACEHOLDER}.`,
+          code: 'MANUAL_FIELD_UNFILLED',
+          message: `\`${section.name}\`: the **${field}** field is still ${PLACEHOLDER}.`,
         });
       }
     }
@@ -140,8 +140,8 @@ export function checkProcessCitations(
     for (const name of cited) {
       if (!known.has(name)) {
         issues.push({
-          code: 'PROCESSO_CITA_FUNCAO_INEXISTENTE',
-          message: `${processId} em PROCESSES.md cita \`${name}()\`, que não existe no código.`,
+          code: 'PROCESS_CITES_UNKNOWN_FUNCTION',
+          message: `${processId} in PROCESSES.md cites \`${name}()\`, which does not exist in the code.`,
         });
       }
     }
@@ -158,8 +158,8 @@ export function checkStructure(
   return versionedDirs
     .filter((dir) => !documented.has(dir))
     .map((dir) => ({
-      code: 'PASTA_SEM_DOC',
-      message: `A pasta \`${dir}\` está versionada mas não aparece em STRUCTURE.md. Adicione uma linha na tabela.`,
+      code: 'DIR_UNDOCUMENTED',
+      message: `The directory \`${dir}\` is versioned but does not appear in STRUCTURE.md. Add a row to the table.`,
     }));
 }
 
@@ -171,15 +171,15 @@ export function checkUiComponents(
   if (components.length === 0) return [];
   if (uiMarkdown === null) {
     return [
-      { code: 'UI_DOC_FALTANDO', message: 'Há componentes de UI mas docs/UI.md não existe.' },
+      { code: 'UI_DOC_MISSING', message: 'There are UI components but docs/UI.md does not exist.' },
     ];
   }
   const documented = extractBacktickedNames(uiMarkdown);
   return components
     .filter((name) => !documented.has(name))
     .map((name) => ({
-      code: 'COMPONENTE_SEM_DOC',
-      message: `O componente \`${name}\` não aparece em UI.md.`,
+      code: 'COMPONENT_UNDOCUMENTED',
+      message: `The component \`${name}\` does not appear in UI.md.`,
     }));
 }
 
@@ -193,30 +193,30 @@ export function checkTests(inventory: Inventory): Issue[] {
         !excepted.has(fn.name) && !new RegExp(`\\b${fn.name}\\b`).test(inventory.testFilesText),
     )
     .map((fn) => ({
-      code: 'FUNCAO_SEM_TESTE',
-      message: `\`${fn.name}\` (${fn.file}) não aparece em nenhum arquivo de teste. Escreva o teste ou registre a exceção em src/test-exceptions.ts.`,
+      code: 'FUNCTION_UNTESTED',
+      message: `\`${fn.name}\` (${fn.file}) does not appear in any test file. Write the test or register the exception in src/test-exceptions.ts.`,
     }));
   for (const exception of inventory.testExceptions) {
     if (!known.has(exception.name)) {
       issues.push({
-        code: 'EXCECAO_DE_TESTE_OBSOLETA',
-        message: `src/test-exceptions.ts lista \`${exception.name}\`, que não existe no código. Remova a entrada.`,
+        code: 'STALE_TEST_EXCEPTION',
+        message: `src/test-exceptions.ts lists \`${exception.name}\`, which does not exist in the code. Remove the entry.`,
       });
     }
   }
   return issues;
 }
 
-/** Constante exportada que não aparece na tabela "Dados e constantes" do FUNCTIONS.md. */
+/** Constante exportada que não aparece na tabela "Data and constants" do FUNCTIONS.md. */
 export function checkConstants(inventory: Inventory, functionsMarkdown: string): Issue[] {
-  const tableStart = functionsMarkdown.indexOf('## Dados e constantes');
+  const tableStart = functionsMarkdown.indexOf('## Data and constants');
   const table = tableStart === -1 ? '' : functionsMarkdown.slice(tableStart);
   const documented = extractBacktickedNames(table);
   return inventory.constants
     .filter((c) => !documented.has(c.name))
     .map((c) => ({
-      code: 'CONSTANTE_SEM_DOC',
-      message: `A constante \`${c.name}\` (${c.file}) não aparece na tabela "Dados e constantes" de FUNCTIONS.md.`,
+      code: 'CONSTANT_UNDOCUMENTED',
+      message: `The constant \`${c.name}\` (${c.file}) does not appear in the "Data and constants" table of FUNCTIONS.md.`,
     }));
 }
 

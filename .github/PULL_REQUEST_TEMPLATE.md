@@ -14,7 +14,7 @@ For each item: check it if you updated it **or** write "n/a: reason".
 - [ ] `docs/PROCESSES.md` — new/changed flows cite the functions
 - [ ] `docs/STRUCTURE.md` — new folders
 - [ ] `docs/ROADMAP.md` — task status and "Next task"
-- [ ] `CHANGELOG.md` — "Não lançado" section (if user-visible)
+- [ ] `CHANGELOG.md` — "Unreleased" section (if user-visible)
 - [ ] `docs/ARCHITECTURE.md` — layers, dependencies, external services
 - [ ] `docs/adr/` — architecture decision recorded
 - [ ] `docs/PRODUCT.md` — product decision recorded with a date

@@ -29,9 +29,9 @@ export const LIMIT = 10;
 export const notData = () => 1;
 const privateValue = 2;
 
-/** Comentário com helper() dentro não conta. */
+/** A comment with helper() inside does not count. */
 export function run(input: string): number {
-  const text = 'helper() em string também não conta';
+  const text = 'helper() in a string does not count either';
   const obj = { helper: 1 };
   return helper(input).length + obj.helper + LIMIT + privateValue + text.length;
 }
@@ -60,7 +60,7 @@ export let uninit: number;
 export default function anon() {}
 `;
 
-describe('análise AST', () => {
+describe('AST analysis', () => {
   let root = '';
 
   beforeAll(() => {
@@ -76,7 +76,7 @@ describe('análise AST', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  it('globToRegExp e isAnalyzedSource filtram testes, fixtures e .d.ts', () => {
+  it('globToRegExp and isAnalyzedSource filter out tests, fixtures and .d.ts', () => {
     expect(globToRegExp('**/fixtures/**').test('src/fixtures/f.ts')).toBe(true);
     expect(globToRegExp('**/fixtures/**').test('tools/hooks/fixtures/util.ts')).toBe(true);
     expect(globToRegExp('**/fixtures/**').test('fixtures/a/b.ts')).toBe(true);
@@ -90,11 +90,11 @@ describe('análise AST', () => {
     expect(isAnalyzedSource('src/x.json', DEFAULT_DOCS_CONFIG)).toBe(false);
   });
 
-  it('toPosixRelative usa barras normais', () => {
+  it('toPosixRelative uses forward slashes', () => {
     expect(toPosixRelative('/r', '/r/a/b.ts')).toBe('a/b.ts');
   });
 
-  it('collectFunctions registra só funções de topo nomeadas, com assinatura', () => {
+  it('collectFunctions records only named top-level functions, with signature', () => {
     const project = openProject(root, DEFAULT_DOCS_CONFIG);
     const functions = collectFunctions(root, project);
     expect(functions.map((f) => f.name)).toEqual([
@@ -115,12 +115,12 @@ describe('análise AST', () => {
     );
   });
 
-  it('collectConstants lista constantes exportadas que não são funções', () => {
+  it('collectConstants lists exported constants that are not functions', () => {
     const project = openProject(root, DEFAULT_DOCS_CONFIG);
     expect(collectConstants(root, project).map((c) => c.name)).toEqual(['LIMIT', 'uninit']);
   });
 
-  it('buildReferenceIndex ignora declaração, imports, strings, comentários e chaves de objeto', () => {
+  it('buildReferenceIndex ignores the declaration, imports, strings, comments and object keys', () => {
     const project = openProject(root, DEFAULT_DOCS_CONFIG);
     const functions = collectFunctions(root, project);
     const index = buildReferenceIndex(root, project, functions);
@@ -131,7 +131,7 @@ describe('análise AST', () => {
     expect(index.get('later')).toEqual(new Set());
   });
 
-  it('buildCallGraph inverte o índice só para donos que são funções', () => {
+  it('buildCallGraph inverts the index only for owners that are functions', () => {
     const project = openProject(root, DEFAULT_DOCS_CONFIG);
     const functions = collectFunctions(root, project);
     const graph = buildCallGraph(functions, buildReferenceIndex(root, project, functions));
@@ -140,7 +140,7 @@ describe('análise AST', () => {
     expect(graph.get('helper')).toEqual(new Set());
   });
 
-  it('findDeclaration devolve undefined para arquivo desconhecido', () => {
+  it('findDeclaration returns undefined for an unknown file', () => {
     const project = openProject(root, DEFAULT_DOCS_CONFIG);
     expect(
       findDeclaration(root, project, { name: 'x', file: 'src/nope.ts', signature: '' }),
@@ -148,7 +148,7 @@ describe('análise AST', () => {
   });
 });
 
-describe('funções auxiliares da AST', () => {
+describe('AST helper functions', () => {
   let root = '';
 
   beforeAll(() => {
@@ -172,7 +172,7 @@ describe('funções auxiliares da AST', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  it('signatureOf, collectFileFunctions, isDataDeclaration e collectFileConstants', () => {
+  it('signatureOf, collectFileFunctions, isDataDeclaration and collectFileConstants', () => {
     const project = openProject(root, DEFAULT_DOCS_CONFIG);
     const file = project.getSourceFileOrThrow(`${root}/src/c.ts`);
     expect(signatureOf(file.getFunctionOrThrow('named'))).toBe('named(a: number): number');
@@ -183,7 +183,7 @@ describe('funções auxiliares da AST', () => {
     expect(collectFileConstants(root, file).map((c) => c.name)).toEqual(['DATA']);
   });
 
-  it('isIgnoredReference e ownerLabelOf classificam cada referência', () => {
+  it('isIgnoredReference and ownerLabelOf classify each reference', () => {
     const project = openProject(root, DEFAULT_DOCS_CONFIG);
     const file = project.getSourceFileOrThrow(`${root}/src/c.ts`);
     const refs = file.getFunctionOrThrow('named').findReferencesAsNodes();

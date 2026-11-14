@@ -29,14 +29,14 @@ find everything here without scanning the code. When docs and code diverge, `npm
 | Rule                                                                       | Machine (command)                         | PR checklist                                |
 | -------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------- |
 | Every function documented in FUNCTIONS.md, in the right module             | `docs:check`                              | —                                           |
-| Generated blocks (Arquivo, Assinatura, Usada por, Processos) up to date    | `docs:check` (`docs:generate` fixes it)   | —                                           |
-| Manual fields filled in (Faz, Entrada, Saída, Efeitos, Erros)              | `docs:check` (only detects the marker)    | Content is correct and useful               |
+| Generated blocks (File, Signature, Used by, Processes) up to date          | `docs:check` (`docs:generate` fixes it)   | —                                           |
+| Manual fields filled in (Does, Input, Output, Effects, Errors)             | `docs:check` (only detects the marker)    | Content is correct and useful               |
 | Function names unique in the repository                                    | `docs:check`                              | —                                           |
 | Function cited in PROCESSES.md exists                                      | `docs:check`                              | Process steps match the code                |
 | Every versioned folder in STRUCTURE.md                                     | `docs:check`                              | Folder description makes sense              |
 | Every UI component in UI.md                                                | `docs:check` (if `uiDir` is configured)   | States and variants documented              |
 | Every function has a test (or a justified exception)                       | `docs:check`                              | Test covers the behavior, not just the name |
-| Exported constant in the "Dados e constantes" table                        | `docs:check`                              | —                                           |
+| Exported constant in the "Data and constants" table                        | `docs:check`                              | —                                           |
 | Minimum coverage of 90%                                                    | `test:coverage`                           | —                                           |
 | No duplication                                                             | `dup:check` (jscpd)                       | Similar but not identical logic unified?    |
 | Functions ≤ 25 lines, ≤ 3 parameters, complexity ≤ 8, top-level `function` | `lint` (ESLint)                           | Does the function do a single job?          |

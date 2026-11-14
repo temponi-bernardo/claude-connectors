@@ -18,14 +18,14 @@ export const DEFAULT_DOCS_CONFIG: DocsConfig = {
 /** Mescla um objeto parcial lido do JSON sobre os padrões, validando os tipos essenciais. */
 export function mergeDocsConfig(partial: unknown): DocsConfig {
   if (typeof partial !== 'object' || partial === null || Array.isArray(partial)) {
-    throw new Error('docs.config.json precisa ser um objeto JSON.');
+    throw new Error('docs.config.json must be a JSON object.');
   }
   const merged = { ...DEFAULT_DOCS_CONFIG, ...(partial as Partial<DocsConfig>) };
   if (!Array.isArray(merged.sourceDirs) || merged.sourceDirs.length === 0) {
-    throw new Error('docs.config.json: "sourceDirs" precisa ser uma lista com ao menos uma pasta.');
+    throw new Error('docs.config.json: "sourceDirs" must be a list with at least one directory.');
   }
   if (merged.uiDir !== null && typeof merged.uiDir !== 'string') {
-    throw new Error('docs.config.json: "uiDir" precisa ser string ou null.');
+    throw new Error('docs.config.json: "uiDir" must be a string or null.');
   }
   return merged;
 }

@@ -29,6 +29,6 @@ conventional commits.
 
 - Positive: single source of version (`package.json`, mirrored in `.release-please-manifest.json`), automatic
   changelog, tag only after a human merge.
-- Negative: the CHANGELOG "Não lançado" section is kept by hand as a human view and must be moved into the
+- Negative: the CHANGELOG "Unreleased" section is kept by hand as a human view and must be moved into the
   version in the release PR (the `/lancar-versao` skill handles this).
 - Docs that change: WORKFLOW.md (release section), CHANGELOG.md.

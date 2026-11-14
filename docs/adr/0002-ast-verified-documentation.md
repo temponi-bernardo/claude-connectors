@@ -6,7 +6,7 @@
 
 ## Context
 
-We want `docs/FUNCTIONS.md` to list every function with correct "Usada por" and "Processos", without anyone
+We want `docs/FUNCTIONS.md` to list every function with correct "Used by" and "Processes", without anyone
 maintaining that by hand. An earlier regex-based version needed a growing list of special cases (skip
 comments, strings, `${}`, object keys, find the owning function by the indentation of `}`), and still got it
 wrong.
@@ -14,9 +14,9 @@ wrong.
 ## Decision
 
 Use the AST (ts-morph) to register top-level functions, resolve references by symbol and find the function
-that contains each reference. Fields derivable from the code (Arquivo, Assinatura, Usada por, Processos) are
+that contains each reference. Fields derivable from the code (File, Signature, Used by, Processes) are
 **generated** by `docs:generate` in marked blocks; `docs:check` only fails if a generated block is out of
-date. Intent fields (Faz, Entrada, Saída, Efeitos, Erros) stay manual and required.
+date. Intent fields (Does, Input, Output, Effects, Errors) stay manual and required.
 
 ## Alternatives considered
 
@@ -24,7 +24,7 @@ date. Intent fields (Faz, Entrada, Saída, Efeitos, Erros) stay manual and requi
 | -------------------------------------------------- | ------------------------------------------------------------------------ |
 | Regex over the code                                | Endless list of exceptions; false positives in strings and comments      |
 | Check only (no generation)                         | Forces writing by hand data the machine already knows; churn in every PR |
-| TypeDoc                                            | Generates an API reference, but no "Usada por" nor links to processes    |
+| TypeDoc                                            | Generates an API reference, but no "Used by" nor links to processes      |
 | Require arrow vs. `function` because of the parser | With an AST the restriction is unnecessary; kept only as style (lint)    |
 
 ## Consequences

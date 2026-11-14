@@ -1,6 +1,6 @@
 ---
 name: sync-docs
-description: Use to audit the whole documentation against the code when you suspect drift the machine does not catch (stale Faz/Entrada/Saída/Efeitos/Erros fields, processes that do not match the real flow, outdated ROADMAP or ARCHITECTURE), for example after each finished phase or before a release.
+description: Use to audit the whole documentation against the code when you suspect drift the machine does not catch (stale Does/Input/Output/Effects/Errors fields, processes that do not match the real flow, outdated ROADMAP or ARCHITECTURE), for example after each finished phase or before a release.
 context: fork
 agent: general-purpose
 ---

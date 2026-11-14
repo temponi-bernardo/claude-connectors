@@ -17,12 +17,12 @@ _Similar_ logic that jscpd misses is the review's job.
 - Cyclomatic complexity up to **8**, nesting up to **3** — `complexity`, `max-depth`.
 - If the function's description needs an "and", split it.
 - **Deciding apart from doing:** pure functions (calculation, validation, decision) do not touch disk, network,
-  stdout or global state; functions with effects are thin and call the pure ones. The **Efeitos** (effects) field
+  stdout or global state; functions with effects are thin and call the pure ones. The **Effects** field
   in FUNCTIONS.md makes this explicit.
 
 ## 3. Function names unique across the whole repository ⚙️ (`docs:check`)
 
-One name, one function. This makes `FUNCTIONS.md` an unambiguous index and lets "Usada por" (used by) be computed
+One name, one function. This makes `FUNCTIONS.md` an unambiguous index and lets "Used by" be computed
 without confusion. Prefer names that carry their context: `renderGeneratedBlock`, not `render`.
 
 Frameworks that require fixed names (`GET`, `loader`, `default`) stay in entry files and are recorded as a
@@ -43,7 +43,7 @@ domain types.
 ## 6. Errors
 
 Throw an `Error` whose message says **what** failed and **how to fix it**. Do not swallow errors silently; if a
-`catch` returns a default value, document it in **Erros** (errors) and **Saída** (output).
+`catch` returns a default value, document it in **Errors** and **Output**.
 
 ## 7. Names
 
@@ -55,7 +55,7 @@ Throw an `Error` whose message says **what** failed and **how to fix it**. Do no
 
 ## 8. Comments
 
-A one-line JSDoc on every function (`/** What it does. */`) — the same sentence goes into the **Faz** (what it
+A one-line JSDoc on every function (`/** What it does. */`) — the same sentence goes into the **Does** (what it
 does) field. Comments explain the why, never the obvious. No commented-out code.
 
 ## 9. Imports

@@ -9,28 +9,28 @@
   "changelog-sections": [
     {
       "type": "feat",
-      "section": "Adicionado"
+      "section": "Added"
     },
     {
       "type": "fix",
-      "section": "Corrigido"
+      "section": "Fixed"
     },
     {
       "type": "perf",
-      "section": "Alterado"
+      "section": "Changed"
     },
     {
       "type": "revert",
-      "section": "Removido"
+      "section": "Removed"
     },
     {
       "type": "refactor",
-      "section": "Alterado",
+      "section": "Changed",
       "hidden": true
     },
     {
       "type": "docs",
-      "section": "Documentação",
+      "section": "Documentation",
       "hidden": true
     },
     {

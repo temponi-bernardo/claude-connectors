@@ -16,7 +16,7 @@ import type {
 } from './types.js';
 
 /** Campos manuais de cada função, na ordem fixa do modelo (docs/DOCUMENTATION.md). */
-export const MANUAL_FIELDS = ['Faz', 'Entrada', 'Saída', 'Efeitos', 'Erros'] as const;
+export const MANUAL_FIELDS = ['Does', 'Input', 'Output', 'Effects', 'Errors'] as const;
 
 /** Formata uma lista para o markdown: itens em crase separados por vírgula, ou `—` se vazia. */
 export function formatList(items: readonly string[]): string {
@@ -27,10 +27,10 @@ export function formatList(items: readonly string[]): string {
 /** Renderiza o conteúdo do bloco gerado de uma função (sem os marcadores). */
 export function renderGeneratedBlock(info: FunctionInfo, data: GeneratedData): string {
   return [
-    `- **Arquivo:** \`${info.file}\``,
-    `- **Assinatura:** \`${info.signature}\``,
-    `- **Usada por:** ${formatList(data.usedBy)}`,
-    `- **Processos:** ${data.processes.length === 0 ? '—' : data.processes.join(', ')}`,
+    `- **File:** \`${info.file}\``,
+    `- **Signature:** \`${info.signature}\``,
+    `- **Used by:** ${formatList(data.usedBy)}`,
+    `- **Processes:** ${data.processes.length === 0 ? '—' : data.processes.join(', ')}`,
   ].join('\n');
 }
 
@@ -120,9 +120,9 @@ export function appendSection(markdown: string, info: FunctionInfo, section: str
   return `${markdown.slice(0, nextHeading).trimEnd()}\n\n${section}\n${markdown.slice(nextHeading)}`;
 }
 
-/** Insere texto antes da seção "## Dados e constantes" (ou no fim, se ela não existir). */
+/** Insere texto antes da seção "## Data and constants" (ou no fim, se ela não existir). */
 export function insertBeforeDataTable(markdown: string, text: string): string {
-  const marker = '\n## Dados e constantes';
+  const marker = '\n## Data and constants';
   const index = markdown.indexOf(marker);
   if (index === -1) return `${markdown.trimEnd()}\n\n${text}`;
   return `${markdown.slice(0, index).trimEnd()}\n\n${text}${markdown.slice(index)}`;

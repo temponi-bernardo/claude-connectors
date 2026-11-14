@@ -32,5 +32,5 @@ Goal: the next session (after `/clear`) starts knowing exactly where things stop
 
 ## Don't
 
-Don't paste diffs or command output; don't leave `_preencher_`; don't record secrets or paths outside the
+Don't paste diffs or command output; don't leave `_fill_in_`; don't record secrets or paths outside the
 repository; don't skip the `/clear` notice.

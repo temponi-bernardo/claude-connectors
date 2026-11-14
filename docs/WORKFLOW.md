@@ -61,7 +61,7 @@ When you create a new layer or module, add the scope there **and** here in the s
 
 A task is done when: the roadmap's "Pronto quando" (done when) criterion is verifiable and true; `npm run check`
 passes; the documentation in the same PR is updated as in [DOCUMENTATION.md](DOCUMENTATION.md); the CHANGELOG
-"Não lançado" (unreleased) section has the entry (if user-visible); the state in the ROADMAP and its "Next task"
+"Unreleased" section has the entry (if user-visible); the state in the ROADMAP and its "Next task"
 were updated; affected skills were reviewed.
 
 ## Local hooks
@@ -110,7 +110,7 @@ get. The flow belongs to the `/release` skill:
 1. Conventional commits reach `main` through PRs.
 2. The local CLI opens/updates a **release PR** with the version bump and the generated CHANGELOG:
    `npx release-please release-pr --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`.
-3. Review the release PR (and the CHANGELOG "Não lançado" section, which becomes the version).
+3. Review the release PR (and the CHANGELOG "Unreleased" section, which becomes the version).
 4. Claude merges the release PR, like any PR. Human confirmation is in publishing the draft. Afterwards the same
    CLI creates the `vX.Y.Z` tag and a release **draft**: `npx release-please github-release --draft --token
 "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`. It also creates `<name>-vX.Y.Z` tags and

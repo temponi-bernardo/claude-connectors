@@ -105,7 +105,7 @@ export async function loadTestExceptions(
   const module = (await import(pathToFileURL(absolute).href)) as { TEST_EXCEPTIONS?: unknown };
   const list = module.TEST_EXCEPTIONS;
   if (!Array.isArray(list)) {
-    throw new Error(`${config.testExceptionsFile} precisa exportar TEST_EXCEPTIONS como lista.`);
+    throw new Error(`${config.testExceptionsFile} must export TEST_EXCEPTIONS as a list.`);
   }
   return list as TestExceptionEntry[];
 }

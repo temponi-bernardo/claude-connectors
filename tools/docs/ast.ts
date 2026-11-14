@@ -13,7 +13,7 @@ import {
 import type { CallGraph, ConstantInfo, DocsConfig, FunctionInfo, ReferenceIndex } from './types.js';
 
 /** Rótulo usado quando uma referência acontece fora de qualquer função (nível do módulo). */
-export const MODULE_SCOPE_SUFFIX = ' (módulo)';
+export const MODULE_SCOPE_SUFFIX = ' (module)';
 
 /** Converte um caminho absoluto em relativo à raiz, sempre com `/`. */
 export function toPosixRelative(rootDir: string, absolutePath: string): string {
@@ -111,7 +111,7 @@ export function collectFileConstants(rootDir: string, file: SourceFile): Constan
     .map((declaration) => ({ name: declaration.getName(), file: relativeFile }));
 }
 
-/** Lista as constantes exportadas de topo do projeto (para a tabela "Dados e constantes"). */
+/** Lista as constantes exportadas de topo do projeto (para a tabela "Data and constants"). */
 export function collectConstants(rootDir: string, project: Project): ConstantInfo[] {
   return project.getSourceFiles().flatMap((file) => collectFileConstants(rootDir, file));
 }

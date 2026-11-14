@@ -1,73 +1,76 @@
-# API interna da ponte WhatsApp (contrato Worker ↔ container)
+# WhatsApp bridge internal API (Worker ↔ container contract)
 
-A ponte (`bridge/`, Go + whatsmeow) escuta em `:8080` **só dentro do container**. Quem fala com ela é o
-Durable Object `WhatsAppBridge` do Worker (`src/container.ts`); ela nunca fica exposta na internet.
+The bridge (`bridge/`, Go + whatsmeow) listens on `:8080` **only inside the container**. The only caller is the
+Worker's `WhatsAppBridge` Durable Object (`src/container.ts`); it is never exposed to the internet.
 
-## Autenticação
+## Authentication
 
-Toda rota, menos `GET /health`, exige `Authorization: Bearer <BRIDGE_TOKEN>` (comparação em tempo constante).
-Sem o header ou com token errado: `401 {"error":"unauthorized"}`.
+Every route except `GET /health` requires `Authorization: Bearer <BRIDGE_TOKEN>` (constant-time comparison).
+Without the header or with a wrong token: `401 {"error":"unauthorized"}`.
 
-## Ambiente do container
+## Container environment
 
-| Variável            | Obrigatória | Padrão              | Para quê                                                                     |
-| ------------------- | ----------- | ------------------- | ---------------------------------------------------------------------------- |
-| `BRIDGE_TOKEN`      | sim         | —                   | Token compartilhado com o Worker (≥ 32 caracteres)                           |
-| `SNAPSHOT_KEY`      | sim         | —                   | 32 bytes em base64: chave AES-256 dos snapshots                              |
-| `DATA_DIR`          | não         | `/data`             | Onde ficam `session.db` e `messages.db`                                      |
-| `PORT`              | não         | `8080`              | Porta HTTP                                                                   |
-| `TIMEZONE`          | não         | `America/Sao_Paulo` | Fuso das datas ISO devolvidas (IANA; `time/tzdata` embutido)                 |
-| `HISTORY_DAYS`      | não         | `90`                | Mensagens mais antigas que isso não são guardadas (sync de histórico)        |
-| `MAX_MEDIA_BYTES`   | não         | `5242880`           | Limite de `GET /media`                                                       |
-| `ENABLE_SEND`       | não         | `false`             | Liga `POST /send` (o `wrangler.toml` do Worker repassa `true`)               |
-| `SEND_ALLOWLIST`    | não         | vazio               | Números ou JIDs separados por vírgula; vazia = qualquer destinatário         |
-| `SEND_MAX_PER_HOUR` | não         | `10`                | Limite rígido de envios por hora (persistido no banco)                       |
-| `SNAPSHOT_PUSH_URL` | não         | vazio               | Para onde enviar o snapshot no `SIGTERM` e quando a sessão muda (ver abaixo) |
+| Variable            | Required | Default             | Purpose                                                                      |
+| ------------------- | -------- | ------------------- | ---------------------------------------------------------------------------- |
+| `BRIDGE_TOKEN`      | yes      | —                   | Token shared with the Worker (≥ 32 characters)                               |
+| `SNAPSHOT_KEY`      | yes      | —                   | 32 bytes in base64: AES-256 key for the snapshots                            |
+| `DATA_DIR`          | no       | `/data`             | Where `session.db` and `messages.db` live                                    |
+| `PORT`              | no       | `8080`              | HTTP port                                                                    |
+| `TIMEZONE`          | no       | `America/Sao_Paulo` | Time zone of the returned ISO dates (IANA; `time/tzdata` embedded)           |
+| `HISTORY_DAYS`      | no       | `90`                | Messages older than this are not stored (history sync)                       |
+| `MAX_MEDIA_BYTES`   | no       | `5242880`           | `GET /media` limit                                                           |
+| `ENABLE_SEND`       | no       | `false`             | Enables `POST /send` (the Worker's `wrangler.toml` passes `true`)            |
+| `SEND_ALLOWLIST`    | no       | empty               | Comma-separated numbers or JIDs; empty = any recipient                       |
+| `SEND_MAX_PER_HOUR` | no       | `10`                | Hard limit of sends per hour (persisted in the database)                     |
+| `SNAPSHOT_PUSH_URL` | no       | empty               | Where to send the snapshot on `SIGTERM` and when the session changes (below) |
 
-Logs nunca contêm texto de mensagem, número de telefone completo nem chaves.
+Logs never contain message text, full phone numbers or keys.
 
-## Fases
+## Phases
 
-`awaiting_restore` → (`POST /restore`) → `starting` → `ready`. Enquanto não estiver `ready`, as rotas de dados
-respondem `503 {"error":"not_ready","phase":"..."}` (inclusive `/status` e `/snapshot`; só `/health` e `/restore`
-fogem disso). `ready` significa banco aberto e cliente whatsmeow criado (conectado ou não; a conexão é assíncrona).
-Se a abertura dos bancos falhar depois de um `/restore` aceito, a ponte volta para `awaiting_restore` (e o erro vai
-para o log).
+`awaiting_restore` → (`POST /restore`) → `starting` → `ready`. Until `ready`, the data routes answer
+`503 {"error":"not_ready","phase":"..."}` (including `/status` and `/snapshot`; only `/health` and `/restore`
+are exempt). `ready` means the database is open and the whatsmeow client is created (connected or not; the
+connection is asynchronous). If opening the databases fails after an accepted `/restore`, the bridge goes back
+to `awaiting_restore` (and the error goes to the log).
 
-## Rotas
+## Routes
 
-Respostas JSON com `content-type: application/json`. Datas sempre RFC 3339 com fuso (`2026-11-14T09:30:00-03:00`).
-Erro: `{"error":"<código>","message":"<texto em português>"}`. Códigos gerais: `400 bad_request` (parâmetro ou
-corpo inválido), `500 internal`, `503 not_connected` (precisa do WhatsApp conectado e ele não está).
+JSON responses with `content-type: application/json`. Dates are always RFC 3339 with offset
+(`2026-11-14T09:30:00-03:00`). Error: `{"error":"<code>","message":"<text in Portuguese>"}`. General codes:
+`400 bad_request` (invalid parameter or body), `500 internal`, `503 not_connected` (WhatsApp must be connected
+and it is not).
 
-Textos devolvidos (mensagens, nomes, nomes de arquivo) vêm sem caracteres de controle (menos `\n` e `\t`) e sem
-overrides bidi (U+202A–U+202E, U+2066–U+2069). Buscas (`query`) ignoram maiúsculas e acentos (`joao` acha `João`).
-`sender_name` é `"You"` nas mensagens enviadas pela própria conta; sem nome conhecido, vale o telefone
+Returned text (messages, names, file names) comes without control characters (except `\n` and `\t`) and without
+bidi overrides (U+202A–U+202E, U+2066–U+2069). Searches (`query`) ignore case and accents (`joao` finds `João`).
+`sender_name` is `"You"` on messages sent by the account itself; with no known name, the phone number is used
 (`+5531...`).
 
-### `GET /health` (sem auth)
+### `GET /health` (no auth)
 
 `200 {"phase":"awaiting_restore"|"starting"|"ready"}`.
 
 ### `POST /restore`
 
-- Só na fase `awaiting_restore` (senão `409 {"error":"already_restored"}`).
-- Header `X-Snapshot: none` e corpo vazio → começa do zero (`400` se vier corpo). Senão o corpo é um snapshot
-  (formato abaixo), lido em streaming, com teto de 1 GiB.
-- Snapshot inválido (MAC, versão, truncado) → `422 {"error":"bad_snapshot"}` e a ponte **continua** em
-  `awaiting_restore` (o Worker decide começar do zero ou não).
-- Sucesso: `200 {"restored":true|false,"generation":<n>}`; abre os bancos e conecta ao WhatsApp em segundo plano.
+- Only in the `awaiting_restore` phase (otherwise `409 {"error":"already_restored"}`).
+- `X-Snapshot: none` header and empty body → start from scratch (`400` if there is a body). Otherwise the body is
+  a snapshot (format below), read as a stream, capped at 1 GiB.
+- Invalid snapshot (MAC, version, truncated) → `422 {"error":"bad_snapshot"}` and the bridge **stays** in
+  `awaiting_restore` (the Worker decides whether to start from scratch).
+- Success: `200 {"restored":true|false,"generation":<n>}`; opens the databases and connects to WhatsApp in the
+  background.
 
 ### `GET /snapshot`
 
-Gera um snapshot consistente (`VACUUM INTO` dos dois bancos → tar → cifra). Se o SHA-256 do tar em claro for igual
-ao do último snapshot entregue ou restaurado: `204`. Senão `200` com `content-type: application/octet-stream`,
-`content-length` e `x-snapshot-generation: <n>` (n cresce 1 a cada snapshot novo).
+Builds a consistent snapshot (`VACUUM INTO` of both databases → tar → encrypt). If the SHA-256 of the plaintext
+tar equals that of the last snapshot delivered or restored: `204`. Otherwise `200` with
+`content-type: application/octet-stream`, `content-length` and `x-snapshot-generation: <n>` (n grows by 1 with
+each new snapshot).
 
-`GET /snapshot?force=1` ignora a comparação e sempre devolve `200` (útil se o Worker recebeu um snapshot mas não
-conseguiu gravá-lo no R2: sem isso, os próximos dariam `204`). Para o hash ser estável, a ponte normaliza nos bancos
-copiados os campos do cabeçalho SQLite que mudam sem mudar o conteúdo (formato WAL/legado, contador de mudanças e
-schema cookie).
+`GET /snapshot?force=1` skips the comparison and always returns `200` (useful if the Worker received a snapshot
+but could not write it to R2: without this, the next ones would return `204`). To keep the hash stable, the
+bridge normalizes, in the copied databases, the SQLite header fields that change without the content changing
+(WAL/legacy format, change counter and schema cookie).
 
 ### `GET /status`
 
@@ -86,19 +89,19 @@ schema cookie).
 }
 ```
 
-`needs_pairing` = sem sessão (nunca pareado ou deslogado pelo celular). `last_event_at` pode ser `null`; `account`
-é `null` sem sessão.
+`needs_pairing` = no session (never paired or logged out from the phone). `last_event_at` may be `null`;
+`account` is `null` without a session.
 
 ### `POST /sync/wait?timeout_ms=<n>`
 
-Espera até `connected && offline_sync_complete`, ou `needs_pairing`, ou o tempo (padrão 10000, máximo 20000; valores
-maiores são reduzidos a 20000). Devolve o mesmo corpo do `/status` mais `"partial": true` se o tempo acabou antes
-(sem o campo quando terminou).
+Waits until `connected && offline_sync_complete`, or `needs_pairing`, or the timeout (default 10000, maximum
+20000; larger values are reduced to 20000). Returns the same body as `/status` plus `"partial": true` if time
+ran out first (the field is absent when it finished).
 
 ### `GET /chats?query=&limit=&cursor=`
 
-`limit` 1–100 (padrão 20). `query` filtra por nome ou número (LIKE com escape, sem diferenciar maiúsculas).
-Ordem: última mensagem mais recente primeiro. `cursor` é opaco (devolvido em `next_cursor`, `null` no fim).
+`limit` 1–100 (default 20). `query` filters by name or number (escaped LIKE, case-insensitive). Order: most
+recent last message first. `cursor` is opaque (returned in `next_cursor`, `null` at the end).
 
 ```json
 {
@@ -117,8 +120,8 @@ Ordem: última mensagem mais recente primeiro. `cursor` é opaco (devolvido em `
 
 ### `GET /messages?chat_jid=&limit=&before=`
 
-`limit` 1–100 (padrão 30). Mais recentes primeiro. `before` é o `next_before` opaco da página anterior.
-`404 {"error":"chat_not_found"}` se o JID não existe no banco.
+`limit` 1–100 (default 30). Most recent first. `before` is the opaque `next_before` from the previous page.
+`404 {"error":"chat_not_found"}` if the JID does not exist in the database.
 
 ```json
 {
@@ -140,87 +143,91 @@ Ordem: última mensagem mais recente primeiro. `cursor` é opaco (devolvido em `
 }
 ```
 
-`text` é a legenda em mídias e pode ser `""`. `media` só existe em mensagens de mídia.
+`text` is the caption on media and may be `""`. `media` only exists on media messages.
 
 ### `GET /search?query=&chat_jid=&limit=`
 
-`query` obrigatório (1–200 caracteres; `400` senão). `limit` 1–100 (padrão 20). Busca no texto (LIKE com escape).
-Devolve `{"messages":[...]}` no formato acima com `chat_name` em cada item.
+`query` required (1–200 characters; `400` otherwise). `limit` 1–100 (default 20). Searches the text (escaped
+LIKE). Returns `{"messages":[...]}` in the format above with `chat_name` on each item.
 
 ### `GET /contacts?query=&limit=`
 
-`query` obrigatório (1–200 caracteres). `limit` 1–100 (padrão 20). Busca em nome salvo, push name e número (o
-número só entra com 3 dígitos ou mais). Grupos ficam de fora.
-`{"contacts":[{"jid":"...","name":"...","push_name":"...","phone":"+5531999999999"}]}`. Campos sem valor vêm `null`
-(`phone` é `null` para contatos só com LID).
+`query` required (1–200 characters). `limit` 1–100 (default 20). Searches saved name, push name and number (the
+number only counts with 3 or more digits). Groups are excluded.
+`{"contacts":[{"jid":"...","name":"...","push_name":"...","phone":"+5531999999999"}]}`. Fields without a value
+are `null` (`phone` is `null` for LID-only contacts).
 
 ### `GET /media?message_id=&chat_jid=`
 
-Baixa a mídia pelo whatsmeow. `404 {"error":"not_found"}` se a mensagem não existe ou não tem mídia;
-`413 {"error":"too_large"}` se o tamanho declarado (ou o baixado) passar de `MAX_MEDIA_BYTES`;
-`410 {"error":"media_expired"}` se o WhatsApp não tiver mais o arquivo; `502 {"error":"download_failed"}` em outras
-falhas. Sucesso: bytes com `content-type` da mídia (`application/octet-stream` se o tipo guardado for inválido),
-`content-length` e `x-media-filename` quando houver — **percent-encoded em UTF-8** (use `decodeURIComponent`).
+Downloads the media through whatsmeow. `404 {"error":"not_found"}` if the message does not exist or has no media;
+`413 {"error":"too_large"}` if the declared (or downloaded) size exceeds `MAX_MEDIA_BYTES`;
+`410 {"error":"media_expired"}` if WhatsApp no longer has the file; `502 {"error":"download_failed"}` on other
+failures. Success: bytes with the media's `content-type` (`application/octet-stream` if the stored type is
+invalid), `content-length` and `x-media-filename` when available — **percent-encoded in UTF-8** (use
+`decodeURIComponent`).
 
-### `POST /pair/code` — corpo `{"phone":"5531999999999"}`
+### `POST /pair/code` — body `{"phone":"5531999999999"}`
 
-Só dígitos, 8–15. Exige `needs_pairing`. Devolve `{"code":"ABCD-EFGH"}` (whatsmeow `PairPhone`; pode levar alguns
-segundos, porque espera o websocket de pareamento abrir). `409 {"error":"already_paired"}` se já houver sessão;
-`503 not_connected` se o websocket não abrir em 15 s; `502 {"error":"pair_failed"}` se o WhatsApp recusar.
+Digits only, 8–15. Requires `needs_pairing`. Returns `{"code":"ABCD-EFGH"}` (whatsmeow `PairPhone`; it may take
+a few seconds, because it waits for the pairing websocket to open). `409 {"error":"already_paired"}` if a
+session already exists; `503 not_connected` if the websocket does not open within 15 s;
+`502 {"error":"pair_failed"}` if WhatsApp refuses.
 
 ### `GET /pair/qr`
 
-`{"qr":"<texto do QR>","png_base64":"<PNG 256×256 do QR em base64>","expires_at":"..."}` com o QR atual, ou
-`409 {"error":"already_paired"}` se já pareado, `503 {"error":"qr_not_ready"}` se ainda não chegou (ou expirou: nesse
-caso a ponte reabre o pareamento e um novo QR chega em alguns segundos).
+`{"qr":"<QR text>","png_base64":"<256×256 QR PNG in base64>","expires_at":"..."}` with the current QR, or
+`409 {"error":"already_paired"}` if already paired, `503 {"error":"qr_not_ready"}` if it has not arrived yet (or
+expired: in that case the bridge reopens pairing and a new QR arrives in a few seconds).
 
 ### `POST /logout`
 
-Desloga do WhatsApp e apaga a sessão local (se o servidor não responder, apaga só a local). `{"logged_out":true}`;
-`502 {"error":"logout_failed"}` se nem a sessão local puder ser apagada. As mensagens já guardadas ficam.
+Logs out of WhatsApp and deletes the local session (if the server does not answer, deletes only the local one).
+`{"logged_out":true}`; `502 {"error":"logout_failed"}` if not even the local session can be deleted. Messages
+already stored are kept.
 
-### `POST /send` — corpo `{"recipient":"5531999999999","text":"...","reply_to":"<id opcional>"}`
+### `POST /send` — body `{"recipient":"5531999999999","text":"...","reply_to":"<optional id>"}`
 
 - `ENABLE_SEND=false` → `403 {"error":"send_disabled"}`.
-- `recipient` aceita número (só dígitos, com DDI, `+` opcional) ou JID de contato (`@s.whatsapp.net`, `@lid`) ou de
-  grupo (`@g.us`); qualquer outro (ex.: `status@broadcast`) → `400`.
-- `SEND_ALLOWLIST` vazia libera qualquer contato ou grupo; com itens, destinatário fora dela →
+- `recipient` accepts a number (digits only, with country code, optional `+`) or a contact JID
+  (`@s.whatsapp.net`, `@lid`) or group JID (`@g.us`); anything else (e.g. `status@broadcast`) → `400`.
+- An empty `SEND_ALLOWLIST` allows any contact or group; with entries, a recipient outside it →
   `403 {"error":"recipient_not_allowed"}`.
-- Texto vazio (só espaços) ou acima de 4096 caracteres → `400`.
-- `reply_to` (opcional, até 200 caracteres): id de uma mensagem **da mesma conversa** já guardada no banco; a resposta
-  sai citando essa mensagem. Id desconhecido → `404 {"error":"quoted_not_found"}`, sem gastar a cota de envios.
-- Mais de `SEND_MAX_PER_HOUR` tentativas na última hora → `429 {"error":"rate_limited","retry_after_seconds":n}` (e
-  header `Retry-After`). A tentativa conta mesmo se o WhatsApp recusar depois.
-- WhatsApp desconectado → `503 not_connected`; recusa do WhatsApp → `502 {"error":"send_failed"}`.
-- Sucesso: `{"id":"...","timestamp":"..."}`; a mensagem enviada também é gravada no banco.
+- Empty text (whitespace only) or longer than 4096 characters → `400`.
+- `reply_to` (optional, up to 200 characters): id of a message **from the same chat** already stored in the
+  database; the reply goes out quoting that message. Unknown id → `404 {"error":"quoted_not_found"}`, without
+  using up the send quota.
+- More than `SEND_MAX_PER_HOUR` attempts in the last hour → `429 {"error":"rate_limited","retry_after_seconds":n}`
+  (and a `Retry-After` header). The attempt counts even if WhatsApp refuses it afterwards.
+- WhatsApp disconnected → `503 not_connected`; refusal by WhatsApp → `502 {"error":"send_failed"}`.
+- Success: `{"id":"...","timestamp":"..."}`; the sent message is also written to the database.
 
-## Formato do snapshot (`WAS1`)
+## Snapshot format (`WAS1`)
 
-Cabeçalho (63 bytes, usado como dado associado de todos os blocos):
+Header (63 bytes, used as associated data for every chunk):
 
-| Campo         | Bytes | Valor                                                                    |
-| ------------- | ----- | ------------------------------------------------------------------------ |
-| magic         | 4     | `WAS1`                                                                   |
-| versão        | 1     | `1`                                                                      |
-| generation    | 8     | uint64 big-endian                                                        |
-| tamanho bloco | 4     | uint32 big-endian (65536)                                                |
-| salt          | 32    | aleatório; subchave = HKDF-SHA256(chave, salt, `"whatsapp-snapshot-v1"`) |
-| reservado     | 14    | zeros                                                                    |
+| Field      | Bytes | Value                                                             |
+| ---------- | ----- | ----------------------------------------------------------------- |
+| magic      | 4     | `WAS1`                                                            |
+| version    | 1     | `1`                                                               |
+| generation | 8     | uint64 big-endian                                                 |
+| chunk size | 4     | uint32 big-endian (65536)                                         |
+| salt       | 32    | random; subkey = HKDF-SHA256(key, salt, `"whatsapp-snapshot-v1"`) |
+| reserved   | 14    | zeros                                                             |
 
-Depois, blocos `AES-256-GCM` de até `tamanho bloco` bytes em claro, cada um com nonce de 12 bytes =
-contador uint64 big-endian em 11 bytes (os 3 primeiros zero) + 1 byte de flag (`1` no último bloco, `0` nos
-outros). O último bloco pode ser vazio. Truncar, reordenar ou alterar qualquer byte faz a abertura falhar.
-O conteúdo em claro é um tar com `session.db` e `messages.db`.
+Then `AES-256-GCM` chunks of up to `chunk size` plaintext bytes, each with a 12-byte nonce = uint64 big-endian
+counter in 11 bytes (the first 3 zero) + 1 flag byte (`1` on the last chunk, `0` on the others). The last chunk
+may be empty. Truncating, reordering or changing any byte makes opening fail. The plaintext is a tar with
+`session.db` and `messages.db`.
 
 ## `SIGTERM`
 
-Para de aceitar requisições, desconecta o whatsmeow e, se `SNAPSHOT_PUSH_URL` estiver definida e houver mudança
-desde o último snapshot, faz `PUT` do snapshot nela (header `Authorization: Bearer <BRIDGE_TOKEN>`,
-`x-snapshot-generation`), com limite de 10 s. Falha só vai para o log.
+Stops accepting requests, disconnects whatsmeow and, if `SNAPSHOT_PUSH_URL` is set and something changed since
+the last snapshot, `PUT`s the snapshot to it (header `Authorization: Bearer <BRIDGE_TOKEN>`,
+`x-snapshot-generation`), with a 10 s limit. A failure only goes to the log.
 
-## Mudança de sessão
+## Session change
 
-O mesmo `PUT` acontece, em segundo plano, quando a sessão do aparelho muda: pareamento concluído
-(`PairSuccess`), conexão aberta (`Connected`) e logout pelo celular (`LoggedOut`). Sem mudança desde o último
-snapshot, nada é enviado; antes de `ready`, o aviso é ignorado. Assim um pareamento novo chega ao R2 na hora e
-sobrevive a deploys e reinícios do container.
+The same `PUT` happens, in the background, when the device session changes: pairing completed (`PairSuccess`),
+connection opened (`Connected`) and logout from the phone (`LoggedOut`). With no change since the last snapshot,
+nothing is sent; before `ready`, the notification is ignored. This way a new pairing reaches R2 right away and
+survives container deploys and restarts.

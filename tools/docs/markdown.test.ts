@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   GENERATED_END,
   GENERATED_START,
+  INDEX_END,
+  INDEX_START,
+  PLACEHOLDER,
   buildSection,
   extractBacktickedNames,
   extractCalledNames,
@@ -14,104 +17,114 @@ import {
   stripCodeBlocks,
 } from './markdown.js';
 
+describe('markers', () => {
+  it('uses English generated-block, index and placeholder markers', () => {
+    expect(GENERATED_START).toBe('<!-- generated:start -->');
+    expect(GENERATED_END).toBe('<!-- generated:end -->');
+    expect(INDEX_START).toBe('<!-- index:start -->');
+    expect(INDEX_END).toBe('<!-- index:end -->');
+    expect(PLACEHOLDER).toBe('_fill_in_');
+  });
+});
+
 describe('stripCodeBlocks', () => {
-  it('remove blocos ``` e ~~~ mantendo o resto', () => {
-    const md = 'antes\n```ts\nexemplo()\n```\nmeio\n~~~\noutro()\n~~~\ndepois';
+  it('removes ``` and ~~~ blocks keeping the rest', () => {
+    const md = 'before\n```ts\nexample()\n```\nmiddle\n~~~\nother()\n~~~\nafter';
     const result = stripCodeBlocks(md);
-    expect(result).not.toContain('exemplo()');
-    expect(result).not.toContain('outro()');
-    expect(result).toContain('antes');
-    expect(result).toContain('depois');
+    expect(result).not.toContain('example()');
+    expect(result).not.toContain('other()');
+    expect(result).toContain('before');
+    expect(result).toContain('after');
   });
 });
 
 describe('firstGroup', () => {
-  it('devolve o grupo 1 ou vazio', () => {
+  it('returns group 1 or empty', () => {
     expect(firstGroup(/a(b)/.exec('ab')!)).toBe('b');
     expect(firstGroup(/a(b)?/.exec('a')!)).toBe('');
   });
 });
 
 describe('extractCalledNames', () => {
-  it('pega só nomes em crase com parênteses, ignorando blocos de código', () => {
-    const md = 'Usa `slugify()` e `outra()`; não `const` nem `x`.\n```\n`dentro()`\n```';
-    expect(extractCalledNames(md)).toEqual(new Set(['slugify', 'outra']));
+  it('takes only backticked names with parentheses, ignoring code blocks', () => {
+    const md = 'Uses `slugify()` and `other()`; not `const` nor `x`.\n```\n`inside()`\n```';
+    expect(extractCalledNames(md)).toEqual(new Set(['slugify', 'other']));
   });
 });
 
 describe('sliceBetween / replaceBetween', () => {
-  const text = `a\n${GENERATED_START}\nvelho\n${GENERATED_END}\nz`;
+  const text = `a\n${GENERATED_START}\nold\n${GENERATED_END}\nz`;
 
-  it('extrai o miolo entre marcadores', () => {
-    expect(sliceBetween(text, GENERATED_START, GENERATED_END)).toBe('velho');
+  it('extracts the content between markers', () => {
+    expect(sliceBetween(text, GENERATED_START, GENERATED_END)).toBe('old');
   });
 
-  it('devolve null sem marcadores', () => {
-    expect(sliceBetween('nada', GENERATED_START, GENERATED_END)).toBeNull();
+  it('returns null without markers', () => {
+    expect(sliceBetween('nothing', GENERATED_START, GENERATED_END)).toBeNull();
   });
 
-  it('substitui o miolo', () => {
-    const out = replaceBetween(text, [GENERATED_START, GENERATED_END], 'novo');
-    expect(out).toBe(`a\n${GENERATED_START}\nnovo\n${GENERATED_END}\nz`);
+  it('replaces the content', () => {
+    const out = replaceBetween(text, [GENERATED_START, GENERATED_END], 'new');
+    expect(out).toBe(`a\n${GENERATED_START}\nnew\n${GENERATED_END}\nz`);
   });
 
-  it('não altera texto sem marcadores', () => {
-    expect(replaceBetween('x', [GENERATED_START, GENERATED_END], 'novo')).toBe('x');
+  it('leaves text without markers unchanged', () => {
+    expect(replaceBetween('x', [GENERATED_START, GENERATED_END], 'new')).toBe('x');
   });
 });
 
 describe('extractFunctionSections', () => {
   const md = [
-    '# Funções',
+    '# Functions',
     '## `src/a.ts`',
     '### `alpha`',
     GENERATED_START,
-    '- **Arquivo:** `src/a.ts`',
+    '- **File:** `src/a.ts`',
     GENERATED_END,
-    '- **Faz:** algo',
+    '- **Does:** something',
     '## `src/b.ts`',
     '### `beta`',
-    '- **Faz:** outra coisa',
+    '- **Does:** something else',
     '```',
-    '### `naoConta`',
+    '### `doesNotCount`',
     '```',
   ].join('\n');
 
-  it('lista seções com módulo, bloco gerado e texto manual', () => {
+  it('lists sections with module, generated block and manual text', () => {
     const sections = extractFunctionSections(md);
     expect(sections.map((s) => s.name)).toEqual(['alpha', 'beta']);
     expect(sections[0]?.moduleHeading).toBe('`src/a.ts`');
-    expect(sections[0]?.generatedBlock).toBe('- **Arquivo:** `src/a.ts`');
-    expect(sections[0]?.manualText).toBe('- **Faz:** algo');
+    expect(sections[0]?.generatedBlock).toBe('- **File:** `src/a.ts`');
+    expect(sections[0]?.manualText).toBe('- **Does:** something');
     expect(sections[1]?.moduleHeading).toBe('`src/b.ts`');
     expect(sections[1]?.generatedBlock).toBeNull();
   });
 
-  it('buildSection funciona sem módulo', () => {
-    const section = buildSection('x', null, '### `x`\n- **Faz:** y');
+  it('buildSection works without a module', () => {
+    const section = buildSection('x', null, '### `x`\n- **Does:** y');
     expect(section).toEqual({
       name: 'x',
       moduleHeading: null,
       generatedBlock: null,
-      manualText: '- **Faz:** y',
+      manualText: '- **Does:** y',
     });
   });
 });
 
 describe('extractProcessCitations', () => {
-  it('agrupa funções citadas por processo', () => {
+  it('groups cited functions by process', () => {
     const md =
-      '## P01 — Fluxo\n1. `a()` chama `b()`\n## P02 — Outro\n`c()`\n## Não processo\n`d()`';
+      '## P01 — Flow\n1. `a()` calls `b()`\n## P02 — Other\n`c()`\n## Not a process\n`d()`';
     const result = extractProcessCitations(md);
     expect(result.get('P01')).toEqual(new Set(['a', 'b']));
     expect(result.get('P02')).toEqual(new Set(['c']));
-    expect(result.has('Não processo')).toBe(false);
+    expect(result.has('Not a process')).toBe(false);
   });
 });
 
 describe('extractDocumentedDirs / extractBacktickedNames', () => {
-  it('pega pastas com barra final e nomes simples', () => {
-    const md = '| `src/` | x |\n| `docs/adr/` | y |\n`Button` e `arquivo.ts`';
+  it('takes directories with a trailing slash and simple names', () => {
+    const md = '| `src/` | x |\n| `docs/adr/` | y |\n`Button` and `file.ts`';
     expect(extractDocumentedDirs(md)).toEqual(new Set(['src/', 'docs/adr/']));
     expect(extractBacktickedNames(md)).toEqual(new Set(['Button']));
   });

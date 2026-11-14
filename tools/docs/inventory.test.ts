@@ -15,7 +15,7 @@ import {
   walkFiles,
 } from './inventory.js';
 
-describe('inventário em disco', () => {
+describe('on-disk inventory', () => {
   let root = '';
 
   beforeAll(() => {
@@ -39,14 +39,14 @@ describe('inventário em disco', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  it('walkFiles pula node_modules e dirsFromFiles inclui pastas intermediárias', () => {
+  it('walkFiles skips node_modules and dirsFromFiles includes intermediate directories', () => {
     const files = walkFiles(root);
     expect(files).toContain('src/core/a.ts');
     expect(files.some((f) => f.startsWith('node_modules'))).toBe(false);
     expect(dirsFromFiles(['a/b/c.ts', 'a/d.ts'])).toEqual(['a/', 'a/b/']);
   });
 
-  it('listGitFiles devolve null fora de um repositório e lista dentro de um', () => {
+  it('listGitFiles returns null outside a repository and lists inside one', () => {
     expect(listGitFiles(root)).toBeNull();
     execFileSync('git', ['init', '-q'], { cwd: root });
     const files = listGitFiles(root);
@@ -54,28 +54,28 @@ describe('inventário em disco', () => {
     expect(listVersionedDirs(root)).toContain('src/core/');
   });
 
-  it('readTestFilesText concatena só arquivos de teste', () => {
+  it('readTestFilesText concatenates only test files', () => {
     expect(readTestFilesText(root, DEFAULT_DOCS_CONFIG)).toBe('alpha');
-    expect(readTestFilesText(root, { ...DEFAULT_DOCS_CONFIG, sourceDirs: ['nada'] })).toBe('');
+    expect(readTestFilesText(root, { ...DEFAULT_DOCS_CONFIG, sourceDirs: ['nothing'] })).toBe('');
   });
 
-  it('listUiComponents lista .tsx fora de testes, ou nada sem uiDir', () => {
+  it('listUiComponents lists .tsx outside tests, or nothing without uiDir', () => {
     expect(listUiComponents(root, DEFAULT_DOCS_CONFIG)).toEqual([]);
     expect(listUiComponents(root, { ...DEFAULT_DOCS_CONFIG, uiDir: 'ui' })).toEqual([
       'Button',
       'Card',
     ]);
-    expect(listUiComponents(root, { ...DEFAULT_DOCS_CONFIG, uiDir: 'inexistente' })).toEqual([]);
+    expect(listUiComponents(root, { ...DEFAULT_DOCS_CONFIG, uiDir: 'missing' })).toEqual([]);
   });
 
-  it('loadTestExceptions importa a lista e falha se não for lista', async () => {
+  it('loadTestExceptions imports the list and fails when it is not a list', async () => {
     expect(await loadTestExceptions(root, DEFAULT_DOCS_CONFIG)).toEqual([
       { name: 'alpha', reason: 'r', manualTest: 'm' },
     ]);
     expect(
       await loadTestExceptions(root, {
         ...DEFAULT_DOCS_CONFIG,
-        testExceptionsFile: 'nao-existe.ts',
+        testExceptionsFile: 'does-not-exist.ts',
       }),
     ).toEqual([]);
     writeFileSync(join(root, 'src/bad-exceptions.ts'), 'export const TEST_EXCEPTIONS = 1;');
@@ -87,7 +87,7 @@ describe('inventário em disco', () => {
     ).rejects.toThrow('TEST_EXCEPTIONS');
   });
 
-  it('buildInventory junta tudo', async () => {
+  it('buildInventory puts everything together', async () => {
     const inventory = await buildInventory(root, { ...DEFAULT_DOCS_CONFIG, sourceDirs: ['src'] });
     expect(inventory.functions.map((f) => f.name)).toEqual(['alpha']);
     expect(inventory.versionedDirs).toContain('src/');

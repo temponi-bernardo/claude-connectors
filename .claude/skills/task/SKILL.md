@@ -42,7 +42,7 @@ Target task: `$ARGUMENTS` (empty = the "Next task" at the top of `docs/ROADMAP.m
 
 ## Don't
 
-Don't start coding without reading the docs; don't create a function without a test; don't leave `_preencher_`
+Don't start coding without reading the docs; don't create a function without a test; don't leave `_fill_in_`
 in FUNCTIONS.md; don't open a PR with a red `check`; don't touch `main`; don't end the task without `/handoff`.
 Don't write files through a heredoc or script in Bash if the text has `.env` in quotes (e.g. `process.env`): the
 guard blocks it; use Write/Edit.
