@@ -152,4 +152,11 @@ describe('partialSyncWarning and compactStatus', () => {
     expect(unpaired).toMatchObject({ pair_at: 'u' });
     expect(unpaired).not.toHaveProperty('account');
   });
+
+  it('adds the partial-sync warning only when the wait ran out', () => {
+    expect(compactStatus(STATUS, 'u')).not.toHaveProperty('warning');
+    expect(compactStatus({ ...STATUS, partial: true }, 'u')).toMatchObject({
+      warning: expect.stringContaining('still syncing') as unknown,
+    });
+  });
 });

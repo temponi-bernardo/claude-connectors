@@ -67,16 +67,21 @@ export function syncWaitBudget(ctx: WhatsAppToolContext, deadline: number): numb
   return Math.max(0, Math.min(ctx.settings.syncWaitMs, deadline - ctx.now() - QUERY_RESERVE_MS));
 }
 
+/** Asks the bridge to wait for the sync within the budget and returns its status (`partial` if time ran out). */
+export async function waitForSync(
+  ctx: WhatsAppToolContext,
+  deadline: number,
+): Promise<BridgeStatus> {
+  const path = bridgePath('/sync/wait', { timeout_ms: syncWaitBudget(ctx, deadline) });
+  return bridgeJson<BridgeStatus>(ctx.bridge, path, { init: { method: 'POST' }, deadline });
+}
+
 /** Waits for the sync within the budget; throws if pairing is needed and returns the partial-result warning. */
 export async function prepareRead(
   ctx: WhatsAppToolContext,
   deadline: number,
 ): Promise<string | null> {
-  const path = bridgePath('/sync/wait', { timeout_ms: syncWaitBudget(ctx, deadline) });
-  const status = await bridgeJson<BridgeStatus>(ctx.bridge, path, {
-    init: { method: 'POST' },
-    deadline,
-  });
+  const status = await waitForSync(ctx, deadline);
   if (status.needs_pairing) {
     throw new Error(
       `WhatsApp is not paired. Ask the user to open ${ctx.pairUrl} and link the phone.`,
@@ -105,12 +110,12 @@ export async function runRead<T>(
 
 const statusTool = defineTool({
   name: 'whatsapp_status',
-  description: 'WhatsApp connection status: connected, last sync, whether pairing is needed.',
+  description:
+    'WhatsApp connection status: connected, last sync, whether pairing is needed. Waits briefly for the server to reconnect after idling.',
   shape: {},
   annotations: toolAnnotations('WhatsApp status', READ_ONLY_HINTS),
   run: async (ctx: WhatsAppToolContext) => {
-    const deadline = toolDeadline(ctx);
-    const status = await bridgeJson<BridgeStatus>(ctx.bridge, '/status', { deadline });
+    const status = await waitForSync(ctx, toolDeadline(ctx));
     return compactStatus(status, ctx.pairUrl);
   },
 });

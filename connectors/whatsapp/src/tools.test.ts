@@ -16,6 +16,7 @@ import {
   runRead,
   syncWaitBudget,
   toolDeadline,
+  waitForSync,
   WHATSAPP_INSTRUCTIONS,
   WHATSAPP_SERVER_INFO,
   whatsappTools,
@@ -71,6 +72,19 @@ describe('deadlines', () => {
   });
 });
 
+describe('waitForSync', () => {
+  it('posts /sync/wait with the budget and returns the status as-is, partial included', async () => {
+    const ctx = context({ '/sync/wait': () => Response.json({ ...READY_STATUS, partial: true }) });
+    expect(await waitForSync(ctx, Date.now() + 25_000)).toMatchObject({
+      partial: true,
+      connected: true,
+    });
+    expect((ctx.bridge as ReturnType<typeof fakeBridge>).paths).toEqual([
+      `/sync/wait?timeout_ms=${SETTINGS.syncWaitMs}`,
+    ]);
+  });
+});
+
 describe('prepareRead and runRead', () => {
   it('requests the sync with the budget and does not warn when complete', async () => {
     const ctx = context({});
@@ -101,12 +115,29 @@ describe('prepareRead and runRead', () => {
 });
 
 describe('read tools', () => {
-  it('whatsapp_status returns the compact status without waiting for the sync', async () => {
-    const ctx = context({ '/status': () => Response.json(READY_STATUS) });
+  it('whatsapp_status waits for the sync before reporting, so a cold start is not shown as offline', async () => {
+    const ctx = context({});
     expect(await run('whatsapp_status', ctx)).toMatchObject({
       connected: true,
       stored: { chats: 1 },
     });
+    expect((ctx.bridge as ReturnType<typeof fakeBridge>).paths).toEqual([
+      `/sync/wait?timeout_ms=${SETTINGS.syncWaitMs}`,
+    ]);
+  });
+
+  it('whatsapp_status warns when the wait ran out and still reports pairing', async () => {
+    const partial = context({
+      '/sync/wait': () => Response.json({ ...READY_STATUS, connected: false, partial: true }),
+    });
+    expect(await run('whatsapp_status', partial)).toMatchObject({
+      connected: false,
+      warning: expect.stringContaining('not connected') as unknown,
+    });
+    const unpaired = context({
+      '/sync/wait': () => Response.json({ ...READY_STATUS, needs_pairing: true }),
+    });
+    expect(await run('whatsapp_status', unpaired)).toMatchObject({ pair_at: unpaired.pairUrl });
   });
 
   it('list_chats forwards filters and marks the content as untrusted', async () => {

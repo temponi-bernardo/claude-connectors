@@ -128,7 +128,7 @@ export function partialSyncWarning(status: BridgeStatus): string | null {
     : 'Warning: WhatsApp is not connected yet; results come from the last saved backup and may be outdated.';
 }
 
-/** Compact status for `whatsapp_status`. */
+/** Compact status for `whatsapp_status`, with the partial-sync warning when the wait ran out. */
 export function compactStatus(status: BridgeStatus, pairUrl: string): Record<string, unknown> {
   return {
     connected: status.connected,
@@ -140,5 +140,6 @@ export function compactStatus(status: BridgeStatus, pairUrl: string): Record<str
     last_event_at: status.last_event_at,
     stored: { chats: status.chats, messages: status.messages },
     send_enabled: status.send_enabled,
+    ...(status.partial ? { warning: partialSyncWarning(status) } : {}),
   };
 }

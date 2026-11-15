@@ -52,7 +52,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/whatsapp/src/pair-page.ts`: [`describePairStatus`](#describepairstatus), [`pairForm`](#pairform), [`pairingSection`](#pairingsection), [`maintenanceSection`](#maintenancesection), [`alertHtml`](#alerthtml), [`renderPairPage`](#renderpairpage)
 - `connectors/whatsapp/src/pair.ts`: [`parseCookies`](#parsecookies), [`pairCookie`](#paircookie), [`redirectWithCookies`](#redirectwithcookies), [`readPairSession`](#readpairsession), [`issuePairCsrf`](#issuepaircsrf), [`isTrustedPost`](#istrustedpost), [`startPairLogin`](#startpairlogin), [`isValidPairLogin`](#isvalidpairlogin), [`openPairSession`](#openpairsession), [`handlePairCallback`](#handlepaircallback), [`pairDeadline`](#pairdeadline), [`fetchPairStatus`](#fetchpairstatus), [`pairPage`](#pairpage), [`pairActionError`](#pairactionerror), [`handlePairPost`](#handlepairpost), [`routePairPost`](#routepairpost), [`isPairPath`](#ispairpath), [`routePairRequest`](#routepairrequest)
 - `connectors/whatsapp/src/snapshots.ts`: [`pumpInto`](#pumpinto), [`storedGeneration`](#storedgeneration), [`readUploadHeaders`](#readuploadheaders), [`storeSnapshot`](#storesnapshot), [`storeSnapshotResponse`](#storesnapshotresponse), [`archiveSnapshot`](#archivesnapshot), [`sameSecret`](#samesecret), [`acceptSnapshotPush`](#acceptsnapshotpush)
-- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
+- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`waitForSync`](#waitforsync), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
 - `connectors/whatsapp/src/worker-env.ts`: [`bridgeStub`](#bridgestub), [`bridgeFetchFor`](#bridgefetchfor)
 - `connectors/whatsapp/src/worker.ts`: [`unixNow`](#unixnow), [`githubSettingsFrom`](#githubsettingsfrom), [`whatsappRemoteConnector`](#whatsappremoteconnector), [`createWhatsAppApps`](#createwhatsappapps), [`handleWhatsAppFetch`](#handlewhatsappfetch), [`isSyncCronEnabled`](#issynccronenabled), [`runScheduledSync`](#runscheduledsync)
 - `src/core/bytes.ts`: [`byteView`](#byteview), [`concatBytes`](#concatbytes), [`utf16leToString`](#utf16letostring), [`bytesToBase64`](#bytestobase64)
@@ -6789,7 +6789,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/bridge-client.ts`
 - **Signature:** `async bridgeJson(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<T>`
-- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `fetchPairStatus()`, `prepareRead()`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `fetchPairStatus()`, `waitForSync()`
 - **Processes:** P13, P14, P15
 
 <!-- generated:end -->
@@ -6806,7 +6806,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/bridge-client.ts`
 - **Signature:** `bridgePath(path: string, params: Readonly<Record<string, string | number | undefined>>): string`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `prepareRead()`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `waitForSync()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -7169,7 +7169,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `partialSyncWarning(status: BridgeStatus): string | null`
-- **Used by:** `prepareRead()`
+- **Used by:** `compactStatus()`, `prepareRead()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -7191,9 +7191,10 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Compact status for `whatsapp_status`.
+- **Does:** Compact status for `whatsapp_status`, with the partial-sync warning when the wait ran out.
 - **Input:** The bridge's `status` and the pairing page's `pairUrl`.
-- **Output:** Object with connection, pairing (and `pair_at` if needed), sync, counts and sending.
+- **Output:** Object with connection, pairing (and `pair_at` if needed), sync, counts, sending and `warning` (only
+  when `status.partial`).
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -7995,7 +7996,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/tools.ts`
 - **Signature:** `syncWaitBudget(ctx: WhatsAppToolContext, deadline: number): number`
-- **Used by:** `prepareRead()`
+- **Used by:** `waitForSync()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -8020,7 +8021,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Waits for the sync within the budget; throws if pairing is needed and returns the partial-result warning.
 - **Input:** `ctx` and the `deadline` (Unix ms).
 - **Output:** Partial-result warning or `null`.
-- **Effects:** Network: `POST /sync/wait` on the bridge.
+- **Effects:** Network: `POST /sync/wait` on the bridge (through `waitForSync()`).
 - **Errors:** Rejects if WhatsApp is not paired; those of `bridgeJson`.
 
 ### `runRead`
@@ -8141,6 +8142,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** Decoded text; `""` if null/empty; the original value if the encoding is invalid.
 - **Effects:** None (pure).
 - **Errors:** None (the `decodeURIComponent` error is caught).
+
+### `waitForSync`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/tools.ts`
+- **Signature:** `async waitForSync(ctx: WhatsAppToolContext, deadline: number): Promise<BridgeStatus>`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `prepareRead()`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Asks the bridge to wait for the sync within the budget from `syncWaitBudget()` and returns its status.
+- **Input:** `ctx` and the `deadline` (Unix ms).
+- **Output:** The bridge status, with `partial: true` if the wait ran out first.
+- **Effects:** Network: `POST /sync/wait` on the bridge.
+- **Errors:** Those of `bridgeJson`.
 
 ## `connectors/whatsapp/src/worker-env.ts`
 

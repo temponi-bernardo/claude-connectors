@@ -248,9 +248,11 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Steps:**
   1. `handleMcp()` opens the access token and checks with `acceptsSecret` whether the email is still on the list; the
      `createServer` builds `createWhatsAppMcpServer()` with `whatsappTools()` (read; sending only with `ENABLE_SEND`).
-  2. The tool runs in `runRead()` with the deadline from `toolDeadline()`: `prepareRead()` requests `POST /sync/wait` with the
-     budget from `syncWaitBudget()` and, if pairing is needed, returns the `/pair` address. `withDeadline()` cuts off
-     anything past the ceiling.
+  2. The tool runs in `runRead()` with the deadline from `toolDeadline()`: `prepareRead()` calls `waitForSync()`, which
+     requests `POST /sync/wait` with the budget from `syncWaitBudget()`, and, if pairing is needed, returns the `/pair`
+     address. `withDeadline()` cuts off anything past the ceiling. `whatsapp_status` also calls `waitForSync()` (not
+     `GET /status`), so a container that just woke up reports its connection once it reconnects instead of
+     `connected: false`; if the wait runs out, `compactStatus()` adds the `warning`.
   3. Bridge calls go through `bridgeJson()`/`callBridge()` (`bridgePath()`, `jsonPost()`), which use
      `bridgeFetchFor()` over the single stub from `bridgeStub()`. Errors become text with `bridgeErrorFrom()`;
      deadline overruns, `bridgeTimeoutMessage()`.
