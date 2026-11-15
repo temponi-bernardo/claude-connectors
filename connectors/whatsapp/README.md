@@ -36,15 +36,15 @@ Claude ──OAuth 2.1 + MCP (HTTPS)──▶ Worker ──▶ Durable Object "o
 
 ## Tools
 
-| Tool              | Does                                                                            |
-| ----------------- | ------------------------------------------------------------------------------- |
-| `whatsapp_status` | Connection, last event, whether sync is complete, whether pairing is needed     |
-| `list_chats`      | Chats (most recent first) with a preview of the last message; filter and paging |
-| `get_messages`    | Messages in a chat, paged with `before`                                         |
-| `search_messages` | Search in the text of stored messages, optionally within one chat               |
-| `search_contacts` | Contacts by name or number                                                      |
-| `get_media`       | Image, audio or document from a message (up to `MAX_MEDIA_BYTES`, 5 MB)         |
-| `send_message`    | One text message to a contact or group, optionally quoting another              |
+| Tool              | Does                                                                                                               |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `whatsapp_status` | Connection, last event, whether sync is complete, whether pairing is needed (waits for the reconnect after idling) |
+| `list_chats`      | Chats (most recent first) with a preview of the last message; filter and paging                                    |
+| `get_messages`    | Messages in a chat, paged with `before`                                                                            |
+| `search_messages` | Search in the text of stored messages, optionally within one chat                                                  |
+| `search_contacts` | Contacts by name or number                                                                                         |
+| `get_media`       | Image, audio or document from a message (up to `MAX_MEDIA_BYTES`, 5 MB)                                            |
+| `send_message`    | One text message to a contact or group, optionally quoting another                                                 |
 
 Dates in ISO 8601 with time zone (`TIMEZONE`, default `America/Sao_Paulo`). Compact answers, with the warning that
 message content is untrusted third-party data.
