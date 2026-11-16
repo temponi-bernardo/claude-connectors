@@ -14318,6 +14318,21 @@ function byteLimitStream(maxBytes, message) {
     }
   });
 }
+function byteRangeStream(skip, take) {
+  let seen = 0;
+  return new TransformStream({
+    start(controller) {
+      if (take === 0) controller.terminate();
+    },
+    transform(chunk, controller) {
+      const from = Math.max(0, skip - seen);
+      const to = Math.min(chunk.length, skip + take - seen);
+      seen += chunk.length;
+      if (to > from) controller.enqueue(chunk.subarray(from, to));
+      if (seen >= skip + take) controller.terminate();
+    }
+  });
+}
 function framedStream(prefix, suffix) {
   const encoder = new TextEncoder();
   return new TransformStream({
@@ -19211,6 +19226,41 @@ function wordToText(kind, bytes) {
   return kind === "docx" ? docxToText(bytes) : Promise.resolve(docToText(bytes));
 }
 
+// connectors/canvas-puc/src/chunks.ts
+var MAX_CHUNK_BYTES = 8 * 1024 * 1024;
+function planDownloadChunk(total, request) {
+  const start = request.offset ?? 0;
+  if (start > 0 && start >= total) {
+    return `offset ${start} is past the end of the file (${total} bytes).`;
+  }
+  const length = Math.min(request.length ?? MAX_CHUNK_BYTES, MAX_CHUNK_BYTES);
+  const end = Math.min(total, start + length);
+  return { start, end, total, step: length, whole: start === 0 && end === total };
+}
+function chunkDescription(file, chunk) {
+  const kb = Math.round(chunk.total / 1024);
+  const head = `"${String(file.display_name)}" (${String(file["content-type"])}, ${kb} KB)`;
+  const link = `Link: ${String(file.url)}`;
+  if (chunk.whole) return `${head}. ${link}`;
+  const part = `part ${Math.floor(chunk.start / chunk.step) + 1} of ${Math.ceil(chunk.total / chunk.step)}`;
+  const next = chunk.end < chunk.total ? `next part: download_file with offset=${chunk.end}` : "this is the last part";
+  return `${head} is sent in parts of raw bytes. This part: bytes ${chunk.start}\u2013${chunk.end - 1} of ${chunk.total} (${part}). Save the parts in order and join them; ${next}. ${link}`;
+}
+function chunkMimeType(file, chunk) {
+  if (!chunk.whole) return "application/octet-stream";
+  return file["content-type"] ?? "application/octet-stream";
+}
+function chunkUri(url, chunk) {
+  return chunk.whole ? url : `${url}#bytes=${chunk.start}-${chunk.end - 1}`;
+}
+function rangeHeaders(chunk) {
+  return chunk.whole ? {} : { range: `bytes=${chunk.start}-${chunk.end - 1}` };
+}
+function isRangeAnswer(res, chunk) {
+  const range = res.headers.get("content-range") ?? "";
+  return res.status === 206 && range.startsWith(`bytes ${chunk.start}-`);
+}
+
 // connectors/canvas-puc/src/helpers.ts
 var ASSIGNMENT_BUCKETS = {
   all: void 0,
@@ -19264,24 +19314,6 @@ function getAllOrEmpty(client, path, params) {
 var MAX_DOWNLOAD_MB = 70;
 var MAX_DOWNLOAD_BYTES = MAX_DOWNLOAD_MB * 1024 * 1024;
 var MAX_TEXT_CHARS = 1e5;
-function fileMimeType(file) {
-  return file["content-type"] ?? "application/octet-stream";
-}
-function fileContentBlock(file, bytes) {
-  return binaryContentBlock(
-    fileMimeType(file),
-    bytes,
-    file.url ?? `canvas-file:${String(file.id)}`
-  );
-}
-function describeDownloadedFile(file, size) {
-  const kb = Math.round(size / 1024);
-  return `"${String(file.display_name)}" (${String(file["content-type"])}, ${kb} KB). Link: ${String(file.url)}`;
-}
-function downloadedFileResult(file, bytes) {
-  const text = describeDownloadedFile(file, bytes.length);
-  return rawToolResult({ content: [{ type: "text", text }, fileContentBlock(file, bytes)] });
-}
 function tooLargeMessage(name, size, url) {
   const mb = (size / 1024 / 1024).toFixed(1);
   return `"${name}" is ${mb} MB, above the ${MAX_DOWNLOAD_MB} MB limit for the conversation; download it from the link: ${url}`;
@@ -19292,31 +19324,46 @@ function downloadRefusal(file) {
   if ((file.size ?? 0) > MAX_DOWNLOAD_BYTES) return tooLargeMessage(name, file.size ?? 0, file.url);
   return null;
 }
-async function openCanvasFileStream(client, url) {
-  const res = await client.fetchStream(url);
-  const size = Number(res.headers.get("content-length") ?? 0);
-  if (!res.body || size > MAX_DOWNLOAD_BYTES) {
-    await res.body?.cancel();
-    return null;
-  }
-  return { body: res.body, size };
-}
-async function streamCanvasFile(client, file) {
-  if (downloadRefusal(file) !== null || !file.url) return null;
-  const opened = await openCanvasFileStream(client, file.url);
-  if (!opened) return null;
-  const overflow = tooLargeMessage(String(file.display_name), MAX_DOWNLOAD_BYTES + 1, file.url);
-  return {
-    text: describeDownloadedFile(file, file.size ?? opened.size),
-    mimeType: fileMimeType(file),
-    uri: file.url,
-    body: opened.body.pipeThrough(byteLimitStream(MAX_DOWNLOAD_BYTES, overflow))
-  };
-}
-async function downloadCanvasFile(client, file) {
+function planCanvasDownload(file, request) {
   const refusal = downloadRefusal(file);
   if (refusal !== null) return refusal;
-  return downloadedFileResult(file, await client.fetchBytes(String(file.url)));
+  const name = String(file.display_name);
+  if (file.size === void 0) {
+    return `Canvas did not report the size of "${name}"; download it from the link: ${String(file.url)}`;
+  }
+  const plan = planDownloadChunk(file.size, request);
+  return typeof plan === "string" ? `"${name}": ${plan}` : plan;
+}
+async function openCanvasChunk(client, url, chunk) {
+  const res = await client.fetchStream(url, rangeHeaders(chunk));
+  if (!res.body) throw new Error("Canvas sent an empty download.");
+  const skip = isRangeAnswer(res, chunk) ? 0 : chunk.start;
+  return res.body.pipeThrough(byteRangeStream(skip, chunk.end - chunk.start));
+}
+async function streamCanvasFile(client, file, request) {
+  const chunk = planCanvasDownload(file, request);
+  if (typeof chunk === "string") return null;
+  const url = String(file.url);
+  return {
+    text: chunkDescription(file, chunk),
+    mimeType: chunkMimeType(file, chunk),
+    uri: chunkUri(url, chunk),
+    body: await openCanvasChunk(client, url, chunk)
+  };
+}
+function chunkToolResult(file, chunk, bytes) {
+  const block = binaryContentBlock(
+    chunkMimeType(file, chunk),
+    bytes,
+    chunkUri(String(file.url), chunk)
+  );
+  return rawToolResult({ content: [{ type: "text", text: chunkDescription(file, chunk) }, block] });
+}
+async function downloadCanvasFile(client, file, request) {
+  const chunk = planCanvasDownload(file, request);
+  if (typeof chunk === "string") return chunk;
+  const body = await openCanvasChunk(client, String(file.url), chunk);
+  return chunkToolResult(file, chunk, new Uint8Array(await new Response(body).arrayBuffer()));
 }
 async function readCanvasFileText(client, file) {
   const type = file["content-type"] ?? "";
@@ -19371,8 +19418,8 @@ async function collectPages(deps, first, max) {
   }
   return items.slice(0, max);
 }
-async function fetchDownload(fetchFn, url) {
-  const res = await fetchFn(url);
+async function fetchDownload(fetchFn, url, headers = {}) {
+  const res = await fetchFn(url, { headers });
   if (!res.ok) throw new Error(`Failed to download the file (${res.status}).`);
   return res;
 }
@@ -19395,7 +19442,7 @@ function createCanvasClient(deps) {
     post: async (path, body) => await (await requestCanvas(deps, { method: "POST", path, body })).json(),
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
-    fetchStream: (url) => fetchDownload(deps.fetchFn, url)
+    fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers)
   };
 }
 
@@ -19605,7 +19652,13 @@ function toCalendarEvent(e) {
 // connectors/canvas-puc/src/tools-read.ts
 var id = external_exports.union([external_exports.string(), external_exports.number()]);
 var courseId = id.describe("Course ID (see list_courses)");
-var downloadFileShape = { file_id: id };
+var downloadFileShape = {
+  file_id: id,
+  offset: external_exports.number().int().min(0).optional().describe(
+    "First byte to return, for files sent in parts (use the offset given by the previous part)"
+  ),
+  length: external_exports.number().int().min(1).max(MAX_CHUNK_BYTES).optional().describe("Bytes to return (default and maximum 8 MB)")
+};
 var CANVAS_READ_TOOLS = [
   defineTool({
     name: "whoami",
@@ -19780,7 +19833,8 @@ var CANVAS_READ_TOOLS = [
     annotations: toolAnnotations("Download file", READ_ONLY_HINTS),
     run: async ({ client }, args) => downloadCanvasFile(
       client,
-      await client.get(`/files/${String(args.file_id)}`)
+      await client.get(`/files/${String(args.file_id)}`),
+      args
     )
   }),
   defineTool({
@@ -24161,8 +24215,9 @@ function canvasClientFor(settings, token) {
 }
 async function streamCanvasTool(client, call) {
   if (call.name !== "download_file") return null;
-  const { file_id: fileId } = external_exports.object(downloadFileShape).parse(call.args);
-  return streamCanvasFile(client, await client.get(`/files/${String(fileId)}`));
+  const args = external_exports.object(downloadFileShape).parse(call.args);
+  const file = await client.get(`/files/${String(args.file_id)}`);
+  return streamCanvasFile(client, file, args);
 }
 function canvasRemoteConnector(settings) {
   return {

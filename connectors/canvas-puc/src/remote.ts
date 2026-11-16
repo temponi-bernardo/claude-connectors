@@ -194,8 +194,9 @@ export async function streamCanvasTool(
   call: ToolCallRequest,
 ): Promise<StreamedToolContent | null> {
   if (call.name !== 'download_file') return null;
-  const { file_id: fileId } = z.object(downloadFileShape).parse(call.args);
-  return streamCanvasFile(client, await client.get<CanvasAttachment>(`/files/${String(fileId)}`));
+  const args = z.object(downloadFileShape).parse(call.args);
+  const file = await client.get<CanvasAttachment>(`/files/${String(args.file_id)}`);
+  return streamCanvasFile(client, file, args);
 }
 
 /** Builds the remote Canvas connector for the HTTP server. */

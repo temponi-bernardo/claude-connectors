@@ -11,8 +11,9 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- index:start -->
 
+- `connectors/canvas-puc/src/chunks.ts`: [`planDownloadChunk`](#plandownloadchunk), [`chunkDescription`](#chunkdescription), [`chunkMimeType`](#chunkmimetype), [`chunkUri`](#chunkuri), [`rangeHeaders`](#rangeheaders), [`isRangeAnswer`](#israngeanswer)
 - `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`requestCanvas`](#requestcanvas), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`createCanvasClient`](#createcanvasclient)
-- `connectors/canvas-puc/src/files.ts`: [`fileMimeType`](#filemimetype), [`fileContentBlock`](#filecontentblock), [`describeDownloadedFile`](#describedownloadedfile), [`downloadedFileResult`](#downloadedfileresult), [`tooLargeMessage`](#toolargemessage), [`downloadRefusal`](#downloadrefusal), [`openCanvasFileStream`](#opencanvasfilestream), [`streamCanvasFile`](#streamcanvasfile), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
+- `connectors/canvas-puc/src/files.ts`: [`tooLargeMessage`](#toolargemessage), [`downloadRefusal`](#downloadrefusal), [`planCanvasDownload`](#plancanvasdownload), [`openCanvasChunk`](#opencanvaschunk), [`streamCanvasFile`](#streamcanvasfile), [`chunkToolResult`](#chunktoolresult), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
@@ -61,7 +62,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
 - `src/core/pdf.ts`: [`bytesToLatin1`](#bytestolatin1), [`isPdf`](#ispdf), [`streamDataStart`](#streamdatastart), [`trimStreamEol`](#trimstreameol), [`readRawObject`](#readrawobject), [`listRawObjects`](#listrawobjects), [`decodePdfStream`](#decodepdfstream), [`splitObjectStream`](#splitobjectstream), [`storePdfObject`](#storepdfobject), [`readPdfObjects`](#readpdfobjects), [`pdfRefs`](#pdfrefs), [`dictRefs`](#dictrefs), [`collectPdfPages`](#collectpdfpages), [`orderedPages`](#orderedpages), [`utf16beHexToString`](#utf16behextostring), [`readBfChars`](#readbfchars), [`readBfRanges`](#readbfranges), [`rangeTarget`](#rangetarget), [`parseToUnicodeCMap`](#parsetounicodecmap), [`addFontRefs`](#addfontrefs), [`fontResourceRefs`](#fontresourcerefs), [`fontCMaps`](#fontcmaps), [`decodePdfText`](#decodepdftext), [`readLiteralString`](#readliteralstring), [`readEscape`](#readescape), [`readHexString`](#readhexstring), [`skipPdfSpace`](#skippdfspace), [`nextPdfToken`](#nextpdftoken), [`readPdfWord`](#readpdfword), [`wrapString`](#wrapstring), [`classifyWord`](#classifyword), [`showArrayText`](#showarraytext), [`lastOperandText`](#lastoperandtext), [`moveText`](#movetext), [`applyTextOperator`](#applytextoperator), [`feedPdfToken`](#feedpdftoken), [`contentStreamText`](#contentstreamtext), [`tidyPdfText`](#tidypdftext), [`pdfToText`](#pdftotext)
-- `src/core/stream.ts`: [`splitBase64Ready`](#splitbase64ready), [`base64EncodeStream`](#base64encodestream), [`byteLimitStream`](#bytelimitstream), [`framedStream`](#framedstream), [`readLimitedBytes`](#readlimitedbytes)
+- `src/core/stream.ts`: [`splitBase64Ready`](#splitbase64ready), [`base64EncodeStream`](#base64encodestream), [`byteLimitStream`](#bytelimitstream), [`byteRangeStream`](#byterangestream), [`framedStream`](#framedstream), [`readLimitedBytes`](#readlimitedbytes)
 - `src/core/word.ts`: [`docxXmlToText`](#docxxmltotext), [`docxToText`](#docxtotext), [`cp1252ToString`](#cp1252tostring), [`parsePieceTable`](#parsepiecetable), [`pieceText`](#piecetext), [`cleanWordText`](#cleanwordtext), [`docToText`](#doctotext), [`wordKind`](#wordkind), [`wordToText`](#wordtotext)
 - `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`decompressBytes`](#decompressbytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
 - `src/mcp/annotations.ts`: [`toolAnnotations`](#toolannotations)
@@ -1309,7 +1310,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:end -->
 
 - **Does:** Downloads a text file from a direct URL.
-- **Input:** `fetchFn`: `fetch` function; `url`: download link (already authorized by Canvas).
+- **Input:** `fetchFn`: `fetch` function; `url`: download link (already authorized by Canvas); `headers` (e.g. `Range`).
 - **Output:** Promise with the file content.
 - **Effects:** Network.
 - **Errors:** Rejects with "Failed to download the file (<status>)." if the response is not ok.
@@ -1336,14 +1337,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/client.ts`
-- **Signature:** `async fetchDownload(fetchFn: typeof fetch, url: string): Promise<Response>`
+- **Signature:** `async fetchDownload(fetchFn: typeof fetch, url: string, headers: Record<string, string> = {}): Promise<Response>`
 - **Used by:** `createCanvasClient()`, `fetchFileBytes()`, `fetchPlainText()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
 
 - **Does:** Downloads a direct Canvas link and checks the status.
-- **Input:** `fetchFn`: `fetch` function; `url`: download link (already authorized by Canvas).
+- **Input:** `fetchFn`: `fetch` function; `url`: download link (already authorized by Canvas); `headers` (e.g. `Range`).
 - **Output:** Promise with the ok `Response`.
 - **Effects:** Network.
 - **Errors:** Rejects with "Failed to download the file (<status>)." if the response is not ok.
@@ -2118,7 +2119,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `rawToolResult(result: CallToolResult): RawToolResult`
-- **Used by:** `downloadedFileResult()`, `mediaResult()`
+- **Used by:** `chunkToolResult()`, `mediaResult()`
 - **Processes:** P03, P14
 
 <!-- generated:end -->
@@ -2152,7 +2153,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `binaryContentBlock(mimeType: string, bytes: Uint8Array, uri: string): CallToolResult['content'][number]`
-- **Used by:** `fileContentBlock()`, `mediaResult()`
+- **Used by:** `chunkToolResult()`, `mediaResult()`
 - **Processes:** P03, P14
 
 <!-- generated:end -->
@@ -2433,7 +2434,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Connector `streamTool` of Canvas: streams `download_file`, leaves every other tool to the MCP server.
+- **Does:** Connector `streamTool` of Canvas: streams `download_file` (with its `offset`/`length`), leaves every other tool to the MCP server.
 - **Input:** `client`; `call` (`ToolCallRequest`).
 - **Output:** `StreamedToolContent`; `null` for other tools or when `streamCanvasFile()` declines.
 - **Effects:** Canvas GET `/files/:id` and the download.
@@ -3426,47 +3427,13 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 ## `connectors/canvas-puc/src/files.ts`
 
-### `fileContentBlock`
-
-<!-- generated:start -->
-
-- **File:** `connectors/canvas-puc/src/files.ts`
-- **Signature:** `fileContentBlock(file: CanvasAttachment, bytes: Uint8Array): CallToolResult['content'][number]`
-- **Used by:** `downloadedFileResult()`
-- **Processes:** P03
-
-<!-- generated:end -->
-
-- **Does:** Builds the MCP block with the file content: `image` for `image/*`, embedded `resource` (blob) for the rest.
-- **Input:** `file`: Canvas file; `bytes`: content.
-- **Output:** MCP content block.
-- **Effects:** None (pure).
-- **Errors:** None.
-
-### `downloadedFileResult`
-
-<!-- generated:start -->
-
-- **File:** `connectors/canvas-puc/src/files.ts`
-- **Signature:** `downloadedFileResult(file: CanvasAttachment, bytes: Uint8Array): RawToolResult`
-- **Used by:** `downloadCanvasFile()`
-- **Processes:** P03
-
-<!-- generated:end -->
-
-- **Does:** Builds the `download_file` result: one line with name, type, size and link, and the content block.
-- **Input:** `file`; `bytes`.
-- **Output:** `RawToolResult`.
-- **Effects:** None (pure).
-- **Errors:** None.
-
 ### `downloadRefusal`
 
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/files.ts`
 - **Signature:** `downloadRefusal(file: CanvasAttachment): string | null`
-- **Used by:** `downloadCanvasFile()`, `streamCanvasFile()`
+- **Used by:** `planCanvasDownload()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
@@ -3482,14 +3449,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/files.ts`
-- **Signature:** `async downloadCanvasFile(client: CanvasClient, file: CanvasAttachment): Promise<RawToolResult | string>`
+- **Signature:** `async downloadCanvasFile(client: CanvasClient, file: CanvasAttachment, request: ChunkRequest): Promise<RawToolResult | string>`
 - **Used by:** `connectors/canvas-puc/src/tools-read.ts (module)`
 - **Processes:** P03
 
 <!-- generated:end -->
 
-- **Does:** Downloads the file and returns its content to the conversation, or the reason for not downloading it.
-- **Input:** `client`: Canvas client; `file`: metadata from `/files/:id`.
+- **Does:** Downloads the planned part (`planCanvasDownload()`, at most `MAX_CHUNK_BYTES`) and returns it to the conversation, or the reason for not downloading it.
+- **Input:** `client`: Canvas client; `file`: metadata from `/files/:id`; `request` (`offset`, `length`).
 - **Output:** Promise with a `RawToolResult` or a message.
 - **Effects:** Network (file download).
 - **Errors:** Passes download errors through.
@@ -3511,47 +3478,13 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network (file download).
 - **Errors:** Passes through download and Word extraction errors.
 
-### `fileMimeType`
-
-<!-- generated:start -->
-
-- **File:** `connectors/canvas-puc/src/files.ts`
-- **Signature:** `fileMimeType(file: CanvasAttachment): string`
-- **Used by:** `fileContentBlock()`, `streamCanvasFile()`
-- **Processes:** P03, P08, P09
-
-<!-- generated:end -->
-
-- **Does:** Picks the MIME type of a Canvas file.
-- **Input:** `file` (`CanvasAttachment`).
-- **Output:** Its `content-type`, or `application/octet-stream`.
-- **Effects:** None.
-- **Errors:** None.
-
-### `describeDownloadedFile`
-
-<!-- generated:start -->
-
-- **File:** `connectors/canvas-puc/src/files.ts`
-- **Signature:** `describeDownloadedFile(file: CanvasAttachment, size: number): string`
-- **Used by:** `downloadedFileResult()`, `streamCanvasFile()`
-- **Processes:** P03, P08, P09
-
-<!-- generated:end -->
-
-- **Does:** Writes the description line of a downloaded file.
-- **Input:** `file` (`CanvasAttachment`); `size` in bytes.
-- **Output:** `"<name>" (<type>, <n> KB). Link: <url>`.
-- **Effects:** None.
-- **Errors:** None.
-
 ### `tooLargeMessage`
 
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/files.ts`
 - **Signature:** `tooLargeMessage(name: string, size: number, url: string): string`
-- **Used by:** `downloadRefusal()`, `fetchFileBytes()`, `streamCanvasFile()`
+- **Used by:** `downloadRefusal()`, `fetchFileBytes()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
@@ -3562,39 +3495,73 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None.
 - **Errors:** None.
 
-### `openCanvasFileStream`
-
-<!-- generated:start -->
-
-- **File:** `connectors/canvas-puc/src/files.ts`
-- **Signature:** `async openCanvasFileStream(client: CanvasClient, url: string): Promise<{ readonly body: ReadableStream<Uint8Array>; readonly size: number } | null>`
-- **Used by:** `streamCanvasFile()`
-- **Processes:** P03, P08, P09
-
-<!-- generated:end -->
-
-- **Does:** Opens a Canvas file download without reading it and checks the declared size.
-- **Input:** `client`; `url` of the download.
-- **Output:** `{ body, size }` (`size` from `content-length`, 0 if absent); `null` without a body or above `MAX_DOWNLOAD_BYTES` (body cancelled).
-- **Effects:** HTTP GET to the file URL.
-- **Errors:** Rejects like `fetchDownload()` (non-2xx, network).
-
 ### `streamCanvasFile`
 
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/files.ts`
-- **Signature:** `async streamCanvasFile(client: CanvasClient, file: CanvasAttachment): Promise<StreamedToolContent | null>`
+- **Signature:** `async streamCanvasFile(client: CanvasClient, file: CanvasAttachment, request: ChunkRequest): Promise<StreamedToolContent | null>`
 - **Used by:** `streamCanvasTool()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
 
-- **Does:** Streams a Canvas file for the remote server, capped at `MAX_DOWNLOAD_BYTES` whatever Canvas declares (ADR 0023).
-- **Input:** `client`; `file` (`CanvasAttachment`).
-- **Output:** `StreamedToolContent` (description, MIME type, URI, capped body); `null` when `downloadRefusal()` refuses or the download is declared too large, so the regular tool answers.
+- **Does:** Streams the planned part of a Canvas file for the remote server (ADR 0023, 0024): at most `MAX_CHUNK_BYTES`, never whole in memory.
+- **Input:** `client`; `file` (`CanvasAttachment`); `request` (`offset`, `length`).
+- **Output:** `StreamedToolContent` (description, MIME type, URI, body of the part); `null` when `planCanvasDownload()` refuses, so the regular tool explains why.
+- **Effects:** HTTP GET to the file URL (with `Range` for a part).
+- **Errors:** Rejects like `openCanvasChunk()`.
+
+### `planCanvasDownload`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/files.ts`
+- **Signature:** `planCanvasDownload(file: CanvasAttachment, request: ChunkRequest): DownloadChunk | string`
+- **Used by:** `downloadCanvasFile()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Plans the part of a Canvas file `download_file` returns.
+- **Input:** `file` (`CanvasAttachment`); `request` (`offset`, `length`).
+- **Output:** `DownloadChunk`; or a message for `downloadRefusal()`, an unknown size or an offset past the end.
+- **Effects:** None.
+- **Errors:** None.
+
+### `openCanvasChunk`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/files.ts`
+- **Signature:** `async openCanvasChunk(client: CanvasClient, url: string, chunk: DownloadChunk): Promise<ReadableStream<Uint8Array>>`
+- **Used by:** `downloadCanvasFile()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Opens the bytes of a part: sends `Range` and, when the server ignores it, skips to the part in the stream; never passes more than the part.
+- **Input:** `client`; `url`; `chunk`.
+- **Output:** Stream with exactly the part's bytes (fewer if the file is shorter).
 - **Effects:** HTTP GET to the file URL.
-- **Errors:** Rejects like `fetchDownload()`; the body errors with `tooLargeMessage()` if it passes the cap.
+- **Errors:** Rejects like `fetchDownload()`; rejects on a download without a body.
+
+### `chunkToolResult`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/files.ts`
+- **Signature:** `chunkToolResult(file: CanvasAttachment, chunk: DownloadChunk, bytes: Uint8Array): RawToolResult`
+- **Used by:** `downloadCanvasFile()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Builds the `download_file` result: description line and content block of the part.
+- **Input:** `file`; `chunk`; `bytes` of the part.
+- **Output:** `RawToolResult`.
+- **Effects:** None.
+- **Errors:** None.
 
 ## `src/core/cfb.ts`
 
@@ -9900,7 +9867,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/stream.ts`
 - **Signature:** `byteLimitStream(maxBytes: number, message: string): TransformStream<Uint8Array, Uint8Array>`
-- **Used by:** `readLimitedBytes()`, `streamCanvasFile()`
+- **Used by:** `readLimitedBytes()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
@@ -9944,6 +9911,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `Uint8Array` (empty for `null`).
 - **Effects:** Consumes the stream.
 - **Errors:** Rejects with `Error(message)` as soon as the body passes `maxBytes`.
+
+### `byteRangeStream`
+
+<!-- generated:start -->
+
+- **File:** `src/core/stream.ts`
+- **Signature:** `byteRangeStream(skip: number, take: number): TransformStream<Uint8Array, Uint8Array>`
+- **Used by:** `openCanvasChunk()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Drops the first `skip` bytes of a stream, passes the next `take` and ends, cancelling the source.
+- **Input:** `skip`; `take` (bytes).
+- **Output:** `TransformStream` of bytes.
+- **Effects:** Cancels the source once `take` bytes passed.
+- **Errors:** None.
 
 ## `src/remote/streamed-tool.ts`
 
@@ -10032,6 +10016,110 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None until read (then reads `content.body`).
 - **Errors:** The body errors if the source stream errors (e.g. over the cap).
 
+## `connectors/canvas-puc/src/chunks.ts`
+
+### `planDownloadChunk`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/chunks.ts`
+- **Signature:** `planDownloadChunk(total: number, request: ChunkRequest): DownloadChunk | string`
+- **Used by:** `planCanvasDownload()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Plans bytes `[start, end)` of a file from the asked offset and length (default and cap `MAX_CHUNK_BYTES`).
+- **Input:** `total` bytes; `request` (`ChunkRequest`).
+- **Output:** `DownloadChunk` (`whole` when it is the entire file); a message for an offset past the end.
+- **Effects:** None.
+- **Errors:** None.
+
+### `chunkDescription`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/chunks.ts`
+- **Signature:** `chunkDescription(file: CanvasAttachment, chunk: DownloadChunk): string`
+- **Used by:** `chunkToolResult()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Writes the description of what `download_file` returned: the file as before, or the part with its byte range, part number and the next offset.
+- **Input:** `file` (`CanvasAttachment`); `chunk` (`DownloadChunk`).
+- **Output:** Description line with the link.
+- **Effects:** None.
+- **Errors:** None.
+
+### `chunkMimeType`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/chunks.ts`
+- **Signature:** `chunkMimeType(file: CanvasAttachment, chunk: DownloadChunk): string`
+- **Used by:** `chunkToolResult()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Picks the MIME type of the returned content: the file's own when whole, `application/octet-stream` for a part.
+- **Input:** `file`; `chunk`.
+- **Output:** MIME type.
+- **Effects:** None.
+- **Errors:** None.
+
+### `chunkUri`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/chunks.ts`
+- **Signature:** `chunkUri(url: string, chunk: DownloadChunk): string`
+- **Used by:** `chunkToolResult()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Builds the URI of the returned content.
+- **Input:** `url` of the file; `chunk`.
+- **Output:** The link, with `#bytes=<first>-<last>` for a part.
+- **Effects:** None.
+- **Errors:** None.
+
+### `rangeHeaders`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/chunks.ts`
+- **Signature:** `rangeHeaders(chunk: DownloadChunk): Record<string, string>`
+- **Used by:** `openCanvasChunk()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Builds the `Range` header of a part.
+- **Input:** `chunk`.
+- **Output:** `{ range: 'bytes=<first>-<last>' }`; `{}` for a whole file.
+- **Effects:** None.
+- **Errors:** None.
+
+### `isRangeAnswer`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/chunks.ts`
+- **Signature:** `isRangeAnswer(res: Response, chunk: DownloadChunk): boolean`
+- **Used by:** `openCanvasChunk()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Says whether the download honoured the asked range.
+- **Input:** `res` (`Response`); `chunk`.
+- **Output:** `true` for a 206 whose `content-range` starts at the asked byte.
+- **Effects:** None.
+- **Errors:** None.
+
 ## Data and constants
 
 | Name                         | File                                       | What it is                                                                                                      |
@@ -10052,9 +10140,10 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `CFB_SIGNATURE`              | `src/core/cfb.ts`                          | The first 8 bytes of every OLE/CFB file (the .doc container).                                                   |
 | `CP1252_HIGH`                | `src/core/word.ts`                         | Windows-1252 characters 0x80 to 0x9F, used when decoding the .doc's 8-bit text.                                 |
 | `WORD_TEXT_REPLACEMENTS`     | `src/core/word.ts`                         | Replacements (regex → text) applied in order by `cleanWordText` to Word marks.                                  |
-| `MAX_DOWNLOAD_BYTES`         | `connectors/canvas-puc/src/files.ts`       | Largest file `download_file` brings into the conversation (70 MB, streamed — ADR 0023).                         |
+| `MAX_DOWNLOAD_BYTES`         | `connectors/canvas-puc/src/files.ts`       | Largest file `download_file` brings into the conversation (70 MB, in parts — ADR 0023, 0024).                   |
 | `MAX_DOWNLOAD_MB`            | `connectors/canvas-puc/src/files.ts`       | The same limit in MB (70), used in the tool description and refusals.                                           |
-| `downloadFileShape`          | `connectors/canvas-puc/src/tools-read.ts`  | Arguments of `download_file` (`file_id`), shared with `streamCanvasTool()`.                                     |
+| `MAX_CHUNK_BYTES`            | `connectors/canvas-puc/src/chunks.ts`      | Largest part `download_file` returns per call (8 MB; ADR 0024).                                                 |
+| `downloadFileShape`          | `connectors/canvas-puc/src/tools-read.ts`  | Arguments of `download_file` (`file_id`, `offset`, `length`), shared with `streamCanvasTool()`.                 |
 | `MAX_TEXT_CHARS`             | `connectors/canvas-puc/src/files.ts`       | Largest text returned by `read_file_text` (100,000 characters).                                                 |
 | `CONNECTORS_DIR`             | `tools/bundle/bundle.ts`                   | Connectors folder relative to the root (`connectors`).                                                          |
 | `PLUGIN_DIR`                 | `tools/bundle/bundle.ts`                   | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                          |

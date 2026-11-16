@@ -155,6 +155,18 @@ describe('streamCanvasTool', () => {
     await expect(new Response(content!.body).text()).resolves.toBe('pdf');
     await expect(streamCanvasTool(client, { ...call, name: 'list_files' })).resolves.toBeNull();
     await expect(streamCanvasTool(client, { ...call, args: {} })).rejects.toThrow();
+    await expect(
+      streamCanvasTool(client, { ...call, args: { file_id: 1, length: 9 * 1024 * 1024 } }),
+    ).rejects.toThrow();
+  });
+
+  it('passes offset and length to the part it streams', async () => {
+    const big = { ...file, size: 10 };
+    const settings = settingsWith(new Response(JSON.stringify(big)), new Response('0123456789'));
+    const call = { id: 1, name: 'download_file', args: { file_id: 1, offset: 4, length: 3 } };
+    const content = await streamCanvasTool(canvasClientFor(settings, 'tok'), call);
+    expect(new Headers(settings.fetchFn.mock.calls[1]![1]?.headers).get('range')).toBe('bytes=4-6');
+    await expect(new Response(content!.body).text()).resolves.toBe('456');
   });
 
   it('is the connector streamTool', async () => {

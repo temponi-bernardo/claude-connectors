@@ -21,6 +21,7 @@ import type {
   CanvasSubmission,
 } from './canvas-types.js';
 import type { CanvasContext } from './context.js';
+import { MAX_CHUNK_BYTES } from './chunks.js';
 import { downloadCanvasFile, MAX_DOWNLOAD_MB, readCanvasFileText } from './files.js';
 import * as f from './format.js';
 import * as h from './helpers.js';
@@ -28,8 +29,25 @@ import * as h from './helpers.js';
 const id = z.union([z.string(), z.number()]);
 const courseId = id.describe('Course ID (see list_courses)');
 
-/** Arguments of `download_file`, shared with its streamed version in remote mode (ADR 0023). */
-export const downloadFileShape = { file_id: id };
+/** Arguments of `download_file`, shared with its streamed version in remote mode (ADR 0023, 0024). */
+export const downloadFileShape = {
+  file_id: id,
+  offset: z
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe(
+      'First byte to return, for files sent in parts (use the offset given by the previous part)',
+    ),
+  length: z
+    .number()
+    .int()
+    .min(1)
+    .max(MAX_CHUNK_BYTES)
+    .optional()
+    .describe('Bytes to return (default and maximum 8 MB)'),
+};
 
 /** Read tools, in the order the model sees them. */
 export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
@@ -218,6 +236,7 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
       downloadCanvasFile(
         client,
         await client.get<CanvasAttachment>(`/files/${String(args.file_id)}`),
+        args,
       ),
   }),
   defineTool({

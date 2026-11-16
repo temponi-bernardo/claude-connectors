@@ -1,53 +1,33 @@
 /**
  * Canvas files: read as text (including .doc/.docx) and download the content into the conversation.
  */
-import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { byteLimitStream } from '../../../src/core/stream.js';
+import { byteRangeStream } from '../../../src/core/stream.js';
 import { htmlToText } from '../../../src/core/html.js';
 import { wordKind, wordToText } from '../../../src/core/word.js';
 import { binaryContentBlock, rawToolResult, type RawToolResult } from '../../../src/mcp/tools.js';
 import type { StreamedToolContent } from '../../../src/remote/streamed-tool.js';
 import type { CanvasAttachment } from './canvas-types.js';
+import {
+  chunkDescription,
+  chunkMimeType,
+  chunkUri,
+  isRangeAnswer,
+  planDownloadChunk,
+  rangeHeaders,
+  type ChunkRequest,
+  type DownloadChunk,
+} from './chunks.js';
 import type { CanvasClient } from './client.js';
 import { isTextFile } from './helpers.js';
 
 /** Largest file `download_file` brings into the conversation, in MB (ADR 0023). */
 export const MAX_DOWNLOAD_MB = 70;
 
-/** Largest file `download_file` brings into the conversation, in bytes; streamed, so it never sits whole in memory. */
+/** Largest file `download_file` brings into the conversation, in bytes (in parts of `MAX_CHUNK_BYTES`). */
 export const MAX_DOWNLOAD_BYTES = MAX_DOWNLOAD_MB * 1024 * 1024;
 
 /** Longest text returned by `read_file_text`, in characters. */
 export const MAX_TEXT_CHARS = 100_000;
-
-/** MIME type of the file, `application/octet-stream` when Canvas does not say. */
-export function fileMimeType(file: CanvasAttachment): string {
-  return file['content-type'] ?? 'application/octet-stream';
-}
-
-/** MCP block with the file content: an image for `image/*`, an embedded resource for the rest. */
-export function fileContentBlock(
-  file: CanvasAttachment,
-  bytes: Uint8Array,
-): CallToolResult['content'][number] {
-  return binaryContentBlock(
-    fileMimeType(file),
-    bytes,
-    file.url ?? `canvas-file:${String(file.id)}`,
-  );
-}
-
-/** Description line of a downloaded file: name, type, size in KB and link. */
-export function describeDownloadedFile(file: CanvasAttachment, size: number): string {
-  const kb = Math.round(size / 1024);
-  return `"${String(file.display_name)}" (${String(file['content-type'])}, ${kb} KB). Link: ${String(file.url)}`;
-}
-
-/** Result of `download_file`: a description line and the file content. */
-export function downloadedFileResult(file: CanvasAttachment, bytes: Uint8Array): RawToolResult {
-  const text = describeDownloadedFile(file, bytes.length);
-  return rawToolResult({ content: [{ type: 'text', text }, fileContentBlock(file, bytes)] });
-}
 
 /** Refusal for a file above `MAX_DOWNLOAD_BYTES`, pointing to the link. */
 export function tooLargeMessage(name: string, size: number, url: string): string {
@@ -63,48 +43,77 @@ export function downloadRefusal(file: CanvasAttachment): string | null {
   return null;
 }
 
-/** Opens the download stream; `null` (body released) when Canvas declares more than `MAX_DOWNLOAD_BYTES`. */
-export async function openCanvasFileStream(
+/** Plans the part of the file to return (ADR 0024), or the reason it cannot be returned. */
+export function planCanvasDownload(
+  file: CanvasAttachment,
+  request: ChunkRequest,
+): DownloadChunk | string {
+  const refusal = downloadRefusal(file);
+  if (refusal !== null) return refusal;
+  const name = String(file.display_name);
+  if (file.size === undefined) {
+    return `Canvas did not report the size of "${name}"; download it from the link: ${String(file.url)}`;
+  }
+  const plan = planDownloadChunk(file.size, request);
+  return typeof plan === 'string' ? `"${name}": ${plan}` : plan;
+}
+
+/** Opens the bytes of the part: asks Canvas for the range and, if it sends the whole file, skips to it. */
+export async function openCanvasChunk(
   client: CanvasClient,
   url: string,
-): Promise<{ readonly body: ReadableStream<Uint8Array>; readonly size: number } | null> {
-  const res = await client.fetchStream(url);
-  const size = Number(res.headers.get('content-length') ?? 0);
-  if (!res.body || size > MAX_DOWNLOAD_BYTES) {
-    await res.body?.cancel();
-    return null;
-  }
-  return { body: res.body, size };
+  chunk: DownloadChunk,
+): Promise<ReadableStream<Uint8Array>> {
+  const res = await client.fetchStream(url, rangeHeaders(chunk));
+  if (!res.body) throw new Error('Canvas sent an empty download.');
+  const skip = isRangeAnswer(res, chunk) ? 0 : chunk.start;
+  return res.body.pipeThrough(byteRangeStream(skip, chunk.end - chunk.start));
 }
 
 /**
- * Streams the file for the remote server (ADR 0023), capped at `MAX_DOWNLOAD_BYTES` whatever Canvas declares;
- * `null` when it refuses it or the download is declared too large (the regular tool then answers).
+ * Streams the planned part for the remote server (ADR 0023, 0024): never more than `MAX_CHUNK_BYTES`, never
+ * whole in memory; `null` when it cannot be returned (the regular tool then explains why).
  */
 export async function streamCanvasFile(
   client: CanvasClient,
   file: CanvasAttachment,
+  request: ChunkRequest,
 ): Promise<StreamedToolContent | null> {
-  if (downloadRefusal(file) !== null || !file.url) return null;
-  const opened = await openCanvasFileStream(client, file.url);
-  if (!opened) return null;
-  const overflow = tooLargeMessage(String(file.display_name), MAX_DOWNLOAD_BYTES + 1, file.url);
+  const chunk = planCanvasDownload(file, request);
+  if (typeof chunk === 'string') return null;
+  const url = String(file.url);
   return {
-    text: describeDownloadedFile(file, file.size ?? opened.size),
-    mimeType: fileMimeType(file),
-    uri: file.url,
-    body: opened.body.pipeThrough(byteLimitStream(MAX_DOWNLOAD_BYTES, overflow)),
+    text: chunkDescription(file, chunk),
+    mimeType: chunkMimeType(file, chunk),
+    uri: chunkUri(url, chunk),
+    body: await openCanvasChunk(client, url, chunk),
   };
 }
 
-/** Downloads the file and returns its content to the conversation, or the reason it was not downloaded. */
+/** Result of `download_file`: the description line and the content of the part. */
+export function chunkToolResult(
+  file: CanvasAttachment,
+  chunk: DownloadChunk,
+  bytes: Uint8Array,
+): RawToolResult {
+  const block = binaryContentBlock(
+    chunkMimeType(file, chunk),
+    bytes,
+    chunkUri(String(file.url), chunk),
+  );
+  return rawToolResult({ content: [{ type: 'text', text: chunkDescription(file, chunk) }, block] });
+}
+
+/** Downloads the planned part and returns it to the conversation, or the reason it was not downloaded. */
 export async function downloadCanvasFile(
   client: CanvasClient,
   file: CanvasAttachment,
+  request: ChunkRequest,
 ): Promise<RawToolResult | string> {
-  const refusal = downloadRefusal(file);
-  if (refusal !== null) return refusal;
-  return downloadedFileResult(file, await client.fetchBytes(String(file.url)));
+  const chunk = planCanvasDownload(file, request);
+  if (typeof chunk === 'string') return chunk;
+  const body = await openCanvasChunk(client, String(file.url), chunk);
+  return chunkToolResult(file, chunk, new Uint8Array(await new Response(body).arrayBuffer()));
 }
 
 /** Reads a file as text: plain text, HTML or a Word document; other types return the link. */

@@ -257,7 +257,7 @@ describe('read tools', () => {
       { file_id: 5 },
       {
         '/files/5': { display_name: 'a.pdf', url: 'p', 'content-type': 'application/pdf', size: 3 },
-        p: new Uint8Array([1, 2, 3]),
+        p: new Response(new Uint8Array([1, 2, 3])),
       },
     );
     expect(toToolResult(ok.result).content[1]).toMatchObject({ type: 'resource' });

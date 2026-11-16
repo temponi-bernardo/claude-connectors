@@ -116,6 +116,12 @@ describe('fetchPlainText', () => {
 });
 
 describe('fetchDownload', () => {
+  it('sends the given headers, such as a byte range', async () => {
+    const f = fakeFetch(new Response('ok'));
+    await fetchDownload(f as unknown as typeof fetch, 'https://f.test/a', { range: 'bytes=0-1' });
+    expect(f.mock.calls[0]![1]).toEqual({ headers: { range: 'bytes=0-1' } });
+  });
+
   it('returns the response or fails with the status', async () => {
     const f = fakeFetch(new Response('ok'), new Response('', { status: 403 }));
     const res = await fetchDownload(f as unknown as typeof fetch, 'https://f.test/a');

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   base64EncodeStream,
+  byteRangeStream,
   byteLimitStream,
   framedStream,
   readLimitedBytes,
@@ -76,5 +77,20 @@ describe('readLimitedBytes', () => {
     await expect(readLimitedBytes(streamOf([new Uint8Array(3)]), 2, 'over')).rejects.toThrow(
       'over',
     );
+  });
+});
+
+describe('byteRangeStream', () => {
+  it('skips the first bytes and passes exactly the asked amount, across chunks', async () => {
+    const chunks = [new Uint8Array([0, 1, 2]), new Uint8Array([3, 4, 5]), new Uint8Array([6, 7])];
+    const out = streamOf(chunks).pipeThrough(byteRangeStream(2, 4));
+    expect([...new Uint8Array(await new Response(out).arrayBuffer())]).toEqual([2, 3, 4, 5]);
+  });
+
+  it('passes what there is when the source ends early, and nothing for an empty range', async () => {
+    const short = streamOf([new Uint8Array([1, 2])]).pipeThrough(byteRangeStream(1, 5));
+    expect([...new Uint8Array(await new Response(short).arrayBuffer())]).toEqual([2]);
+    const none = streamOf([new Uint8Array([1])]).pipeThrough(byteRangeStream(0, 0));
+    expect(new Uint8Array(await new Response(none).arrayBuffer())).toHaveLength(0);
   });
 });

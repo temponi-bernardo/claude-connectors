@@ -35,8 +35,8 @@ export interface CanvasClient {
   readonly post: <T>(path: string, body: unknown) => Promise<T>;
   readonly fetchText: (url: string) => Promise<string>;
   readonly fetchBytes: (url: string) => Promise<Uint8Array>;
-  /** Opens a file download without reading it (the caller streams the body). */
-  readonly fetchStream: (url: string) => Promise<Response>;
+  /** Opens a file download without reading it (the caller streams the body); `headers` e.g. `Range`. */
+  readonly fetchStream: (url: string, headers?: Record<string, string>) => Promise<Response>;
 }
 
 /** 401 message: the token expired or was revoked; tells the user to generate another and reconnect. */
@@ -87,9 +87,13 @@ export async function collectPages<T>(
   return items.slice(0, max);
 }
 
-/** Downloads a file by direct URL (Canvas download links already carry the authorization). */
-export async function fetchDownload(fetchFn: typeof fetch, url: string): Promise<Response> {
-  const res = await fetchFn(url);
+/** Downloads a file by direct URL (Canvas download links already carry the authorization), with optional headers. */
+export async function fetchDownload(
+  fetchFn: typeof fetch,
+  url: string,
+  headers: Record<string, string> = {},
+): Promise<Response> {
+  const res = await fetchFn(url, { headers });
   if (!res.ok) throw new Error(`Failed to download the file (${res.status}).`);
   return res;
 }
@@ -125,6 +129,6 @@ export function createCanvasClient(deps: ClientDeps): CanvasClient {
       (await (await requestCanvas(deps, { method: 'POST', path, body })).json()) as T,
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
-    fetchStream: (url) => fetchDownload(deps.fetchFn, url),
+    fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers),
   };
 }
