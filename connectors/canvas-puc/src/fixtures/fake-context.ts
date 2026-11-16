@@ -27,6 +27,7 @@ export interface FakeContext {
   readonly post: Mock<PostFn>;
   readonly fetchText: Mock<TextFn>;
   readonly fetchBytes: Mock<TextFn>;
+  readonly fetchStream: Mock<TextFn>;
 }
 
 /** Creates a context with a fake client and a clock fixed at 2026-11-05T12:00:00Z. */
@@ -36,6 +37,7 @@ export function fakeContext(routes: Routes = {}): FakeContext {
   const post = vi.fn<PostFn>((path) => answer(routes, path));
   const fetchText = vi.fn<TextFn>((url) => answer(routes, url));
   const fetchBytes = vi.fn<TextFn>((url) => answer(routes, url));
+  const fetchStream = vi.fn<TextFn>((url) => answer(routes, url));
   const client = {
     baseUrl: 'https://x.test',
     get,
@@ -43,7 +45,8 @@ export function fakeContext(routes: Routes = {}): FakeContext {
     post,
     fetchText,
     fetchBytes,
+    fetchStream,
   } as unknown as CanvasClient;
   const ctx: CanvasContext = { client, now: () => new Date('2026-11-05T12:00:00Z') };
-  return { ctx, get, getAll, post, fetchText, fetchBytes };
+  return { ctx, get, getAll, post, fetchText, fetchBytes, fetchStream };
 }

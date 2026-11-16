@@ -3,9 +3,14 @@
  * the OAuth page; every MCP request uses that token, with no browser session and no file on disk.
  */
 import { envValue, parseFlag, type EnvVars } from '../../../src/core/env.js';
+import { z } from 'zod';
 import type { RemoteConnector, SecretRenewal } from '../../../src/remote/handler.js';
+import type { StreamedToolContent, ToolCallRequest } from '../../../src/remote/streamed-tool.js';
+import type { CanvasAttachment } from './canvas-types.js';
+import { createCanvasClient, type CanvasClient } from './client.js';
+import { streamCanvasFile } from './files.js';
+import { downloadFileShape } from './tools-read.js';
 import type { LoginPageText } from '../../../src/remote/login-page.js';
-import { createCanvasClient } from './client.js';
 import { canvasTools, createCanvasMcpServer } from './tools.js';
 
 /** PUC Minas Canvas, used when `CANVAS_BASE_URL` is not set. */
@@ -178,6 +183,21 @@ export async function renewCanvasSecret(
   return 'kept';
 }
 
+/** Canvas client of the server's Canvas, authorized with the user's token. */
+export function canvasClientFor(settings: CanvasRemoteSettings, token: string): CanvasClient {
+  return createCanvasClient({ baseUrl: settings.baseUrl, token, fetchFn: settings.fetchFn });
+}
+
+/** Streams `download_file` (ADR 0023); `null` for every other tool, which the MCP server answers. */
+export async function streamCanvasTool(
+  client: CanvasClient,
+  call: ToolCallRequest,
+): Promise<StreamedToolContent | null> {
+  if (call.name !== 'download_file') return null;
+  const { file_id: fileId } = z.object(downloadFileShape).parse(call.args);
+  return streamCanvasFile(client, await client.get<CanvasAttachment>(`/files/${String(fileId)}`));
+}
+
 /** Builds the remote Canvas connector for the HTTP server. */
 export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector {
   return {
@@ -187,16 +207,11 @@ export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteCon
       verify: (secret) => verifyCanvasToken(settings, secret),
     },
     renewSecret: (secret) => renewCanvasSecret(settings, secret, new Date()),
-    createServer: (secret) => {
-      const client = createCanvasClient({
-        baseUrl: settings.baseUrl,
-        token: secret,
-        fetchFn: settings.fetchFn,
-      });
-      return createCanvasMcpServer(canvasTools(settings.allowWrite), {
-        client,
+    createServer: (secret) =>
+      createCanvasMcpServer(canvasTools(settings.allowWrite), {
+        client: canvasClientFor(settings, secret),
         now: () => new Date(),
-      });
-    },
+      }),
+    streamTool: (secret, call) => streamCanvasTool(canvasClientFor(settings, secret), call),
   };
 }

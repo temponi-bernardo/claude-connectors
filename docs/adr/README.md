@@ -27,3 +27,4 @@ that marks the old one as "Superseded by NNNN". Template in [0000-template.md](0
 | [0020](0020-plugin-content-in-plugin-subfolder.md)       | Plugin content lives in a `plugin/` subfolder                   | Accepted                            | 2026-11-14 |
 | [0021](0021-english-across-the-repository.md)            | English across the repository                                   | Accepted                            | 2026-11-14 |
 | [0022](0022-version-per-plugin.md)                       | One version per plugin                                          | Accepted                            | 2026-11-14 |
+| [0023](0023-streamed-canvas-downloads.md)                | Streamed Canvas downloads up to 70 MB                           | Accepted                            | 2026-11-16 |

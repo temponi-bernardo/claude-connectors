@@ -9,6 +9,7 @@ import {
   runToolSafely,
   textResult,
   toToolResult,
+  base64ContentBlock,
   binaryContentBlock,
 } from './tools.js';
 import { READ_ONLY_HINTS, SEND_HINTS, toolAnnotations } from './annotations.js';
@@ -150,6 +151,20 @@ describe('binaryContentBlock', () => {
     expect(binaryContentBlock('application/pdf', bytes, 'x:1')).toEqual({
       type: 'resource',
       resource: { uri: 'x:1', mimeType: 'application/pdf', blob: 'AQ==' },
+    });
+  });
+});
+
+describe('base64ContentBlock', () => {
+  it('builds the block from data already in base64', () => {
+    expect(base64ContentBlock('image/png', 'QQ==', 'u')).toEqual({
+      type: 'image',
+      data: 'QQ==',
+      mimeType: 'image/png',
+    });
+    expect(base64ContentBlock('application/pdf', 'QQ==', 'u')).toEqual({
+      type: 'resource',
+      resource: { uri: 'u', mimeType: 'application/pdf', blob: 'QQ==' },
     });
   });
 });

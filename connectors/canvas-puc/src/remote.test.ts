@@ -12,8 +12,10 @@ import {
   renewCanvasToken,
   withCanvasUserAgent,
   canvasLoginText,
+  canvasClientFor,
   canvasRemoteConnector,
   readCanvasRemoteSettings,
+  streamCanvasTool,
   verifyCanvasToken,
   type CanvasRemoteSettings,
 } from './remote.js';
@@ -123,6 +125,43 @@ describe('canvasRemoteConnector', () => {
     const settings = settingsWith(new Response('{}'), new Response('[]'));
     await expect(canvasRemoteConnector(settings).renewSecret?.('abc')).resolves.toBe('kept');
     expect(settings.fetchFn).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('canvasClientFor', () => {
+  it('calls the server Canvas with the user token', async () => {
+    const settings = settingsWith(new Response('{"id":1}'));
+    await expect(canvasClientFor(settings, 'tok').get('/users/self')).resolves.toEqual({ id: 1 });
+    const [url, init] = settings.fetchFn.mock.calls[0]!;
+    expect((url as URL).href).toBe(`${BASE}/api/v1/users/self`);
+    expect(new Headers(init?.headers).get('authorization')).toBe('Bearer tok');
+  });
+});
+
+describe('streamCanvasTool', () => {
+  const file = {
+    display_name: 'a.pdf',
+    url: `${BASE}/files/1/download`,
+    'content-type': 'application/pdf',
+    size: 3,
+  };
+
+  it('streams download_file and leaves every other tool to the MCP server', async () => {
+    const settings = settingsWith(new Response(JSON.stringify(file)), new Response('pdf'));
+    const client = canvasClientFor(settings, 'tok');
+    const call = { id: 1, name: 'download_file', args: { file_id: 1 } };
+    const content = await streamCanvasTool(client, call);
+    expect((settings.fetchFn.mock.calls[0]![0] as URL).href).toBe(`${BASE}/api/v1/files/1`);
+    await expect(new Response(content!.body).text()).resolves.toBe('pdf');
+    await expect(streamCanvasTool(client, { ...call, name: 'list_files' })).resolves.toBeNull();
+    await expect(streamCanvasTool(client, { ...call, args: {} })).rejects.toThrow();
+  });
+
+  it('is the connector streamTool', async () => {
+    const settings = settingsWith(new Response(JSON.stringify(file)), new Response('pdf'));
+    const call = { id: 1, name: 'download_file', args: { file_id: '1' } };
+    const content = await canvasRemoteConnector(settings).streamTool?.('tok', call);
+    expect(content?.mimeType).toBe('application/pdf');
   });
 });
 

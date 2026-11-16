@@ -21,12 +21,15 @@ import type {
   CanvasSubmission,
 } from './canvas-types.js';
 import type { CanvasContext } from './context.js';
-import { downloadCanvasFile, readCanvasFileText } from './files.js';
+import { downloadCanvasFile, MAX_DOWNLOAD_MB, readCanvasFileText } from './files.js';
 import * as f from './format.js';
 import * as h from './helpers.js';
 
 const id = z.union([z.string(), z.number()]);
 const courseId = id.describe('Course ID (see list_courses)');
+
+/** Arguments of `download_file`, shared with its streamed version in remote mode (ADR 0023). */
+export const downloadFileShape = { file_id: id };
 
 /** Read tools, in the order the model sees them. */
 export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
@@ -208,9 +211,8 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   }),
   defineTool({
     name: 'download_file',
-    description:
-      'Download a course file (PDF, slides, image etc., up to 10 MB) and bring its content into the conversation.',
-    shape: { file_id: id },
+    description: `Download a course file (PDF, slides, image etc., up to ${MAX_DOWNLOAD_MB} MB) and bring its content into the conversation.`,
+    shape: downloadFileShape,
     annotations: toolAnnotations('Download file', READ_ONLY_HINTS),
     run: async ({ client }, args) =>
       downloadCanvasFile(

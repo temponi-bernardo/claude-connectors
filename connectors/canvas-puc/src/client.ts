@@ -2,6 +2,8 @@
  * HTTP client for the Canvas REST API: token (Bearer) authentication and pagination.
  */
 import { buildUrl, parseNextLink, type QueryParams } from '../../../src/core/http.js';
+import { readLimitedBytes } from '../../../src/core/stream.js';
+import { MAX_DOWNLOAD_BYTES, tooLargeMessage } from './files.js';
 
 /** Items per page requested from Canvas (the maximum the API accepts). */
 export const CANVAS_PAGE_SIZE = 100;
@@ -33,6 +35,8 @@ export interface CanvasClient {
   readonly post: <T>(path: string, body: unknown) => Promise<T>;
   readonly fetchText: (url: string) => Promise<string>;
   readonly fetchBytes: (url: string) => Promise<Uint8Array>;
+  /** Opens a file download without reading it (the caller streams the body). */
+  readonly fetchStream: (url: string) => Promise<Response>;
 }
 
 /** 401 message: the token expired or was revoked; tells the user to generate another and reconnect. */
@@ -95,9 +99,14 @@ export async function fetchPlainText(fetchFn: typeof fetch, url: string): Promis
   return (await fetchDownload(fetchFn, url)).text();
 }
 
-/** Downloads a binary file by direct URL. */
-export async function fetchFileBytes(fetchFn: typeof fetch, url: string): Promise<Uint8Array> {
-  return new Uint8Array(await (await fetchDownload(fetchFn, url)).arrayBuffer());
+/** Downloads a binary file by direct URL, failing as soon as it passes `maxBytes` (default `MAX_DOWNLOAD_BYTES`). */
+export async function fetchFileBytes(
+  fetchFn: typeof fetch,
+  url: string,
+  maxBytes = MAX_DOWNLOAD_BYTES,
+): Promise<Uint8Array> {
+  const res = await fetchDownload(fetchFn, url);
+  return readLimitedBytes(res.body, maxBytes, tooLargeMessage('The file', maxBytes + 1, url));
 }
 
 /** Creates the Canvas client. */
@@ -116,5 +125,6 @@ export function createCanvasClient(deps: ClientDeps): CanvasClient {
       (await (await requestCanvas(deps, { method: 'POST', path, body })).json()) as T,
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
+    fetchStream: (url) => fetchDownload(deps.fetchFn, url),
   };
 }
