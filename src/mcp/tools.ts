@@ -111,7 +111,15 @@ export function binaryContentBlock(
   bytes: Uint8Array,
   uri: string,
 ): CallToolResult['content'][number] {
-  const data = bytesToBase64(bytes);
+  return base64ContentBlock(mimeType, bytesToBase64(bytes), uri);
+}
+
+/** MCP block with content already in base64: image, audio or an embedded resource with the given `uri`. */
+export function base64ContentBlock(
+  mimeType: string,
+  data: string,
+  uri: string,
+): CallToolResult['content'][number] {
   if (mimeType.startsWith('image/')) return { type: 'image', data, mimeType };
   if (mimeType.startsWith('audio/')) return { type: 'audio', data, mimeType };
   return { type: 'resource', resource: { uri, mimeType, blob: data } };

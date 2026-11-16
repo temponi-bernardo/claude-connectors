@@ -5,8 +5,14 @@ import { fakeContext } from './fixtures/fake-context.js';
 import {
   downloadCanvasFile,
   downloadedFileResult,
+  describeDownloadedFile,
   downloadRefusal,
   fileContentBlock,
+  fileMimeType,
+  MAX_DOWNLOAD_MB,
+  openCanvasFileStream,
+  streamCanvasFile,
+  tooLargeMessage,
   MAX_DOWNLOAD_BYTES,
   MAX_TEXT_CHARS,
   readCanvasFileText,
@@ -53,10 +59,87 @@ describe('downloadRefusal', () => {
     expect(downloadRefusal({ display_name: 'a' })).toContain('has no download link');
     const big = { display_name: 'v.mp4', url: 'u', size: MAX_DOWNLOAD_BYTES + 1 };
     expect(downloadRefusal(big)).toBe(
-      '"v.mp4" is 10.0 MB, above the 10 MB limit for the conversation; download it from the link: u',
+      '"v.mp4" is 70.0 MB, above the 70 MB limit for the conversation; download it from the link: u',
     );
     expect(downloadRefusal({ url: 'u', size: 10 })).toBeNull();
     expect(downloadRefusal({ url: 'u' })).toBeNull();
+  });
+});
+
+describe('tooLargeMessage', () => {
+  it('names the file, its size and the limit, and points to the link', () => {
+    expect(tooLargeMessage('a.pdf', 75 * 1024 * 1024, 'u')).toBe(
+      '"a.pdf" is 75.0 MB, above the 70 MB limit for the conversation; download it from the link: u',
+    );
+    expect(MAX_DOWNLOAD_MB).toBe(70);
+    expect(MAX_DOWNLOAD_BYTES).toBe(70 * 1024 * 1024);
+  });
+});
+
+describe('describeDownloadedFile', () => {
+  it('describes name, type, size in KB and link', () => {
+    const file = { display_name: 'a.pdf', url: 'u', 'content-type': 'application/pdf' };
+    expect(describeDownloadedFile(file, 3072)).toBe('"a.pdf" (application/pdf, 3 KB). Link: u');
+  });
+});
+
+describe('fileMimeType', () => {
+  it('uses the Canvas content type or a generic binary type', () => {
+    expect(fileMimeType({ 'content-type': 'image/png' })).toBe('image/png');
+    expect(fileMimeType({})).toBe('application/octet-stream');
+  });
+});
+
+describe('openCanvasFileStream', () => {
+  it('returns the body with the declared size, or null without a body', async () => {
+    const sized = new Response('abc', { headers: { 'content-length': '3' } });
+    const { ctx } = fakeContext({ a: sized, b: new Response(null) });
+    const opened = await openCanvasFileStream(ctx.client, 'a');
+    expect(opened?.size).toBe(3);
+    await expect(openCanvasFileStream(ctx.client, 'b')).resolves.toBeNull();
+  });
+});
+
+describe('streamCanvasFile', () => {
+  const pdf = { display_name: 'a.pdf', url: 'u', 'content-type': 'application/pdf', size: 4 };
+
+  it('streams the file body with its description', async () => {
+    const { ctx, fetchStream } = fakeContext({ u: new Response('abcd') });
+    const content = await streamCanvasFile(ctx.client, pdf);
+    expect(fetchStream).toHaveBeenCalledWith('u');
+    expect(content).toMatchObject({
+      text: describeDownloadedFile(pdf, 4),
+      mimeType: 'application/pdf',
+      uri: 'u',
+    });
+    await expect(new Response(content!.body).text()).resolves.toBe('abcd');
+  });
+
+  it('caps the body even when the size reported by Canvas is wrong', async () => {
+    const { ctx } = fakeContext({ u: new Response('x'.repeat(MAX_DOWNLOAD_BYTES + 1)) });
+    const content = await streamCanvasFile(ctx.client, { ...pdf, size: 1 });
+    await expect(new Response(content!.body).arrayBuffer()).rejects.toThrow(
+      'above the 70 MB limit',
+    );
+  });
+
+  it('uses the downloaded size when Canvas does not report one', async () => {
+    const res = new Response('abcd', { headers: { 'content-length': '2048' } });
+    const { ctx } = fakeContext({ u: res });
+    const unsized = { display_name: 'a.pdf', url: 'u', 'content-type': 'application/pdf' };
+    const content = await streamCanvasFile(ctx.client, unsized);
+    expect(content?.text).toContain('2 KB');
+  });
+
+  it('leaves to the regular tool what it refuses or what is declared too large', async () => {
+    const big = new Response('x', {
+      headers: { 'content-length': String(MAX_DOWNLOAD_BYTES + 1) },
+    });
+    const { ctx, fetchStream } = fakeContext({ u: big });
+    await expect(streamCanvasFile(ctx.client, { display_name: 'n' })).resolves.toBeNull();
+    expect(fetchStream).not.toHaveBeenCalled();
+    await expect(streamCanvasFile(ctx.client, pdf)).resolves.toBeNull();
+    expect(big.bodyUsed || big.body?.locked).toBeTruthy();
   });
 });
 
