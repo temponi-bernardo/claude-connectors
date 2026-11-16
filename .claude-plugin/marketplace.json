@@ -10,7 +10,7 @@
     {
       "name": "canvas-puc",
       "source": "./connectors/canvas-puc/plugin",
-      "description": "PUC Minas Canvas LMS in the cloud: due dates, assignments, grades, announcements, modules, files and discussions. Nothing is installed on your computer.",
+      "description": "PUC Minas Canvas LMS in the cloud: due dates, assignments, grades, announcements, modules, files, discussions and inbox messages. Nothing is installed on your computer.",
       "category": "education",
       "tags": ["canvas", "lms", "education", "puc-minas"]
     },

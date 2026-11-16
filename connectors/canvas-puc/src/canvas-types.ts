@@ -171,3 +171,36 @@ export interface CanvasProfile {
   readonly login_id?: string;
   readonly time_zone?: string;
 }
+
+export interface CanvasRecipient {
+  readonly id: Id;
+  readonly name?: string;
+  readonly full_name?: string;
+  readonly common_courses?: Readonly<Record<string, readonly string[]>>;
+}
+
+export interface CanvasConversationParticipant {
+  readonly id: Id;
+  readonly name?: string;
+  readonly full_name?: string;
+}
+
+export interface CanvasConversationMessage {
+  readonly id: Id;
+  readonly author_id?: Id;
+  readonly created_at?: string;
+  readonly body?: string | null;
+  readonly attachments?: readonly CanvasAttachment[];
+}
+
+export interface CanvasConversation {
+  readonly id: Id;
+  readonly subject?: string | null;
+  readonly workflow_state?: string;
+  readonly last_message?: string | null;
+  readonly last_message_at?: string | null;
+  readonly message_count?: number;
+  readonly context_name?: string;
+  readonly participants?: readonly CanvasConversationParticipant[];
+  readonly messages?: readonly CanvasConversationMessage[];
+}

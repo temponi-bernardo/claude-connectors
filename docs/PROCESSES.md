@@ -57,7 +57,13 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
      `readLimitedBytes()` and `downloadedFileResult()` (`describeDownloadedFile()`) embeds the content with
      `fileContentBlock()` (`fileMimeType()`, `binaryContentBlock()`, `base64ContentBlock()`) and marks it with
      `rawToolResult()`. In remote mode this path only answers what P09 step 2 does not stream.
-  6. `toToolResult()` returns the JSON (via `textResult()`) or the ready-made result to Claude; any error becomes
+  6. Inbox: `find_recipients` maps `GET /search/recipients` with `toRecipient()`; `list_conversations` and
+     `get_conversation` (read without marking as read) use `toConversationSummary()` and `toConversationDetail()`
+     (`conversationNames()`, `participantName()`, `toConversationMessage()`). With writes enabled, `send_message`
+     accepts only numeric user IDs (at most `MAX_MESSAGE_RECIPIENTS`), builds the body with `newMessagePayload()`
+     and answers with `sentConversation()`; `reply_to_conversation` posts to `add_message` and answers with
+     `sentReply()`.
+  7. `toToolResult()` returns the JSON (via `textResult()`) or the ready-made result to Claude; any error becomes
      `errorResult()` with the message.
 - **Result:** Claude receives only the useful fields, with absolute links and clean text.
 - **Failures:** 401 becomes `unauthorizedMessage()` (generate another token and reconnect); any other non-2xx status

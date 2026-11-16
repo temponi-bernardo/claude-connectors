@@ -78,14 +78,14 @@ docker build -t canvas-puc-remote connectors/canvas-puc
 docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes in base64> -e CANVAS_ALLOW_WRITE=true canvas-puc-remote
 ```
 
-| Variable               | Default                            | Purpose                                                             |
-| ---------------------- | ---------------------------------- | ------------------------------------------------------------------- |
-| `PUBLIC_URL`           | — (on the Worker: its own address) | Public https address (required on Docker)                           |
-| `SEAL_KEY`             | —                                  | OAuth seal key; changing it disconnects everyone                    |
-| `PORT`                 | `8080`                             | HTTP port                                                           |
-| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Where OAuth may send the access back to                             |
-| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | The server's fixed Canvas instance                                  |
-| `CANVAS_ALLOW_WRITE`   | off                                | `true` registers `submit_text_assignment` and `reply_to_discussion` |
+| Variable               | Default                            | Purpose                                                                                                      |
+| ---------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `PUBLIC_URL`           | — (on the Worker: its own address) | Public https address (required on Docker)                                                                    |
+| `SEAL_KEY`             | —                                  | OAuth seal key; changing it disconnects everyone                                                             |
+| `PORT`                 | `8080`                             | HTTP port                                                                                                    |
+| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Where OAuth may send the access back to                                                                      |
+| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | The server's fixed Canvas instance                                                                           |
+| `CANVAS_ALLOW_WRITE`   | off                                | `true` registers `submit_text_assignment`, `reply_to_discussion`, `send_message` and `reply_to_conversation` |
 
 **Common problems:**
 
@@ -97,26 +97,31 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes 
 
 ## Tools
 
-| Tool                     | Does                                                                  |
-| ------------------------ | --------------------------------------------------------------------- |
-| `whoami`                 | Profile (connection test)                                             |
-| `list_courses`           | Courses with current grade                                            |
-| `upcoming_assignments`   | What's due in the next few days, across all courses                   |
-| `list_assignments`       | A course's assignments with status (filters: upcoming, overdue...)    |
-| `get_assignment`         | Instructions, rubric, deadlines and feedback                          |
-| `get_grades`             | Grade summary or grades per assignment                                |
-| `list_announcements`     | Recent announcements                                                  |
-| `list_modules`           | Modules and items                                                     |
-| `get_page`               | Content of a page                                                     |
-| `list_files`             | Files with download link                                              |
-| `read_file_text`         | Content of text/code files, including `.doc` and `.docx`              |
-| `download_file`          | Brings a PDF, slides or image (up to 70 MB) into the conversation     |
-| `list_discussions`       | Course discussion forums                                              |
-| `get_discussion`         | Posts in a forum                                                      |
-| `get_calendar`           | Calendar events                                                       |
-| `search`                 | Search across assignments, pages, files and modules                   |
-| `submit_text_assignment` | Submits text/a link (only with writes enabled; Claude confirms first) |
-| `reply_to_discussion`    | Replies to a forum (only with writes enabled; Claude confirms first)  |
+| Tool                     | Does                                                                                                      |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `whoami`                 | Profile (connection test)                                                                                 |
+| `list_courses`           | Courses with current grade                                                                                |
+| `upcoming_assignments`   | What's due in the next few days, across all courses                                                       |
+| `list_assignments`       | A course's assignments with status (filters: upcoming, overdue...)                                        |
+| `get_assignment`         | Instructions, rubric, deadlines and feedback                                                              |
+| `get_grades`             | Grade summary or grades per assignment                                                                    |
+| `list_announcements`     | Recent announcements                                                                                      |
+| `list_modules`           | Modules and items                                                                                         |
+| `get_page`               | Content of a page                                                                                         |
+| `list_files`             | Files with download link                                                                                  |
+| `read_file_text`         | Content of text/code files, including `.doc` and `.docx`                                                  |
+| `download_file`          | Brings a PDF, slides or image (up to 70 MB) into the conversation                                         |
+| `list_discussions`       | Course discussion forums                                                                                  |
+| `get_discussion`         | Posts in a forum                                                                                          |
+| `get_calendar`           | Calendar events                                                                                           |
+| `search`                 | Search across assignments, pages, files and modules                                                       |
+| `find_recipients`        | Finds people to message (teachers, TAs, classmates) and their user ID                                     |
+| `list_conversations`     | Inbox conversations (inbox, unread, starred, sent, archived)                                              |
+| `get_conversation`       | Reads a conversation with all messages, without marking it as read                                        |
+| `submit_text_assignment` | Submits text/a link (only with writes enabled; Claude confirms first)                                     |
+| `reply_to_discussion`    | Replies to a forum (only with writes enabled; Claude confirms first)                                      |
+| `send_message`           | Sends a new inbox message to up to 20 people by user ID (only with writes enabled; Claude confirms first) |
+| `reply_to_conversation`  | Replies in an inbox conversation (only with writes enabled; Claude confirms first)                        |
 
 Internal flows: [PROCESSES.md](../../docs/PROCESSES.md). Architecture decision:
 [ADR 0013](../../docs/adr/0013-remote-only-connector-via-marketplace.md).
