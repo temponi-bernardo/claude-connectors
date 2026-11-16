@@ -14260,553 +14260,79 @@ function mcpUnauthorizedResponse(issuer) {
   });
 }
 
-// src/remote/oauth.ts
-import { createHash } from "node:crypto";
-
-// src/core/env.ts
-function envValue(env, key) {
-  const value = env[key]?.trim();
-  if (!value || value.startsWith("${")) return null;
-  return value;
+// src/core/bytes.ts
+function byteView(bytes) {
+  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
-function parseFlag(value) {
-  return ["1", "true", "sim", "yes"].includes((value ?? "").toLowerCase());
-}
-
-// src/remote/seal.ts
-import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
-var SEAL_KEY_BYTES = 32;
-var IV_BYTES = 12;
-var TAG_BYTES = 16;
-function parseSealKey(raw, name = "SEAL_KEY") {
-  if (!raw) {
-    throw new Error(
-      `Set ${name} to 32 random bytes in base64: \`node -e "console.log(crypto.randomBytes(32).toString('base64'))"\`.`
-    );
+function concatBytes(parts) {
+  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let pos = 0;
+  for (const part of parts) {
+    out.set(part, pos);
+    pos += part.length;
   }
-  const key = Buffer.from(raw, "base64");
-  if (key.length !== SEAL_KEY_BYTES) throw new Error(`${name} must be 32 bytes in base64.`);
-  return key;
+  return out;
 }
-function sealPayload(payload, key) {
-  const iv = randomBytes(IV_BYTES);
-  const cipher = createCipheriv("aes-256-gcm", key, iv);
-  const body = Buffer.concat([cipher.update(JSON.stringify(payload), "utf8"), cipher.final()]);
-  return Buffer.concat([iv, cipher.getAuthTag(), body]).toString("base64url");
+function utf16leToString(bytes) {
+  const v = byteView(bytes);
+  let out = "";
+  for (let pos = 0; pos + 1 < bytes.length; pos += 2)
+    out += String.fromCharCode(v.getUint16(pos, true));
+  return out;
 }
-function unsealPayload(sealed, key) {
-  try {
-    const raw = Buffer.from(sealed, "base64url");
-    const decipher = createDecipheriv("aes-256-gcm", key, raw.subarray(0, IV_BYTES));
-    decipher.setAuthTag(raw.subarray(IV_BYTES, IV_BYTES + TAG_BYTES));
-    const text = Buffer.concat([
-      decipher.update(raw.subarray(IV_BYTES + TAG_BYTES)),
-      decipher.final()
-    ]);
-    const value = JSON.parse(text.toString("utf8"));
-    return typeof value === "object" && value !== null ? value : null;
-  } catch {
-    return null;
+function bytesToBase64(bytes) {
+  let binary = "";
+  for (let pos = 0; pos < bytes.length; pos += 32768) {
+    binary += String.fromCharCode(...bytes.subarray(pos, pos + 32768));
   }
-}
-function openSealed(sealed, key, expected) {
-  const claims = unsealPayload(sealed, key);
-  if (claims?.typ !== expected.typ || typeof claims.exp !== "number") return null;
-  return claims.exp > expected.now ? claims : null;
+  return btoa(binary);
 }
 
-// src/remote/oauth.ts
-var CLIENT_TTL_SECONDS = 10 * 365 * 24 * 3600;
-var DEFAULT_REDIRECT_HOSTS = ["claude.ai", "claude.com", "localhost"];
-function readOAuthSettings(env, issuer) {
-  const hosts = envValue(env, "OAUTH_REDIRECT_HOSTS")?.split(",").map((host) => host.trim()).filter(Boolean);
-  return {
-    issuer,
-    key: parseSealKey(envValue(env, "SEAL_KEY")),
-    redirectHosts: hosts ?? DEFAULT_REDIRECT_HOSTS
-  };
+// src/core/stream.ts
+function splitBase64Ready(carry, chunk) {
+  const joined = carry.length ? concatBytes([carry, chunk]) : chunk;
+  const cut = joined.length - joined.length % 3;
+  return { ready: joined.subarray(0, cut), rest: joined.slice(cut) };
 }
-function oauthError(error2, description) {
-  return { ok: false, error: error2, description };
-}
-function authorizationServerMetadata(issuer) {
-  return {
-    issuer,
-    authorization_endpoint: `${issuer}/authorize`,
-    token_endpoint: `${issuer}/token`,
-    registration_endpoint: `${issuer}/register`,
-    response_types_supported: ["code"],
-    grant_types_supported: ["authorization_code", "refresh_token"],
-    code_challenge_methods_supported: ["S256"],
-    token_endpoint_auth_methods_supported: ["none"]
-  };
-}
-function protectedResourceMetadata(issuer) {
-  return {
-    resource: `${issuer}/mcp`,
-    authorization_servers: [issuer],
-    bearer_methods_supported: ["header"]
-  };
-}
-function isAllowedRedirect(uri, hosts) {
-  if (!URL.canParse(uri)) return false;
-  const { protocol, hostname: hostname2 } = new URL(uri);
-  if (protocol === "http:") {
-    return hosts.includes("localhost") && ["localhost", "127.0.0.1"].includes(hostname2);
-  }
-  return protocol === "https:" && hosts.some((host) => hostname2 === host || hostname2.endsWith(`.${host}`));
-}
-function pkceChallenge(verifier) {
-  return createHash("sha256").update(verifier).digest("base64url");
-}
-function readRedirectUris(body) {
-  if (typeof body !== "object" || body === null) return null;
-  const uris = body.redirect_uris;
-  if (!Array.isArray(uris) || uris.length === 0) return null;
-  return uris.every((uri) => typeof uri === "string") ? uris : null;
-}
-function registerClient(body, settings, now) {
-  const uris = readRedirectUris(body);
-  if (!uris?.every((uri) => isAllowedRedirect(uri, settings.redirectHosts))) {
-    return oauthError("invalid_redirect_uri", "Missing or disallowed redirect address.");
-  }
-  const clientId = sealPayload(
-    { typ: "client", exp: now + CLIENT_TTL_SECONDS, redirect_uris: uris },
-    settings.key
-  );
-  return {
-    ok: true,
-    value: {
-      client_id: clientId,
-      redirect_uris: uris,
-      token_endpoint_auth_method: "none",
-      grant_types: ["authorization_code", "refresh_token"],
-      response_types: ["code"]
-    }
-  };
-}
-function clientRedirectUris(clientId, settings, now) {
-  const claims = openSealed(clientId, settings.key, { typ: "client", now });
-  return claims ? readRedirectUris(claims) : null;
-}
-function parseAuthorizeQuery(query, settings, now) {
-  const clientId = query.get("client_id") ?? "";
-  const uris = clientRedirectUris(clientId, settings, now);
-  if (!uris) return oauthError("invalid_client", "Unknown client: register the connector again.");
-  const redirectUri = query.get("redirect_uri") ?? "";
-  if (!uris.includes(redirectUri))
-    return oauthError("invalid_request", "redirect_uri is not registered.");
-  const challenge = readCodeChallenge(query);
-  if (!challenge.ok) return challenge;
-  const codeChallenge = challenge.value;
-  return { ok: true, value: { clientId, redirectUri, codeChallenge, state: query.get("state") } };
-}
-function readCodeChallenge(query) {
-  if (query.get("response_type") !== "code") {
-    return oauthError("unsupported_response_type", "Only response_type=code is accepted.");
-  }
-  const codeChallenge = query.get("code_challenge") ?? "";
-  if (!codeChallenge || query.get("code_challenge_method") !== "S256") {
-    return oauthError("invalid_request", "PKCE with code_challenge_method=S256 is required.");
-  }
-  return { ok: true, value: codeChallenge };
-}
-
-// src/remote/tokens.ts
-var PENDING_TTL_SECONDS = 15 * 60;
-var CODE_TTL_SECONDS = 5 * 60;
-var ACCESS_TTL_SECONDS = 60 * 60;
-var REFRESH_TTL_SECONDS = 30 * 24 * 3600;
-function sealAuthorizeRequest(request, settings, now) {
-  return sealPayload({ typ: "pending", exp: now + PENDING_TTL_SECONDS, request }, settings.key);
-}
-function openAuthorizeRequest(sealed, settings, now) {
-  const claims = openSealed(sealed, settings.key, { typ: "pending", now });
-  return claims ? claims.request : null;
-}
-function issueAuthorizationCode(grant, settings, now) {
-  const { clientId, redirectUri, codeChallenge } = grant.request;
-  return sealPayload(
-    {
-      typ: "code",
-      exp: now + CODE_TTL_SECONDS,
-      clientId,
-      redirectUri,
-      codeChallenge,
-      secret: grant.secret
+function base64EncodeStream() {
+  const encoder = new TextEncoder();
+  let carry = new Uint8Array(0);
+  return new TransformStream({
+    transform(chunk, controller) {
+      const { ready, rest } = splitBase64Ready(carry, chunk);
+      carry = rest;
+      if (ready.length) controller.enqueue(encoder.encode(bytesToBase64(ready)));
     },
-    settings.key
-  );
-}
-function issueTokenSet(secret, settings, now) {
-  return {
-    access_token: sealPayload(
-      { typ: "access", exp: now + ACCESS_TTL_SECONDS, secret },
-      settings.key
-    ),
-    token_type: "Bearer",
-    expires_in: ACCESS_TTL_SECONDS,
-    refresh_token: sealPayload(
-      { typ: "refresh", exp: now + REFRESH_TTL_SECONDS, secret },
-      settings.key
-    )
-  };
-}
-function redeemAuthorizationCode(form, settings, now) {
-  const claims = openSealed(form.get("code") ?? "", settings.key, { typ: "code", now });
-  const matches = claims !== null && claims.clientId === form.get("client_id") && claims.redirectUri === form.get("redirect_uri") && claims.codeChallenge === pkceChallenge(form.get("code_verifier") ?? "");
-  if (!matches)
-    return oauthError("invalid_grant", "Invalid or expired code, or code from another client.");
-  return { ok: true, value: String(claims.secret) };
-}
-function redeemRefreshToken(form, settings, now) {
-  const claims = openSealed(form.get("refresh_token") ?? "", settings.key, { typ: "refresh", now });
-  if (!claims)
-    return oauthError("invalid_grant", "Invalid or expired refresh token: connect again.");
-  return { ok: true, value: String(claims.secret) };
-}
-function redeemTokenRequest(form, settings, now) {
-  const grantType = form.get("grant_type");
-  let secret;
-  if (grantType === "authorization_code") secret = redeemAuthorizationCode(form, settings, now);
-  else if (grantType === "refresh_token") secret = redeemRefreshToken(form, settings, now);
-  else return oauthError("unsupported_grant_type", "Use authorization_code or refresh_token.");
-  if (!secret.ok) return secret;
-  const tokens = issueTokenSet(secret.value, settings, now);
-  return {
-    ok: true,
-    value: { tokens, secret: secret.value, refreshed: grantType === "refresh_token" }
-  };
-}
-function readAccessSecret(authorization, settings, now) {
-  const match = /^Bearer\s+(\S+)$/i.exec(authorization ?? "");
-  if (!match?.[1]) return null;
-  const claims = openSealed(match[1], settings.key, { typ: "access", now });
-  return claims ? String(claims.secret) : null;
-}
-
-// src/remote/handler.ts
-var UPSTREAM_CALLBACK_PATH = "/oauth/callback";
-var CORS_HEADERS = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
-  "access-control-allow-headers": "authorization, content-type, mcp-protocol-version, mcp-session-id",
-  "access-control-expose-headers": "www-authenticate, mcp-session-id"
-};
-function jsonResponse(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json", "cache-control": "no-store" }
-  });
-}
-function pageSecurityPolicy(formTarget) {
-  const formAction = formTarget ? `'self' ${formTarget}` : "'self'";
-  return `default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action ${formAction}; frame-ancestors 'none'`;
-}
-function htmlResponse(html, status = 200, formTarget = null) {
-  return new Response(html, {
-    status,
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "cache-control": "no-store",
-      "content-security-policy": pageSecurityPolicy(formTarget)
+    flush(controller) {
+      if (carry.length) controller.enqueue(encoder.encode(bytesToBase64(carry)));
     }
   });
 }
-async function readForm(request) {
-  return new URLSearchParams(await request.text());
-}
-async function readJsonBody(request) {
-  try {
-    const body = await request.json();
-    return body;
-  } catch {
-    return null;
-  }
-}
-function loginPageFor(app, request, error2) {
-  if (app.connector.login.kind !== "secret") return htmlResponse("<p>Not found.</p>", 404);
-  return htmlResponse(
-    renderLoginPage({
-      text: app.connector.login.text,
-      pending: sealAuthorizeRequest(request, app.settings, app.now()),
-      clientHost: new URL(request.redirectUri).host,
-      error: error2
-    }),
-    200,
-    new URL(request.redirectUri).origin
-  );
-}
-function redirectWithCode(request, code) {
-  const target = new URL(request.redirectUri);
-  target.searchParams.set("code", code);
-  if (request.state !== null) target.searchParams.set("state", request.state);
-  return new Response(null, { status: 302, headers: { location: target.toString() } });
-}
-async function handleRegister(app, request) {
-  const result = registerClient(await readJsonBody(request), app.settings, app.now());
-  if (!result.ok)
-    return jsonResponse({ error: result.error, error_description: result.description }, 400);
-  return jsonResponse(result.value, 201);
-}
-function redirectToUpstream(app, login, request) {
-  const state = sealAuthorizeRequest(request, app.settings, app.now());
-  const target = login.start(state, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
-  return new Response(null, { status: 302, headers: { location: target } });
-}
-function handleAuthorizePage(app, request) {
-  const result = parseAuthorizeQuery(new URL(request.url).searchParams, app.settings, app.now());
-  if (!result.ok) return Promise.resolve(htmlResponse(`<p>${result.description}</p>`, 400));
-  const login = app.connector.login;
-  if (login.kind === "upstream")
-    return Promise.resolve(redirectToUpstream(app, login, result.value));
-  return Promise.resolve(loginPageFor(app, result.value, null));
-}
-async function handleUpstreamCallback(app, request) {
-  const login = app.connector.login;
-  if (login.kind !== "upstream") return htmlResponse("<p>Not found.</p>", 404);
-  const query = new URL(request.url).searchParams;
-  const pending = openAuthorizeRequest(query.get("state") ?? "", app.settings, app.now());
-  if (!pending)
-    return htmlResponse("<p>The request expired. Go back to Claude and connect again.</p>", 400);
-  let secret;
-  try {
-    secret = await login.finish(query, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
-  } catch (error2) {
-    return htmlResponse(
-      `<p>${escapeHtml(error2 instanceof Error ? error2.message : String(error2))}</p>`,
-      403
-    );
-  }
-  return redirectWithCode(
-    pending,
-    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now())
-  );
-}
-async function handleAuthorizeSubmit(app, request) {
-  const form = await readForm(request);
-  const login = app.connector.login;
-  if (login.kind !== "secret") return htmlResponse("<p>Not found.</p>", 404);
-  const pending = openAuthorizeRequest(form.get("pending") ?? "", app.settings, app.now());
-  if (!pending)
-    return htmlResponse("<p>The request expired. Go back to Claude and connect again.</p>", 400);
-  const secret = (form.get("secret") ?? "").trim();
-  try {
-    await login.verify(secret);
-  } catch (error2) {
-    return loginPageFor(app, pending, error2 instanceof Error ? error2.message : String(error2));
-  }
-  return redirectWithCode(
-    pending,
-    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now())
-  );
-}
-async function renewSecretQuietly(connector, secret) {
-  try {
-    return await connector.renewSecret?.(secret) ?? "kept";
-  } catch (error2) {
-    console.warn("Could not renew the credential:", error2 instanceof Error ? error2.message : error2);
-    return "kept";
-  }
-}
-var REVOKED_SECRET_DESCRIPTION = "The service no longer accepts the credential behind this refresh token (revoked or expired): connect the connector again.";
-async function handleToken(app, request) {
-  const result = redeemTokenRequest(await readForm(request), app.settings, app.now());
-  if (!result.ok)
-    return jsonResponse({ error: result.error, error_description: result.description }, 400);
-  const revoked = result.value.refreshed && await renewSecretQuietly(app.connector, result.value.secret) === "revoked";
-  if (revoked)
-    return jsonResponse(
-      { error: "invalid_grant", error_description: REVOKED_SECRET_DESCRIPTION },
-      400
-    );
-  return jsonResponse(result.value.tokens);
-}
-function handleMcp(app, request) {
-  const secret = readAccessSecret(request.headers.get("authorization"), app.settings, app.now());
-  if (secret === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
-  if (app.connector.acceptsSecret?.(secret) === false) {
-    return Promise.resolve(jsonResponse({ error: "access_revoked" }, 403));
-  }
-  return serveMcpRequest(app.connector.createServer(secret), request);
-}
-var REMOTE_ROUTES = {
-  "GET /": () => Promise.resolve(new Response("ok")),
-  "GET /.well-known/oauth-authorization-server": (app) => Promise.resolve(jsonResponse(authorizationServerMetadata(app.settings.issuer))),
-  "GET /.well-known/oauth-protected-resource": (app) => Promise.resolve(jsonResponse(protectedResourceMetadata(app.settings.issuer))),
-  "GET /.well-known/oauth-protected-resource/mcp": (app) => Promise.resolve(jsonResponse(protectedResourceMetadata(app.settings.issuer))),
-  "POST /register": handleRegister,
-  "GET /authorize": handleAuthorizePage,
-  "POST /authorize": handleAuthorizeSubmit,
-  "POST /token": handleToken,
-  [`GET ${UPSTREAM_CALLBACK_PATH}`]: handleUpstreamCallback,
-  "GET /mcp": handleMcp,
-  "POST /mcp": handleMcp,
-  "DELETE /mcp": handleMcp
-};
-function withCors(response) {
-  for (const [name, value] of Object.entries(CORS_HEADERS)) response.headers.set(name, value);
-  return response;
-}
-async function routeRemoteRequest(app, request) {
-  if (request.method === "OPTIONS") return withCors(new Response(null, { status: 204 }));
-  const path = new URL(request.url).pathname.replace(/(.)\/+$/, "$1");
-  const route = REMOTE_ROUTES[`${request.method} ${path}`];
-  if (!route) return new Response("Not found", { status: 404 });
-  return withCors(await route(app, request));
-}
-function createRemoteHandler(app) {
-  return (request) => routeRemoteRequest(app, request);
-}
-
-// src/remote/node-server.ts
-import { createServer } from "node:http";
-var MAX_BODY_BYTES = 1e6;
-function readPublicUrl(env) {
-  const raw = envValue(env, "PUBLIC_URL");
-  if (!raw || !URL.canParse(raw))
-    throw new Error("Set PUBLIC_URL to the public address of the server.");
-  const url = new URL(raw);
-  if (url.protocol !== "https:" && url.hostname !== "localhost") {
-    throw new Error("PUBLIC_URL must use https (Claude only connects over https).");
-  }
-  return raw.replace(/\/+$/, "");
-}
-function readRemoteServerConfig(env) {
-  return {
-    port: Number(envValue(env, "PORT") ?? 8080),
-    settings: readOAuthSettings(env, readPublicUrl(env))
-  };
-}
-async function readNodeBody(req) {
-  const chunks = [];
-  let size = 0;
-  for await (const chunk of req) {
-    size += chunk.length;
-    if (size > MAX_BODY_BYTES) return null;
-    chunks.push(chunk);
-  }
-  return Buffer.concat(chunks);
-}
-function toWebRequest(req, body, origin) {
-  const headers = new Headers();
-  for (const [name, value] of Object.entries(req.headers)) {
-    if (value !== void 0) headers.set(name, Array.isArray(value) ? value.join(", ") : value);
-  }
-  const method = req.method ?? "GET";
-  const hasBody = !["GET", "HEAD"].includes(method);
-  return new Request(new URL(req.url ?? "/", origin), {
-    method,
-    headers,
-    ...hasBody ? { body: new Uint8Array(body) } : {}
+function byteLimitStream(maxBytes, message) {
+  let total = 0;
+  return new TransformStream({
+    transform(chunk, controller) {
+      total += chunk.length;
+      if (total > maxBytes) controller.error(new Error(message));
+      else controller.enqueue(chunk);
+    }
   });
 }
-async function writeWebResponse(res, response) {
-  res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
-  res.end(Buffer.from(await response.arrayBuffer()));
-}
-async function serveNodeRequest(options, req, res) {
-  const body = await readNodeBody(req);
-  if (!body) {
-    await writeWebResponse(res, new Response("Body too large.", { status: 413 }));
-    return;
-  }
-  try {
-    await writeWebResponse(res, await options.handler(toWebRequest(req, body, options.origin)));
-  } catch (error2) {
-    console.error(error2);
-    await writeWebResponse(res, new Response("Internal error.", { status: 500 }));
-  }
-}
-function startRemoteHttpServer(options) {
-  const server = createServer((req, res) => void serveNodeRequest(options, req, res));
-  return server.listen(options.port);
-}
-
-// src/core/http.ts
-function buildUrl(base, path, params = {}) {
-  const url = new URL(path.startsWith("http") ? path : `${base}${path}`);
-  for (const [key, value] of Object.entries(params)) {
-    if (value === null || value === void 0) continue;
-    if (Array.isArray(value)) {
-      for (const item of value) {
-        url.searchParams.append(`${key}[]`, String(item));
-      }
-    } else {
-      url.searchParams.set(key, String(value));
-    }
-  }
-  return url;
-}
-function parseNextLink(linkHeader) {
-  if (!linkHeader) return null;
-  const next = linkHeader.split(",").find((part) => part.includes('rel="next"'));
-  return next?.match(/<([^>]+)>/)?.[1] ?? null;
-}
-
-// connectors/canvas-puc/src/client.ts
-var CANVAS_PAGE_SIZE = 100;
-var DEFAULT_MAX_ITEMS = 200;
-function unauthorizedMessage(baseUrl) {
-  return `Canvas rejected the token (expired or revoked). Generate a new one at ${baseUrl}/profile/settings and reconnect the connector in Claude's settings.`;
-}
-function sendCanvasRequest(deps, req) {
-  const hasBody = req.body !== void 0;
-  return deps.fetchFn(buildUrl(`${deps.baseUrl}/api/v1`, req.path, req.params), {
-    method: req.method,
-    headers: {
-      Authorization: `Bearer ${deps.token}`,
-      Accept: "application/json",
-      ...hasBody ? { "Content-Type": "application/json" } : {}
+function framedStream(prefix, suffix) {
+  const encoder = new TextEncoder();
+  return new TransformStream({
+    start(controller) {
+      controller.enqueue(encoder.encode(prefix));
     },
-    ...hasBody ? { body: JSON.stringify(req.body) } : {}
+    flush(controller) {
+      controller.enqueue(encoder.encode(suffix));
+    }
   });
 }
-async function requestCanvas(deps, req) {
-  const res = await sendCanvasRequest(deps, req);
-  if (res.status === 401) throw new Error(unauthorizedMessage(deps.baseUrl));
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Canvas ${res.status} on ${req.method} ${req.path}: ${text.slice(0, 300)}`);
-  }
-  return res;
-}
-async function collectPages(deps, first, max) {
-  const items = [];
-  let req = first;
-  while (req && items.length < max) {
-    const res = await requestCanvas(deps, req);
-    const data = await res.json();
-    items.push(...Array.isArray(data) ? data : [data]);
-    const next = parseNextLink(res.headers.get("link"));
-    req = next ? { method: "GET", path: next } : null;
-  }
-  return items.slice(0, max);
-}
-async function fetchDownload(fetchFn, url) {
-  const res = await fetchFn(url);
-  if (!res.ok) throw new Error(`Failed to download the file (${res.status}).`);
-  return res;
-}
-async function fetchPlainText(fetchFn, url) {
-  return (await fetchDownload(fetchFn, url)).text();
-}
-async function fetchFileBytes(fetchFn, url) {
-  return new Uint8Array(await (await fetchDownload(fetchFn, url)).arrayBuffer());
-}
-function createCanvasClient(deps) {
-  return {
-    baseUrl: deps.baseUrl,
-    get: async (path, params = {}) => await (await requestCanvas(deps, { method: "GET", path, params })).json(),
-    getAll: (path, params = {}, max = DEFAULT_MAX_ITEMS) => collectPages(
-      deps,
-      { method: "GET", path, params: { per_page: CANVAS_PAGE_SIZE, ...params } },
-      max
-    ),
-    post: async (path, body) => await (await requestCanvas(deps, { method: "POST", path, body })).json(),
-    fetchText: (url) => fetchPlainText(deps.fetchFn, url),
-    fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url)
-  };
+async function readLimitedBytes(body, maxBytes, message) {
+  if (!body) return new Uint8Array(0);
+  const limited = body.pipeThrough(byteLimitStream(maxBytes, message));
+  return new Uint8Array(await new Response(limited).arrayBuffer());
 }
 
 // node_modules/zod/v3/external.js
@@ -18849,6 +18375,1483 @@ var coerce = {
   date: ((arg) => ZodDate.create({ ...arg, coerce: true }))
 };
 var NEVER2 = INVALID;
+
+// src/mcp/tools.ts
+function defineTool(def) {
+  const schema = external_exports.object(def.shape);
+  return {
+    name: def.name,
+    description: def.description,
+    shape: def.shape,
+    annotations: def.annotations,
+    run: async (ctx, rawArgs) => def.run(ctx, schema.parse(rawArgs ?? {}))
+  };
+}
+function textResult(data, notes = []) {
+  const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+  return { content: [text, ...notes].map((t) => ({ type: "text", text: t })) };
+}
+var RAW_RESULT = /* @__PURE__ */ Symbol("rawToolResult");
+function rawToolResult(result) {
+  return { [RAW_RESULT]: result };
+}
+function toToolResult(data) {
+  if (typeof data === "object" && data !== null && RAW_RESULT in data) {
+    return data[RAW_RESULT];
+  }
+  return textResult(data);
+}
+function errorResult(error2) {
+  const message = error2 instanceof Error ? error2.message : String(error2);
+  return { isError: true, content: [{ type: "text", text: message }] };
+}
+async function runToolSafely(spec, ctx, rawArgs) {
+  try {
+    return toToolResult(await spec.run(ctx, rawArgs));
+  } catch (error2) {
+    return errorResult(error2);
+  }
+}
+function registerToolSpecs(server, specs, ctx) {
+  for (const spec of specs) {
+    server.registerTool(
+      spec.name,
+      {
+        title: spec.annotations.title,
+        description: spec.description,
+        inputSchema: spec.shape,
+        annotations: spec.annotations
+      },
+      (args) => runToolSafely(spec, ctx, args)
+    );
+  }
+}
+function binaryContentBlock(mimeType, bytes, uri) {
+  return base64ContentBlock(mimeType, bytesToBase64(bytes), uri);
+}
+function base64ContentBlock(mimeType, data, uri) {
+  if (mimeType.startsWith("image/")) return { type: "image", data, mimeType };
+  if (mimeType.startsWith("audio/")) return { type: "audio", data, mimeType };
+  return { type: "resource", resource: { uri, mimeType, blob: data } };
+}
+
+// src/remote/streamed-tool.ts
+function asJsonObject(value) {
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? value : null;
+}
+function parseToolCallRequest(message) {
+  const { id: id4, method, params } = asJsonObject(message) ?? {};
+  if (method !== "tools/call" || typeof id4 !== "string" && typeof id4 !== "number") return null;
+  const { name, arguments: args } = asJsonObject(params) ?? {};
+  if (typeof name !== "string") return null;
+  return { id: id4, name, args: args ?? {} };
+}
+async function readToolCallRequest(request) {
+  if (request.method !== "POST") return null;
+  try {
+    return parseToolCallRequest(await request.clone().json());
+  } catch {
+    return null;
+  }
+}
+function streamedResultFrame(id4, content, marker) {
+  const block = base64ContentBlock(content.mimeType, marker, content.uri);
+  const result = { content: [{ type: "text", text: content.text }, block] };
+  const json = JSON.stringify({ jsonrpc: "2.0", id: id4, result });
+  const at = json.indexOf(marker);
+  return [json.slice(0, at), json.slice(at + marker.length)];
+}
+function streamedToolResponse(id4, content) {
+  const [prefix, suffix] = streamedResultFrame(id4, content, `stream-${crypto.randomUUID()}`);
+  const body = content.body.pipeThrough(base64EncodeStream()).pipeThrough(framedStream(prefix, suffix));
+  return new Response(body, { status: 200, headers: { "content-type": "application/json" } });
+}
+
+// src/remote/oauth.ts
+import { createHash } from "node:crypto";
+
+// src/core/env.ts
+function envValue(env, key) {
+  const value = env[key]?.trim();
+  if (!value || value.startsWith("${")) return null;
+  return value;
+}
+function parseFlag(value) {
+  return ["1", "true", "sim", "yes"].includes((value ?? "").toLowerCase());
+}
+
+// src/remote/seal.ts
+import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
+var SEAL_KEY_BYTES = 32;
+var IV_BYTES = 12;
+var TAG_BYTES = 16;
+function parseSealKey(raw, name = "SEAL_KEY") {
+  if (!raw) {
+    throw new Error(
+      `Set ${name} to 32 random bytes in base64: \`node -e "console.log(crypto.randomBytes(32).toString('base64'))"\`.`
+    );
+  }
+  const key = Buffer.from(raw, "base64");
+  if (key.length !== SEAL_KEY_BYTES) throw new Error(`${name} must be 32 bytes in base64.`);
+  return key;
+}
+function sealPayload(payload, key) {
+  const iv = randomBytes(IV_BYTES);
+  const cipher = createCipheriv("aes-256-gcm", key, iv);
+  const body = Buffer.concat([cipher.update(JSON.stringify(payload), "utf8"), cipher.final()]);
+  return Buffer.concat([iv, cipher.getAuthTag(), body]).toString("base64url");
+}
+function unsealPayload(sealed, key) {
+  try {
+    const raw = Buffer.from(sealed, "base64url");
+    const decipher = createDecipheriv("aes-256-gcm", key, raw.subarray(0, IV_BYTES));
+    decipher.setAuthTag(raw.subarray(IV_BYTES, IV_BYTES + TAG_BYTES));
+    const text = Buffer.concat([
+      decipher.update(raw.subarray(IV_BYTES + TAG_BYTES)),
+      decipher.final()
+    ]);
+    const value = JSON.parse(text.toString("utf8"));
+    return typeof value === "object" && value !== null ? value : null;
+  } catch {
+    return null;
+  }
+}
+function openSealed(sealed, key, expected) {
+  const claims = unsealPayload(sealed, key);
+  if (claims?.typ !== expected.typ || typeof claims.exp !== "number") return null;
+  return claims.exp > expected.now ? claims : null;
+}
+
+// src/remote/oauth.ts
+var CLIENT_TTL_SECONDS = 10 * 365 * 24 * 3600;
+var DEFAULT_REDIRECT_HOSTS = ["claude.ai", "claude.com", "localhost"];
+function readOAuthSettings(env, issuer) {
+  const hosts = envValue(env, "OAUTH_REDIRECT_HOSTS")?.split(",").map((host) => host.trim()).filter(Boolean);
+  return {
+    issuer,
+    key: parseSealKey(envValue(env, "SEAL_KEY")),
+    redirectHosts: hosts ?? DEFAULT_REDIRECT_HOSTS
+  };
+}
+function oauthError(error2, description) {
+  return { ok: false, error: error2, description };
+}
+function authorizationServerMetadata(issuer) {
+  return {
+    issuer,
+    authorization_endpoint: `${issuer}/authorize`,
+    token_endpoint: `${issuer}/token`,
+    registration_endpoint: `${issuer}/register`,
+    response_types_supported: ["code"],
+    grant_types_supported: ["authorization_code", "refresh_token"],
+    code_challenge_methods_supported: ["S256"],
+    token_endpoint_auth_methods_supported: ["none"]
+  };
+}
+function protectedResourceMetadata(issuer) {
+  return {
+    resource: `${issuer}/mcp`,
+    authorization_servers: [issuer],
+    bearer_methods_supported: ["header"]
+  };
+}
+function isAllowedRedirect(uri, hosts) {
+  if (!URL.canParse(uri)) return false;
+  const { protocol, hostname: hostname2 } = new URL(uri);
+  if (protocol === "http:") {
+    return hosts.includes("localhost") && ["localhost", "127.0.0.1"].includes(hostname2);
+  }
+  return protocol === "https:" && hosts.some((host) => hostname2 === host || hostname2.endsWith(`.${host}`));
+}
+function pkceChallenge(verifier) {
+  return createHash("sha256").update(verifier).digest("base64url");
+}
+function readRedirectUris(body) {
+  if (typeof body !== "object" || body === null) return null;
+  const uris = body.redirect_uris;
+  if (!Array.isArray(uris) || uris.length === 0) return null;
+  return uris.every((uri) => typeof uri === "string") ? uris : null;
+}
+function registerClient(body, settings, now) {
+  const uris = readRedirectUris(body);
+  if (!uris?.every((uri) => isAllowedRedirect(uri, settings.redirectHosts))) {
+    return oauthError("invalid_redirect_uri", "Missing or disallowed redirect address.");
+  }
+  const clientId = sealPayload(
+    { typ: "client", exp: now + CLIENT_TTL_SECONDS, redirect_uris: uris },
+    settings.key
+  );
+  return {
+    ok: true,
+    value: {
+      client_id: clientId,
+      redirect_uris: uris,
+      token_endpoint_auth_method: "none",
+      grant_types: ["authorization_code", "refresh_token"],
+      response_types: ["code"]
+    }
+  };
+}
+function clientRedirectUris(clientId, settings, now) {
+  const claims = openSealed(clientId, settings.key, { typ: "client", now });
+  return claims ? readRedirectUris(claims) : null;
+}
+function parseAuthorizeQuery(query, settings, now) {
+  const clientId = query.get("client_id") ?? "";
+  const uris = clientRedirectUris(clientId, settings, now);
+  if (!uris) return oauthError("invalid_client", "Unknown client: register the connector again.");
+  const redirectUri = query.get("redirect_uri") ?? "";
+  if (!uris.includes(redirectUri))
+    return oauthError("invalid_request", "redirect_uri is not registered.");
+  const challenge = readCodeChallenge(query);
+  if (!challenge.ok) return challenge;
+  const codeChallenge = challenge.value;
+  return { ok: true, value: { clientId, redirectUri, codeChallenge, state: query.get("state") } };
+}
+function readCodeChallenge(query) {
+  if (query.get("response_type") !== "code") {
+    return oauthError("unsupported_response_type", "Only response_type=code is accepted.");
+  }
+  const codeChallenge = query.get("code_challenge") ?? "";
+  if (!codeChallenge || query.get("code_challenge_method") !== "S256") {
+    return oauthError("invalid_request", "PKCE with code_challenge_method=S256 is required.");
+  }
+  return { ok: true, value: codeChallenge };
+}
+
+// src/remote/tokens.ts
+var PENDING_TTL_SECONDS = 15 * 60;
+var CODE_TTL_SECONDS = 5 * 60;
+var ACCESS_TTL_SECONDS = 60 * 60;
+var REFRESH_TTL_SECONDS = 30 * 24 * 3600;
+function sealAuthorizeRequest(request, settings, now) {
+  return sealPayload({ typ: "pending", exp: now + PENDING_TTL_SECONDS, request }, settings.key);
+}
+function openAuthorizeRequest(sealed, settings, now) {
+  const claims = openSealed(sealed, settings.key, { typ: "pending", now });
+  return claims ? claims.request : null;
+}
+function issueAuthorizationCode(grant, settings, now) {
+  const { clientId, redirectUri, codeChallenge } = grant.request;
+  return sealPayload(
+    {
+      typ: "code",
+      exp: now + CODE_TTL_SECONDS,
+      clientId,
+      redirectUri,
+      codeChallenge,
+      secret: grant.secret
+    },
+    settings.key
+  );
+}
+function issueTokenSet(secret, settings, now) {
+  return {
+    access_token: sealPayload(
+      { typ: "access", exp: now + ACCESS_TTL_SECONDS, secret },
+      settings.key
+    ),
+    token_type: "Bearer",
+    expires_in: ACCESS_TTL_SECONDS,
+    refresh_token: sealPayload(
+      { typ: "refresh", exp: now + REFRESH_TTL_SECONDS, secret },
+      settings.key
+    )
+  };
+}
+function redeemAuthorizationCode(form, settings, now) {
+  const claims = openSealed(form.get("code") ?? "", settings.key, { typ: "code", now });
+  const matches = claims !== null && claims.clientId === form.get("client_id") && claims.redirectUri === form.get("redirect_uri") && claims.codeChallenge === pkceChallenge(form.get("code_verifier") ?? "");
+  if (!matches)
+    return oauthError("invalid_grant", "Invalid or expired code, or code from another client.");
+  return { ok: true, value: String(claims.secret) };
+}
+function redeemRefreshToken(form, settings, now) {
+  const claims = openSealed(form.get("refresh_token") ?? "", settings.key, { typ: "refresh", now });
+  if (!claims)
+    return oauthError("invalid_grant", "Invalid or expired refresh token: connect again.");
+  return { ok: true, value: String(claims.secret) };
+}
+function redeemTokenRequest(form, settings, now) {
+  const grantType = form.get("grant_type");
+  let secret;
+  if (grantType === "authorization_code") secret = redeemAuthorizationCode(form, settings, now);
+  else if (grantType === "refresh_token") secret = redeemRefreshToken(form, settings, now);
+  else return oauthError("unsupported_grant_type", "Use authorization_code or refresh_token.");
+  if (!secret.ok) return secret;
+  const tokens = issueTokenSet(secret.value, settings, now);
+  return {
+    ok: true,
+    value: { tokens, secret: secret.value, refreshed: grantType === "refresh_token" }
+  };
+}
+function readAccessSecret(authorization, settings, now) {
+  const match = /^Bearer\s+(\S+)$/i.exec(authorization ?? "");
+  if (!match?.[1]) return null;
+  const claims = openSealed(match[1], settings.key, { typ: "access", now });
+  return claims ? String(claims.secret) : null;
+}
+
+// src/remote/handler.ts
+var UPSTREAM_CALLBACK_PATH = "/oauth/callback";
+var CORS_HEADERS = {
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
+  "access-control-allow-headers": "authorization, content-type, mcp-protocol-version, mcp-session-id",
+  "access-control-expose-headers": "www-authenticate, mcp-session-id"
+};
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "content-type": "application/json", "cache-control": "no-store" }
+  });
+}
+function pageSecurityPolicy(formTarget) {
+  const formAction = formTarget ? `'self' ${formTarget}` : "'self'";
+  return `default-src 'none'; style-src 'unsafe-inline'; img-src data:; form-action ${formAction}; frame-ancestors 'none'`;
+}
+function htmlResponse(html, status = 200, formTarget = null) {
+  return new Response(html, {
+    status,
+    headers: {
+      "content-type": "text/html; charset=utf-8",
+      "cache-control": "no-store",
+      "content-security-policy": pageSecurityPolicy(formTarget)
+    }
+  });
+}
+async function readForm(request) {
+  return new URLSearchParams(await request.text());
+}
+async function readJsonBody(request) {
+  try {
+    const body = await request.json();
+    return body;
+  } catch {
+    return null;
+  }
+}
+function loginPageFor(app, request, error2) {
+  if (app.connector.login.kind !== "secret") return htmlResponse("<p>Not found.</p>", 404);
+  return htmlResponse(
+    renderLoginPage({
+      text: app.connector.login.text,
+      pending: sealAuthorizeRequest(request, app.settings, app.now()),
+      clientHost: new URL(request.redirectUri).host,
+      error: error2
+    }),
+    200,
+    new URL(request.redirectUri).origin
+  );
+}
+function redirectWithCode(request, code) {
+  const target = new URL(request.redirectUri);
+  target.searchParams.set("code", code);
+  if (request.state !== null) target.searchParams.set("state", request.state);
+  return new Response(null, { status: 302, headers: { location: target.toString() } });
+}
+async function handleRegister(app, request) {
+  const result = registerClient(await readJsonBody(request), app.settings, app.now());
+  if (!result.ok)
+    return jsonResponse({ error: result.error, error_description: result.description }, 400);
+  return jsonResponse(result.value, 201);
+}
+function redirectToUpstream(app, login, request) {
+  const state = sealAuthorizeRequest(request, app.settings, app.now());
+  const target = login.start(state, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
+  return new Response(null, { status: 302, headers: { location: target } });
+}
+function handleAuthorizePage(app, request) {
+  const result = parseAuthorizeQuery(new URL(request.url).searchParams, app.settings, app.now());
+  if (!result.ok) return Promise.resolve(htmlResponse(`<p>${result.description}</p>`, 400));
+  const login = app.connector.login;
+  if (login.kind === "upstream")
+    return Promise.resolve(redirectToUpstream(app, login, result.value));
+  return Promise.resolve(loginPageFor(app, result.value, null));
+}
+async function handleUpstreamCallback(app, request) {
+  const login = app.connector.login;
+  if (login.kind !== "upstream") return htmlResponse("<p>Not found.</p>", 404);
+  const query = new URL(request.url).searchParams;
+  const pending = openAuthorizeRequest(query.get("state") ?? "", app.settings, app.now());
+  if (!pending)
+    return htmlResponse("<p>The request expired. Go back to Claude and connect again.</p>", 400);
+  let secret;
+  try {
+    secret = await login.finish(query, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
+  } catch (error2) {
+    return htmlResponse(
+      `<p>${escapeHtml(error2 instanceof Error ? error2.message : String(error2))}</p>`,
+      403
+    );
+  }
+  return redirectWithCode(
+    pending,
+    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now())
+  );
+}
+async function handleAuthorizeSubmit(app, request) {
+  const form = await readForm(request);
+  const login = app.connector.login;
+  if (login.kind !== "secret") return htmlResponse("<p>Not found.</p>", 404);
+  const pending = openAuthorizeRequest(form.get("pending") ?? "", app.settings, app.now());
+  if (!pending)
+    return htmlResponse("<p>The request expired. Go back to Claude and connect again.</p>", 400);
+  const secret = (form.get("secret") ?? "").trim();
+  try {
+    await login.verify(secret);
+  } catch (error2) {
+    return loginPageFor(app, pending, error2 instanceof Error ? error2.message : String(error2));
+  }
+  return redirectWithCode(
+    pending,
+    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now())
+  );
+}
+async function renewSecretQuietly(connector, secret) {
+  try {
+    return await connector.renewSecret?.(secret) ?? "kept";
+  } catch (error2) {
+    console.warn("Could not renew the credential:", error2 instanceof Error ? error2.message : error2);
+    return "kept";
+  }
+}
+var REVOKED_SECRET_DESCRIPTION = "The service no longer accepts the credential behind this refresh token (revoked or expired): connect the connector again.";
+async function handleToken(app, request) {
+  const result = redeemTokenRequest(await readForm(request), app.settings, app.now());
+  if (!result.ok)
+    return jsonResponse({ error: result.error, error_description: result.description }, 400);
+  const revoked = result.value.refreshed && await renewSecretQuietly(app.connector, result.value.secret) === "revoked";
+  if (revoked)
+    return jsonResponse(
+      { error: "invalid_grant", error_description: REVOKED_SECRET_DESCRIPTION },
+      400
+    );
+  return jsonResponse(result.value.tokens);
+}
+function handleMcp(app, request) {
+  const secret = readAccessSecret(request.headers.get("authorization"), app.settings, app.now());
+  if (secret === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
+  if (app.connector.acceptsSecret?.(secret) === false) {
+    return Promise.resolve(jsonResponse({ error: "access_revoked" }, 403));
+  }
+  return serveMcpWithStreaming(app.connector, secret, request);
+}
+async function serveMcpWithStreaming(connector, secret, request) {
+  const streamed = await streamToolQuietly(connector, secret, request);
+  return streamed ?? serveMcpRequest(connector.createServer(secret), request);
+}
+async function streamToolQuietly(connector, secret, request) {
+  if (!connector.streamTool) return null;
+  const call = await readToolCallRequest(request);
+  if (!call) return null;
+  try {
+    const content = await connector.streamTool(secret, call);
+    return content && streamedToolResponse(call.id, content);
+  } catch (error2) {
+    console.warn("Streamed tool fell back:", error2 instanceof Error ? error2.message : error2);
+    return null;
+  }
+}
+var REMOTE_ROUTES = {
+  "GET /": () => Promise.resolve(new Response("ok")),
+  "GET /.well-known/oauth-authorization-server": (app) => Promise.resolve(jsonResponse(authorizationServerMetadata(app.settings.issuer))),
+  "GET /.well-known/oauth-protected-resource": (app) => Promise.resolve(jsonResponse(protectedResourceMetadata(app.settings.issuer))),
+  "GET /.well-known/oauth-protected-resource/mcp": (app) => Promise.resolve(jsonResponse(protectedResourceMetadata(app.settings.issuer))),
+  "POST /register": handleRegister,
+  "GET /authorize": handleAuthorizePage,
+  "POST /authorize": handleAuthorizeSubmit,
+  "POST /token": handleToken,
+  [`GET ${UPSTREAM_CALLBACK_PATH}`]: handleUpstreamCallback,
+  "GET /mcp": handleMcp,
+  "POST /mcp": handleMcp,
+  "DELETE /mcp": handleMcp
+};
+function withCors(response) {
+  for (const [name, value] of Object.entries(CORS_HEADERS)) response.headers.set(name, value);
+  return response;
+}
+async function routeRemoteRequest(app, request) {
+  if (request.method === "OPTIONS") return withCors(new Response(null, { status: 204 }));
+  const path = new URL(request.url).pathname.replace(/(.)\/+$/, "$1");
+  const route = REMOTE_ROUTES[`${request.method} ${path}`];
+  if (!route) return new Response("Not found", { status: 404 });
+  return withCors(await route(app, request));
+}
+function createRemoteHandler(app) {
+  return (request) => routeRemoteRequest(app, request);
+}
+
+// src/remote/node-server.ts
+import { createServer } from "node:http";
+var MAX_BODY_BYTES = 1e6;
+function readPublicUrl(env) {
+  const raw = envValue(env, "PUBLIC_URL");
+  if (!raw || !URL.canParse(raw))
+    throw new Error("Set PUBLIC_URL to the public address of the server.");
+  const url = new URL(raw);
+  if (url.protocol !== "https:" && url.hostname !== "localhost") {
+    throw new Error("PUBLIC_URL must use https (Claude only connects over https).");
+  }
+  return raw.replace(/\/+$/, "");
+}
+function readRemoteServerConfig(env) {
+  return {
+    port: Number(envValue(env, "PORT") ?? 8080),
+    settings: readOAuthSettings(env, readPublicUrl(env))
+  };
+}
+async function readNodeBody(req) {
+  const chunks = [];
+  let size = 0;
+  for await (const chunk of req) {
+    size += chunk.length;
+    if (size > MAX_BODY_BYTES) return null;
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks);
+}
+function toWebRequest(req, body, origin) {
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(req.headers)) {
+    if (value !== void 0) headers.set(name, Array.isArray(value) ? value.join(", ") : value);
+  }
+  const method = req.method ?? "GET";
+  const hasBody = !["GET", "HEAD"].includes(method);
+  return new Request(new URL(req.url ?? "/", origin), {
+    method,
+    headers,
+    ...hasBody ? { body: new Uint8Array(body) } : {}
+  });
+}
+async function writeWebResponse(res, response) {
+  res.writeHead(response.status, Object.fromEntries(response.headers.entries()));
+  res.end(Buffer.from(await response.arrayBuffer()));
+}
+async function serveNodeRequest(options, req, res) {
+  const body = await readNodeBody(req);
+  if (!body) {
+    await writeWebResponse(res, new Response("Body too large.", { status: 413 }));
+    return;
+  }
+  try {
+    await writeWebResponse(res, await options.handler(toWebRequest(req, body, options.origin)));
+  } catch (error2) {
+    console.error(error2);
+    await writeWebResponse(res, new Response("Internal error.", { status: 500 }));
+  }
+}
+function startRemoteHttpServer(options) {
+  const server = createServer((req, res) => void serveNodeRequest(options, req, res));
+  return server.listen(options.port);
+}
+
+// src/core/http.ts
+function buildUrl(base, path, params = {}) {
+  const url = new URL(path.startsWith("http") ? path : `${base}${path}`);
+  for (const [key, value] of Object.entries(params)) {
+    if (value === null || value === void 0) continue;
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        url.searchParams.append(`${key}[]`, String(item));
+      }
+    } else {
+      url.searchParams.set(key, String(value));
+    }
+  }
+  return url;
+}
+function parseNextLink(linkHeader) {
+  if (!linkHeader) return null;
+  const next = linkHeader.split(",").find((part) => part.includes('rel="next"'));
+  return next?.match(/<([^>]+)>/)?.[1] ?? null;
+}
+
+// src/core/html.ts
+var HTML_TEXT_REPLACEMENTS = [
+  [/<(script|style)[\s\S]*?<\/\1>/gi, ""],
+  [/<br\s*\/?>/gi, "\n"],
+  [/<\/(p|div|li|h[1-6]|tr)>/gi, "\n"],
+  [/<li[^>]*>/gi, "\u2022 "],
+  [/<[^>]+>/g, ""],
+  [/&nbsp;/g, " "],
+  [/&lt;/g, "<"],
+  [/&gt;/g, ">"],
+  [/&quot;/g, '"'],
+  [/&#39;/g, "'"],
+  [/&amp;/g, "&"],
+  [/[ \t]+\n/g, "\n"],
+  [/\n{3,}/g, "\n\n"]
+];
+function htmlToText(html) {
+  if (!html) return "";
+  const text = HTML_TEXT_REPLACEMENTS.reduce(
+    (acc, [pattern, replacement]) => acc.replace(pattern, replacement),
+    html
+  );
+  return text.trim();
+}
+
+// src/core/cfb.ts
+var CFB_SIGNATURE = [208, 207, 17, 224, 161, 177, 26, 225];
+var END_OF_CHAIN = 4294967294;
+function isCfb(bytes) {
+  return CFB_SIGNATURE.every((b, i) => bytes[i] === b);
+}
+function readCfbHeader(bytes) {
+  if (!isCfb(bytes)) throw new Error("File is not an Office (OLE) document.");
+  const v = byteView(bytes);
+  return {
+    sectorSize: 1 << v.getUint16(30, true),
+    miniSectorSize: 1 << v.getUint16(32, true),
+    firstDirSector: v.getUint32(48, true),
+    miniCutoff: v.getUint32(56, true),
+    firstMiniFatSector: v.getUint32(60, true),
+    firstDifatSector: v.getUint32(68, true),
+    difatCount: v.getUint32(72, true)
+  };
+}
+function cfbSector(bytes, header, id4) {
+  const start = (id4 + 1) * header.sectorSize;
+  return bytes.subarray(start, start + header.sectorSize);
+}
+function sectorWords(sector) {
+  const v = byteView(sector);
+  return Array.from({ length: sector.length >> 2 }, (_, i) => v.getUint32(i * 4, true));
+}
+function fatSectorIds(bytes, header) {
+  const ids = sectorWords(bytes.subarray(76, 512));
+  let next = header.firstDifatSector;
+  for (let i = 0; i < header.difatCount && next < END_OF_CHAIN; i++) {
+    const words = sectorWords(cfbSector(bytes, header, next));
+    next = words.pop() ?? END_OF_CHAIN;
+    ids.push(...words);
+  }
+  return ids.filter((id4) => id4 < END_OF_CHAIN);
+}
+function followChain(table, start) {
+  const chain = [];
+  let id4 = start;
+  while (id4 !== void 0 && id4 < table.length && chain.length < table.length) {
+    chain.push(id4);
+    id4 = table[id4];
+  }
+  return chain;
+}
+function readRegularChain(file, start) {
+  return concatBytes(
+    followChain(file.fat, start).map((id4) => cfbSector(file.bytes, file.header, id4))
+  );
+}
+function parseDirectory(dir) {
+  const v = byteView(dir);
+  const entries = [];
+  for (let pos = 0; pos + 128 <= dir.length; pos += 128) {
+    const nameBytes = Math.max(0, v.getUint16(pos + 64, true) - 2);
+    entries.push({
+      name: utf16leToString(dir.subarray(pos, pos + nameBytes)),
+      start: v.getUint32(pos + 116, true),
+      size: v.getUint32(pos + 120, true)
+    });
+  }
+  return entries;
+}
+function openCfb(bytes) {
+  const header = readCfbHeader(bytes);
+  const fat = fatSectorIds(bytes, header).flatMap(
+    (id4) => sectorWords(cfbSector(bytes, header, id4))
+  );
+  const entries = parseDirectory(readRegularChain({ bytes, header, fat }, header.firstDirSector));
+  return { bytes, header, fat, entries };
+}
+function readMiniStream(file, entry) {
+  const root = file.entries[0];
+  const container = root ? readRegularChain(file, root.start) : new Uint8Array();
+  const miniFat = sectorWords(readRegularChain(file, file.header.firstMiniFatSector));
+  const size = file.header.miniSectorSize;
+  const parts = followChain(miniFat, entry.start).map(
+    (id4) => container.subarray(id4 * size, (id4 + 1) * size)
+  );
+  return concatBytes(parts);
+}
+function readCfbStream(file, name) {
+  const entry = file.entries.find((e, i) => i > 0 && e.name === name);
+  if (!entry) return null;
+  const data = entry.size < file.header.miniCutoff ? readMiniStream(file, entry) : readRegularChain(file, entry.start);
+  return data.subarray(0, entry.size);
+}
+
+// src/core/zip.ts
+var EOCD_SIGNATURE = 101010256;
+var CENTRAL_SIGNATURE = 33639248;
+function findEndOfCentralDirectory(bytes) {
+  const view = byteView(bytes);
+  for (let pos = bytes.length - 22; pos >= 0; pos--) {
+    if (view.getUint32(pos, true) === EOCD_SIGNATURE) return pos;
+  }
+  throw new Error("Invalid ZIP file: central directory not found.");
+}
+function listZipEntries(bytes) {
+  const view = byteView(bytes);
+  const eocd = findEndOfCentralDirectory(bytes);
+  const entries = [];
+  let pos = view.getUint32(eocd + 16, true);
+  for (let i = 0; i < view.getUint16(eocd + 10, true); i++) {
+    if (view.getUint32(pos, true) !== CENTRAL_SIGNATURE) break;
+    const nameLength = view.getUint16(pos + 28, true);
+    entries.push({
+      name: new TextDecoder().decode(bytes.subarray(pos + 46, pos + 46 + nameLength)),
+      method: view.getUint16(pos + 10, true),
+      compressedSize: view.getUint32(pos + 20, true),
+      localOffset: view.getUint32(pos + 42, true)
+    });
+    pos += 46 + nameLength + view.getUint16(pos + 30, true) + view.getUint16(pos + 32, true);
+  }
+  return entries;
+}
+function zipEntryBytes(bytes, entry) {
+  const view = byteView(bytes);
+  const start = entry.localOffset + 30 + view.getUint16(entry.localOffset + 26, true) + view.getUint16(entry.localOffset + 28, true);
+  return bytes.subarray(start, start + entry.compressedSize);
+}
+async function decompressBytes(data, format) {
+  const stream = new Blob([new Uint8Array(data)]).stream().pipeThrough(new DecompressionStream(format));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+function inflateRaw(data) {
+  return decompressBytes(data, "deflate-raw");
+}
+async function readZipEntry(bytes, name) {
+  const entry = listZipEntries(bytes).find((e) => e.name === name);
+  if (!entry) return null;
+  const data = zipEntryBytes(bytes, entry);
+  if (entry.method === 0) return data;
+  if (entry.method === 8) return inflateRaw(data);
+  throw new Error(`Unsupported ZIP compression (method ${entry.method}).`);
+}
+
+// src/core/word.ts
+var CP1252_HIGH = "\u20AC\x81\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\x8D\u017D\x8F\x90\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\x9D\u017E\u0178";
+var DOCX_TOKENS = /<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>|<w:tab\/>|<w:(?:br|cr)(?:\s[^>]*)?\/>|<\/w:p>/g;
+function docxXmlToText(xml) {
+  let out = "";
+  for (const match of xml.matchAll(DOCX_TOKENS)) {
+    const [token, text] = match;
+    if (text !== void 0) out += text;
+    else if (token === "<w:tab/>") out += "	";
+    else out += "\n";
+  }
+  return htmlToText(out);
+}
+async function docxToText(bytes) {
+  const xml = await readZipEntry(bytes, "word/document.xml");
+  if (!xml) throw new Error(".docx file without word/document.xml.");
+  return docxXmlToText(new TextDecoder().decode(xml));
+}
+function cp1252ToString(bytes) {
+  let out = "";
+  for (const b of bytes) {
+    out += b >= 128 && b < 160 ? CP1252_HIGH.charAt(b - 128) : String.fromCharCode(b);
+  }
+  return out;
+}
+function parsePieceTable(table, fcClx) {
+  const v = byteView(table);
+  let pos = fcClx;
+  while (table[pos] === 1) pos += 3 + v.getUint16(pos + 1, true);
+  if (table[pos] !== 2) throw new Error(".doc document with an invalid text table.");
+  const lcb = v.getUint32(pos + 1, true);
+  const plc = pos + 5;
+  const count = (lcb - 4) / 12;
+  return Array.from({ length: count }, (_, i) => ({
+    cpStart: v.getUint32(plc + i * 4, true),
+    cpEnd: v.getUint32(plc + (i + 1) * 4, true),
+    fc: v.getUint32(plc + (count + 1) * 4 + i * 8 + 2, true)
+  }));
+}
+function pieceText(wordDoc, piece) {
+  const length = piece.cpEnd - piece.cpStart;
+  if (piece.fc & 1073741824) {
+    const start = (piece.fc & 1073741823) / 2;
+    return cp1252ToString(wordDoc.subarray(start, start + length));
+  }
+  return utf16leToString(wordDoc.subarray(piece.fc, piece.fc + length * 2));
+}
+var WORD_TEXT_REPLACEMENTS = [
+  [/\u0013[^\u0013\u0014\u0015]*\u0014/g, ""],
+  [/\u0013[^\u0013\u0014\u0015]*\u0015/g, ""],
+  [/[\r\u000b\u000c]/g, "\n"],
+  [/\u0007/g, "	"],
+  [/[\u0000-\u0008\u000e-\u001f]/g, ""],
+  [/[ \t]+\n/g, "\n"],
+  [/\n{3,}/g, "\n\n"]
+];
+function cleanWordText(raw) {
+  return WORD_TEXT_REPLACEMENTS.reduce((acc, [re, to]) => acc.replace(re, to), raw).trim();
+}
+function docToText(bytes) {
+  const cfb = openCfb(bytes);
+  const wordDoc = readCfbStream(cfb, "WordDocument");
+  if (!wordDoc) throw new Error(".doc file without the WordDocument stream.");
+  const v = byteView(wordDoc);
+  const flags = v.getUint16(10, true);
+  if (flags & 256) throw new Error("The .doc is password-protected.");
+  const table = readCfbStream(cfb, flags & 512 ? "1Table" : "0Table");
+  if (!table) throw new Error(".doc file without the table stream.");
+  const pieces = parsePieceTable(table, v.getUint32(418, true));
+  const raw = pieces.map((p) => pieceText(wordDoc, p)).join("");
+  return cleanWordText(raw.slice(0, v.getUint32(76, true)));
+}
+function wordKind(contentType2, name) {
+  if (/\.docx$/i.test(name) || contentType2.includes("wordprocessingml")) return "docx";
+  if (/\.doc$/i.test(name) || contentType2 === "application/msword") return "doc";
+  return null;
+}
+function wordToText(kind, bytes) {
+  return kind === "docx" ? docxToText(bytes) : Promise.resolve(docToText(bytes));
+}
+
+// connectors/canvas-puc/src/helpers.ts
+var ASSIGNMENT_BUCKETS = {
+  all: void 0,
+  upcoming: "upcoming",
+  past: "past",
+  unsubmitted: "unsubmitted",
+  overdue: "overdue"
+};
+function isoDaysFrom(now, days) {
+  return new Date(now.getTime() + days * 864e5).toISOString();
+}
+function dateOnly(iso) {
+  return iso.slice(0, 10);
+}
+function courseContextCodes(ids) {
+  return ids.map((id4) => `course_${String(id4)}`);
+}
+function courseNameMap(courses) {
+  return new Map(courses.map((c) => [String(c.id), c.name ?? ""]));
+}
+function participantNames(view) {
+  return new Map((view.participants ?? []).map((p) => [String(p.id), p.display_name ?? ""]));
+}
+function isTextFile(contentType2, name) {
+  return /^text\/|json|xml|javascript|csv/.test(contentType2) || /\.(txt|md|csv|py|js|ts|java|c|cpp|h|html?)$/i.test(name);
+}
+function matchModuleItems(modules, term) {
+  const q = term.toLowerCase();
+  return modules.flatMap(
+    (m) => (m.items ?? []).filter((i) => i.title?.toLowerCase().includes(q)).map((i) => ({ module: m.name, title: i.title, type: i.type }))
+  );
+}
+function activeCourses(client) {
+  return client.getAll("/courses", { enrollment_state: "active" });
+}
+async function fetchOwnSubmission(client, courseId3, assignmentId) {
+  const path = `/courses/${String(courseId3)}/assignments/${String(assignmentId)}/submissions/self`;
+  try {
+    return await client.get(path, {
+      include: ["submission_comments", "rubric_assessment"]
+    });
+  } catch {
+    return null;
+  }
+}
+function getAllOrEmpty(client, path, params) {
+  return client.getAll(path, params).catch(() => []);
+}
+
+// connectors/canvas-puc/src/files.ts
+var MAX_DOWNLOAD_MB = 70;
+var MAX_DOWNLOAD_BYTES = MAX_DOWNLOAD_MB * 1024 * 1024;
+var MAX_TEXT_CHARS = 1e5;
+function fileMimeType(file) {
+  return file["content-type"] ?? "application/octet-stream";
+}
+function fileContentBlock(file, bytes) {
+  return binaryContentBlock(
+    fileMimeType(file),
+    bytes,
+    file.url ?? `canvas-file:${String(file.id)}`
+  );
+}
+function describeDownloadedFile(file, size) {
+  const kb = Math.round(size / 1024);
+  return `"${String(file.display_name)}" (${String(file["content-type"])}, ${kb} KB). Link: ${String(file.url)}`;
+}
+function downloadedFileResult(file, bytes) {
+  const text = describeDownloadedFile(file, bytes.length);
+  return rawToolResult({ content: [{ type: "text", text }, fileContentBlock(file, bytes)] });
+}
+function tooLargeMessage(name, size, url) {
+  const mb = (size / 1024 / 1024).toFixed(1);
+  return `"${name}" is ${mb} MB, above the ${MAX_DOWNLOAD_MB} MB limit for the conversation; download it from the link: ${url}`;
+}
+function downloadRefusal(file) {
+  const name = String(file.display_name);
+  if (!file.url) return `"${name}" has no download link available for this account.`;
+  if ((file.size ?? 0) > MAX_DOWNLOAD_BYTES) return tooLargeMessage(name, file.size ?? 0, file.url);
+  return null;
+}
+async function openCanvasFileStream(client, url) {
+  const res = await client.fetchStream(url);
+  const size = Number(res.headers.get("content-length") ?? 0);
+  if (!res.body || size > MAX_DOWNLOAD_BYTES) {
+    await res.body?.cancel();
+    return null;
+  }
+  return { body: res.body, size };
+}
+async function streamCanvasFile(client, file) {
+  if (downloadRefusal(file) !== null || !file.url) return null;
+  const opened = await openCanvasFileStream(client, file.url);
+  if (!opened) return null;
+  const overflow = tooLargeMessage(String(file.display_name), MAX_DOWNLOAD_BYTES + 1, file.url);
+  return {
+    text: describeDownloadedFile(file, file.size ?? opened.size),
+    mimeType: fileMimeType(file),
+    uri: file.url,
+    body: opened.body.pipeThrough(byteLimitStream(MAX_DOWNLOAD_BYTES, overflow))
+  };
+}
+async function downloadCanvasFile(client, file) {
+  const refusal = downloadRefusal(file);
+  if (refusal !== null) return refusal;
+  return downloadedFileResult(file, await client.fetchBytes(String(file.url)));
+}
+async function readCanvasFileText(client, file) {
+  const type = file["content-type"] ?? "";
+  const name = file.display_name ?? "";
+  const word = wordKind(type, name);
+  if (!file.url || !word && !isTextFile(type, name)) {
+    return `"${name}" is ${type}; use \`download_file\` to bring its content or download it from the link: ${String(file.url)}`;
+  }
+  const text = word ? await wordToText(word, await client.fetchBytes(file.url)) : await client.fetchText(file.url);
+  const body = type.includes("html") ? htmlToText(text) : text;
+  return `# ${name}
+
+${body}`.slice(0, MAX_TEXT_CHARS);
+}
+
+// connectors/canvas-puc/src/client.ts
+var CANVAS_PAGE_SIZE = 100;
+var DEFAULT_MAX_ITEMS = 200;
+function unauthorizedMessage(baseUrl) {
+  return `Canvas rejected the token (expired or revoked). Generate a new one at ${baseUrl}/profile/settings and reconnect the connector in Claude's settings.`;
+}
+function sendCanvasRequest(deps, req) {
+  const hasBody = req.body !== void 0;
+  return deps.fetchFn(buildUrl(`${deps.baseUrl}/api/v1`, req.path, req.params), {
+    method: req.method,
+    headers: {
+      Authorization: `Bearer ${deps.token}`,
+      Accept: "application/json",
+      ...hasBody ? { "Content-Type": "application/json" } : {}
+    },
+    ...hasBody ? { body: JSON.stringify(req.body) } : {}
+  });
+}
+async function requestCanvas(deps, req) {
+  const res = await sendCanvasRequest(deps, req);
+  if (res.status === 401) throw new Error(unauthorizedMessage(deps.baseUrl));
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`Canvas ${res.status} on ${req.method} ${req.path}: ${text.slice(0, 300)}`);
+  }
+  return res;
+}
+async function collectPages(deps, first, max) {
+  const items = [];
+  let req = first;
+  while (req && items.length < max) {
+    const res = await requestCanvas(deps, req);
+    const data = await res.json();
+    items.push(...Array.isArray(data) ? data : [data]);
+    const next = parseNextLink(res.headers.get("link"));
+    req = next ? { method: "GET", path: next } : null;
+  }
+  return items.slice(0, max);
+}
+async function fetchDownload(fetchFn, url) {
+  const res = await fetchFn(url);
+  if (!res.ok) throw new Error(`Failed to download the file (${res.status}).`);
+  return res;
+}
+async function fetchPlainText(fetchFn, url) {
+  return (await fetchDownload(fetchFn, url)).text();
+}
+async function fetchFileBytes(fetchFn, url, maxBytes = MAX_DOWNLOAD_BYTES) {
+  const res = await fetchDownload(fetchFn, url);
+  return readLimitedBytes(res.body, maxBytes, tooLargeMessage("The file", maxBytes + 1, url));
+}
+function createCanvasClient(deps) {
+  return {
+    baseUrl: deps.baseUrl,
+    get: async (path, params = {}) => await (await requestCanvas(deps, { method: "GET", path, params })).json(),
+    getAll: (path, params = {}, max = DEFAULT_MAX_ITEMS) => collectPages(
+      deps,
+      { method: "GET", path, params: { per_page: CANVAS_PAGE_SIZE, ...params } },
+      max
+    ),
+    post: async (path, body) => await (await requestCanvas(deps, { method: "POST", path, body })).json(),
+    fetchText: (url) => fetchPlainText(deps.fetchFn, url),
+    fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
+    fetchStream: (url) => fetchDownload(deps.fetchFn, url)
+  };
+}
+
+// src/mcp/annotations.ts
+var READ_ONLY_HINTS = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true
+};
+var SEND_HINTS = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: false,
+  openWorldHint: true
+};
+function toolAnnotations(title, hints) {
+  return { title, ...hints };
+}
+
+// connectors/canvas-puc/src/format.ts
+var MAX_TEXT_LENGTH = 3e3;
+function shortText(html) {
+  return htmlToText(html).slice(0, MAX_TEXT_LENGTH);
+}
+function toProfile(p) {
+  return {
+    id: p.id,
+    name: p.name,
+    email: p.primary_email,
+    login: p.login_id,
+    time_zone: p.time_zone
+  };
+}
+function toCourse(c) {
+  const enrollment = c.enrollments?.[0] ?? {};
+  return {
+    id: c.id,
+    name: c.name,
+    code: c.course_code,
+    term: c.term?.name,
+    current_score: enrollment.computed_current_score ?? null,
+    current_grade: enrollment.computed_current_grade ?? null
+  };
+}
+function toSubmissionFlags(flags) {
+  if (!flags) return null;
+  return {
+    submitted: flags.submitted,
+    late: flags.late,
+    missing: flags.missing,
+    graded: flags.graded
+  };
+}
+function toPlannerItem(i, baseUrl) {
+  return {
+    type: i.plannable_type,
+    title: i.plannable?.title ?? i.plannable?.name,
+    course: i.context_name,
+    course_id: i.course_id,
+    id: i.plannable_id,
+    date: i.plannable_date,
+    points: i.plannable?.points_possible,
+    submission: toSubmissionFlags(i.submissions),
+    url: i.html_url ? `${baseUrl}${i.html_url}` : void 0
+  };
+}
+function toAssignmentSummary(a) {
+  const s = a.submission ?? {};
+  return {
+    id: a.id,
+    name: a.name,
+    due_at: a.due_at,
+    points: a.points_possible,
+    submission_types: a.submission_types,
+    status: s.workflow_state,
+    score: s.score ?? null,
+    late: s.late ?? null,
+    missing: s.missing ?? null,
+    url: a.html_url
+  };
+}
+function toRubricCriterion(r) {
+  const levels = (r.ratings ?? []).map((x) => `${String(x.points)}: ${String(x.description)}`);
+  return { criterion: r.description, points: r.points, ratings: levels };
+}
+function toFileInfo(f) {
+  return {
+    id: f.id,
+    name: f.display_name,
+    content_type: f["content-type"],
+    size_kb: Math.round((f.size ?? 0) / 1024),
+    updated_at: f.updated_at,
+    download: f.url
+  };
+}
+function toSubmissionDetail(s) {
+  return {
+    status: s.workflow_state,
+    submitted_at: s.submitted_at,
+    score: s.score,
+    grade: s.grade,
+    late: s.late,
+    comments: (s.submission_comments ?? []).map((c) => ({
+      author: c.author_name,
+      text: c.comment,
+      date: c.created_at
+    })),
+    rubric_assessment: s.rubric_assessment ?? null,
+    attachments: (s.attachments ?? []).map(toFileInfo)
+  };
+}
+function toAssignmentDetail(a, submission) {
+  return {
+    id: a.id,
+    name: a.name,
+    due_at: a.due_at,
+    unlock_at: a.unlock_at,
+    lock_at: a.lock_at,
+    points: a.points_possible,
+    submission_types: a.submission_types,
+    allowed_extensions: a.allowed_extensions,
+    description: htmlToText(a.description),
+    rubric: (a.rubric ?? []).map(toRubricCriterion),
+    submission: submission ? toSubmissionDetail(submission) : null,
+    url: a.html_url
+  };
+}
+function toGradeRow(s) {
+  return {
+    assignment: s.assignment?.name,
+    assignment_id: s.assignment_id,
+    score: s.score,
+    points_possible: s.assignment?.points_possible,
+    grade: s.grade,
+    status: s.workflow_state,
+    due_at: s.assignment?.due_at
+  };
+}
+function toEnrollmentGrade(e, courseNames) {
+  return {
+    course_id: e.course_id,
+    course: courseNames.get(String(e.course_id)),
+    current_score: e.grades?.current_score,
+    current_grade: e.grades?.current_grade,
+    final_score: e.grades?.final_score
+  };
+}
+function toAnnouncement(a) {
+  return {
+    id: a.id,
+    title: a.title,
+    course: a.context_code,
+    author: a.author?.display_name ?? a.user_name,
+    posted_at: a.posted_at,
+    text: shortText(a.message),
+    url: a.html_url
+  };
+}
+function toModuleItem(i) {
+  return {
+    id: i.id,
+    type: i.type,
+    title: i.title,
+    content_id: i.content_id,
+    page_url: i.page_url,
+    external_url: i.external_url,
+    completed: i.completion_requirement?.completed ?? null
+  };
+}
+function toModule(m) {
+  return { id: m.id, name: m.name, items: (m.items ?? []).map(toModuleItem) };
+}
+function toDiscussionSummary(d) {
+  return {
+    id: d.id,
+    title: d.title,
+    due_at: d.assignment?.due_at ?? null,
+    reply_count: d.discussion_subentry_count,
+    unread_count: d.unread_count,
+    last_reply_at: d.last_reply_at,
+    url: d.html_url
+  };
+}
+function flattenDiscussion(entries, names, depth = 0) {
+  return (entries ?? []).flatMap((e) => [
+    {
+      depth,
+      author: names.get(String(e.user_id)),
+      date: e.created_at,
+      text: htmlToText(e.message)
+    },
+    ...flattenDiscussion(e.replies, names, depth + 1)
+  ]);
+}
+function toCalendarEvent(e) {
+  return {
+    title: e.title,
+    start_at: e.start_at,
+    end_at: e.end_at,
+    location: e.location_name,
+    course: e.context_name,
+    description: shortText(e.description).slice(0, 1e3)
+  };
+}
+
+// connectors/canvas-puc/src/tools-read.ts
+var id = external_exports.union([external_exports.string(), external_exports.number()]);
+var courseId = id.describe("Course ID (see list_courses)");
+var downloadFileShape = { file_id: id };
+var CANVAS_READ_TOOLS = [
+  defineTool({
+    name: "whoami",
+    description: "Show the signed-in user's Canvas profile (useful to test the connection).",
+    shape: {},
+    annotations: toolAnnotations("Who am I", READ_ONLY_HINTS),
+    run: async ({ client }) => toProfile(await client.get("/users/self/profile"))
+  }),
+  defineTool({
+    name: "list_courses",
+    description: "List the student's courses with the current grade. Active ones only by default.",
+    shape: { include_completed: external_exports.boolean().optional().describe("Include courses that ended") },
+    annotations: toolAnnotations("List courses", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const state = args.include_completed ? void 0 : "active";
+      const params = { include: ["term", "total_scores"], enrollment_state: state };
+      const courses = await client.getAll("/courses", params);
+      return courses.filter((c) => c.name).map(toCourse);
+    }
+  }),
+  defineTool({
+    name: "upcoming_assignments",
+    description: "What is due in the next days across all courses: assignments, quizzes and events (the student's planner).",
+    shape: {
+      days: external_exports.number().int().min(1).max(120).optional().describe("Window in days (default 14)")
+    },
+    annotations: toolAnnotations("Upcoming assignments", READ_ONLY_HINTS),
+    run: async ({ client, now }, args) => {
+      const params = {
+        start_date: now().toISOString(),
+        end_date: isoDaysFrom(now(), args.days ?? 14)
+      };
+      const items = await client.getAll("/planner/items", params);
+      return items.map((i) => toPlannerItem(i, client.baseUrl));
+    }
+  }),
+  defineTool({
+    name: "list_assignments",
+    description: "List the assignments of a course with due date, submission status and score.",
+    shape: {
+      course_id: courseId,
+      filter: external_exports.enum(["all", "upcoming", "past", "unsubmitted", "overdue"]).optional()
+    },
+    annotations: toolAnnotations("List assignments", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const params = {
+        include: ["submission"],
+        order_by: "due_at",
+        bucket: ASSIGNMENT_BUCKETS[args.filter ?? "all"]
+      };
+      const list = await client.getAll(
+        `/courses/${String(args.course_id)}/assignments`,
+        params
+      );
+      return list.map(toAssignmentSummary);
+    }
+  }),
+  defineTool({
+    name: "get_assignment",
+    description: "Assignment details: description as text, rubric, dates and the student's submission and feedback.",
+    shape: { course_id: courseId, assignment_id: id },
+    annotations: toolAnnotations("Get assignment", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
+      const [assignment, submission] = await Promise.all([
+        client.get(path),
+        fetchOwnSubmission(client, args.course_id, args.assignment_id)
+      ]);
+      return toAssignmentDetail(assignment, submission);
+    }
+  }),
+  defineTool({
+    name: "get_grades",
+    description: "The student's grades. Without course_id: summary of every active course. With course_id: the score of each assignment.",
+    shape: { course_id: courseId.optional() },
+    annotations: toolAnnotations("Get grades", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      if (args.course_id === void 0) {
+        const params = { type: ["StudentEnrollment"], state: ["active"] };
+        const [enrollments, courses] = await Promise.all([
+          client.getAll("/users/self/enrollments", params),
+          activeCourses(client)
+        ]);
+        return enrollments.map((e) => toEnrollmentGrade(e, courseNameMap(courses)));
+      }
+      const path = `/courses/${String(args.course_id)}/students/submissions`;
+      const subs = await client.getAll(path, {
+        student_ids: ["self"],
+        include: ["assignment"]
+      });
+      return subs.filter((s) => s.assignment).map(toGradeRow);
+    }
+  }),
+  defineTool({
+    name: "list_announcements",
+    description: "Recent announcements of one course or of every active course.",
+    shape: {
+      course_id: courseId.optional().describe("When omitted, searches every active course"),
+      days: external_exports.number().int().min(1).max(365).optional().describe("Days back (default 30)")
+    },
+    annotations: toolAnnotations("List announcements", READ_ONLY_HINTS),
+    run: async ({ client, now }, args) => {
+      const ids = args.course_id !== void 0 ? [args.course_id] : (await activeCourses(client)).map((c) => c.id);
+      if (ids.length === 0) return [];
+      const params = {
+        context_codes: courseContextCodes(ids),
+        start_date: isoDaysFrom(now(), -(args.days ?? 30)),
+        end_date: now().toISOString()
+      };
+      return (await client.getAll("/announcements", params)).map(
+        toAnnouncement
+      );
+    }
+  }),
+  defineTool({
+    name: "list_modules",
+    description: "Modules of a course and the items of each one (lessons, files, pages, assignments).",
+    shape: { course_id: courseId },
+    annotations: toolAnnotations("List modules", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/courses/${String(args.course_id)}/modules`;
+      return (await client.getAll(path, { include: ["items"] })).map(toModule);
+    }
+  }),
+  defineTool({
+    name: "get_page",
+    description: "Read a course page as text. Use the page_url from list_modules, or 'front_page' for the home page.",
+    shape: { course_id: courseId, page_url: external_exports.string() },
+    annotations: toolAnnotations("Get page", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/courses/${String(args.course_id)}/pages/${encodeURIComponent(args.page_url)}`;
+      const p = await client.get(path);
+      return {
+        title: p.title,
+        updated_at: p.updated_at,
+        body: htmlToText(p.body),
+        url: p.html_url
+      };
+    }
+  }),
+  defineTool({
+    name: "list_files",
+    description: "Files of a course (PDFs, slides etc.) with a download link, newest first.",
+    shape: {
+      course_id: courseId,
+      search: external_exports.string().min(2).optional().describe("Part of the file name")
+    },
+    annotations: toolAnnotations("List files", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const params = { search_term: args.search, sort: "updated_at", order: "desc" };
+      const files = await client.getAll(
+        `/courses/${String(args.course_id)}/files`,
+        params
+      );
+      return files.map(toFileInfo);
+    }
+  }),
+  defineTool({
+    name: "read_file_text",
+    description: "Read a course file as text (txt, md, csv, code, html, doc and docx). For PDF or slides, use download_file.",
+    shape: { file_id: id },
+    annotations: toolAnnotations("Read file as text", READ_ONLY_HINTS),
+    run: async ({ client }, args) => readCanvasFileText(
+      client,
+      await client.get(`/files/${String(args.file_id)}`)
+    )
+  }),
+  defineTool({
+    name: "download_file",
+    description: `Download a course file (PDF, slides, image etc., up to ${MAX_DOWNLOAD_MB} MB) and bring its content into the conversation.`,
+    shape: downloadFileShape,
+    annotations: toolAnnotations("Download file", READ_ONLY_HINTS),
+    run: async ({ client }, args) => downloadCanvasFile(
+      client,
+      await client.get(`/files/${String(args.file_id)}`)
+    )
+  }),
+  defineTool({
+    name: "list_discussions",
+    description: "List the discussion forums of a course.",
+    shape: { course_id: courseId },
+    annotations: toolAnnotations("List discussions", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/courses/${String(args.course_id)}/discussion_topics`;
+      return (await client.getAll(path)).map(toDiscussionSummary);
+    }
+  }),
+  defineTool({
+    name: "get_discussion",
+    description: "Read a discussion forum: its prompt and every post, with the depth of each reply.",
+    shape: { course_id: courseId, topic_id: id },
+    annotations: toolAnnotations("Get discussion", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}`;
+      const [topic, view] = await Promise.all([
+        client.get(path),
+        client.get(`${path}/view`).catch(() => ({}))
+      ]);
+      const posts = flattenDiscussion(view.view, participantNames(view));
+      return { title: topic.title, description: htmlToText(topic.message), posts };
+    }
+  }),
+  defineTool({
+    name: "get_calendar",
+    description: "Calendar events (classes, scheduled exams) in a date range, from every active course.",
+    shape: {
+      start_date: external_exports.string().optional().describe("Start date YYYY-MM-DD (default today)"),
+      end_date: external_exports.string().optional().describe("End date YYYY-MM-DD (default +30 days)")
+    },
+    annotations: toolAnnotations("Get calendar", READ_ONLY_HINTS),
+    run: async ({ client, now }, args) => {
+      const ids = (await activeCourses(client)).map((c) => c.id);
+      const params = {
+        type: "event",
+        start_date: args.start_date ?? dateOnly(now().toISOString()),
+        end_date: args.end_date ?? dateOnly(isoDaysFrom(now(), 30)),
+        context_codes: ["user_self", ...courseContextCodes(ids)].slice(0, 10)
+      };
+      return (await client.getAll("/calendar_events", params)).map(
+        toCalendarEvent
+      );
+    }
+  }),
+  defineTool({
+    name: "search",
+    description: "Search a term in the names of the assignments, pages, files and module items of a course.",
+    shape: { course_id: courseId, term: external_exports.string().min(2) },
+    annotations: toolAnnotations("Search course", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const base = `/courses/${String(args.course_id)}`;
+      const search = { search_term: args.term };
+      const [assignments, pages, files, modules] = await Promise.all([
+        getAllOrEmpty(client, `${base}/assignments`, search),
+        getAllOrEmpty(client, `${base}/pages`, search),
+        getAllOrEmpty(client, `${base}/files`, search),
+        getAllOrEmpty(client, `${base}/modules`, { include: ["items"] })
+      ]);
+      return {
+        assignments: assignments.map((a) => ({ id: a.id, name: a.name, due_at: a.due_at })),
+        pages: pages.map((p) => ({ page_url: p.url, title: p.title })),
+        files: files.map(toFileInfo),
+        module_items: matchModuleItems(modules, args.term)
+      };
+    }
+  })
+];
 
 // node_modules/zod/v4/mini/schemas.js
 var ZodMiniType = /* @__PURE__ */ $constructor("ZodMiniType", (inst, def) => {
@@ -22987,133 +23990,6 @@ function manifestVersion(manifest) {
   return typeof version2 === "string" && version2 !== "" ? version2 : FALLBACK_SERVER_VERSION;
 }
 
-// src/core/bytes.ts
-function byteView(bytes) {
-  return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-}
-function concatBytes(parts) {
-  const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
-  let pos = 0;
-  for (const part of parts) {
-    out.set(part, pos);
-    pos += part.length;
-  }
-  return out;
-}
-function utf16leToString(bytes) {
-  const v = byteView(bytes);
-  let out = "";
-  for (let pos = 0; pos + 1 < bytes.length; pos += 2)
-    out += String.fromCharCode(v.getUint16(pos, true));
-  return out;
-}
-function bytesToBase64(bytes) {
-  let binary = "";
-  for (let pos = 0; pos < bytes.length; pos += 32768) {
-    binary += String.fromCharCode(...bytes.subarray(pos, pos + 32768));
-  }
-  return btoa(binary);
-}
-
-// src/mcp/tools.ts
-function defineTool(def) {
-  const schema = external_exports.object(def.shape);
-  return {
-    name: def.name,
-    description: def.description,
-    shape: def.shape,
-    annotations: def.annotations,
-    run: async (ctx, rawArgs) => def.run(ctx, schema.parse(rawArgs ?? {}))
-  };
-}
-function textResult(data, notes = []) {
-  const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
-  return { content: [text, ...notes].map((t) => ({ type: "text", text: t })) };
-}
-var RAW_RESULT = /* @__PURE__ */ Symbol("rawToolResult");
-function rawToolResult(result) {
-  return { [RAW_RESULT]: result };
-}
-function toToolResult(data) {
-  if (typeof data === "object" && data !== null && RAW_RESULT in data) {
-    return data[RAW_RESULT];
-  }
-  return textResult(data);
-}
-function errorResult(error2) {
-  const message = error2 instanceof Error ? error2.message : String(error2);
-  return { isError: true, content: [{ type: "text", text: message }] };
-}
-async function runToolSafely(spec, ctx, rawArgs) {
-  try {
-    return toToolResult(await spec.run(ctx, rawArgs));
-  } catch (error2) {
-    return errorResult(error2);
-  }
-}
-function registerToolSpecs(server, specs, ctx) {
-  for (const spec of specs) {
-    server.registerTool(
-      spec.name,
-      {
-        title: spec.annotations.title,
-        description: spec.description,
-        inputSchema: spec.shape,
-        annotations: spec.annotations
-      },
-      (args) => runToolSafely(spec, ctx, args)
-    );
-  }
-}
-function binaryContentBlock(mimeType, bytes, uri) {
-  const data = bytesToBase64(bytes);
-  if (mimeType.startsWith("image/")) return { type: "image", data, mimeType };
-  if (mimeType.startsWith("audio/")) return { type: "audio", data, mimeType };
-  return { type: "resource", resource: { uri, mimeType, blob: data } };
-}
-
-// src/mcp/annotations.ts
-var READ_ONLY_HINTS = {
-  readOnlyHint: true,
-  destructiveHint: false,
-  idempotentHint: true,
-  openWorldHint: true
-};
-var SEND_HINTS = {
-  readOnlyHint: false,
-  destructiveHint: true,
-  idempotentHint: false,
-  openWorldHint: true
-};
-function toolAnnotations(title, hints) {
-  return { title, ...hints };
-}
-
-// src/core/html.ts
-var HTML_TEXT_REPLACEMENTS = [
-  [/<(script|style)[\s\S]*?<\/\1>/gi, ""],
-  [/<br\s*\/?>/gi, "\n"],
-  [/<\/(p|div|li|h[1-6]|tr)>/gi, "\n"],
-  [/<li[^>]*>/gi, "\u2022 "],
-  [/<[^>]+>/g, ""],
-  [/&nbsp;/g, " "],
-  [/&lt;/g, "<"],
-  [/&gt;/g, ">"],
-  [/&quot;/g, '"'],
-  [/&#39;/g, "'"],
-  [/&amp;/g, "&"],
-  [/[ \t]+\n/g, "\n"],
-  [/\n{3,}/g, "\n\n"]
-];
-function htmlToText(html) {
-  if (!html) return "";
-  const text = HTML_TEXT_REPLACEMENTS.reduce(
-    (acc, [pattern, replacement]) => acc.replace(pattern, replacement),
-    html
-  );
-  return text.trim();
-}
-
 // connectors/canvas-puc/src/inbox.ts
 var CONVERSATION_PREVIEW_LENGTH = 300;
 function toRecipient(r) {
@@ -23182,17 +24058,17 @@ function sentReply(c) {
 
 // connectors/canvas-puc/src/tools-inbox.ts
 var MAX_MESSAGE_RECIPIENTS = 20;
-var id = external_exports.union([external_exports.string(), external_exports.number()]);
+var id2 = external_exports.union([external_exports.string(), external_exports.number()]);
 var userId = external_exports.union([external_exports.number().int().positive(), external_exports.string().regex(/^\d+$/)]);
-var courseId = id.describe("Course ID (see list_courses)");
-var conversationId = id.describe("Conversation ID (see list_conversations)");
+var courseId2 = id2.describe("Course ID (see list_courses)");
+var conversationId = id2.describe("Conversation ID (see list_conversations)");
 var CANVAS_INBOX_READ_TOOLS = [
   defineTool({
     name: "find_recipients",
     description: "Find people the user can message in the Canvas inbox (teachers, TAs, classmates) by name. Returns the user ID that send_message needs.",
     shape: {
       search: external_exports.string().min(2).describe("Part of the person name"),
-      course_id: courseId.optional().describe("Only people of this course")
+      course_id: courseId2.optional().describe("Only people of this course")
     },
     annotations: toolAnnotations("Find recipients", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
@@ -23240,7 +24116,7 @@ var CANVAS_INBOX_WRITE_TOOLS = [
       recipient_ids: external_exports.array(userId).min(1).max(MAX_MESSAGE_RECIPIENTS).describe("User IDs"),
       subject: external_exports.string().min(1).max(255),
       body: external_exports.string().min(1).describe("Plain text"),
-      course_id: courseId.optional().describe("Course the message is about")
+      course_id: courseId2.optional().describe("Course the message is about")
     },
     annotations: toolAnnotations("Send message", SEND_HINTS),
     run: async ({ client }, args) => {
@@ -23263,750 +24139,6 @@ var CANVAS_INBOX_WRITE_TOOLS = [
     run: async ({ client }, args) => {
       const path = `/conversations/${String(args.conversation_id)}/add_message`;
       return sentReply(await client.post(path, { body: args.body }));
-    }
-  })
-];
-
-// src/core/cfb.ts
-var CFB_SIGNATURE = [208, 207, 17, 224, 161, 177, 26, 225];
-var END_OF_CHAIN = 4294967294;
-function isCfb(bytes) {
-  return CFB_SIGNATURE.every((b, i) => bytes[i] === b);
-}
-function readCfbHeader(bytes) {
-  if (!isCfb(bytes)) throw new Error("File is not an Office (OLE) document.");
-  const v = byteView(bytes);
-  return {
-    sectorSize: 1 << v.getUint16(30, true),
-    miniSectorSize: 1 << v.getUint16(32, true),
-    firstDirSector: v.getUint32(48, true),
-    miniCutoff: v.getUint32(56, true),
-    firstMiniFatSector: v.getUint32(60, true),
-    firstDifatSector: v.getUint32(68, true),
-    difatCount: v.getUint32(72, true)
-  };
-}
-function cfbSector(bytes, header, id4) {
-  const start = (id4 + 1) * header.sectorSize;
-  return bytes.subarray(start, start + header.sectorSize);
-}
-function sectorWords(sector) {
-  const v = byteView(sector);
-  return Array.from({ length: sector.length >> 2 }, (_, i) => v.getUint32(i * 4, true));
-}
-function fatSectorIds(bytes, header) {
-  const ids = sectorWords(bytes.subarray(76, 512));
-  let next = header.firstDifatSector;
-  for (let i = 0; i < header.difatCount && next < END_OF_CHAIN; i++) {
-    const words = sectorWords(cfbSector(bytes, header, next));
-    next = words.pop() ?? END_OF_CHAIN;
-    ids.push(...words);
-  }
-  return ids.filter((id4) => id4 < END_OF_CHAIN);
-}
-function followChain(table, start) {
-  const chain = [];
-  let id4 = start;
-  while (id4 !== void 0 && id4 < table.length && chain.length < table.length) {
-    chain.push(id4);
-    id4 = table[id4];
-  }
-  return chain;
-}
-function readRegularChain(file, start) {
-  return concatBytes(
-    followChain(file.fat, start).map((id4) => cfbSector(file.bytes, file.header, id4))
-  );
-}
-function parseDirectory(dir) {
-  const v = byteView(dir);
-  const entries = [];
-  for (let pos = 0; pos + 128 <= dir.length; pos += 128) {
-    const nameBytes = Math.max(0, v.getUint16(pos + 64, true) - 2);
-    entries.push({
-      name: utf16leToString(dir.subarray(pos, pos + nameBytes)),
-      start: v.getUint32(pos + 116, true),
-      size: v.getUint32(pos + 120, true)
-    });
-  }
-  return entries;
-}
-function openCfb(bytes) {
-  const header = readCfbHeader(bytes);
-  const fat = fatSectorIds(bytes, header).flatMap(
-    (id4) => sectorWords(cfbSector(bytes, header, id4))
-  );
-  const entries = parseDirectory(readRegularChain({ bytes, header, fat }, header.firstDirSector));
-  return { bytes, header, fat, entries };
-}
-function readMiniStream(file, entry) {
-  const root = file.entries[0];
-  const container = root ? readRegularChain(file, root.start) : new Uint8Array();
-  const miniFat = sectorWords(readRegularChain(file, file.header.firstMiniFatSector));
-  const size = file.header.miniSectorSize;
-  const parts = followChain(miniFat, entry.start).map(
-    (id4) => container.subarray(id4 * size, (id4 + 1) * size)
-  );
-  return concatBytes(parts);
-}
-function readCfbStream(file, name) {
-  const entry = file.entries.find((e, i) => i > 0 && e.name === name);
-  if (!entry) return null;
-  const data = entry.size < file.header.miniCutoff ? readMiniStream(file, entry) : readRegularChain(file, entry.start);
-  return data.subarray(0, entry.size);
-}
-
-// src/core/zip.ts
-var EOCD_SIGNATURE = 101010256;
-var CENTRAL_SIGNATURE = 33639248;
-function findEndOfCentralDirectory(bytes) {
-  const view = byteView(bytes);
-  for (let pos = bytes.length - 22; pos >= 0; pos--) {
-    if (view.getUint32(pos, true) === EOCD_SIGNATURE) return pos;
-  }
-  throw new Error("Invalid ZIP file: central directory not found.");
-}
-function listZipEntries(bytes) {
-  const view = byteView(bytes);
-  const eocd = findEndOfCentralDirectory(bytes);
-  const entries = [];
-  let pos = view.getUint32(eocd + 16, true);
-  for (let i = 0; i < view.getUint16(eocd + 10, true); i++) {
-    if (view.getUint32(pos, true) !== CENTRAL_SIGNATURE) break;
-    const nameLength = view.getUint16(pos + 28, true);
-    entries.push({
-      name: new TextDecoder().decode(bytes.subarray(pos + 46, pos + 46 + nameLength)),
-      method: view.getUint16(pos + 10, true),
-      compressedSize: view.getUint32(pos + 20, true),
-      localOffset: view.getUint32(pos + 42, true)
-    });
-    pos += 46 + nameLength + view.getUint16(pos + 30, true) + view.getUint16(pos + 32, true);
-  }
-  return entries;
-}
-function zipEntryBytes(bytes, entry) {
-  const view = byteView(bytes);
-  const start = entry.localOffset + 30 + view.getUint16(entry.localOffset + 26, true) + view.getUint16(entry.localOffset + 28, true);
-  return bytes.subarray(start, start + entry.compressedSize);
-}
-async function decompressBytes(data, format) {
-  const stream = new Blob([new Uint8Array(data)]).stream().pipeThrough(new DecompressionStream(format));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
-}
-function inflateRaw(data) {
-  return decompressBytes(data, "deflate-raw");
-}
-async function readZipEntry(bytes, name) {
-  const entry = listZipEntries(bytes).find((e) => e.name === name);
-  if (!entry) return null;
-  const data = zipEntryBytes(bytes, entry);
-  if (entry.method === 0) return data;
-  if (entry.method === 8) return inflateRaw(data);
-  throw new Error(`Unsupported ZIP compression (method ${entry.method}).`);
-}
-
-// src/core/word.ts
-var CP1252_HIGH = "\u20AC\x81\u201A\u0192\u201E\u2026\u2020\u2021\u02C6\u2030\u0160\u2039\u0152\x8D\u017D\x8F\x90\u2018\u2019\u201C\u201D\u2022\u2013\u2014\u02DC\u2122\u0161\u203A\u0153\x9D\u017E\u0178";
-var DOCX_TOKENS = /<w:t(?:\s[^>]*)?>([^<]*)<\/w:t>|<w:tab\/>|<w:(?:br|cr)(?:\s[^>]*)?\/>|<\/w:p>/g;
-function docxXmlToText(xml) {
-  let out = "";
-  for (const match of xml.matchAll(DOCX_TOKENS)) {
-    const [token, text] = match;
-    if (text !== void 0) out += text;
-    else if (token === "<w:tab/>") out += "	";
-    else out += "\n";
-  }
-  return htmlToText(out);
-}
-async function docxToText(bytes) {
-  const xml = await readZipEntry(bytes, "word/document.xml");
-  if (!xml) throw new Error(".docx file without word/document.xml.");
-  return docxXmlToText(new TextDecoder().decode(xml));
-}
-function cp1252ToString(bytes) {
-  let out = "";
-  for (const b of bytes) {
-    out += b >= 128 && b < 160 ? CP1252_HIGH.charAt(b - 128) : String.fromCharCode(b);
-  }
-  return out;
-}
-function parsePieceTable(table, fcClx) {
-  const v = byteView(table);
-  let pos = fcClx;
-  while (table[pos] === 1) pos += 3 + v.getUint16(pos + 1, true);
-  if (table[pos] !== 2) throw new Error(".doc document with an invalid text table.");
-  const lcb = v.getUint32(pos + 1, true);
-  const plc = pos + 5;
-  const count = (lcb - 4) / 12;
-  return Array.from({ length: count }, (_, i) => ({
-    cpStart: v.getUint32(plc + i * 4, true),
-    cpEnd: v.getUint32(plc + (i + 1) * 4, true),
-    fc: v.getUint32(plc + (count + 1) * 4 + i * 8 + 2, true)
-  }));
-}
-function pieceText(wordDoc, piece) {
-  const length = piece.cpEnd - piece.cpStart;
-  if (piece.fc & 1073741824) {
-    const start = (piece.fc & 1073741823) / 2;
-    return cp1252ToString(wordDoc.subarray(start, start + length));
-  }
-  return utf16leToString(wordDoc.subarray(piece.fc, piece.fc + length * 2));
-}
-var WORD_TEXT_REPLACEMENTS = [
-  [/\u0013[^\u0013\u0014\u0015]*\u0014/g, ""],
-  [/\u0013[^\u0013\u0014\u0015]*\u0015/g, ""],
-  [/[\r\u000b\u000c]/g, "\n"],
-  [/\u0007/g, "	"],
-  [/[\u0000-\u0008\u000e-\u001f]/g, ""],
-  [/[ \t]+\n/g, "\n"],
-  [/\n{3,}/g, "\n\n"]
-];
-function cleanWordText(raw) {
-  return WORD_TEXT_REPLACEMENTS.reduce((acc, [re, to]) => acc.replace(re, to), raw).trim();
-}
-function docToText(bytes) {
-  const cfb = openCfb(bytes);
-  const wordDoc = readCfbStream(cfb, "WordDocument");
-  if (!wordDoc) throw new Error(".doc file without the WordDocument stream.");
-  const v = byteView(wordDoc);
-  const flags = v.getUint16(10, true);
-  if (flags & 256) throw new Error("The .doc is password-protected.");
-  const table = readCfbStream(cfb, flags & 512 ? "1Table" : "0Table");
-  if (!table) throw new Error(".doc file without the table stream.");
-  const pieces = parsePieceTable(table, v.getUint32(418, true));
-  const raw = pieces.map((p) => pieceText(wordDoc, p)).join("");
-  return cleanWordText(raw.slice(0, v.getUint32(76, true)));
-}
-function wordKind(contentType2, name) {
-  if (/\.docx$/i.test(name) || contentType2.includes("wordprocessingml")) return "docx";
-  if (/\.doc$/i.test(name) || contentType2 === "application/msword") return "doc";
-  return null;
-}
-function wordToText(kind, bytes) {
-  return kind === "docx" ? docxToText(bytes) : Promise.resolve(docToText(bytes));
-}
-
-// connectors/canvas-puc/src/helpers.ts
-var ASSIGNMENT_BUCKETS = {
-  all: void 0,
-  upcoming: "upcoming",
-  past: "past",
-  unsubmitted: "unsubmitted",
-  overdue: "overdue"
-};
-function isoDaysFrom(now, days) {
-  return new Date(now.getTime() + days * 864e5).toISOString();
-}
-function dateOnly(iso) {
-  return iso.slice(0, 10);
-}
-function courseContextCodes(ids) {
-  return ids.map((id4) => `course_${String(id4)}`);
-}
-function courseNameMap(courses) {
-  return new Map(courses.map((c) => [String(c.id), c.name ?? ""]));
-}
-function participantNames(view) {
-  return new Map((view.participants ?? []).map((p) => [String(p.id), p.display_name ?? ""]));
-}
-function isTextFile(contentType2, name) {
-  return /^text\/|json|xml|javascript|csv/.test(contentType2) || /\.(txt|md|csv|py|js|ts|java|c|cpp|h|html?)$/i.test(name);
-}
-function matchModuleItems(modules, term) {
-  const q = term.toLowerCase();
-  return modules.flatMap(
-    (m) => (m.items ?? []).filter((i) => i.title?.toLowerCase().includes(q)).map((i) => ({ module: m.name, title: i.title, type: i.type }))
-  );
-}
-function activeCourses(client) {
-  return client.getAll("/courses", { enrollment_state: "active" });
-}
-async function fetchOwnSubmission(client, courseId3, assignmentId) {
-  const path = `/courses/${String(courseId3)}/assignments/${String(assignmentId)}/submissions/self`;
-  try {
-    return await client.get(path, {
-      include: ["submission_comments", "rubric_assessment"]
-    });
-  } catch {
-    return null;
-  }
-}
-function getAllOrEmpty(client, path, params) {
-  return client.getAll(path, params).catch(() => []);
-}
-
-// connectors/canvas-puc/src/files.ts
-var MAX_DOWNLOAD_BYTES = 10 * 1024 * 1024;
-var MAX_TEXT_CHARS = 1e5;
-function fileContentBlock(file, bytes) {
-  const mimeType = file["content-type"] ?? "application/octet-stream";
-  return binaryContentBlock(mimeType, bytes, file.url ?? `canvas-file:${String(file.id)}`);
-}
-function downloadedFileResult(file, bytes) {
-  const kb = Math.round(bytes.length / 1024);
-  const text = `"${String(file.display_name)}" (${String(file["content-type"])}, ${kb} KB). Link: ${String(file.url)}`;
-  return rawToolResult({ content: [{ type: "text", text }, fileContentBlock(file, bytes)] });
-}
-function downloadRefusal(file) {
-  const name = String(file.display_name);
-  if (!file.url) return `"${name}" has no download link available for this account.`;
-  if ((file.size ?? 0) > MAX_DOWNLOAD_BYTES) {
-    const mb = ((file.size ?? 0) / 1024 / 1024).toFixed(1);
-    return `"${name}" is ${mb} MB, above the 10 MB limit for the conversation; download it from the link: ${file.url}`;
-  }
-  return null;
-}
-async function downloadCanvasFile(client, file) {
-  const refusal = downloadRefusal(file);
-  if (refusal !== null) return refusal;
-  return downloadedFileResult(file, await client.fetchBytes(String(file.url)));
-}
-async function readCanvasFileText(client, file) {
-  const type = file["content-type"] ?? "";
-  const name = file.display_name ?? "";
-  const word = wordKind(type, name);
-  if (!file.url || !word && !isTextFile(type, name)) {
-    return `"${name}" is ${type}; use \`download_file\` to bring its content or download it from the link: ${String(file.url)}`;
-  }
-  const text = word ? await wordToText(word, await client.fetchBytes(file.url)) : await client.fetchText(file.url);
-  const body = type.includes("html") ? htmlToText(text) : text;
-  return `# ${name}
-
-${body}`.slice(0, MAX_TEXT_CHARS);
-}
-
-// connectors/canvas-puc/src/format.ts
-var MAX_TEXT_LENGTH = 3e3;
-function shortText(html) {
-  return htmlToText(html).slice(0, MAX_TEXT_LENGTH);
-}
-function toProfile(p) {
-  return {
-    id: p.id,
-    name: p.name,
-    email: p.primary_email,
-    login: p.login_id,
-    time_zone: p.time_zone
-  };
-}
-function toCourse(c) {
-  const enrollment = c.enrollments?.[0] ?? {};
-  return {
-    id: c.id,
-    name: c.name,
-    code: c.course_code,
-    term: c.term?.name,
-    current_score: enrollment.computed_current_score ?? null,
-    current_grade: enrollment.computed_current_grade ?? null
-  };
-}
-function toSubmissionFlags(flags) {
-  if (!flags) return null;
-  return {
-    submitted: flags.submitted,
-    late: flags.late,
-    missing: flags.missing,
-    graded: flags.graded
-  };
-}
-function toPlannerItem(i, baseUrl) {
-  return {
-    type: i.plannable_type,
-    title: i.plannable?.title ?? i.plannable?.name,
-    course: i.context_name,
-    course_id: i.course_id,
-    id: i.plannable_id,
-    date: i.plannable_date,
-    points: i.plannable?.points_possible,
-    submission: toSubmissionFlags(i.submissions),
-    url: i.html_url ? `${baseUrl}${i.html_url}` : void 0
-  };
-}
-function toAssignmentSummary(a) {
-  const s = a.submission ?? {};
-  return {
-    id: a.id,
-    name: a.name,
-    due_at: a.due_at,
-    points: a.points_possible,
-    submission_types: a.submission_types,
-    status: s.workflow_state,
-    score: s.score ?? null,
-    late: s.late ?? null,
-    missing: s.missing ?? null,
-    url: a.html_url
-  };
-}
-function toRubricCriterion(r) {
-  const levels = (r.ratings ?? []).map((x) => `${String(x.points)}: ${String(x.description)}`);
-  return { criterion: r.description, points: r.points, ratings: levels };
-}
-function toFileInfo(f) {
-  return {
-    id: f.id,
-    name: f.display_name,
-    content_type: f["content-type"],
-    size_kb: Math.round((f.size ?? 0) / 1024),
-    updated_at: f.updated_at,
-    download: f.url
-  };
-}
-function toSubmissionDetail(s) {
-  return {
-    status: s.workflow_state,
-    submitted_at: s.submitted_at,
-    score: s.score,
-    grade: s.grade,
-    late: s.late,
-    comments: (s.submission_comments ?? []).map((c) => ({
-      author: c.author_name,
-      text: c.comment,
-      date: c.created_at
-    })),
-    rubric_assessment: s.rubric_assessment ?? null,
-    attachments: (s.attachments ?? []).map(toFileInfo)
-  };
-}
-function toAssignmentDetail(a, submission) {
-  return {
-    id: a.id,
-    name: a.name,
-    due_at: a.due_at,
-    unlock_at: a.unlock_at,
-    lock_at: a.lock_at,
-    points: a.points_possible,
-    submission_types: a.submission_types,
-    allowed_extensions: a.allowed_extensions,
-    description: htmlToText(a.description),
-    rubric: (a.rubric ?? []).map(toRubricCriterion),
-    submission: submission ? toSubmissionDetail(submission) : null,
-    url: a.html_url
-  };
-}
-function toGradeRow(s) {
-  return {
-    assignment: s.assignment?.name,
-    assignment_id: s.assignment_id,
-    score: s.score,
-    points_possible: s.assignment?.points_possible,
-    grade: s.grade,
-    status: s.workflow_state,
-    due_at: s.assignment?.due_at
-  };
-}
-function toEnrollmentGrade(e, courseNames) {
-  return {
-    course_id: e.course_id,
-    course: courseNames.get(String(e.course_id)),
-    current_score: e.grades?.current_score,
-    current_grade: e.grades?.current_grade,
-    final_score: e.grades?.final_score
-  };
-}
-function toAnnouncement(a) {
-  return {
-    id: a.id,
-    title: a.title,
-    course: a.context_code,
-    author: a.author?.display_name ?? a.user_name,
-    posted_at: a.posted_at,
-    text: shortText(a.message),
-    url: a.html_url
-  };
-}
-function toModuleItem(i) {
-  return {
-    id: i.id,
-    type: i.type,
-    title: i.title,
-    content_id: i.content_id,
-    page_url: i.page_url,
-    external_url: i.external_url,
-    completed: i.completion_requirement?.completed ?? null
-  };
-}
-function toModule(m) {
-  return { id: m.id, name: m.name, items: (m.items ?? []).map(toModuleItem) };
-}
-function toDiscussionSummary(d) {
-  return {
-    id: d.id,
-    title: d.title,
-    due_at: d.assignment?.due_at ?? null,
-    reply_count: d.discussion_subentry_count,
-    unread_count: d.unread_count,
-    last_reply_at: d.last_reply_at,
-    url: d.html_url
-  };
-}
-function flattenDiscussion(entries, names, depth = 0) {
-  return (entries ?? []).flatMap((e) => [
-    {
-      depth,
-      author: names.get(String(e.user_id)),
-      date: e.created_at,
-      text: htmlToText(e.message)
-    },
-    ...flattenDiscussion(e.replies, names, depth + 1)
-  ]);
-}
-function toCalendarEvent(e) {
-  return {
-    title: e.title,
-    start_at: e.start_at,
-    end_at: e.end_at,
-    location: e.location_name,
-    course: e.context_name,
-    description: shortText(e.description).slice(0, 1e3)
-  };
-}
-
-// connectors/canvas-puc/src/tools-read.ts
-var id2 = external_exports.union([external_exports.string(), external_exports.number()]);
-var courseId2 = id2.describe("Course ID (see list_courses)");
-var CANVAS_READ_TOOLS = [
-  defineTool({
-    name: "whoami",
-    description: "Show the signed-in user's Canvas profile (useful to test the connection).",
-    shape: {},
-    annotations: toolAnnotations("Who am I", READ_ONLY_HINTS),
-    run: async ({ client }) => toProfile(await client.get("/users/self/profile"))
-  }),
-  defineTool({
-    name: "list_courses",
-    description: "List the student's courses with the current grade. Active ones only by default.",
-    shape: { include_completed: external_exports.boolean().optional().describe("Include courses that ended") },
-    annotations: toolAnnotations("List courses", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const state = args.include_completed ? void 0 : "active";
-      const params = { include: ["term", "total_scores"], enrollment_state: state };
-      const courses = await client.getAll("/courses", params);
-      return courses.filter((c) => c.name).map(toCourse);
-    }
-  }),
-  defineTool({
-    name: "upcoming_assignments",
-    description: "What is due in the next days across all courses: assignments, quizzes and events (the student's planner).",
-    shape: {
-      days: external_exports.number().int().min(1).max(120).optional().describe("Window in days (default 14)")
-    },
-    annotations: toolAnnotations("Upcoming assignments", READ_ONLY_HINTS),
-    run: async ({ client, now }, args) => {
-      const params = {
-        start_date: now().toISOString(),
-        end_date: isoDaysFrom(now(), args.days ?? 14)
-      };
-      const items = await client.getAll("/planner/items", params);
-      return items.map((i) => toPlannerItem(i, client.baseUrl));
-    }
-  }),
-  defineTool({
-    name: "list_assignments",
-    description: "List the assignments of a course with due date, submission status and score.",
-    shape: {
-      course_id: courseId2,
-      filter: external_exports.enum(["all", "upcoming", "past", "unsubmitted", "overdue"]).optional()
-    },
-    annotations: toolAnnotations("List assignments", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const params = {
-        include: ["submission"],
-        order_by: "due_at",
-        bucket: ASSIGNMENT_BUCKETS[args.filter ?? "all"]
-      };
-      const list = await client.getAll(
-        `/courses/${String(args.course_id)}/assignments`,
-        params
-      );
-      return list.map(toAssignmentSummary);
-    }
-  }),
-  defineTool({
-    name: "get_assignment",
-    description: "Assignment details: description as text, rubric, dates and the student's submission and feedback.",
-    shape: { course_id: courseId2, assignment_id: id2 },
-    annotations: toolAnnotations("Get assignment", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const path = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
-      const [assignment, submission] = await Promise.all([
-        client.get(path),
-        fetchOwnSubmission(client, args.course_id, args.assignment_id)
-      ]);
-      return toAssignmentDetail(assignment, submission);
-    }
-  }),
-  defineTool({
-    name: "get_grades",
-    description: "The student's grades. Without course_id: summary of every active course. With course_id: the score of each assignment.",
-    shape: { course_id: courseId2.optional() },
-    annotations: toolAnnotations("Get grades", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      if (args.course_id === void 0) {
-        const params = { type: ["StudentEnrollment"], state: ["active"] };
-        const [enrollments, courses] = await Promise.all([
-          client.getAll("/users/self/enrollments", params),
-          activeCourses(client)
-        ]);
-        return enrollments.map((e) => toEnrollmentGrade(e, courseNameMap(courses)));
-      }
-      const path = `/courses/${String(args.course_id)}/students/submissions`;
-      const subs = await client.getAll(path, {
-        student_ids: ["self"],
-        include: ["assignment"]
-      });
-      return subs.filter((s) => s.assignment).map(toGradeRow);
-    }
-  }),
-  defineTool({
-    name: "list_announcements",
-    description: "Recent announcements of one course or of every active course.",
-    shape: {
-      course_id: courseId2.optional().describe("When omitted, searches every active course"),
-      days: external_exports.number().int().min(1).max(365).optional().describe("Days back (default 30)")
-    },
-    annotations: toolAnnotations("List announcements", READ_ONLY_HINTS),
-    run: async ({ client, now }, args) => {
-      const ids = args.course_id !== void 0 ? [args.course_id] : (await activeCourses(client)).map((c) => c.id);
-      if (ids.length === 0) return [];
-      const params = {
-        context_codes: courseContextCodes(ids),
-        start_date: isoDaysFrom(now(), -(args.days ?? 30)),
-        end_date: now().toISOString()
-      };
-      return (await client.getAll("/announcements", params)).map(
-        toAnnouncement
-      );
-    }
-  }),
-  defineTool({
-    name: "list_modules",
-    description: "Modules of a course and the items of each one (lessons, files, pages, assignments).",
-    shape: { course_id: courseId2 },
-    annotations: toolAnnotations("List modules", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const path = `/courses/${String(args.course_id)}/modules`;
-      return (await client.getAll(path, { include: ["items"] })).map(toModule);
-    }
-  }),
-  defineTool({
-    name: "get_page",
-    description: "Read a course page as text. Use the page_url from list_modules, or 'front_page' for the home page.",
-    shape: { course_id: courseId2, page_url: external_exports.string() },
-    annotations: toolAnnotations("Get page", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const path = `/courses/${String(args.course_id)}/pages/${encodeURIComponent(args.page_url)}`;
-      const p = await client.get(path);
-      return {
-        title: p.title,
-        updated_at: p.updated_at,
-        body: htmlToText(p.body),
-        url: p.html_url
-      };
-    }
-  }),
-  defineTool({
-    name: "list_files",
-    description: "Files of a course (PDFs, slides etc.) with a download link, newest first.",
-    shape: {
-      course_id: courseId2,
-      search: external_exports.string().min(2).optional().describe("Part of the file name")
-    },
-    annotations: toolAnnotations("List files", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const params = { search_term: args.search, sort: "updated_at", order: "desc" };
-      const files = await client.getAll(
-        `/courses/${String(args.course_id)}/files`,
-        params
-      );
-      return files.map(toFileInfo);
-    }
-  }),
-  defineTool({
-    name: "read_file_text",
-    description: "Read a course file as text (txt, md, csv, code, html, doc and docx). For PDF or slides, use download_file.",
-    shape: { file_id: id2 },
-    annotations: toolAnnotations("Read file as text", READ_ONLY_HINTS),
-    run: async ({ client }, args) => readCanvasFileText(
-      client,
-      await client.get(`/files/${String(args.file_id)}`)
-    )
-  }),
-  defineTool({
-    name: "download_file",
-    description: "Download a course file (PDF, slides, image etc., up to 10 MB) and bring its content into the conversation.",
-    shape: { file_id: id2 },
-    annotations: toolAnnotations("Download file", READ_ONLY_HINTS),
-    run: async ({ client }, args) => downloadCanvasFile(
-      client,
-      await client.get(`/files/${String(args.file_id)}`)
-    )
-  }),
-  defineTool({
-    name: "list_discussions",
-    description: "List the discussion forums of a course.",
-    shape: { course_id: courseId2 },
-    annotations: toolAnnotations("List discussions", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const path = `/courses/${String(args.course_id)}/discussion_topics`;
-      return (await client.getAll(path)).map(toDiscussionSummary);
-    }
-  }),
-  defineTool({
-    name: "get_discussion",
-    description: "Read a discussion forum: its prompt and every post, with the depth of each reply.",
-    shape: { course_id: courseId2, topic_id: id2 },
-    annotations: toolAnnotations("Get discussion", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}`;
-      const [topic, view] = await Promise.all([
-        client.get(path),
-        client.get(`${path}/view`).catch(() => ({}))
-      ]);
-      const posts = flattenDiscussion(view.view, participantNames(view));
-      return { title: topic.title, description: htmlToText(topic.message), posts };
-    }
-  }),
-  defineTool({
-    name: "get_calendar",
-    description: "Calendar events (classes, scheduled exams) in a date range, from every active course.",
-    shape: {
-      start_date: external_exports.string().optional().describe("Start date YYYY-MM-DD (default today)"),
-      end_date: external_exports.string().optional().describe("End date YYYY-MM-DD (default +30 days)")
-    },
-    annotations: toolAnnotations("Get calendar", READ_ONLY_HINTS),
-    run: async ({ client, now }, args) => {
-      const ids = (await activeCourses(client)).map((c) => c.id);
-      const params = {
-        type: "event",
-        start_date: args.start_date ?? dateOnly(now().toISOString()),
-        end_date: args.end_date ?? dateOnly(isoDaysFrom(now(), 30)),
-        context_codes: ["user_self", ...courseContextCodes(ids)].slice(0, 10)
-      };
-      return (await client.getAll("/calendar_events", params)).map(
-        toCalendarEvent
-      );
-    }
-  }),
-  defineTool({
-    name: "search",
-    description: "Search a term in the names of the assignments, pages, files and module items of a course.",
-    shape: { course_id: courseId2, term: external_exports.string().min(2) },
-    annotations: toolAnnotations("Search course", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
-      const base = `/courses/${String(args.course_id)}`;
-      const search = { search_term: args.term };
-      const [assignments, pages, files, modules] = await Promise.all([
-        getAllOrEmpty(client, `${base}/assignments`, search),
-        getAllOrEmpty(client, `${base}/pages`, search),
-        getAllOrEmpty(client, `${base}/files`, search),
-        getAllOrEmpty(client, `${base}/modules`, { include: ["items"] })
-      ]);
-      return {
-        assignments: assignments.map((a) => ({ id: a.id, name: a.name, due_at: a.due_at })),
-        pages: pages.map((p) => ({ page_url: p.url, title: p.title })),
-        files: files.map(toFileInfo),
-        module_items: matchModuleItems(modules, args.term)
-      };
     }
   })
 ];
@@ -24178,6 +24310,14 @@ async function renewCanvasSecret(settings, token, now) {
   await renewCanvasToken(settings, token, now);
   return "kept";
 }
+function canvasClientFor(settings, token) {
+  return createCanvasClient({ baseUrl: settings.baseUrl, token, fetchFn: settings.fetchFn });
+}
+async function streamCanvasTool(client, call) {
+  if (call.name !== "download_file") return null;
+  const { file_id: fileId } = external_exports.object(downloadFileShape).parse(call.args);
+  return streamCanvasFile(client, await client.get(`/files/${String(fileId)}`));
+}
 function canvasRemoteConnector(settings) {
   return {
     login: {
@@ -24186,17 +24326,11 @@ function canvasRemoteConnector(settings) {
       verify: (secret) => verifyCanvasToken(settings, secret)
     },
     renewSecret: (secret) => renewCanvasSecret(settings, secret, /* @__PURE__ */ new Date()),
-    createServer: (secret) => {
-      const client = createCanvasClient({
-        baseUrl: settings.baseUrl,
-        token: secret,
-        fetchFn: settings.fetchFn
-      });
-      return createCanvasMcpServer(canvasTools(settings.allowWrite), {
-        client,
-        now: () => /* @__PURE__ */ new Date()
-      });
-    }
+    createServer: (secret) => createCanvasMcpServer(canvasTools(settings.allowWrite), {
+      client: canvasClientFor(settings, secret),
+      now: () => /* @__PURE__ */ new Date()
+    }),
+    streamTool: (secret, call) => streamCanvasTool(canvasClientFor(settings, secret), call)
   };
 }
 

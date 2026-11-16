@@ -12,12 +12,12 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- index:start -->
 
 - `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`requestCanvas`](#requestcanvas), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`createCanvasClient`](#createcanvasclient)
-- `connectors/canvas-puc/src/files.ts`: [`fileContentBlock`](#filecontentblock), [`downloadedFileResult`](#downloadedfileresult), [`downloadRefusal`](#downloadrefusal), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
+- `connectors/canvas-puc/src/files.ts`: [`fileMimeType`](#filemimetype), [`fileContentBlock`](#filecontentblock), [`describeDownloadedFile`](#describedownloadedfile), [`downloadedFileResult`](#downloadedfileresult), [`tooLargeMessage`](#toolargemessage), [`downloadRefusal`](#downloadrefusal), [`openCanvasFileStream`](#opencanvasfilestream), [`streamCanvasFile`](#streamcanvasfile), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
 - `connectors/canvas-puc/src/inbox.ts`: [`toRecipient`](#torecipient), [`participantName`](#participantname), [`conversationNames`](#conversationnames), [`toConversationSummary`](#toconversationsummary), [`toConversationMessage`](#toconversationmessage), [`toConversationDetail`](#toconversationdetail), [`newMessagePayload`](#newmessagepayload), [`sentConversation`](#sentconversation), [`sentReply`](#sentreply)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
-- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`fetchCanvasSelf`](#fetchcanvasself), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`isCanvasTokenAlive`](#iscanvastokenalive), [`renewCanvasSecret`](#renewcanvassecret), [`canvasRemoteConnector`](#canvasremoteconnector)
+- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`fetchCanvasSelf`](#fetchcanvasself), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`isCanvasTokenAlive`](#iscanvastokenalive), [`renewCanvasSecret`](#renewcanvassecret), [`canvasClientFor`](#canvasclientfor), [`streamCanvasTool`](#streamcanvastool), [`canvasRemoteConnector`](#canvasremoteconnector)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
 - `connectors/canvas-puc/src/worker.ts`: [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
@@ -62,18 +62,20 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `src/core/html.ts`: [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
 - `src/core/pdf.ts`: [`bytesToLatin1`](#bytestolatin1), [`isPdf`](#ispdf), [`streamDataStart`](#streamdatastart), [`trimStreamEol`](#trimstreameol), [`readRawObject`](#readrawobject), [`listRawObjects`](#listrawobjects), [`decodePdfStream`](#decodepdfstream), [`splitObjectStream`](#splitobjectstream), [`storePdfObject`](#storepdfobject), [`readPdfObjects`](#readpdfobjects), [`pdfRefs`](#pdfrefs), [`dictRefs`](#dictrefs), [`collectPdfPages`](#collectpdfpages), [`orderedPages`](#orderedpages), [`utf16beHexToString`](#utf16behextostring), [`readBfChars`](#readbfchars), [`readBfRanges`](#readbfranges), [`rangeTarget`](#rangetarget), [`parseToUnicodeCMap`](#parsetounicodecmap), [`addFontRefs`](#addfontrefs), [`fontResourceRefs`](#fontresourcerefs), [`fontCMaps`](#fontcmaps), [`decodePdfText`](#decodepdftext), [`readLiteralString`](#readliteralstring), [`readEscape`](#readescape), [`readHexString`](#readhexstring), [`skipPdfSpace`](#skippdfspace), [`nextPdfToken`](#nextpdftoken), [`readPdfWord`](#readpdfword), [`wrapString`](#wrapstring), [`classifyWord`](#classifyword), [`showArrayText`](#showarraytext), [`lastOperandText`](#lastoperandtext), [`moveText`](#movetext), [`applyTextOperator`](#applytextoperator), [`feedPdfToken`](#feedpdftoken), [`contentStreamText`](#contentstreamtext), [`tidyPdfText`](#tidypdftext), [`pdfToText`](#pdftotext)
+- `src/core/stream.ts`: [`splitBase64Ready`](#splitbase64ready), [`base64EncodeStream`](#base64encodestream), [`byteLimitStream`](#bytelimitstream), [`framedStream`](#framedstream), [`readLimitedBytes`](#readlimitedbytes)
 - `src/core/word.ts`: [`docxXmlToText`](#docxxmltotext), [`docxToText`](#docxtotext), [`cp1252ToString`](#cp1252tostring), [`parsePieceTable`](#parsepiecetable), [`pieceText`](#piecetext), [`cleanWordText`](#cleanwordtext), [`docToText`](#doctotext), [`wordKind`](#wordkind), [`wordToText`](#wordtotext)
 - `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`decompressBytes`](#decompressbytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
 - `src/mcp/annotations.ts`: [`toolAnnotations`](#toolannotations)
 - `src/mcp/server-version.ts`: [`manifestVersion`](#manifestversion)
-- `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`rawToolResult`](#rawtoolresult), [`toToolResult`](#totoolresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs), [`binaryContentBlock`](#binarycontentblock)
+- `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`rawToolResult`](#rawtoolresult), [`toToolResult`](#totoolresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs), [`binaryContentBlock`](#binarycontentblock), [`base64ContentBlock`](#base64contentblock)
 - `src/remote/github-login.ts`: [`githubAuthorizeUrl`](#githubauthorizeurl), [`parseEmailList`](#parseemaillist), [`pickAllowedEmail`](#pickallowedemail), [`exchangeGithubCode`](#exchangegithubcode), [`fetchGithubEmails`](#fetchgithubemails), [`finishGithubLogin`](#finishgithublogin), [`githubUpstreamLogin`](#githubupstreamlogin)
-- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
+- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`serveMcpWithStreaming`](#servemcpwithstreaming), [`streamToolQuietly`](#streamtoolquietly), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
 - `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage)
 - `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
 - `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`resolveIssuer`](#resolveissuer), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
 - `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed)
+- `src/remote/streamed-tool.ts`: [`asJsonObject`](#asjsonobject), [`parseToolCallRequest`](#parsetoolcallrequest), [`readToolCallRequest`](#readtoolcallrequest), [`streamedResultFrame`](#streamedresultframe), [`streamedToolResponse`](#streamedtoolresponse)
 - `src/remote/tokens.ts`: [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessSecret`](#readaccesssecret)
 - `tools/bundle/bundle.ts`: [`listConnectors`](#listconnectors), [`isRemoteMcpUrl`](#isremotemcpurl), [`mcpServerProblems`](#mcpserverproblems), [`pluginMcpProblems`](#pluginmcpproblems), [`bundleOptions`](#bundleoptions)
 - `tools/bundle/cli.ts`: [`buildConnector`](#buildconnector), [`runBuildCli`](#runbuildcli)
@@ -1319,7 +1321,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/client.ts`
 - **Signature:** `createCanvasClient(deps: ClientDeps): CanvasClient`
-- **Used by:** `canvasRemoteConnector()`
+- **Used by:** `canvasClientFor()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
@@ -1336,7 +1338,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/client.ts`
 - **Signature:** `async fetchDownload(fetchFn: typeof fetch, url: string): Promise<Response>`
-- **Used by:** `fetchFileBytes()`, `fetchPlainText()`
+- **Used by:** `createCanvasClient()`, `fetchFileBytes()`, `fetchPlainText()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
@@ -1352,17 +1354,17 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/client.ts`
-- **Signature:** `async fetchFileBytes(fetchFn: typeof fetch, url: string): Promise<Uint8Array>`
+- **Signature:** `async fetchFileBytes(fetchFn: typeof fetch, url: string, maxBytes = MAX_DOWNLOAD_BYTES): Promise<Uint8Array>`
 - **Used by:** `createCanvasClient()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
 
-- **Does:** Downloads a binary file from a direct URL.
-- **Input:** `fetchFn`; `url`.
+- **Does:** Downloads a binary file from a direct URL, reading at most `maxBytes`.
+- **Input:** `fetchFn`; `url`; `maxBytes` (default `MAX_DOWNLOAD_BYTES`).
 - **Output:** Promise with the bytes.
 - **Effects:** Network.
-- **Errors:** Passes on the error from `fetchDownload`.
+- **Errors:** Passes on the error from `fetchDownload`; rejects with `tooLargeMessage()` as soon as the body passes `maxBytes`.
 
 ### `requestCanvas`
 
@@ -2162,6 +2164,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** None.
 
+### `base64ContentBlock`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tools.ts`
+- **Signature:** `base64ContentBlock(mimeType: string, data: string, uri: string): CallToolResult['content'][number]`
+- **Used by:** `binaryContentBlock()`, `streamedResultFrame()`
+- **Processes:** P03, P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Builds the MCP content block from data already in base64: `image` for `image/*`, `audio` for `audio/*`, embedded `resource` for the rest.
+- **Input:** `mimeType`; `data` (base64, or a marker the stream replaces); `uri` of the resource.
+- **Output:** `CallToolResult` content block.
+- **Effects:** None.
+- **Errors:** None.
+
 ## `connectors/canvas-puc/src/remote-main.ts`
 
 ### `startCanvasRemoteServer`
@@ -2387,6 +2406,40 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network: `isCanvasTokenAlive()` and, if alive, `renewCanvasToken()`.
 - **Errors:** Propagates `renewCanvasToken()` errors (`renewSecretQuietly()` turns them into a log warning).
 
+### `canvasClientFor`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/remote.ts`
+- **Signature:** `canvasClientFor(settings: CanvasRemoteSettings, token: string): CanvasClient`
+- **Used by:** `canvasRemoteConnector()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Creates the Canvas client of the server's Canvas, authorized with the user's token.
+- **Input:** `settings` (`CanvasRemoteSettings`); `token`.
+- **Output:** `CanvasClient`.
+- **Effects:** None (the client makes requests only when used).
+- **Errors:** None.
+
+### `streamCanvasTool`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/remote.ts`
+- **Signature:** `async streamCanvasTool(client: CanvasClient, call: ToolCallRequest): Promise<StreamedToolContent | null>`
+- **Used by:** `canvasRemoteConnector()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Connector `streamTool` of Canvas: streams `download_file`, leaves every other tool to the MCP server.
+- **Input:** `client`; `call` (`ToolCallRequest`).
+- **Output:** `StreamedToolContent`; `null` for other tools or when `streamCanvasFile()` declines.
+- **Effects:** Canvas GET `/files/:id` and the download.
+- **Errors:** Rejects on invalid arguments (zod) or Canvas errors; the remote handler then falls back to the MCP server.
+
 ## `src/remote/handler.ts`
 
 ### `jsonResponse`
@@ -2570,7 +2623,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Handles `/mcp`, requiring the access token.
+- **Does:** Handles `/mcp`, requiring the access token; serves through `serveMcpWithStreaming()`.
 - **Input:** `app`; `request`.
 - **Output:** MCP response, or a 401 that starts OAuth.
 - **Effects:** Runs connector tools (network).
@@ -2695,6 +2748,40 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Whatever the login's `finish` does (e.g. `fetch` to GitHub).
 - **Errors:** None (a `finish` failure becomes a 403 page).
 
+### `serveMcpWithStreaming`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/handler.ts`
+- **Signature:** `async serveMcpWithStreaming(connector: RemoteConnector, secret: string, request: Request): Promise<Response>`
+- **Used by:** `handleMcp()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Serves `/mcp`: a call the connector streams goes straight out; everything else goes to the connector's MCP server.
+- **Input:** `connector`; `secret` of the user; `request`.
+- **Output:** `Response`.
+- **Effects:** Like `streamToolQuietly()` and `serveMcpRequest()`.
+- **Errors:** None (failures become MCP responses).
+
+### `streamToolQuietly`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/handler.ts`
+- **Signature:** `async streamToolQuietly(connector: RemoteConnector, secret: string, request: Request): Promise<Response | null>`
+- **Used by:** `serveMcpWithStreaming()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Asks the connector to stream a `tools/call`; any failure falls back to the MCP server with a warning.
+- **Input:** `connector`; `secret`; `request`.
+- **Output:** Streamed `Response`; `null` when the connector has no `streamTool`, the message is not a `tools/call`, it declines or fails.
+- **Effects:** Calls the connector; logs a warning on failure.
+- **Errors:** None.
+
 ## `src/remote/login-page.ts`
 
 ### `escapeHtml`
@@ -2739,7 +2826,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/mcp-endpoint.ts`
 - **Signature:** `async serveMcpRequest(server: McpServer, request: Request): Promise<Response>`
-- **Used by:** `handleMcp()`, `handleMcpApi()`
+- **Used by:** `handleMcpApi()`, `serveMcpWithStreaming()`
 - **Processes:** P09, P10, P12, P14
 
 <!-- generated:end -->
@@ -3380,8 +3467,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/files.ts`
 - **Signature:** `downloadRefusal(file: CanvasAttachment): string | null`
-- **Used by:** `downloadCanvasFile()`
-- **Processes:** P03
+- **Used by:** `downloadCanvasFile()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
 
 <!-- generated:end -->
 
@@ -3424,6 +3511,91 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** Promise with `# nome` and the text (up to `MAX_TEXT_CHARS`), or the message with the link.
 - **Effects:** Network (file download).
 - **Errors:** Passes through download and Word extraction errors.
+
+### `fileMimeType`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/files.ts`
+- **Signature:** `fileMimeType(file: CanvasAttachment): string`
+- **Used by:** `fileContentBlock()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Picks the MIME type of a Canvas file.
+- **Input:** `file` (`CanvasAttachment`).
+- **Output:** Its `content-type`, or `application/octet-stream`.
+- **Effects:** None.
+- **Errors:** None.
+
+### `describeDownloadedFile`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/files.ts`
+- **Signature:** `describeDownloadedFile(file: CanvasAttachment, size: number): string`
+- **Used by:** `downloadedFileResult()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Writes the description line of a downloaded file.
+- **Input:** `file` (`CanvasAttachment`); `size` in bytes.
+- **Output:** `"<name>" (<type>, <n> KB). Link: <url>`.
+- **Effects:** None.
+- **Errors:** None.
+
+### `tooLargeMessage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/files.ts`
+- **Signature:** `tooLargeMessage(name: string, size: number, url: string): string`
+- **Used by:** `downloadRefusal()`, `fetchFileBytes()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Writes the refusal for a file above `MAX_DOWNLOAD_BYTES`, pointing to the link.
+- **Input:** `name`; `size` in bytes; `url`.
+- **Output:** Message with the size in MB and the 70 MB limit.
+- **Effects:** None.
+- **Errors:** None.
+
+### `openCanvasFileStream`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/files.ts`
+- **Signature:** `async openCanvasFileStream(client: CanvasClient, url: string): Promise<{ readonly body: ReadableStream<Uint8Array>; readonly size: number } | null>`
+- **Used by:** `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Opens a Canvas file download without reading it and checks the declared size.
+- **Input:** `client`; `url` of the download.
+- **Output:** `{ body, size }` (`size` from `content-length`, 0 if absent); `null` without a body or above `MAX_DOWNLOAD_BYTES` (body cancelled).
+- **Effects:** HTTP GET to the file URL.
+- **Errors:** Rejects like `fetchDownload()` (non-2xx, network).
+
+### `streamCanvasFile`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/files.ts`
+- **Signature:** `async streamCanvasFile(client: CanvasClient, file: CanvasAttachment): Promise<StreamedToolContent | null>`
+- **Used by:** `streamCanvasTool()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Streams a Canvas file for the remote server, capped at `MAX_DOWNLOAD_BYTES` whatever Canvas declares (ADR 0023).
+- **Input:** `client`; `file` (`CanvasAttachment`).
+- **Output:** `StreamedToolContent` (description, MIME type, URI, capped body); `null` when `downloadRefusal()` refuses or the download is declared too large, so the regular tool answers.
+- **Effects:** HTTP GET to the file URL.
+- **Errors:** Rejects like `fetchDownload()`; the body errors with `tooLargeMessage()` if it passes the cap.
 
 ## `src/core/cfb.ts`
 
@@ -3898,8 +4070,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/bytes.ts`
 - **Signature:** `concatBytes(parts: readonly Uint8Array[]): Uint8Array`
-- **Used by:** `readMiniStream()`, `readRegularChain()`
-- **Processes:** P03, P12
+- **Used by:** `readMiniStream()`, `readRegularChain()`, `splitBase64Ready()`
+- **Processes:** P03, P09, P12, P14
 
 <!-- generated:end -->
 
@@ -3932,8 +4104,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/bytes.ts`
 - **Signature:** `bytesToBase64(bytes: Uint8Array): string`
-- **Used by:** `binaryContentBlock()`
-- **Processes:** P03, P14
+- **Used by:** `base64EncodeStream()`, `binaryContentBlock()`
+- **Processes:** P03, P09, P14
 
 <!-- generated:end -->
 
@@ -9687,6 +9859,180 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** None (a missing or invalid version falls back).
 
+## `src/core/stream.ts`
+
+### `splitBase64Ready`
+
+<!-- generated:start -->
+
+- **File:** `src/core/stream.ts`
+- **Signature:** `splitBase64Ready(carry: Uint8Array, chunk: Uint8Array): { readonly ready: Uint8Array; readonly rest: Uint8Array }`
+- **Used by:** `base64EncodeStream()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Splits carried and new bytes into a part ready to encode (a multiple of 3) and the rest to carry.
+- **Input:** `carry`; `chunk`.
+- **Output:** `{ ready, rest }`.
+- **Effects:** None.
+- **Errors:** None.
+
+### `base64EncodeStream`
+
+<!-- generated:start -->
+
+- **File:** `src/core/stream.ts`
+- **Signature:** `base64EncodeStream(): TransformStream<Uint8Array, Uint8Array>`
+- **Used by:** `streamedToolResponse()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Encodes a byte stream as base64 piece by piece, carrying 0–2 bytes between chunks so the output equals encoding the whole buffer.
+- **Input:** None.
+- **Output:** `TransformStream` from bytes to the ASCII bytes of the base64.
+- **Effects:** None (CPU only).
+- **Errors:** None.
+
+### `byteLimitStream`
+
+<!-- generated:start -->
+
+- **File:** `src/core/stream.ts`
+- **Signature:** `byteLimitStream(maxBytes: number, message: string): TransformStream<Uint8Array, Uint8Array>`
+- **Used by:** `readLimitedBytes()`, `streamCanvasFile()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Passes bytes through and fails as soon as the running total passes the limit.
+- **Input:** `maxBytes`; `message` of the error.
+- **Output:** `TransformStream` of bytes.
+- **Effects:** None.
+- **Errors:** Errors the stream with `Error(message)` above `maxBytes`.
+
+### `framedStream`
+
+<!-- generated:start -->
+
+- **File:** `src/core/stream.ts`
+- **Signature:** `framedStream(prefix: string, suffix: string): TransformStream<Uint8Array, Uint8Array>`
+- **Used by:** `streamedToolResponse()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Writes a prefix before and a suffix after the content of a byte stream.
+- **Input:** `prefix`; `suffix` (UTF-8 text).
+- **Output:** `TransformStream` of bytes.
+- **Effects:** None.
+- **Errors:** None.
+
+### `readLimitedBytes`
+
+<!-- generated:start -->
+
+- **File:** `src/core/stream.ts`
+- **Signature:** `async readLimitedBytes(body: ReadableStream<Uint8Array> | null, maxBytes: number, message: string): Promise<Uint8Array>`
+- **Used by:** `fetchFileBytes()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Reads a whole body into memory with a hard byte cap.
+- **Input:** `body` (or `null`); `maxBytes`; `message` of the error.
+- **Output:** `Uint8Array` (empty for `null`).
+- **Effects:** Consumes the stream.
+- **Errors:** Rejects with `Error(message)` as soon as the body passes `maxBytes`.
+
+## `src/remote/streamed-tool.ts`
+
+### `asJsonObject`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/streamed-tool.ts`
+- **Signature:** `asJsonObject(value: unknown): Record<string, unknown> | null`
+- **Used by:** `parseToolCallRequest()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Narrows a JSON value to a plain object.
+- **Input:** `value`: any parsed JSON.
+- **Output:** The object as a record; `null` for arrays, primitives and `null`.
+- **Effects:** None.
+- **Errors:** None.
+
+### `parseToolCallRequest`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/streamed-tool.ts`
+- **Signature:** `parseToolCallRequest(message: unknown): ToolCallRequest | null`
+- **Used by:** `readToolCallRequest()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Reads a single JSON-RPC `tools/call` message (batches and other methods are ignored).
+- **Input:** `message`: parsed JSON body.
+- **Output:** `{ id, name, args }` (`args` defaults to `{}`); `null` otherwise.
+- **Effects:** None.
+- **Errors:** None.
+
+### `readToolCallRequest`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/streamed-tool.ts`
+- **Signature:** `async readToolCallRequest(request: Request): Promise<ToolCallRequest | null>`
+- **Used by:** `streamToolQuietly()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Reads the `tools/call` of an `/mcp` POST from a clone, so the request can still go to the MCP server.
+- **Input:** `request`.
+- **Output:** `ToolCallRequest`; `null` for non-POST, invalid JSON or another message.
+- **Effects:** Reads a clone of the body.
+- **Errors:** None (invalid JSON becomes `null`).
+
+### `streamedResultFrame`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/streamed-tool.ts`
+- **Signature:** `streamedResultFrame(id: string | number, content: StreamedToolContent, marker: string): readonly [string, string]`
+- **Used by:** `streamedToolResponse()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Serializes the JSON-RPC result of a streamed tool and splits it around the base64 data.
+- **Input:** `id` of the call; `content`; `marker` absent from the text.
+- **Output:** `[prefix, suffix]`.
+- **Effects:** None.
+- **Errors:** None.
+
+### `streamedToolResponse`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/streamed-tool.ts`
+- **Signature:** `streamedToolResponse(id: string | number, content: StreamedToolContent): Response`
+- **Used by:** `streamToolQuietly()`
+- **Processes:** P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Builds the HTTP response of a streamed tool: prefix, the content encoded as base64 while it flows, suffix.
+- **Input:** `id` of the call; `content` (`StreamedToolContent`).
+- **Output:** `Response` 200, `application/json`, streamed body.
+- **Effects:** None until read (then reads `content.body`).
+- **Errors:** The body errors if the source stream errors (e.g. over the cap).
+
 ## `connectors/canvas-puc/src/inbox.ts`
 
 ### `toRecipient`
@@ -9862,7 +10208,9 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `CFB_SIGNATURE`               | `src/core/cfb.ts`                          | The first 8 bytes of every OLE/CFB file (the .doc container).                                                   |
 | `CP1252_HIGH`                 | `src/core/word.ts`                         | Windows-1252 characters 0x80 to 0x9F, used when decoding the .doc's 8-bit text.                                 |
 | `WORD_TEXT_REPLACEMENTS`      | `src/core/word.ts`                         | Replacements (regex → text) applied in order by `cleanWordText` to Word marks.                                  |
-| `MAX_DOWNLOAD_BYTES`          | `connectors/canvas-puc/src/files.ts`       | Largest file `download_file` brings into the conversation (10 MB).                                              |
+| `MAX_DOWNLOAD_BYTES`          | `connectors/canvas-puc/src/files.ts`       | Largest file `download_file` brings into the conversation (70 MB, streamed — ADR 0023).                         |
+| `MAX_DOWNLOAD_MB`             | `connectors/canvas-puc/src/files.ts`       | The same limit in MB (70), used in the tool description and refusals.                                           |
+| `downloadFileShape`           | `connectors/canvas-puc/src/tools-read.ts`  | Arguments of `download_file` (`file_id`), shared with `streamCanvasTool()`.                                     |
 | `MAX_TEXT_CHARS`              | `connectors/canvas-puc/src/files.ts`       | Largest text returned by `read_file_text` (100,000 characters).                                                 |
 | `CONNECTORS_DIR`              | `tools/bundle/bundle.ts`                   | Connectors folder relative to the root (`connectors`).                                                          |
 | `PLUGIN_DIR`                  | `tools/bundle/bundle.ts`                   | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                          |

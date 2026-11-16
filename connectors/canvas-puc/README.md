@@ -110,7 +110,7 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes 
 | `get_page`               | Content of a page                                                                                         |
 | `list_files`             | Files with download link                                                                                  |
 | `read_file_text`         | Content of text/code files, including `.doc` and `.docx`                                                  |
-| `download_file`          | Brings a PDF, slides or image (up to 10 MB) into the conversation                                         |
+| `download_file`          | Brings a PDF, slides or image (up to 70 MB) into the conversation                                         |
 | `list_discussions`       | Course discussion forums                                                                                  |
 | `get_discussion`         | Posts in a forum                                                                                          |
 | `get_calendar`           | Calendar events                                                                                           |

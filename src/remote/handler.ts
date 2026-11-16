@@ -6,6 +6,12 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { escapeHtml, renderLoginPage, type LoginPageText } from './login-page.js';
 import { mcpUnauthorizedResponse, serveMcpRequest } from './mcp-endpoint.js';
 import {
+  readToolCallRequest,
+  streamedToolResponse,
+  type StreamedToolContent,
+  type ToolCallRequest,
+} from './streamed-tool.js';
+import {
   authorizationServerMetadata,
   parseAuthorizeQuery,
   protectedResourceMetadata,
@@ -50,6 +56,14 @@ export interface RemoteConnector {
   readonly renewSecret?: (secret: string) => Promise<SecretRenewal>;
   /** Optional: checks on each `/mcp` whether the secret is still valid (e.g. email still on the owner's list). */
   readonly acceptsSecret?: (secret: string) => boolean;
+  /**
+   * Optional: answers a `tools/call` as a stream (large files, ADR 0023); `null` leaves it to the MCP server,
+   * which also reports any error.
+   */
+  readonly streamTool?: (
+    secret: string,
+    call: ToolCallRequest,
+  ) => Promise<StreamedToolContent | null>;
 }
 
 /** Callback path of the delegated login (register `<issuer>/oauth/callback` with the provider). */
@@ -258,7 +272,35 @@ export function handleMcp(app: RemoteApp, request: Request): Promise<Response> {
   if (app.connector.acceptsSecret?.(secret) === false) {
     return Promise.resolve(jsonResponse({ error: 'access_revoked' }, 403));
   }
-  return serveMcpRequest(app.connector.createServer(secret), request);
+  return serveMcpWithStreaming(app.connector, secret, request);
+}
+
+/** Serves `/mcp`: a call the connector streams goes straight out; the rest goes to the MCP server. */
+export async function serveMcpWithStreaming(
+  connector: RemoteConnector,
+  secret: string,
+  request: Request,
+): Promise<Response> {
+  const streamed = await streamToolQuietly(connector, secret, request);
+  return streamed ?? serveMcpRequest(connector.createServer(secret), request);
+}
+
+/** Streamed response of a `tools/call` the connector takes; `null` (with a warning on failure) otherwise. */
+export async function streamToolQuietly(
+  connector: RemoteConnector,
+  secret: string,
+  request: Request,
+): Promise<Response | null> {
+  if (!connector.streamTool) return null;
+  const call = await readToolCallRequest(request);
+  if (!call) return null;
+  try {
+    const content = await connector.streamTool(secret, call);
+    return content && streamedToolResponse(call.id, content);
+  } catch (error) {
+    console.warn('Streamed tool fell back:', error instanceof Error ? error.message : error);
+    return null;
+  }
 }
 
 /** Route table: `METHOD path` → function. */

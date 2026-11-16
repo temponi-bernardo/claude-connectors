@@ -132,6 +132,13 @@ describe('fetchFileBytes', () => {
     const bytes = await fetchFileBytes(f as unknown as typeof fetch, 'https://f.test/a');
     expect(Array.from(bytes)).toEqual([1, 2, 3]);
   });
+
+  it('stops reading as soon as the file passes the limit', async () => {
+    const f = fakeFetch(new Response(new Uint8Array(5)));
+    await expect(
+      fetchFileBytes(f as unknown as typeof fetch, 'https://f.test/a', 4),
+    ).rejects.toThrow('above the 70 MB limit');
+  });
 });
 
 describe('createCanvasClient', () => {
@@ -142,6 +149,7 @@ describe('createCanvasClient', () => {
       json({ p: 1 }),
       new Response('txt'),
       new Response(new Uint8Array([7])),
+      new Response('s'),
     );
     const client = createCanvasClient(deps(f));
     await expect(client.get('/g')).resolves.toEqual({ g: 1 });
@@ -150,6 +158,7 @@ describe('createCanvasClient', () => {
     await expect(client.post('/p', { a: 1 })).resolves.toEqual({ p: 1 });
     await expect(client.fetchText('https://f.test/x')).resolves.toBe('txt');
     expect(Array.from(await client.fetchBytes('https://f.test/y'))).toEqual([7]);
+    await expect((await client.fetchStream('https://f.test/z')).text()).resolves.toBe('s');
     expect(client.baseUrl).toBe('https://x.test');
   });
 });

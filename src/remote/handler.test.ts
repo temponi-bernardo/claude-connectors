@@ -20,6 +20,8 @@ import {
   redirectWithCode,
   renewSecretQuietly,
   routeRemoteRequest,
+  serveMcpWithStreaming,
+  streamToolQuietly,
   UPSTREAM_CALLBACK_PATH,
   withCors,
   type RemoteApp,
@@ -228,6 +230,77 @@ describe('createRemoteHandler — /mcp', () => {
       }),
     );
     expect(JSON.stringify(await call.json())).toContain('secret=good');
+  });
+});
+
+/** Connector whose `streamTool` streams `big` and declines (or fails on) the rest. */
+function streamingConnector(): RemoteConnector {
+  return {
+    ...connector,
+    streamTool: (secret, call) => {
+      if (call.name === 'boom') return Promise.reject(new Error('down'));
+      if (call.name !== 'big') return Promise.resolve(null);
+      const body = new Response(`bytes-for-${secret}`).body!;
+      return Promise.resolve({ text: 'big file', mimeType: 'application/pdf', uri: 'u', body });
+    },
+  };
+}
+
+function toolCall(name: string): unknown {
+  return { jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name, arguments: {} } };
+}
+
+describe('serveMcpWithStreaming', () => {
+  it('streams what the connector takes and serves the rest with the MCP server', async () => {
+    const streamed = await serveMcpWithStreaming(
+      streamingConnector(),
+      'good',
+      rpc('t', toolCall('big')),
+    );
+    expect(JSON.stringify(await streamed.json())).toContain(btoa('bytes-for-good'));
+    const other = await serveMcpWithStreaming(
+      streamingConnector(),
+      'good',
+      rpc('t', toolCall('whoami')),
+    );
+    expect(other.status).toBe(200);
+  });
+});
+
+describe('streamToolQuietly', () => {
+  it('streams the call the connector takes, with the user secret', async () => {
+    const res = await streamToolQuietly(streamingConnector(), 'good', rpc('t', toolCall('big')));
+    const json = (await res!.json()) as {
+      id: number;
+      result: { content: { resource?: { blob: string } }[] };
+    };
+    expect(json.id).toBe(9);
+    expect(atob(json.result.content[1]?.resource?.blob ?? '')).toBe('bytes-for-good');
+  });
+
+  it('returns null when the connector declines, fails or does not stream', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    await expect(
+      streamToolQuietly(streamingConnector(), 's', rpc('t', toolCall('x'))),
+    ).resolves.toBeNull();
+    await expect(
+      streamToolQuietly(streamingConnector(), 's', rpc('t', toolCall('boom'))),
+    ).resolves.toBeNull();
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
+    await expect(streamToolQuietly(connector, 's', rpc('t', toolCall('big')))).resolves.toBeNull();
+    const list = rpc('t', { jsonrpc: '2.0', id: 1, method: 'tools/list' });
+    await expect(streamToolQuietly(streamingConnector(), 's', list)).resolves.toBeNull();
+  });
+
+  it('is used by /mcp, which falls back to the MCP server for the other calls', async () => {
+    const app = { ...makeApp(), connector: streamingConnector() };
+    const handle = createRemoteHandler(app);
+    const token = await accessToken(handle);
+    const streamed = await handle(rpc(token, toolCall('big')));
+    expect(JSON.stringify(await streamed.json())).toContain(btoa('bytes-for-good'));
+    const normal = await handle(rpc(token, { jsonrpc: '2.0', id: 1, method: 'ping' }));
+    expect(normal.status).toBe(200);
   });
 });
 
