@@ -45,6 +45,26 @@ export function byteLimitStream(
   });
 }
 
+/** Transform that drops the first `skip` bytes, passes the next `take` and then ends, cancelling the source. */
+export function byteRangeStream(
+  skip: number,
+  take: number,
+): TransformStream<Uint8Array, Uint8Array> {
+  let seen = 0;
+  return new TransformStream({
+    start(controller) {
+      if (take === 0) controller.terminate();
+    },
+    transform(chunk, controller) {
+      const from = Math.max(0, skip - seen);
+      const to = Math.min(chunk.length, skip + take - seen);
+      seen += chunk.length;
+      if (to > from) controller.enqueue(chunk.subarray(from, to));
+      if (seen >= skip + take) controller.terminate();
+    },
+  });
+}
+
 /** Transform that writes `prefix` before the content and `suffix` after it (UTF-8). */
 export function framedStream(
   prefix: string,

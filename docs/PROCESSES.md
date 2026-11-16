@@ -52,11 +52,13 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
   5. Files: `read_file_text` uses `readCanvasFileText()`, which downloads text with `fetchPlainText()` or, for
      Word (`wordKind()`), the bytes with `fetchFileBytes()` and extracts the text with `wordToText()` (`docxToText()`
      over `readZipEntry()`; `docToText()` over `openCfb()`/`readCfbStream()` and `parsePieceTable()`).
-     `download_file` uses `downloadCanvasFile()`: `downloadRefusal()` refuses a file without a link or above
-     `MAX_DOWNLOAD_BYTES` (70 MB, message from `tooLargeMessage()`); otherwise `fetchFileBytes()` reads it with
-     `readLimitedBytes()` and `downloadedFileResult()` (`describeDownloadedFile()`) embeds the content with
-     `fileContentBlock()` (`fileMimeType()`, `binaryContentBlock()`, `base64ContentBlock()`) and marks it with
-     `rawToolResult()`. In remote mode this path only answers what P09 step 2 does not stream.
+     `download_file` uses `downloadCanvasFile()`: `planCanvasDownload()` applies `downloadRefusal()` (no link or above
+     `MAX_DOWNLOAD_BYTES`, 70 MB, message from `tooLargeMessage()`) and `planDownloadChunk()`, which returns the whole
+     file up to `MAX_CHUNK_BYTES` (8 MB) or one part from `offset` (ADR 0024). `openCanvasChunk()` asks for the part with
+     `rangeHeaders()` and, unless `isRangeAnswer()`, cuts it out of the full stream with `byteRangeStream()`;
+     `chunkToolResult()` embeds it (`chunkMimeType()`, `chunkUri()`, `binaryContentBlock()`, `base64ContentBlock()`)
+     with `chunkDescription()`, which gives the next offset, and marks it with `rawToolResult()`. Claude calls again
+     with each offset and joins the parts. In remote mode this path only answers what P09 step 2 does not stream.
   6. Inbox: `find_recipients` maps `GET /search/recipients` with `toRecipient()`; `list_conversations` and
      `get_conversation` (read without marking as read) use `toConversationSummary()` and `toConversationDetail()`
      (`conversationNames()`, `participantName()`, `toConversationMessage()`). With writes enabled, `send_message`
@@ -155,10 +157,10 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
   1. `handleMcp()` reads the Canvas token with `readAccessSecret()` (`openSealed()` checks type and expiry).
   2. `serveMcpWithStreaming()` first tries `streamToolQuietly()` (ADR 0023): `readToolCallRequest()` reads a clone
      of the body (`parseToolCallRequest()`, `asJsonObject()`) and the connector's `streamTool`, `streamCanvasTool()`,
-     takes only `download_file`: `canvasClientFor()` builds the client, `streamCanvasFile()` checks
-     `downloadRefusal()`, opens the download with `openCanvasFileStream()` and caps it with `byteLimitStream()`.
+     takes only `download_file`: `canvasClientFor()` builds the client and `streamCanvasFile()` plans the part with
+     `planCanvasDownload()` and opens it with `openCanvasChunk()` (P03 step 5).
      `streamedToolResponse()` writes the JSON-RPC result from `streamedResultFrame()` around the body encoded by
-     `base64EncodeStream()` (`splitBase64Ready()`) and framed by `framedStream()`, so a 70 MB file never sits
+     `base64EncodeStream()` (`splitBase64Ready()`) and framed by `framedStream()`, so no file ever sits
      whole in the Worker's memory. Any other call, a refusal or a failure (warned) falls through to step 3.
   3. The `createServer` of `canvasRemoteConnector()` builds the client with `canvasClientFor()`, and
      `createCanvasMcpServer()` registers `canvasTools()`.
@@ -167,8 +169,8 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Result:** the tool's response, with nothing stored on the server.
 - **Failures:** expired access token → 401 and Claude uses the refresh token (and P08 step 7 extends the
   Canvas token); expired Canvas token (more than 30 days unused, or revoked) → `unauthorizedMessage()` returns the
-  instruction to generate another token and reconnect (P08). A streamed download that passes 70 MB despite the size
-  Canvas declared is cut by `byteLimitStream()`: the response ends mid-way and Claude reports a failed tool call.
+  instruction to generate another token and reconnect (P08). A part never carries more than its planned bytes
+  (`byteRangeStream()`), whatever Canvas sends.
 
 ## P10 — Connect the remote Gmail (install and sign in with Google)
 
