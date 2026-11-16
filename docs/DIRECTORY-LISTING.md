@@ -35,8 +35,9 @@ Description (≤ 2000 characters):
 
 > Connect Claude to your PUC Minas Canvas account. Ask what is due this week, read an assignment with its rubric
 > and attachments, check grades, catch up on announcements, browse course modules, pages and files, read and reply
-> to discussions, and see your calendar. Claude can also submit a text assignment or post a discussion reply, and
-> asks for your confirmation before each submission.
+> to discussions, read your Canvas inbox and see your calendar. Claude can also submit a text assignment, post a
+> discussion reply or send an inbox message (for example, to a teacher), and asks for your confirmation before each
+> one.
 >
 > How sign-in works: the first time you connect, the authorization page asks for a Canvas access token (Account →
 > Settings → New access token). The token is checked against Canvas and then travels only encrypted (AES-256-GCM)

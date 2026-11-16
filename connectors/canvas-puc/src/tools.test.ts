@@ -5,11 +5,14 @@ import { toToolResult, type ToolSpec } from '../../../src/mcp/tools.js';
 import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
 import type { CanvasContext } from './context.js';
 import { fakeContext, type Routes } from './fixtures/fake-context.js';
+import { CANVAS_INBOX_READ_TOOLS, CANVAS_INBOX_WRITE_TOOLS } from './tools-inbox.js';
 import { CANVAS_READ_TOOLS } from './tools-read.js';
 import { CANVAS_WRITE_TOOLS, submissionPayload } from './tools-write.js';
 import { CANVAS_SERVER_INFO, canvasTools, createCanvasMcpServer } from './tools.js';
 
-const ALL = [...CANVAS_READ_TOOLS, ...CANVAS_WRITE_TOOLS];
+const READS = [...CANVAS_READ_TOOLS, ...CANVAS_INBOX_READ_TOOLS];
+const WRITES = [...CANVAS_WRITE_TOOLS, ...CANVAS_INBOX_WRITE_TOOLS];
+const ALL = [...READS, ...WRITES];
 
 function tool(name: string): ToolSpec<CanvasContext> {
   const spec = ALL.find((t) => t.name === name);
@@ -57,16 +60,21 @@ describe('canvasTools', () => {
       'get_discussion',
       'get_calendar',
       'search',
+      'find_recipients',
+      'list_conversations',
+      'get_conversation',
       'submit_text_assignment',
       'reply_to_discussion',
+      'send_message',
+      'reply_to_conversation',
     ]);
   });
 
   it('gives every tool a unique title; reads are read-only and writes are destructive', () => {
     const titles = ALL.map((t) => t.annotations.title);
     expect(new Set(titles).size).toBe(ALL.length);
-    for (const spec of CANVAS_READ_TOOLS) expect(spec.annotations.readOnlyHint).toBe(true);
-    for (const spec of CANVAS_WRITE_TOOLS) {
+    for (const spec of READS) expect(spec.annotations.readOnlyHint).toBe(true);
+    for (const spec of WRITES) {
       expect(spec.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: true });
     }
   });

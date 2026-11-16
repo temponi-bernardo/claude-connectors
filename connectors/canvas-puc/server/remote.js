@@ -2339,10 +2339,10 @@ var require_resolve = __commonJS({
       }
       return count;
     }
-    function getFullPath(resolver, id3 = "", normalize) {
+    function getFullPath(resolver, id4 = "", normalize) {
       if (normalize !== false)
-        id3 = normalizeId(id3);
-      const p = resolver.parse(id3);
+        id4 = normalizeId(id4);
+      const p = resolver.parse(id4);
       return _getFullPath(resolver, p);
     }
     exports.getFullPath = getFullPath;
@@ -2352,13 +2352,13 @@ var require_resolve = __commonJS({
     }
     exports._getFullPath = _getFullPath;
     var TRAILING_SLASH_HASH = /#\/?$/;
-    function normalizeId(id3) {
-      return id3 ? id3.replace(TRAILING_SLASH_HASH, "") : "";
+    function normalizeId(id4) {
+      return id4 ? id4.replace(TRAILING_SLASH_HASH, "") : "";
     }
     exports.normalizeId = normalizeId;
-    function resolveUrl(resolver, baseId, id3) {
-      id3 = normalizeId(id3);
-      return resolver.resolve(baseId, id3);
+    function resolveUrl(resolver, baseId, id4) {
+      id4 = normalizeId(id4);
+      return resolver.resolve(baseId, id4);
     }
     exports.resolveUrl = resolveUrl;
     var ANCHOR = /^[a-z_][-a-z0-9._]*$/i;
@@ -3128,8 +3128,8 @@ var require_compile = __commonJS({
       if (Object.keys(root.schema).length > 0 && refPath === baseId) {
         return getJsonPointer.call(this, p, root);
       }
-      const id3 = (0, resolve_1.normalizeId)(refPath);
-      const schOrRef = this.refs[id3] || this.schemas[id3];
+      const id4 = (0, resolve_1.normalizeId)(refPath);
+      const schOrRef = this.refs[id4] || this.schemas[id4];
       if (typeof schOrRef == "string") {
         const sch = resolveSchema.call(this, root, schOrRef);
         if (typeof (sch === null || sch === void 0 ? void 0 : sch.schema) !== "object")
@@ -3140,7 +3140,7 @@ var require_compile = __commonJS({
         return;
       if (!schOrRef.validate)
         compileSchema.call(this, schOrRef);
-      if (id3 === (0, resolve_1.normalizeId)(ref)) {
+      if (id4 === (0, resolve_1.normalizeId)(ref)) {
         const { schema } = schOrRef;
         const { schemaId } = this.opts;
         const schId = schema[schemaId];
@@ -4623,15 +4623,15 @@ var require_core = __commonJS({
             this.addSchema(sch, void 0, _meta, _validateSchema);
           return this;
         }
-        let id3;
+        let id4;
         if (typeof schema === "object") {
           const { schemaId } = this.opts;
-          id3 = schema[schemaId];
-          if (id3 !== void 0 && typeof id3 != "string") {
+          id4 = schema[schemaId];
+          if (id4 !== void 0 && typeof id4 != "string") {
             throw new Error(`schema ${schemaId} must be string`);
           }
         }
-        key = (0, resolve_1.normalizeId)(key || id3);
+        key = (0, resolve_1.normalizeId)(key || id4);
         this._checkUnique(key);
         this.schemas[key] = this._addSchema(schema, _meta, key, _validateSchema, true);
         return this;
@@ -4710,11 +4710,11 @@ var require_core = __commonJS({
           case "object": {
             const cacheKey = schemaKeyRef;
             this._cache.delete(cacheKey);
-            let id3 = schemaKeyRef[this.opts.schemaId];
-            if (id3) {
-              id3 = (0, resolve_1.normalizeId)(id3);
-              delete this.schemas[id3];
-              delete this.refs[id3];
+            let id4 = schemaKeyRef[this.opts.schemaId];
+            if (id4) {
+              id4 = (0, resolve_1.normalizeId)(id4);
+              delete this.schemas[id4];
+              delete this.refs[id4];
             }
             return this;
           }
@@ -4821,10 +4821,10 @@ var require_core = __commonJS({
         }
       }
       _addSchema(schema, meta, baseId, validateSchema = this.opts.validateSchema, addSchema = this.opts.addUsedSchema) {
-        let id3;
+        let id4;
         const { schemaId } = this.opts;
         if (typeof schema == "object") {
-          id3 = schema[schemaId];
+          id4 = schema[schemaId];
         } else {
           if (this.opts.jtd)
             throw new Error("schema must be object");
@@ -4834,7 +4834,7 @@ var require_core = __commonJS({
         let sch = this._cache.get(schema);
         if (sch !== void 0)
           return sch;
-        baseId = (0, resolve_1.normalizeId)(id3 || baseId);
+        baseId = (0, resolve_1.normalizeId)(id4 || baseId);
         const localRefs = resolve_1.getSchemaRefs.call(this, schema, baseId);
         sch = new compile_1.SchemaEnv({ schema, schemaId, meta, baseId, localRefs });
         this._cache.set(sch.schema, sch);
@@ -4847,9 +4847,9 @@ var require_core = __commonJS({
           this.validateSchema(schema, true);
         return sch;
       }
-      _checkUnique(id3) {
-        if (this.schemas[id3] || this.refs[id3]) {
-          throw new Error(`schema with key or id "${id3}" already exists`);
+      _checkUnique(id4) {
+        if (this.schemas[id4] || this.refs[id4]) {
+          throw new Error(`schema with key or id "${id4}" already exists`);
         }
       }
       _compileSchemaEnv(sch) {
@@ -9234,38 +9234,38 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     doc.write(`const newResult = {}`);
     for (const key of normalized.keys) {
       if (normalized.optionalKeys.has(key)) {
-        const id3 = ids[key];
-        doc.write(`const ${id3} = ${parseStr(key)};`);
+        const id4 = ids[key];
+        doc.write(`const ${id4} = ${parseStr(key)};`);
         const k = esc(key);
         doc.write(`
-        if (${id3}.issues.length) {
+        if (${id4}.issues.length) {
           if (input[${k}] === undefined) {
             if (${k} in input) {
               newResult[${k}] = undefined;
             }
           } else {
             payload.issues = payload.issues.concat(
-              ${id3}.issues.map((iss) => ({
+              ${id4}.issues.map((iss) => ({
                 ...iss,
                 path: iss.path ? [${k}, ...iss.path] : [${k}],
               }))
             );
           }
-        } else if (${id3}.value === undefined) {
+        } else if (${id4}.value === undefined) {
           if (${k} in input) newResult[${k}] = undefined;
         } else {
-          newResult[${k}] = ${id3}.value;
+          newResult[${k}] = ${id4}.value;
         }
         `);
       } else {
-        const id3 = ids[key];
-        doc.write(`const ${id3} = ${parseStr(key)};`);
+        const id4 = ids[key];
+        doc.write(`const ${id4} = ${parseStr(key)};`);
         doc.write(`
-          if (${id3}.issues.length) payload.issues = payload.issues.concat(${id3}.issues.map(iss => ({
+          if (${id4}.issues.length) payload.issues = payload.issues.concat(${id4}.issues.map(iss => ({
             ...iss,
             path: iss.path ? [${esc(key)}, ...iss.path] : [${esc(key)}]
           })));`);
-        doc.write(`newResult[${esc(key)}] = ${id3}.value`);
+        doc.write(`newResult[${esc(key)}] = ${id4}.value`);
       }
     }
     doc.write(`payload.value = newResult;`);
@@ -10996,13 +10996,13 @@ var JSONSchemaGenerator = class {
       const defsSegment = this.target === "draft-2020-12" ? "$defs" : "definitions";
       if (params.external) {
         const externalId = params.external.registry.get(entry[0])?.id;
-        const uriGenerator = params.external.uri ?? ((id4) => id4);
+        const uriGenerator = params.external.uri ?? ((id5) => id5);
         if (externalId) {
           return { ref: uriGenerator(externalId) };
         }
-        const id3 = entry[1].defId ?? entry[1].schema.id ?? `schema${this.counter++}`;
-        entry[1].defId = id3;
-        return { defId: id3, ref: `${uriGenerator("__shared")}#/${defsSegment}/${id3}` };
+        const id4 = entry[1].defId ?? entry[1].schema.id ?? `schema${this.counter++}`;
+        entry[1].defId = id4;
+        return { defId: id4, ref: `${uriGenerator("__shared")}#/${defsSegment}/${id4}` };
       }
       if (entry[1] === root) {
         return { ref: "#" };
@@ -11050,8 +11050,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           continue;
         }
       }
-      const id3 = this.metadataRegistry.get(entry[0])?.id;
-      if (id3) {
+      const id4 = this.metadataRegistry.get(entry[0])?.id;
+      if (id4) {
         extractToDef(entry);
         continue;
       }
@@ -11105,10 +11105,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       console.warn(`Invalid target: ${this.target}`);
     }
     if (params.external?.uri) {
-      const id3 = params.external.registry.get(schema)?.id;
-      if (!id3)
+      const id4 = params.external.registry.get(schema)?.id;
+      if (!id4)
         throw new Error("Schema is missing an `id` property");
-      result.$id = params.external.uri(id3);
+      result.$id = params.external.uri(id4);
     }
     Object.assign(result, root.def);
     const defs = params.external?.defs ?? {};
@@ -14188,28 +14188,28 @@ data:
     }
     if (isJSONRPCResultResponse(message) || isJSONRPCErrorResponse(message)) {
       this._requestResponseMap.set(requestId, message);
-      const relatedIds = Array.from(this._requestToStreamMapping.entries()).filter(([_, sid]) => sid === streamId).map(([id3]) => id3);
-      const allResponsesReady = relatedIds.every((id3) => this._requestResponseMap.has(id3));
+      const relatedIds = Array.from(this._requestToStreamMapping.entries()).filter(([_, sid]) => sid === streamId).map(([id4]) => id4);
+      const allResponsesReady = relatedIds.every((id4) => this._requestResponseMap.has(id4));
       if (allResponsesReady) {
         if (!stream) {
           if (this._closed) {
-            for (const id3 of relatedIds) {
-              this._requestResponseMap.delete(id3);
-              this._requestToStreamMapping.delete(id3);
+            for (const id4 of relatedIds) {
+              this._requestResponseMap.delete(id4);
+              this._requestToStreamMapping.delete(id4);
             }
             return;
           }
           if (!this._enableJsonResponse && this._eventStore && this._resumableStreams.has(streamId)) {
-            for (const id3 of relatedIds) {
-              this._requestResponseMap.delete(id3);
-              this._requestToStreamMapping.delete(id3);
+            for (const id4 of relatedIds) {
+              this._requestResponseMap.delete(id4);
+              this._requestToStreamMapping.delete(id4);
             }
             this._resumableStreams.delete(streamId);
             return;
           }
-          for (const id3 of relatedIds) {
-            this._requestResponseMap.delete(id3);
-            this._requestToStreamMapping.delete(id3);
+          for (const id4 of relatedIds) {
+            this._requestResponseMap.delete(id4);
+            this._requestToStreamMapping.delete(id4);
           }
           throw new Error(`No connection established for request ID: ${String(requestId)}`);
         }
@@ -14220,7 +14220,7 @@ data:
           if (this.sessionId !== void 0) {
             headers["mcp-session-id"] = this.sessionId;
           }
-          const responses = relatedIds.map((id3) => this._requestResponseMap.get(id3));
+          const responses = relatedIds.map((id4) => this._requestResponseMap.get(id4));
           if (responses.length === 1) {
             stream.resolveJson(new Response(JSON.stringify(responses[0]), { status: 200, headers }));
           } else {
@@ -14229,9 +14229,9 @@ data:
         } else {
           stream.cleanup();
         }
-        for (const id3 of relatedIds) {
-          this._requestResponseMap.delete(id3);
-          this._requestToStreamMapping.delete(id3);
+        for (const id4 of relatedIds) {
+          this._requestResponseMap.delete(id4);
+          this._requestToStreamMapping.delete(id4);
         }
         this._resumableStreams.delete(streamId);
       }
@@ -21520,7 +21520,7 @@ var ExperimentalServerTasks = class {
       if (hasPreviousToolUse) {
         const toolUseIds = new Set(previousContent.filter((c) => c.type === "tool_use").map((c) => c.id));
         const toolResultIds = new Set(lastContent.filter((c) => c.type === "tool_result").map((c) => c.toolUseId));
-        if (toolUseIds.size !== toolResultIds.size || ![...toolUseIds].every((id3) => toolResultIds.has(id3))) {
+        if (toolUseIds.size !== toolResultIds.size || ![...toolUseIds].every((id4) => toolResultIds.has(id4))) {
           throw new Error("ids of tool_result blocks and tool_use blocks from previous message do not match");
         }
       }
@@ -21945,7 +21945,7 @@ var Server = class extends Protocol {
       if (hasPreviousToolUse) {
         const toolUseIds = new Set(previousContent.filter((c) => c.type === "tool_use").map((c) => c.id));
         const toolResultIds = new Set(lastContent.filter((c) => c.type === "tool_result").map((c) => c.toolUseId));
-        if (toolUseIds.size !== toolResultIds.size || ![...toolUseIds].every((id3) => toolResultIds.has(id3))) {
+        if (toolUseIds.size !== toolResultIds.size || ![...toolUseIds].every((id4) => toolResultIds.has(id4))) {
           throw new Error("ids of tool_result blocks and tool_use blocks from previous message do not match");
         }
       }
@@ -23072,6 +23072,23 @@ function binaryContentBlock(mimeType, bytes, uri) {
   return { type: "resource", resource: { uri, mimeType, blob: data } };
 }
 
+// src/mcp/annotations.ts
+var READ_ONLY_HINTS = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: true
+};
+var SEND_HINTS = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: false,
+  openWorldHint: true
+};
+function toolAnnotations(title, hints) {
+  return { title, ...hints };
+}
+
 // src/core/html.ts
 var HTML_TEXT_REPLACEMENTS = [
   [/<(script|style)[\s\S]*?<\/\1>/gi, ""],
@@ -23097,22 +23114,158 @@ function htmlToText(html) {
   return text.trim();
 }
 
-// src/mcp/annotations.ts
-var READ_ONLY_HINTS = {
-  readOnlyHint: true,
-  destructiveHint: false,
-  idempotentHint: true,
-  openWorldHint: true
-};
-var SEND_HINTS = {
-  readOnlyHint: false,
-  destructiveHint: true,
-  idempotentHint: false,
-  openWorldHint: true
-};
-function toolAnnotations(title, hints) {
-  return { title, ...hints };
+// connectors/canvas-puc/src/inbox.ts
+var CONVERSATION_PREVIEW_LENGTH = 300;
+function toRecipient(r) {
+  const roles = new Set(Object.values(r.common_courses ?? {}).flat());
+  return { id: r.id, name: r.full_name ?? r.name, roles: [...roles] };
 }
+function participantName(p) {
+  return p.full_name ?? p.name;
+}
+function conversationNames(c) {
+  return new Map((c.participants ?? []).map((p) => [String(p.id), participantName(p)]));
+}
+function toConversationSummary(c) {
+  return {
+    id: c.id,
+    subject: c.subject,
+    course: c.context_name,
+    state: c.workflow_state,
+    participants: (c.participants ?? []).map(participantName),
+    message_count: c.message_count,
+    last_message_at: c.last_message_at,
+    last_message: htmlToText(c.last_message).slice(0, CONVERSATION_PREVIEW_LENGTH)
+  };
+}
+function toConversationMessage(m, names) {
+  return {
+    id: m.id,
+    author: names.get(String(m.author_id)),
+    date: m.created_at,
+    text: htmlToText(m.body),
+    attachments: (m.attachments ?? []).map((a) => ({ name: a.display_name, url: a.url }))
+  };
+}
+function toConversationDetail(c) {
+  const names = conversationNames(c);
+  const messages = [...c.messages ?? []].reverse();
+  return {
+    ...toConversationSummary(c),
+    messages: messages.map((m) => toConversationMessage(m, names))
+  };
+}
+function newMessagePayload(msg) {
+  return {
+    recipients: msg.recipients.map(String),
+    subject: msg.subject,
+    body: msg.body,
+    force_new: true,
+    group_conversation: true,
+    ...msg.course_id !== void 0 ? { context_code: `course_${String(msg.course_id)}` } : {}
+  };
+}
+function sentConversation(created) {
+  const c = created[0];
+  if (!c) return { ok: true, conversation_id: null, queued: true };
+  return { ok: true, conversation_id: c.id, subject: c.subject, sent_at: c.last_message_at };
+}
+function sentReply(c) {
+  const last = c.messages?.[0];
+  return {
+    ok: true,
+    conversation_id: c.id,
+    message_id: last?.id ?? null,
+    sent_at: last?.created_at ?? null
+  };
+}
+
+// connectors/canvas-puc/src/tools-inbox.ts
+var MAX_MESSAGE_RECIPIENTS = 20;
+var id = external_exports.union([external_exports.string(), external_exports.number()]);
+var userId = external_exports.union([external_exports.number().int().positive(), external_exports.string().regex(/^\d+$/)]);
+var courseId = id.describe("Course ID (see list_courses)");
+var conversationId = id.describe("Conversation ID (see list_conversations)");
+var CANVAS_INBOX_READ_TOOLS = [
+  defineTool({
+    name: "find_recipients",
+    description: "Find people the user can message in the Canvas inbox (teachers, TAs, classmates) by name. Returns the user ID that send_message needs.",
+    shape: {
+      search: external_exports.string().min(2).describe("Part of the person name"),
+      course_id: courseId.optional().describe("Only people of this course")
+    },
+    annotations: toolAnnotations("Find recipients", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const context = args.course_id === void 0 ? void 0 : `course_${String(args.course_id)}`;
+      const params = { search: args.search, type: "user", context };
+      const found = await client.getAll("/search/recipients", params, 50);
+      return found.map(toRecipient);
+    }
+  }),
+  defineTool({
+    name: "list_conversations",
+    description: "List the Canvas inbox conversations (messages), newest first.",
+    shape: {
+      scope: external_exports.enum(["inbox", "unread", "starred", "sent", "archived"]).optional(),
+      limit: external_exports.number().int().min(1).max(100).optional().describe("Default 20")
+    },
+    annotations: toolAnnotations("List conversations", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const params = { scope: args.scope ?? "inbox" };
+      const list = await client.getAll(
+        "/conversations",
+        params,
+        args.limit ?? 20
+      );
+      return list.map(toConversationSummary);
+    }
+  }),
+  defineTool({
+    name: "get_conversation",
+    description: "Read a Canvas inbox conversation with all its messages (does not mark it as read).",
+    shape: { conversation_id: conversationId },
+    annotations: toolAnnotations("Get conversation", READ_ONLY_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/conversations/${String(args.conversation_id)}`;
+      const c = await client.get(path, { auto_mark_as_read: false });
+      return toConversationDetail(c);
+    }
+  })
+];
+var CANVAS_INBOX_WRITE_TOOLS = [
+  defineTool({
+    name: "send_message",
+    description: "SENDS a new Canvas inbox message to people (e.g. a teacher). Get user IDs with find_recipients. Real action, visible to the recipients: show the exact recipients, subject and text and confirm with the user first.",
+    shape: {
+      recipient_ids: external_exports.array(userId).min(1).max(MAX_MESSAGE_RECIPIENTS).describe("User IDs"),
+      subject: external_exports.string().min(1).max(255),
+      body: external_exports.string().min(1).describe("Plain text"),
+      course_id: courseId.optional().describe("Course the message is about")
+    },
+    annotations: toolAnnotations("Send message", SEND_HINTS),
+    run: async ({ client }, args) => {
+      const payload = newMessagePayload({
+        recipients: args.recipient_ids,
+        subject: args.subject,
+        body: args.body,
+        course_id: args.course_id
+      });
+      return sentConversation(
+        await client.post("/conversations", payload)
+      );
+    }
+  }),
+  defineTool({
+    name: "reply_to_conversation",
+    description: "SENDS a reply in an existing Canvas inbox conversation, to all its participants. Real action: show the text and confirm with the user first.",
+    shape: { conversation_id: conversationId, body: external_exports.string().min(1).describe("Plain text") },
+    annotations: toolAnnotations("Reply to conversation", SEND_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/conversations/${String(args.conversation_id)}/add_message`;
+      return sentReply(await client.post(path, { body: args.body }));
+    }
+  })
+];
 
 // src/core/cfb.ts
 var CFB_SIGNATURE = [208, 207, 17, 224, 161, 177, 26, 225];
@@ -23133,8 +23286,8 @@ function readCfbHeader(bytes) {
     difatCount: v.getUint32(72, true)
   };
 }
-function cfbSector(bytes, header, id3) {
-  const start = (id3 + 1) * header.sectorSize;
+function cfbSector(bytes, header, id4) {
+  const start = (id4 + 1) * header.sectorSize;
   return bytes.subarray(start, start + header.sectorSize);
 }
 function sectorWords(sector) {
@@ -23149,20 +23302,20 @@ function fatSectorIds(bytes, header) {
     next = words.pop() ?? END_OF_CHAIN;
     ids.push(...words);
   }
-  return ids.filter((id3) => id3 < END_OF_CHAIN);
+  return ids.filter((id4) => id4 < END_OF_CHAIN);
 }
 function followChain(table, start) {
   const chain = [];
-  let id3 = start;
-  while (id3 !== void 0 && id3 < table.length && chain.length < table.length) {
-    chain.push(id3);
-    id3 = table[id3];
+  let id4 = start;
+  while (id4 !== void 0 && id4 < table.length && chain.length < table.length) {
+    chain.push(id4);
+    id4 = table[id4];
   }
   return chain;
 }
 function readRegularChain(file, start) {
   return concatBytes(
-    followChain(file.fat, start).map((id3) => cfbSector(file.bytes, file.header, id3))
+    followChain(file.fat, start).map((id4) => cfbSector(file.bytes, file.header, id4))
   );
 }
 function parseDirectory(dir) {
@@ -23181,7 +23334,7 @@ function parseDirectory(dir) {
 function openCfb(bytes) {
   const header = readCfbHeader(bytes);
   const fat = fatSectorIds(bytes, header).flatMap(
-    (id3) => sectorWords(cfbSector(bytes, header, id3))
+    (id4) => sectorWords(cfbSector(bytes, header, id4))
   );
   const entries = parseDirectory(readRegularChain({ bytes, header, fat }, header.firstDirSector));
   return { bytes, header, fat, entries };
@@ -23192,7 +23345,7 @@ function readMiniStream(file, entry) {
   const miniFat = sectorWords(readRegularChain(file, file.header.firstMiniFatSector));
   const size = file.header.miniSectorSize;
   const parts = followChain(miniFat, entry.start).map(
-    (id3) => container.subarray(id3 * size, (id3 + 1) * size)
+    (id4) => container.subarray(id4 * size, (id4 + 1) * size)
   );
   return concatBytes(parts);
 }
@@ -23348,7 +23501,7 @@ function dateOnly(iso) {
   return iso.slice(0, 10);
 }
 function courseContextCodes(ids) {
-  return ids.map((id3) => `course_${String(id3)}`);
+  return ids.map((id4) => `course_${String(id4)}`);
 }
 function courseNameMap(courses) {
   return new Map(courses.map((c) => [String(c.id), c.name ?? ""]));
@@ -23368,8 +23521,8 @@ function matchModuleItems(modules, term) {
 function activeCourses(client) {
   return client.getAll("/courses", { enrollment_state: "active" });
 }
-async function fetchOwnSubmission(client, courseId2, assignmentId) {
-  const path = `/courses/${String(courseId2)}/assignments/${String(assignmentId)}/submissions/self`;
+async function fetchOwnSubmission(client, courseId3, assignmentId) {
+  const path = `/courses/${String(courseId3)}/assignments/${String(assignmentId)}/submissions/self`;
   try {
     return await client.get(path, {
       include: ["submission_comments", "rubric_assessment"]
@@ -23609,8 +23762,8 @@ function toCalendarEvent(e) {
 }
 
 // connectors/canvas-puc/src/tools-read.ts
-var id = external_exports.union([external_exports.string(), external_exports.number()]);
-var courseId = id.describe("Course ID (see list_courses)");
+var id2 = external_exports.union([external_exports.string(), external_exports.number()]);
+var courseId2 = id2.describe("Course ID (see list_courses)");
 var CANVAS_READ_TOOLS = [
   defineTool({
     name: "whoami",
@@ -23651,7 +23804,7 @@ var CANVAS_READ_TOOLS = [
     name: "list_assignments",
     description: "List the assignments of a course with due date, submission status and score.",
     shape: {
-      course_id: courseId,
+      course_id: courseId2,
       filter: external_exports.enum(["all", "upcoming", "past", "unsubmitted", "overdue"]).optional()
     },
     annotations: toolAnnotations("List assignments", READ_ONLY_HINTS),
@@ -23671,7 +23824,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "get_assignment",
     description: "Assignment details: description as text, rubric, dates and the student's submission and feedback.",
-    shape: { course_id: courseId, assignment_id: id },
+    shape: { course_id: courseId2, assignment_id: id2 },
     annotations: toolAnnotations("Get assignment", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
@@ -23685,7 +23838,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "get_grades",
     description: "The student's grades. Without course_id: summary of every active course. With course_id: the score of each assignment.",
-    shape: { course_id: courseId.optional() },
+    shape: { course_id: courseId2.optional() },
     annotations: toolAnnotations("Get grades", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       if (args.course_id === void 0) {
@@ -23708,7 +23861,7 @@ var CANVAS_READ_TOOLS = [
     name: "list_announcements",
     description: "Recent announcements of one course or of every active course.",
     shape: {
-      course_id: courseId.optional().describe("When omitted, searches every active course"),
+      course_id: courseId2.optional().describe("When omitted, searches every active course"),
       days: external_exports.number().int().min(1).max(365).optional().describe("Days back (default 30)")
     },
     annotations: toolAnnotations("List announcements", READ_ONLY_HINTS),
@@ -23728,7 +23881,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "list_modules",
     description: "Modules of a course and the items of each one (lessons, files, pages, assignments).",
-    shape: { course_id: courseId },
+    shape: { course_id: courseId2 },
     annotations: toolAnnotations("List modules", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/modules`;
@@ -23738,7 +23891,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "get_page",
     description: "Read a course page as text. Use the page_url from list_modules, or 'front_page' for the home page.",
-    shape: { course_id: courseId, page_url: external_exports.string() },
+    shape: { course_id: courseId2, page_url: external_exports.string() },
     annotations: toolAnnotations("Get page", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/pages/${encodeURIComponent(args.page_url)}`;
@@ -23755,7 +23908,7 @@ var CANVAS_READ_TOOLS = [
     name: "list_files",
     description: "Files of a course (PDFs, slides etc.) with a download link, newest first.",
     shape: {
-      course_id: courseId,
+      course_id: courseId2,
       search: external_exports.string().min(2).optional().describe("Part of the file name")
     },
     annotations: toolAnnotations("List files", READ_ONLY_HINTS),
@@ -23771,7 +23924,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "read_file_text",
     description: "Read a course file as text (txt, md, csv, code, html, doc and docx). For PDF or slides, use download_file.",
-    shape: { file_id: id },
+    shape: { file_id: id2 },
     annotations: toolAnnotations("Read file as text", READ_ONLY_HINTS),
     run: async ({ client }, args) => readCanvasFileText(
       client,
@@ -23781,7 +23934,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "download_file",
     description: "Download a course file (PDF, slides, image etc., up to 10 MB) and bring its content into the conversation.",
-    shape: { file_id: id },
+    shape: { file_id: id2 },
     annotations: toolAnnotations("Download file", READ_ONLY_HINTS),
     run: async ({ client }, args) => downloadCanvasFile(
       client,
@@ -23791,7 +23944,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "list_discussions",
     description: "List the discussion forums of a course.",
-    shape: { course_id: courseId },
+    shape: { course_id: courseId2 },
     annotations: toolAnnotations("List discussions", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/discussion_topics`;
@@ -23801,7 +23954,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "get_discussion",
     description: "Read a discussion forum: its prompt and every post, with the depth of each reply.",
-    shape: { course_id: courseId, topic_id: id },
+    shape: { course_id: courseId2, topic_id: id2 },
     annotations: toolAnnotations("Get discussion", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}`;
@@ -23837,7 +23990,7 @@ var CANVAS_READ_TOOLS = [
   defineTool({
     name: "search",
     description: "Search a term in the names of the assignments, pages, files and module items of a course.",
-    shape: { course_id: courseId, term: external_exports.string().min(2) },
+    shape: { course_id: courseId2, term: external_exports.string().min(2) },
     annotations: toolAnnotations("Search course", READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const base = `/courses/${String(args.course_id)}`;
@@ -23859,7 +24012,7 @@ var CANVAS_READ_TOOLS = [
 ];
 
 // connectors/canvas-puc/src/tools-write.ts
-var id2 = external_exports.union([external_exports.string(), external_exports.number()]);
+var id3 = external_exports.union([external_exports.string(), external_exports.number()]);
 function submissionPayload(kind, content) {
   return kind === "text" ? { submission: { submission_type: "online_text_entry", body: content } } : { submission: { submission_type: "online_url", url: content } };
 }
@@ -23868,8 +24021,8 @@ var CANVAS_WRITE_TOOLS = [
     name: "submit_text_assignment",
     description: "SUBMITS a text or link entry to an assignment. Real action, visible to the teacher: confirm with the user first.",
     shape: {
-      course_id: id2,
-      assignment_id: id2,
+      course_id: id3,
+      assignment_id: id3,
       type: external_exports.enum(["text", "url"]),
       content: external_exports.string().min(1).describe("Text (HTML allowed) or the URL")
     },
@@ -23886,7 +24039,7 @@ var CANVAS_WRITE_TOOLS = [
   defineTool({
     name: "reply_to_discussion",
     description: "POSTS a reply to a discussion forum. Real action, visible to the class: confirm with the user first.",
-    shape: { course_id: id2, topic_id: id2, message: external_exports.string().min(1) },
+    shape: { course_id: id3, topic_id: id3, message: external_exports.string().min(1) },
     annotations: toolAnnotations("Reply to discussion", SEND_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}/entries`;
@@ -23902,7 +24055,7 @@ var CANVAS_WRITE_TOOLS = [
 var plugin_default = {
   name: "canvas-puc",
   version: "3.0.0",
-  description: "Assignments, deadlines, grades, announcements, modules and files from PUC Minas Canvas, straight from the cloud: sign in with a Canvas access token the first time.",
+  description: "Assignments, deadlines, grades, announcements, modules, files and inbox messages from PUC Minas Canvas, straight from the cloud: sign in with a Canvas access token the first time.",
   author: {
     name: "Bernardo Temponi",
     url: "https://github.com/temponi-bernardo"
@@ -23920,7 +24073,8 @@ var CANVAS_SERVER_INFO = {
   version: manifestVersion(plugin_default)
 };
 function canvasTools(allowWrite) {
-  return [...CANVAS_READ_TOOLS, ...allowWrite ? CANVAS_WRITE_TOOLS : []];
+  const reads = [...CANVAS_READ_TOOLS, ...CANVAS_INBOX_READ_TOOLS];
+  return [...reads, ...allowWrite ? [...CANVAS_WRITE_TOOLS, ...CANVAS_INBOX_WRITE_TOOLS] : []];
 }
 function createCanvasMcpServer(specs, ctx) {
   const server = new McpServer({ ...CANVAS_SERVER_INFO });

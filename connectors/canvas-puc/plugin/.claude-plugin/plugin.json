@@ -1,7 +1,7 @@
 {
   "name": "canvas-puc",
   "version": "3.0.0",
-  "description": "Assignments, deadlines, grades, announcements, modules and files from PUC Minas Canvas, straight from the cloud: sign in with a Canvas access token the first time.",
+  "description": "Assignments, deadlines, grades, announcements, modules, files and inbox messages from PUC Minas Canvas, straight from the cloud: sign in with a Canvas access token the first time.",
   "author": {
     "name": "Bernardo Temponi",
     "url": "https://github.com/temponi-bernardo"
