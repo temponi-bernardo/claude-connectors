@@ -1,6 +1,7 @@
 /**
  * Thin `node:http` server around the standard Web handler, and reading of the remote server configuration.
  */
+import { logWarning } from '../core/redact.js';
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from 'node:http';
 import { envValue, type EnvVars } from '../core/env.js';
 import { readOAuthSettings, type OAuthSettings } from './oauth.js';
@@ -88,7 +89,7 @@ export async function serveNodeRequest(
   try {
     await writeWebResponse(res, await options.handler(toWebRequest(req, body, options.origin)));
   } catch (error) {
-    console.error(error);
+    logWarning('Request failed:', error);
     await writeWebResponse(res, new Response('Internal error.', { status: 500 }));
   }
 }

@@ -3,6 +3,7 @@
  * empty, forwards calls with the `BRIDGE_TOKEN`, saves snapshots after syncs (at most one per minute) and enforces
  * the hard hourly send limit in the Durable Object storage.
  */
+import { logWarning } from '../../../src/core/redact.js';
 import { bridgeErrorFrom } from './bridge-client.js';
 import {
   archiveSnapshot,
@@ -199,7 +200,7 @@ export async function logSnapshotFailure(run: Promise<SnapshotOutcome>): Promise
   try {
     await run;
   } catch (error) {
-    console.warn('Snapshot failed:', error instanceof Error ? error.message : String(error));
+    logWarning('Snapshot failed:', error);
   }
 }
 

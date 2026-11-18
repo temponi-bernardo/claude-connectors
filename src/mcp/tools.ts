@@ -6,6 +6,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { bytesToBase64 } from '../core/bytes.js';
+import { errorMessage, redactSecrets } from '../core/redact.js';
 import type { RequiredToolAnnotations } from './annotations.js';
 
 /** Tool with erased types, ready to register. `C` is the connector context (client etc.). */
@@ -66,10 +67,9 @@ export function toToolResult(data: unknown): CallToolResult {
   return textResult(data);
 }
 
-/** Converts an error into an MCP result with `isError`, using the error message. */
+/** Converts an error into an MCP result with `isError`, using the error message with secrets redacted. */
 export function errorResult(error: unknown): CallToolResult {
-  const message = error instanceof Error ? error.message : String(error);
-  return { isError: true, content: [{ type: 'text', text: message }] };
+  return { isError: true, content: [{ type: 'text', text: redactSecrets(errorMessage(error)) }] };
 }
 
 /** Runs a tool catching errors: success becomes `toToolResult`, failure becomes `errorResult`. */
