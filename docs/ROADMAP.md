@@ -75,6 +75,15 @@ Plan from the 2026-11-14 marketplace review. One PR per task, in order; each end
 | F4.6 | Translate the repo: `docs:check` labels first, then docs, project skills, hooks, site           | ✅     | No Portuguese text left outside quoted user data; `docs:check` green                                                                                                |
 | F4.7 | Connectors Directory readiness for Canvas and Gmail (no submission)                             | ✅     | OAuth audit (PKCE S256, resource metadata, claude.ai callback, `invalid_grant`) tested; privacy page reviewed; MCP Inspector run recorded; listing draft in `docs/` |
 
+## Security — data isolation (out of phase)
+
+Audit of 2026-11-18: no user, account, connector or request may see another one's data. Map, evidence and residual
+risks in [security/isolation.md](security/isolation.md).
+
+| Id   | Task                                                                                                                        | Status | Done when                                                                                                                                                                               |
+| ---- | --------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S1.1 | Isolation audit and fixes: seal `aud`, Canvas write opt-in, Gmail link confirmation, single WhatsApp owner, redaction, CORS | ✅     | Isolation tests green (two concurrent users, foreign/tampered/expired tokens, per-owner KV and cache, link ticket, redaction, module state); 3 Workers deployed; live probe 401/200/302 |
+
 ## Later phases
 
 One new connector per phase, following the mold of `connectors/canvas-puc/`. Do not plan more than two phases
