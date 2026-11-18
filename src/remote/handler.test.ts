@@ -2,6 +2,9 @@ import { randomBytes } from 'node:crypto';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { describe, expect, it, vi } from 'vitest';
 import {
+  allowsCors,
+  BROWSER_PAGE_PATHS,
+  chosenGrants,
   REMOTE_ROUTES,
   createRemoteHandler,
   handleAuthorizePage,
@@ -26,6 +29,7 @@ import {
   withCors,
   type RemoteApp,
   type RemoteConnector,
+  type SecretLogin,
   type SecretRenewal,
 } from './handler.js';
 import { pkceChallenge } from './oauth.js';
@@ -250,17 +254,41 @@ function toolCall(name: string): unknown {
   return { jsonrpc: '2.0', id: 9, method: 'tools/call', params: { name, arguments: {} } };
 }
 
+describe('chosenGrants', () => {
+  const text = {
+    title: 'T',
+    intro: 'I',
+    secretLabel: 'S',
+    helpUrl: ISSUER,
+    helpLabel: 'H',
+    submit: 'Go',
+  };
+  const login: SecretLogin = {
+    kind: 'secret',
+    text: { ...text, grantOption: { name: 'write', label: 'Write' } },
+    verify: () => Promise.resolve(),
+  };
+
+  it('returns the offered permission only when ticked, and never one that was not offered', () => {
+    expect(chosenGrants(login, new URLSearchParams('grant=write'))).toEqual(['write']);
+    expect(chosenGrants(login, new URLSearchParams(''))).toEqual([]);
+    expect(chosenGrants(login, new URLSearchParams('grant=admin'))).toEqual([]);
+    const noOption: SecretLogin = { ...login, text };
+    expect(chosenGrants(noOption, new URLSearchParams('grant=write'))).toEqual([]);
+  });
+});
+
 describe('serveMcpWithStreaming', () => {
   it('streams what the connector takes and serves the rest with the MCP server', async () => {
     const streamed = await serveMcpWithStreaming(
       streamingConnector(),
-      'good',
+      { secret: 'good', grants: [] },
       rpc('t', toolCall('big')),
     );
     expect(JSON.stringify(await streamed.json())).toContain(btoa('bytes-for-good'));
     const other = await serveMcpWithStreaming(
       streamingConnector(),
-      'good',
+      { secret: 'good', grants: [] },
       rpc('t', toolCall('whoami')),
     );
     expect(other.status).toBe(200);
@@ -378,7 +406,11 @@ describe('Connectors Directory requirements (Canvas and every shared-handler con
     const app = makeApp();
     const handle = createRemoteHandler(app);
     expect(await accessToken(handle)).not.toBe('');
-    const expired = issueTokenSet('good', app.settings, app.now() - 31 * 24 * 3600);
+    const expired = issueTokenSet(
+      { secret: 'good', grants: [] },
+      app.settings,
+      app.now() - 31 * 24 * 3600,
+    );
     for (const refresh_token of ['garbage', expired.refresh_token]) {
       const res = await handle(form('/token', { grant_type: 'refresh_token', refresh_token }));
       expect(res.status).toBe(400);
@@ -477,10 +509,31 @@ describe('router helpers', () => {
     );
   });
 
-  it('withCors and routeRemoteRequest allow any origin', async () => {
+  it('withCors and routeRemoteRequest allow any origin on the API routes', async () => {
     expect(withCors(new Response()).headers.get('access-control-allow-origin')).toBe('*');
-    const res = await routeRemoteRequest(makeApp(), new Request(`${ISSUER}/authorize/`));
+    const res = await routeRemoteRequest(
+      makeApp(),
+      new Request(`${ISSUER}/token`, { method: 'POST' }),
+    );
     expect(res.headers.get('access-control-allow-origin')).toBe('*');
+    const preflight = await routeRemoteRequest(
+      makeApp(),
+      new Request(`${ISSUER}/mcp`, { method: 'OPTIONS' }),
+    );
+    expect(preflight.headers.get('access-control-allow-origin')).toBe('*');
+  });
+
+  it('gives no CORS headers to the browser pages (login and provider return)', async () => {
+    const page = await routeRemoteRequest(makeApp(), new Request(`${ISSUER}/authorize/`));
+    expect(page.headers.get('access-control-allow-origin')).toBeNull();
+    const preflight = await routeRemoteRequest(
+      makeApp(),
+      new Request(`${ISSUER}/authorize`, { method: 'OPTIONS' }),
+    );
+    expect(preflight.status).toBe(204);
+    expect(preflight.headers.get('access-control-allow-origin')).toBeNull();
+    expect(allowsCors(UPSTREAM_CALLBACK_PATH)).toBe(false);
+    expect(BROWSER_PAGE_PATHS).toContain('/authorize');
   });
 });
 
@@ -488,7 +541,11 @@ describe('handleToken — credential renewal', () => {
   function refreshApp(renewSecret: (secret: string) => Promise<SecretRenewal>) {
     const app = makeApp();
     const withRenew: RemoteApp = { ...app, connector: { ...connector, renewSecret } };
-    const { refresh_token } = issueTokenSet('good', app.settings, app.now());
+    const { refresh_token } = issueTokenSet(
+      { secret: 'good', grants: [] },
+      app.settings,
+      app.now(),
+    );
     return {
       app: withRenew,
       refresh: form('/token', { grant_type: 'refresh_token', refresh_token }),
@@ -536,6 +593,57 @@ describe('renewSecretQuietly', () => {
     await expect(renewSecretQuietly(failing, 'good')).resolves.toBe('kept');
     const revoked = { ...connector, renewSecret: () => Promise.resolve<SecretRenewal>('revoked') };
     await expect(renewSecretQuietly(revoked, 'good')).resolves.toBe('revoked');
+  });
+
+  it('logs the failure with the credential and emails redacted', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const fake = '999~FakeCanvasTokenForTestsOnly0000';
+    const leaky = {
+      ...connector,
+      renewSecret: () => Promise.reject(new Error(`Bearer ${fake} refused for friend@example.dev`)),
+    };
+    await renewSecretQuietly(leaky, fake);
+    const logged = JSON.stringify(warn.mock.calls);
+    expect(logged).not.toContain(fake);
+    expect(logged).not.toContain('friend@example.dev');
+    warn.mockRestore();
+  });
+});
+
+describe('HTML pages never show a credential', () => {
+  it('redacts tokens from a login error and from a provider refusal', async () => {
+    const fake = '999~FakeCanvasTokenForTestsOnly0000';
+    const app = {
+      ...makeApp(),
+      connector: {
+        ...connector,
+        login: {
+          ...connector.login,
+          verify: () => Promise.reject(new Error(`Canvas refused ${fake}`)),
+        },
+      },
+    } as RemoteApp;
+    const handle = createRemoteHandler(app);
+    const { pending } = await authorizePage(handle, await register(handle));
+    const page = await handle(form('/authorize', { pending, secret: fake }));
+    expect(await page.text()).not.toContain(fake);
+    const upstream: RemoteApp = {
+      ...makeApp(),
+      connector: {
+        ...upstreamConnector,
+        login: {
+          ...upstreamConnector.login,
+          finish: () => Promise.reject(new Error(`access_token=${fake}`)),
+        } as RemoteConnector['login'],
+      },
+    };
+    const up = createRemoteHandler(upstream);
+    const state = await upstreamState(up);
+    const refused = await up(
+      new Request(`${ISSUER}${UPSTREAM_CALLBACK_PATH}?code=x&state=${encodeURIComponent(state)}`),
+    );
+    expect(refused.status).toBe(403);
+    expect(await refused.text()).not.toContain(fake);
   });
 });
 
@@ -613,7 +721,11 @@ describe('createRemoteHandler — delegated login (upstream)', () => {
 
   it('/mcp rejects with 403 a secret the connector no longer accepts', async () => {
     const app = upstreamApp();
-    const revoked = issueTokenSet('former-owner@example.dev', app.settings, app.now()).access_token;
+    const revoked = issueTokenSet(
+      { secret: 'former-owner@example.dev', grants: [] },
+      app.settings,
+      app.now(),
+    ).access_token;
     const res = await handleMcp(app, rpc(revoked, { jsonrpc: '2.0', id: 1, method: 'tools/list' }));
     expect(res.status).toBe(403);
   });

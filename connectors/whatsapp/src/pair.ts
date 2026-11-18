@@ -62,7 +62,11 @@ export function redirectWithCookies(location: string, cookies: readonly string[]
 /** Email of the `/pair` session in the cookie; null if missing, expired or no longer on the list. */
 export function readPairSession(app: PairApp, request: Request): string | null {
   const sealed = parseCookies(request.headers.get('cookie'))[PAIR_SESSION_COOKIE] ?? '';
-  const claims = openSealed(sealed, app.settings.key, { typ: 'pair_session', now: app.now() });
+  const claims = openSealed(sealed, app.settings.key, {
+    typ: 'pair_session',
+    now: app.now(),
+    aud: app.settings.issuer,
+  });
   const email = typeof claims?.email === 'string' ? claims.email : null;
   return email && app.github.allowedEmails.includes(email) ? email : null;
 }
@@ -70,7 +74,12 @@ export function readPairSession(app: PairApp, request: Request): string | null {
 /** Anti-CSRF token bound to the session email. */
 export function issuePairCsrf(app: PairApp, email: string): string {
   return sealPayload(
-    { typ: 'pair_csrf', exp: app.now() + PAIR_SESSION_TTL_SECONDS, email },
+    {
+      typ: 'pair_csrf',
+      aud: app.settings.issuer,
+      exp: app.now() + PAIR_SESSION_TTL_SECONDS,
+      email,
+    },
     app.settings.key,
   );
 }
@@ -81,7 +90,11 @@ export function isTrustedPost(
   request: Request,
   input: { csrf: string; email: string },
 ): boolean {
-  const claims = openSealed(input.csrf, app.settings.key, { typ: 'pair_csrf', now: app.now() });
+  const claims = openSealed(input.csrf, app.settings.key, {
+    typ: 'pair_csrf',
+    now: app.now(),
+    aud: app.settings.issuer,
+  });
   const origin = request.headers.get('origin');
   return claims?.email === input.email && origin === new URL(app.settings.issuer).origin;
 }
@@ -90,7 +103,7 @@ export function isTrustedPost(
 export function startPairLogin(app: PairApp): Response {
   const nonce = crypto.randomUUID();
   const state = sealPayload(
-    { typ: 'pair_login', exp: app.now() + PAIR_LOGIN_TTL_SECONDS, nonce },
+    { typ: 'pair_login', aud: app.settings.issuer, exp: app.now() + PAIR_LOGIN_TTL_SECONDS, nonce },
     app.settings.key,
   );
   const target = githubAuthorizeUrl(
@@ -109,6 +122,7 @@ export function isValidPairLogin(app: PairApp, request: Request): boolean {
   const claims = openSealed(query.get('state') ?? '', app.settings.key, {
     typ: 'pair_login',
     now: app.now(),
+    aud: app.settings.issuer,
   });
   const nonce = parseCookies(request.headers.get('cookie'))[PAIR_NONCE_COOKIE];
   return claims !== null && nonce !== undefined && claims.nonce === nonce;
@@ -117,7 +131,12 @@ export function isValidPairLogin(app: PairApp, request: Request): boolean {
 /** Opens the `/pair` session for the accepted email and returns to the page. */
 export function openPairSession(app: PairApp, email: string): Response {
   const session = sealPayload(
-    { typ: 'pair_session', exp: app.now() + PAIR_SESSION_TTL_SECONDS, email },
+    {
+      typ: 'pair_session',
+      aud: app.settings.issuer,
+      exp: app.now() + PAIR_SESSION_TTL_SECONDS,
+      email,
+    },
     app.settings.key,
   );
   return redirectWithCookies('/pair', [

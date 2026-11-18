@@ -4,6 +4,9 @@ import {
   consentPage,
   consentPageBody,
   copyConsentHeaders,
+  linkConfirmBody,
+  linkConfirmPage,
+  maskEmail,
   messagePage,
   pageDocument,
   redirectWith,
@@ -21,6 +24,34 @@ const DETAILS = {
 describe('HTML', () => {
   it('pageDocument escapes the title', () => {
     expect(pageDocument('<t>', '<p>body</p>')).toContain('<title>&lt;t&gt;</title>');
+  });
+
+  it('messagePage redacts tokens from the message', async () => {
+    const fake = 'ya29.FakeGoogleAccessTokenForTests';
+    expect(await messagePage('Failed', `Google said ${fake}`, 400).text()).not.toContain(fake);
+  });
+
+  it('maskEmail keeps two characters and the domain', () => {
+    expect(maskEmail('owner@example.com')).toBe('ow***@example.com');
+    expect(maskEmail('a@example.com')).toBe('a***@example.com');
+    expect(maskEmail('nobody')).toBe('***');
+  });
+
+  it('linkConfirmBody names the masked owner, warns about forwarded links and posts the fields', () => {
+    const body = linkConfirmBody({ ownerEmail: 'owner@example.com', ticket: 't"1', confirm: 'c1' });
+    expect(body).toContain('ow***@example.com');
+    expect(body).toContain('close this page');
+    expect(body).toContain('value="t&quot;1"');
+    expect(linkConfirmBody({ ownerEmail: null, ticket: 't', confirm: 'c' })).toContain(
+      'an unknown user',
+    );
+  });
+
+  it('linkConfirmPage lets the form go to Google and keeps the cookies', () => {
+    const headers = new Headers({ 'set-cookie': 'a=1' });
+    const page = linkConfirmPage({ ownerEmail: null, ticket: 't', confirm: 'c' }, headers);
+    expect(page.headers.get('content-security-policy')).toContain('https://accounts.google.com');
+    expect(page.headers.getSetCookie()).toEqual(['a=1']);
   });
 
   it('messagePage escapes the message and applies a strict CSP', async () => {

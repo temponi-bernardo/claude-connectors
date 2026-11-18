@@ -36,7 +36,7 @@ export const TARGET_SHAPE = {
     .max(MAX_TARGET_THREADS)
     .optional()
     .describe('Whole threads (every message in them).'),
-};
+} as const;
 
 /** Action on or off depending on the tool's boolean parameter. */
 export function toggleAction(

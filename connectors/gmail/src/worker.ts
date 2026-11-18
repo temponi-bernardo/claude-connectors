@@ -22,7 +22,12 @@ import {
 import { readGmailSettings } from './config.js';
 import type { GmailDeps, KvStore, OwnerDeps } from './context.js';
 import { GOOGLE_CALLBACK_PATH } from './google-oauth.js';
-import { finishAccountLink, LINK_STATE_PREFIX, startAccountLink } from './link-flow.js';
+import {
+  finishAccountLink,
+  LINK_STATE_PREFIX,
+  showLinkConfirmation,
+  startAccountLink,
+} from './link-flow.js';
 import { messagePage } from './pages.js';
 import { isRateLimited, rateLimitedResponse, type RateLimiter } from './rate-limit.js';
 import { finishSignIn, showAuthorize, submitAuthorize, type GrantProps } from './sign-in.js';
@@ -92,7 +97,8 @@ export async function handleMcpApi(
   if (await isRateLimited(env.RATE_LIMITER, props.sid)) return rateLimitedResponse();
   let deps: OwnerDeps;
   try {
-    deps = { ...createGmailDeps(env, publicOrigin(env, request)), owner: props.owner };
+    const base = createGmailDeps(env, publicOrigin(env, request));
+    deps = { ...base, owner: props.owner, ownerEmail: props.email };
   } catch (error) {
     return configErrorResponse(error);
   }
@@ -105,7 +111,8 @@ export const GMAIL_ROUTES: Readonly<
 > = {
   'GET /authorize': showAuthorize,
   'POST /authorize': submitAuthorize,
-  'GET /accounts/link': (deps, _oauth, request) => startAccountLink(deps, request),
+  'GET /accounts/link': (deps, _oauth, request) => showLinkConfirmation(deps, request),
+  'POST /accounts/link': (deps, _oauth, request) => startAccountLink(deps, request),
   [`GET ${GOOGLE_CALLBACK_PATH}`]: (deps, oauth, request) =>
     new URL(request.url).searchParams.get('state')?.startsWith(LINK_STATE_PREFIX)
       ? finishAccountLink(deps, request)

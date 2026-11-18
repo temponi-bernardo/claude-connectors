@@ -7359,6 +7359,33 @@ var require_dist = __commonJS({
   }
 });
 
+// src/core/redact.ts
+var SECRET_PATTERNS = [
+  [/\bBearer\s+[^\s"',;]+/gi, "Bearer [redacted]"],
+  [
+    /\b(access_token|refresh_token|client_secret|id_token)(["']?\s*[:=]\s*["']?)[^"'&\s,;}]+/gi,
+    "$1$2[redacted]"
+  ],
+  [/\beyJ[\w-]{4,}\.[\w-]{4,}\.[\w-]*/g, "[redacted-jwt]"],
+  [/\bya29\.[\w.-]+/g, "[redacted-google-token]"],
+  [/\b1\/\/0[\w-]+/g, "[redacted-google-token]"],
+  [/\b\d{1,8}~[A-Za-z0-9]{16,}/g, "[redacted-canvas-token]"],
+  [/[A-Za-z0-9_-]{80,}/g, "[redacted]"]
+];
+var EMAIL_PATTERN = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+function redactSecrets(text) {
+  return SECRET_PATTERNS.reduce((out, [pattern, mask]) => out.replace(pattern, mask), text);
+}
+function redactForLog(text) {
+  return redactSecrets(text).replace(EMAIL_PATTERN, "[email]");
+}
+function errorMessage(error2) {
+  return error2 instanceof Error ? error2.message : String(error2);
+}
+function logWarning(context, error2) {
+  console.warn(context, redactForLog(errorMessage(error2)));
+}
+
 // src/remote/login-page.ts
 var LOGIN_PAGE_CSS = `:root{--bg:#f6f7f9;--surface:#fff;--text:#1d2129;--muted:#5b6270;--accent:#2357d9;--danger:#b42318;--line:#d9dde3;--space:16px;--radius:10px}
 @media (prefers-color-scheme:dark){:root{--bg:#121417;--surface:#1c1f24;--text:#e8eaed;--muted:#a3a9b3;--accent:#7aa2ff;--danger:#ff8a80;--line:#30343b}}
@@ -7367,13 +7394,15 @@ main{background:var(--surface);border:1px solid var(--line);border-radius:var(--
 h1{font-size:1.25rem;margin:0 0 8px}p{color:var(--muted);margin:0 0 var(--space)}label{display:block;font-weight:600;margin-bottom:6px}
 input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
 button{margin-top:var(--space);width:100%;padding:10px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;font-weight:600;cursor:pointer}
-a{color:var(--accent)}.error{color:var(--danger);font-weight:600}`;
+a{color:var(--accent)}.error{color:var(--danger);font-weight:600}
+.option{display:flex;gap:8px;align-items:flex-start;font-weight:400}.option input{width:auto;margin-top:4px}`;
 function escapeHtml(value) {
   return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
 function renderLoginPage(view) {
   const { text } = view;
   const error2 = view.error ? `<p class="error" role="alert">${escapeHtml(view.error)}</p>` : "";
+  const option = grantCheckbox(text);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escapeHtml(text.title)}</title><style>${LOGIN_PAGE_CSS}</style></head><body><main>
 <h1>${escapeHtml(text.title)}</h1>
 <p>${escapeHtml(text.intro)} Access will be granted to <strong>${escapeHtml(view.clientHost)}</strong>.</p>
@@ -7381,9 +7410,15 @@ ${error2}<form method="post" action="/authorize">
 <input type="hidden" name="pending" value="${escapeHtml(view.pending)}">
 <label for="secret">${escapeHtml(text.secretLabel)}</label>
 <input id="secret" type="password" name="secret" required autocomplete="off">
-<p><a href="${escapeHtml(text.helpUrl)}" target="_blank" rel="noopener">${escapeHtml(text.helpLabel)}</a></p>
+${option}<p><a href="${escapeHtml(text.helpUrl)}" target="_blank" rel="noopener">${escapeHtml(text.helpLabel)}</a></p>
 <button type="submit">${escapeHtml(text.submit)}</button>
 </form></main></body></html>`;
+}
+function grantCheckbox(text) {
+  if (!text.grantOption) return "";
+  const { name, label } = text.grantOption;
+  return `<p><label class="option"><input type="checkbox" name="grant" value="${escapeHtml(name)}"> ${escapeHtml(label)}</label></p>
+`;
 }
 
 // node_modules/@modelcontextprotocol/sdk/dist/esm/shared/mediaType.js
@@ -14841,15 +14876,15 @@ var makeIssue = (params) => {
       message: issueData.message
     };
   }
-  let errorMessage = "";
+  let errorMessage2 = "";
   const maps = errorMaps.filter((m) => !!m).slice().reverse();
   for (const map of maps) {
-    errorMessage = map(fullIssue, { data, defaultError: errorMessage }).message;
+    errorMessage2 = map(fullIssue, { data, defaultError: errorMessage2 }).message;
   }
   return {
     ...issueData,
     path: fullPath,
-    message: errorMessage
+    message: errorMessage2
   };
 };
 var EMPTY_PATH = [];
@@ -18417,8 +18452,7 @@ function toToolResult(data) {
   return textResult(data);
 }
 function errorResult(error2) {
-  const message = error2 instanceof Error ? error2.message : String(error2);
-  return { isError: true, content: [{ type: "text", text: message }] };
+  return { isError: true, content: [{ type: "text", text: redactSecrets(errorMessage(error2)) }] };
 }
 async function runToolSafely(spec, ctx, rawArgs) {
   try {
@@ -18500,6 +18534,7 @@ import { createCipheriv, createDecipheriv, randomBytes } from "node:crypto";
 var SEAL_KEY_BYTES = 32;
 var IV_BYTES = 12;
 var TAG_BYTES = 16;
+var LEGACY_AUDLESS_UNTIL = 1798761600;
 function parseSealKey(raw, name = "SEAL_KEY") {
   if (!raw) {
     throw new Error(
@@ -18534,7 +18569,13 @@ function unsealPayload(sealed, key) {
 function openSealed(sealed, key, expected) {
   const claims = unsealPayload(sealed, key);
   if (claims?.typ !== expected.typ || typeof claims.exp !== "number") return null;
+  if (!audienceMatches(claims, expected)) return null;
   return claims.exp > expected.now ? claims : null;
+}
+function audienceMatches(claims, expected) {
+  if (expected.aud === void 0) return true;
+  if (claims.aud === void 0) return expected.now < LEGACY_AUDLESS_UNTIL;
+  return claims.aud === expected.aud;
 }
 
 // src/remote/oauth.ts
@@ -18593,7 +18634,7 @@ function registerClient(body, settings, now) {
     return oauthError("invalid_redirect_uri", "Missing or disallowed redirect address.");
   }
   const clientId = sealPayload(
-    { typ: "client", exp: now + CLIENT_TTL_SECONDS, redirect_uris: uris },
+    { typ: "client", aud: settings.issuer, exp: now + CLIENT_TTL_SECONDS, redirect_uris: uris },
     settings.key
   );
   return {
@@ -18608,7 +18649,7 @@ function registerClient(body, settings, now) {
   };
 }
 function clientRedirectUris(clientId, settings, now) {
-  const claims = openSealed(clientId, settings.key, { typ: "client", now });
+  const claims = openSealed(clientId, settings.key, { typ: "client", now, aud: settings.issuer });
   return claims ? readRedirectUris(claims) : null;
 }
 function parseAuthorizeQuery(query, settings, now) {
@@ -18639,11 +18680,21 @@ var PENDING_TTL_SECONDS = 15 * 60;
 var CODE_TTL_SECONDS = 5 * 60;
 var ACCESS_TTL_SECONDS = 60 * 60;
 var REFRESH_TTL_SECONDS = 30 * 24 * 3600;
+function grantFromClaims(claims) {
+  const raw = Array.isArray(claims.grants) ? claims.grants : [];
+  return {
+    secret: String(claims.secret),
+    grants: raw.filter((item) => typeof item === "string")
+  };
+}
 function sealAuthorizeRequest(request, settings, now) {
-  return sealPayload({ typ: "pending", exp: now + PENDING_TTL_SECONDS, request }, settings.key);
+  return sealPayload(
+    { typ: "pending", aud: settings.issuer, exp: now + PENDING_TTL_SECONDS, request },
+    settings.key
+  );
 }
 function openAuthorizeRequest(sealed, settings, now) {
-  const claims = openSealed(sealed, settings.key, { typ: "pending", now });
+  const claims = openSealed(sealed, settings.key, { typ: "pending", now, aud: settings.issuer });
   return claims ? claims.request : null;
 }
 function issueAuthorizationCode(grant, settings, now) {
@@ -18651,60 +18702,65 @@ function issueAuthorizationCode(grant, settings, now) {
   return sealPayload(
     {
       typ: "code",
+      aud: settings.issuer,
       exp: now + CODE_TTL_SECONDS,
       clientId,
       redirectUri,
       codeChallenge,
-      secret: grant.secret
+      secret: grant.secret,
+      grants: grant.grants
     },
     settings.key
   );
 }
-function issueTokenSet(secret, settings, now) {
+function issueTokenSet(grant, settings, now) {
+  const claims = { aud: settings.issuer, secret: grant.secret, grants: grant.grants };
   return {
     access_token: sealPayload(
-      { typ: "access", exp: now + ACCESS_TTL_SECONDS, secret },
+      { typ: "access", exp: now + ACCESS_TTL_SECONDS, ...claims },
       settings.key
     ),
     token_type: "Bearer",
     expires_in: ACCESS_TTL_SECONDS,
     refresh_token: sealPayload(
-      { typ: "refresh", exp: now + REFRESH_TTL_SECONDS, secret },
+      { typ: "refresh", exp: now + REFRESH_TTL_SECONDS, ...claims },
       settings.key
     )
   };
 }
 function redeemAuthorizationCode(form, settings, now) {
-  const claims = openSealed(form.get("code") ?? "", settings.key, { typ: "code", now });
+  const expected = { typ: "code", now, aud: settings.issuer };
+  const claims = openSealed(form.get("code") ?? "", settings.key, expected);
   const matches = claims !== null && claims.clientId === form.get("client_id") && claims.redirectUri === form.get("redirect_uri") && claims.codeChallenge === pkceChallenge(form.get("code_verifier") ?? "");
   if (!matches)
     return oauthError("invalid_grant", "Invalid or expired code, or code from another client.");
-  return { ok: true, value: String(claims.secret) };
+  return { ok: true, value: grantFromClaims(claims) };
 }
 function redeemRefreshToken(form, settings, now) {
-  const claims = openSealed(form.get("refresh_token") ?? "", settings.key, { typ: "refresh", now });
+  const expected = { typ: "refresh", now, aud: settings.issuer };
+  const claims = openSealed(form.get("refresh_token") ?? "", settings.key, expected);
   if (!claims)
     return oauthError("invalid_grant", "Invalid or expired refresh token: connect again.");
-  return { ok: true, value: String(claims.secret) };
+  return { ok: true, value: grantFromClaims(claims) };
 }
 function redeemTokenRequest(form, settings, now) {
   const grantType = form.get("grant_type");
-  let secret;
-  if (grantType === "authorization_code") secret = redeemAuthorizationCode(form, settings, now);
-  else if (grantType === "refresh_token") secret = redeemRefreshToken(form, settings, now);
+  let grant;
+  if (grantType === "authorization_code") grant = redeemAuthorizationCode(form, settings, now);
+  else if (grantType === "refresh_token") grant = redeemRefreshToken(form, settings, now);
   else return oauthError("unsupported_grant_type", "Use authorization_code or refresh_token.");
-  if (!secret.ok) return secret;
-  const tokens = issueTokenSet(secret.value, settings, now);
+  if (!grant.ok) return grant;
+  const tokens = issueTokenSet(grant.value, settings, now);
   return {
     ok: true,
-    value: { tokens, secret: secret.value, refreshed: grantType === "refresh_token" }
+    value: { tokens, grant: grant.value, refreshed: grantType === "refresh_token" }
   };
 }
-function readAccessSecret(authorization, settings, now) {
+function readAccessGrant(authorization, settings, now) {
   const match = /^Bearer\s+(\S+)$/i.exec(authorization ?? "");
   if (!match?.[1]) return null;
-  const claims = openSealed(match[1], settings.key, { typ: "access", now });
-  return claims ? String(claims.secret) : null;
+  const claims = openSealed(match[1], settings.key, { typ: "access", now, aud: settings.issuer });
+  return claims ? grantFromClaims(claims) : null;
 }
 
 // src/remote/handler.ts
@@ -18753,7 +18809,7 @@ function loginPageFor(app, request, error2) {
       text: app.connector.login.text,
       pending: sealAuthorizeRequest(request, app.settings, app.now()),
       clientHost: new URL(request.redirectUri).host,
-      error: error2
+      error: error2 === null ? null : redactSecrets(error2)
     }),
     200,
     new URL(request.redirectUri).origin
@@ -18795,14 +18851,11 @@ async function handleUpstreamCallback(app, request) {
   try {
     secret = await login.finish(query, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
   } catch (error2) {
-    return htmlResponse(
-      `<p>${escapeHtml(error2 instanceof Error ? error2.message : String(error2))}</p>`,
-      403
-    );
+    return htmlResponse(`<p>${escapeHtml(redactSecrets(errorMessage(error2)))}</p>`, 403);
   }
   return redirectWithCode(
     pending,
-    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now())
+    issueAuthorizationCode({ request: pending, secret, grants: [] }, app.settings, app.now())
   );
 }
 async function handleAuthorizeSubmit(app, request) {
@@ -18816,18 +18869,23 @@ async function handleAuthorizeSubmit(app, request) {
   try {
     await login.verify(secret);
   } catch (error2) {
-    return loginPageFor(app, pending, error2 instanceof Error ? error2.message : String(error2));
+    return loginPageFor(app, pending, errorMessage(error2));
   }
+  const grants = chosenGrants(login, form);
   return redirectWithCode(
     pending,
-    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now())
+    issueAuthorizationCode({ request: pending, secret, grants }, app.settings, app.now())
   );
+}
+function chosenGrants(login, form) {
+  const offered = login.text.grantOption?.name;
+  return offered !== void 0 && form.getAll("grant").includes(offered) ? [offered] : [];
 }
 async function renewSecretQuietly(connector, secret) {
   try {
     return await connector.renewSecret?.(secret) ?? "kept";
   } catch (error2) {
-    console.warn("Could not renew the credential:", error2 instanceof Error ? error2.message : error2);
+    logWarning("Could not renew the credential:", error2);
     return "kept";
   }
 }
@@ -18836,7 +18894,7 @@ async function handleToken(app, request) {
   const result = redeemTokenRequest(await readForm(request), app.settings, app.now());
   if (!result.ok)
     return jsonResponse({ error: result.error, error_description: result.description }, 400);
-  const revoked = result.value.refreshed && await renewSecretQuietly(app.connector, result.value.secret) === "revoked";
+  const revoked = result.value.refreshed && await renewSecretQuietly(app.connector, result.value.grant.secret) === "revoked";
   if (revoked)
     return jsonResponse(
       { error: "invalid_grant", error_description: REVOKED_SECRET_DESCRIPTION },
@@ -18845,16 +18903,16 @@ async function handleToken(app, request) {
   return jsonResponse(result.value.tokens);
 }
 function handleMcp(app, request) {
-  const secret = readAccessSecret(request.headers.get("authorization"), app.settings, app.now());
-  if (secret === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
-  if (app.connector.acceptsSecret?.(secret) === false) {
+  const grant = readAccessGrant(request.headers.get("authorization"), app.settings, app.now());
+  if (grant === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
+  if (app.connector.acceptsSecret?.(grant.secret) === false) {
     return Promise.resolve(jsonResponse({ error: "access_revoked" }, 403));
   }
-  return serveMcpWithStreaming(app.connector, secret, request);
+  return serveMcpWithStreaming(app.connector, grant, request);
 }
-async function serveMcpWithStreaming(connector, secret, request) {
-  const streamed = await streamToolQuietly(connector, secret, request);
-  return streamed ?? serveMcpRequest(connector.createServer(secret), request);
+async function serveMcpWithStreaming(connector, grant, request) {
+  const streamed = await streamToolQuietly(connector, grant.secret, request);
+  return streamed ?? serveMcpRequest(connector.createServer(grant.secret, grant.grants), request);
 }
 async function streamToolQuietly(connector, secret, request) {
   if (!connector.streamTool) return null;
@@ -18864,7 +18922,7 @@ async function streamToolQuietly(connector, secret, request) {
     const content = await connector.streamTool(secret, call);
     return content && streamedToolResponse(call.id, content);
   } catch (error2) {
-    console.warn("Streamed tool fell back:", error2 instanceof Error ? error2.message : error2);
+    logWarning("Streamed tool fell back:", error2);
     return null;
   }
 }
@@ -18886,12 +18944,20 @@ function withCors(response) {
   for (const [name, value] of Object.entries(CORS_HEADERS)) response.headers.set(name, value);
   return response;
 }
+var BROWSER_PAGE_PATHS = ["/authorize", UPSTREAM_CALLBACK_PATH];
+function allowsCors(path) {
+  return !BROWSER_PAGE_PATHS.includes(path);
+}
 async function routeRemoteRequest(app, request) {
-  if (request.method === "OPTIONS") return withCors(new Response(null, { status: 204 }));
   const path = new URL(request.url).pathname.replace(/(.)\/+$/, "$1");
+  if (request.method === "OPTIONS") {
+    const preflight = new Response(null, { status: 204 });
+    return allowsCors(path) ? withCors(preflight) : preflight;
+  }
   const route = REMOTE_ROUTES[`${request.method} ${path}`];
   if (!route) return new Response("Not found", { status: 404 });
-  return withCors(await route(app, request));
+  const response = await route(app, request);
+  return allowsCors(path) ? withCors(response) : response;
 }
 function createRemoteHandler(app) {
   return (request) => routeRemoteRequest(app, request);
@@ -18952,7 +19018,7 @@ async function serveNodeRequest(options, req, res) {
   try {
     await writeWebResponse(res, await options.handler(toWebRequest(req, body, options.origin)));
   } catch (error2) {
-    console.error(error2);
+    logWarning("Request failed:", error2);
     await writeWebResponse(res, new Response("Internal error.", { status: 500 }));
   }
 }
@@ -22827,19 +22893,19 @@ var getRefs = (options) => {
 };
 
 // node_modules/zod-to-json-schema/dist/esm/errorMessages.js
-function addErrorMessage(res, key, errorMessage, refs) {
+function addErrorMessage(res, key, errorMessage2, refs) {
   if (!refs?.errorMessages)
     return;
-  if (errorMessage) {
+  if (errorMessage2) {
     res.errorMessage = {
       ...res.errorMessage,
-      [key]: errorMessage
+      [key]: errorMessage2
     };
   }
 }
-function setResponseValueAndErrors(res, key, value, errorMessage, refs) {
+function setResponseValueAndErrors(res, key, value, errorMessage2, refs) {
   res[key] = value;
-  addErrorMessage(res, key, errorMessage, refs);
+  addErrorMessage(res, key, errorMessage2, refs);
 }
 
 // node_modules/zod-to-json-schema/dist/esm/getRelativePath.js
@@ -24153,8 +24219,8 @@ var Protocol = class {
                   if (queuedMessage.type === "response") {
                     resolver(message);
                   } else {
-                    const errorMessage = message;
-                    const error2 = new McpError(errorMessage.error.code, errorMessage.error.message, errorMessage.error.data);
+                    const errorMessage2 = message;
+                    const error2 = new McpError(errorMessage2.error.code, errorMessage2.error.message, errorMessage2.error.data);
                     resolver(error2);
                   }
                 } else {
@@ -25465,23 +25531,23 @@ var Server = class extends Protocol {
       const wrappedHandler = async (request, extra) => {
         const validatedRequest = safeParse3(CallToolRequestSchema, request);
         if (!validatedRequest.success) {
-          const errorMessage = validatedRequest.error instanceof Error ? validatedRequest.error.message : String(validatedRequest.error);
-          throw new McpError(ErrorCode.InvalidParams, `Invalid tools/call request: ${errorMessage}`);
+          const errorMessage2 = validatedRequest.error instanceof Error ? validatedRequest.error.message : String(validatedRequest.error);
+          throw new McpError(ErrorCode.InvalidParams, `Invalid tools/call request: ${errorMessage2}`);
         }
         const { params } = validatedRequest.data;
         const result = await Promise.resolve(handler(request, extra));
         if (params.task) {
           const taskValidationResult = safeParse3(CreateTaskResultSchema, result);
           if (!taskValidationResult.success) {
-            const errorMessage = taskValidationResult.error instanceof Error ? taskValidationResult.error.message : String(taskValidationResult.error);
-            throw new McpError(ErrorCode.InvalidParams, `Invalid task creation result: ${errorMessage}`);
+            const errorMessage2 = taskValidationResult.error instanceof Error ? taskValidationResult.error.message : String(taskValidationResult.error);
+            throw new McpError(ErrorCode.InvalidParams, `Invalid task creation result: ${errorMessage2}`);
           }
           return taskValidationResult.data;
         }
         const validationResult = safeParse3(CallToolResultSchema, result);
         if (!validationResult.success) {
-          const errorMessage = validationResult.error instanceof Error ? validationResult.error.message : String(validationResult.error);
-          throw new McpError(ErrorCode.InvalidParams, `Invalid tools/call result: ${errorMessage}`);
+          const errorMessage2 = validationResult.error instanceof Error ? validationResult.error.message : String(validationResult.error);
+          throw new McpError(ErrorCode.InvalidParams, `Invalid tools/call result: ${errorMessage2}`);
         }
         return validationResult.data;
       };
@@ -26021,12 +26087,12 @@ var McpServer = class {
    * @param errorMessage - The error message.
    * @returns The tool error result.
    */
-  createToolError(errorMessage) {
+  createToolError(errorMessage2) {
     return {
       content: [
         {
           type: "text",
-          text: errorMessage
+          text: errorMessage2
         }
       ],
       isError: true
@@ -26047,8 +26113,8 @@ var McpServer = class {
     const parseResult = await safeParseAsync3(schemaToParse, args ?? {});
     if (!parseResult.success) {
       const error2 = "error" in parseResult ? parseResult.error : "Unknown error";
-      const errorMessage = getParseErrorMessage(error2);
-      throw new McpError(ErrorCode.InvalidParams, `Input validation error: Invalid arguments for tool ${toolName}: ${errorMessage}`);
+      const errorMessage2 = getParseErrorMessage(error2);
+      throw new McpError(ErrorCode.InvalidParams, `Input validation error: Invalid arguments for tool ${toolName}: ${errorMessage2}`);
     }
     return parseResult.data;
   }
@@ -26072,8 +26138,8 @@ var McpServer = class {
     const parseResult = await safeParseAsync3(outputObj, result.structuredContent);
     if (!parseResult.success) {
       const error2 = "error" in parseResult ? parseResult.error : "Unknown error";
-      const errorMessage = getParseErrorMessage(error2);
-      throw new McpError(ErrorCode.InvalidParams, `Output validation error: Invalid structured content for tool ${toolName}: ${errorMessage}`);
+      const errorMessage2 = getParseErrorMessage(error2);
+      throw new McpError(ErrorCode.InvalidParams, `Output validation error: Invalid structured content for tool ${toolName}: ${errorMessage2}`);
     }
   }
   /**
@@ -26285,8 +26351,8 @@ var McpServer = class {
         const parseResult = await safeParseAsync3(argsObj, request.params.arguments ?? {});
         if (!parseResult.success) {
           const error2 = "error" in parseResult ? parseResult.error : "Unknown error";
-          const errorMessage = getParseErrorMessage(error2);
-          throw new McpError(ErrorCode.InvalidParams, `Invalid arguments for prompt ${request.params.name}: ${errorMessage}`);
+          const errorMessage2 = getParseErrorMessage(error2);
+          throw new McpError(ErrorCode.InvalidParams, `Invalid arguments for prompt ${request.params.name}: ${errorMessage2}`);
         }
         const args = parseResult.data;
         const cb = prompt.callback;
@@ -27035,8 +27101,12 @@ function readCanvasRemoteSettings(env) {
     fetchFn: (input, init) => fetch(input, withCanvasUserAgent(init))
   };
 }
-function canvasLoginText(baseUrl) {
+var CANVAS_WRITE_GRANT = "write";
+var CANVAS_WRITE_OPTION_LABEL = "Also allow Claude to send messages, reply to discussions and submit assignments on my behalf (it always asks before each action).";
+function canvasLoginText(baseUrl, allowWrite) {
+  const option = { name: CANVAS_WRITE_GRANT, label: CANVAS_WRITE_OPTION_LABEL };
   return {
+    ...allowWrite ? { grantOption: option } : {},
     title: "Connect Canvas to Claude",
     intro: "Paste a Canvas access token (Account \u2192 Settings \u2192 New Access Token). The token is not stored on this server and, while you use the connector, its expiry is renewed automatically.",
     secretLabel: "Canvas access token",
@@ -27115,6 +27185,9 @@ async function renewCanvasSecret(settings, token, now) {
   await renewCanvasToken(settings, token, now);
   return "kept";
 }
+function canWriteFor(settings, grants) {
+  return settings.allowWrite && grants.includes(CANVAS_WRITE_GRANT);
+}
 function canvasClientFor(settings, token) {
   return createCanvasClient({ baseUrl: settings.baseUrl, token, fetchFn: settings.fetchFn });
 }
@@ -27127,11 +27200,11 @@ function canvasRemoteConnector(settings) {
   return {
     login: {
       kind: "secret",
-      text: canvasLoginText(settings.baseUrl),
+      text: canvasLoginText(settings.baseUrl, settings.allowWrite),
       verify: (secret) => verifyCanvasToken(settings, secret)
     },
     renewSecret: (secret) => renewCanvasSecret(settings, secret, /* @__PURE__ */ new Date()),
-    createServer: (secret) => createCanvasMcpServer(canvasTools(settings.allowWrite), {
+    createServer: (secret, grants) => createCanvasMcpServer(canvasTools(canWriteFor(settings, grants)), {
       client: canvasClientFor(settings, secret),
       now: () => /* @__PURE__ */ new Date()
     }),

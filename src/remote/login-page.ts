@@ -11,6 +11,8 @@ export interface LoginPageText {
   readonly helpUrl: string;
   readonly helpLabel: string;
   readonly submit: string;
+  /** Optional permission the user may opt into with an unticked checkbox (e.g. `write`). */
+  readonly grantOption?: { readonly name: string; readonly label: string };
 }
 
 /** What the page shows: texts, sealed request, host that will receive access and error (if any). */
@@ -29,7 +31,8 @@ main{background:var(--surface);border:1px solid var(--line);border-radius:var(--
 h1{font-size:1.25rem;margin:0 0 8px}p{color:var(--muted);margin:0 0 var(--space)}label{display:block;font-weight:600;margin-bottom:6px}
 input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
 button{margin-top:var(--space);width:100%;padding:10px;border:0;border-radius:8px;background:var(--accent);color:#fff;font:inherit;font-weight:600;cursor:pointer}
-a{color:var(--accent)}.error{color:var(--danger);font-weight:600}`;
+a{color:var(--accent)}.error{color:var(--danger);font-weight:600}
+.option{display:flex;gap:8px;align-items:flex-start;font-weight:400}.option input{width:auto;margin-top:4px}`;
 
 /** Escapes text for HTML (content and attributes). */
 export function escapeHtml(value: string): string {
@@ -45,6 +48,7 @@ export function escapeHtml(value: string): string {
 export function renderLoginPage(view: LoginPageView): string {
   const { text } = view;
   const error = view.error ? `<p class="error" role="alert">${escapeHtml(view.error)}</p>` : '';
+  const option = grantCheckbox(text);
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${escapeHtml(text.title)}</title><style>${LOGIN_PAGE_CSS}</style></head><body><main>
 <h1>${escapeHtml(text.title)}</h1>
 <p>${escapeHtml(text.intro)} Access will be granted to <strong>${escapeHtml(view.clientHost)}</strong>.</p>
@@ -52,7 +56,15 @@ ${error}<form method="post" action="/authorize">
 <input type="hidden" name="pending" value="${escapeHtml(view.pending)}">
 <label for="secret">${escapeHtml(text.secretLabel)}</label>
 <input id="secret" type="password" name="secret" required autocomplete="off">
-<p><a href="${escapeHtml(text.helpUrl)}" target="_blank" rel="noopener">${escapeHtml(text.helpLabel)}</a></p>
+${option}<p><a href="${escapeHtml(text.helpUrl)}" target="_blank" rel="noopener">${escapeHtml(text.helpLabel)}</a></p>
 <button type="submit">${escapeHtml(text.submit)}</button>
 </form></main></body></html>`;
+}
+
+/** Unticked checkbox of the optional permission (empty when the connector offers none). */
+export function grantCheckbox(text: LoginPageText): string {
+  if (!text.grantOption) return '';
+  const { name, label } = text.grantOption;
+  return `<p><label class="option"><input type="checkbox" name="grant" value="${escapeHtml(name)}"> ${escapeHtml(label)}</label></p>
+`;
 }

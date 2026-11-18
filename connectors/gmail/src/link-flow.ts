@@ -1,9 +1,12 @@
 /**
  * Links one more Gmail account to a connector user. The `link_account` tool issues a link with a sealed
- * ticket (user + 10-minute validity, single use); `/accounts/link` redeems the ticket and sends the browser to
- * Google with `gmail.modify` and offline access, a single-use `state` bound to the browser by a `__Host-`
- * cookie, PKCE S256 and `nonce`. On return, the refresh token is stored (sealed) in that user's accounts.
+ * ticket (user + email + 10-minute validity, single use, bound to this Worker). `GET /accounts/link` only shows
+ * whose connector receives the account and asks for confirmation (setting a `__Host-` cookie); the confirmation
+ * `POST`, which only works from that page in that browser, redeems the ticket and sends the browser to Google
+ * with `gmail.modify` and offline access, a single-use `state` bound to the same cookie, PKCE S256 and `nonce`.
+ * On return, the refresh token is stored (sealed) in that user's accounts.
  */
+import { readForm } from '../../../src/remote/handler.js';
 import { openSealed, sealPayload } from '../../../src/remote/seal.js';
 import { pkceChallenge } from '../../../src/remote/oauth.js';
 import { forgetAccessToken } from './access-token.js';
@@ -17,7 +20,7 @@ import {
   type GoogleTokens,
 } from './google-oauth.js';
 import { verifyGoogleIdToken } from './id-token.js';
-import { messagePage, redirectWith } from './pages.js';
+import { linkConfirmPage, messagePage, redirectWith } from './pages.js';
 import { loadOwnerAccounts, saveOwnerAccounts, sha256Hex, upsertAccount } from './token-store.js';
 
 /** Prefix of the linking `state` (the OAuth library `state` never has a dot). */
@@ -35,6 +38,16 @@ export const LINK_REQUEST_TYP = 'gmail_link';
 /** Seal type of the link ticket issued by `link_account`. */
 export const LINK_TICKET_TYP = 'gmail_link_ticket';
 
+/** Seal type of the confirmation form (ties the confirmation to the ticket and to this browser's cookie). */
+export const LINK_CONFIRM_TYP = 'gmail_link_confirm';
+
+/** Opened link ticket: whose connector receives the account, their email (if known) and the single-use id. */
+export interface LinkTicket {
+  readonly owner: string;
+  readonly email: string | null;
+  readonly jti: string;
+}
+
 /** Link request kept in KV between the trip to Google and the return. */
 export interface LinkRequest {
   readonly owner: string;
@@ -47,27 +60,76 @@ export function nowSeconds(deps: GmailDeps): number {
   return Math.floor(deps.now() / 1000);
 }
 
-/** Single-use linking link for the user (valid for 10 minutes). */
+/** Single-use linking link for the user (valid for 10 minutes, only on this Worker). */
 export function issueLinkUrl(deps: OwnerDeps): string {
   const exp = nowSeconds(deps) + LINK_TTL_SECONDS;
+  const claims = { owner: deps.owner, email: deps.ownerEmail ?? null, jti: randomToken(16) };
   const ticket = sealPayload(
-    { typ: LINK_TICKET_TYP, exp, owner: deps.owner, jti: randomToken(16) },
+    { typ: LINK_TICKET_TYP, aud: deps.origin, exp, ...claims },
     deps.settings.tokenKey,
   );
   return `${deps.origin}/accounts/link?ticket=${ticket}`;
 }
 
-/** Redeems the ticket (single use, marked in KV until it expires); returns the user, or null if invalid or used. */
-export async function redeemLinkTicket(deps: GmailDeps, ticket: string): Promise<string | null> {
-  const claims = openSealed(ticket, deps.settings.tokenKey, {
-    typ: LINK_TICKET_TYP,
-    now: nowSeconds(deps),
-  });
+/** Opens a ticket without spending it; null if invalid, expired or from another Worker. */
+export function openLinkTicket(deps: GmailDeps, ticket: string): LinkTicket | null {
+  const expected = { typ: LINK_TICKET_TYP, now: nowSeconds(deps), aud: deps.origin };
+  const claims = openSealed(ticket, deps.settings.tokenKey, expected);
   if (typeof claims?.owner !== 'string' || typeof claims.jti !== 'string') return null;
-  const usedKey = `ticket:${sha256Hex(claims.jti)}`;
-  if ((await deps.kv.get(usedKey)) !== null) return null;
-  await deps.kv.put(usedKey, '1', { expirationTtl: LINK_TTL_SECONDS });
-  return claims.owner;
+  const email = typeof claims.email === 'string' ? claims.email : null;
+  return { owner: claims.owner, email, jti: claims.jti };
+}
+
+/** KV key that marks a ticket as used. */
+export function usedTicketKey(jti: string): string {
+  return `ticket:${sha256Hex(jti)}`;
+}
+
+/** Redeems the ticket (single use, marked in KV until it expires); returns it, or null if invalid or used. */
+export async function redeemLinkTicket(
+  deps: GmailDeps,
+  ticket: string,
+): Promise<LinkTicket | null> {
+  const opened = openLinkTicket(deps, ticket);
+  if (!opened || (await deps.kv.get(usedTicketKey(opened.jti))) !== null) return null;
+  await deps.kv.put(usedTicketKey(opened.jti), '1', { expirationTtl: LINK_TTL_SECONDS });
+  return opened;
+}
+
+/** `GET /accounts/link?ticket=...`: shows whose connector receives the account and asks for confirmation. */
+export async function showLinkConfirmation(deps: GmailDeps, request: Request): Promise<Response> {
+  const ticket = new URL(request.url).searchParams.get('ticket') ?? '';
+  const opened = openLinkTicket(deps, ticket);
+  if (!opened || (await deps.kv.get(usedTicketKey(opened.jti))) !== null) {
+    return invalidTicketPage();
+  }
+  const binding = randomToken();
+  const exp = nowSeconds(deps) + LINK_TTL_SECONDS;
+  const confirm = sealPayload(
+    {
+      typ: LINK_CONFIRM_TYP,
+      aud: deps.origin,
+      exp,
+      jti: opened.jti,
+      bindingHash: sha256Hex(binding),
+    },
+    deps.settings.tokenKey,
+  );
+  const headers = new Headers({ 'set-cookie': linkCookie(binding) });
+  return linkConfirmPage({ ownerEmail: opened.email, ticket, confirm }, headers);
+}
+
+/** Says whether the confirmation came from the page shown to this browser for this very ticket. */
+export function isConfirmedInThisBrowser(
+  deps: GmailDeps,
+  form: URLSearchParams,
+  binding: string | null,
+): boolean {
+  const expected = { typ: LINK_CONFIRM_TYP, now: nowSeconds(deps), aud: deps.origin };
+  const confirm = openSealed(form.get('confirm') ?? '', deps.settings.tokenKey, expected);
+  const ticket = openLinkTicket(deps, form.get('ticket') ?? '');
+  if (!confirm || !ticket || binding === null) return false;
+  return confirm.jti === ticket.jti && confirm.bindingHash === sha256Hex(binding);
 }
 
 /** KV key of the link request. */
@@ -99,16 +161,28 @@ export function invalidTicketPage(): Response {
   );
 }
 
-/** `GET /accounts/link?ticket=...`: redeems the ticket, stores the request (sealed) and sends the browser to Google. */
+/** Redeems the ticket of a confirmation posted from this browser; returns the owner and the cookie binding. */
+export async function redeemConfirmedTicket(
+  deps: GmailDeps,
+  request: Request,
+): Promise<{ readonly owner: string; readonly binding: string } | null> {
+  const form = await readForm(request);
+  const binding = readCookie(request.headers.get('cookie'), LINK_COOKIE);
+  if (binding === null || !isConfirmedInThisBrowser(deps, form, binding)) return null;
+  const ticket = await redeemLinkTicket(deps, form.get('ticket') ?? '');
+  return ticket && { owner: ticket.owner, binding };
+}
+
+/** `POST /accounts/link`: checks the confirmation, redeems the ticket, stores the request and goes to Google. */
 export async function startAccountLink(deps: GmailDeps, request: Request): Promise<Response> {
-  const owner = await redeemLinkTicket(deps, new URL(request.url).searchParams.get('ticket') ?? '');
-  if (owner === null) return invalidTicketPage();
+  const confirmed = await redeemConfirmedTicket(deps, request);
+  if (confirmed === null) return invalidTicketPage();
+  const { owner, binding } = confirmed;
   const state = `${LINK_STATE_PREFIX}${randomToken()}`;
-  const binding = randomToken();
   const link: LinkRequest = { owner, verifier: randomToken(), nonce: randomToken() };
   const exp = nowSeconds(deps) + LINK_TTL_SECONDS;
   const sealed = sealPayload(
-    { typ: LINK_REQUEST_TYP, exp, bindingHash: sha256Hex(binding), ...link },
+    { typ: LINK_REQUEST_TYP, aud: deps.origin, exp, bindingHash: sha256Hex(binding), ...link },
     deps.settings.tokenKey,
   );
   await deps.kv.put(linkRequestKey(state), sealed, { expirationTtl: LINK_TTL_SECONDS });
@@ -136,6 +210,7 @@ export async function takeLinkRequest(
   const claims = openSealed(sealed, deps.settings.tokenKey, {
     typ: LINK_REQUEST_TYP,
     now: nowSeconds(deps),
+    aud: deps.origin,
   });
   const binding = readCookie(request.headers.get('cookie'), LINK_COOKIE);
   if (!claims || binding === null || sha256Hex(binding) !== claims.bindingHash) return null;

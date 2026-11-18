@@ -29,6 +29,8 @@ export interface GmailDeps {
 export interface OwnerDeps extends GmailDeps {
   /** Stable Google user id (`sub` from sign-in), owner of the linked accounts. */
   readonly owner: string;
+  /** Email the owner signed in with (shown on the link confirmation page); absent outside `/mcp`. */
+  readonly ownerEmail?: string;
 }
 
 /** User-Agent sent to Google (lesson from Canvas: calls without a User-Agent may be blocked). */

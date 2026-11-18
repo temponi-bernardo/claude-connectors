@@ -44,9 +44,18 @@ export function readCanvasRemoteSettings(env: EnvVars): CanvasRemoteSettings {
   };
 }
 
-/** Texts of the Canvas authorization page. */
-export function canvasLoginText(baseUrl: string): LoginPageText {
+/** Permission a user opts into on the login page to get the tools that send, reply and submit. */
+export const CANVAS_WRITE_GRANT = 'write';
+
+/** Label of the write opt-in checkbox (unticked by default: each user chooses, read-only otherwise). */
+export const CANVAS_WRITE_OPTION_LABEL =
+  'Also allow Claude to send messages, reply to discussions and submit assignments on my behalf (it always asks before each action).';
+
+/** Texts of the Canvas authorization page; with writing on, the page offers the per-user write opt-in. */
+export function canvasLoginText(baseUrl: string, allowWrite: boolean): LoginPageText {
+  const option = { name: CANVAS_WRITE_GRANT, label: CANVAS_WRITE_OPTION_LABEL };
   return {
+    ...(allowWrite ? { grantOption: option } : {}),
     title: 'Connect Canvas to Claude',
     intro:
       'Paste a Canvas access token (Account → Settings → New Access Token). The token is not stored on this server and, while you use the connector, its expiry is renewed automatically.',
@@ -183,6 +192,11 @@ export async function renewCanvasSecret(
   return 'kept';
 }
 
+/** Write tools only when the server allows writing AND this user opted in at login (old tokens: read-only). */
+export function canWriteFor(settings: CanvasRemoteSettings, grants: readonly string[]): boolean {
+  return settings.allowWrite && grants.includes(CANVAS_WRITE_GRANT);
+}
+
 /** Canvas client of the server's Canvas, authorized with the user's token. */
 export function canvasClientFor(settings: CanvasRemoteSettings, token: string): CanvasClient {
   return createCanvasClient({ baseUrl: settings.baseUrl, token, fetchFn: settings.fetchFn });
@@ -203,12 +217,12 @@ export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteCon
   return {
     login: {
       kind: 'secret',
-      text: canvasLoginText(settings.baseUrl),
+      text: canvasLoginText(settings.baseUrl, settings.allowWrite),
       verify: (secret) => verifyCanvasToken(settings, secret),
     },
     renewSecret: (secret) => renewCanvasSecret(settings, secret, new Date()),
-    createServer: (secret) =>
-      createCanvasMcpServer(canvasTools(settings.allowWrite), {
+    createServer: (secret, grants) =>
+      createCanvasMcpServer(canvasTools(canWriteFor(settings, grants)), {
         client: canvasClientFor(settings, secret),
         now: () => new Date(),
       }),

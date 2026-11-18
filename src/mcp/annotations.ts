@@ -24,7 +24,7 @@ export type ToolHints = Omit<ToolAnnotations, 'title' | 'readOnlyHint' | 'destru
 export type RequiredToolAnnotations = ToolHints & { readonly title: string };
 
 /** Read-only: changes nothing. */
-export const READ_ONLY_HINTS: ToolHints = {
+export const READ_ONLY_HINTS: Readonly<ToolHints> = {
   readOnlyHint: true,
   destructiveHint: false,
   idempotentHint: true,
@@ -32,7 +32,7 @@ export const READ_ONLY_HINTS: ToolHints = {
 };
 
 /** Sends or publishes something that cannot be taken back (email, message, submission): not idempotent. */
-export const SEND_HINTS: ToolHints = {
+export const SEND_HINTS: Readonly<ToolHints> = {
   readOnlyHint: false,
   destructiveHint: true,
   idempotentHint: false,
@@ -40,7 +40,7 @@ export const SEND_HINTS: ToolHints = {
 };
 
 /** Deletes or overwrites (trash, draft, account link): destructive, idempotent. */
-export const DESTRUCTIVE_HINTS: ToolHints = {
+export const DESTRUCTIVE_HINTS: Readonly<ToolHints> = {
   readOnlyHint: false,
   destructiveHint: true,
   idempotentHint: true,
@@ -48,7 +48,7 @@ export const DESTRUCTIVE_HINTS: ToolHints = {
 };
 
 /** Reversible organization (read, archive, star, labels, restore). */
-export const ORGANIZE_HINTS: ToolHints = {
+export const ORGANIZE_HINTS: Readonly<ToolHints> = {
   readOnlyHint: false,
   destructiveHint: false,
   idempotentHint: true,
@@ -56,7 +56,7 @@ export const ORGANIZE_HINTS: ToolHints = {
 };
 
 /** Creates something new without deleting anything (draft, link). */
-export const CREATE_HINTS: ToolHints = {
+export const CREATE_HINTS: Readonly<ToolHints> = {
   readOnlyHint: false,
   destructiveHint: false,
   idempotentHint: false,

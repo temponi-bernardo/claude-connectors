@@ -127,7 +127,7 @@ export function registerClient(
     return oauthError('invalid_redirect_uri', 'Missing or disallowed redirect address.');
   }
   const clientId = sealPayload(
-    { typ: 'client', exp: now + CLIENT_TTL_SECONDS, redirect_uris: uris },
+    { typ: 'client', aud: settings.issuer, exp: now + CLIENT_TTL_SECONDS, redirect_uris: uris },
     settings.key,
   );
   return {
@@ -148,7 +148,7 @@ export function clientRedirectUris(
   settings: OAuthSettings,
   now: number,
 ): string[] | null {
-  const claims = openSealed(clientId, settings.key, { typ: 'client', now });
+  const claims = openSealed(clientId, settings.key, { typ: 'client', now, aud: settings.issuer });
   return claims ? readRedirectUris(claims) : null;
 }
 

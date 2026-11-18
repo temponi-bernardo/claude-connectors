@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { escapeHtml, renderLoginPage, type LoginPageText } from './login-page.js';
+import { escapeHtml, grantCheckbox, renderLoginPage, type LoginPageText } from './login-page.js';
 
 const text: LoginPageText = {
   title: 'Connect Canvas',
@@ -44,5 +44,24 @@ describe('renderLoginPage', () => {
     });
     expect(html).toContain('role="alert"');
     expect(html).toContain('&lt;b&gt;failed&lt;/b&gt;');
+  });
+});
+
+describe('grantCheckbox', () => {
+  const base = {
+    title: 'T',
+    intro: 'I',
+    secretLabel: 'S',
+    helpUrl: 'https://example.dev',
+    helpLabel: 'H',
+    submit: 'Go',
+  };
+
+  it('renders an unticked, escaped checkbox only when a permission is offered', () => {
+    expect(grantCheckbox(base)).toBe('');
+    const html = grantCheckbox({ ...base, grantOption: { name: 'write', label: 'Send <b>' } });
+    expect(html).toContain('type="checkbox" name="grant" value="write"');
+    expect(html).not.toContain('checked');
+    expect(html).toContain('Send &lt;b&gt;');
   });
 });

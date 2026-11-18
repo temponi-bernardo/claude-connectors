@@ -45,7 +45,7 @@ export const DRAFT_SHAPE = {
     'Make the draft a reply to this message (recipients, subject and thread from it).',
   ),
   reply_all: z.boolean().default(false).describe('With reply_to_message_id: reply to all.'),
-};
+} as const;
 
 /** Content parameters of the draft tools, already validated. */
 export interface DraftToolArgs {

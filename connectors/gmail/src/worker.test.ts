@@ -162,6 +162,11 @@ async function signIn(browser: Browser, email = 'owner@example.com'): Promise<st
   return ((await token.json()) as { access_token: string }).access_token;
 }
 
+/** Value of a hidden form field in a page. */
+function hiddenField(html: string, name: string): string {
+  return new RegExp(`name="${name}" value="([^"]+)"`).exec(html)?.[1] ?? '';
+}
+
 /** JSON-RPC call to `/mcp` with the given token. */
 function mcpCall(browser: Browser, token: string, body: unknown): Promise<Response> {
   return browser.fetch('/mcp', {
@@ -279,7 +284,17 @@ describe('installer sign-in and /mcp', () => {
     const { link_url } = JSON.parse(await toolText(browser, token, ['link_account', {}])) as {
       link_url: string;
     };
-    const response = await browser.fetch(new URL(link_url).pathname + new URL(link_url).search);
+    const page = await browser.fetch(new URL(link_url).pathname + new URL(link_url).search);
+    const html = await page.text();
+    expect(html).toContain('ow***@example.com');
+    const response = await browser.fetch('/accounts/link', {
+      method: 'POST',
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        ticket: hiddenField(html, 'ticket'),
+        confirm: hiddenField(html, 'confirm'),
+      }).toString(),
+    });
     const google = new URL(response.headers.get('location') ?? '');
     expect(google.searchParams.get('access_type')).toBe('offline');
     const back = await browser.fetch(

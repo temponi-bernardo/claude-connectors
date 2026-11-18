@@ -17,11 +17,19 @@ export type SealedClaims = Readonly<Record<string, unknown>> & {
   readonly exp: number;
 };
 
-/** What `openSealed` requires: the expected type and the current time (Unix seconds). */
+/** What `openSealed` requires: the expected type, the current time (Unix seconds) and, optionally, the audience. */
 export interface SealExpectation {
   readonly typ: string;
   readonly now: number;
+  /** Who the seal is for (the connector issuer); a seal for another connector does not open. */
+  readonly aud?: string;
 }
+
+/**
+ * Until this instant (2027-01-01 UTC) a seal issued before `aud` existed still opens where an audience is
+ * expected, so nobody is disconnected by the upgrade; every older access or refresh token expires before it.
+ */
+export const LEGACY_AUDLESS_UNTIL = 1_798_761_600;
 
 /** Decodes a seal key (base64 or base64url) and requires 32 bytes; `name` is the variable, for the error. */
 export function parseSealKey(raw: string | null, name = 'SEAL_KEY'): Buffer {
@@ -68,5 +76,16 @@ export function openSealed(
 ): SealedClaims | null {
   const claims = unsealPayload(sealed, key);
   if (claims?.typ !== expected.typ || typeof claims.exp !== 'number') return null;
+  if (!audienceMatches(claims, expected)) return null;
   return claims.exp > expected.now ? (claims as SealedClaims) : null;
+}
+
+/** Says whether the seal's `aud` is the expected one (a seal without `aud` passes only before the legacy cutoff). */
+export function audienceMatches(
+  claims: Readonly<Record<string, unknown>>,
+  expected: SealExpectation,
+): boolean {
+  if (expected.aud === undefined) return true;
+  if (claims.aud === undefined) return expected.now < LEGACY_AUDLESS_UNTIL;
+  return claims.aud === expected.aud;
 }

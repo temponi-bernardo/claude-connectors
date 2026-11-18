@@ -27,7 +27,17 @@ renewed (ADR 0011). Only if you go more than 30 days without using the connector
 tools warn you: generate a new token and reconnect the connector in Claude's settings.
 
 Security: the Canvas token is never stored on the server; it only travels encrypted inside the OAuth tokens.
-Anyone with a valid Canvas token can use the server, but only reaches their own account.
+Anyone with a valid Canvas token can use the server, but only reaches their own account
+([isolation map](../../docs/security/isolation.md)).
+
+**Sending and submitting is opt-in per person.** On the connect page, the box _"Also allow Claude to send
+messages, reply to discussions and submit assignments on my behalf"_ starts unticked. Without it you get only the
+read tools; to turn it on later, reconnect the connector and tick it. Connections made before this option existed
+are read-only until reconnected.
+
+**Cutting someone off.** The server keeps no list of users, so there is no per-user switch on it. To revoke one
+person, delete their token in Canvas (Account → Settings → Approved integrations / Access tokens): every tool call
+and every token refresh goes to Canvas, so access stops at once. Changing `SEAL_KEY` disconnects everyone.
 
 ## Plugin commands
 
@@ -78,14 +88,14 @@ docker build -t canvas-puc-remote connectors/canvas-puc
 docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes in base64> -e CANVAS_ALLOW_WRITE=true canvas-puc-remote
 ```
 
-| Variable               | Default                            | Purpose                                                                                                                                |
-| ---------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `PUBLIC_URL`           | — (on the Worker: its own address) | Public https address (required on Docker)                                                                                              |
-| `SEAL_KEY`             | —                                  | OAuth seal key; changing it disconnects everyone                                                                                       |
-| `PORT`                 | `8080`                             | HTTP port                                                                                                                              |
-| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Where OAuth may send the access back to                                                                                                |
-| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | The server's fixed Canvas instance                                                                                                     |
-| `CANVAS_ALLOW_WRITE`   | off                                | `true` registers `submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`, `send_message` and `reply_to_conversation` |
+| Variable               | Default                            | Purpose                                                                                                                                                       |
+| ---------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_URL`           | — (on the Worker: its own address) | Public https address (required on Docker)                                                                                                                     |
+| `SEAL_KEY`             | —                                  | OAuth seal key; changing it disconnects everyone                                                                                                              |
+| `PORT`                 | `8080`                             | HTTP port                                                                                                                                                     |
+| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Where OAuth may send the access back to                                                                                                                       |
+| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | The server's fixed Canvas instance                                                                                                                            |
+| `CANVAS_ALLOW_WRITE`   | off                                | `true` offers each user the write opt-in (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`, `send_message`, `reply_to_conversation`) |
 
 **Common problems:**
 

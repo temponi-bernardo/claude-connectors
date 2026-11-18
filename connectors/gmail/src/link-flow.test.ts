@@ -11,7 +11,7 @@ import {
   tokenRoute,
   validIdToken,
 } from './fixtures/fake-google.js';
-import type { Fetcher } from './context.js';
+import type { Fetcher, GmailDeps, OwnerDeps } from './context.js';
 import type { GoogleTokens } from './google-oauth.js';
 import {
   finishAccountLink,
@@ -25,10 +25,15 @@ import {
   linkSafely,
   nowSeconds,
   readCookie,
+  isConfirmedInThisBrowser,
+  openLinkTicket,
+  redeemConfirmedTicket,
   redeemLinkTicket,
+  showLinkConfirmation,
   startAccountLink,
   storeGoogleAccount,
   takeLinkRequest,
+  usedTicketKey,
 } from './link-flow.js';
 import { loadOwnerAccounts, saveOwnerAccounts, sha256Hex } from './token-store.js';
 
@@ -62,11 +67,38 @@ function googleFor(
   ]);
 }
 
-/** Opens the linking link and returns the `state`, `nonce` and cookie Google/the browser would send. */
+/** Opens the link (GET) and returns the confirmation form fields and the cookie the browser keeps. */
+async function confirmation(deps: GmailDeps, url = issueLinkUrl(deps as OwnerDeps)) {
+  const page = await showLinkConfirmation(deps, new Request(url));
+  const html = await page.text();
+  const cookie = (page.headers.getSetCookie()[0] ?? '').split(';')[0] ?? '';
+  const [ticket, confirm] = [formField(html, 'ticket'), formField(html, 'confirm')];
+  return { page, html, ticket, confirm, cookie };
+}
+
+/** Value of a hidden form field in the page. */
+function formField(html: string, name: string): string {
+  return new RegExp(`name="${name}" value="([^"]+)"`).exec(html)?.[1] ?? '';
+}
+
+/** The confirmation POST the page sends (with the given cookie). */
+function confirmPost(fields: { ticket: string; confirm: string }, cookie: string | null): Request {
+  return new Request('https://gmail.test/accounts/link', {
+    method: 'POST',
+    body: new URLSearchParams(fields).toString(),
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      ...(cookie === null ? {} : { cookie }),
+    },
+  });
+}
+
+/** Opens the link, confirms and returns the `state`, `nonce` and cookie Google/the browser would send. */
 async function begin(deps: ReturnType<typeof testDeps>) {
-  const response = await startAccountLink(deps, new Request(issueLinkUrl(deps)));
+  const shown = await confirmation(deps);
+  const response = await startAccountLink(deps, confirmPost(shown, shown.cookie));
   const google = new URL(response.headers.get('location') ?? '');
-  const cookie = (response.headers.getSetCookie()[0] ?? '').split(';')[0] ?? '';
+  const cookie = shown.cookie;
   return {
     response,
     google,
@@ -142,7 +174,10 @@ describe('link ticket', () => {
   it('redeemLinkTicket returns the user only once', async () => {
     const deps = testDeps(fakeFetch([]));
     const ticket = new URL(issueLinkUrl(deps)).searchParams.get('ticket') ?? '';
-    expect(await redeemLinkTicket(deps, ticket)).toBe(TEST_OWNER);
+    expect(await redeemLinkTicket(deps, ticket)).toMatchObject({
+      owner: TEST_OWNER,
+      email: 'owner@example.com',
+    });
     expect(await redeemLinkTicket(deps, ticket)).toBeNull();
     expect(await redeemLinkTicket(deps, 'junk')).toBeNull();
   });
@@ -176,8 +211,76 @@ describe('startAccountLink', () => {
 
   it('without a valid ticket shows the invalid link page', async () => {
     const deps = testDeps(fakeFetch([]));
-    const response = await startAccountLink(deps, new Request('https://gmail.test/accounts/link'));
+    const response = await startAccountLink(deps, confirmPost({ ticket: '', confirm: '' }, null));
     expect(response.status).toBe(400);
+  });
+});
+
+describe('link confirmation (a forwarded link cannot link someone else into the owner)', () => {
+  it('GET only shows whose connector receives the account and spends nothing', async () => {
+    const deps = testDeps(fakeFetch([]));
+    const shown = await confirmation(deps);
+    expect(shown.page.status).toBe(200);
+    expect(shown.html).toContain('ow***@example.com');
+    expect(shown.html).not.toContain('owner@example.com');
+    expect(shown.html).toContain('If someone sent you this link, close this page');
+    expect(shown.page.headers.get('content-security-policy')).toContain('accounts.google.com');
+    expect(await redeemLinkTicket(deps, shown.ticket)).not.toBeNull();
+  });
+
+  it('refuses the POST without the cookie of the browser that saw the page (cross-site auto-submit)', async () => {
+    const deps = testDeps(fakeFetch([]));
+    const shown = await confirmation(deps);
+    expect((await startAccountLink(deps, confirmPost(shown, null))).status).toBe(400);
+    const other = await confirmation(deps);
+    expect((await startAccountLink(deps, confirmPost(shown, other.cookie))).status).toBe(400);
+    expect((await startAccountLink(deps, confirmPost(shown, shown.cookie))).status).toBe(302);
+  });
+
+  it('refuses a confirmation made for another ticket, and a ticket used twice', async () => {
+    const deps = testDeps(fakeFetch([]));
+    const a = await confirmation(deps);
+    const b = await confirmation(deps);
+    const mixed = { ticket: b.ticket, confirm: a.confirm };
+    expect((await startAccountLink(deps, confirmPost(mixed, a.cookie))).status).toBe(400);
+    expect((await startAccountLink(deps, confirmPost(a, a.cookie))).status).toBe(302);
+    expect((await startAccountLink(deps, confirmPost(a, a.cookie))).status).toBe(400);
+    expect(
+      (await confirmation(deps, `https://gmail.test/accounts/link?ticket=${a.ticket}`)).page.status,
+    ).toBe(400);
+  });
+
+  it('refuses a ticket issued by another Worker, even sealed with the same key', async () => {
+    const deps = testDeps(fakeFetch([]));
+    const foreign = issueLinkUrl({ ...deps, origin: 'https://other-gmail.test' });
+    const ticket = new URL(foreign).searchParams.get('ticket') ?? '';
+    expect(openLinkTicket(deps, ticket)).toBeNull();
+    expect(
+      (await confirmation(deps, `https://gmail.test/accounts/link?ticket=${ticket}`)).page.status,
+    ).toBe(400);
+  });
+
+  it('isConfirmedInThisBrowser and redeemConfirmedTicket need the page fields and the same cookie', async () => {
+    const deps = testDeps(fakeFetch([]));
+    const shown = await confirmation(deps);
+    const fields = new URLSearchParams({ ticket: shown.ticket, confirm: shown.confirm });
+    const binding = shown.cookie.slice(`${LINK_COOKIE}=`.length);
+    expect(isConfirmedInThisBrowser(deps, fields, binding)).toBe(true);
+    expect(isConfirmedInThisBrowser(deps, fields, 'other-binding')).toBe(false);
+    expect(isConfirmedInThisBrowser(deps, fields, null)).toBe(false);
+    expect(await redeemConfirmedTicket(deps, confirmPost(shown, null))).toBeNull();
+    expect(await redeemConfirmedTicket(deps, confirmPost(shown, shown.cookie))).toEqual({
+      owner: TEST_OWNER,
+      binding,
+    });
+    expect(usedTicketKey('j')).toBe(`ticket:${sha256Hex('j')}`);
+  });
+
+  it('expires after 10 minutes', () => {
+    const deps = testDeps(fakeFetch([]));
+    const ticket = new URL(issueLinkUrl(deps)).searchParams.get('ticket') ?? '';
+    const later = { ...deps, now: () => TEST_NOW_MS + 601_000 };
+    expect(openLinkTicket(later, ticket)).toBeNull();
   });
 });
 

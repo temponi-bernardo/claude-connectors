@@ -96,7 +96,7 @@ running (`wrangler` builds the bridge image) and a GitHub account.
    node -e "console.log(crypto.randomBytes(32).toString('hex'))"    | npx wrangler secret put BRIDGE_TOKEN $C
    npx wrangler secret put GITHUB_CLIENT_ID $C
    npx wrangler secret put GITHUB_CLIENT_SECRET $C
-   npx wrangler secret put ALLOWED_EMAILS $C   # your verified GitHub email (comma-separated for more than one)
+   npx wrangler secret put ALLOWED_EMAILS $C   # your verified GitHub email: ONE email (see below)
    ```
 
    Keep the `SNAPSHOT_KEY` in a password manager: without it the backup cannot be opened (and changing it forces
@@ -140,6 +140,10 @@ backup gets corrupted).
 
 Access lasts as long as Claude renews the token (30-day refresh). Removing your email from `ALLOWED_EMAILS`
 revokes it immediately (`/mcp` starts answering 403).
+
+**Single tenant.** Everyone in `ALLOWED_EMAILS` reads and sends on the **same** WhatsApp — yours. So the Worker
+refuses to start with more than one email. If all the emails are yours (e.g. personal and work GitHub emails), set
+`ALLOW_SHARED_OWNER = "true"` to accept them. Never add someone else's email: give them their own deploy.
 
 ## Configuration (`[vars]` in `wrangler.toml`)
 

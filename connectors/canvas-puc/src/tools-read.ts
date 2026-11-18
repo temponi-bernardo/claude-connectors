@@ -44,7 +44,7 @@ export const fileRefShape = {
     .optional()
     .describe('Full Canvas file link (the url of a file link); its verifier opens hidden files'),
   course_id: courseId.optional(),
-};
+} as const;
 
 /** Arguments of `download_file`, shared with its streamed version in remote mode (ADR 0023, 0024). */
 export const downloadFileShape = {
@@ -64,7 +64,7 @@ export const downloadFileShape = {
     .max(MAX_CHUNK_BYTES)
     .optional()
     .describe('Bytes to return (default and maximum 8 MB)'),
-};
+} as const;
 
 /** Read tools, in the order the model sees them. */
 export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
