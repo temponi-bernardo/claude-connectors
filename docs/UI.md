@@ -5,7 +5,10 @@ require components. The only screen is the **remote connector's authorization pa
 no script, produced by `renderLoginPage()` in `src/remote/login-page.ts`, styled by `LOGIN_PAGE_CSS` and the
 tokens below (light and dark via `prefers-color-scheme`). The GitHub Pages **public site** (ADR 0012:
 `docs/index.html`, `privacy.html`, `terms.html`; `privacidade.html` and `termos.html` only redirect) uses the same tokens in `docs/site.css`, with no script. The Gmail
-connector's pages (consent and link result, `connectors/gmail/src/pages.ts`) use the same `LOGIN_PAGE_CSS`. WhatsApp's
+connector's pages (consent, link confirmation with the masked owner email and the warning in `--danger`, and link
+result, `connectors/gmail/src/pages.ts`) use the same `LOGIN_PAGE_CSS`. The login page may show one optional
+permission as an unticked checkbox (`grantCheckbox()`, class `.option`: inline checkbox, normal weight), e.g. the
+Canvas write opt-in. WhatsApp's
 `/pair` page (`renderPairPage()` in `connectors/whatsapp/src/pair-page.ts`, ADR 0015) uses `LOGIN_PAGE_CSS` plus
 `PAIR_PAGE_CSS` (pairing code in a large mono font, QR on a white background, `secondary` and `danger` buttons).
 States: needs pairing (code and QR forms), connecting, connected, no response from the bridge, error
