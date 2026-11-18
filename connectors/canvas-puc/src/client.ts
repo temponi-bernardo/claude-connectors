@@ -4,6 +4,7 @@
 import { buildUrl, parseNextLink, type QueryParams } from '../../../src/core/http.js';
 import { readLimitedBytes } from '../../../src/core/stream.js';
 import { MAX_DOWNLOAD_BYTES, tooLargeMessage } from './files.js';
+import { redactVerifier } from './links.js';
 
 /** Items per page requested from Canvas (the maximum the API accepts). */
 export const CANVAS_PAGE_SIZE = 100;
@@ -58,15 +59,43 @@ export function sendCanvasRequest(deps: ClientDeps, req: CanvasRequest): Promise
   });
 }
 
-/** Sends the request and throws on 401 (token refused) or on any status outside 2xx. */
+/** Error of a Canvas API call, with the HTTP status for callers that react to 401/403/404. */
+export interface CanvasApiError extends Error {
+  readonly status: number;
+  /** `true` when Canvas refused the token itself (expired or revoked), not just this resource. */
+  readonly tokenRejected: boolean;
+}
+
+/** Creates a `CanvasApiError`. */
+export function canvasApiError(
+  message: string,
+  status: number,
+  tokenRejected = false,
+): CanvasApiError {
+  return Object.assign(new Error(message), { status, tokenRejected });
+}
+
+/** HTTP status of a `CanvasApiError`, or `null` for any other error. */
+export function canvasErrorStatus(error: unknown): number | null {
+  const status = (error as Partial<CanvasApiError> | null)?.status;
+  return typeof status === 'number' ? status : null;
+}
+
+/** Says whether a 401 body is Canvas denying this resource (`"status": "unauthorized"`), not the token. */
+export function isPermissionDenial(body: string): boolean {
+  return /"status"\s*:\s*"unauthorized"/.test(body);
+}
+
+/** Sends the request and throws a `CanvasApiError` on any status outside 2xx (token refused on a bare 401). */
 export async function requestCanvas(deps: ClientDeps, req: CanvasRequest): Promise<Response> {
   const res = await sendCanvasRequest(deps, req);
-  if (res.status === 401) throw new Error(unauthorizedMessage(deps.baseUrl));
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(`Canvas ${res.status} on ${req.method} ${req.path}: ${text.slice(0, 300)}`);
+  if (res.ok) return res;
+  const text = await res.text().catch(() => '');
+  if (res.status === 401 && !isPermissionDenial(text)) {
+    throw canvasApiError(unauthorizedMessage(deps.baseUrl), 401, true);
   }
-  return res;
+  const message = `Canvas ${res.status} on ${req.method} ${req.path}: ${text.slice(0, 300)}`;
+  throw canvasApiError(message, res.status);
 }
 
 /** Fetches every page of a listing by following the `Link` header, up to `max` items. */
@@ -110,7 +139,8 @@ export async function fetchFileBytes(
   maxBytes = MAX_DOWNLOAD_BYTES,
 ): Promise<Uint8Array> {
   const res = await fetchDownload(fetchFn, url);
-  return readLimitedBytes(res.body, maxBytes, tooLargeMessage('The file', maxBytes + 1, url));
+  const limitMessage = tooLargeMessage('The file', maxBytes + 1, redactVerifier(url));
+  return readLimitedBytes(res.body, maxBytes, limitMessage);
 }
 
 /** Creates the Canvas client. */

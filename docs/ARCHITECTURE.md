@@ -88,12 +88,13 @@ No credentials in the repository or on the server: the Canvas token exists only 
 
 ## Runtime dependencies
 
-| Package                              | What for                                                   |
-| ------------------------------------ | ---------------------------------------------------------- |
-| `@modelcontextprotocol/sdk`          | MCP server over Streamable HTTP                            |
-| `zod` (v3)                           | Tool input schemas                                         |
-| `@cloudflare/workers-oauth-provider` | OAuth 2.1 for the Gmail connector (DCR, PKCE, consent, KV) |
-| `@cloudflare/containers`             | `Container` class of the WhatsApp bridge's Durable Object  |
+| Package                              | What for                                                         |
+| ------------------------------------ | ---------------------------------------------------------------- |
+| `@modelcontextprotocol/sdk`          | MCP server over Streamable HTTP                                  |
+| `zod` (v3)                           | Tool input schemas                                               |
+| `@cloudflare/workers-oauth-provider` | OAuth 2.1 for the Gmail connector (DCR, PKCE, consent, KV)       |
+| `@cloudflare/containers`             | `Container` class of the WhatsApp bridge's Durable Object        |
+| `htmlparser2`                        | HTML tokenizer for text and links (`src/core/html.ts`, ADR 0025) |
 
 The WhatsApp bridge is a separate Go module (`connectors/whatsapp/bridge/go.mod`: whatsmeow, SQLite), with
 licenses in `connectors/whatsapp/NOTICE.md` (note: `go.mau.fi/libsignal` is GPL-3.0).

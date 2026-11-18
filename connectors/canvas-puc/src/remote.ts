@@ -6,8 +6,8 @@ import { envValue, parseFlag, type EnvVars } from '../../../src/core/env.js';
 import { z } from 'zod';
 import type { RemoteConnector, SecretRenewal } from '../../../src/remote/handler.js';
 import type { StreamedToolContent, ToolCallRequest } from '../../../src/remote/streamed-tool.js';
-import type { CanvasAttachment } from './canvas-types.js';
 import { createCanvasClient, type CanvasClient } from './client.js';
+import { resolveCanvasFile } from './file-ref.js';
 import { streamCanvasFile } from './files.js';
 import { downloadFileShape } from './tools-read.js';
 import type { LoginPageText } from '../../../src/remote/login-page.js';
@@ -195,8 +195,7 @@ export async function streamCanvasTool(
 ): Promise<StreamedToolContent | null> {
   if (call.name !== 'download_file') return null;
   const args = z.object(downloadFileShape).parse(call.args);
-  const file = await client.get<CanvasAttachment>(`/files/${String(args.file_id)}`);
-  return streamCanvasFile(client, file, args);
+  return streamCanvasFile(client, await resolveCanvasFile(client, args), args);
 }
 
 /** Builds the remote Canvas connector for the HTTP server. */

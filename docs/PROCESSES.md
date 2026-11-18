@@ -48,8 +48,21 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
      (`buildUrl()` + `Authorization: Bearer`); listings follow the pages with `collectPages()` and `parseNextLink()`.
      Helpers such as `activeCourses()`, `fetchOwnSubmission()` and `getAllOrEmpty()` compose lookups.
   4. Responses become lean objects with English keys (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
-     etc.), with HTML converted by `htmlToText()`.
-  5. Files: `read_file_text` uses `readCanvasFileText()`, which downloads text with `fetchPlainText()` or, for
+     etc.), with HTML converted by `htmlToText()`. Content HTML (assignments, pages, forums with
+     `flattenDiscussion()`, announcements with `toAnnouncement()`) goes through `canvasHtml()` (ADR 0025):
+     `parseHtmlContent()` tokenizes it with htmlparser2 (`openHtmlTag()`, `closeHtmlTag()`, `openHtmlAnchor()`,
+     `closeHtmlAnchor()`, `addHtmlMedia()`, `addHtmlRef()`, `markHtmlRef()`, `keptHtmlAttrs()`, `safeHttpUrl()`,
+     `tidyHtmlText()`) into text with `title [link N]` marks, and `classifyCanvasRef()` types each reference
+     (`isCanvasUrl()`, `canvasRefTarget()`, `canvasTargetOf()`, `videoProviderOf()`, `hostMatches()`). The views add
+     `links` (`linksField()` for posts) and, with `raw_html`, the original HTML (`rawHtmlField()`).
+     `list_linked_files` runs `listLinkedFiles()`: `fetchLinkSources()` (`linkSource()`) and the modules feed
+     `originLinks()` (`moduleItemLinks()`), and `collectLinkedFiles()` (`isLinkedFileLink()`, `linkedFileKey()`,
+     `toLinkedFile()`) keeps one entry per file or video. `list_files` adds `LIST_FILES_HINT`, or with
+     `include_linked` calls `listFilesWithLinked()` (`linkedOnlyRows()`, `linkedOnlyNote()`).
+  5. Files: both file tools first find the file with `resolveCanvasFile()`: `fileRefFromArgs()` (`fileRefFromUrl()`)
+     reads `file_id`/`url`/`course_id`, and `fileLookupPlan()` tries the course, global and verifier endpoints; when
+     all fail, `fileAccessError()` (`fileAccessReason()`, `canvasErrorStatus()`) lists each one. `read_file_text`
+     uses `readCanvasFileText()`, which downloads text with `fetchPlainText()` or, for
      Word (`wordKind()`), the bytes with `fetchFileBytes()` and extracts the text with `wordToText()` (`docxToText()`
      over `readZipEntry()`; `docToText()` over `openCfb()`/`readCfbStream()` and `parsePieceTable()`).
      `download_file` uses `downloadCanvasFile()`: `planCanvasDownload()` applies `downloadRefusal()` (no link or above
@@ -68,8 +81,10 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
   7. `toToolResult()` returns the JSON (via `textResult()`) or the ready-made result to Claude; any error becomes
      `errorResult()` with the message.
 - **Result:** Claude receives only the useful fields, with absolute links and clean text.
-- **Failures:** 401 becomes `unauthorizedMessage()` (generate another token and reconnect); any other non-2xx status
-  becomes an error with status and body; invalid arguments are rejected by zod.
+- **Failures:** a 401 that refuses the token becomes `unauthorizedMessage()` (generate another token and reconnect);
+  a 401 whose body denies only the resource (`isPermissionDenial()`) and any other non-2xx status become a
+  `canvasApiError()` with status and body; invalid arguments are rejected by zod. Download errors hide verifiers
+  (`redactVerifier()`).
 
 ## P04 — (removed) Browser login
 
@@ -157,7 +172,8 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
   1. `handleMcp()` reads the Canvas token with `readAccessSecret()` (`openSealed()` checks type and expiry).
   2. `serveMcpWithStreaming()` first tries `streamToolQuietly()` (ADR 0023): `readToolCallRequest()` reads a clone
      of the body (`parseToolCallRequest()`, `asJsonObject()`) and the connector's `streamTool`, `streamCanvasTool()`,
-     takes only `download_file`: `canvasClientFor()` builds the client and `streamCanvasFile()` plans the part with
+     takes only `download_file`: `canvasClientFor()` builds the client, `resolveCanvasFile()` finds the file
+     (P03 step 5) and `streamCanvasFile()` plans the part with
      `planCanvasDownload()` and opens it with `openCanvasChunk()` (P03 step 5).
      `streamedToolResponse()` writes the JSON-RPC result from `streamedResultFrame()` around the body encoded by
      `base64EncodeStream()` (`splitBase64Ready()`) and framed by `framedStream()`, so no file ever sits

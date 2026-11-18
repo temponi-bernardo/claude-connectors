@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   MAX_TEXT_LENGTH,
   flattenDiscussion,
+  linksField,
+  rawHtmlField,
   shortText,
   toAnnouncement,
   toAssignmentDetail,
@@ -20,6 +22,8 @@ import {
   toSubmissionDetail,
   toSubmissionFlags,
 } from './format.js';
+
+const BASE = 'https://c.test';
 
 describe('shortText', () => {
   it('converts HTML and cuts at the limit', () => {
@@ -192,11 +196,43 @@ describe('toSubmissionDetail', () => {
 describe('toAssignmentDetail', () => {
   it('converts the description and includes the submission when there is one', () => {
     const a = { id: 1, description: '<p>Do it</p>', rubric: [{ description: 'C' }] };
-    expect(toAssignmentDetail(a, null)).toMatchObject({ description: 'Do it', submission: null });
-    expect(toAssignmentDetail({ id: 2 }, { score: 7 })).toMatchObject({
+    expect(toAssignmentDetail(a, null, BASE)).toMatchObject({
+      description: 'Do it',
+      links: [],
+      submission: null,
+    });
+    expect(toAssignmentDetail({ id: 2 }, { score: 7 }, BASE)).toMatchObject({
       rubric: [],
       submission: { score: 7 },
     });
+  });
+});
+
+describe('toAssignmentDetail links', () => {
+  it('marks the embedded file in the text and returns it in links', () => {
+    const a = {
+      id: 1,
+      description: '<p><a href="/courses/9/files/5?verifier=v">Lista 1</a></p>',
+    };
+    const view = toAssignmentDetail(a, null, BASE);
+    expect(view.description).toBe('Lista 1 [link 1]');
+    expect(view.links).toEqual([
+      expect.objectContaining({ type: 'file', file_id: '5', course_id: '9', followable: true }),
+    ]);
+  });
+});
+
+describe('rawHtmlField and linksField', () => {
+  it('adds the raw HTML only when asked', () => {
+    expect(rawHtmlField('body_html', '<p>x</p>', true)).toEqual({ body_html: '<p>x</p>' });
+    expect(rawHtmlField('body_html', null, true)).toEqual({ body_html: '' });
+    expect(rawHtmlField('body_html', '<p>x</p>', false)).toEqual({});
+  });
+
+  it('adds links only when there are some', () => {
+    expect(linksField([])).toEqual({});
+    const link = { n: 1, type: 'external' as const, title: 't', url: 'u', followable: false };
+    expect(linksField([link])).toEqual({ links: [link] });
   });
 });
 
@@ -237,14 +273,27 @@ describe('toEnrollmentGrade', () => {
 describe('toAnnouncement', () => {
   it("prefers the author's name and converts the text", () => {
     expect(
-      toAnnouncement({
-        id: 1,
-        message: '<b>hi</b>',
-        author: { display_name: 'A' },
-        user_name: 'B',
-      }),
-    ).toMatchObject({ author: 'A', text: 'hi' });
-    expect(toAnnouncement({ id: 1, user_name: 'B' })).toMatchObject({ author: 'B', text: '' });
+      toAnnouncement(
+        {
+          id: 1,
+          message: '<b>hi</b>',
+          author: { display_name: 'A' },
+          user_name: 'B',
+        },
+        BASE,
+      ),
+    ).toMatchObject({ author: 'A', text: 'hi', links: [] });
+    expect(toAnnouncement({ id: 1, user_name: 'B' }, BASE)).toMatchObject({
+      author: 'B',
+      text: '',
+    });
+  });
+
+  it('keeps the links of the whole message even when the text is cut', () => {
+    const message = `<p>${'x'.repeat(4000)}</p><a href="https://youtu.be/abc">aula</a>`;
+    const view = toAnnouncement({ id: 1, message }, BASE);
+    expect((view.text as string).length).toBe(3000);
+    expect(view.links).toEqual([expect.objectContaining({ type: 'video', provider: 'youtube' })]);
   });
 });
 
@@ -275,14 +324,28 @@ describe('flattenDiscussion', () => {
   it('flattens nested replies with the depth and the author', () => {
     const names = new Map([['1', 'Ana']]);
     const flat = flattenDiscussion(
-      [{ user_id: 1, message: '<p>a</p>', replies: [{ user_id: 2, message: 'b' }] }],
-      names,
+      [
+        {
+          user_id: 1,
+          message: '<p>a <a href="https://e.test/x">site</a></p>',
+          replies: [{ user_id: 2, message: 'b' }],
+        },
+      ],
+      { names, baseUrl: BASE },
     );
     expect(flat).toEqual([
-      { depth: 0, author: 'Ana', date: undefined, text: 'a' },
+      {
+        depth: 0,
+        author: 'Ana',
+        date: undefined,
+        text: 'a site [link 1]',
+        links: [
+          { n: 1, type: 'external', title: 'site', url: 'https://e.test/x', followable: false },
+        ],
+      },
       { depth: 1, author: undefined, date: undefined, text: 'b' },
     ]);
-    expect(flattenDiscussion(undefined, names)).toEqual([]);
+    expect(flattenDiscussion(undefined, { names, baseUrl: BASE })).toEqual([]);
   });
 });
 

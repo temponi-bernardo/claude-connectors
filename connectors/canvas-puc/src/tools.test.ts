@@ -54,6 +54,7 @@ describe('canvasTools', () => {
       'list_modules',
       'get_page',
       'list_files',
+      'list_linked_files',
       'read_file_text',
       'download_file',
       'list_discussions',
@@ -192,7 +193,14 @@ describe('read tools', () => {
       context_codes: ['course_1'],
       start_date: '2026-10-06T12:00:00.000Z',
     });
-    expect(all.result).toEqual([expect.objectContaining({ text: 'hi' })]);
+    expect(all.result).toEqual([expect.objectContaining({ text: 'hi', links: [] })]);
+    expect(all.result[0]).not.toHaveProperty('message_html');
+    const raw = await run(
+      'list_announcements',
+      { course_id: 1, raw_html: true },
+      { '/announcements': [{ id: 5, message: '<b>hi</b>' }] },
+    );
+    expect(raw.result).toEqual([expect.objectContaining({ message_html: '<b>hi</b>' })]);
     const one = await run(
       'list_announcements',
       { course_id: 3, days: 1 },
@@ -227,7 +235,44 @@ describe('read tools', () => {
       { '/courses/1/files': [{ id: 1, size: 1024 }] },
     );
     expect(files.getAll.mock.calls[0]![1]).toMatchObject({ search_term: 'pdf' });
-    expect(files.result).toEqual([expect.objectContaining({ size_kb: 1 })]);
+    const listed = toToolResult(files.result).content;
+    expect(JSON.parse((listed[0] as { text: string }).text)).toEqual([
+      expect.objectContaining({ size_kb: 1 }),
+    ]);
+    expect((listed[1] as { text: string }).text).toContain('list_linked_files');
+  });
+
+  it('list_files with include_linked adds the files only the course content links to', async () => {
+    const routes = {
+      '/courses/1/files': [{ id: 1 }],
+      '/courses/1/assignments': [{ id: 2, description: '<a href="/courses/1/files/9">hidden</a>' }],
+      '/courses/1/pages': [],
+      '/courses/1/discussion_topics': [],
+      '/courses/1/modules': [],
+    };
+    const { result } = await run('list_files', { course_id: 1, include_linked: true }, routes);
+    const content = toToolResult(result).content;
+    expect((content[0] as { text: string }).text).toContain('"linked_only": true');
+    expect((content[1] as { text: string }).text).toContain('1 file(s)');
+  });
+
+  it('list_linked_files returns the files and videos linked from the course', async () => {
+    const routes = {
+      '/courses/1/assignments': [
+        { id: 2, name: 'A', description: '<iframe src="https://youtu.be/x"></iframe>' },
+      ],
+      '/courses/1/pages': [],
+      '/courses/1/discussion_topics': [],
+      '/courses/1/modules': [],
+    };
+    const { result } = await run('list_linked_files', { course_id: 1 }, routes);
+    expect(result).toEqual([
+      expect.objectContaining({
+        type: 'video',
+        provider: 'youtube',
+        found_in: [expect.anything()],
+      }),
+    ]);
   });
 
   it('get_page encodes the page_url and converts the body', async () => {
@@ -236,7 +281,60 @@ describe('read tools', () => {
       { course_id: 1, page_url: 'a b' },
       { '/courses/1/pages/a%20b': { title: 'P', body: '<p>c</p>' } },
     );
-    expect(result).toMatchObject({ title: 'P', body: 'c' });
+    expect(result).toMatchObject({ title: 'P', body: 'c', links: [] });
+    expect(result).not.toHaveProperty('body_html');
+  });
+
+  it('get_page returns the links of the body and the raw HTML when asked', async () => {
+    const body = '<p><a href="/courses/1/files/3/download">slides</a></p>';
+    const { result } = await run(
+      'get_page',
+      { course_id: 1, page_url: 'p', raw_html: true },
+      { '/courses/1/pages/p': { title: 'P', body } },
+    );
+    expect(result).toMatchObject({
+      body: 'slides [link 1]',
+      links: [{ type: 'file', file_id: '3', course_id: '1' }],
+      body_html: body,
+    });
+  });
+
+  it('get_assignment returns the embedded file and video of the description', async () => {
+    const description =
+      '<p><a href="/courses/1/files/5?verifier=v" data-api-endpoint="https://x.test/api/v1/courses/1/files/5">Revisão</a></p><iframe title="Vídeo" src="/media_attachments_iframe/6?type=video"></iframe>';
+    const routes = {
+      '/courses/1/assignments/2': { id: 2, description },
+      '/courses/1/assignments/2/submissions/self': new Error('none'),
+    };
+    const plain = await run('get_assignment', { course_id: 1, assignment_id: 2 }, routes);
+    expect(plain.result).toMatchObject({
+      description: 'Revisão [link 1]\n Vídeo [link 2]',
+      links: [
+        { n: 1, type: 'file', file_id: '5' },
+        { n: 2, type: 'video', file_id: '6' },
+      ],
+    });
+    expect(plain.result).not.toHaveProperty('description_html');
+    const raw = await run(
+      'get_assignment',
+      { course_id: 1, assignment_id: 2, raw_html: true },
+      routes,
+    );
+    expect(raw.result).toMatchObject({ description_html: description });
+  });
+
+  it('download_file and read_file_text accept a Canvas file url and use its course and verifier', async () => {
+    const url = 'https://x.test/courses/1/files/5?verifier=v';
+    const file = { display_name: 'a.md', url: 'u', 'content-type': 'text/markdown', size: 1 };
+    const read = await run('read_file_text', { url }, { '/courses/1/files/5': file, u: 'hi' });
+    expect(read.result).toBe('# a.md\n\nhi');
+    const down = await run(
+      'download_file',
+      { url },
+      { '/courses/1/files/5': new Error('403'), '/files/5': file, u: new Response('x') },
+    );
+    expect(down.get.mock.calls.map((c) => c[0])).toEqual(['/courses/1/files/5', '/files/5']);
+    expect(toToolResult(down.result).content).toHaveLength(2);
   });
 
   it('read_file_text reads text, converts HTML and returns the link for binaries', async () => {
@@ -289,8 +387,16 @@ describe('read tools', () => {
     expect(ok.result).toMatchObject({
       title: 'F',
       description: 'e',
+      links: [],
       posts: [{ author: 'Ana', text: 'hi' }],
     });
+    expect(ok.result).not.toHaveProperty('description_html');
+    const raw = await run(
+      'get_discussion',
+      { course_id: 1, topic_id: 2, raw_html: true },
+      { [base]: { id: 2, message: '<p>e</p>' }, [`${base}/view`]: {} },
+    );
+    expect(raw.result).toMatchObject({ description_html: '<p>e</p>' });
     const noView = await run(
       'get_discussion',
       { course_id: 1, topic_id: 2 },
