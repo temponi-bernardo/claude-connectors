@@ -129,4 +129,4 @@ export const WHATSAPP_WORKER_HANDLERS = {
   fetch: handleWhatsAppFetch,
   scheduled: (event: { readonly cron: string }, env: WhatsAppEnv): Promise<string> =>
     runScheduledSync(env, event.cron),
-};
+} as const;
