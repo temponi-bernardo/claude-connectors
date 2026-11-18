@@ -100,6 +100,11 @@ mutable `Map`/`Set`/array/object literal not typed read-only, outside a reviewed
   WhatsApp `state` → Canvas `POST /authorize` 400; each Worker's `client_id` on the other 400; control on its own
   Worker 200. `/mcp` without or with a random token → 401 on all three.
 
+**Accepted by the owner (2026-11-18):** the two-user run and the token revocation were proven on Cloudflare with
+the production code (temporary Workers) and not on the production Workers, because that would need real Canvas
+tokens, which the audit rules forbid. The production Workers were checked with real sealed values crossed between
+them and with bad tokens (401).
+
 ## Residual risks
 
 - Revoking one Canvas user is done in Canvas (delete the token); it takes effect on the next call (proven live
