@@ -3,6 +3,7 @@
  * All pure: takes the API JSON and returns only the useful fields.
  */
 import { htmlToText } from '../../../src/core/html.js';
+import { canvasHtml, type CanvasLink } from './links.js';
 import type {
   CanvasAnnouncement,
   CanvasAssignment,
@@ -30,6 +31,16 @@ export const MAX_TEXT_LENGTH = 3000;
 /** Converts HTML to text and cuts it at `MAX_TEXT_LENGTH`. */
 export function shortText(html: string | null | undefined): string {
   return htmlToText(html).slice(0, MAX_TEXT_LENGTH);
+}
+
+/** `{ [key]: html }` when the raw HTML was asked for (`raw_html: true`), else `{}`; spread into a view. */
+export function rawHtmlField(key: string, html: string | null | undefined, wanted: boolean): View {
+  return wanted ? { [key]: html ?? '' } : {};
+}
+
+/** `{ links }` when there are links, else `{}`: keeps long lists (forum posts) lean. */
+export function linksField(links: readonly CanvasLink[]): View {
+  return links.length > 0 ? { links } : {};
 }
 
 /** Profile of the signed-in user. */
@@ -135,8 +146,13 @@ export function toSubmissionDetail(s: CanvasSubmission): View {
   };
 }
 
-/** Full assignment: description as text, dates, rubric and (if any) the student's submission. */
-export function toAssignmentDetail(a: CanvasAssignment, submission: CanvasSubmission | null): View {
+/** Full assignment: description as text with `[link N]` marks, its links, dates, rubric and submission. */
+export function toAssignmentDetail(
+  a: CanvasAssignment,
+  submission: CanvasSubmission | null,
+  baseUrl: string,
+): View {
+  const description = canvasHtml(a.description, baseUrl);
   return {
     id: a.id,
     name: a.name,
@@ -146,7 +162,8 @@ export function toAssignmentDetail(a: CanvasAssignment, submission: CanvasSubmis
     points: a.points_possible,
     submission_types: a.submission_types,
     allowed_extensions: a.allowed_extensions,
-    description: htmlToText(a.description),
+    description: description.text,
+    links: description.links,
     rubric: (a.rubric ?? []).map(toRubricCriterion),
     submission: submission ? toSubmissionDetail(submission) : null,
     url: a.html_url,
@@ -180,15 +197,17 @@ export function toEnrollmentGrade(
   };
 }
 
-/** Course announcement with its text converted and cut. */
-export function toAnnouncement(a: CanvasAnnouncement): View {
+/** Course announcement with its text converted and cut, and the links of the whole message. */
+export function toAnnouncement(a: CanvasAnnouncement, baseUrl: string): View {
+  const message = canvasHtml(a.message, baseUrl);
   return {
     id: a.id,
     title: a.title,
     course: a.context_code,
     author: a.author?.display_name ?? a.user_name,
     posted_at: a.posted_at,
-    text: shortText(a.message),
+    text: message.text.slice(0, MAX_TEXT_LENGTH),
+    links: message.links,
     url: a.html_url,
   };
 }
@@ -224,21 +243,29 @@ export function toDiscussionSummary(d: CanvasDiscussionTopic): View {
   };
 }
 
-/** Flattens a forum's post tree, marking the depth of each reply. */
+/** What `flattenDiscussion` needs besides the entries: participant names and the Canvas base URL. */
+export interface DiscussionContext {
+  readonly names: ReadonlyMap<string, string>;
+  readonly baseUrl: string;
+}
+
+/** Flattens a forum's post tree, marking the depth of each reply and keeping the links of each post. */
 export function flattenDiscussion(
   entries: readonly CanvasDiscussionEntry[] | undefined,
-  names: ReadonlyMap<string, string>,
+  ctx: DiscussionContext,
   depth = 0,
-): { depth: number; author: string | undefined; date: string | undefined; text: string }[] {
-  return (entries ?? []).flatMap((e) => [
-    {
+): View[] {
+  return (entries ?? []).flatMap((e) => {
+    const message = canvasHtml(e.message, ctx.baseUrl);
+    const post = {
       depth,
-      author: names.get(String(e.user_id)),
+      author: ctx.names.get(String(e.user_id)),
       date: e.created_at,
-      text: htmlToText(e.message),
-    },
-    ...flattenDiscussion(e.replies, names, depth + 1),
-  ]);
+      text: message.text,
+      ...linksField(message.links),
+    };
+    return [post, ...flattenDiscussion(e.replies, ctx, depth + 1)];
+  });
 }
 
 /** Calendar event with a short text description. */

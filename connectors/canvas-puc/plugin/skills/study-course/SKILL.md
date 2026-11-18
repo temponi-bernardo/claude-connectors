@@ -13,9 +13,17 @@ Ask (if it is not clear) which course and which slice: specific modules, "up to 
 ## 2. Read the content
 
 1. `list_modules` for the course to see the sequence of lectures.
-2. For each item in scope: `get_page` for pages and `read_file_text` for files (slides, PDFs, documents). Read
-   only what is needed; if the volume is large, agree with the user on where to start.
-3. Note what could not be opened (videos, images, PDFs without text) so the user can check it on their own.
+2. For each item in scope: `get_page` for pages and `read_file_text` or `download_file` for files (slides,
+   PDFs, documents). Read only what is needed; if the volume is large, agree with the user on where to start.
+3. **Follow the links.** `get_page` and `get_assignment` return the text with `title [link N]` marks and a `links`
+   list. For every link in scope with `type: "file"`, open it with `download_file` (PDF, slides, images) or
+   `read_file_text` (text, Word), passing its `url` (or `file_id`). Teachers often hide these files from the Files
+   area, so they never show up in `list_files`. For a quick inventory of the whole course, use
+   `list_linked_files`. Follow `page` and `assignment` links with `get_page`/`get_assignment` when they belong to
+   the scope.
+4. Videos (`type: "video"`) and `external` links cannot be opened here: list them with title and link so the user
+   can watch or open them. If `download_file` says a file is hidden, locked or not permitted, report that reason.
+5. Note what could not be opened (videos, images, PDFs without text) so the user can check it on their own.
 
 ## 3. Study material
 

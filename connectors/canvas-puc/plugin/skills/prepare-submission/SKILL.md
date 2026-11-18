@@ -15,9 +15,17 @@ types and rubric.
 
 ## 2. Read the supporting material
 
-For each file or page cited in the description, use `read_file_text` or `get_page`. If the description mentions a
-lecture or module, look in `list_modules` or use `search`. Say what you could not open (for example, a scanned PDF
-without text).
+The description comes with `title [link N]` marks and a `links` list. Open every attachment automatically, without
+waiting to be asked:
+
+- `type: "file"` (or `image`): `download_file` (PDF, slides, images) or `read_file_text` (text, code, Word), with the
+  link's `url` (or its `file_id`). These files are often hidden from the Files area and missing from `list_files`.
+- `type: "page"` or `"assignment"`: `get_page` (`page_url`) or `get_assignment` (`assignment_id`).
+- `type: "video"` or `"external"`: list them with title and link; they cannot be opened here.
+
+If the description mentions a lecture or module without a link, look in `list_modules`, `list_linked_files` or
+`search`. Say what you could not open and why (the error of `download_file` says whether the file is hidden,
+locked or not permitted; a scanned PDF may have no text).
 
 ## 3. Checklist and plan
 

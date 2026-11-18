@@ -59,6 +59,9 @@ export interface CanvasAttachment {
   readonly size?: number;
   readonly updated_at?: string;
   readonly 'content-type'?: string;
+  readonly hidden_for_user?: boolean;
+  readonly locked_for_user?: boolean;
+  readonly lock_explanation?: string;
 }
 
 export interface CanvasSubmission {

@@ -38,7 +38,10 @@ export function tooLargeMessage(name: string, size: number, url: string): string
 /** Why the file cannot be downloaded into the conversation (no link or too large), or `null` if it can. */
 export function downloadRefusal(file: CanvasAttachment): string | null {
   const name = String(file.display_name);
-  if (!file.url) return `"${name}" has no download link available for this account.`;
+  if (!file.url) {
+    const why = file.lock_explanation ? ` Canvas says: ${htmlToText(file.lock_explanation)}` : '';
+    return `"${name}" has no download link available for this account (locked or restricted).${why}`;
+  }
   if ((file.size ?? 0) > MAX_DOWNLOAD_BYTES) return tooLargeMessage(name, file.size ?? 0, file.url);
   return null;
 }

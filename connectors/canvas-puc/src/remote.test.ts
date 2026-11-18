@@ -169,6 +169,20 @@ describe('streamCanvasTool', () => {
     await expect(new Response(content!.body).text()).resolves.toBe('456');
   });
 
+  it('streams a hidden file from a Canvas link, through the course endpoint', async () => {
+    const settings = settingsWith(new Response(JSON.stringify(file)), new Response('pdf'));
+    const args = { url: `${BASE}/courses/7/files/1?verifier=v&wrap=1` };
+    const content = await streamCanvasTool(canvasClientFor(settings, 'tok'), {
+      id: 1,
+      name: 'download_file',
+      args,
+    });
+    expect((settings.fetchFn.mock.calls[0]![0] as URL).href).toBe(
+      `${BASE}/api/v1/courses/7/files/1`,
+    );
+    await expect(new Response(content!.body).text()).resolves.toBe('pdf');
+  });
+
   it('is the connector streamTool', async () => {
     const settings = settingsWith(new Response(JSON.stringify(file)), new Response('pdf'));
     const call = { id: 1, name: 'download_file', args: { file_id: '1' } };

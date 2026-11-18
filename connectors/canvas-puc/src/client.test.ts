@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  canvasApiError,
+  canvasErrorStatus,
   collectPages,
+  isPermissionDenial,
   createCanvasClient,
   fetchDownload,
   fetchFileBytes,
@@ -76,11 +79,49 @@ describe('requestCanvas', () => {
     expect(f).toHaveBeenCalledOnce();
   });
 
+  it('on a 401 that denies only the resource, keeps the status and does not blame the token', async () => {
+    const body = '{"status":"unauthorized","errors":[{"message":"user not authorized"}]}';
+    const f = fakeFetch(new Response(body, { status: 401 }));
+    const error: unknown = await requestCanvas(deps(f), { method: 'GET', path: '/a' }).catch(
+      (e: unknown) => e,
+    );
+    expect(error).toMatchObject({ status: 401, tokenRejected: false });
+    expect(String(error)).toContain('Canvas 401 on GET /a');
+  });
+
+  it('marks a bare 401 as a rejected token', async () => {
+    const f = fakeFetch(json({ errors: [{ message: 'Invalid access token.' }] }, { status: 401 }));
+    const error: unknown = await requestCanvas(deps(f), { method: 'GET', path: '/a' }).catch(
+      (e: unknown) => e,
+    );
+    expect(error).toMatchObject({ status: 401, tokenRejected: true });
+  });
+
   it('includes the status and body in other errors', async () => {
     const f = fakeFetch(new Response('forbidden', { status: 403 }));
     await expect(requestCanvas(deps(f), { method: 'GET', path: '/a' })).rejects.toThrow(
       'Canvas 403 on GET /a: forbidden',
     );
+  });
+});
+
+describe('canvasApiError and canvasErrorStatus', () => {
+  it('reads the status of a Canvas error and null for anything else', () => {
+    expect(canvasErrorStatus(canvasApiError('x', 404))).toBe(404);
+    expect(canvasApiError('x', 401, true).tokenRejected).toBe(true);
+    expect(canvasErrorStatus(new Error('x'))).toBeNull();
+    expect(canvasErrorStatus(null)).toBeNull();
+  });
+});
+
+describe('isPermissionDenial', () => {
+  it.each([
+    ['{"status":"unauthorized","errors":[]}', true],
+    ['{"status": "unauthorized"}', true],
+    ['{"errors":[{"message":"Invalid access token."}]}', false],
+    ['', false],
+  ])('%s → %s', (body, expected) => {
+    expect(isPermissionDenial(body)).toBe(expected);
   });
 });
 
@@ -144,6 +185,17 @@ describe('fetchFileBytes', () => {
     await expect(
       fetchFileBytes(f as unknown as typeof fetch, 'https://f.test/a', 4),
     ).rejects.toThrow('above the 70 MB limit');
+  });
+
+  it('never puts the verifier of the URL in the error', async () => {
+    const f = fakeFetch(new Response(new Uint8Array(5)));
+    const error: unknown = await fetchFileBytes(
+      f as unknown as typeof fetch,
+      'https://f.test/a?verifier=secret&x=1',
+      4,
+    ).catch((e: unknown) => e);
+    expect(String(error)).toContain('verifier=[hidden]&x=1');
+    expect(String(error)).not.toContain('secret');
   });
 });
 

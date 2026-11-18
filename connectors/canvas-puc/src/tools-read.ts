@@ -2,9 +2,8 @@
  * Canvas read tools (profile, courses, planner, assignments, grades, announcements, content, forums).
  */
 import { z } from 'zod';
-import { htmlToText } from '../../../src/core/html.js';
 import { READ_ONLY_HINTS, toolAnnotations } from '../../../src/mcp/annotations.js';
-import { defineTool, type ToolSpec } from '../../../src/mcp/tools.js';
+import { defineTool, rawToolResult, textResult, type ToolSpec } from '../../../src/mcp/tools.js';
 import type {
   CanvasAnnouncement,
   CanvasAssignment,
@@ -22,16 +21,34 @@ import type {
 } from './canvas-types.js';
 import type { CanvasContext } from './context.js';
 import { MAX_CHUNK_BYTES } from './chunks.js';
+import { resolveCanvasFile } from './file-ref.js';
 import { downloadCanvasFile, MAX_DOWNLOAD_MB, readCanvasFileText } from './files.js';
 import * as f from './format.js';
 import * as h from './helpers.js';
+import { listFilesWithLinked, listLinkedFiles, LIST_FILES_HINT } from './linked-files.js';
+import { canvasHtml } from './links.js';
 
 const id = z.union([z.string(), z.number()]);
 const courseId = id.describe('Course ID (see list_courses)');
+const rawHtml = z
+  .boolean()
+  .optional()
+  .describe('Also return the original HTML, for debugging (default false)');
+
+/** How to point to a file: `file_id`, a Canvas file `url` (from `links`) or both, plus the course. */
+export const fileRefShape = {
+  file_id: id.optional().describe('File ID (from list_files, list_linked_files or a link file_id)'),
+  url: z
+    .string()
+    .max(2048)
+    .optional()
+    .describe('Full Canvas file link (the url of a file link); its verifier opens hidden files'),
+  course_id: courseId.optional(),
+};
 
 /** Arguments of `download_file`, shared with its streamed version in remote mode (ADR 0023, 0024). */
 export const downloadFileShape = {
-  file_id: id,
+  ...fileRefShape,
   offset: z
     .number()
     .int()
@@ -111,8 +128,8 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   defineTool({
     name: 'get_assignment',
     description:
-      "Assignment details: description as text, rubric, dates and the student's submission and feedback.",
-    shape: { course_id: courseId, assignment_id: id },
+      "Assignment details: description as text with [link N] marks, its links (embedded files, videos, pages; open files with download_file), rubric, dates and the student's submission and feedback.",
+    shape: { course_id: courseId, assignment_id: id, raw_html: rawHtml },
     annotations: toolAnnotations('Get assignment', READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
@@ -120,7 +137,10 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
         client.get<CanvasAssignment>(path),
         h.fetchOwnSubmission(client, args.course_id, args.assignment_id),
       ]);
-      return f.toAssignmentDetail(assignment, submission);
+      return {
+        ...f.toAssignmentDetail(assignment, submission, client.baseUrl),
+        ...f.rawHtmlField('description_html', assignment.description, args.raw_html === true),
+      };
     },
   }),
   defineTool({
@@ -152,6 +172,7 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
     shape: {
       course_id: courseId.optional().describe('When omitted, searches every active course'),
       days: z.number().int().min(1).max(365).optional().describe('Days back (default 30)'),
+      raw_html: rawHtml,
     },
     annotations: toolAnnotations('List announcements', READ_ONLY_HINTS),
     run: async ({ client, now }, args) => {
@@ -165,9 +186,10 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
         start_date: h.isoDaysFrom(now(), -(args.days ?? 30)),
         end_date: now().toISOString(),
       };
-      return (await client.getAll<CanvasAnnouncement>('/announcements', params)).map(
-        f.toAnnouncement,
-      );
+      return (await client.getAll<CanvasAnnouncement>('/announcements', params)).map((a) => ({
+        ...f.toAnnouncement(a, client.baseUrl),
+        ...f.rawHtmlField('message_html', a.message, args.raw_html === true),
+      }));
     },
   }),
   defineTool({
@@ -184,26 +206,36 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   defineTool({
     name: 'get_page',
     description:
-      "Read a course page as text. Use the page_url from list_modules, or 'front_page' for the home page.",
-    shape: { course_id: courseId, page_url: z.string() },
+      "Read a course page as text with [link N] marks and its links (files, videos, pages). Use the page_url from list_modules, or 'front_page' for the home page.",
+    shape: { course_id: courseId, page_url: z.string(), raw_html: rawHtml },
     annotations: toolAnnotations('Get page', READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/pages/${encodeURIComponent(args.page_url)}`;
       const p = await client.get<CanvasPage>(path);
+      const body = canvasHtml(p.body, client.baseUrl);
       return {
         title: p.title,
         updated_at: p.updated_at,
-        body: htmlToText(p.body),
+        body: body.text,
+        links: body.links,
         url: p.html_url,
+        ...f.rawHtmlField('body_html', p.body, args.raw_html === true),
       };
     },
   }),
   defineTool({
     name: 'list_files',
-    description: 'Files of a course (PDFs, slides etc.) with a download link, newest first.',
+    description:
+      'Files of a course (PDFs, slides etc.) with a download link, newest first. Canvas hides hidden or locked files from students here; files embedded in assignments and pages come with include_linked or list_linked_files.',
     shape: {
       course_id: courseId,
       search: z.string().min(2).optional().describe('Part of the file name'),
+      include_linked: z
+        .boolean()
+        .optional()
+        .describe(
+          'Also add the files linked from assignments, pages, forums and modules that this list misses',
+        ),
     },
     annotations: toolAnnotations('List files', READ_ONLY_HINTS),
     run: async ({ client }, args) => {
@@ -212,32 +244,35 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
         `/courses/${String(args.course_id)}/files`,
         params,
       );
-      return files.map(f.toFileInfo);
+      const listed = files.map(f.toFileInfo);
+      if (!args.include_linked) return rawToolResult(textResult(listed, [LIST_FILES_HINT]));
+      return listFilesWithLinked(client, args.course_id, listed);
     },
+  }),
+  defineTool({
+    name: 'list_linked_files',
+    description:
+      'Every file and video the content of a course points to (assignment descriptions, pages, forums, announcements and module items), one entry per file with where it appears. Finds files the teacher embedded but hid from list_files; open them with download_file.',
+    shape: { course_id: courseId },
+    annotations: toolAnnotations('List linked files', READ_ONLY_HINTS),
+    run: ({ client }, args) => listLinkedFiles(client, args.course_id),
   }),
   defineTool({
     name: 'read_file_text',
     description:
-      'Read a course file as text (txt, md, csv, code, html, doc and docx). For PDF or slides, use download_file.',
-    shape: { file_id: id },
+      'Read a course file as text (txt, md, csv, code, html, doc and docx), by file_id or by a Canvas file url from links (works for files hidden from list_files). For PDF or slides, use download_file.',
+    shape: fileRefShape,
     annotations: toolAnnotations('Read file as text', READ_ONLY_HINTS),
     run: async ({ client }, args) =>
-      readCanvasFileText(
-        client,
-        await client.get<CanvasAttachment>(`/files/${String(args.file_id)}`),
-      ),
+      readCanvasFileText(client, await resolveCanvasFile(client, args)),
   }),
   defineTool({
     name: 'download_file',
-    description: `Download a course file (PDF, slides, image etc., up to ${MAX_DOWNLOAD_MB} MB) and bring its content into the conversation.`,
+    description: `Download a course file (PDF, slides, image etc., up to ${MAX_DOWNLOAD_MB} MB) and bring its content into the conversation. Pass file_id or a Canvas file url from links (works for files hidden from list_files; tries the course, global and verifier endpoints).`,
     shape: downloadFileShape,
     annotations: toolAnnotations('Download file', READ_ONLY_HINTS),
     run: async ({ client }, args) =>
-      downloadCanvasFile(
-        client,
-        await client.get<CanvasAttachment>(`/files/${String(args.file_id)}`),
-        args,
-      ),
+      downloadCanvasFile(client, await resolveCanvasFile(client, args), args),
   }),
   defineTool({
     name: 'list_discussions',
@@ -252,8 +287,8 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   defineTool({
     name: 'get_discussion',
     description:
-      'Read a discussion forum: its prompt and every post, with the depth of each reply.',
-    shape: { course_id: courseId, topic_id: id },
+      'Read a discussion forum: its prompt and every post, with the depth of each reply and the links of each one.',
+    shape: { course_id: courseId, topic_id: id, raw_html: rawHtml },
     annotations: toolAnnotations('Get discussion', READ_ONLY_HINTS),
     run: async ({ client }, args) => {
       const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}`;
@@ -261,8 +296,16 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
         client.get<CanvasDiscussionTopic>(path),
         client.get<CanvasDiscussionView>(`${path}/view`).catch((): CanvasDiscussionView => ({})),
       ]);
-      const posts = f.flattenDiscussion(view.view, h.participantNames(view));
-      return { title: topic.title, description: htmlToText(topic.message), posts };
+      const names = h.participantNames(view);
+      const posts = f.flattenDiscussion(view.view, { names, baseUrl: client.baseUrl });
+      const prompt = canvasHtml(topic.message, client.baseUrl);
+      return {
+        title: topic.title,
+        description: prompt.text,
+        links: prompt.links,
+        posts,
+        ...f.rawHtmlField('description_html', topic.message, args.raw_html === true),
+      };
     },
   }),
   defineTool({
