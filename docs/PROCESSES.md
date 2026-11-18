@@ -237,17 +237,19 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      and sets the link cookie.
   3. The user confirms; `startAccountLink()` calls `redeemConfirmedTicket()`, which requires
      `isConfirmedInThisBrowser()` (the sealed confirmation names the same ticket and the cookie hash) and redeems the
-     ticket with `redeemLinkTicket()` (single use, marked in KV). It creates the `state` (`link.` + random), verifier
-     and `nonce`, stores the sealed request under the key from `linkRequestKey()` and redirects with
-     `googleAuthorizeUrl()`.
+     ticket with `redeemLinkTicket()` (single use, marked in KV). `beginLinkStage()` starts the `verify` stage:
+     `storeLinkRequest()` keeps the sealed request under a `link.` state and `linkStageUrl()` sends the browser to
+     Google with `OWNER_CHECK_SCOPES` and the owner `login_hint`.
   4. On return, `finishAccountLink()` takes the request with `takeLinkRequest()` (single use, cookie checked by
-     `readCookie()` and `sha256Hex()`).
-  5. `linkSafely()` runs `linkFromCode()`, which exchanges the code, validates the `id_token`, checks `linkRefusalReason()`
+     `readCookie()` and `sha256Hex()`) and `linkSafely()` runs its stage. In `verify`, `verifyOwnerThenLink()`
+     requires the `id_token` `sub` to be the owner (otherwise `notOwnerPage()`, 403, nothing linked) and starts the
+     `link` stage with `beginLinkStage()` (Gmail scopes, offline access), keeping the cookie.
+  5. In `link`, `linkSafely()` runs `linkFromCode()`, which exchanges the code, validates the `id_token`, checks `linkRefusalReason()`
      (`gmail.modify` scope with `hasModifyScope()` and refresh token) and stores with `storeGoogleAccount()` (`upsertAccount()`,
      `saveOwnerAccounts()`, seal from `sealOwnerAccounts()`) under the ticket's user.
 - **Result:** "Account linked" page; the cookie is cleared with `linkCookie()`.
 - **Failures:** expired link, already used, from another Worker, or confirmed without the page's cookie →
-  `invalidTicketPage()`; refusal at Google → "Link
+  `invalidTicketPage()`; owner check signed in with another Google account (a forwarded link) → `notOwnerPage()`; refusal at Google → "Link
   cancelled"; Gmail permission unchecked → "Missing permission"; more than 10 accounts → limit error.
 
 ## P12 — Answer a Gmail tool
@@ -293,8 +295,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      follows P08 (step 6).
 - **Result:** the connector shows up as connected; the secret sealed in the tokens is only the owner's email.
 - **Failures:** login cancelled or account outside the list → 403 page with the reason (`escapeHtml()`); expired `state` →
-  400; missing secret, or more than one email in `ALLOWED_EMAILS` without `ALLOW_SHARED_OWNER=true` (single tenant)
-  → 500 explaining which one.
+  400; missing secret, or `ALLOWED_EMAILS` without exactly one email (single tenant) → 500 explaining which one.
 
 ## P14 — Answer a WhatsApp tool (on demand)
 

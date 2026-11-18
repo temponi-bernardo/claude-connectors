@@ -6,7 +6,7 @@ no script, produced by `renderLoginPage()` in `src/remote/login-page.ts`, styled
 tokens below (light and dark via `prefers-color-scheme`). The GitHub Pages **public site** (ADR 0012:
 `docs/index.html`, `privacy.html`, `terms.html`; `privacidade.html` and `termos.html` only redirect) uses the same tokens in `docs/site.css`, with no script. The Gmail
 connector's pages (consent, link confirmation with the masked owner email and the warning in `--danger`, and link
-result, `connectors/gmail/src/pages.ts`) use the same `LOGIN_PAGE_CSS`. The login page may show one optional
+result and the "Not the owner of this link" refusal, `connectors/gmail/src/pages.ts`) use the same `LOGIN_PAGE_CSS`. The login page may show one optional
 permission as an unticked checkbox (`grantCheckbox()`, class `.option`: inline checkbox, normal weight), e.g. the
 Canvas write opt-in. WhatsApp's
 `/pair` page (`renderPairPage()` in `connectors/whatsapp/src/pair-page.ts`, ADR 0015) uses `LOGIN_PAGE_CSS` plus
