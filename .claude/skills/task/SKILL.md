@@ -25,7 +25,10 @@ Target task: `$ARGUMENTS` (empty = the "Next task" at the top of `docs/ROADMAP.m
 7. **Commits**: small, Conventional Commits with an English description (ADR 0021).
 8. **PR:** `gh pr create` with a conventional title, body from the template (`.github/PULL_REQUEST_TEMPLATE.md`),
    documentation checklist filled item by item. Before that, run `npm run pr:check -- "<PR title>"` (there is no
-   CI, ADR 0006); fix until green; answer comments.
+   CI, ADR 0006); fix until green; answer comments. In a Claude Code cloud session the Docker daemon is
+   installed but stopped, and `whatsapp:build` needs it even in dry-run: start it first with
+   `(dockerd > /dev/null 2>&1 &)` and wait until `docker info` answers. Without `gh` there, open and merge the PR
+   with the GitHub MCP tools (`create_pull_request`, `merge_pull_request` with `merge_method: squash`).
 9. **Merge:** Claude merges with a green `pr:check` (`docs/WORKFLOW.md`). Run `pr:check` again on the final
    branch, then `gh pr merge --squash --delete-branch`. If the PR touched the Canvas connector, deploy the remote
    server from the updated `main`: `npm run worker:deploy` (needs `CLOUDFLARE_API_TOKEN`, ADR 0010). If it
