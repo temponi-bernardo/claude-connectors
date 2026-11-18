@@ -65,6 +65,7 @@ describe('canvasTools', () => {
       'list_conversations',
       'get_conversation',
       'submit_text_assignment',
+      'submit_file_assignment',
       'reply_to_discussion',
       'send_message',
       'reply_to_conversation',
@@ -465,6 +466,22 @@ describe('write tools', () => {
     );
     expect(post).toHaveBeenCalledWith(path, submissionPayload('url', 'u'));
     expect(result).toEqual({ ok: true, submitted_at: 'd', attempt: 1 });
+  });
+
+  it('submit_file_assignment uploads the text file and submits it', async () => {
+    const base = '/courses/1/assignments/2';
+    const { result, upload } = await run(
+      'submit_file_assignment',
+      { course_id: 1, assignment_id: 2, file_name: 'r.txt', content: 'hi' },
+      {
+        [base]: { id: 2, submission_types: ['online_upload'], allowed_extensions: ['txt'] },
+        [`${base}/submissions/self/files`]: { upload_url: 'https://up.test/u' },
+        'https://up.test/u': { id: 5, display_name: 'r.txt', size: 2 },
+        [`${base}/submissions`]: { submitted_at: 'd', attempt: 1 },
+      },
+    );
+    expect(upload.mock.calls[0]![1]).toMatchObject({ name: 'r.txt', contentType: 'text/plain' });
+    expect(result).toMatchObject({ ok: true, file: { id: 5 } });
   });
 
   it('reply_to_discussion posts the message', async () => {

@@ -3,7 +3,10 @@ import {
   canvasApiError,
   canvasErrorStatus,
   collectPages,
+  confirmUpload,
   isPermissionDenial,
+  postUploadForm,
+  uploadForm,
   createCanvasClient,
   fetchDownload,
   fetchFileBytes,
@@ -199,7 +202,75 @@ describe('fetchFileBytes', () => {
   });
 });
 
+const SLOT = { upload_url: 'https://up.test/u', upload_params: { key: 'k1', policy: 'p' } };
+const FILE = { name: 'r.txt', contentType: 'text/plain', bytes: new Uint8Array([104, 105]) };
+
+describe('uploadForm', () => {
+  it("puts Canvas's params first and the file last", async () => {
+    const form = uploadForm(SLOT, FILE);
+    expect([...form.keys()]).toEqual(['key', 'policy', 'file']);
+    const blob = form.get('file') as File;
+    expect(blob.name).toBe('r.txt');
+    expect(blob.type).toBe('text/plain');
+    await expect(blob.text()).resolves.toBe('hi');
+  });
+
+  it('accepts a slot without params', () => {
+    expect([...uploadForm({ upload_url: 'u' }, FILE).keys()]).toEqual(['file']);
+  });
+});
+
+describe('postUploadForm', () => {
+  it('posts the form without the Canvas token and without following redirects', async () => {
+    const f = fakeFetch(json({}));
+    await postUploadForm(f as unknown as typeof fetch, SLOT, FILE);
+    const [url, init] = f.mock.calls[0]!;
+    expect(String(url)).toBe('https://up.test/u');
+    expect(init).toMatchObject({ method: 'POST', redirect: 'manual' });
+    expect(init).not.toHaveProperty('headers');
+    expect(init?.body).toBeInstanceOf(FormData);
+  });
+});
+
+describe('confirmUpload', () => {
+  it('reads the file from a 2xx answer', async () => {
+    const f = fakeFetch();
+    await expect(confirmUpload(deps(f), json({ id: 9 }, { status: 201 }))).resolves.toEqual({
+      id: 9,
+    });
+    expect(f).not.toHaveBeenCalled();
+  });
+
+  it('confirms a 3xx answer at its Location with the token', async () => {
+    const f = fakeFetch(json({ id: 9 }));
+    const redirect = new Response(null, {
+      status: 302,
+      headers: { location: 'https://x.test/api/v1/files/9/create_success?uuid=u' },
+    });
+    await expect(confirmUpload(deps(f), redirect)).resolves.toEqual({ id: 9 });
+    const [url, init] = f.mock.calls[0]!;
+    expect(String(url)).toBe('https://x.test/api/v1/files/9/create_success?uuid=u');
+    expect(init).toMatchObject({ method: 'POST', headers: { Authorization: 'Bearer t' } });
+  });
+
+  it('fails on a refused upload or a redirect without Location', async () => {
+    const f = fakeFetch();
+    await expect(confirmUpload(deps(f), new Response('denied', { status: 403 }))).rejects.toThrow(
+      /upload \(403\): denied/,
+    );
+    await expect(confirmUpload(deps(f), new Response(null, { status: 302 }))).rejects.toThrow(
+      /upload \(302\)/,
+    );
+  });
+});
+
 describe('createCanvasClient', () => {
+  it('uploads a file and confirms it', async () => {
+    const f = fakeFetch(json({ id: 9 }, { status: 201 }));
+    await expect(createCanvasClient(deps(f)).upload(SLOT, FILE)).resolves.toEqual({ id: 9 });
+    expect(String(f.mock.calls[0]![0])).toBe('https://up.test/u');
+  });
+
   it('exposes get, getAll with per_page, post, fetchText and fetchBytes', async () => {
     const f = fakeFetch(
       json({ g: 1 }),

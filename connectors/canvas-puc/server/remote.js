@@ -21828,6 +21828,29 @@ async function fetchFileBytes(fetchFn, url, maxBytes = MAX_DOWNLOAD_BYTES) {
   const limitMessage = tooLargeMessage("The file", maxBytes + 1, redactVerifier(url));
   return readLimitedBytes(res.body, maxBytes, limitMessage);
 }
+function uploadForm(slot, file) {
+  const form = new FormData();
+  for (const [key, value] of Object.entries(slot.upload_params ?? {})) form.append(key, value);
+  const blob = new Blob([file.bytes], { type: file.contentType });
+  form.append("file", blob, file.name);
+  return form;
+}
+function postUploadForm(fetchFn, slot, file) {
+  return fetchFn(slot.upload_url, {
+    method: "POST",
+    body: uploadForm(slot, file),
+    redirect: "manual"
+  });
+}
+async function confirmUpload(deps, res) {
+  if (res.ok) return await res.json();
+  const location = res.headers.get("location");
+  if (res.status >= 300 && res.status < 400 && location) {
+    return await (await requestCanvas(deps, { method: "POST", path: location })).json();
+  }
+  const text = await res.text().catch(() => "");
+  throw new Error(`Canvas rejected the file upload (${res.status}): ${text.slice(0, 300)}`);
+}
 function createCanvasClient(deps) {
   return {
     baseUrl: deps.baseUrl,
@@ -21840,7 +21863,8 @@ function createCanvasClient(deps) {
     post: async (path, body) => await (await requestCanvas(deps, { method: "POST", path, body })).json(),
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
-    fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers)
+    fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers),
+    upload: async (slot, file) => confirmUpload(deps, await postUploadForm(deps.fetchFn, slot, file))
   };
 }
 
@@ -26826,6 +26850,87 @@ var CANVAS_INBOX_WRITE_TOOLS = [
   })
 ];
 
+// connectors/canvas-puc/src/upload.ts
+var MAX_UPLOAD_MB = 5;
+var MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
+var CONTENT_TYPES = {
+  txt: "text/plain",
+  md: "text/markdown",
+  csv: "text/csv",
+  html: "text/html",
+  json: "application/json",
+  pdf: "application/pdf",
+  zip: "application/zip",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+};
+function decodeUploadContent(content, encoding) {
+  if (encoding === "text") return new TextEncoder().encode(content);
+  const clean = content.replace(/\s+/g, "");
+  if (clean.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(clean)) {
+    throw new Error('The content is not valid base64; send text files with encoding "text".');
+  }
+  return Uint8Array.from(atob(clean), (c) => c.charCodeAt(0));
+}
+function fileExtension(name) {
+  const dot = name.lastIndexOf(".");
+  return dot > 0 ? name.slice(dot + 1).toLowerCase() : "";
+}
+function uploadContentType(name) {
+  return CONTENT_TYPES[fileExtension(name)] ?? "application/octet-stream";
+}
+function extensionRefusal(allowed, name) {
+  if (!allowed?.length) return null;
+  const ext = fileExtension(name);
+  if (allowed.some((a) => a.toLowerCase() === ext)) return null;
+  const which = ext ? `".${ext}"` : "no extension";
+  return `"${name}" has ${which}; the assignment only accepts: ${allowed.join(", ")}.`;
+}
+function uploadSizeRefusal(size) {
+  if (size === 0) return "The file is empty.";
+  if (size <= MAX_UPLOAD_BYTES) return null;
+  const mb = (size / 1024 / 1024).toFixed(1);
+  return `The file is ${mb} MB, above the ${MAX_UPLOAD_MB} MB limit; submit it in Canvas itself.`;
+}
+function uploadRefusal(assignment, name, size) {
+  const types = assignment.submission_types ?? [];
+  if (!types.includes("online_upload")) {
+    const label = assignment.name ?? String(assignment.id);
+    return `"${label}" does not accept file uploads (accepts: ${types.join(", ") || "none"}).`;
+  }
+  return extensionRefusal(assignment.allowed_extensions, name) ?? uploadSizeRefusal(size);
+}
+function onlineUploadPayload(fileIds) {
+  return { submission: { submission_type: "online_upload", file_ids: fileIds } };
+}
+function uploadedFileFromArgs(args) {
+  const name = args.file_name.trim();
+  const bytes = decodeUploadContent(args.content, args.encoding);
+  return { name, bytes, contentType: args.content_type ?? uploadContentType(name) };
+}
+async function submitFileAssignment(client, base, file) {
+  const assignment = await client.get(base);
+  const refusal = uploadRefusal(assignment, file.name, file.bytes.length);
+  if (refusal !== null) throw new Error(refusal);
+  const slot = await client.post(`${base}/submissions/self/files`, {
+    name: file.name,
+    size: file.bytes.length,
+    content_type: file.contentType
+  });
+  const uploaded = await client.upload(slot, file);
+  const fileIds = [uploaded.id ?? ""];
+  const s = await client.post(
+    `${base}/submissions`,
+    onlineUploadPayload(fileIds)
+  );
+  const summary = { id: uploaded.id, name: uploaded.display_name, size: uploaded.size };
+  return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt, file: summary };
+}
+
 // connectors/canvas-puc/src/tools-write.ts
 var id3 = external_exports.union([external_exports.string(), external_exports.number()]);
 function submissionPayload(kind, content) {
@@ -26849,6 +26954,23 @@ var CANVAS_WRITE_TOOLS = [
         submissionPayload(args.type, args.content)
       );
       return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt };
+    }
+  }),
+  defineTool({
+    name: "submit_file_assignment",
+    description: `SUBMITS a file to an assignment that accepts uploads (online_upload). Real action, visible to the teacher: show the file name and content and confirm with the user first. Pass the file in content: plain text with encoding "text" (e.g. a .txt report), or base64 with encoding "base64". At most ${MAX_UPLOAD_MB} MB; the extension must be in the assignment's allowed_extensions.`,
+    shape: {
+      course_id: id3,
+      assignment_id: id3,
+      file_name: external_exports.string().trim().min(1).max(255).describe("Name with extension, e.g. report.txt"),
+      content: external_exports.string().min(1).describe('File content: text, or base64 with encoding "base64"'),
+      encoding: external_exports.enum(["text", "base64"]).default("text"),
+      content_type: external_exports.string().min(1).optional().describe("MIME type; guessed from the extension")
+    },
+    annotations: toolAnnotations("Submit file assignment", SEND_HINTS),
+    run: ({ client }, args) => {
+      const base = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
+      return submitFileAssignment(client, base, uploadedFileFromArgs(args));
     }
   }),
   defineTool({

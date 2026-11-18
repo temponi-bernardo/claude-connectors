@@ -38,6 +38,8 @@ export interface CanvasClient {
   readonly fetchBytes: (url: string) => Promise<Uint8Array>;
   /** Opens a file download without reading it (the caller streams the body); `headers` e.g. `Range`. */
   readonly fetchStream: (url: string, headers?: Record<string, string>) => Promise<Response>;
+  /** Sends a file to an upload slot and returns the confirmed Canvas file (upload steps 2 and 3). */
+  readonly upload: <T>(slot: CanvasUploadSlot, file: UploadedBytes) => Promise<T>;
 }
 
 /** 401 message: the token expired or was revoked; tells the user to generate another and reconnect. */
@@ -143,6 +145,52 @@ export async function fetchFileBytes(
   return readLimitedBytes(res.body, maxBytes, limitMessage);
 }
 
+/** Upload slot Canvas answers in step 1 of a file upload (where and with which fields to send the file). */
+export interface CanvasUploadSlot {
+  readonly upload_url: string;
+  readonly upload_params?: Readonly<Record<string, string>>;
+}
+
+/** A file to upload: name, MIME type and bytes. */
+export interface UploadedBytes {
+  readonly name: string;
+  readonly contentType: string;
+  readonly bytes: Uint8Array;
+}
+
+/** Builds the multipart form of upload step 2: Canvas's params first, the file last (Canvas requires it). */
+export function uploadForm(slot: CanvasUploadSlot, file: UploadedBytes): FormData {
+  const form = new FormData();
+  for (const [key, value] of Object.entries(slot.upload_params ?? {})) form.append(key, value);
+  const blob = new Blob([file.bytes as Uint8Array<ArrayBuffer>], { type: file.contentType });
+  form.append('file', blob, file.name);
+  return form;
+}
+
+/** Sends the file to the upload URL (step 2): no Canvas token (the URL is signed) and no redirect following. */
+export function postUploadForm(
+  fetchFn: typeof fetch,
+  slot: CanvasUploadSlot,
+  file: UploadedBytes,
+): Promise<Response> {
+  return fetchFn(slot.upload_url, {
+    method: 'POST',
+    body: uploadForm(slot, file),
+    redirect: 'manual',
+  });
+}
+
+/** Upload step 3: reads the file of a 2xx answer, or confirms a 3xx at its `Location` with the token. */
+export async function confirmUpload<T>(deps: ClientDeps, res: Response): Promise<T> {
+  if (res.ok) return (await res.json()) as T;
+  const location = res.headers.get('location');
+  if (res.status >= 300 && res.status < 400 && location) {
+    return (await (await requestCanvas(deps, { method: 'POST', path: location })).json()) as T;
+  }
+  const text = await res.text().catch(() => '');
+  throw new Error(`Canvas rejected the file upload (${res.status}): ${text.slice(0, 300)}`);
+}
+
 /** Creates the Canvas client. */
 export function createCanvasClient(deps: ClientDeps): CanvasClient {
   return {
@@ -160,5 +208,7 @@ export function createCanvasClient(deps: ClientDeps): CanvasClient {
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
     fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers),
+    upload: async <T>(slot: CanvasUploadSlot, file: UploadedBytes) =>
+      confirmUpload<T>(deps, await postUploadForm(deps.fetchFn, slot, file)),
   };
 }

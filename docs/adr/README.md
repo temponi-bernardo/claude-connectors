@@ -30,3 +30,4 @@ that marks the old one as "Superseded by NNNN". Template in [0000-template.md](0
 | [0023](0023-streamed-canvas-downloads.md)                | Streamed Canvas downloads up to 70 MB                           | Accepted                            | 2026-11-16 |
 | [0024](0024-canvas-downloads-in-parts.md)                | Canvas downloads in parts of 8 MB                               | Accepted                            | 2026-11-16 |
 | [0025](0025-canvas-html-links-and-hidden-files.md)       | Links of Canvas HTML and access to hidden files                 | Accepted                            | 2026-11-18 |
+| [0026](0026-canvas-file-submissions.md)                  | Canvas file submissions from the tool call                      | Accepted                            | 2026-11-18 |
