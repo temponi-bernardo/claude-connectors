@@ -11,6 +11,9 @@ import {
   renewCanvasSecret,
   renewCanvasToken,
   withCanvasUserAgent,
+  CANVAS_WRITE_GRANT,
+  CANVAS_WRITE_OPTION_LABEL,
+  canWriteFor,
   canvasLoginText,
   canvasClientFor,
   canvasRemoteConnector,
@@ -84,7 +87,25 @@ describe('withCanvasUserAgent', () => {
 
 describe('canvasLoginText', () => {
   it('points the help link to the Canvas tokens page', () => {
-    expect(canvasLoginText(BASE).helpUrl).toBe(`${BASE}/profile/settings`);
+    expect(canvasLoginText(BASE, false).helpUrl).toBe(`${BASE}/profile/settings`);
+  });
+
+  it('offers the unticked write opt-in only when the server allows writing', () => {
+    expect(canvasLoginText(BASE, false).grantOption).toBeUndefined();
+    expect(canvasLoginText(BASE, true).grantOption).toEqual({
+      name: CANVAS_WRITE_GRANT,
+      label: CANVAS_WRITE_OPTION_LABEL,
+    });
+  });
+});
+
+describe('canWriteFor', () => {
+  it('allows writing only with the server flag AND the user opt-in', () => {
+    const on = settingsWith();
+    const off = { ...on, allowWrite: false };
+    expect(canWriteFor(on, [CANVAS_WRITE_GRANT])).toBe(true);
+    expect(canWriteFor(on, [])).toBe(false);
+    expect(canWriteFor(off, [CANVAS_WRITE_GRANT])).toBe(false);
   });
 });
 
@@ -118,7 +139,7 @@ describe('canvasRemoteConnector', () => {
     await expect(
       connector.login.kind === 'secret' && connector.login.verify('abc'),
     ).resolves.toBeUndefined();
-    expect(connector.createServer('abc').isConnected()).toBe(false);
+    expect(connector.createServer('abc', []).isConnected()).toBe(false);
   });
 
   it("renews the token's expiry through Canvas", async () => {
