@@ -135,6 +135,7 @@ export function testDeps(fetcher: Fetcher, kv: FakeKv = new FakeKv()): OwnerDeps
     now: () => TEST_NOW_MS,
     origin: TEST_ORIGIN,
     owner: TEST_OWNER,
+    ownerEmail: 'owner@example.com',
   };
 }
 
