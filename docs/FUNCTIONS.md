@@ -36,7 +36,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/gmail/src/gmail-api.ts`: [`gmailUrl`](#gmailurl), [`gmailHttpError`](#gmailhttperror), [`gmailErrorDetail`](#gmailerrordetail), [`sendGmailRequest`](#sendgmailrequest), [`readGmailJson`](#readgmailjson), [`gmailCall`](#gmailcall), [`gmailGet`](#gmailget), [`gmailWrite`](#gmailwrite)
 - `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`randomToken`](#randomtoken), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken), [`revokeGoogleToken`](#revokegoogletoken)
 - `connectors/gmail/src/id-token.ts`: [`decodeJwtJson`](#decodejwtjson), [`decodeJwt`](#decodejwt), [`idTokenProblems`](#idtokenproblems), [`checkIdTokenClaims`](#checkidtokenclaims), [`fetchGoogleKey`](#fetchgooglekey), [`verifyRs256`](#verifyrs256), [`verifyGoogleIdToken`](#verifygoogleidtoken)
-- `connectors/gmail/src/link-flow.ts`: [`nowSeconds`](#nowseconds), [`issueLinkUrl`](#issuelinkurl), [`openLinkTicket`](#openlinkticket), [`usedTicketKey`](#usedticketkey), [`redeemLinkTicket`](#redeemlinkticket), [`showLinkConfirmation`](#showlinkconfirmation), [`isConfirmedInThisBrowser`](#isconfirmedinthisbrowser), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`invalidTicketPage`](#invalidticketpage), [`redeemConfirmedTicket`](#redeemconfirmedticket), [`startAccountLink`](#startaccountlink), [`takeLinkRequest`](#takelinkrequest), [`linkRefusalReason`](#linkrefusalreason), [`storeGoogleAccount`](#storegoogleaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
+- `connectors/gmail/src/link-flow.ts`: [`nowSeconds`](#nowseconds), [`issueLinkUrl`](#issuelinkurl), [`openLinkTicket`](#openlinkticket), [`usedTicketKey`](#usedticketkey), [`redeemLinkTicket`](#redeemlinkticket), [`showLinkConfirmation`](#showlinkconfirmation), [`isConfirmedInThisBrowser`](#isconfirmedinthisbrowser), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`invalidTicketPage`](#invalidticketpage), [`redeemConfirmedTicket`](#redeemconfirmedticket), [`storeLinkRequest`](#storelinkrequest), [`linkStageUrl`](#linkstageurl), [`beginLinkStage`](#beginlinkstage), [`startAccountLink`](#startaccountlink), [`notOwnerPage`](#notownerpage), [`verifyOwnerThenLink`](#verifyownerthenlink), [`takeLinkRequest`](#takelinkrequest), [`linkRefusalReason`](#linkrefusalreason), [`storeGoogleAccount`](#storegoogleaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
 - `connectors/gmail/src/mailbox-tools.ts`: [`toggleAction`](#toggleaction), [`writableTargets`](#writabletargets), [`runMailboxAction`](#runmailboxaction)
 - `connectors/gmail/src/mailbox.ts`: [`mailTargets`](#mailtargets), [`checkLabelChange`](#checklabelchange), [`resolveLabelIds`](#resolvelabelids), [`fetchLabels`](#fetchlabels), [`applyLabelChange`](#applylabelchange), [`targetCounts`](#targetcounts), [`moveToTrash`](#movetotrash)
 - `connectors/gmail/src/message-format.ts`: [`base64UrlToBytes`](#base64urltobytes), [`partCharset`](#partcharset), [`decodePartBody`](#decodepartbody), [`headerValues`](#headervalues), [`flattenParts`](#flattenparts), [`isBodyPart`](#isbodypart), [`messageBodyText`](#messagebodytext), [`messageAttachments`](#messageattachments), [`truncateText`](#truncatetext), [`internalDateIso`](#internaldateiso), [`pickHeaders`](#pickheaders), [`formatMessage`](#formatmessage), [`perMessageLimit`](#permessagelimit), [`formatThread`](#formatthread), [`summarizeThread`](#summarizethread)
@@ -2085,7 +2085,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/env.ts`
 - **Signature:** `parseFlag(value: string | null): boolean`
-- **Used by:** `readAllowedEmails()`, `readCanvasRemoteSettings()`, `readSendSettings()`
+- **Used by:** `readCanvasRemoteSettings()`, `readSendSettings()`
 - **Processes:** P08, P13, P17
 
 <!-- generated:end -->
@@ -3448,7 +3448,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/oauth.ts`
 - **Signature:** `pkceChallenge(verifier: string): string`
-- **Used by:** `beginGoogleSignIn()`, `redeemAuthorizationCode()`, `startAccountLink()`
+- **Used by:** `beginGoogleSignIn()`, `linkStageUrl()`, `redeemAuthorizationCode()`
 - **Processes:** P08, P10, P11
 
 <!-- generated:end -->
@@ -3603,7 +3603,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/seal.ts`
 - **Signature:** `sealPayload(payload: unknown, key: Buffer): string`
-- **Used by:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `showLinkConfirmation()`, `startAccountLink()`, `startPairLogin()`
+- **Used by:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `showLinkConfirmation()`, `startPairLogin()`, `storeLinkRequest()`
 - **Processes:** P08, P10, P11, P12, P13, P15, P18
 
 <!-- generated:end -->
@@ -5110,7 +5110,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/google-oauth.ts`
 - **Signature:** `googleRedirectUri(origin: string): string`
-- **Used by:** `beginGoogleSignIn()`, `exchangeGoogleCode()`, `startAccountLink()`
+- **Used by:** `beginGoogleSignIn()`, `exchangeGoogleCode()`, `linkStageUrl()`
 - **Processes:** P10, P11
 
 <!-- generated:end -->
@@ -5127,13 +5127,13 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/google-oauth.ts`
 - **Signature:** `googleAuthorizeUrl(params: GoogleAuthorizeParams): string`
-- **Used by:** `beginGoogleSignIn()`, `startAccountLink()`
+- **Used by:** `beginGoogleSignIn()`, `linkStageUrl()`
 - **Processes:** P10, P11
 
 <!-- generated:end -->
 
 - **Does:** Builds the Google authorization URL.
-- **Input:** `params`: client, redirect URI, scopes, `state`, PKCE challenge, `nonce` and `offline` (requests a refresh token and new consent).
+- **Input:** `params`: client, redirect, scopes, `state`, PKCE challenge, `nonce`, `offline` and optional `loginHint`.
 - **Output:** The authorization URL with PKCE S256 and account selection.
 - **Effects:** None (pure).
 - **Errors:** None.
@@ -5144,7 +5144,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/google-oauth.ts`
 - **Signature:** `randomToken(bytes = 32): string`
-- **Used by:** `beginGoogleSignIn()`, `completeSignIn()`, `issueLinkUrl()`, `mimeBoundary()`, `showLinkConfirmation()`, `startAccountLink()`
+- **Used by:** `beginGoogleSignIn()`, `beginLinkStage()`, `completeSignIn()`, `issueLinkUrl()`, `mimeBoundary()`, `showLinkConfirmation()`, `storeLinkRequest()`
 - **Processes:** P10, P11, P18
 
 <!-- generated:end -->
@@ -5212,7 +5212,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/google-oauth.ts`
 - **Signature:** `exchangeGoogleCode(deps: GmailDeps, code: string, verifier: string): Promise<GoogleTokens>`
-- **Used by:** `completeSignIn()`, `linkFromCode()`
+- **Used by:** `completeSignIn()`, `linkFromCode()`, `verifyOwnerThenLink()`
 - **Processes:** P10, P11
 
 <!-- generated:end -->
@@ -5367,7 +5367,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/id-token.ts`
 - **Signature:** `async verifyGoogleIdToken(deps: GmailDeps, idToken: string, nonce: string): Promise<GoogleIdentity>`
-- **Used by:** `completeSignIn()`, `linkFromCode()`
+- **Used by:** `completeSignIn()`, `linkFromCode()`, `verifyOwnerThenLink()`
 - **Processes:** P10, P11
 
 <!-- generated:end -->
@@ -5386,7 +5386,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/link-flow.ts`
 - **Signature:** `linkRequestKey(state: string): string`
-- **Used by:** `startAccountLink()`, `takeLinkRequest()`
+- **Used by:** `storeLinkRequest()`, `takeLinkRequest()`
 - **Processes:** P11
 
 <!-- generated:end -->
@@ -5420,7 +5420,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/link-flow.ts`
 - **Signature:** `linkCookie(value: string | null): string`
-- **Used by:** `finishAccountLink()`, `showLinkConfirmation()`, `startAccountLink()`
+- **Used by:** `beginLinkStage()`, `finishAccountLink()`, `showLinkConfirmation()`
 - **Processes:** P11
 
 <!-- generated:end -->
@@ -5442,9 +5442,9 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Handles the confirmation `POST /accounts/link`: requires the confirmation from this browser (`redeemConfirmedTicket`), redeems the ticket and sends the browser to Google to link the account.
+- **Does:** Handles the confirmation `POST /accounts/link`: requires the confirmation from this browser (`redeemConfirmedTicket`), redeems the ticket and starts the owner check (`verify` stage) with `beginLinkStage()`.
 - **Input:** `deps`: dependencies. `request`: form POST with `ticket` and `confirm` and the link cookie.
-- **Output:** 302 to Google with the link cookie; 400 page without a valid ticket.
+- **Output:** 302 to Google (`openid email`, owner `login_hint`) with the link cookie; 400 page without a valid confirmation or ticket.
 - **Effects:** KV: marks the ticket and stores the sealed request (10 minutes, bound to the cookie set by the confirmation page).
 - **Errors:** Propagates KV failures.
 
@@ -5453,7 +5453,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/gmail/src/link-flow.ts`
-- **Signature:** `async takeLinkRequest(deps: GmailDeps, request: Request): Promise<LinkRequest | null>`
+- **Signature:** `async takeLinkRequest(deps: GmailDeps, request: Request): Promise<(LinkRequest & { readonly binding: string }) | null>`
 - **Used by:** `finishAccountLink()`
 - **Processes:** P11
 
@@ -5461,7 +5461,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Retrieves and deletes the link request on the return from Google.
 - **Input:** `deps`: dependencies. `request`: Google callback with `state` and cookie.
-- **Output:** User, verifier and `nonce`; null if absent, expired or from another browser.
+- **Output:** The request with its stage and the cookie binding; null if missing, expired, from another Worker, without a stage or the cookie does not match.
 - **Effects:** KV: reads and deletes the request (single use).
 - **Errors:** Propagates KV failures.
 
@@ -5487,13 +5487,13 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/gmail/src/link-flow.ts`
-- **Signature:** `async linkSafely(deps: GmailDeps, code: string, link: LinkRequest): Promise<Response>`
+- **Signature:** `async linkSafely(deps: GmailDeps, code: string, link: LinkRequest & { readonly binding: string }): Promise<Response>`
 - **Used by:** `finishAccountLink()`
 - **Processes:** P11
 
 <!-- generated:end -->
 
-- **Does:** Runs `linkFromCode()`, turning failures into an error page.
+- **Does:** Runs the stage of the request (`verifyOwnerThenLink()` or `linkFromCode()`); failures become a 400 page without storing anything.
 - **Input:** `deps`: connector dependencies. `code`: Google code. `link`: retrieved link request.
 - **Output:** The page from `linkFromCode()`, or a 400 page with the error message.
 - **Effects:** Those of `linkFromCode()` (network with Google; stores the account in KV when allowed).
@@ -5510,7 +5510,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Handles the Google callback in account linking.
+- **Does:** Return from Google when linking: checks the request, runs its stage and deletes the cookie unless the flow goes on to the next stage.
 - **Input:** `deps`: dependencies. `request`: callback with `state`, `code` or `error` and the cookie.
 - **Output:** Result page, always with the link cookie deleted.
 - **Effects:** Those of `takeLinkRequest()` and `linkSafely()`; deletes the cookie.
@@ -5522,7 +5522,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/link-flow.ts`
 - **Signature:** `nowSeconds(deps: GmailDeps): number`
-- **Used by:** `isConfirmedInThisBrowser()`, `issueLinkUrl()`, `openLinkTicket()`, `showLinkConfirmation()`, `startAccountLink()`, `takeLinkRequest()`
+- **Used by:** `isConfirmedInThisBrowser()`, `issueLinkUrl()`, `openLinkTicket()`, `showLinkConfirmation()`, `storeLinkRequest()`, `takeLinkRequest()`
 - **Processes:** P11
 
 <!-- generated:end -->
@@ -5691,7 +5691,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/gmail/src/link-flow.ts`
-- **Signature:** `async redeemConfirmedTicket(deps: GmailDeps, request: Request): Promise<{ readonly owner: string; readonly binding: string } | null>`
+- **Signature:** `async redeemConfirmedTicket(deps: GmailDeps, request: Request): Promise<LinkStageStart | null>`
 - **Used by:** `startAccountLink()`
 - **Processes:** P11
 
@@ -5699,9 +5699,94 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Checks the confirmation and the browser cookie, then redeems the ticket (single use).
 - **Input:** `deps`; `request`: confirmation POST.
-- **Output:** `{ owner, binding }` or null.
+- **Output:** `LinkStageStart` for the `verify` stage (owner, binding, owner email hint) or null.
 - **Effects:** Reads the body; reads and writes KV (used ticket).
 - **Errors:** None (invalid → null).
+
+### `storeLinkRequest`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `async storeLinkRequest(deps: GmailDeps, link: LinkRequest, binding: string): Promise<string>`
+- **Used by:** `beginLinkStage()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Stores the sealed link request (owner, PKCE verifier, nonce, stage, browser cookie hash, `aud`) under a new `link.` state.
+- **Input:** `deps`; `link`: `LinkRequest`; `binding`: link cookie value.
+- **Output:** The new `state`.
+- **Effects:** Writes KV (10 minutes).
+- **Errors:** None.
+
+### `linkStageUrl`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `linkStageUrl(deps: GmailDeps, link: LinkRequest & { readonly state: string }, loginHint: string | null): string`
+- **Used by:** `beginLinkStage()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Builds the Google address of a link stage: `openid email` with the owner `login_hint` for `verify`; Gmail scopes with offline access for `link`.
+- **Input:** `deps`; `link`: request + `state`; `loginHint`: owner email or null.
+- **Output:** Google authorization URL.
+- **Effects:** None.
+- **Errors:** None.
+
+### `beginLinkStage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `async beginLinkStage(deps: GmailDeps, start: LinkStageStart): Promise<Response>`
+- **Used by:** `startAccountLink()`, `verifyOwnerThenLink()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Starts a link stage: stores the request and redirects the browser to Google, keeping the binding cookie.
+- **Input:** `deps`; `start`: `LinkStageStart` (owner, binding, stage, login hint).
+- **Output:** 302 to Google with the link cookie.
+- **Effects:** Writes KV.
+- **Errors:** None.
+
+### `notOwnerPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `notOwnerPage(): Response`
+- **Used by:** `verifyOwnerThenLink()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Page shown when the Google account of the owner check is not the person who asked for the link.
+- **Input:** None.
+- **Output:** HTML `Response` 403 ("Nothing was linked").
+- **Effects:** None.
+- **Errors:** None.
+
+### `verifyOwnerThenLink`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `async verifyOwnerThenLink(deps: GmailDeps, code: string, link: LinkRequest & { readonly binding: string }): Promise<Response>`
+- **Used by:** `linkSafely()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** `verify` stage return: exchanges the code, validates the `id_token` and requires its `sub` to be the link owner; only then starts the `link` stage. A forwarded link opened by someone else stops here.
+- **Input:** `deps`; `code`: Google code; `link`: request with stage and binding.
+- **Output:** 302 to the `link` stage; 403 `notOwnerPage()`; 400 without `id_token`.
+- **Effects:** Network (Google token and JWKS); writes KV.
+- **Errors:** Rejects if Google fails or the `id_token` is invalid (`linkSafely()` turns it into a page).
 
 ## `connectors/gmail/src/message-format.ts`
 
@@ -5985,7 +6070,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/pages.ts`
 - **Signature:** `messagePage(title: string, message: string, status = 200): Response`
-- **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`
+- **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`, `notOwnerPage()`, `verifyOwnerThenLink()`
 - **Processes:** P10, P11
 
 <!-- generated:end -->
@@ -6053,7 +6138,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/pages.ts`
 - **Signature:** `redirectWith(location: string, headers: Headers = new Headers()): Response`
-- **Used by:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `finishSignIn()`, `startAccountLink()`, `submitAuthorize()`
+- **Used by:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `beginLinkStage()`, `finishSignIn()`, `submitAuthorize()`
 - **Processes:** P10, P11
 
 <!-- generated:end -->
@@ -7672,7 +7757,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Reads the owner list (`ALLOWED_EMAILS`); empty throws (nobody could sign in), and more than one email throws unless `ALLOW_SHARED_OWNER=true` (single tenant: everyone listed reads the same WhatsApp).
+- **Does:** Reads the owner (`ALLOWED_EMAILS`): exactly one email. Empty or more than one throws, with no override (single tenant: everyone listed would read the same WhatsApp).
 - **Input:** `env`.
 - **Output:** List of lowercase e-mails.
 - **Effects:** None (pure).
@@ -9375,7 +9460,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/token-store.ts`
 - **Signature:** `sha256Hex(text: string): string`
-- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerKey()`, `showLinkConfirmation()`, `startAccountLink()`, `takeLinkRequest()`, `usedTicketKey()`
+- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerKey()`, `showLinkConfirmation()`, `storeLinkRequest()`, `takeLinkRequest()`, `usedTicketKey()`
 - **Processes:** P10, P11, P12, P18
 
 <!-- generated:end -->
@@ -11700,3 +11785,4 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `CANVAS_WRITE_GRANT`          | `connectors/canvas-puc/src/remote.ts`       | Permission (`write`) a Canvas user opts into at login to get the send, reply and submit tools.                                            |
 | `CANVAS_WRITE_OPTION_LABEL`   | `connectors/canvas-puc/src/remote.ts`       | Label of the unticked write opt-in checkbox on the Canvas login page.                                                                     |
 | `LINK_CONFIRM_TYP`            | `connectors/gmail/src/link-flow.ts`         | Seal type of the Gmail link confirmation form (ticket `jti` + browser cookie hash).                                                       |
+| `OWNER_CHECK_SCOPES`          | `connectors/gmail/src/link-flow.ts`         | Scopes of the Gmail link owner check (`openid email`, no Gmail access).                                                                   |

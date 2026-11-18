@@ -7,7 +7,7 @@
 #   SNAPSHOT_KEY         32 bytes in base64 (AES-256-GCM for the R2 backups)
 #   GITHUB_CLIENT_ID     GitHub OAuth App client ID
 #   GITHUB_CLIENT_SECRET GitHub OAuth App secret
-#   ALLOWED_EMAILS       the owner's verified GitHub email (ONE; several of the same owner need ALLOW_SHARED_OWNER=true)
+#   ALLOWED_EMAILS       the owner's verified GitHub email (exactly ONE: single tenant)
 name = "whatsapp-remote"
 main = "src/index.ts"
 compatibility_date = "2026-10-01"

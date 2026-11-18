@@ -23,6 +23,8 @@ export interface GoogleAuthorizeParams {
   readonly nonce: string;
   /** Asks for a refresh token (`access_type=offline` + `prompt=consent`): only when linking an account. */
   readonly offline: boolean;
+  /** Suggests the account to sign in with (`login_hint`), e.g. the owner in the link's identity check. */
+  readonly loginHint?: string;
 }
 
 /** Google token endpoint response, already validated. */
@@ -62,6 +64,7 @@ export function googleAuthorizeUrl(params: GoogleAuthorizeParams): string {
     code_challenge: params.codeChallenge,
     code_challenge_method: 'S256',
     nonce: params.nonce,
+    ...(params.loginHint ? { login_hint: params.loginHint } : {}),
     ...(params.offline
       ? {
           access_type: 'offline',

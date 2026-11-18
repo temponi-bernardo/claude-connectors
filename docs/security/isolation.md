@@ -42,14 +42,17 @@ grants)`) with a Canvas client bound to that token; `serveMcpRequest()` closes i
 5. **Linking another account** — `link_account` issues a ticket (owner, owner email, `jti`, 10 minutes, `aud` =
    this Worker). `GET /accounts/link` only shows whose connector receives the account and sets a `__Host-`
    cookie; the `POST` confirmation must come from that page in that browser (sealed `jti` + cookie hash) before
-   the ticket is spent and the browser goes to Google.
+   the ticket is spent. Then the person must **prove they are the owner**: a Google sign-in with `openid email`
+   whose `sub` must equal the ticket owner (`verifyOwnerThenLink()`). Only after that does Google ask for Gmail
+   access for the account to add. Someone who opens a forwarded link cannot pass the owner check, so nothing of
+   theirs is linked.
 6. **Response/log** — `errorResult()` and `messagePage()` redact secrets.
 
 ### WhatsApp (`connectors/whatsapp/src/worker.ts`)
 
 1. **Auth** — the same handler as Canvas (`aud` included); the secret is the owner's email.
 2. **Owner** — `acceptsSecret()` re-checks the email against `ALLOWED_EMAILS` on every request → `403` otherwise.
-   `readAllowedEmails()` refuses more than one email unless `ALLOW_SHARED_OWNER=true`.
+   `readAllowedEmails()` requires exactly one email, with no override.
 3. **Server** — a new `McpServer` per request, wired to the single Durable Object.
 4. **Storage** — Durable Object `owner`, container and R2 snapshots (encrypted with `SNAPSHOT_KEY`): one person's.
 5. **`/pair`** — GitHub login of its own (`pair_login` → `pair_session` cookie, `aud` bound), email re-checked on
@@ -64,25 +67,38 @@ mutable `Map`/`Set`/array/object literal not typed read-only, outside a reviewed
 
 ## Findings
 
-| #   | Item                               | Verdict                  | Evidence                                                                                                            | Fix                                                                                                                                           | Test                                                                                                                               |
-| --- | ---------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Seals without audience             | Confirmed (no live leak) | `openSealed` only checked `typ`/`exp`; `issueTokenSet`, `registerClient`, pair seals and Gmail tickets had no `aud` | `aud` = issuer in every seal of the OAuth, `/pair` and Gmail link flows; `audienceMatches()` in `openSealed`. Keys are distinct → no rotation | `tokens.test.ts`, `seal.test.ts`, `canvas-puc/src/isolation.test.ts`, `whatsapp/src/worker.test.ts`, `gmail/src/link-flow.test.ts` |
-| 2   | Canvas writing on for everyone     | Confirmed                | `CANVAS_ALLOW_WRITE = "true"` gave every user `send_message`, `reply_to_*`, `submit_*`                              | Per-user opt-in: unticked checkbox on the login page, `write` grant sealed in the tokens; old tokens are read-only. Annotations checked       | `canvas-puc/src/isolation.test.ts`, `remote.test.ts` (`canWriteFor`), `handler.test.ts` (`chosenGrants`)                           |
-| 3   | Canvas without per-user revocation | Confirmed (by design)    | Stateless: access 1 h, refresh 30 days                                                                              | Documented: deleting the token in Canvas cuts that user at once (every call and every refresh hit Canvas). No denylist (it would need KV)     | `remote.test.ts` (`renewCanvasSecret` → `revoked`)                                                                                 |
-| 4   | WhatsApp with several owners       | Confirmed                | `readAllowedEmails` accepted any list                                                                               | More than one email throws unless `ALLOW_SHARED_OWNER=true`                                                                                   | `whatsapp/src/config.test.ts`, `worker.test.ts`                                                                                    |
-| 5   | Gmail link ticket forwarded        | Confirmed                | `GET /accounts/link` spent the ticket and went to Google at once                                                    | Confirmation page with the masked owner email; POST bound to the page and browser cookie; ticket bound to the Worker                          | `gmail/src/link-flow.test.ts`, `pages.test.ts`, `worker.test.ts`                                                                   |
-| 5b  | Gmail `ALLOWED_EMAILS` empty       | Intended                 | `config.ts` header: "public and multi-user"; no `ALLOWED_EMAILS` secret deployed                                    | None                                                                                                                                          | `gmail/src/config.test.ts`                                                                                                         |
-| 6   | Global state                       | Refuted (one safe cache) | Only `accessTokenCache` (`owner\nemail` key); `McpServer` per request, closed in `finally`                          | Architecture test; constants typed read-only                                                                                                  | `src/module-state.test.ts`, `gmail/src/isolation.test.ts`                                                                          |
-| 7   | Errors and logs                    | Confirmed                | `client.ts` returned up to 300 characters of the Canvas body; `console.warn` with raw `error.message`               | `src/core/redact.ts`: `redactSecrets()` in `errorResult`, login/callback pages and `messagePage`; `logWarning()` for every log                | `src/core/redact.test.ts`, `handler.test.ts`, `canvas-puc/src/isolation.test.ts`                                                   |
-| 8   | CORS `*` everywhere                | Partly confirmed         | `routeRemoteRequest` added CORS to `/authorize` and `/oauth/callback`                                               | No CORS on the browser pages; `*` stays on discovery, `/register`, `/token` and `/mcp` (no cookies there)                                     | `handler.test.ts`                                                                                                                  |
+| #   | Item                               | Verdict                  | Evidence                                                                                                            | Fix                                                                                                                                                       | Test                                                                                                                               |
+| --- | ---------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Seals without audience             | Confirmed (no live leak) | `openSealed` only checked `typ`/`exp`; `issueTokenSet`, `registerClient`, pair seals and Gmail tickets had no `aud` | `aud` = issuer in every seal of the OAuth, `/pair` and Gmail link flows; `audienceMatches()` in `openSealed`. Keys are distinct → no rotation             | `tokens.test.ts`, `seal.test.ts`, `canvas-puc/src/isolation.test.ts`, `whatsapp/src/worker.test.ts`, `gmail/src/link-flow.test.ts` |
+| 2   | Canvas writing on for everyone     | Confirmed                | `CANVAS_ALLOW_WRITE = "true"` gave every user `send_message`, `reply_to_*`, `submit_*`                              | Per-user opt-in: unticked checkbox on the login page, `write` grant sealed in the tokens; old tokens are read-only. Annotations checked                   | `canvas-puc/src/isolation.test.ts`, `remote.test.ts` (`canWriteFor`), `handler.test.ts` (`chosenGrants`)                           |
+| 3   | Canvas without per-user revocation | Confirmed (by design)    | Stateless: access 1 h, refresh 30 days                                                                              | Documented: deleting the token in Canvas cuts that user at once (every call and every refresh hit Canvas). No denylist (it would need KV)                 | `remote.test.ts` (`renewCanvasSecret` → `revoked`)                                                                                 |
+| 4   | WhatsApp with several owners       | Confirmed                | `readAllowedEmails` accepted any list                                                                               | Exactly one email, no override                                                                                                                            | `whatsapp/src/config.test.ts`, `worker.test.ts`                                                                                    |
+| 5   | Gmail link ticket forwarded        | Confirmed                | `GET /accounts/link` spent the ticket and went to Google at once                                                    | Confirmation page (masked owner); POST bound to page + browser cookie; Google owner check (`sub` = owner) before Gmail access; ticket bound to the Worker | `gmail/src/link-flow.test.ts`, `pages.test.ts`, `worker.test.ts`                                                                   |
+| 5b  | Gmail `ALLOWED_EMAILS` empty       | Intended                 | `config.ts` header: "public and multi-user"; no `ALLOWED_EMAILS` secret deployed                                    | None                                                                                                                                                      | `gmail/src/config.test.ts`                                                                                                         |
+| 6   | Global state                       | Refuted (one safe cache) | Only `accessTokenCache` (`owner\nemail` key); `McpServer` per request, closed in `finally`                          | Architecture test; constants typed read-only                                                                                                              | `src/module-state.test.ts`, `gmail/src/isolation.test.ts`                                                                          |
+| 7   | Errors and logs                    | Confirmed                | `client.ts` returned up to 300 characters of the Canvas body; `console.warn` with raw `error.message`               | `src/core/redact.ts`: `redactSecrets()` in `errorResult`, login/callback pages and `messagePage`; `logWarning()` for every log                            | `src/core/redact.test.ts`, `handler.test.ts`, `canvas-puc/src/isolation.test.ts`                                                   |
+| 8   | CORS `*` everywhere                | Partly confirmed         | `routeRemoteRequest` added CORS to `/authorize` and `/oauth/callback`                                               | No CORS on the browser pages; `*` stays on discovery, `/register`, `/token` and `/mcp` (no cookies there)                                                 | `handler.test.ts`                                                                                                                  |
+
+## Live evidence (2026-11-18, fake credentials only)
+
+- **Two users in the real Workers runtime** (`wrangler dev`/workerd, Canvas Worker, fake Canvas server, full OAuth
+  for both): 40 interleaved concurrent calls each returned only the caller's profile and no token; write tools
+  only for the user who ticked the box (kept after refresh); refresh token as access, tampered and random tokens
+  → 401; after revoking one user's token in Canvas, that user's calls fail (no token in the error) and the
+  refresh gives `invalid_grant`, while the other user is unaffected. 11/11 checks passed.
+- **Same `SEAL_KEY`, two Workers** (two local Canvas Workers on different origins): a token valid on its own Worker
+  (200) is refused by the other: access 401, refresh 400, `client_id` 400. This is the `aud` check working even
+  when the keys are equal.
+- **Deployed Workers, real sealed artifacts crossed:** Canvas `pending` → WhatsApp `/oauth/callback` 400;
+  WhatsApp `state` → Canvas `POST /authorize` 400; each Worker's `client_id` on the other 400; control on its own
+  Worker 200. `/mcp` without or with a random token → 401 on all three.
 
 ## Residual risks
 
-- A Canvas user who leaves keeps working until their Canvas token is deleted in Canvas (or expires). There is no
-  server-side switch per user; `SEAL_KEY` rotation disconnects everyone.
+- Revoking one Canvas user is done in Canvas (delete the token); it takes effect on the next call (proven live
+  above). There is no server-side switch per user; `SEAL_KEY` rotation disconnects everyone.
 - Tokens issued before this change have no `aud`; they keep opening until `LEGACY_AUDLESS_UNTIL` (2027-01-01).
   Every access/refresh token issued before the change expires earlier, and the keys are distinct, so nothing
   crosses Workers today.
-- The Gmail confirmation page relies on the person reading it: someone who receives a forwarded link and still
-  confirms links their own account into the sender's connector.
-- WhatsApp with `ALLOW_SHARED_OWNER=true` gives everyone listed full access to the same WhatsApp.
+- None of these lets one user read another user's data. Gmail forwarded links are stopped by the owner check;
+  WhatsApp accepts exactly one owner.

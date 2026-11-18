@@ -14,7 +14,13 @@ import {
 import type { Fetcher, GmailDeps, OwnerDeps } from './context.js';
 import type { GoogleTokens } from './google-oauth.js';
 import {
+  beginLinkStage,
   finishAccountLink,
+  linkStageUrl,
+  notOwnerPage,
+  OWNER_CHECK_SCOPES,
+  storeLinkRequest,
+  verifyOwnerThenLink,
   invalidTicketPage,
   issueLinkUrl,
   LINK_COOKIE,
@@ -46,13 +52,13 @@ const TOKENS: GoogleTokens = {
   scope: SCOPE,
 };
 const EXP = { exp: 1_700_000_000 + 600 };
-const LINK = { owner: TEST_OWNER, verifier: 'v', nonce: 'n' };
+const LINK = { owner: TEST_OWNER, verifier: 'v', nonce: 'n', stage: 'link' as const, binding: 'b' };
 
 /** `fetch` whose Google returns, on code exchange, an id_token for the given email with `holder`'s nonce. */
 function googleFor(
   email: string,
   extra: Record<string, unknown> = {},
-  holder = { nonce: 'n' },
+  holder: { nonce: string; email?: string } = { nonce: 'n' },
 ): Fetcher {
   return fakeFetch([
     tokenRoute(() =>
@@ -60,7 +66,7 @@ function googleFor(
         access_token: 'a',
         refresh_token: 'new-refresh',
         scope: SCOPE,
-        id_token: validIdToken(email, holder.nonce, EXP),
+        id_token: validIdToken(holder.email ?? email, holder.nonce, EXP),
         ...extra,
       }),
     ),
@@ -105,6 +111,26 @@ async function begin(deps: ReturnType<typeof testDeps>) {
     state: google.searchParams.get('state') ?? '',
     nonce: google.searchParams.get('nonce') ?? '',
     cookie,
+  };
+}
+
+/** Passes the owner check as `email` and returns the `link` stage redirect (state, nonce, response). */
+async function passOwnerCheck(
+  deps: ReturnType<typeof testDeps>,
+  holder: { nonce: string; email?: string },
+) {
+  const started = await begin(deps);
+  Object.assign(holder, { nonce: started.nonce, email: 'owner@example.com' });
+  const verified = await finishAccountLink(
+    deps,
+    callback({ state: started.state, code: 'owner-code' }, started.cookie),
+  );
+  const google = new URL(verified.headers.get('location') ?? '');
+  return {
+    verified,
+    google,
+    cookie: started.cookie,
+    state: google.searchParams.get('state') ?? '',
   };
 }
 
@@ -195,13 +221,14 @@ describe('link ticket', () => {
 });
 
 describe('startAccountLink', () => {
-  it('asks for offline access to manage Gmail and keeps the sealed request with an expiry', async () => {
+  it('first asks the owner to prove who they are (identity only, owner hint) and keeps the sealed request', async () => {
     const deps = testDeps(fakeFetch([]));
     const { response, google, state, cookie } = await begin(deps);
     expect(response.status).toBe(302);
     expect(google.origin + google.pathname).toBe('https://accounts.google.com/o/oauth2/v2/auth');
-    expect(google.searchParams.get('scope')).toBe(SCOPE);
-    expect(google.searchParams.get('access_type')).toBe('offline');
+    expect(google.searchParams.get('scope')).toBe(OWNER_CHECK_SCOPES.join(' '));
+    expect(google.searchParams.get('access_type')).toBeNull();
+    expect(google.searchParams.get('login_hint')).toBe('owner@example.com');
     expect(state.startsWith('link.')).toBe(true);
     expect(cookie.startsWith(`${LINK_COOKIE}=`)).toBe(true);
     const entry = deps.kv.entries.get(linkRequestKey(state));
@@ -272,6 +299,8 @@ describe('link confirmation (a forwarded link cannot link someone else into the 
     expect(await redeemConfirmedTicket(deps, confirmPost(shown, shown.cookie))).toEqual({
       owner: TEST_OWNER,
       binding,
+      stage: 'verify',
+      loginHint: 'owner@example.com',
     });
     expect(usedTicketKey('j')).toBe(`ticket:${sha256Hex('j')}`);
   });
@@ -305,18 +334,82 @@ describe('takeLinkRequest', () => {
 });
 
 describe('linkFromCode, linkSafely and finishAccountLink', () => {
-  it('links the account to the ticket user and deletes the cookie', async () => {
-    const holder = { nonce: '' };
+  it('after the owner check, asks for Gmail offline access, links the account and deletes the cookie', async () => {
+    const holder: { nonce: string; email?: string } = { nonce: '' };
     const deps = testDeps((url, init) => googleFor('music@example.com', {}, holder)(url, init));
-    const started = await begin(deps);
-    holder.nonce = started.nonce;
-    const request = callback({ state: started.state, code: 'c' }, started.cookie);
+    const { verified, google, cookie, state } = await passOwnerCheck(deps, holder);
+    expect(verified.status).toBe(302);
+    expect(verified.headers.getSetCookie().join()).not.toContain('Max-Age=0');
+    expect(google.searchParams.get('scope')).toBe(SCOPE);
+    expect(google.searchParams.get('access_type')).toBe('offline');
+    Object.assign(holder, {
+      nonce: google.searchParams.get('nonce') ?? '',
+      email: 'music@example.com',
+    });
+    const request = callback({ state, code: 'c' }, cookie);
     const response = await finishAccountLink(deps, request);
     expect(response.status).toBe(200);
     expect(await response.text()).toContain('music@example.com was linked');
     expect(response.headers.getSetCookie().at(-1)).toContain('Max-Age=0');
     const accounts = await loadOwnerAccounts(deps.kv, TEST_TOKEN_KEY, TEST_OWNER);
     expect(accounts.map((a) => a.email)).toEqual(['music@example.com']);
+  });
+
+  it('refuses a forwarded link: a Google account other than the owner links nothing (403)', async () => {
+    const holder: { nonce: string; email?: string } = { nonce: '' };
+    const deps = testDeps((url, init) => googleFor('victim@example.com', {}, holder)(url, init));
+    const started = await begin(deps);
+    holder.nonce = started.nonce;
+    const response = await finishAccountLink(
+      deps,
+      callback({ state: started.state, code: 'c' }, started.cookie),
+    );
+    expect(response.status).toBe(403);
+    expect(await response.text()).toContain('Nothing was linked');
+    expect(response.headers.getSetCookie().at(-1)).toContain('Max-Age=0');
+    expect(await loadOwnerAccounts(deps.kv, TEST_TOKEN_KEY, TEST_OWNER)).toEqual([]);
+    expect(notOwnerPage().status).toBe(403);
+  });
+
+  it('verifyOwnerThenLink needs an id_token; takeLinkRequest refuses a request without a stage', async () => {
+    const noId = testDeps(googleFor('owner@example.com', { id_token: undefined }));
+    const verify = { ...LINK, stage: 'verify' as const };
+    expect((await verifyOwnerThenLink(noId, 'c', verify)).status).toBe(400);
+    const deps = testDeps(fakeFetch([]));
+    const legacy = sealPayload(
+      {
+        typ: 'gmail_link',
+        aud: 'https://gmail.test',
+        exp: 4e9,
+        owner: 'x',
+        verifier: 'v',
+        nonce: 'n',
+        bindingHash: sha256Hex('b'),
+      },
+      TEST_TOKEN_KEY,
+    );
+    await deps.kv.put(linkRequestKey('link.legacy'), legacy);
+    expect(
+      await takeLinkRequest(deps, callback({ state: 'link.legacy' }, `${LINK_COOKIE}=b`)),
+    ).toBeNull();
+  });
+
+  it('storeLinkRequest, linkStageUrl and beginLinkStage build each stage', async () => {
+    const deps = testDeps(fakeFetch([]));
+    const state = await storeLinkRequest(deps, LINK, 'b');
+    expect(deps.kv.entries.has(linkRequestKey(state))).toBe(true);
+    const verifyUrl = new URL(linkStageUrl(deps, { ...LINK, stage: 'verify', state }, 'me@x.com'));
+    expect(verifyUrl.searchParams.get('login_hint')).toBe('me@x.com');
+    expect(
+      new URL(linkStageUrl(deps, { ...LINK, state }, null)).searchParams.get('login_hint'),
+    ).toBeNull();
+    const started = await beginLinkStage(deps, {
+      owner: TEST_OWNER,
+      binding: 'b',
+      stage: 'link',
+      loginHint: null,
+    });
+    expect(started.headers.getSetCookie()[0]).toContain(`${LINK_COOKIE}=b`);
   });
 
   it('refuses without id_token, scope or refresh token', async () => {

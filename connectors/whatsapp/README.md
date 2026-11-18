@@ -141,9 +141,9 @@ backup gets corrupted).
 Access lasts as long as Claude renews the token (30-day refresh). Removing your email from `ALLOWED_EMAILS`
 revokes it immediately (`/mcp` starts answering 403).
 
-**Single tenant.** Everyone in `ALLOWED_EMAILS` reads and sends on the **same** WhatsApp — yours. So the Worker
-refuses to start with more than one email. If all the emails are yours (e.g. personal and work GitHub emails), set
-`ALLOW_SHARED_OWNER = "true"` to accept them. Never add someone else's email: give them their own deploy.
+**Single tenant.** Everyone in `ALLOWED_EMAILS` would read and send on the **same** WhatsApp — yours. So the
+Worker accepts exactly one email and refuses to start otherwise, with no override. Someone else who wants the
+connector deploys their own copy.
 
 ## Configuration (`[vars]` in `wrangler.toml`)
 

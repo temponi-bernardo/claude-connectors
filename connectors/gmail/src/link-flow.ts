@@ -48,11 +48,29 @@ export interface LinkTicket {
   readonly jti: string;
 }
 
+/**
+ * Stages of the link: `verify` proves with an `openid email` sign-in that whoever confirmed IS the owner (same
+ * Google `sub`); only then `link` asks for Gmail access for the account to add.
+ */
+export type LinkStage = 'verify' | 'link';
+
+/** Scopes of the owner check: identity only, no Gmail access. */
+export const OWNER_CHECK_SCOPES: readonly string[] = ['openid', 'email'];
+
 /** Link request kept in KV between the trip to Google and the return. */
 export interface LinkRequest {
   readonly owner: string;
   readonly verifier: string;
   readonly nonce: string;
+  readonly stage: LinkStage;
+}
+
+/** Where a link stage goes: whose connector, the browser binding and, for `verify`, the owner email hint. */
+export interface LinkStageStart {
+  readonly owner: string;
+  readonly binding: string;
+  readonly stage: LinkStage;
+  readonly loginHint: string | null;
 }
 
 /** Unix seconds from the dependencies' clock. */
@@ -161,48 +179,104 @@ export function invalidTicketPage(): Response {
   );
 }
 
-/** Redeems the ticket of a confirmation posted from this browser; returns the owner and the cookie binding. */
+/** Redeems the ticket of a confirmation posted from this browser; returns the `verify` stage to start. */
 export async function redeemConfirmedTicket(
   deps: GmailDeps,
   request: Request,
-): Promise<{ readonly owner: string; readonly binding: string } | null> {
+): Promise<LinkStageStart | null> {
   const form = await readForm(request);
   const binding = readCookie(request.headers.get('cookie'), LINK_COOKIE);
   if (binding === null || !isConfirmedInThisBrowser(deps, form, binding)) return null;
   const ticket = await redeemLinkTicket(deps, form.get('ticket') ?? '');
-  return ticket && { owner: ticket.owner, binding };
+  return ticket && { owner: ticket.owner, binding, stage: 'verify', loginHint: ticket.email };
 }
 
-/** `POST /accounts/link`: checks the confirmation, redeems the ticket, stores the request and goes to Google. */
-export async function startAccountLink(deps: GmailDeps, request: Request): Promise<Response> {
-  const confirmed = await redeemConfirmedTicket(deps, request);
-  if (confirmed === null) return invalidTicketPage();
-  const { owner, binding } = confirmed;
+/** Stores the sealed link request (bound to the browser cookie hash) under a new `state`; returns the `state`. */
+export async function storeLinkRequest(
+  deps: GmailDeps,
+  link: LinkRequest,
+  binding: string,
+): Promise<string> {
   const state = `${LINK_STATE_PREFIX}${randomToken()}`;
-  const link: LinkRequest = { owner, verifier: randomToken(), nonce: randomToken() };
   const exp = nowSeconds(deps) + LINK_TTL_SECONDS;
   const sealed = sealPayload(
     { typ: LINK_REQUEST_TYP, aud: deps.origin, exp, bindingHash: sha256Hex(binding), ...link },
     deps.settings.tokenKey,
   );
   await deps.kv.put(linkRequestKey(state), sealed, { expirationTtl: LINK_TTL_SECONDS });
-  const location = googleAuthorizeUrl({
+  return state;
+}
+
+/** Google address of a stage: identity only (with the owner hint) for `verify`, Gmail offline for `link`. */
+export function linkStageUrl(
+  deps: GmailDeps,
+  link: LinkRequest & { readonly state: string },
+  loginHint: string | null,
+): string {
+  return googleAuthorizeUrl({
     clientId: deps.settings.googleClientId,
     redirectUri: googleRedirectUri(deps.origin),
-    scopes: GMAIL_SCOPES,
-    state,
+    scopes: link.stage === 'verify' ? OWNER_CHECK_SCOPES : GMAIL_SCOPES,
+    state: link.state,
     codeChallenge: pkceChallenge(link.verifier),
     nonce: link.nonce,
-    offline: true,
+    offline: link.stage === 'link',
+    ...(loginHint ? { loginHint } : {}),
   });
-  return redirectWith(location, new Headers({ 'set-cookie': linkCookie(binding) }));
+}
+
+/** Starts a link stage: stores the request and redirects the browser to Google, keeping the binding cookie. */
+export async function beginLinkStage(deps: GmailDeps, start: LinkStageStart): Promise<Response> {
+  const link: LinkRequest = {
+    owner: start.owner,
+    verifier: randomToken(),
+    nonce: randomToken(),
+    stage: start.stage,
+  };
+  const state = await storeLinkRequest(deps, link, start.binding);
+  const location = linkStageUrl(deps, { ...link, state }, start.loginHint);
+  return redirectWith(location, new Headers({ 'set-cookie': linkCookie(start.binding) }));
+}
+
+/** `POST /accounts/link`: checks the confirmation, redeems the ticket and sends the owner to prove who they are. */
+export async function startAccountLink(deps: GmailDeps, request: Request): Promise<Response> {
+  const confirmed = await redeemConfirmedTicket(deps, request);
+  return confirmed === null ? invalidTicketPage() : beginLinkStage(deps, confirmed);
+}
+
+/** Page shown when the Google account of the identity check is not the owner who asked for the link. */
+export function notOwnerPage(): Response {
+  return messagePage(
+    'Not the owner of this link',
+    'This link was created by another person. Sign in with the Google account that asked Claude for the link. Nothing was linked.',
+    403,
+  );
+}
+
+/** `verify` stage return: the signed-in Google account must be the owner; then asks Gmail access to link. */
+export async function verifyOwnerThenLink(
+  deps: GmailDeps,
+  code: string,
+  link: LinkRequest & { readonly binding: string },
+): Promise<Response> {
+  const tokens = await exchangeGoogleCode(deps, code, link.verifier);
+  if (tokens.idToken === null)
+    return messagePage('Linking failed', 'No id_token from Google.', 400);
+  const identity = await verifyGoogleIdToken(deps, tokens.idToken, link.nonce);
+  if (identity.sub !== link.owner) return notOwnerPage();
+  return beginLinkStage(deps, {
+    owner: link.owner,
+    binding: link.binding,
+    stage: 'link',
+    loginHint: null,
+  });
 }
 
 /** Fetches and deletes (single use) the link request; null if missing, expired or the cookie does not match. */
 export async function takeLinkRequest(
   deps: GmailDeps,
   request: Request,
-): Promise<LinkRequest | null> {
+): Promise<(LinkRequest & { readonly binding: string }) | null> {
   const key = linkRequestKey(new URL(request.url).searchParams.get('state') ?? '');
   const sealed = await deps.kv.get(key);
   if (sealed === null) return null;
@@ -214,10 +288,13 @@ export async function takeLinkRequest(
   });
   const binding = readCookie(request.headers.get('cookie'), LINK_COOKIE);
   if (!claims || binding === null || sha256Hex(binding) !== claims.bindingHash) return null;
+  if (claims.stage !== 'verify' && claims.stage !== 'link') return null;
   return {
     owner: String(claims.owner),
     verifier: String(claims.verifier),
     nonce: String(claims.nonce),
+    stage: claims.stage,
+    binding,
   };
 }
 
@@ -267,13 +344,14 @@ export async function linkFromCode(
   return messagePage('Account linked', `The account ${email} was linked. You can close this page.`);
 }
 
-/** Runs `linkFromCode`, turning failures (Google down, invalid `id_token`) into a 400 page without storing anything. */
+/** Runs the stage (`verifyOwnerThenLink` or `linkFromCode`); failures become a 400 page without storing anything. */
 export async function linkSafely(
   deps: GmailDeps,
   code: string,
-  link: LinkRequest,
+  link: LinkRequest & { readonly binding: string },
 ): Promise<Response> {
   try {
+    if (link.stage === 'verify') return await verifyOwnerThenLink(deps, code, link);
     return await linkFromCode(deps, code, link);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -281,7 +359,7 @@ export async function linkSafely(
   }
 }
 
-/** Return from Google when linking: checks the request, handles refusal and errors and deletes the cookie. */
+/** Return from Google when linking: checks the request, runs the stage and deletes the cookie unless it goes on. */
 export async function finishAccountLink(deps: GmailDeps, request: Request): Promise<Response> {
   const params = new URL(request.url).searchParams;
   const link = await takeLinkRequest(deps, request);
@@ -297,6 +375,6 @@ export async function finishAccountLink(deps: GmailDeps, request: Request): Prom
   } else {
     response = await linkSafely(deps, params.get('code') ?? '', link);
   }
-  response.headers.append('set-cookie', linkCookie(null));
+  if (response.status !== 302) response.headers.append('set-cookie', linkCookie(null));
   return response;
 }

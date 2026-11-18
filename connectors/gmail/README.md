@@ -20,9 +20,10 @@ or unlinks accounts and runs a test. The manual steps are:
 2. When connecting, click **Allow** and sign in with your Google account, checking the permission to **read,
    compose and send email** (manage Gmail). That account is linked right away.
 3. For more accounts, ask Claude: _"link another Gmail account"_. It generates a single-use link (valid for 10
-   minutes); open it in the browser, check that the page names **your** connector (e.g. `bf***@gmail.com`),
-   click **Continue to Google** and sign in with the other account. Never open a link someone else sent you:
-   the account you sign in with would go to their connector.
+   minutes); open it in the browser, check that the page names **your** connector (e.g. `bf***@gmail.com`) and
+   click **Continue to Google**. Google first asks you to confirm it is you (sign in with your own account,
+   identity only), then to sign in with the account to add. A link opened by anyone else stops at that check
+   and links nothing.
 4. Ask as usual: _"find the FL Cloud receipt in all my accounts"_, _"reply to Ana saying I'm in"_, _"archive
    today's promotions"_. Before sending, forwarding, trashing or deleting a draft, Claude shows what it will do
    and waits for your "yes".

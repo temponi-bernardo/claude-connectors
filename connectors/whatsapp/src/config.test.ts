@@ -92,17 +92,14 @@ describe('readAllowedEmails', () => {
   it('refuses more than one email: the WhatsApp is single-tenant and everyone listed would read it', () => {
     const two = { ALLOWED_EMAILS: 'owner@example.dev, friend@example.dev' };
     expect(() => readAllowedEmails(two)).toThrow('single-tenant');
-    expect(() => readAllowedEmails({ ...two, ALLOW_SHARED_OWNER: 'false' })).toThrow(
-      'ALLOW_SHARED_OWNER',
-    );
   });
 
-  it('accepts several emails of the same owner only with ALLOW_SHARED_OWNER=true', () => {
+  it('has no override: an extra flag never lets a second email in', () => {
     const two = {
       ALLOWED_EMAILS: 'me@example.dev,me@work.example.dev',
       ALLOW_SHARED_OWNER: 'true',
     };
-    expect(readAllowedEmails(two)).toEqual(['me@example.dev', 'me@work.example.dev']);
+    expect(() => readAllowedEmails(two)).toThrow('exactly one email');
   });
 });
 
