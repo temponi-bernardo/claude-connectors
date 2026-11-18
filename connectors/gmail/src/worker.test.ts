@@ -277,7 +277,7 @@ describe('installer sign-in and /mcp', () => {
     expect(biaCall).toMatch(/is not linked/);
   });
 
-  it('link_account issues a link that leads to Google with offline access', async () => {
+  it('link_account issues a link that confirms, then sends the owner to prove who they are', async () => {
     const env = workerEnv();
     const browser = new Browser(env);
     const token = await signIn(browser);
@@ -296,7 +296,8 @@ describe('installer sign-in and /mcp', () => {
       }).toString(),
     });
     const google = new URL(response.headers.get('location') ?? '');
-    expect(google.searchParams.get('access_type')).toBe('offline');
+    expect(google.searchParams.get('scope')).toBe('openid email');
+    expect(google.searchParams.get('login_hint')).toBe('owner@example.com');
     const back = await browser.fetch(
       `/google/callback?state=${google.searchParams.get('state') ?? ''}&error=access_denied`,
     );
