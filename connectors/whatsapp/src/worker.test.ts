@@ -144,7 +144,7 @@ describe('WhatsApp isolation (single tenant)', () => {
     expect(paths).toEqual([]);
   });
 
-  it('refuses to start with two owner emails unless ALLOW_SHARED_OWNER=true', async () => {
+  it('refuses to start with two owner emails', async () => {
     const { env } = envWith(() => new Response(), {
       ALLOWED_EMAILS: 'owner@example.dev,friend@example.dev',
     });

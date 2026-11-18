@@ -100,18 +100,18 @@ export function readSendAllowlist(env: EnvVars): string[] {
 }
 
 /**
- * Reads the owner list (`ALLOWED_EMAILS`). Empty throws (nobody could sign in). More than one email throws too,
- * because the connector is single-tenant: everyone on the list reads the SAME WhatsApp. Several emails of the
- * same person need the explicit `ALLOW_SHARED_OWNER=true`.
+ * Reads the owner (`ALLOWED_EMAILS`): exactly one email. Empty throws (nobody could sign in) and more than one
+ * throws too, with no override, because the connector is single-tenant: everyone listed would read the SAME
+ * WhatsApp.
  */
 export function readAllowedEmails(env: EnvVars): string[] {
   const emails = parseEmailList(envValue(env, 'ALLOWED_EMAILS'));
   if (emails.length === 0) {
     throw new Error('Set ALLOWED_EMAILS to the verified email of your GitHub account.');
   }
-  if (emails.length > 1 && !parseFlag(envValue(env, 'ALLOW_SHARED_OWNER'))) {
+  if (emails.length > 1) {
     throw new Error(
-      'ALLOWED_EMAILS has more than one email, but this WhatsApp is single-tenant: everyone listed reads the same WhatsApp. Keep only your own email, or, if all emails are yours, set ALLOW_SHARED_OWNER=true.',
+      'ALLOWED_EMAILS must have exactly one email: this WhatsApp is single-tenant and everyone listed would read the same WhatsApp. Keep only the verified GitHub email you sign in with.',
     );
   }
   return emails;
