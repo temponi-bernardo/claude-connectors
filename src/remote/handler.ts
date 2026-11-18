@@ -3,6 +3,7 @@
  * authorization with the login page, token exchange and the protected `/mcp` endpoint.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { errorMessage, logWarning, redactSecrets } from '../core/redact.js';
 import { escapeHtml, renderLoginPage, type LoginPageText } from './login-page.js';
 import { mcpUnauthorizedResponse, serveMcpRequest } from './mcp-endpoint.js';
 import {
@@ -22,9 +23,10 @@ import {
 import {
   issueAuthorizationCode,
   openAuthorizeRequest,
-  readAccessSecret,
+  readAccessGrant,
   redeemTokenRequest,
   sealAuthorizeRequest,
+  type SealedGrant,
 } from './tokens.js';
 
 /** Login where the user pastes the service credential on the `/authorize` page (e.g. the Canvas token). */
@@ -50,8 +52,8 @@ export type SecretRenewal = 'kept' | 'revoked';
 /** What a connector hands to the remote server. */
 export interface RemoteConnector {
   readonly login: SecretLogin | UpstreamLogin;
-  /** Creates the MCP server with the tools bound to the user's credential. */
-  readonly createServer: (secret: string) => McpServer;
+  /** Creates the MCP server with the tools bound to the user's credential and the permissions they opted into. */
+  readonly createServer: (secret: string, grants: readonly string[]) => McpServer;
   /** Optional: extends the credential lifetime at the service on each OAuth refresh. */
   readonly renewSecret?: (secret: string) => Promise<SecretRenewal>;
   /** Optional: checks on each `/mcp` whether the secret is still valid (e.g. email still on the owner's list). */
@@ -79,7 +81,7 @@ export interface RemoteApp {
 /** Function that serves a request. */
 export type RemoteRoute = (app: RemoteApp, request: Request) => Promise<Response>;
 
-/** CORS headers: the endpoints use no cookies, so any origin may call them. */
+/** CORS headers of the API routes: they use no cookies, so any origin may call them (pages get none). */
 export const CORS_HEADERS: Readonly<Record<string, string>> = {
   'access-control-allow-origin': '*',
   'access-control-allow-methods': 'GET, POST, DELETE, OPTIONS',
@@ -145,7 +147,7 @@ export function loginPageFor(
       text: app.connector.login.text,
       pending: sealAuthorizeRequest(request, app.settings, app.now()),
       clientHost: new URL(request.redirectUri).host,
-      error,
+      error: error === null ? null : redactSecrets(error),
     }),
     200,
     new URL(request.redirectUri).origin,
@@ -201,14 +203,11 @@ export async function handleUpstreamCallback(app: RemoteApp, request: Request): 
   try {
     secret = await login.finish(query, `${app.settings.issuer}${UPSTREAM_CALLBACK_PATH}`);
   } catch (error) {
-    return htmlResponse(
-      `<p>${escapeHtml(error instanceof Error ? error.message : String(error))}</p>`,
-      403,
-    );
+    return htmlResponse(`<p>${escapeHtml(redactSecrets(errorMessage(error)))}</p>`, 403);
   }
   return redirectWithCode(
     pending,
-    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now()),
+    issueAuthorizationCode({ request: pending, secret, grants: [] }, app.settings, app.now()),
   );
 }
 
@@ -224,12 +223,19 @@ export async function handleAuthorizeSubmit(app: RemoteApp, request: Request): P
   try {
     await login.verify(secret);
   } catch (error) {
-    return loginPageFor(app, pending, error instanceof Error ? error.message : String(error));
+    return loginPageFor(app, pending, errorMessage(error));
   }
+  const grants = chosenGrants(login, form);
   return redirectWithCode(
     pending,
-    issueAuthorizationCode({ request: pending, secret }, app.settings, app.now()),
+    issueAuthorizationCode({ request: pending, secret, grants }, app.settings, app.now()),
   );
+}
+
+/** Permissions the user ticked on the login page: only the one the connector offers, never anything else. */
+export function chosenGrants(login: SecretLogin, form: URLSearchParams): string[] {
+  const offered = login.text.grantOption?.name;
+  return offered !== undefined && form.getAll('grant').includes(offered) ? [offered] : [];
 }
 
 /** Renews the credential through the connector, if it can; a failure only logs a warning (the refresh goes on). */
@@ -240,7 +246,7 @@ export async function renewSecretQuietly(
   try {
     return (await connector.renewSecret?.(secret)) ?? 'kept';
   } catch (error) {
-    console.warn('Could not renew the credential:', error instanceof Error ? error.message : error);
+    logWarning('Could not renew the credential:', error);
     return 'kept';
   }
 }
@@ -256,7 +262,7 @@ export async function handleToken(app: RemoteApp, request: Request): Promise<Res
     return jsonResponse({ error: result.error, error_description: result.description }, 400);
   const revoked =
     result.value.refreshed &&
-    (await renewSecretQuietly(app.connector, result.value.secret)) === 'revoked';
+    (await renewSecretQuietly(app.connector, result.value.grant.secret)) === 'revoked';
   if (revoked)
     return jsonResponse(
       { error: 'invalid_grant', error_description: REVOKED_SECRET_DESCRIPTION },
@@ -267,22 +273,22 @@ export async function handleToken(app: RemoteApp, request: Request): Promise<Res
 
 /** `/mcp`: requires the access token and serves with the user's MCP server. */
 export function handleMcp(app: RemoteApp, request: Request): Promise<Response> {
-  const secret = readAccessSecret(request.headers.get('authorization'), app.settings, app.now());
-  if (secret === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
-  if (app.connector.acceptsSecret?.(secret) === false) {
+  const grant = readAccessGrant(request.headers.get('authorization'), app.settings, app.now());
+  if (grant === null) return Promise.resolve(mcpUnauthorizedResponse(app.settings.issuer));
+  if (app.connector.acceptsSecret?.(grant.secret) === false) {
     return Promise.resolve(jsonResponse({ error: 'access_revoked' }, 403));
   }
-  return serveMcpWithStreaming(app.connector, secret, request);
+  return serveMcpWithStreaming(app.connector, grant, request);
 }
 
-/** Serves `/mcp`: a call the connector streams goes straight out; the rest goes to the MCP server. */
+/** Serves `/mcp`: a call the connector streams goes straight out; the rest goes to a new MCP server. */
 export async function serveMcpWithStreaming(
   connector: RemoteConnector,
-  secret: string,
+  grant: SealedGrant,
   request: Request,
 ): Promise<Response> {
-  const streamed = await streamToolQuietly(connector, secret, request);
-  return streamed ?? serveMcpRequest(connector.createServer(secret), request);
+  const streamed = await streamToolQuietly(connector, grant.secret, request);
+  return streamed ?? serveMcpRequest(connector.createServer(grant.secret, grant.grants), request);
 }
 
 /** Streamed response of a `tools/call` the connector takes; `null` (with a warning on failure) otherwise. */
@@ -298,7 +304,7 @@ export async function streamToolQuietly(
     const content = await connector.streamTool(secret, call);
     return content && streamedToolResponse(call.id, content);
   } catch (error) {
-    console.warn('Streamed tool fell back:', error instanceof Error ? error.message : error);
+    logWarning('Streamed tool fell back:', error);
     return null;
   }
 }
@@ -328,13 +334,25 @@ export function withCors(response: Response): Response {
   return response;
 }
 
-/** Picks the route by method and path; a CORS preflight gives 204 and an unknown path gives 404. */
+/** Browser pages (login and provider return): navigated to, never fetched, so they get no CORS headers. */
+export const BROWSER_PAGE_PATHS: readonly string[] = ['/authorize', UPSTREAM_CALLBACK_PATH];
+
+/** Says whether a path is an API route that other origins may call (everything but the browser pages). */
+export function allowsCors(path: string): boolean {
+  return !BROWSER_PAGE_PATHS.includes(path);
+}
+
+/** Picks the route by method and path; a CORS preflight gives 204 (API routes only) and an unknown path 404. */
 export async function routeRemoteRequest(app: RemoteApp, request: Request): Promise<Response> {
-  if (request.method === 'OPTIONS') return withCors(new Response(null, { status: 204 }));
   const path = new URL(request.url).pathname.replace(/(.)\/+$/, '$1');
+  if (request.method === 'OPTIONS') {
+    const preflight = new Response(null, { status: 204 });
+    return allowsCors(path) ? withCors(preflight) : preflight;
+  }
   const route = REMOTE_ROUTES[`${request.method} ${path}`];
   if (!route) return new Response('Not found', { status: 404 });
-  return withCors(await route(app, request));
+  const response = await route(app, request);
+  return allowsCors(path) ? withCors(response) : response;
 }
 
 /** Creates the `(Request) => Promise<Response>` handler of the remote connector. */

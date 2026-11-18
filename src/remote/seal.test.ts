@@ -1,6 +1,13 @@
 import { randomBytes } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { openSealed, parseSealKey, sealPayload, unsealPayload } from './seal.js';
+import {
+  audienceMatches,
+  LEGACY_AUDLESS_UNTIL,
+  openSealed,
+  parseSealKey,
+  sealPayload,
+  unsealPayload,
+} from './seal.js';
 
 const KEY = randomBytes(32);
 
@@ -54,5 +61,22 @@ describe('openSealed', () => {
 
   it('rejects a seal without a numeric expiry', () => {
     expect(openSealed(sealPayload({ typ: 'code' }, KEY), KEY, { typ: 'code', now })).toBeNull();
+  });
+});
+
+describe('audienceMatches', () => {
+  it('requires the expected aud, lets an aud-less seal pass only before the cutoff, ignores aud when none expected', () => {
+    const expected = { typ: 'x', now: 10, aud: 'https://a.dev' };
+    expect(audienceMatches({ aud: 'https://a.dev' }, expected)).toBe(true);
+    expect(audienceMatches({ aud: 'https://b.dev' }, expected)).toBe(false);
+    expect(audienceMatches({}, expected)).toBe(true);
+    expect(audienceMatches({}, { ...expected, now: LEGACY_AUDLESS_UNTIL })).toBe(false);
+    expect(audienceMatches({ aud: 'https://b.dev' }, { typ: 'x', now: 10 })).toBe(true);
+  });
+
+  it('makes openSealed refuse a seal for another audience', () => {
+    const sealed = sealPayload({ typ: 'x', aud: 'https://a.dev', exp: 99 }, KEY);
+    expect(openSealed(sealed, KEY, { typ: 'x', now: 1, aud: 'https://a.dev' })).not.toBeNull();
+    expect(openSealed(sealed, KEY, { typ: 'x', now: 1, aud: 'https://b.dev' })).toBeNull();
   });
 });

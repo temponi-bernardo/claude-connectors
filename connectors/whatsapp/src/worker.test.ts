@@ -1,5 +1,6 @@
 import { randomBytes } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
+import { issueTokenSet } from '../../../src/remote/tokens.js';
 import { readWhatsAppSettings } from './config.js';
 import { memoryBucket, READY_STATUS } from './fixtures/fakes.js';
 import type { WhatsAppEnv } from './worker-env.js';
@@ -72,7 +73,7 @@ describe('whatsappRemoteConnector', () => {
     expect(connector.login.kind).toBe('upstream');
     expect(connector.acceptsSecret?.('owner@example.dev')).toBe(true);
     expect(connector.acceptsSecret?.('x@y.z')).toBe(false);
-    expect(connector.createServer('owner@example.dev').server).toBeDefined();
+    expect(connector.createServer('owner@example.dev', []).server).toBeDefined();
   });
 });
 
@@ -102,6 +103,54 @@ describe('createWhatsAppApps and handleWhatsAppFetch', () => {
       env,
     );
     expect(((await meta.json()) as { issuer: string }).issuer).toBe(ORIGIN);
+  });
+});
+
+describe('WhatsApp isolation (single tenant)', () => {
+  function accessToken(env: WhatsAppEnv, email: string, issuer = ORIGIN): string {
+    const settings = {
+      issuer,
+      key: Buffer.from(String(env.SEAL_KEY), 'base64'),
+      redirectHosts: [],
+    };
+    return issueTokenSet({ secret: email, grants: [] }, settings, unixNow()).access_token;
+  }
+
+  function mcp(token: string | null): Request {
+    return new Request(`${ORIGIN}/mcp`, {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json, text/event-stream',
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+    });
+  }
+
+  it('answers 403 to a valid token whose email is not the owner, and never reaches the bridge', async () => {
+    const { env, paths } = envWith(() => Response.json(READY_STATUS));
+    const res = await handleWhatsAppFetch(mcp(accessToken(env, 'friend@example.dev')), env);
+    expect(res.status).toBe(403);
+    expect(paths).toEqual([]);
+  });
+
+  it('answers 401 without a token, with a random one and with a token of another connector', async () => {
+    const { env, paths } = envWith(() => Response.json(READY_STATUS));
+    const foreign = accessToken(env, 'owner@example.dev', 'https://canvas.example.dev');
+    for (const token of [null, 'random-token', foreign]) {
+      expect((await handleWhatsAppFetch(mcp(token), env)).status).toBe(401);
+    }
+    expect(paths).toEqual([]);
+  });
+
+  it('refuses to start with two owner emails unless ALLOW_SHARED_OWNER=true', async () => {
+    const { env } = envWith(() => new Response(), {
+      ALLOWED_EMAILS: 'owner@example.dev,friend@example.dev',
+    });
+    const res = await handleWhatsAppFetch(mcp(null), env);
+    expect(res.status).toBe(500);
+    expect(await res.text()).toContain('single-tenant');
   });
 });
 

@@ -9,7 +9,7 @@ import {
   type OAuthResult,
   type OAuthSettings,
 } from './oauth.js';
-import { openSealed, sealPayload } from './seal.js';
+import { openSealed, sealPayload, type SealedClaims } from './seal.js';
 
 /** Lifetimes in seconds: pending request, code, access token and refresh token. */
 export const PENDING_TTL_SECONDS = 15 * 60;
@@ -25,17 +25,31 @@ export interface TokenSet {
   readonly refresh_token: string;
 }
 
-/** Result of `/token`: the new tokens, the secret sealed in them and whether it came from a refresh. */
+/** What the tokens carry: the user's secret and the optional permissions they opted into (e.g. `write`). */
+export interface SealedGrant {
+  readonly secret: string;
+  readonly grants: readonly string[];
+}
+
+/** Result of `/token`: the new tokens, the grant sealed in them and whether it came from a refresh. */
 export interface RedeemedGrant {
   readonly tokens: TokenSet;
-  readonly secret: string;
+  readonly grant: SealedGrant;
   readonly refreshed: boolean;
 }
 
-/** Approved request: the validated request and the secret the user provided. */
-export interface ApprovedGrant {
+/** Approved request: the validated request plus the secret and permissions the user provided. */
+export interface ApprovedGrant extends SealedGrant {
   readonly request: AuthorizeRequest;
-  readonly secret: string;
+}
+
+/** Reads secret and permissions from opened claims (a token without `grants` has none: read-only). */
+export function grantFromClaims(claims: SealedClaims): SealedGrant {
+  const raw = Array.isArray(claims.grants) ? (claims.grants as unknown[]) : [];
+  return {
+    secret: String(claims.secret),
+    grants: raw.filter((item): item is string => typeof item === 'string'),
+  };
 }
 
 /** Seals the authorization request so it travels in the login form without being tampered with. */
@@ -44,7 +58,10 @@ export function sealAuthorizeRequest(
   settings: OAuthSettings,
   now: number,
 ): string {
-  return sealPayload({ typ: 'pending', exp: now + PENDING_TTL_SECONDS, request }, settings.key);
+  return sealPayload(
+    { typ: 'pending', aud: settings.issuer, exp: now + PENDING_TTL_SECONDS, request },
+    settings.key,
+  );
 }
 
 /** Opens the sealed request from the form; null if invalid or expired. */
@@ -53,7 +70,7 @@ export function openAuthorizeRequest(
   settings: OAuthSettings,
   now: number,
 ): AuthorizeRequest | null {
-  const claims = openSealed(sealed, settings.key, { typ: 'pending', now });
+  const claims = openSealed(sealed, settings.key, { typ: 'pending', now, aud: settings.issuer });
   return claims ? (claims.request as AuthorizeRequest) : null;
 }
 
@@ -67,39 +84,43 @@ export function issueAuthorizationCode(
   return sealPayload(
     {
       typ: 'code',
+      aud: settings.issuer,
       exp: now + CODE_TTL_SECONDS,
       clientId,
       redirectUri,
       codeChallenge,
       secret: grant.secret,
+      grants: grant.grants,
     },
     settings.key,
   );
 }
 
-/** Issues the access token (1 hour) + refresh token (30 days) pair for a secret. */
-export function issueTokenSet(secret: string, settings: OAuthSettings, now: number): TokenSet {
+/** Issues the access token (1 hour) + refresh token (30 days) pair for a grant, bound to this issuer. */
+export function issueTokenSet(grant: SealedGrant, settings: OAuthSettings, now: number): TokenSet {
+  const claims = { aud: settings.issuer, secret: grant.secret, grants: grant.grants };
   return {
     access_token: sealPayload(
-      { typ: 'access', exp: now + ACCESS_TTL_SECONDS, secret },
+      { typ: 'access', exp: now + ACCESS_TTL_SECONDS, ...claims },
       settings.key,
     ),
     token_type: 'Bearer',
     expires_in: ACCESS_TTL_SECONDS,
     refresh_token: sealPayload(
-      { typ: 'refresh', exp: now + REFRESH_TTL_SECONDS, secret },
+      { typ: 'refresh', exp: now + REFRESH_TTL_SECONDS, ...claims },
       settings.key,
     ),
   };
 }
 
-/** Checks the code against client, redirect and PKCE verifier; returns its secret. */
+/** Checks the code against client, redirect and PKCE verifier; returns its grant. */
 export function redeemAuthorizationCode(
   form: URLSearchParams,
   settings: OAuthSettings,
   now: number,
-): OAuthResult<string> {
-  const claims = openSealed(form.get('code') ?? '', settings.key, { typ: 'code', now });
+): OAuthResult<SealedGrant> {
+  const expected = { typ: 'code', now, aud: settings.issuer };
+  const claims = openSealed(form.get('code') ?? '', settings.key, expected);
   const matches =
     claims !== null &&
     claims.clientId === form.get('client_id') &&
@@ -107,19 +128,20 @@ export function redeemAuthorizationCode(
     claims.codeChallenge === pkceChallenge(form.get('code_verifier') ?? '');
   if (!matches)
     return oauthError('invalid_grant', 'Invalid or expired code, or code from another client.');
-  return { ok: true, value: String(claims.secret) };
+  return { ok: true, value: grantFromClaims(claims) };
 }
 
-/** Checks the refresh token; returns its secret. */
+/** Checks the refresh token; returns its grant. */
 export function redeemRefreshToken(
   form: URLSearchParams,
   settings: OAuthSettings,
   now: number,
-): OAuthResult<string> {
-  const claims = openSealed(form.get('refresh_token') ?? '', settings.key, { typ: 'refresh', now });
+): OAuthResult<SealedGrant> {
+  const expected = { typ: 'refresh', now, aud: settings.issuer };
+  const claims = openSealed(form.get('refresh_token') ?? '', settings.key, expected);
   if (!claims)
     return oauthError('invalid_grant', 'Invalid or expired refresh token: connect again.');
-  return { ok: true, value: String(claims.secret) };
+  return { ok: true, value: grantFromClaims(claims) };
 }
 
 /** Serves `/token`: exchanges a code or refresh token for a new token pair. */
@@ -129,26 +151,26 @@ export function redeemTokenRequest(
   now: number,
 ): OAuthResult<RedeemedGrant> {
   const grantType = form.get('grant_type');
-  let secret: OAuthResult<string>;
-  if (grantType === 'authorization_code') secret = redeemAuthorizationCode(form, settings, now);
-  else if (grantType === 'refresh_token') secret = redeemRefreshToken(form, settings, now);
+  let grant: OAuthResult<SealedGrant>;
+  if (grantType === 'authorization_code') grant = redeemAuthorizationCode(form, settings, now);
+  else if (grantType === 'refresh_token') grant = redeemRefreshToken(form, settings, now);
   else return oauthError('unsupported_grant_type', 'Use authorization_code or refresh_token.');
-  if (!secret.ok) return secret;
-  const tokens = issueTokenSet(secret.value, settings, now);
+  if (!grant.ok) return grant;
+  const tokens = issueTokenSet(grant.value, settings, now);
   return {
     ok: true,
-    value: { tokens, secret: secret.value, refreshed: grantType === 'refresh_token' },
+    value: { tokens, grant: grant.value, refreshed: grantType === 'refresh_token' },
   };
 }
 
-/** Reads the secret from an `Authorization: Bearer <access token>` header; null if missing or invalid. */
-export function readAccessSecret(
+/** Reads the grant from an `Authorization: Bearer <access token>` header; null if missing, invalid or foreign. */
+export function readAccessGrant(
   authorization: string | null,
   settings: OAuthSettings,
   now: number,
-): string | null {
+): SealedGrant | null {
   const match = /^Bearer\s+(\S+)$/i.exec(authorization ?? '');
   if (!match?.[1]) return null;
-  const claims = openSealed(match[1], settings.key, { typ: 'access', now });
-  return claims ? String(claims.secret) : null;
+  const claims = openSealed(match[1], settings.key, { typ: 'access', now, aud: settings.issuer });
+  return claims ? grantFromClaims(claims) : null;
 }
