@@ -86,6 +86,13 @@ mutable `Map`/`Set`/array/object literal not typed read-only, outside a reviewed
   only for the user who ticked the box (kept after refresh); refresh token as access, tampered and random tokens
   → 401; after revoking one user's token in Canvas, that user's calls fail (no token in the error) and the
   refresh gives `invalid_grant`, while the other user is unaffected. 11/11 checks passed.
+- **Two users on Cloudflare** (temporary Workers, created with the owner's approval and deleted after the run: a
+  copy of the Canvas Worker built from this code plus a fake Canvas, full OAuth for both users): the same checks
+  passed, **12/12**: 40 interleaved concurrent calls with each user seeing only their own data and no token; write
+  tools only for the opted-in user, kept after refresh; refresh-as-access, tampered and random tokens → 401;
+  revoking Alice in the fake Canvas → her calls fail without leaking her token and her refresh gives
+  `invalid_grant`, Bob unaffected; a token of that Worker refused by the production Canvas Worker (401). Real
+  Canvas tokens were never used: revoking one would cut a real user's access.
 - **Same `SEAL_KEY`, two Workers** (two local Canvas Workers on different origins): a token valid on its own Worker
   (200) is refused by the other: access 401, refresh 400, `client_id` 400. This is the `aud` check working even
   when the keys are equal.
