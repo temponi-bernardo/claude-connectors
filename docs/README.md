@@ -22,6 +22,7 @@ find everything here without scanning the code. When docs and code diverge, `npm
 | Know what a term means                                     | [GLOSSARY.md](GLOSSARY.md)                              |
 | Work on the interface (if the project has one)             | [UI.md](UI.md)                                          |
 | Know how to report a vulnerability                         | [../SECURITY.md](../SECURITY.md)                        |
+| Know how user data is kept apart (isolation map)           | [security/isolation.md](security/isolation.md)          |
 | Prepare a connector for Anthropic's Connectors Directory   | [DIRECTORY-LISTING.md](DIRECTORY-LISTING.md)            |
 
 ## Who checks what

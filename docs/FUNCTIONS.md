@@ -21,7 +21,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/canvas-puc/src/linked-files.ts`: [`isLinkedFileLink`](#islinkedfilelink), [`linkedFileKey`](#linkedfilekey), [`moduleItemLinks`](#moduleitemlinks), [`originLinks`](#originlinks), [`collectLinkedFiles`](#collectlinkedfiles), [`toLinkedFile`](#tolinkedfile), [`fetchLinkSources`](#fetchlinksources), [`linkSource`](#linksource), [`listLinkedFiles`](#listlinkedfiles), [`linkedOnlyRows`](#linkedonlyrows), [`linkedOnlyNote`](#linkedonlynote), [`listFilesWithLinked`](#listfileswithlinked)
 - `connectors/canvas-puc/src/links.ts`: [`hostMatches`](#hostmatches), [`isCanvasUrl`](#iscanvasurl), [`videoProviderOf`](#videoproviderof), [`canvasTargetOf`](#canvastargetof), [`canvasRefTarget`](#canvasreftarget), [`classifyCanvasRef`](#classifycanvasref), [`canvasHtml`](#canvashtml), [`redactVerifier`](#redactverifier)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
-- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`fetchCanvasSelf`](#fetchcanvasself), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`isCanvasTokenAlive`](#iscanvastokenalive), [`renewCanvasSecret`](#renewcanvassecret), [`canvasClientFor`](#canvasclientfor), [`streamCanvasTool`](#streamcanvastool), [`canvasRemoteConnector`](#canvasremoteconnector)
+- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`fetchCanvasSelf`](#fetchcanvasself), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`isCanvasTokenAlive`](#iscanvastokenalive), [`renewCanvasSecret`](#renewcanvassecret), [`canWriteFor`](#canwritefor), [`canvasClientFor`](#canvasclientfor), [`streamCanvasTool`](#streamcanvastool), [`canvasRemoteConnector`](#canvasremoteconnector)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
 - `connectors/canvas-puc/src/upload.ts`: [`decodeUploadContent`](#decodeuploadcontent), [`fileExtension`](#fileextension), [`uploadContentType`](#uploadcontenttype), [`extensionRefusal`](#extensionrefusal), [`uploadSizeRefusal`](#uploadsizerefusal), [`uploadRefusal`](#uploadrefusal), [`onlineUploadPayload`](#onlineuploadpayload), [`uploadedFileFromArgs`](#uploadedfilefromargs), [`submitFileAssignment`](#submitfileassignment)
@@ -36,12 +36,12 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/gmail/src/gmail-api.ts`: [`gmailUrl`](#gmailurl), [`gmailHttpError`](#gmailhttperror), [`gmailErrorDetail`](#gmailerrordetail), [`sendGmailRequest`](#sendgmailrequest), [`readGmailJson`](#readgmailjson), [`gmailCall`](#gmailcall), [`gmailGet`](#gmailget), [`gmailWrite`](#gmailwrite)
 - `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`randomToken`](#randomtoken), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken), [`revokeGoogleToken`](#revokegoogletoken)
 - `connectors/gmail/src/id-token.ts`: [`decodeJwtJson`](#decodejwtjson), [`decodeJwt`](#decodejwt), [`idTokenProblems`](#idtokenproblems), [`checkIdTokenClaims`](#checkidtokenclaims), [`fetchGoogleKey`](#fetchgooglekey), [`verifyRs256`](#verifyrs256), [`verifyGoogleIdToken`](#verifygoogleidtoken)
-- `connectors/gmail/src/link-flow.ts`: [`nowSeconds`](#nowseconds), [`issueLinkUrl`](#issuelinkurl), [`redeemLinkTicket`](#redeemlinkticket), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`invalidTicketPage`](#invalidticketpage), [`startAccountLink`](#startaccountlink), [`takeLinkRequest`](#takelinkrequest), [`linkRefusalReason`](#linkrefusalreason), [`storeGoogleAccount`](#storegoogleaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
+- `connectors/gmail/src/link-flow.ts`: [`nowSeconds`](#nowseconds), [`issueLinkUrl`](#issuelinkurl), [`openLinkTicket`](#openlinkticket), [`usedTicketKey`](#usedticketkey), [`redeemLinkTicket`](#redeemlinkticket), [`showLinkConfirmation`](#showlinkconfirmation), [`isConfirmedInThisBrowser`](#isconfirmedinthisbrowser), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`invalidTicketPage`](#invalidticketpage), [`redeemConfirmedTicket`](#redeemconfirmedticket), [`startAccountLink`](#startaccountlink), [`takeLinkRequest`](#takelinkrequest), [`linkRefusalReason`](#linkrefusalreason), [`storeGoogleAccount`](#storegoogleaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
 - `connectors/gmail/src/mailbox-tools.ts`: [`toggleAction`](#toggleaction), [`writableTargets`](#writabletargets), [`runMailboxAction`](#runmailboxaction)
 - `connectors/gmail/src/mailbox.ts`: [`mailTargets`](#mailtargets), [`checkLabelChange`](#checklabelchange), [`resolveLabelIds`](#resolvelabelids), [`fetchLabels`](#fetchlabels), [`applyLabelChange`](#applylabelchange), [`targetCounts`](#targetcounts), [`moveToTrash`](#movetotrash)
 - `connectors/gmail/src/message-format.ts`: [`base64UrlToBytes`](#base64urltobytes), [`partCharset`](#partcharset), [`decodePartBody`](#decodepartbody), [`headerValues`](#headervalues), [`flattenParts`](#flattenparts), [`isBodyPart`](#isbodypart), [`messageBodyText`](#messagebodytext), [`messageAttachments`](#messageattachments), [`truncateText`](#truncatetext), [`internalDateIso`](#internaldateiso), [`pickHeaders`](#pickheaders), [`formatMessage`](#formatmessage), [`perMessageLimit`](#permessagelimit), [`formatThread`](#formatthread), [`summarizeThread`](#summarizethread)
 - `connectors/gmail/src/mime.ts`: [`splitAddressList`](#splitaddresslist), [`parseMailAddress`](#parsemailaddress), [`parseAddressList`](#parseaddresslist), [`parseRecipients`](#parserecipients), [`cleanHeaderText`](#cleanheadertext), [`isPrintableAscii`](#isprintableascii), [`encodeHeaderWord`](#encodeheaderword), [`formatMailAddress`](#formatmailaddress), [`addressHeader`](#addressheader), [`messageIdList`](#messageidlist), [`mimeHeaderLines`](#mimeheaderlines), [`wrapBase64`](#wrapbase64), [`textPart`](#textpart), [`safeMimeType`](#safemimetype), [`attachmentPart`](#attachmentpart), [`buildMimeMessage`](#buildmimemessage), [`toRawMessage`](#torawmessage)
-- `connectors/gmail/src/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`consentPageBody`](#consentpagebody), [`copyConsentHeaders`](#copyconsentheaders), [`consentPage`](#consentpage), [`redirectWith`](#redirectwith)
+- `connectors/gmail/src/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`maskEmail`](#maskemail), [`linkConfirmBody`](#linkconfirmbody), [`linkConfirmPage`](#linkconfirmpage), [`consentPageBody`](#consentpagebody), [`copyConsentHeaders`](#copyconsentheaders), [`consentPage`](#consentpage), [`redirectWith`](#redirectwith)
 - `connectors/gmail/src/rate-limit.ts`: [`isRateLimited`](#isratelimited), [`rateLimitedResponse`](#ratelimitedresponse)
 - `connectors/gmail/src/search.ts`: [`encodeMultiPageToken`](#encodemultipagetoken), [`decodeMultiPageToken`](#decodemultipagetoken), [`fetchThreadMetadata`](#fetchthreadmetadata), [`searchAccount`](#searchaccount), [`threadDate`](#threaddate), [`sortByDateDesc`](#sortbydatedesc), [`pagesToFetch`](#pagestofetch), [`searchThreads`](#searchthreads)
 - `connectors/gmail/src/send-tools.ts`: [`replyTool`](#replytool)
@@ -67,6 +67,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `src/core/html.ts`: [`safeHttpUrl`](#safehttpurl), [`keptHtmlAttrs`](#kepthtmlattrs), [`addHtmlRef`](#addhtmlref), [`markHtmlRef`](#markhtmlref), [`openHtmlAnchor`](#openhtmlanchor), [`closeHtmlAnchor`](#closehtmlanchor), [`addHtmlMedia`](#addhtmlmedia), [`openHtmlTag`](#openhtmltag), [`closeHtmlTag`](#closehtmltag), [`tidyHtmlText`](#tidyhtmltext), [`parseHtmlContent`](#parsehtmlcontent), [`htmlToText`](#htmltotext)
 - `src/core/http.ts`: [`buildUrl`](#buildurl), [`parseNextLink`](#parsenextlink)
 - `src/core/pdf.ts`: [`bytesToLatin1`](#bytestolatin1), [`isPdf`](#ispdf), [`streamDataStart`](#streamdatastart), [`trimStreamEol`](#trimstreameol), [`readRawObject`](#readrawobject), [`listRawObjects`](#listrawobjects), [`decodePdfStream`](#decodepdfstream), [`splitObjectStream`](#splitobjectstream), [`storePdfObject`](#storepdfobject), [`readPdfObjects`](#readpdfobjects), [`pdfRefs`](#pdfrefs), [`dictRefs`](#dictrefs), [`collectPdfPages`](#collectpdfpages), [`orderedPages`](#orderedpages), [`utf16beHexToString`](#utf16behextostring), [`readBfChars`](#readbfchars), [`readBfRanges`](#readbfranges), [`rangeTarget`](#rangetarget), [`parseToUnicodeCMap`](#parsetounicodecmap), [`addFontRefs`](#addfontrefs), [`fontResourceRefs`](#fontresourcerefs), [`fontCMaps`](#fontcmaps), [`decodePdfText`](#decodepdftext), [`readLiteralString`](#readliteralstring), [`readEscape`](#readescape), [`readHexString`](#readhexstring), [`skipPdfSpace`](#skippdfspace), [`nextPdfToken`](#nextpdftoken), [`readPdfWord`](#readpdfword), [`wrapString`](#wrapstring), [`classifyWord`](#classifyword), [`showArrayText`](#showarraytext), [`lastOperandText`](#lastoperandtext), [`moveText`](#movetext), [`applyTextOperator`](#applytextoperator), [`feedPdfToken`](#feedpdftoken), [`contentStreamText`](#contentstreamtext), [`tidyPdfText`](#tidypdftext), [`pdfToText`](#pdftotext)
+- `src/core/redact.ts`: [`redactSecrets`](#redactsecrets), [`redactForLog`](#redactforlog), [`errorMessage`](#errormessage), [`logWarning`](#logwarning)
 - `src/core/stream.ts`: [`splitBase64Ready`](#splitbase64ready), [`base64EncodeStream`](#base64encodestream), [`byteLimitStream`](#bytelimitstream), [`byteRangeStream`](#byterangestream), [`framedStream`](#framedstream), [`readLimitedBytes`](#readlimitedbytes)
 - `src/core/word.ts`: [`docxXmlToText`](#docxxmltotext), [`docxToText`](#docxtotext), [`cp1252ToString`](#cp1252tostring), [`parsePieceTable`](#parsepiecetable), [`pieceText`](#piecetext), [`cleanWordText`](#cleanwordtext), [`docToText`](#doctotext), [`wordKind`](#wordkind), [`wordToText`](#wordtotext)
 - `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`decompressBytes`](#decompressbytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
@@ -74,14 +75,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `src/mcp/server-version.ts`: [`manifestVersion`](#manifestversion)
 - `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`rawToolResult`](#rawtoolresult), [`toToolResult`](#totoolresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs), [`binaryContentBlock`](#binarycontentblock), [`base64ContentBlock`](#base64contentblock)
 - `src/remote/github-login.ts`: [`githubAuthorizeUrl`](#githubauthorizeurl), [`parseEmailList`](#parseemaillist), [`pickAllowedEmail`](#pickallowedemail), [`exchangeGithubCode`](#exchangegithubcode), [`fetchGithubEmails`](#fetchgithubemails), [`finishGithubLogin`](#finishgithublogin), [`githubUpstreamLogin`](#githubupstreamlogin)
-- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`serveMcpWithStreaming`](#servemcpwithstreaming), [`streamToolQuietly`](#streamtoolquietly), [`withCors`](#withcors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
-- `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage)
+- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`chosenGrants`](#chosengrants), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`serveMcpWithStreaming`](#servemcpwithstreaming), [`streamToolQuietly`](#streamtoolquietly), [`withCors`](#withcors), [`allowsCors`](#allowscors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
+- `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage), [`grantCheckbox`](#grantcheckbox)
 - `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
 - `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`resolveIssuer`](#resolveissuer), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
-- `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed)
+- `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed), [`audienceMatches`](#audiencematches)
 - `src/remote/streamed-tool.ts`: [`asJsonObject`](#asjsonobject), [`parseToolCallRequest`](#parsetoolcallrequest), [`readToolCallRequest`](#readtoolcallrequest), [`streamedResultFrame`](#streamedresultframe), [`streamedToolResponse`](#streamedtoolresponse)
-- `src/remote/tokens.ts`: [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessSecret`](#readaccesssecret)
+- `src/remote/tokens.ts`: [`grantFromClaims`](#grantfromclaims), [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessGrant`](#readaccessgrant)
 - `tools/bundle/bundle.ts`: [`listConnectors`](#listconnectors), [`isRemoteMcpUrl`](#isremotemcpurl), [`mcpServerProblems`](#mcpserverproblems), [`pluginMcpProblems`](#pluginmcpproblems), [`bundleOptions`](#bundleoptions)
 - `tools/bundle/cli.ts`: [`buildConnector`](#buildconnector), [`runBuildCli`](#runbuildcli)
 - `tools/docs/ast.ts`: [`toPosixRelative`](#toposixrelative), [`globToRegExp`](#globtoregexp), [`isAnalyzedSource`](#isanalyzedsource), [`openProject`](#openproject), [`signatureOf`](#signatureof), [`collectFileFunctions`](#collectfilefunctions), [`collectFunctions`](#collectfunctions), [`isDataDeclaration`](#isdatadeclaration), [`collectFileConstants`](#collectfileconstants), [`collectConstants`](#collectconstants), [`isIgnoredReference`](#isignoredreference), [`ownerLabelOf`](#ownerlabelof), [`findDeclaration`](#finddeclaration), [`buildReferenceIndex`](#buildreferenceindex), [`buildCallGraph`](#buildcallgraph)
@@ -2084,7 +2085,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/env.ts`
 - **Signature:** `parseFlag(value: string | null): boolean`
-- **Used by:** `readCanvasRemoteSettings()`, `readSendSettings()`
+- **Used by:** `readAllowedEmails()`, `readCanvasRemoteSettings()`, `readSendSettings()`
 - **Processes:** P08, P13, P17
 
 <!-- generated:end -->
@@ -2401,9 +2402,9 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Converts an error into an MCP result with `isError`.
+- **Does:** Converts an error into an MCP result with `isError`, redacting secrets from the message (`redactSecrets`).
 - **Input:** `error`: any thrown value.
-- **Output:** `CallToolResult` with `isError: true` and the error message (or `String(error)`).
+- **Output:** `CallToolResult` with `isError: true` and the redacted error message.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -2552,15 +2553,15 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/remote.ts`
-- **Signature:** `canvasLoginText(baseUrl: string): LoginPageText`
+- **Signature:** `canvasLoginText(baseUrl: string, allowWrite: boolean): LoginPageText`
 - **Used by:** `canvasRemoteConnector()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
 
 - **Does:** Builds the texts of the Canvas authorization page.
-- **Input:** `baseUrl`: Canvas address.
-- **Output:** `LoginPageText` with the help pointing to `/profile/settings`.
+- **Input:** `baseUrl`: Canvas address; `allowWrite`: whether the server offers the write opt-in.
+- **Output:** `LoginPageText` with the help pointing to `/profile/settings` and, with writing on, the unticked write opt-in (`grantOption`).
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -2768,6 +2769,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Canvas GET `/files/:id` and the download.
 - **Errors:** Rejects on invalid arguments (zod), on `resolveCanvasFile()` errors (never with the verifier) or Canvas errors; the remote handler then falls back to the MCP server.
 
+### `canWriteFor`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/remote.ts`
+- **Signature:** `canWriteFor(settings: CanvasRemoteSettings, grants: readonly string[]): boolean`
+- **Used by:** `canvasRemoteConnector()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Says whether a Canvas user gets the write tools: the server allows writing (`CANVAS_ALLOW_WRITE`) AND the user opted in at login (`write` grant). Old tokens have no grant and are read-only.
+- **Input:** `settings`; `grants`: permissions sealed in the token.
+- **Output:** `true`/`false`.
+- **Effects:** None.
+- **Errors:** None.
+
 ## `src/remote/handler.ts`
 
 ### `jsonResponse`
@@ -2793,7 +2811,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/handler.ts`
 - **Signature:** `htmlResponse(html: string, status = 200, formTarget: string | null = null): Response`
-- **Used by:** `consentPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `loginPageFor()`, `messagePage()`, `pairPage()`, `routePairRequest()`
+- **Used by:** `consentPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `linkConfirmPage()`, `loginPageFor()`, `messagePage()`, `pairPage()`, `routePairRequest()`
 - **Processes:** P08, P10, P11, P13, P15
 
 <!-- generated:end -->
@@ -2810,8 +2828,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/handler.ts`
 - **Signature:** `async readForm(request: Request): Promise<URLSearchParams>`
-- **Used by:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`, `submitAuthorize()`
-- **Processes:** P08, P10, P13, P15
+- **Used by:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`, `redeemConfirmedTicket()`, `submitAuthorize()`
+- **Processes:** P08, P10, P11, P13, P15
 
 <!-- generated:end -->
 
@@ -2918,8 +2936,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:end -->
 
 - **Does:** Handles `POST /authorize`: checks the credential and returns the code.
-- **Input:** `app`; `request`: form with `pending` and `secret`.
-- **Output:** 302 to the client; page with an error if the credential fails; 400 if the request expired.
+- **Input:** `app`; `request`: form with `pending`, `secret` and the optional `grant` checkbox.
+- **Output:** 302 to the client with a code carrying the secret and the ticked permission (`chosenGrants`); page with a redacted error if the credential fails; 400 if the request expired.
 - **Effects:** Network (via the connector's `verifySecret`).
 - **Errors:** None.
 
@@ -2953,7 +2971,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Handles `/mcp`, requiring the access token; serves through `serveMcpWithStreaming()`.
 - **Input:** `app`; `request`.
-- **Output:** MCP response, or a 401 that starts OAuth.
+- **Output:** MCP response; 401 (starts OAuth) for a missing, invalid or foreign token; 403 if the connector no longer accepts the secret.
 - **Effects:** Runs connector tools (network).
 - **Errors:** Passes MCP transport errors through.
 
@@ -2987,7 +3005,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Picks the route by method and path.
 - **Input:** `app`; `request`.
-- **Output:** Route response with CORS; 204 on preflight; 404 on an unknown path.
+- **Output:** Route response, with CORS only on API routes (`allowsCors`); 204 on preflight; 404 on an unknown path.
 - **Effects:** Those of the chosen route.
 - **Errors:** Passes route errors through.
 
@@ -3039,7 +3057,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Asks the connector to renew the credential (`renewSecret`), without letting a failure break the refresh.
 - **Input:** Remote connector and the user's secret.
 - **Output:** `SecretRenewal`: what `renewSecret` answered, or `'kept'` when the connector has none or it failed.
-- **Effects:** Whatever the connector's `renewSecret` does; `console.warn` if it fails.
+- **Effects:** Whatever the connector's `renewSecret` does; a redacted warning (`logWarning`) if it fails.
 - **Errors:** None (the failure becomes a log warning).
 
 ### `redirectToUpstream`
@@ -3081,14 +3099,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `src/remote/handler.ts`
-- **Signature:** `async serveMcpWithStreaming(connector: RemoteConnector, secret: string, request: Request): Promise<Response>`
+- **Signature:** `async serveMcpWithStreaming(connector: RemoteConnector, grant: SealedGrant, request: Request): Promise<Response>`
 - **Used by:** `handleMcp()`
 - **Processes:** P09, P14
 
 <!-- generated:end -->
 
-- **Does:** Serves `/mcp`: a call the connector streams goes straight out; everything else goes to the connector's MCP server.
-- **Input:** `connector`; `secret` of the user; `request`.
+- **Does:** Serves `/mcp`: a call the connector streams goes straight out; everything else goes to a new MCP server created for this request with the user's grant.
+- **Input:** `connector`; `grant`: the user's secret and permissions; `request`.
 - **Output:** `Response`.
 - **Effects:** Like `streamToolQuietly()` and `serveMcpRequest()`.
 - **Errors:** None (failures become MCP responses).
@@ -3107,7 +3125,41 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Asks the connector to stream a `tools/call`; any failure falls back to the MCP server with a warning.
 - **Input:** `connector`; `secret`; `request`.
 - **Output:** Streamed `Response`; `null` when the connector has no `streamTool`, the message is not a `tools/call`, it declines or fails.
-- **Effects:** Calls the connector; logs a warning on failure.
+- **Effects:** Calls the connector; logs a redacted warning on failure.
+- **Errors:** None.
+
+### `chosenGrants`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/handler.ts`
+- **Signature:** `chosenGrants(login: SecretLogin, form: URLSearchParams): string[]`
+- **Used by:** `handleAuthorizeSubmit()`
+- **Processes:** P08
+
+<!-- generated:end -->
+
+- **Does:** Permissions the user ticked on the login page: only the one the connector offers (`text.grantOption`); anything else in the form is ignored.
+- **Input:** `login`: `SecretLogin`; `form`: posted form.
+- **Output:** `[name]` or `[]`.
+- **Effects:** None.
+- **Errors:** None.
+
+### `allowsCors`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/handler.ts`
+- **Signature:** `allowsCors(path: string): boolean`
+- **Used by:** `routeRemoteRequest()`
+- **Processes:** P08, P13
+
+<!-- generated:end -->
+
+- **Does:** Says whether a path is an API route that other origins may call; the browser pages (`/authorize`, `/oauth/callback`) get no CORS headers.
+- **Input:** `path`: request path without trailing slash.
+- **Output:** `true` for API routes.
+- **Effects:** None.
 - **Errors:** None.
 
 ## `src/remote/login-page.ts`
@@ -3118,7 +3170,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/login-page.ts`
 - **Signature:** `escapeHtml(value: string): string`
-- **Used by:** `alertHtml()`, `consentPageBody()`, `handlePairCallback()`, `handleUpstreamCallback()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`
+- **Used by:** `alertHtml()`, `consentPageBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`
 - **Processes:** P08, P10, P11, P13, P15
 
 <!-- generated:end -->
@@ -3144,6 +3196,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `view`: texts, sealed request, client host and optional error.
 - **Output:** Complete HTML, without scripts.
 - **Effects:** None (pure).
+- **Errors:** None.
+
+### `grantCheckbox`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/login-page.ts`
+- **Signature:** `grantCheckbox(text: LoginPageText): string`
+- **Used by:** `renderLoginPage()`
+- **Processes:** P08, P13
+
+<!-- generated:end -->
+
+- **Does:** Renders the unticked, escaped checkbox of the optional permission the connector offers on the login page.
+- **Input:** `text`: `LoginPageText`.
+- **Output:** HTML (empty without `grantOption`).
+- **Effects:** None.
 - **Errors:** None.
 
 ## `src/remote/mcp-endpoint.ts`
@@ -3283,7 +3352,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Handles a Node request with the handler.
 - **Input:** `options`: handler and origin; `req`; `res`.
 - **Output:** Empty promise.
-- **Effects:** Reads the body, writes the response; logs errors to stderr.
+- **Effects:** Reads the body, writes the response; logs a redacted warning on errors.
 - **Errors:** None: a large body becomes 413 and a handler error becomes 500.
 
 ### `startRemoteHttpServer`
@@ -3418,7 +3487,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Registers an OAuth client by sealing the return addresses into the `client_id`.
+- **Does:** Registers an OAuth client by sealing the return addresses into the `client_id`, bound to this issuer (`aud`).
 - **Input:** `body`: JSON registration body; `settings`; `now`: Unix seconds.
 - **Output:** `ClientRegistration`, or an `invalid_redirect_uri` error.
 - **Effects:** Generates random bytes (seal).
@@ -3534,7 +3603,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/seal.ts`
 - **Signature:** `sealPayload(payload: unknown, key: Buffer): string`
-- **Used by:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `startAccountLink()`, `startPairLogin()`
+- **Used by:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `showLinkConfirmation()`, `startAccountLink()`, `startPairLogin()`
 - **Processes:** P08, P10, P11, P12, P13, P15, P18
 
 <!-- generated:end -->
@@ -3568,15 +3637,32 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/seal.ts`
 - **Signature:** `openSealed(sealed: string, key: Buffer, expected: SealExpectation): SealedClaims | null`
-- **Used by:** `clientRedirectUris()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openOwnerAccounts()`, `readAccessSecret()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemLinkTicket()`, `redeemRefreshToken()`, `takeLinkRequest()`
+- **Used by:** `clientRedirectUris()`, `isConfirmedInThisBrowser()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openLinkTicket()`, `openOwnerAccounts()`, `readAccessGrant()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `takeLinkRequest()`
 - **Processes:** P08, P09, P10, P11, P12, P13, P14, P15, P18
 
 <!-- generated:end -->
 
-- **Does:** Opens a not-yet-expired seal of the expected type.
-- **Input:** `sealed`; `key`; `expected`: `typ` and instant `now` (Unix seconds).
-- **Output:** `SealedClaims`; `null` if invalid, of another type, without a numeric `exp` or expired.
+- **Does:** Opens a not-yet-expired seal of the expected type and, when `expected.aud` is set, of the expected audience (`audienceMatches`).
+- **Input:** `sealed`; `key`; `expected`: `typ`, instant `now` (Unix seconds) and optional `aud` (connector issuer).
+- **Output:** `SealedClaims`; `null` if invalid, of another type or audience, without a numeric `exp` or expired.
 - **Effects:** None (pure).
+- **Errors:** None.
+
+### `audienceMatches`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/seal.ts`
+- **Signature:** `audienceMatches(claims: Readonly<Record<string, unknown>>, expected: SealExpectation): boolean`
+- **Used by:** `openSealed()`
+- **Processes:** P08, P09, P10, P11, P12, P13, P14, P15, P18
+
+<!-- generated:end -->
+
+- **Does:** Says whether a seal's `aud` is the expected audience (the connector issuer); a seal without `aud` passes only before `LEGACY_AUDLESS_UNTIL`, and nothing is checked when no audience is expected.
+- **Input:** `claims`: opened seal; `expected`: `SealExpectation` (`typ`, `now`, optional `aud`).
+- **Output:** `true` if the audience fits.
+- **Effects:** None.
 - **Errors:** None.
 
 ## `src/remote/tokens.ts`
@@ -3627,7 +3713,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:end -->
 
 - **Does:** Issues the authorization code (5 minutes) bound to client, return address and PKCE.
-- **Input:** `grant`: request + secret; `settings`; `now`.
+- **Input:** `grant`: request + secret + permissions; `settings`; `now`.
 - **Output:** Sealed code of type `code`.
 - **Effects:** Generates random bytes (seal).
 - **Errors:** None.
@@ -3637,14 +3723,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `src/remote/tokens.ts`
-- **Signature:** `issueTokenSet(secret: string, settings: OAuthSettings, now: number): TokenSet`
+- **Signature:** `issueTokenSet(grant: SealedGrant, settings: OAuthSettings, now: number): TokenSet`
 - **Used by:** `redeemTokenRequest()`
 - **Processes:** P08
 
 <!-- generated:end -->
 
-- **Does:** Issues an access token (1 hour) and a refresh token (30 days) for a secret.
-- **Input:** `secret`: user credential; `settings`; `now`.
+- **Does:** Issues an access token (1 hour) and a refresh token (30 days) carrying the secret and the opted-in permissions, bound to this issuer (`aud`).
+- **Input:** `grant`: `SealedGrant` (secret + permissions); `settings`; `now`.
 - **Output:** Bearer-type `TokenSet`.
 - **Effects:** Generates random bytes (seals).
 - **Errors:** None.
@@ -3654,7 +3740,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `src/remote/tokens.ts`
-- **Signature:** `redeemAuthorizationCode(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<string>`
+- **Signature:** `redeemAuthorizationCode(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<SealedGrant>`
 - **Used by:** `redeemTokenRequest()`
 - **Processes:** P08
 
@@ -3662,7 +3748,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Checks the code against client, return address and PKCE verifier.
 - **Input:** `form`: `/token` body; `settings`; `now`.
-- **Output:** The sealed secret, or an `invalid_grant` error.
+- **Output:** The sealed `SealedGrant`, or an `invalid_grant` error (also for a code of another issuer).
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -3671,7 +3757,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `src/remote/tokens.ts`
-- **Signature:** `redeemRefreshToken(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<string>`
+- **Signature:** `redeemRefreshToken(form: URLSearchParams, settings: OAuthSettings, now: number): OAuthResult<SealedGrant>`
 - **Used by:** `redeemTokenRequest()`
 - **Processes:** P08
 
@@ -3679,7 +3765,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Checks the refresh token.
 - **Input:** `form`: `/token` body; `settings`; `now`.
-- **Output:** The sealed secret, or an `invalid_grant` error.
+- **Output:** The sealed `SealedGrant`, or an `invalid_grant` error (also for a refresh token of another issuer).
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -3696,26 +3782,43 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Handles `/token` according to `grant_type`.
 - **Input:** `form`: `/token` body; `settings`; `now`.
-- **Output:** `RedeemedGrant` (new `TokenSet`, the secret and whether it came from a refresh), or an `invalid_grant`/`unsupported_grant_type` error.
+- **Output:** `RedeemedGrant` (new `TokenSet`, the grant and whether it came from a refresh), or an `invalid_grant`/`unsupported_grant_type` error.
 - **Effects:** Generates random bytes (seals).
 - **Errors:** None.
 
-### `readAccessSecret`
+### `grantFromClaims`
 
 <!-- generated:start -->
 
 - **File:** `src/remote/tokens.ts`
-- **Signature:** `readAccessSecret(authorization: string | null, settings: OAuthSettings, now: number): string | null`
+- **Signature:** `grantFromClaims(claims: SealedClaims): SealedGrant`
+- **Used by:** `readAccessGrant()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`
+- **Processes:** P08, P09, P14
+
+<!-- generated:end -->
+
+- **Does:** Reads the user secret and the opted-in permissions from opened token claims; a token without `grants` (issued before per-user permissions) has none.
+- **Input:** `claims`: opened seal.
+- **Output:** `SealedGrant` (`secret`, `grants` with string items only).
+- **Effects:** None.
+- **Errors:** None.
+
+### `readAccessGrant`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/tokens.ts`
+- **Signature:** `readAccessGrant(authorization: string | null, settings: OAuthSettings, now: number): SealedGrant | null`
 - **Used by:** `handleMcp()`
 - **Processes:** P09, P14
 
 <!-- generated:end -->
 
-- **Does:** Reads the secret from an `Authorization: Bearer` header.
-- **Input:** `authorization`: header (or null); `settings`; `now`.
-- **Output:** The secret; `null` without Bearer, with a token of another type or expired.
-- **Effects:** None (pure).
-- **Errors:** None.
+- **Does:** Reads the grant from an `Authorization: Bearer <access token>` header, accepting only an access token of this issuer (`aud`), unexpired and untampered.
+- **Input:** `authorization`: header or null; `settings`; `now`.
+- **Output:** `SealedGrant` or null.
+- **Effects:** None.
+- **Errors:** None (invalid → null).
 
 ## `connectors/canvas-puc/src/worker.ts`
 
@@ -5041,7 +5144,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/google-oauth.ts`
 - **Signature:** `randomToken(bytes = 32): string`
-- **Used by:** `beginGoogleSignIn()`, `completeSignIn()`, `issueLinkUrl()`, `mimeBoundary()`, `startAccountLink()`
+- **Used by:** `beginGoogleSignIn()`, `completeSignIn()`, `issueLinkUrl()`, `mimeBoundary()`, `showLinkConfirmation()`, `startAccountLink()`
 - **Processes:** P10, P11, P18
 
 <!-- generated:end -->
@@ -5300,7 +5403,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/link-flow.ts`
 - **Signature:** `readCookie(header: string | null, name: string): string | null`
-- **Used by:** `takeLinkRequest()`
+- **Used by:** `redeemConfirmedTicket()`, `takeLinkRequest()`
 - **Processes:** P11
 
 <!-- generated:end -->
@@ -5317,7 +5420,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/link-flow.ts`
 - **Signature:** `linkCookie(value: string | null): string`
-- **Used by:** `finishAccountLink()`, `startAccountLink()`
+- **Used by:** `finishAccountLink()`, `showLinkConfirmation()`, `startAccountLink()`
 - **Processes:** P11
 
 <!-- generated:end -->
@@ -5339,10 +5442,10 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Redeems the ticket and sends the browser to Google to link the account.
-- **Input:** `deps`: dependencies. `request`: request to `/accounts/link?ticket=...`.
+- **Does:** Handles the confirmation `POST /accounts/link`: requires the confirmation from this browser (`redeemConfirmedTicket`), redeems the ticket and sends the browser to Google to link the account.
+- **Input:** `deps`: dependencies. `request`: form POST with `ticket` and `confirm` and the link cookie.
 - **Output:** 302 to Google with the link cookie; 400 page without a valid ticket.
-- **Effects:** KV: marks the ticket and stores the sealed request (10 minutes). Sets the `__Host-gmail-link` cookie.
+- **Effects:** KV: marks the ticket and stores the sealed request (10 minutes, bound to the cookie set by the confirmation page).
 - **Errors:** Propagates KV failures.
 
 ### `takeLinkRequest`
@@ -5419,7 +5522,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/link-flow.ts`
 - **Signature:** `nowSeconds(deps: GmailDeps): number`
-- **Used by:** `issueLinkUrl()`, `redeemLinkTicket()`, `startAccountLink()`, `takeLinkRequest()`
+- **Used by:** `isConfirmedInThisBrowser()`, `issueLinkUrl()`, `openLinkTicket()`, `showLinkConfirmation()`, `startAccountLink()`, `takeLinkRequest()`
 - **Processes:** P11
 
 <!-- generated:end -->
@@ -5441,7 +5544,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Generates the user's single-use link URL.
+- **Does:** Generates the user's single-use link URL; the ticket carries owner, owner email and `jti`, bound to this Worker (`aud`).
 - **Input:** `deps`: dependencies with the user.
 - **Output:** `<origem>/accounts/link?ticket=<selo>`, valid for 10 minutes.
 - **Effects:** None (only seals; stores nothing).
@@ -5452,15 +5555,15 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/gmail/src/link-flow.ts`
-- **Signature:** `async redeemLinkTicket(deps: GmailDeps, ticket: string): Promise<string | null>`
-- **Used by:** `startAccountLink()`
+- **Signature:** `async redeemLinkTicket(deps: GmailDeps, ticket: string): Promise<LinkTicket | null>`
+- **Used by:** `redeemConfirmedTicket()`
 - **Processes:** P11
 
 <!-- generated:end -->
 
 - **Does:** Redeems the link ticket only once.
 - **Input:** `deps`: dependencies. `ticket`: link seal.
-- **Output:** The ticket's user; null if invalid, expired or already used.
+- **Output:** The opened `LinkTicket`; null if invalid, expired, from another Worker or already used.
 - **Effects:** KV: reads and writes the `jti` usage mark (valid for 10 minutes).
 - **Errors:** Propagates KV failures.
 
@@ -5470,7 +5573,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/link-flow.ts`
 - **Signature:** `invalidTicketPage(): Response`
-- **Used by:** `finishAccountLink()`, `startAccountLink()`
+- **Used by:** `finishAccountLink()`, `showLinkConfirmation()`, `startAccountLink()`
 - **Processes:** P11
 
 <!-- generated:end -->
@@ -5514,6 +5617,91 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** Nothing.
 - **Effects:** KV: reads and rewrites the user's record. Isolate memory: forgets the old access token.
 - **Errors:** Throws the limit error of `upsertAccount()`; propagates KV failures.
+
+### `openLinkTicket`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `openLinkTicket(deps: GmailDeps, ticket: string): LinkTicket | null`
+- **Used by:** `isConfirmedInThisBrowser()`, `redeemLinkTicket()`, `showLinkConfirmation()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Opens a link ticket without spending it: type, expiry and audience (this Worker) are checked.
+- **Input:** `deps`; `ticket`: sealed ticket.
+- **Output:** `LinkTicket` (`owner`, `email`, `jti`) or null.
+- **Effects:** None.
+- **Errors:** None.
+
+### `usedTicketKey`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `usedTicketKey(jti: string): string`
+- **Used by:** `redeemLinkTicket()`, `showLinkConfirmation()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** KV key that marks a ticket as used (hash of its `jti`).
+- **Input:** `jti`.
+- **Output:** `ticket:<sha256>`.
+- **Effects:** None.
+- **Errors:** None.
+
+### `showLinkConfirmation`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `async showLinkConfirmation(deps: GmailDeps, request: Request): Promise<Response>`
+- **Used by:** `connectors/gmail/src/worker.ts (module)`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** `GET /accounts/link`: validates the ticket without spending it and shows whose connector receives the account, with a confirmation form tied to the ticket and to a new `__Host-` browser cookie.
+- **Input:** `deps`; `request`.
+- **Output:** Confirmation page, or the invalid link page.
+- **Effects:** Reads KV; sets the link cookie.
+- **Errors:** None (invalid or used ticket → 400 page).
+
+### `isConfirmedInThisBrowser`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `isConfirmedInThisBrowser(deps: GmailDeps, form: URLSearchParams, binding: string | null): boolean`
+- **Used by:** `redeemConfirmedTicket()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Says whether a confirmation POST came from the page shown to this browser for this very ticket (sealed confirmation with the ticket `jti` and the cookie hash).
+- **Input:** `deps`; `form`: posted fields; `binding`: link cookie value.
+- **Output:** `true`/`false`.
+- **Effects:** None.
+- **Errors:** None.
+
+### `redeemConfirmedTicket`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/link-flow.ts`
+- **Signature:** `async redeemConfirmedTicket(deps: GmailDeps, request: Request): Promise<{ readonly owner: string; readonly binding: string } | null>`
+- **Used by:** `startAccountLink()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Checks the confirmation and the browser cookie, then redeems the ticket (single use).
+- **Input:** `deps`; `request`: confirmation POST.
+- **Output:** `{ owner, binding }` or null.
+- **Effects:** Reads the body; reads and writes KV (used ticket).
+- **Errors:** None (invalid → null).
 
 ## `connectors/gmail/src/message-format.ts`
 
@@ -5780,7 +5968,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/pages.ts`
 - **Signature:** `pageDocument(title: string, body: string): string`
-- **Used by:** `consentPage()`, `messagePage()`
+- **Used by:** `consentPage()`, `linkConfirmPage()`, `messagePage()`
 - **Processes:** P10, P11
 
 <!-- generated:end -->
@@ -5804,7 +5992,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Builds a simple notice page.
 - **Input:** `title`: plain-text title. `message`: plain-text message. `status`: HTTP code (default 200).
-- **Output:** HTML response with the given status, restrictive CSP and `no-store`; title and message escaped.
+- **Output:** HTML response with the given status, restrictive CSP and `no-store`; title escaped, message redacted (`redactSecrets`) and escaped.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -5874,6 +6062,57 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `location`: destination. `headers`: headers to keep, such as transaction cookies (default empty).
 - **Output:** Bodiless 302 response, with `Location` and `cache-control: no-store`.
 - **Effects:** Mutates the received `headers` object.
+- **Errors:** None.
+
+### `maskEmail`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/pages.ts`
+- **Signature:** `maskEmail(email: string): string`
+- **Used by:** `linkConfirmBody()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Masks an email for display, keeping the first two characters of the name and the domain.
+- **Input:** `email`.
+- **Output:** Masked email (`ow***@example.com`; `***` if it is not an email).
+- **Effects:** None.
+- **Errors:** None.
+
+### `linkConfirmBody`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/pages.ts`
+- **Signature:** `linkConfirmBody(view: LinkConfirmView): string`
+- **Used by:** `linkConfirmPage()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Body of the link confirmation page: whose connector receives the account (masked), the warning about forwarded links and the form that posts ticket and confirmation.
+- **Input:** `view`: `LinkConfirmView`.
+- **Output:** Escaped HTML.
+- **Effects:** None.
+- **Errors:** None.
+
+### `linkConfirmPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/gmail/src/pages.ts`
+- **Signature:** `linkConfirmPage(view: LinkConfirmView, headers: Headers): Response`
+- **Used by:** `showLinkConfirmation()`
+- **Processes:** P11
+
+<!-- generated:end -->
+
+- **Does:** Link confirmation page; its CSP lets the form be redirected to Google and it carries the binding cookie.
+- **Input:** `view`: `LinkConfirmView`; `headers`: `Set-Cookie` to copy.
+- **Output:** HTML `Response` 200.
+- **Effects:** None.
 - **Errors:** None.
 
 ## `connectors/gmail/src/rate-limit.ts`
@@ -7433,7 +7672,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Reads the owner list (`ALLOWED_EMAILS`); empty throws, because nobody could sign in.
+- **Does:** Reads the owner list (`ALLOWED_EMAILS`); empty throws (nobody could sign in), and more than one email throws unless `ALLOW_SHARED_OWNER=true` (single tenant: everyone listed reads the same WhatsApp).
 - **Input:** `env`.
 - **Output:** List of lowercase e-mails.
 - **Effects:** None (pure).
@@ -9136,7 +9375,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/token-store.ts`
 - **Signature:** `sha256Hex(text: string): string`
-- **Used by:** `linkRequestKey()`, `ownerKey()`, `redeemLinkTicket()`, `startAccountLink()`, `takeLinkRequest()`
+- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerKey()`, `showLinkConfirmation()`, `startAccountLink()`, `takeLinkRequest()`, `usedTicketKey()`
 - **Processes:** P10, P11, P12, P18
 
 <!-- generated:end -->
@@ -11206,6 +11445,76 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network: `GET` the assignment, `POST .../submissions/self/files`, the upload (`client.upload`) and `POST .../submissions` — a real submission the teacher sees.
 - **Errors:** Throws the `uploadRefusal()` message before uploading anything; propagates `CanvasApiError` and upload errors.
 
+## `src/core/redact.ts`
+
+### `redactSecrets`
+
+<!-- generated:start -->
+
+- **File:** `src/core/redact.ts`
+- **Signature:** `redactSecrets(text: string): string`
+- **Used by:** `errorResult()`, `handleUpstreamCallback()`, `loginPageFor()`, `messagePage()`, `redactForLog()`
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P16
+
+<!-- generated:end -->
+
+- **Does:** Replaces tokens and credentials in a text: Bearer headers, Canvas tokens (`n~...`), Google tokens (`ya29.`, `1//0`), JWTs, `access_token`/`refresh_token`/`client_secret`/`id_token` fields and long base64url seals.
+- **Input:** `text`.
+- **Output:** Redacted text.
+- **Effects:** None.
+- **Errors:** None.
+
+### `redactForLog`
+
+<!-- generated:start -->
+
+- **File:** `src/core/redact.ts`
+- **Signature:** `redactForLog(text: string): string`
+- **Used by:** `logWarning()`
+- **Processes:** P08, P09, P14, P16
+
+<!-- generated:end -->
+
+- **Does:** Redacts secrets and also masks email addresses, for text that goes to the logs.
+- **Input:** `text`.
+- **Output:** Redacted text.
+- **Effects:** None.
+- **Errors:** None.
+
+### `errorMessage`
+
+<!-- generated:start -->
+
+- **File:** `src/core/redact.ts`
+- **Signature:** `errorMessage(error: unknown): string`
+- **Used by:** `errorResult()`, `handleAuthorizeSubmit()`, `handleUpstreamCallback()`, `logWarning()`
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P16
+
+<!-- generated:end -->
+
+- **Does:** Message of an unknown error: the `Error` message or the value as text.
+- **Input:** `error`: any value.
+- **Output:** Text.
+- **Effects:** None.
+- **Errors:** None.
+
+### `logWarning`
+
+<!-- generated:start -->
+
+- **File:** `src/core/redact.ts`
+- **Signature:** `logWarning(context: string, error: unknown): void`
+- **Used by:** `logSnapshotFailure()`, `renewSecretQuietly()`, `serveNodeRequest()`, `streamToolQuietly()`
+- **Processes:** P08, P09, P14, P16
+
+<!-- generated:end -->
+
+- **Does:** Writes a warning with the redacted error message (never the raw object or stack).
+- **Input:** `context`: prefix; `error`: any value.
+- **Output:** Nothing.
+- **Effects:** `console.warn`.
+- **Errors:** None.
+
 ## Data and constants
 
 | Name                          | File                                        | What it is                                                                                                                                |
@@ -11384,3 +11693,10 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `MAX_LINKED_ACCOUNTS`         | `connectors/gmail/src/token-store.ts`       | Maximum Gmail accounts a user can link (10).                                                                                              |
 | `linkAccountTool`             | `connectors/gmail/src/tools.ts`             | The `link_account` tool.                                                                                                                  |
 | `unlinkAccountTool`           | `connectors/gmail/src/tools.ts`             | The `unlink_account` tool.                                                                                                                |
+| `SECRET_PATTERNS`             | `src/core/redact.ts`                        | Secret patterns removed by `redactSecrets` (Bearer, Canvas, Google, JWT, OAuth fields, long seals) and their masks.                       |
+| `EMAIL_PATTERN`               | `src/core/redact.ts`                        | Email address pattern masked in logs by `redactForLog`.                                                                                   |
+| `BROWSER_PAGE_PATHS`          | `src/remote/handler.ts`                     | Browser pages of the remote server (`/authorize`, `/oauth/callback`): no CORS headers.                                                    |
+| `LEGACY_AUDLESS_UNTIL`        | `src/remote/seal.ts`                        | Cutoff (2027-01-01 UTC) until which a seal issued before `aud` existed still opens; every older access/refresh token expires before it.   |
+| `CANVAS_WRITE_GRANT`          | `connectors/canvas-puc/src/remote.ts`       | Permission (`write`) a Canvas user opts into at login to get the send, reply and submit tools.                                            |
+| `CANVAS_WRITE_OPTION_LABEL`   | `connectors/canvas-puc/src/remote.ts`       | Label of the unticked write opt-in checkbox on the Canvas login page.                                                                     |
+| `LINK_CONFIRM_TYP`            | `connectors/gmail/src/link-flow.ts`         | Seal type of the Gmail link confirmation form (ticket `jti` + browser cookie hash).                                                       |

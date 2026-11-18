@@ -159,8 +159,11 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
   4. `handleAuthorizePage()` validates the query with `parseAuthorizeQuery()` (`clientRedirectUris()`,
      `readCodeChallenge()`) and shows `renderLoginPage()` via `loginPageFor()`, with the request sealed by
      `sealAuthorizeRequest()`.
-  5. The user pastes the token; `handleAuthorizeSubmit()` opens the request with `openAuthorizeRequest()`, checks the token
-     with `verifyCanvasToken()` and returns the code from `issueAuthorizationCode()` via `redirectWithCode()`.
+  5. The user pastes the token and may tick the write opt-in (`grantCheckbox()`, offered by `canvasLoginText()` when
+     `CANVAS_ALLOW_WRITE` is on); `handleAuthorizeSubmit()` opens the request with `openAuthorizeRequest()`, checks the
+     token with `verifyCanvasToken()`, keeps only the offered permission with `chosenGrants()` and returns the code
+     from `issueAuthorizationCode()` via `redirectWithCode()`. Every seal carries `aud` = issuer, checked by
+     `audienceMatches()` (docs/security/isolation.md).
   6. `handleToken()` exchanges the code in `redeemTokenRequest()` (`redeemAuthorizationCode()` checks PKCE with
      `pkceChallenge()`) and answers with `issueTokenSet()`; afterwards, the refresh goes through `redeemRefreshToken()`.
   7. On each refresh, `handleToken()` calls `renewSecretQuietly()`: for Canvas, `renewCanvasSecret()` first asks
@@ -177,7 +180,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 
 - **Trigger:** Claude calls a tool at `POST /mcp` with the access token.
 - **Steps:**
-  1. `handleMcp()` reads the Canvas token with `readAccessSecret()` (`openSealed()` checks type and expiry).
+  1. `handleMcp()` reads the Canvas token with `readAccessGrant()` (`openSealed()` checks type, expiry and audience `aud`).
   2. `serveMcpWithStreaming()` first tries `streamToolQuietly()` (ADR 0023): `readToolCallRequest()` reads a clone
      of the body (`parseToolCallRequest()`, `asJsonObject()`) and the connector's `streamTool`, `streamCanvasTool()`,
      takes only `download_file`: `canvasClientFor()` builds the client, `resolveCanvasFile()` finds the file
@@ -227,17 +230,24 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Trigger:** the user asks Claude to link another account, or a tool says the account lost
   access.
 - **Steps:**
-  1. The `link_account` tool calls `issueLinkUrl()`: a sealed ticket with the user and 10 minutes of validity.
-  2. The user opens the link; `startAccountLink()` redeems the ticket with `redeemLinkTicket()` (single use, marked in
-     KV), creates the `state` (`link.` + random), verifier, `nonce` and link cookie, stores the sealed request under
-     the key from `linkRequestKey()` and redirects with `googleAuthorizeUrl()`.
-  3. On return, `finishAccountLink()` takes the request with `takeLinkRequest()` (single use, cookie checked by
+  1. The `link_account` tool calls `issueLinkUrl()`: a sealed ticket with the user, their email, a `jti` and 10 minutes
+     of validity, bound to this Worker (`aud`).
+  2. The user opens the link; `showLinkConfirmation()` opens the ticket with `openLinkTicket()` without spending it
+     (checking `usedTicketKey()`), shows `linkConfirmPage()` (`linkConfirmBody()`, owner email masked by `maskEmail()`)
+     and sets the link cookie.
+  3. The user confirms; `startAccountLink()` calls `redeemConfirmedTicket()`, which requires
+     `isConfirmedInThisBrowser()` (the sealed confirmation names the same ticket and the cookie hash) and redeems the
+     ticket with `redeemLinkTicket()` (single use, marked in KV). It creates the `state` (`link.` + random), verifier
+     and `nonce`, stores the sealed request under the key from `linkRequestKey()` and redirects with
+     `googleAuthorizeUrl()`.
+  4. On return, `finishAccountLink()` takes the request with `takeLinkRequest()` (single use, cookie checked by
      `readCookie()` and `sha256Hex()`).
-  4. `linkSafely()` runs `linkFromCode()`, which exchanges the code, validates the `id_token`, checks `linkRefusalReason()`
+  5. `linkSafely()` runs `linkFromCode()`, which exchanges the code, validates the `id_token`, checks `linkRefusalReason()`
      (`gmail.modify` scope with `hasModifyScope()` and refresh token) and stores with `storeGoogleAccount()` (`upsertAccount()`,
      `saveOwnerAccounts()`, seal from `sealOwnerAccounts()`) under the ticket's user.
 - **Result:** "Account linked" page; the cookie is cleared with `linkCookie()`.
-- **Failures:** expired link, already used or from another browser → `invalidTicketPage()`; refusal at Google → "Link
+- **Failures:** expired link, already used, from another Worker, or confirmed without the page's cookie →
+  `invalidTicketPage()`; refusal at Google → "Link
   cancelled"; Gmail permission unchecked → "Missing permission"; more than 10 accounts → limit error.
 
 ## P12 — Answer a Gmail tool
@@ -283,7 +293,8 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      follows P08 (step 6).
 - **Result:** the connector shows up as connected; the secret sealed in the tokens is only the owner's email.
 - **Failures:** login cancelled or account outside the list → 403 page with the reason (`escapeHtml()`); expired `state` →
-  400; missing secret → 500 explaining which one.
+  400; missing secret, or more than one email in `ALLOWED_EMAILS` without `ALLOW_SHARED_OWNER=true` (single tenant)
+  → 500 explaining which one.
 
 ## P14 — Answer a WhatsApp tool (on demand)
 
