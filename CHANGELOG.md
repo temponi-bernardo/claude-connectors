@@ -10,6 +10,12 @@ Canvas plugin released as `canvas-puc` 3.1.0 (details in `connectors/canvas-puc/
 
 ### Added
 
+- Canvas: `submit_file_assignment` submits a file to assignments that only accept uploads (`online_upload`). The
+  file comes inside the call, as plain text (`encoding: "text"`, e.g. a `.txt` report) or base64, up to 5 MB. It
+  refuses before uploading anything when the assignment does not take files, the extension is outside
+  `allowed_extensions` or the file is empty or too large; then it runs Canvas's three-step upload and submits
+  the file. Writes only, with confirmation in the chat (ADR 0026). The `prepare-submission` skill uses it instead
+  of sending the user to Canvas.
 - Canvas: links and media of every HTML content are no longer lost. `get_assignment`, `get_page`, `get_discussion`
   (prompt and each post) and `list_announcements` keep the text readable but write each link as `title [link N]`
   and return a new `links` field: `{ n, type, title, url, file_id?, course_id?, page_url?, assignment_id?,

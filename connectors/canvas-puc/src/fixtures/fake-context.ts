@@ -2,7 +2,7 @@
  * Fake context to test the tools without network: responses by API path.
  */
 import { vi, type Mock } from 'vitest';
-import type { CanvasClient } from '../client.js';
+import type { CanvasClient, CanvasUploadSlot, UploadedBytes } from '../client.js';
 import type { CanvasContext } from '../context.js';
 import type { QueryParams } from '../../../../src/core/http.js';
 
@@ -18,6 +18,7 @@ function answer(routes: Routes, path: string): Promise<unknown> {
 type GetFn = (path: string, params?: QueryParams) => Promise<unknown>;
 type PostFn = (path: string, body: unknown) => Promise<unknown>;
 type TextFn = (url: string) => Promise<unknown>;
+type UploadFn = (slot: CanvasUploadSlot, file: UploadedBytes) => Promise<unknown>;
 
 /** Fake context with the mocks exposed for assertions. */
 export interface FakeContext {
@@ -28,6 +29,8 @@ export interface FakeContext {
   readonly fetchText: Mock<TextFn>;
   readonly fetchBytes: Mock<TextFn>;
   readonly fetchStream: Mock<TextFn>;
+  /** Answers with the route keyed by the slot's `upload_url`. */
+  readonly upload: Mock<UploadFn>;
 }
 
 /** Creates a context with a fake client and a clock fixed at 2026-11-05T12:00:00Z. */
@@ -38,6 +41,7 @@ export function fakeContext(routes: Routes = {}): FakeContext {
   const fetchText = vi.fn<TextFn>((url) => answer(routes, url));
   const fetchBytes = vi.fn<TextFn>((url) => answer(routes, url));
   const fetchStream = vi.fn<TextFn>((url) => answer(routes, url));
+  const upload = vi.fn<UploadFn>((slot) => answer(routes, slot.upload_url));
   const client = {
     baseUrl: 'https://x.test',
     get,
@@ -46,7 +50,8 @@ export function fakeContext(routes: Routes = {}): FakeContext {
     fetchText,
     fetchBytes,
     fetchStream,
+    upload,
   } as unknown as CanvasClient;
   const ctx: CanvasContext = { client, now: () => new Date('2026-11-05T12:00:00Z') };
-  return { ctx, get, getAll, post, fetchText, fetchBytes, fetchStream };
+  return { ctx, get, getAll, post, fetchText, fetchBytes, fetchStream, upload };
 }

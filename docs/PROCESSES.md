@@ -78,7 +78,15 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
      accepts only numeric user IDs (at most `MAX_MESSAGE_RECIPIENTS`), builds the body with `newMessagePayload()`
      and answers with `sentConversation()`; `reply_to_conversation` posts to `add_message` and answers with
      `sentReply()`.
-  7. `toToolResult()` returns the JSON (via `textResult()`) or the ready-made result to Claude; any error becomes
+  7. File submission (ADR 0026, writes only): `submit_file_assignment` builds the file with `uploadedFileFromArgs()`
+     (`decodeUploadContent()`, `uploadContentType()` over `fileExtension()`) and calls `submitFileAssignment()`. It
+     reads the assignment and `uploadRefusal()` refuses, before any upload, an assignment without `online_upload`,
+     an extension outside `allowed_extensions` (`extensionRefusal()`) or an empty file or one above
+     `MAX_UPLOAD_BYTES` (`uploadSizeRefusal()`). Then it asks for an upload slot
+     (`POST .../submissions/self/files`), sends the file with the client's `upload`: `postUploadForm()` posts
+     `uploadForm()` to the signed URL without the token or redirects, and `confirmUpload()` reads the file or
+     confirms a 3xx at its `Location` with the token. Last, it posts `onlineUploadPayload()` to `.../submissions`.
+  8. `toToolResult()` returns the JSON (via `textResult()`) or the ready-made result to Claude; any error becomes
      `errorResult()` with the message.
 - **Result:** Claude receives only the useful fields, with absolute links and clean text.
 - **Failures:** a 401 that refuses the token becomes `unauthorizedMessage()` (generate another token and reconnect);

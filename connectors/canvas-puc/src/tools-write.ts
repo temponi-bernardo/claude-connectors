@@ -7,6 +7,7 @@ import { SEND_HINTS, toolAnnotations } from '../../../src/mcp/annotations.js';
 import { defineTool, type ToolSpec } from '../../../src/mcp/tools.js';
 import type { CanvasSubmission, Id } from './canvas-types.js';
 import type { CanvasContext } from './context.js';
+import { MAX_UPLOAD_MB, submitFileAssignment, uploadedFileFromArgs } from './upload.js';
 
 const id = z.union([z.string(), z.number()]);
 
@@ -40,6 +41,23 @@ export const CANVAS_WRITE_TOOLS: readonly ToolSpec<CanvasContext>[] = [
         submissionPayload(args.type, args.content),
       );
       return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt };
+    },
+  }),
+  defineTool({
+    name: 'submit_file_assignment',
+    description: `SUBMITS a file to an assignment that accepts uploads (online_upload). Real action, visible to the teacher: show the file name and content and confirm with the user first. Pass the file in content: plain text with encoding "text" (e.g. a .txt report), or base64 with encoding "base64". At most ${MAX_UPLOAD_MB} MB; the extension must be in the assignment's allowed_extensions.`,
+    shape: {
+      course_id: id,
+      assignment_id: id,
+      file_name: z.string().trim().min(1).max(255).describe('Name with extension, e.g. report.txt'),
+      content: z.string().min(1).describe('File content: text, or base64 with encoding "base64"'),
+      encoding: z.enum(['text', 'base64']).default('text'),
+      content_type: z.string().min(1).optional().describe('MIME type; guessed from the extension'),
+    },
+    annotations: toolAnnotations('Submit file assignment', SEND_HINTS),
+    run: ({ client }, args) => {
+      const base = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
+      return submitFileAssignment(client, base, uploadedFileFromArgs(args));
     },
   }),
   defineTool({
