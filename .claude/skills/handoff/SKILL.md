@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: Use when finishing a task or a big step, or when the Stop hook asks for it. Overwrites docs/STATE.md with a short, concrete summary of what was done, what is in progress and the next steps, so the next session resumes without this session's excess context.
+description: Use when finishing a task or a big step, before asking for /clear. Overwrites docs/STATE.md with a short, concrete summary of what was done, what is in progress and the next steps, so the next session resumes without this session's excess context.
 ---
 
 # Context handoff

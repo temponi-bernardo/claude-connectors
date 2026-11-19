@@ -1,4 +1,4 @@
-import { writeFileSync } from 'node:fs';
+import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { createTempRepo, runHook } from './fixtures/hook-test-utils.js';
@@ -29,6 +29,13 @@ describe('hook session-start (SessionStart)', () => {
     const r = runHook(HOOK, dir, { input: '{}' });
     expect(r.status).toBe(0);
     expect(r.stdout).toContain('Next roadmap task: **F4.6 — Translate**');
+  });
+
+  it('removes the marker of the old stop-handoff hook', () => {
+    const dir = createTempRepo();
+    writeFileSync(join(dir, '.claude/.last-handoff'), 'abc def\n');
+    expect(runHook(HOOK, dir, { input: '{}' }).status).toBe(0);
+    expect(existsSync(join(dir, '.claude/.last-handoff'))).toBe(false);
   });
 
   it('without STATE.md says there is no handoff and still exits 0', () => {

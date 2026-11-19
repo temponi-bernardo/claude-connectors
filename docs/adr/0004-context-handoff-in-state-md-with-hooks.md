@@ -1,6 +1,6 @@
 # 0004 — Context handoff in `docs/STATE.md` with Claude Code hooks
 
-- **Status:** Partly superseded by [0005](0005-state-md-local-per-clone.md) (local STATE.md and the `Stop` criterion)
+- **Status:** Partly superseded by [0005](0005-state-md-local-per-clone.md) (local STATE.md and the `Stop` criterion) and by [0029](0029-lean-claude-code-layer.md) (no `Stop`/`PreCompact` handoff hooks)
 - **Date:** 2026-10-19
 - **Related:** ADR 0002 (docs as the source of truth)
 

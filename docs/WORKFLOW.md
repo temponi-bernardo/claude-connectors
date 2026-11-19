@@ -50,51 +50,60 @@ When you create a new layer or module, add the scope there **and** here in the s
 2. Title in Conventional Commits format (it becomes the commit on `main`).
 3. Fill in the template: what changed, how to test, documentation checklist (each doc ticked or "n/a:
    reason").
-4. A green `npm run pr:check -- "<PR title>"` is required before opening and before merging: full check,
-   connector build (remote-only plugin, `server/remote.js` committed and current), commitlint of the commits and
-   of the title. Fix things instead of skipping them (`--no-verify` is forbidden and blocked by Claude Code).
-5. **Who merges:** Claude, with a green `pr:check`, without asking for confirmation, including the release PR
+4. A green `npm run pr:check -- "<PR title>"`, **run once** after the last commit: full check, connector build
+   (remote-only plugin, `server/remote.js` committed and current), commitlint of the commits and of the title. It
+   is reused for the merge; run it again only if a commit came after it
+   ([ADR 0029](adr/0029-lean-claude-code-layer.md)). Fix things instead of skipping them (`--no-verify` is
+   forbidden and blocked by Claude Code).
+5. **Review once** with `/review-pr`: the read-only `reviewer` agent reviews the whole PR since the merge-base,
+   the session fixes once and what is left goes into the PR body. No review loop.
+6. **Who merges:** Claude, with a green `pr:check`, without asking for confirmation, including the release PR
    (owner's decision, 2026-11-05).
-6. Merge by **squash**, deleting the branch.
+7. Merge by **squash**, deleting the branch.
 
 ## Definition of done
 
 A task is done when: the roadmap's "Pronto quando" (done when) criterion is verifiable and true; `npm run check`
 passes; the documentation in the same PR is updated as in [DOCUMENTATION.md](DOCUMENTATION.md); the CHANGELOG
 "Unreleased" section has the entry (if user-visible); the state in the ROADMAP and its "Next task"
-were updated; affected skills were reviewed.
+were updated; a skill is updated in the same PR when a step, command or rule it cites changed.
 
 ## Local hooks
 
 Versioned in `.githooks/` and enabled by `npm install` (the `prepare` script → `git config core.hooksPath`).
 
-| Hook         | Runs                                                            | Target time |
-| ------------ | --------------------------------------------------------------- | ----------- |
-| `pre-commit` | lint-staged (ESLint + Prettier on staged files) and `typecheck` | seconds     |
-| `commit-msg` | commitlint                                                      | instant     |
-| `pre-push`   | full `npm run check`                                            | 1–2 min     |
+| Hook         | Runs                                                                                                                     | Target time |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `pre-commit` | refuses `.github/workflows/`, lint-staged (ESLint + Prettier on staged files), `docs:check`                              | seconds     |
+| `commit-msg` | commitlint                                                                                                               | instant     |
+| `pre-push`   | refuses updating or deleting `main`/`master` on the remote (`protected-branches.sh`) and runs gitleaks (`secrets:check`) | seconds     |
+
+Types and the test suite run once per PR, in `pr:check` ([ADR 0029](adr/0029-lean-claude-code-layer.md)). While
+working, run the tests of what you touched (`npx vitest run <path>`).
 
 ## Claude Code context cycle
 
-Claude works in small contexts: one task per session. The cycle, supported by the hooks in
-`.claude/settings.json` (decisions in [ADR 0004](adr/0004-context-handoff-in-state-md-with-hooks.md) and
-[ADR 0005](adr/0005-state-md-local-per-clone.md)):
+Claude works in small contexts: one task per session. A simple request (a fix, a question, a small change) is done
+directly; a roadmap task or a multi-step change goes through `/task`. The configuration lives in
+`.claude/settings.json` (decisions in [ADR 0005](adr/0005-state-md-local-per-clone.md) and
+[ADR 0029](adr/0029-lean-claude-code-layer.md)):
 
 1. `SessionStart` injects `docs/STATE.md` (handoff) and the roadmap's next task. In the cloud, `session-tools.sh`
    also installs gitleaks and the npm dependencies.
-2. During the task, work that can be isolated goes to subagents; only the summary comes back into the context.
-3. When done, `/handoff` overwrites `docs/STATE.md`, which is local to each clone (it is in `.gitignore` and is
-   never committed). If there is a new commit of yours without a handoff, the `Stop` hook blocks ending the turn
-   and asks for the handoff; commits brought in by `git pull` do not count.
+2. Guards run before the fact: `guard-bash.mjs` (force push, push to `main`, `--no-verify`, reading secret files,
+   starting GitHub Actions) and `guard-edit.mjs` (writing `.github/workflows/`, secret files, key files). After
+   every edit, `format-on-edit.mjs` runs Prettier on the file.
+3. Noisy work goes to subagents and only the summary comes back: `docs-explorer` (where/what, from the docs) and
+   `reviewer` (one review per PR, through `/review-pr`).
 4. If the branch changed a plugin (`connectors/` or `.claude-plugin/`) without touching documentation (`docs/`,
    `CHANGELOG.md`, `README.md` or the connector's README), the `Stop` hook `stop-plugin-docs.sh` blocks ending the
    turn and asks for the `/update-docs` skill: every plugin change documents everything that was done.
-5. Claude says so; the user runs `/clear`. If the context overflows first, `PreCompact` generates an automatic
-   handoff via `claude -p` (turn it off with `CLAUDE_HANDOFF_AUTOGEN=0`).
-6. If `/clear` (or the end of the session) comes without a handoff, `SessionEnd` (`session-end-handoff.sh`)
-   generates one the same way, but only if the transcript has a file edit or a `git commit`/`merge`/`push` after
-   the last modification of `STATE.md`; conversation and reading do not trigger it. The 60 s `timeout` in
-   `settings.json` raises SessionEnd's default 1.5 s budget ([ADR 0017](adr/0017-automatic-handoff-on-session-end.md)).
+5. When done, `/handoff` overwrites `docs/STATE.md`, which is local to each clone (it is in `.gitignore` and is
+   never committed), and Claude tells the user to run `/clear`. There is no automatic handoff: no hook calls a
+   model outside the conversation.
+
+Skills: `/task`, `/tests-first`, `/update-docs`, `/review-pr`, `/handoff` and `/release`; `/sync-docs` and
+`/improve-skills` run only when the person calls them.
 
 ## Version and release
 
@@ -140,4 +149,4 @@ Every deploy script runs the post-deploy smoke test right after `wrangler deploy
   `npm audit` and the license.
 - `scripts/setup-github.sh` turns off Actions, leaves only squash merge and tries branch protection, which is not
   enforced on a private repository on the free plan (it requires GitHub Pro). Without it, the local hooks
-  (`guard-bash`, `pre-push`) prevent direct pushes to `main`.
+  (`guard-bash`, `pre-push` → `protected-branches.sh`) prevent direct pushes to `main`.

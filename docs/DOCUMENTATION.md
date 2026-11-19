@@ -135,13 +135,11 @@ old one as "Superseded by NNNN".
 
 ## Automation
 
-| Command                      | Does                                                                                                               |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `npm run docs:generate`      | Updates the index and generated blocks and creates new sections in FUNCTIONS.md                                    |
-| `npm run docs:check`         | Fails on any docs × code mismatch (see the table in [README.md](README.md#who-checks-what))                        |
-| Claude Code `Stop` hook      | Runs `docs:check` at the end of every response that changed code or docs and returns the errors to Claude          |
-| `Stop` hook (handoff)        | Blocks ending the turn if there is a new commit of yours without an updated `docs/STATE.md`                        |
-| `SessionStart` hook          | Injects `docs/STATE.md` and the roadmap's next task at the start of every session                                  |
-| `PreCompact` hook            | Generates an automatic handoff in `docs/STATE.md` via `claude -p` before compacting the conversation               |
-| `SessionEnd` hook            | On `/clear` or session end, generates the handoff via `claude -p` if there was an edit or commit without a handoff |
-| `pre-push` hook / `pr:check` | Run `npm run check`, which includes `docs:check`                                                                   |
+| Command                   | Does                                                                                               |
+| ------------------------- | -------------------------------------------------------------------------------------------------- |
+| `npm run docs:generate`   | Updates the index and generated blocks and creates new sections in FUNCTIONS.md                    |
+| `npm run docs:check`      | Fails on any docs × code mismatch (see the table in [README.md](README.md#who-checks-what))        |
+| `pre-commit` git hook     | Runs lint-staged and `docs:check` (which includes "every function has a test") on every commit     |
+| `Stop` hook (plugin docs) | Blocks ending the turn when a plugin changed without documentation; asks for `/update-docs`        |
+| `SessionStart` hook       | Injects `docs/STATE.md` and the roadmap's next task at the start of every session                  |
+| `pr:check`                | Runs `npm run check` (with `docs:check`) once per PR, plus build, plugin validation and commitlint |

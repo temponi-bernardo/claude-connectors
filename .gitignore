@@ -65,9 +65,7 @@ logs/
 
 # ===== Claude Code =====
 .claude/settings.local.json
-
-# ===== Claude Code handoff (local clone state) =====
-.claude/.last-handoff
+.claude/plans/
 
 # ===== Claude Code handoff: docs/STATE.md is local state of each clone (ADR 0005) =====
 docs/STATE.md

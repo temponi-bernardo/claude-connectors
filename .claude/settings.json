@@ -1,5 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "plansDirectory": "./.claude/plans",
   "permissions": {
     "allow": [
       "Bash(npm run *)",
@@ -30,7 +31,9 @@
       "Edit(docs/**)",
       "Edit(src/**)",
       "Edit(tools/**)",
-      "Edit(.claude/skills/**)"
+      "Edit(.claude/skills/**)",
+      "Edit(.claude/agents/**)",
+      "Edit(.claude/plans/**)"
     ],
     "deny": [
       "Read(.env)",
@@ -41,6 +44,19 @@
       "Read(.env.staging)",
       "Read(.env.test)",
       "Edit(.env)",
+      "Write(.env)",
+      "Edit(.env.local)",
+      "Write(.env.local)",
+      "Edit(.env.*.local)",
+      "Write(.env.*.local)",
+      "Edit(.env.development)",
+      "Write(.env.development)",
+      "Edit(.env.production)",
+      "Write(.env.production)",
+      "Edit(.env.staging)",
+      "Write(.env.staging)",
+      "Edit(.env.test)",
+      "Write(.env.test)",
       "Read(**/*.pem)",
       "Read(**/*.key)",
       "Read(**/*.p12)",
@@ -51,6 +67,9 @@
       "Bash(git push origin main)",
       "Bash(git push origin main *)",
       "Bash(git push -u origin main)",
+      "Bash(git push origin --delete main)",
+      "Bash(git push origin :main)",
+      "Bash(git branch -D main)",
       "Bash(git commit --no-verify *)",
       "Bash(git commit -n *)",
       "Bash(git push --no-verify *)"
@@ -67,27 +86,31 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/guard-edit.mjs",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format-on-edit.mjs",
+            "timeout": 30
+          }
+        ]
       }
     ],
     "Stop": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop-docs-check.sh",
-            "timeout": 180
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop-handoff.sh",
-            "timeout": 15
-          }
-        ]
-      },
       {
         "hooks": [
           {
@@ -114,28 +137,6 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-tools.sh",
             "timeout": 600
-          }
-        ]
-      }
-    ],
-    "PreCompact": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/precompact-handoff.sh",
-            "timeout": 60
-          }
-        ]
-      }
-    ],
-    "SessionEnd": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/session-end-handoff.sh",
-            "timeout": 60
           }
         ]
       }

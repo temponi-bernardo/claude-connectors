@@ -28,6 +28,20 @@ describe('hook guard-bash (PreToolUse)', () => {
     ['rm -rf /', 'rm -rf on the root'],
     ['rm -rf ~', 'rm -rf on the root'],
     ['git config core.hooksPath /dev/null', 'disable the git hooks'],
+    ['git -C repo push origin main', 'direct push to main'],
+    ['git push origin +main', 'direct push to main'],
+    ['git push origin HEAD:refs/heads/master', 'direct push to main'],
+    ['git push origin feat/x && git push origin main', 'direct push to main'],
+    ['git push origin "main"', 'direct push to main'],
+    ["git push origin 'main'", 'direct push to main'],
+    ['git push origin "HEAD:main"', 'direct push to main'],
+    ['(git push origin main)', 'direct push to main'],
+    ['git --work-tree . push origin main', 'direct push to main'],
+    ['git -C "my dir" push origin main', 'direct push to main'],
+    ['git --git-dir .git push -f origin feat/x', 'force push is forbidden'],
+    ['git -C "my dir" commit -m x --no-verify', '--no-verify'],
+    ['gh workflow run ci.yml', 'GitHub Actions is not used'],
+    ['gh api -X POST repos/o/r/actions/workflows/1/dispatches', 'GitHub Actions is not used'],
   ])('blocks: %s', (command, reason) => {
     const { status, stderr } = runGuard(command);
     expect(status).toBe(2);
@@ -44,6 +58,10 @@ describe('hook guard-bash (PreToolUse)', () => {
     'npm run check',
     'rm -rf dist/',
     'echo "read .env.example"',
+    'git push -u origin fix/main-menu',
+    'git stash push -m main',
+    "cat > a.test.ts <<'EOF'\ndescribe('git hook pre-push', () => it('refuses main', () => {}));\nEOF",
+    'git log --grep "push to main"',
   ])('allows: %s', (command) => {
     expect(runGuard(command).status).toBe(0);
   });

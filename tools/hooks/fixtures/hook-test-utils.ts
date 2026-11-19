@@ -1,5 +1,5 @@
 import { spawnSync } from 'node:child_process';
-import { chmodSync, mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -50,17 +50,4 @@ export function runHook(name: string, dir: string, options: HookOptions = {}): H
     env: { ...process.env, CLAUDE_PROJECT_DIR: dir, ...(options.env ?? {}) },
   });
   return { status: r.status, stdout: r.stdout, stderr: r.stderr };
-}
-
-/** Creates a fake `claude` on the PATH that prints `output` (or fails if `output` is null). */
-export function fakeClaude(dir: string, output: string | null): string {
-  const bin = join(dir, 'fakebin');
-  mkdirSync(bin);
-  const body =
-    output === null
-      ? '#!/usr/bin/env bash\ncat >/dev/null\nexit 1\n'
-      : `#!/usr/bin/env bash\ncat >/dev/null\nprintf '%s' ${JSON.stringify(output)}\n`;
-  writeFileSync(join(bin, 'claude'), body);
-  chmodSync(join(bin, 'claude'), 0o755);
-  return `${bin}:${process.env.PATH ?? ''}`;
 }

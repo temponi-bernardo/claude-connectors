@@ -3,6 +3,9 @@
 # and points to the documentation index. Runs on startup, resume, clear and compact.
 cd "${CLAUDE_PROJECT_DIR:-.}" || exit 0
 
+# Marker of the removed stop-handoff.sh hook: does not linger in older clones.
+rm -f .claude/.last-handoff
+
 if [ -s docs/STATE.md ]; then
   echo "=== Handoff from the previous session (docs/STATE.md) ==="
   cat docs/STATE.md
