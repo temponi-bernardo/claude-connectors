@@ -4,14 +4,17 @@ import { readFileSync } from 'node:fs';
 
 // `git` followed directly by the subcommand, global options allowed in between (git -C dir push), so text that
 // only mentions git and push (a heredoc, `git hook pre-push`, `git stash push`) does not match.
-const GIT_OPTIONS = String.raw`\bgit(?:\s+(?:-[Cc]\s+\S+|--?[\w-]+(?:=\S+)?))*\s+`;
+// An option value: quoted (with spaces) or a single token.
+const OPTION_VALUE = String.raw`(?:"[^"]*"|'[^']*'|\S+)`;
+const GIT_OPTIONS = String.raw`\bgit(?:\s+(?:(?:-[Cc]|--(?:git-dir|work-tree|namespace|exec-path|super-prefix|config-env))\s+${OPTION_VALUE}|--?[\w-]+(?:=${OPTION_VALUE})?))*\s+`;
 /** Pattern for `git <one of names> ...<rest>` within one command segment. */
 function gitSubcommand(names, rest) {
   return new RegExp(`${GIT_OPTIONS}(?:${names})\\b[^|;&\\n]*${rest}`);
 }
 // The protected branch only as a whole refspec (origin main, HEAD:main, +main, refs/heads/main), never inside
 // a name like fix/main-menu.
-const PROTECTED_REFSPEC = String.raw`\s\+?(?:\S*:)?\+?(?:refs\/heads\/)?(?:main|master)(?=\s|$|[;&|])`;
+// Quotes around the refspec and a closing `)` of a subshell do not hide it.
+const PROTECTED_REFSPEC = String.raw`\s['"]?\+?(?:[^\s'"]*:)?\+?(?:refs\/heads\/)?(?:main|master)['"]?(?=\s|$|[;&|)])`;
 
 const RULES = [
   {

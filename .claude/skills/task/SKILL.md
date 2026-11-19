@@ -23,7 +23,7 @@ Target task: `$ARGUMENTS` (empty = the "Next task" at the top of `docs/ROADMAP.m
    `docs/CODING-STANDARDS.md`. Before creating a function, look for an equivalent in FUNCTIONS.md.
 5. **Document with `/update-docs`** in the same set of changes.
 6. **Commits**: small, Conventional Commits with an English description (ADR 0021). The `pre-commit` only runs
-   lint-staged and `docs:check`; `pre-push` only guards `main` (ADR 0029). While working, run just the tests of
+   lint-staged and `docs:check`; `pre-push` only guards `main` and runs gitleaks (ADR 0029). While working, run just the tests of
    what you touched (`npx vitest run <path>`).
 7. **`npm run pr:check -- "<PR title>"` once**, after the last commit: it is the CI of the delivery (there is no
    GitHub CI, ADR 0006). Red: fix, commit and run it again. Do not use `--no-verify`; fix the cause. In a Claude

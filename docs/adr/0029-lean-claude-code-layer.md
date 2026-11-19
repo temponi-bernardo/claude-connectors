@@ -18,7 +18,8 @@ mandatory step of every task. The guard on Bash matched text, not commands, so a
 
 - **Checks once per PR.** `npm run pr:check` runs once after the last commit and is reused for the merge unless a
   commit came after it. The `pre-commit` keeps only the fast part (lint-staged and `docs:check`, which also catches
-  a function without a test) and refuses `.github/workflows/`. The `pre-push` only refuses updating or deleting
+  a function without a test) and refuses `.github/workflows/`. The `pre-push` keeps two fast barriers: gitleaks (`secrets:check`, a few seconds, so a
+  secret never reaches GitHub even on a task branch) and the refusal to update or delete
   `main`/`master` on the remote (`.githooks/protected-branches.sh`), for anyone.
 - **No hidden model calls.** `precompact-handoff.sh` and `session-end-handoff.sh` are removed: `/handoff` is manual,
   the last step of `/task`.
@@ -48,7 +49,7 @@ mandatory step of every task. The guard on Bash matched text, not commands, so a
 
 ## Consequences
 
-- Positive: a commit takes seconds and a push is instant; one full check per PR; no model call outside the
+- Positive: a commit and a push take seconds; one full check per PR; no model call outside the
   conversation; the guard no longer blocks heredocs that only mention push and main.
 - Negative / accepted costs: a broken type or test can sit on a task branch until `pr:check`; a `/clear` without
   `/handoff` loses the in-progress summary (git still has the commits); the review is one pass and its leftovers

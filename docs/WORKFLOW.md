@@ -66,17 +66,17 @@ When you create a new layer or module, add the scope there **and** here in the s
 A task is done when: the roadmap's "Pronto quando" (done when) criterion is verifiable and true; `npm run check`
 passes; the documentation in the same PR is updated as in [DOCUMENTATION.md](DOCUMENTATION.md); the CHANGELOG
 "Unreleased" section has the entry (if user-visible); the state in the ROADMAP and its "Next task"
-were updated; affected skills were reviewed.
+were updated; a skill is updated in the same PR when a step, command or rule it cites changed.
 
 ## Local hooks
 
 Versioned in `.githooks/` and enabled by `npm install` (the `prepare` script → `git config core.hooksPath`).
 
-| Hook         | Runs                                                                                        | Target time |
-| ------------ | ------------------------------------------------------------------------------------------- | ----------- |
-| `pre-commit` | refuses `.github/workflows/`, lint-staged (ESLint + Prettier on staged files), `docs:check` | seconds     |
-| `commit-msg` | commitlint                                                                                  | instant     |
-| `pre-push`   | refuses updating or deleting `main`/`master` on the remote (`protected-branches.sh`)        | instant     |
+| Hook         | Runs                                                                                                                     | Target time |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `pre-commit` | refuses `.github/workflows/`, lint-staged (ESLint + Prettier on staged files), `docs:check`                              | seconds     |
+| `commit-msg` | commitlint                                                                                                               | instant     |
+| `pre-push`   | refuses updating or deleting `main`/`master` on the remote (`protected-branches.sh`) and runs gitleaks (`secrets:check`) | seconds     |
 
 Types and the test suite run once per PR, in `pr:check` ([ADR 0029](adr/0029-lean-claude-code-layer.md)). While
 working, run the tests of what you touched (`npx vitest run <path>`).
@@ -139,7 +139,7 @@ Every deploy script runs the post-deploy smoke test right after `wrangler deploy
 
 ## Security in the flow
 
-- `gitleaks` runs in `secrets:check` (inside `check` and `pr:check`). Without CI it is the only
+- `gitleaks` runs in `secrets:check` (inside `check`, `pre-push` and `pr:check`). Without CI it is the only
   barrier: without gitleaks installed, `secrets:check` fails (`winget install Gitleaks.Gitleaks`). In the Claude
   Code cloud it installs version 8.28.0 by itself through Go (`scripts/install-gitleaks.sh`): the direct GitHub
   download is blocked by the proxy and apt ships an old version, without `gitleaks git`/`dir`.
