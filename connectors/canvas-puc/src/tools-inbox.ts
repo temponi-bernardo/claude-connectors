@@ -5,7 +5,12 @@
  * course by accident.
  */
 import { z } from 'zod';
-import { READ_ONLY_HINTS, SEND_HINTS, toolAnnotations } from '../../../src/mcp/annotations.js';
+import {
+  CREATE_HINTS,
+  READ_ONLY_HINTS,
+  SEND_HINTS,
+  toolAnnotations,
+} from '../../../src/mcp/annotations.js';
 import { defineTool, type ToolSpec } from '../../../src/mcp/tools.js';
 import type { CanvasConversation, CanvasRecipient, Id } from './canvas-types.js';
 import type { CanvasClient } from './client.js';
@@ -17,9 +22,13 @@ import {
   attachmentIds,
   attachmentSummary,
   MAX_MESSAGE_ATTACHMENTS,
-  prepareAttachments,
-  uploadMessageAttachments,
 } from './message-attachments.js';
+import {
+  collectMessageAttachments,
+  MAX_DIRECT_UPLOAD_BYTES,
+  MAX_DIRECT_UPLOAD_MB,
+  prepareAttachmentUpload,
+} from './attachment-refs.js';
 import { FILE_FIELDS } from './tools-write.js';
 import type { FileSubmissionArgs } from './upload.js';
 
@@ -87,7 +96,16 @@ const attachments = z
   .array(attachment)
   .max(MAX_MESSAGE_ATTACHMENTS)
   .optional()
-  .describe(`Files to attach, ${ATTACHMENTS_LIMIT_TEXT}; binaries in base64`);
+  .describe(
+    `Small files inside the call, ${ATTACHMENTS_LIMIT_TEXT}; binaries in base64. For local binaries (zip, pdf) prefer prepare_attachment_upload + file_ids`,
+  );
+const fileIds = z
+  .array(userId)
+  .max(MAX_MESSAGE_ATTACHMENTS)
+  .optional()
+  .describe(
+    `Canvas file IDs to attach (from prepare_attachment_upload, or the user's own files); at most ${String(MAX_MESSAGE_ATTACHMENTS)} attachments in total`,
+  );
 
 /** Arguments of `send_message` after validation. */
 export interface SendMessageArgs {
@@ -96,12 +114,12 @@ export interface SendMessageArgs {
   readonly body: string;
   readonly course_id?: Id | undefined;
   readonly attachments?: readonly FileSubmissionArgs[] | undefined;
+  readonly file_ids?: readonly Id[] | undefined;
 }
 
 /** Sends a new message: checks and uploads the attachments first, then creates the conversation. */
 export async function sendInboxMessage(client: CanvasClient, args: SendMessageArgs): Promise<View> {
-  const files = prepareAttachments(args.attachments);
-  const uploaded = await uploadMessageAttachments(client, files);
+  const uploaded = await collectMessageAttachments(client, args);
   const payload = inbox.newMessagePayload({
     recipients: args.recipient_ids,
     subject: args.subject,
@@ -118,6 +136,7 @@ export interface ReplyMessageArgs {
   readonly conversation_id: Id;
   readonly body: string;
   readonly attachments?: readonly FileSubmissionArgs[] | undefined;
+  readonly file_ids?: readonly Id[] | undefined;
 }
 
 /** Replies in a conversation: checks and uploads the attachments first, then adds the message. */
@@ -125,8 +144,7 @@ export async function replyInboxMessage(
   client: CanvasClient,
   args: ReplyMessageArgs,
 ): Promise<View> {
-  const files = prepareAttachments(args.attachments);
-  const uploaded = await uploadMessageAttachments(client, files);
+  const uploaded = await collectMessageAttachments(client, args);
   const path = `/conversations/${String(args.conversation_id)}/add_message`;
   const payload = inbox.replyPayload(args.body, attachmentIds(uploaded));
   const reply = await client.post<CanvasConversation>(path, payload);
@@ -137,26 +155,39 @@ export async function replyInboxMessage(
 export const CANVAS_INBOX_WRITE_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   defineTool({
     name: 'send_message',
-    description: `SENDS a new Canvas inbox message to people (e.g. a teacher), optionally with attachments (${ATTACHMENTS_LIMIT_TEXT}). Get user IDs with find_recipients. Real action, visible to the recipients: show the exact recipients, subject, text and file names and confirm with the user first.`,
+    description: `SENDS a new Canvas inbox message to people (e.g. a teacher), optionally with attachments (inline: ${ATTACHMENTS_LIMIT_TEXT}; larger or local binaries: prepare_attachment_upload, then file_ids). Get user IDs with find_recipients. Real action, visible to the recipients: show the exact recipients, subject, text and file names and confirm with the user first.`,
     shape: {
       recipient_ids: z.array(userId).min(1).max(MAX_MESSAGE_RECIPIENTS).describe('User IDs'),
       subject: z.string().min(1).max(255),
       body: z.string().min(1).describe('Plain text'),
       course_id: courseId.optional().describe('Course the message is about'),
       attachments,
+      file_ids: fileIds,
     },
     annotations: toolAnnotations('Send message', SEND_HINTS),
     run: ({ client }, args) => sendInboxMessage(client, args),
   }),
   defineTool({
     name: 'reply_message',
-    description: `SENDS a reply in an existing Canvas inbox conversation, to all its participants, optionally with attachments (${ATTACHMENTS_LIMIT_TEXT}). Real action: show the text and file names and confirm with the user first.`,
+    description: `SENDS a reply in an existing Canvas inbox conversation, to all its participants, optionally with attachments (inline, or file_ids from prepare_attachment_upload). Real action: show the text and file names and confirm with the user first.`,
     shape: {
       conversation_id: conversationId,
       body: z.string().min(1).describe('Plain text'),
       attachments,
+      file_ids: fileIds,
     },
     annotations: toolAnnotations('Reply message', SEND_HINTS),
     run: ({ client }, args) => replyInboxMessage(client, args),
+  }),
+  defineTool({
+    name: 'prepare_attachment_upload',
+    description: `Prepares sending a file from the user's computer (zip, pdf, any binary up to ${String(MAX_DIRECT_UPLOAD_MB)} MB) as a Canvas message attachment WITHOUT putting its bytes in the call: returns a one-time curl command that uploads it straight to the user's private "conversation attachments" folder. Run it where the file is, then pass the printed "id" in file_ids of send_message or reply_message. Sends nothing to anyone.`,
+    shape: {
+      file_name: z.string().trim().min(1).max(255).describe('Name with extension, e.g. docs.zip'),
+      size: z.number().int().min(1).max(MAX_DIRECT_UPLOAD_BYTES).describe('Exact size in bytes'),
+      content_type: z.string().min(1).optional().describe('MIME type; guessed from the extension'),
+    },
+    annotations: toolAnnotations('Prepare attachment upload', CREATE_HINTS),
+    run: ({ client }, args) => prepareAttachmentUpload(client, args),
   }),
 ];

@@ -7,6 +7,10 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 
 ### Added
 
+- `prepare_attachment_upload`: returns a one-time `curl` that uploads a local file (up to 25 MB) straight to
+  Canvas, with no base64 in the call; `send_message` and `reply_message` take its `id` in `file_ids` (ADR 0028).
+- `file_ids` on `send_message` and `reply_message`: attach Canvas files by id; files outside "conversation
+  attachments" are copied there first.
 - `send_message` and `reply_message` take attachments (up to 5 files of 5 MB, text or base64), uploaded to the
   "conversation attachments" folder before sending; a refused or failed file sends nothing.
 - `/write-access`: a read-only connection turns writing on (or off) from a link, without a new Canvas token.

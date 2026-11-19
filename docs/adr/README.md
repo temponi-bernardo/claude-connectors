@@ -32,3 +32,4 @@ that marks the old one as "Superseded by NNNN". Template in [0000-template.md](0
 | [0025](0025-canvas-html-links-and-hidden-files.md)       | Links of Canvas HTML and access to hidden files                 | Accepted                            | 2026-11-18 |
 | [0026](0026-canvas-file-submissions.md)                  | Canvas file submissions from the tool call                      | Accepted                            | 2026-11-18 |
 | [0027](0027-gated-tools-stay-listed.md)                  | Gated tools stay listed; Canvas writing enabled without a token | Accepted                            | 2026-11-19 |
+| [0028](0028-canvas-attachments-by-reference.md)          | Canvas message attachments by reference and direct upload       | Accepted                            | 2026-11-19 |

@@ -96,14 +96,14 @@ docker build -t canvas-puc-remote connectors/canvas-puc
 docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes in base64> -e CANVAS_ALLOW_WRITE=true canvas-puc-remote
 ```
 
-| Variable               | Default                            | Purpose                                                                                                                                               |
-| ---------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PUBLIC_URL`           | — (on the Worker: its own address) | Public https address (required on Docker)                                                                                                             |
-| `SEAL_KEY`             | —                                  | OAuth seal key; changing it disconnects everyone                                                                                                      |
-| `PORT`                 | `8080`                             | HTTP port                                                                                                                                             |
-| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Where OAuth may send the access back to                                                                                                               |
-| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | The server's fixed Canvas instance                                                                                                                    |
-| `CANVAS_ALLOW_WRITE`   | off                                | `true` offers each user the write opt-in (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`, `send_message`, `reply_message`) |
+| Variable               | Default                            | Purpose                                                                                                                                                                            |
+| ---------------------- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_URL`           | — (on the Worker: its own address) | Public https address (required on Docker)                                                                                                                                          |
+| `SEAL_KEY`             | —                                  | OAuth seal key; changing it disconnects everyone                                                                                                                                   |
+| `PORT`                 | `8080`                             | HTTP port                                                                                                                                                                          |
+| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Where OAuth may send the access back to                                                                                                                                            |
+| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | The server's fixed Canvas instance                                                                                                                                                 |
+| `CANVAS_ALLOW_WRITE`   | off                                | `true` offers each user the write opt-in (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`, `send_message`, `reply_message`, `prepare_attachment_upload`) |
 
 **Common problems:**
 
@@ -115,33 +115,34 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes 
 
 ## Tools
 
-| Tool                     | Does                                                                                                                                                          |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `whoami`                 | Profile (connection test)                                                                                                                                     |
-| `list_courses`           | Courses with current grade                                                                                                                                    |
-| `upcoming_assignments`   | What's due in the next few days, across all courses                                                                                                           |
-| `list_assignments`       | A course's assignments with status (filters: upcoming, overdue...)                                                                                            |
-| `get_assignment`         | Instructions (with `[link N]` marks), `links` to embedded files/videos/pages, rubric, deadlines and feedback; `raw_html` for debugging                        |
-| `get_grades`             | Grade summary or grades per assignment                                                                                                                        |
-| `list_announcements`     | Recent announcements, with their `links`                                                                                                                      |
-| `list_modules`           | Modules and items                                                                                                                                             |
-| `get_page`               | Content of a page, with its `links`; `raw_html` for debugging                                                                                                 |
-| `list_files`             | Files with download link, plus a note that hidden files are not listed; `include_linked` adds the files only linked from the content                          |
-| `list_linked_files`      | Every file and video the course content points to (assignments, pages, forums, modules), once each                                                            |
-| `read_file_text`         | Content of text/code files, including `.doc` and `.docx`, by `file_id` or Canvas file `url`                                                                   |
-| `download_file`          | Brings a PDF, slides or image (up to 70 MB; above 8 MB, in parts), by `file_id` or Canvas file `url`, even if hidden from `list_files`                        |
-| `list_discussions`       | Course discussion forums                                                                                                                                      |
-| `get_discussion`         | Posts in a forum, with the `links` of the prompt and of each post                                                                                             |
-| `get_calendar`           | Calendar events                                                                                                                                               |
-| `search`                 | Search across assignments, pages, files and modules                                                                                                           |
-| `find_recipients`        | Finds people to message (teachers, TAs, classmates) and their user ID                                                                                         |
-| `list_conversations`     | Inbox conversations (inbox, unread, starred, sent, archived)                                                                                                  |
-| `get_conversation`       | Reads a conversation with all messages, without marking it as read                                                                                            |
-| `submit_text_assignment` | Submits text/a link (only with writes enabled; Claude confirms first)                                                                                         |
-| `submit_file_assignment` | Submits a file (up to 5 MB, text or base64) to an `online_upload` assignment, checking `allowed_extensions` (only with writes enabled; Claude confirms first) |
-| `reply_to_discussion`    | Replies to a forum (only with writes enabled; Claude confirms first)                                                                                          |
-| `send_message`           | Sends a new inbox message to up to 20 people by user ID, with up to 5 attachments of 5 MB each (writing on; Claude confirms first)                            |
-| `reply_message`          | Replies in an inbox conversation, with up to 5 attachments of 5 MB each (writing on; Claude confirms first)                                                   |
+| Tool                        | Does                                                                                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `whoami`                    | Profile (connection test)                                                                                                                                     |
+| `list_courses`              | Courses with current grade                                                                                                                                    |
+| `upcoming_assignments`      | What's due in the next few days, across all courses                                                                                                           |
+| `list_assignments`          | A course's assignments with status (filters: upcoming, overdue...)                                                                                            |
+| `get_assignment`            | Instructions (with `[link N]` marks), `links` to embedded files/videos/pages, rubric, deadlines and feedback; `raw_html` for debugging                        |
+| `get_grades`                | Grade summary or grades per assignment                                                                                                                        |
+| `list_announcements`        | Recent announcements, with their `links`                                                                                                                      |
+| `list_modules`              | Modules and items                                                                                                                                             |
+| `get_page`                  | Content of a page, with its `links`; `raw_html` for debugging                                                                                                 |
+| `list_files`                | Files with download link, plus a note that hidden files are not listed; `include_linked` adds the files only linked from the content                          |
+| `list_linked_files`         | Every file and video the course content points to (assignments, pages, forums, modules), once each                                                            |
+| `read_file_text`            | Content of text/code files, including `.doc` and `.docx`, by `file_id` or Canvas file `url`                                                                   |
+| `download_file`             | Brings a PDF, slides or image (up to 70 MB; above 8 MB, in parts), by `file_id` or Canvas file `url`, even if hidden from `list_files`                        |
+| `list_discussions`          | Course discussion forums                                                                                                                                      |
+| `get_discussion`            | Posts in a forum, with the `links` of the prompt and of each post                                                                                             |
+| `get_calendar`              | Calendar events                                                                                                                                               |
+| `search`                    | Search across assignments, pages, files and modules                                                                                                           |
+| `find_recipients`           | Finds people to message (teachers, TAs, classmates) and their user ID                                                                                         |
+| `list_conversations`        | Inbox conversations (inbox, unread, starred, sent, archived)                                                                                                  |
+| `get_conversation`          | Reads a conversation with all messages, without marking it as read                                                                                            |
+| `submit_text_assignment`    | Submits text/a link (only with writes enabled; Claude confirms first)                                                                                         |
+| `submit_file_assignment`    | Submits a file (up to 5 MB, text or base64) to an `online_upload` assignment, checking `allowed_extensions` (only with writes enabled; Claude confirms first) |
+| `reply_to_discussion`       | Replies to a forum (only with writes enabled; Claude confirms first)                                                                                          |
+| `send_message`              | Sends a new inbox message to up to 20 people by user ID, with up to 5 attachments of 5 MB each (writing on; Claude confirms first)                            |
+| `reply_message`             | Replies in an inbox conversation, with up to 5 attachments of 5 MB each (writing on; Claude confirms first)                                                   |
+| `prepare_attachment_upload` | Returns a one-time `curl` that uploads a local file (up to 25 MB) to your private inbox attachments folder; its `id` goes in `file_ids` (writing on)          |
 
 ### Writing (send, reply, submit) and how to turn it on
 
@@ -158,6 +159,11 @@ Attachments of `send_message`/`reply_message` go inside the call (`file_name`, `
 `base64`), are all checked before anything is uploaded, then go through Canvas's three-step upload to your
 "conversation attachments" folder. If any upload fails, the message is not sent. Message text and file contents
 are never logged.
+
+For binaries such as a zip or a PDF on your computer, Claude does not type the file in. It calls
+`prepare_attachment_upload`, runs the returned `curl` where the file is (the bytes go straight to Canvas), and
+passes the printed `id` in `file_ids`. `file_ids` also takes any Canvas file you can access; files outside your
+"conversation attachments" folder are copied there first (ADR 0028).
 
 ### Files embedded in assignments and pages
 

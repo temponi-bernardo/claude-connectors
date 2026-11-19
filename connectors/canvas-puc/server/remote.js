@@ -22058,6 +22058,12 @@ var SEND_HINTS = {
   idempotentHint: false,
   openWorldHint: true
 };
+var CREATE_HINTS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: true
+};
 function toolAnnotations(title, hints) {
   return { title, ...hints };
 }
@@ -26937,8 +26943,8 @@ function uploadRefusal(assignment, name, size) {
   }
   return extensionRefusal(assignment.allowed_extensions, name) ?? uploadSizeRefusal(size);
 }
-function onlineUploadPayload(fileIds) {
-  return { submission: { submission_type: "online_upload", file_ids: fileIds } };
+function onlineUploadPayload(fileIds2) {
+  return { submission: { submission_type: "online_upload", file_ids: fileIds2 } };
 }
 function uploadedFileFromArgs(args) {
   const name = args.file_name.trim();
@@ -26960,10 +26966,10 @@ async function submitFileAssignment(client, base, file) {
   const refusal = uploadRefusal(assignment, file.name, file.bytes.length);
   if (refusal !== null) throw new Error(refusal);
   const uploaded = await uploadCanvasFile(client, { path: `${base}/submissions/self/files`, file });
-  const fileIds = [uploaded.id ?? ""];
+  const fileIds2 = [uploaded.id ?? ""];
   const s = await client.post(
     `${base}/submissions`,
-    onlineUploadPayload(fileIds)
+    onlineUploadPayload(fileIds2)
   );
   const summary = { id: uploaded.id, name: uploaded.display_name, size: uploaded.size };
   return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt, file: summary };
@@ -27011,6 +27017,92 @@ function attachmentSummary(uploaded) {
   return uploaded.map((f) => ({ id: f.id, name: f.display_name, size: f.size }));
 }
 var ATTACHMENTS_LIMIT_TEXT = `up to ${String(MAX_MESSAGE_ATTACHMENTS)} files of at most ${String(MAX_UPLOAD_MB)} MB each`;
+
+// connectors/canvas-puc/src/attachment-refs.ts
+var MAX_DIRECT_UPLOAD_MB = 25;
+var MAX_DIRECT_UPLOAD_BYTES = MAX_DIRECT_UPLOAD_MB * 1024 * 1024;
+var LOCAL_PATH_PLACEHOLDER = "<LOCAL_FILE_PATH>";
+var CONVERSATION_FOLDER_PATH = `/users/self/folders/by_path/${encodeURIComponent(CONVERSATION_ATTACHMENTS_FOLDER)}`;
+function attachmentCountRefusal(inline, byId) {
+  if (inline + byId <= MAX_MESSAGE_ATTACHMENTS) return null;
+  return `A message carries at most ${String(MAX_MESSAGE_ATTACHMENTS)} attachments (got ${String(inline + byId)}). Nothing was sent.`;
+}
+async function conversationFolderId(client) {
+  let folders;
+  try {
+    folders = await client.get(CONVERSATION_FOLDER_PATH);
+  } catch (error2) {
+    throw new Error(
+      `Could not find the "${CONVERSATION_ATTACHMENTS_FOLDER}" folder (${errorMessage(error2)}); use prepare_attachment_upload instead. Nothing was sent.`,
+      { cause: error2 }
+    );
+  }
+  const id4 = folders.at(-1)?.id;
+  if (id4 === void 0)
+    throw new Error(
+      `Canvas returned no "${CONVERSATION_ATTACHMENTS_FOLDER}" folder. Nothing was sent.`
+    );
+  return id4;
+}
+async function fetchAttachmentFile(client, fileId) {
+  try {
+    return await client.get(`/files/${String(fileId)}`);
+  } catch (error2) {
+    throw new Error(
+      `Canvas file ${String(fileId)} is not accessible (${errorMessage(error2)}). Nothing was sent.`,
+      { cause: error2 }
+    );
+  }
+}
+function needsConversationCopy(file, folderId) {
+  return String(file.folder_id) !== String(folderId);
+}
+function copyToConversationFolder(client, file, folderId) {
+  const body = { source_file_id: String(file.id), on_duplicate: "rename" };
+  return client.post(`/folders/${String(folderId)}/copy_file`, body);
+}
+async function resolveFileAttachments(client, fileIds2) {
+  if (!fileIds2?.length) return [];
+  const folderId = await conversationFolderId(client);
+  const files = [];
+  for (const fileId of fileIds2) files.push(await fetchAttachmentFile(client, fileId));
+  const ready = [];
+  for (const file of files) {
+    ready.push(
+      needsConversationCopy(file, folderId) ? await copyToConversationFolder(client, file, folderId) : file
+    );
+  }
+  return ready;
+}
+async function collectMessageAttachments(client, args) {
+  const refusal = attachmentCountRefusal(args.attachments?.length ?? 0, args.file_ids?.length ?? 0);
+  if (refusal !== null) throw new Error(refusal);
+  const files = prepareAttachments(args.attachments);
+  const referenced = await resolveFileAttachments(client, args.file_ids);
+  return [...await uploadMessageAttachments(client, files), ...referenced];
+}
+function shellQuote(value) {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+function curlUploadCommand(slot) {
+  const fields = Object.entries(slot.upload_params ?? {}).map(
+    ([key, value]) => `--form-string ${shellQuote(`${key}=${value}`)}`
+  );
+  const file = `-F ${shellQuote("file=@")}"${LOCAL_PATH_PLACEHOLDER}"`;
+  return ["curl -sS -X POST", shellQuote(slot.upload_url), ...fields, file].join(" ");
+}
+var DIRECT_UPLOAD_NEXT_STEPS = `Run the curl command on the machine that has the file, replacing ${LOCAL_PATH_PLACEHOLDER} with its path (keep the double quotes). It prints the file as JSON: pass its "id" in file_ids of send_message or reply_message. The slot is single-use and expires in minutes; ask for a new one if it fails.`;
+async function prepareAttachmentUpload(client, args) {
+  const name = args.file_name.trim();
+  const slot = await client.post(USER_FILES_PATH, {
+    name,
+    size: args.size,
+    content_type: args.content_type ?? uploadContentType(name),
+    parent_folder_path: CONVERSATION_ATTACHMENTS_FOLDER,
+    on_duplicate: "rename"
+  });
+  return { file_name: name, curl: curlUploadCommand(slot), next_steps: DIRECT_UPLOAD_NEXT_STEPS };
+}
 
 // connectors/canvas-puc/src/tools-write.ts
 var id2 = external_exports.union([external_exports.string(), external_exports.number()]);
@@ -27125,10 +27217,14 @@ var CANVAS_INBOX_READ_TOOLS = [
   })
 ];
 var attachment = external_exports.object(FILE_FIELDS);
-var attachments = external_exports.array(attachment).max(MAX_MESSAGE_ATTACHMENTS).optional().describe(`Files to attach, ${ATTACHMENTS_LIMIT_TEXT}; binaries in base64`);
+var attachments = external_exports.array(attachment).max(MAX_MESSAGE_ATTACHMENTS).optional().describe(
+  `Small files inside the call, ${ATTACHMENTS_LIMIT_TEXT}; binaries in base64. For local binaries (zip, pdf) prefer prepare_attachment_upload + file_ids`
+);
+var fileIds = external_exports.array(userId).max(MAX_MESSAGE_ATTACHMENTS).optional().describe(
+  `Canvas file IDs to attach (from prepare_attachment_upload, or the user's own files); at most ${String(MAX_MESSAGE_ATTACHMENTS)} attachments in total`
+);
 async function sendInboxMessage(client, args) {
-  const files = prepareAttachments(args.attachments);
-  const uploaded = await uploadMessageAttachments(client, files);
+  const uploaded = await collectMessageAttachments(client, args);
   const payload = newMessagePayload({
     recipients: args.recipient_ids,
     subject: args.subject,
@@ -27140,8 +27236,7 @@ async function sendInboxMessage(client, args) {
   return { ...sentConversation(created), attachments: attachmentSummary(uploaded) };
 }
 async function replyInboxMessage(client, args) {
-  const files = prepareAttachments(args.attachments);
-  const uploaded = await uploadMessageAttachments(client, files);
+  const uploaded = await collectMessageAttachments(client, args);
   const path = `/conversations/${String(args.conversation_id)}/add_message`;
   const payload = replyPayload(args.body, attachmentIds(uploaded));
   const reply = await client.post(path, payload);
@@ -27150,27 +27245,40 @@ async function replyInboxMessage(client, args) {
 var CANVAS_INBOX_WRITE_TOOLS = [
   defineTool({
     name: "send_message",
-    description: `SENDS a new Canvas inbox message to people (e.g. a teacher), optionally with attachments (${ATTACHMENTS_LIMIT_TEXT}). Get user IDs with find_recipients. Real action, visible to the recipients: show the exact recipients, subject, text and file names and confirm with the user first.`,
+    description: `SENDS a new Canvas inbox message to people (e.g. a teacher), optionally with attachments (inline: ${ATTACHMENTS_LIMIT_TEXT}; larger or local binaries: prepare_attachment_upload, then file_ids). Get user IDs with find_recipients. Real action, visible to the recipients: show the exact recipients, subject, text and file names and confirm with the user first.`,
     shape: {
       recipient_ids: external_exports.array(userId).min(1).max(MAX_MESSAGE_RECIPIENTS).describe("User IDs"),
       subject: external_exports.string().min(1).max(255),
       body: external_exports.string().min(1).describe("Plain text"),
       course_id: courseId2.optional().describe("Course the message is about"),
-      attachments
+      attachments,
+      file_ids: fileIds
     },
     annotations: toolAnnotations("Send message", SEND_HINTS),
     run: ({ client }, args) => sendInboxMessage(client, args)
   }),
   defineTool({
     name: "reply_message",
-    description: `SENDS a reply in an existing Canvas inbox conversation, to all its participants, optionally with attachments (${ATTACHMENTS_LIMIT_TEXT}). Real action: show the text and file names and confirm with the user first.`,
+    description: `SENDS a reply in an existing Canvas inbox conversation, to all its participants, optionally with attachments (inline, or file_ids from prepare_attachment_upload). Real action: show the text and file names and confirm with the user first.`,
     shape: {
       conversation_id: conversationId,
       body: external_exports.string().min(1).describe("Plain text"),
-      attachments
+      attachments,
+      file_ids: fileIds
     },
     annotations: toolAnnotations("Reply message", SEND_HINTS),
     run: ({ client }, args) => replyInboxMessage(client, args)
+  }),
+  defineTool({
+    name: "prepare_attachment_upload",
+    description: `Prepares sending a file from the user's computer (zip, pdf, any binary up to ${String(MAX_DIRECT_UPLOAD_MB)} MB) as a Canvas message attachment WITHOUT putting its bytes in the call: returns a one-time curl command that uploads it straight to the user's private "conversation attachments" folder. Run it where the file is, then pass the printed "id" in file_ids of send_message or reply_message. Sends nothing to anyone.`,
+    shape: {
+      file_name: external_exports.string().trim().min(1).max(255).describe("Name with extension, e.g. docs.zip"),
+      size: external_exports.number().int().min(1).max(MAX_DIRECT_UPLOAD_BYTES).describe("Exact size in bytes"),
+      content_type: external_exports.string().min(1).optional().describe("MIME type; guessed from the extension")
+    },
+    annotations: toolAnnotations("Prepare attachment upload", CREATE_HINTS),
+    run: ({ client }, args) => prepareAttachmentUpload(client, args)
   })
 ];
 
