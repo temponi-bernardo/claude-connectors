@@ -256,3 +256,33 @@ describe('sendInboxMessage and replyInboxMessage', () => {
     expect(reply).toMatchObject({ ok: true, message_id: 2, attachments: [] });
   });
 });
+
+describe('attachments by Canvas file id', () => {
+  it('send_message attaches file_ids, copying files outside the inbox folder', async () => {
+    const { result, post } = await runInbox(
+      'send_message',
+      { recipient_ids: [5], subject: 'S', body: 'B', file_ids: [3] },
+      {
+        '/users/self/folders/by_path/conversation%20attachments': [{ id: 77 }],
+        '/files/3': { id: 3, folder_id: 1 },
+        '/folders/77/copy_file': { id: 30, display_name: 'docs.zip', size: 9 },
+        '/conversations': [{ id: 1 }],
+      },
+    );
+    expect(result).toMatchObject({ ok: true, attachments: [{ id: 30, name: 'docs.zip' }] });
+    expect(post.mock.calls.at(-1)).toEqual([
+      '/conversations',
+      expect.objectContaining({ attachment_ids: ['30'] }),
+    ]);
+  });
+
+  it('prepare_attachment_upload returns a curl command and sends nothing', async () => {
+    const { result, post } = await runInbox(
+      'prepare_attachment_upload',
+      { file_name: 'docs.zip', size: 189000 },
+      { '/users/self/files': { upload_url: 'https://up.test/x' } },
+    );
+    expect(result).toMatchObject({ file_name: 'docs.zip' });
+    expect(post).toHaveBeenCalledTimes(1);
+  });
+});

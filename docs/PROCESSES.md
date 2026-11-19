@@ -76,14 +76,19 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
      `get_conversation` (read without marking as read) use `toConversationSummary()` and `toConversationDetail()`
      (`conversationNames()`, `participantName()`, `toConversationMessage()`). With writing on, `send_message`
      accepts only numeric user IDs (at most `MAX_MESSAGE_RECIPIENTS`) and calls `sendInboxMessage()`;
-     `reply_message` calls `replyInboxMessage()`. Both first run `prepareAttachments()` (`uploadedFileFromArgs()`,
-     `attachmentsRefusal()`: at most `MAX_MESSAGE_ATTACHMENTS` files of `MAX_UPLOAD_BYTES`), so a refusal comes
-     before any upload; then `uploadMessageAttachments()` sends each file through `uploadMessageAttachment()` →
+     `reply_message` calls `replyInboxMessage()`. Both run `collectMessageAttachments()`:
+     `attachmentCountRefusal()` (inline plus `file_ids`, at most `MAX_MESSAGE_ATTACHMENTS`), then
+     `prepareAttachments()` (`uploadedFileFromArgs()`, `attachmentsRefusal()`: files of `MAX_UPLOAD_BYTES`), then
+     `resolveFileAttachments()` for `file_ids` (ADR 0028: `conversationFolderId()`, `fetchAttachmentFile()` for
+     every id first, then `copyToConversationFolder()` when `needsConversationCopy()`), so a refusal comes before
+     any upload or copy; then `uploadMessageAttachments()` sends each file through `uploadMessageAttachment()` →
      `uploadCanvasFile()` (`POST /users/self/files` with `parent_folder_path` = `CONVERSATION_ATTACHMENTS_FOLDER`,
      then the client's `upload`); a failed upload throws `attachmentUploadError()` and nothing is sent. The body
      carries `attachmentIds()` via `newMessagePayload()` / `replyPayload()` (`attachmentIdsField()`), and the
      answer (`sentConversation()` / `sentReply()`) adds `attachmentSummary()`. Message bodies and file contents
-     are never logged.
+     are never logged. For a local binary, `prepare_attachment_upload` calls `prepareAttachmentUpload()`: step 1 of
+     the upload into the same folder, and `curlUploadCommand()` (`shellQuote()`) returns the `curl` that Claude
+     runs where the file is; Canvas answers it with the file JSON, whose `id` goes in `file_ids`.
      6b. Writing off (ADR 0027): `createCanvasUserServer()` asks `canvasWriteBlock()` — `CANVAS_WRITE_OFF_REASON` when
      the server flag is off; null when `userAllowsWrite()` (sign-in `write` grant, or `hasStoredWriteOptIn()` in
      `CANVAS_KV`); otherwise `readOnlyConnectionReason()` with `writeAccessUrl()`. `canvasTools()` passes the

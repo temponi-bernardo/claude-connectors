@@ -65,6 +65,10 @@
       "readOnly": true
     },
     {
+      "name": "prepare_attachment_upload",
+      "readOnly": false
+    },
+    {
       "name": "read_file_text",
       "readOnly": true
     },

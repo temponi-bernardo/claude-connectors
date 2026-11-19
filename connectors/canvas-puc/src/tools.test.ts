@@ -82,6 +82,7 @@ describe('canvasTools', () => {
       'reply_to_discussion',
       'send_message',
       'reply_message',
+      'prepare_attachment_upload',
     ]);
   });
 
@@ -90,7 +91,8 @@ describe('canvasTools', () => {
     expect(new Set(titles).size).toBe(ALL.length);
     for (const spec of READS) expect(spec.annotations.readOnlyHint).toBe(true);
     for (const spec of WRITES) {
-      expect(spec.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: true });
+      const destructive = spec.name !== 'prepare_attachment_upload';
+      expect(spec.annotations).toMatchObject({ readOnlyHint: false, destructiveHint: destructive });
     }
   });
 });

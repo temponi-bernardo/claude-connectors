@@ -55,6 +55,7 @@ export interface CanvasComment {
 export interface CanvasAttachment {
   readonly id?: Id;
   readonly display_name?: string;
+  readonly folder_id?: Id;
   readonly url?: string;
   readonly size?: number;
   readonly updated_at?: string;

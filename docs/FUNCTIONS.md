@@ -11,6 +11,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- index:start -->
 
+- `connectors/canvas-puc/src/attachment-refs.ts`: [`attachmentCountRefusal`](#attachmentcountrefusal), [`conversationFolderId`](#conversationfolderid), [`fetchAttachmentFile`](#fetchattachmentfile), [`needsConversationCopy`](#needsconversationcopy), [`copyToConversationFolder`](#copytoconversationfolder), [`resolveFileAttachments`](#resolvefileattachments), [`collectMessageAttachments`](#collectmessageattachments), [`shellQuote`](#shellquote), [`curlUploadCommand`](#curluploadcommand), [`prepareAttachmentUpload`](#prepareattachmentupload)
 - `connectors/canvas-puc/src/chunks.ts`: [`planDownloadChunk`](#plandownloadchunk), [`chunkDescription`](#chunkdescription), [`chunkMimeType`](#chunkmimetype), [`chunkUri`](#chunkuri), [`rangeHeaders`](#rangeheaders), [`isRangeAnswer`](#israngeanswer)
 - `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`canvasApiError`](#canvasapierror), [`canvasErrorStatus`](#canvaserrorstatus), [`isPermissionDenial`](#ispermissiondenial), [`requestCanvas`](#requestcanvas), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`uploadForm`](#uploadform), [`postUploadForm`](#postuploadform), [`confirmUpload`](#confirmupload), [`createCanvasClient`](#createcanvasclient)
 - `connectors/canvas-puc/src/file-ref.ts`: [`fileRefFromUrl`](#filereffromurl), [`fileRefFromArgs`](#filereffromargs), [`fileLookupPlan`](#filelookupplan), [`fileAccessReason`](#fileaccessreason), [`fileAccessError`](#fileaccesserror), [`resolveCanvasFile`](#resolvecanvasfile)
@@ -11611,7 +11612,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/upload.ts`
 - **Signature:** `uploadContentType(name: string): string`
-- **Used by:** `uploadedFileFromArgs()`
+- **Used by:** `prepareAttachmentUpload()`, `uploadedFileFromArgs()`
 - **Processes:** P03
 
 <!-- generated:end -->
@@ -11783,7 +11784,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/redact.ts`
 - **Signature:** `errorMessage(error: unknown): string`
-- **Used by:** `attachmentUploadError()`, `errorResult()`, `handleAuthorizeSubmit()`, `handleUpstreamCallback()`, `logWarning()`
+- **Used by:** `attachmentUploadError()`, `conversationFolderId()`, `errorResult()`, `fetchAttachmentFile()`, `handleAuthorizeSubmit()`, `handleUpstreamCallback()`, `logWarning()`
 - **Processes:** P03, P08, P09, P10, P12, P13, P14, P16, P19
 
 <!-- generated:end -->
@@ -11836,7 +11837,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/message-attachments.ts`
 - **Signature:** `prepareAttachments(list: readonly FileSubmissionArgs[] | undefined): UploadedBytes[]`
-- **Used by:** `replyInboxMessage()`, `sendInboxMessage()`
+- **Used by:** `collectMessageAttachments()`
 - **Processes:** P03
 
 <!-- generated:end -->
@@ -11887,7 +11888,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/message-attachments.ts`
 - **Signature:** `async uploadMessageAttachments(client: CanvasClient, files: readonly UploadedBytes[]): Promise<CanvasAttachment[]>`
-- **Used by:** `replyInboxMessage()`, `sendInboxMessage()`
+- **Used by:** `collectMessageAttachments()`
 - **Processes:** P03
 
 <!-- generated:end -->
@@ -12522,6 +12523,178 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network per attempt; up to `SMOKE_ATTEMPTS` attempts with `SMOKE_RETRY_MS` pauses.
 - **Errors:** None.
 
+## `connectors/canvas-puc/src/attachment-refs.ts`
+
+### `attachmentCountRefusal`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `attachmentCountRefusal(inline: number, byId: number): string | null`
+- **Used by:** `collectMessageAttachments()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Checks the total attachments of one message (inline plus by id) against `MAX_MESSAGE_ATTACHMENTS`.
+- **Input:** `inline`: inline file count; `byId`: file id count.
+- **Output:** The refusal text, or null when the total fits.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `conversationFolderId`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `async conversationFolderId(client: CanvasClient): Promise<Id>`
+- **Used by:** `resolveFileAttachments()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Resolves the user's `conversation attachments` folder via `CONVERSATION_FOLDER_PATH` and takes the last folder of the path.
+- **Input:** `client`: the Canvas client.
+- **Output:** The folder id.
+- **Effects:** Network: `GET /users/self/folders/by_path/conversation%20attachments`.
+- **Errors:** Throws when the folder cannot be resolved (points to `prepare_attachment_upload`) or Canvas returns no folder; nothing is sent.
+
+### `fetchAttachmentFile`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `async fetchAttachmentFile(client: CanvasClient, fileId: Id): Promise<CanvasAttachment>`
+- **Used by:** `resolveFileAttachments()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Reads one Canvas file the user can access, to validate a `file_ids` entry before anything is copied or sent.
+- **Input:** `client`: the Canvas client; `fileId`: the file id.
+- **Output:** The Canvas file (with `folder_id`).
+- **Effects:** Network: `GET /files/:id`.
+- **Errors:** Throws `Canvas file X is not accessible (...). Nothing was sent.`
+
+### `needsConversationCopy`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `needsConversationCopy(file: CanvasAttachment, folderId: Id): boolean`
+- **Used by:** `resolveFileAttachments()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Says whether a file lives outside the conversation attachments folder, so Canvas would not attach it as is.
+- **Input:** `file`: the Canvas file; `folderId`: the conversation attachments folder id.
+- **Output:** `true` when the file must be copied.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `copyToConversationFolder`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `copyToConversationFolder(client: CanvasClient, file: CanvasAttachment, folderId: Id): Promise<CanvasAttachment>`
+- **Used by:** `resolveFileAttachments()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Copies a file into the conversation attachments folder, renaming on a name clash.
+- **Input:** `client`: the Canvas client; `file`: the source file; `folderId`: the destination folder id.
+- **Output:** The copy (new id).
+- **Effects:** Network: `POST /folders/:id/copy_file` (creates a file in the user's private folder).
+- **Errors:** Propagates Canvas errors.
+
+### `resolveFileAttachments`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `async resolveFileAttachments(client: CanvasClient, fileIds: readonly Id[] | undefined): Promise<CanvasAttachment[]>`
+- **Used by:** `collectMessageAttachments()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Turns `file_ids` into attachable files: resolves the folder, reads every file first, then copies those outside the folder.
+- **Input:** `client`: the Canvas client; `fileIds`: the ids (may be absent).
+- **Output:** The attachable files, in order (empty without ids).
+- **Effects:** Network: like `conversationFolderId()`, `fetchAttachmentFile()` and `copyToConversationFolder()`.
+- **Errors:** Propagates the first error; no copy happens when a file is not accessible.
+
+### `collectMessageAttachments`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `async collectMessageAttachments(client: CanvasClient, args: MessageAttachmentArgs): Promise<CanvasAttachment[]>`
+- **Used by:** `replyInboxMessage()`, `sendInboxMessage()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Gathers every attachment of a send or reply: count check, inline decode check, file id resolution, then inline uploads.
+- **Input:** `client`: the Canvas client; `args`: `attachments` and `file_ids`.
+- **Output:** Uploaded inline files followed by the referenced files.
+- **Effects:** Network: like `resolveFileAttachments()` and `uploadMessageAttachments()`.
+- **Errors:** Throws the `attachmentCountRefusal()` text, a decode or size refusal, or a file/upload error; the message is never sent after an error.
+
+### `shellQuote`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `shellQuote(value: string): string`
+- **Used by:** `curlUploadCommand()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Quotes a value for a POSIX shell with single quotes, escaping inner single quotes.
+- **Input:** `value`: the raw text.
+- **Output:** The quoted text.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `curlUploadCommand`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `curlUploadCommand(slot: CanvasUploadSlot): string`
+- **Used by:** `prepareAttachmentUpload()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Builds the `curl` that fills a Canvas upload slot from the user's machine: Canvas fields with `--form-string` (no `@` file expansion), the file last at `LOCAL_PATH_PLACEHOLDER`.
+- **Input:** `slot`: the step-1 upload slot.
+- **Output:** The command text.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `prepareAttachmentUpload`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/attachment-refs.ts`
+- **Signature:** `async prepareAttachmentUpload(client: CanvasClient, args: DirectUploadArgs): Promise<Readonly<Record<string, unknown>>>`
+- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Asks Canvas for a single-use upload slot in the conversation attachments folder and returns the `curl` that uploads a local file straight to Canvas, plus `DIRECT_UPLOAD_NEXT_STEPS`.
+- **Input:** `client`: the Canvas client; `args`: `file_name`, `size` (bytes, up to `MAX_DIRECT_UPLOAD_BYTES`), optional `content_type`.
+- **Output:** `{ file_name, curl, next_steps }`.
+- **Effects:** Network: `POST /users/self/files` (step 1 only; the bytes never pass through the Worker).
+- **Errors:** Propagates Canvas errors.
+
 ## Data and constants
 
 | Name                              | File                                               | What it is                                                                                                                                                                          |
@@ -12715,6 +12888,11 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `TOOL_CATALOG_PATH`               | `src/remote/mcp-endpoint.ts`                       | Path of the public tool catalog (`/tools`): the `tools/list` answer, no user data.                                                                                                  |
 | `MAX_MESSAGE_ATTACHMENTS`         | `connectors/canvas-puc/src/message-attachments.ts` | Most files one inbox message may carry (5).                                                                                                                                         |
 | `CONVERSATION_ATTACHMENTS_FOLDER` | `connectors/canvas-puc/src/message-attachments.ts` | Canvas folder of the user's inbox attachments (`conversation attachments`, the API's `parent_folder_path`).                                                                         |
+| `MAX_DIRECT_UPLOAD_MB`            | `connectors/canvas-puc/src/attachment-refs.ts`     | Largest file `prepare_attachment_upload` accepts, in MB (25).                                                                                                                       |
+| `MAX_DIRECT_UPLOAD_BYTES`         | `connectors/canvas-puc/src/attachment-refs.ts`     | `MAX_DIRECT_UPLOAD_MB` in bytes.                                                                                                                                                    |
+| `LOCAL_PATH_PLACEHOLDER`          | `connectors/canvas-puc/src/attachment-refs.ts`     | Placeholder (`<LOCAL_FILE_PATH>`) the local file path replaces in the returned `curl`.                                                                                              |
+| `CONVERSATION_FOLDER_PATH`        | `connectors/canvas-puc/src/attachment-refs.ts`     | API path that resolves the user's `conversation attachments` folder.                                                                                                                |
+| `DIRECT_UPLOAD_NEXT_STEPS`        | `connectors/canvas-puc/src/attachment-refs.ts`     | Steps returned with the `curl`: run it where the file is, then pass the printed `id` in `file_ids`.                                                                                 |
 | `USER_FILES_PATH`                 | `connectors/canvas-puc/src/message-attachments.ts` | Step-1 upload endpoint of a file in the user's own files (`/users/self/files`).                                                                                                     |
 | `ATTACHMENTS_LIMIT_TEXT`          | `connectors/canvas-puc/src/message-attachments.ts` | Text of the attachments limit (`up to 5 files of at most 5 MB each`), for the tool descriptions.                                                                                    |
 | `CANVAS_WRITE_OFF_REASON`         | `connectors/canvas-puc/src/remote.ts`              | Why the write tools refuse when the operator turned writing off (`CANVAS_ALLOW_WRITE`).                                                                                             |

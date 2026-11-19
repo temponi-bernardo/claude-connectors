@@ -5,7 +5,7 @@
  */
 import { randomBytes } from 'node:crypto';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { READ_ONLY_HINTS, SEND_HINTS } from '../../../src/mcp/annotations.js';
+import { CREATE_HINTS, READ_ONLY_HINTS, SEND_HINTS } from '../../../src/mcp/annotations.js';
 import { issueTokenSet } from '../../../src/remote/tokens.js';
 import { CANVAS_WRITE_GRANT } from './remote.js';
 import { CANVAS_INBOX_WRITE_TOOLS } from './tools-inbox.js';
@@ -150,10 +150,11 @@ describe('Canvas write tools are per-user opt-in', () => {
     expect(res.status).toBe(400);
   });
 
-  it('marks every write tool as destructive and every other tool as read-only', () => {
+  it('marks every write tool as destructive (private uploads as create) and every other tool as read-only', () => {
     const writes = new Set([...CANVAS_WRITE_TOOLS, ...CANVAS_INBOX_WRITE_TOOLS].map((t) => t.name));
     for (const tool of canvasTools(null)) {
-      const hints = writes.has(tool.name) ? SEND_HINTS : READ_ONLY_HINTS;
+      const write = tool.name === 'prepare_attachment_upload' ? CREATE_HINTS : SEND_HINTS;
+      const hints = writes.has(tool.name) ? write : READ_ONLY_HINTS;
       expect(tool.annotations).toMatchObject({
         readOnlyHint: hints.readOnlyHint,
         destructiveHint: hints.destructiveHint,
