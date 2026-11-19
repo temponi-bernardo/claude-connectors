@@ -68,7 +68,7 @@ export function uploadSizeRefusal(size: number): string | null {
   if (size === 0) return 'The file is empty.';
   if (size <= MAX_UPLOAD_BYTES) return null;
   const mb = (size / 1024 / 1024).toFixed(1);
-  return `The file is ${mb} MB, above the ${MAX_UPLOAD_MB} MB limit; submit it in Canvas itself.`;
+  return `The file is ${mb} MB, above the ${MAX_UPLOAD_MB} MB limit; upload it in Canvas itself.`;
 }
 
 /** Why the file cannot be submitted to the assignment (type, extension, size), or `null` when it can. */
@@ -113,6 +113,28 @@ export function uploadedFileFromArgs(args: FileSubmissionArgs): UploadedBytes {
   return { name, bytes, contentType: args.content_type ?? uploadContentType(name) };
 }
 
+/** Where a file goes: the step-1 endpoint, the file and extra step-1 fields (e.g. the target folder). */
+export interface CanvasUploadRequest {
+  readonly path: string;
+  readonly file: UploadedBytes;
+  readonly extra?: Readonly<Record<string, string>>;
+}
+
+/** Canvas's three-step upload: asks `path` for a slot, sends the file there and returns the confirmed file. */
+export async function uploadCanvasFile(
+  client: CanvasClient,
+  request: CanvasUploadRequest,
+): Promise<CanvasAttachment> {
+  const { file } = request;
+  const slot = await client.post<CanvasUploadSlot>(request.path, {
+    name: file.name,
+    size: file.bytes.length,
+    content_type: file.contentType,
+    ...request.extra,
+  });
+  return client.upload<CanvasAttachment>(slot, file);
+}
+
 /** Result of a file submission returned to Claude. */
 export interface FileSubmissionResult {
   readonly ok: true;
@@ -130,12 +152,7 @@ export async function submitFileAssignment(
   const assignment = await client.get<CanvasAssignment>(base);
   const refusal = uploadRefusal(assignment, file.name, file.bytes.length);
   if (refusal !== null) throw new Error(refusal);
-  const slot = await client.post<CanvasUploadSlot>(`${base}/submissions/self/files`, {
-    name: file.name,
-    size: file.bytes.length,
-    content_type: file.contentType,
-  });
-  const uploaded = await client.upload<CanvasAttachment>(slot, file);
+  const uploaded = await uploadCanvasFile(client, { path: `${base}/submissions/self/files`, file });
   const fileIds = [uploaded.id ?? ''];
   const s = await client.post<CanvasSubmission>(
     `${base}/submissions`,

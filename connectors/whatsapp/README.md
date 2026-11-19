@@ -147,19 +147,19 @@ connector deploys their own copy.
 
 ## Configuration (`[vars]` in `wrangler.toml`)
 
-| Variable            | Default             | Purpose                                                                        |
-| ------------------- | ------------------- | ------------------------------------------------------------------------------ |
-| `SLEEP_AFTER`       | `5m`                | After this long without use, saves the backup and stops the container (30s–1h) |
-| `TOOL_TIMEOUT_MS`   | `25000`             | End-to-end ceiling for each tool                                               |
-| `SYNC_WAIT_MS`      | `8000`              | How long to wait for pending sync before answering partially                   |
-| `TIMEZONE`          | `America/Sao_Paulo` | Time zone for dates                                                            |
-| `HISTORY_DAYS`      | `90`                | History kept in the initial sync                                               |
-| `MAX_MEDIA_BYTES`   | `5242880`           | `get_media` limit                                                              |
-| `ENABLE_SEND`       | `true`              | Enables `send_message` (`"false"` turns it off for good)                       |
-| `SEND_ALLOWLIST`    | empty               | Optional: restricts sending to numbers or JIDs; empty = anyone                 |
-| `SEND_MAX_PER_HOUR` | `10`                | Hard limit of sends per hour (Worker and bridge)                               |
-| `SYNC_CRON`         | empty               | Optional periodic sync (see below)                                             |
-| `PUBLIC_URL`        | —                   | Custom domain; without it `*.workers.dev` is used                              |
+| Variable            | Default             | Purpose                                                                                                |
+| ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------ |
+| `SLEEP_AFTER`       | `5m`                | After this long without use, saves the backup and stops the container (30s–1h)                         |
+| `TOOL_TIMEOUT_MS`   | `25000`             | End-to-end ceiling for each tool                                                                       |
+| `SYNC_WAIT_MS`      | `8000`              | How long to wait for pending sync before answering partially                                           |
+| `TIMEZONE`          | `America/Sao_Paulo` | Time zone for dates                                                                                    |
+| `HISTORY_DAYS`      | `90`                | History kept in the initial sync                                                                       |
+| `MAX_MEDIA_BYTES`   | `5242880`           | `get_media` limit                                                                                      |
+| `ENABLE_SEND`       | `true`              | Enables `send_message` (`"false"` turns it off: the tool stays listed and answers that sending is off) |
+| `SEND_ALLOWLIST`    | empty               | Optional: restricts sending to numbers or JIDs; empty = anyone                                         |
+| `SEND_MAX_PER_HOUR` | `10`                | Hard limit of sends per hour (Worker and bridge)                                                       |
+| `SYNC_CRON`         | empty               | Optional periodic sync (see below)                                                                     |
+| `PUBLIC_URL`        | —                   | Custom domain; without it `*.workers.dev` is used                                                      |
 
 ### Sending
 

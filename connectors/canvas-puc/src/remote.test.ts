@@ -1,4 +1,11 @@
+import { randomBytes } from 'node:crypto';
 import { describe, expect, it, vi } from 'vitest';
+import {
+  memoryWriteAccessStore,
+  tokenFingerprint,
+  writeAccessKey,
+  type WriteAccessDeps,
+} from './write-access.js';
 import {
   CANVAS_USER_AGENT,
   DEFAULT_CANVAS_URL,
@@ -13,7 +20,11 @@ import {
   withCanvasUserAgent,
   CANVAS_WRITE_GRANT,
   CANVAS_WRITE_OPTION_LABEL,
-  canWriteFor,
+  canvasWriteBlock,
+  CANVAS_WRITE_OFF_REASON,
+  createCanvasUserServer,
+  readOnlyConnectionReason,
+  userAllowsWrite,
   canvasLoginText,
   canvasClientFor,
   canvasRemoteConnector,
@@ -24,6 +35,11 @@ import {
 } from './remote.js';
 
 const BASE = 'https://pucminas.instructure.com';
+
+function accessDeps(): WriteAccessDeps {
+  const oauth = { issuer: 'https://canvas.test', key: randomBytes(32), redirectHosts: [] };
+  return { oauth, store: memoryWriteAccessStore(), now: () => 1_800_000_000 };
+}
 
 function settingsWith(...responses: Response[]) {
   const fetchFn = vi.fn<typeof fetch>(() =>
@@ -99,13 +115,59 @@ describe('canvasLoginText', () => {
   });
 });
 
-describe('canWriteFor', () => {
-  it('allows writing only with the server flag AND the user opt-in', () => {
-    const on = settingsWith();
-    const off = { ...on, allowWrite: false };
-    expect(canWriteFor(on, [CANVAS_WRITE_GRANT])).toBe(true);
-    expect(canWriteFor(on, [])).toBe(false);
-    expect(canWriteFor(off, [CANVAS_WRITE_GRANT])).toBe(false);
+describe('canvasWriteBlock', () => {
+  it('is null with the server flag AND the sign-in opt-in', async () => {
+    const grant = { secret: 'tok', grants: [CANVAS_WRITE_GRANT] };
+    await expect(canvasWriteBlock(settingsWith(), accessDeps(), grant)).resolves.toBeNull();
+  });
+
+  it('explains the server flag is off, even for a user who opted in', async () => {
+    const off = { ...settingsWith(), allowWrite: false };
+    const grant = { secret: 'tok', grants: [CANVAS_WRITE_GRANT] };
+    await expect(canvasWriteBlock(off, accessDeps(), grant)).resolves.toBe(CANVAS_WRITE_OFF_REASON);
+  });
+
+  it('gives a read-only connection the link that turns writing on, without the token', async () => {
+    const block = await canvasWriteBlock(settingsWith(), accessDeps(), {
+      secret: 'tok',
+      grants: [],
+    });
+    expect(block).toMatch(
+      /read-only\. Ask the user to open https:\/\/canvas\.test\/write-access\?t=/,
+    );
+    expect(block).toContain('no new Canvas token needed');
+    expect(block).not.toContain('tok ');
+  });
+
+  it('is null for a connection whose opt-in was stored later on the page', async () => {
+    const access = accessDeps();
+    await access.store.put(writeAccessKey(tokenFingerprint('tok')), 'on');
+    await expect(
+      canvasWriteBlock(settingsWith(), access, { secret: 'tok', grants: [] }),
+    ).resolves.toBeNull();
+  });
+});
+
+describe('readOnlyConnectionReason and userAllowsWrite', () => {
+  it('points to the link and accepts the sign-in grant or a stored opt-in', async () => {
+    expect(readOnlyConnectionReason('https://l')).toContain(
+      'open https://l and click "Allow writing"',
+    );
+    const access = accessDeps();
+    await expect(
+      userAllowsWrite(access, { secret: 's', grants: [CANVAS_WRITE_GRANT] }),
+    ).resolves.toBe(true);
+    await expect(userAllowsWrite(access, { secret: 's', grants: [] })).resolves.toBe(false);
+  });
+});
+
+describe('createCanvasUserServer', () => {
+  it('creates the MCP server of the user', async () => {
+    const server = await createCanvasUserServer(settingsWith(), accessDeps(), {
+      secret: 'tok',
+      grants: [],
+    });
+    expect(server.isConnected()).toBe(false);
   });
 });
 
@@ -134,17 +196,21 @@ describe('verifyCanvasToken', () => {
 describe('canvasRemoteConnector', () => {
   it('creates one MCP server per token and checks the token on Canvas', async () => {
     const settings = settingsWith(new Response('{}'));
-    const connector = canvasRemoteConnector(settings);
+    const connector = canvasRemoteConnector(settings, accessDeps());
     expect(connector.login.kind === 'secret' && connector.login.text.title).toContain('Canvas');
     await expect(
       connector.login.kind === 'secret' && connector.login.verify('abc'),
     ).resolves.toBeUndefined();
-    expect(connector.createServer('abc', []).isConnected()).toBe(false);
+    expect((await connector.createServer('abc', [])).isConnected()).toBe(false);
+    expect(connector.catalogServer?.().isConnected()).toBe(false);
+    expect(Object.keys(connector.pages ?? {})).toEqual(['GET /write-access', 'POST /write-access']);
   });
 
   it("renews the token's expiry through Canvas", async () => {
     const settings = settingsWith(new Response('{}'), new Response('[]'));
-    await expect(canvasRemoteConnector(settings).renewSecret?.('abc')).resolves.toBe('kept');
+    await expect(canvasRemoteConnector(settings, accessDeps()).renewSecret?.('abc')).resolves.toBe(
+      'kept',
+    );
     expect(settings.fetchFn).toHaveBeenCalledTimes(2);
   });
 });
@@ -207,7 +273,7 @@ describe('streamCanvasTool', () => {
   it('is the connector streamTool', async () => {
     const settings = settingsWith(new Response(JSON.stringify(file)), new Response('pdf'));
     const call = { id: 1, name: 'download_file', args: { file_id: '1' } };
-    const content = await canvasRemoteConnector(settings).streamTool?.('tok', call);
+    const content = await canvasRemoteConnector(settings, accessDeps()).streamTool?.('tok', call);
     expect(content?.mimeType).toBe('application/pdf');
   });
 });

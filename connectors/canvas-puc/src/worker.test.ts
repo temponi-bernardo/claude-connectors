@@ -1,12 +1,17 @@
 import { randomBytes } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { createWorkerApp, handleWorkerFetch } from './worker.js';
+import { createWorkerApp, handleWorkerFetch, writeAccessStoreFrom } from './worker.js';
+import { memoryWriteAccessStore } from './write-access.js';
 
 const KEY = randomBytes(32).toString('base64');
 
 describe('createWorkerApp', () => {
   it('uses the request origin as the issuer when PUBLIC_URL is missing', () => {
-    const app = createWorkerApp({ SEAL_KEY: KEY }, 'https://canvas.accounts.workers.dev');
+    const app = createWorkerApp(
+      { SEAL_KEY: KEY },
+      'https://canvas.accounts.workers.dev',
+      memoryWriteAccessStore(),
+    );
     expect(app.settings.issuer).toBe('https://canvas.accounts.workers.dev');
     expect(app.connector.login.kind === 'secret' && app.connector.login.text.helpUrl).toBe(
       'https://pucminas.instructure.com/profile/settings',
@@ -15,7 +20,11 @@ describe('createWorkerApp', () => {
   });
 
   it('prefers PUBLIC_URL, without a trailing slash', () => {
-    const app = createWorkerApp({ SEAL_KEY: KEY, PUBLIC_URL: 'https://canvas.dev/' }, 'https://x');
+    const app = createWorkerApp(
+      { SEAL_KEY: KEY, PUBLIC_URL: 'https://canvas.dev/' },
+      'https://x',
+      memoryWriteAccessStore(),
+    );
     expect(app.settings.issuer).toBe('https://canvas.dev');
   });
 });
@@ -35,5 +44,15 @@ describe('handleWorkerFetch', () => {
     const res = await handleWorkerFetch(new Request('https://w.workers.dev/'), {});
     expect(res.status).toBe(500);
     expect(await res.text()).toContain('SEAL_KEY');
+  });
+});
+
+describe('writeAccessStoreFrom', () => {
+  it('uses the CANVAS_KV binding, or a memory store without it', async () => {
+    const kv = memoryWriteAccessStore();
+    expect(writeAccessStoreFrom({ CANVAS_KV: kv })).toBe(kv);
+    const fallback = writeAccessStoreFrom({});
+    await fallback.put('k', 'on');
+    await expect(fallback.get('k')).resolves.toBe('on');
   });
 });

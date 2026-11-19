@@ -1,0 +1,32 @@
+{
+  "tools": [
+    {
+      "name": "get_media",
+      "readOnly": true
+    },
+    {
+      "name": "get_messages",
+      "readOnly": true
+    },
+    {
+      "name": "list_chats",
+      "readOnly": true
+    },
+    {
+      "name": "search_contacts",
+      "readOnly": true
+    },
+    {
+      "name": "search_messages",
+      "readOnly": true
+    },
+    {
+      "name": "send_message",
+      "readOnly": false
+    },
+    {
+      "name": "whatsapp_status",
+      "readOnly": true
+    }
+  ]
+}

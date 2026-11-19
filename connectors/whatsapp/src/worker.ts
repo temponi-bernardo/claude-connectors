@@ -14,7 +14,7 @@ import { readOAuthSettings, resolveIssuer } from '../../../src/remote/oauth.js';
 import { withDeadline, type BridgeFetch } from './bridge-client.js';
 import { readWhatsAppSettings, type WhatsAppSettings } from './config.js';
 import { routePairRequest, type PairApp } from './pair.js';
-import { createWhatsAppMcpServer } from './tools.js';
+import { createWhatsAppCatalogServer, createWhatsAppMcpServer } from './tools.js';
 import { bridgeFetchFor, bridgeStub, type WhatsAppEnv } from './worker-env.js';
 
 /** Clock in Unix seconds. */
@@ -49,6 +49,7 @@ export function whatsappRemoteConnector(
         pairUrl: `${issuer}/pair`,
         now: () => Date.now(),
       }),
+    catalogServer: () => createWhatsAppCatalogServer(settings),
   };
 }
 

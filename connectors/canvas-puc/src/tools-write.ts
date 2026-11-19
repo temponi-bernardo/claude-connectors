@@ -1,6 +1,6 @@
 /**
- * Tools that act on Canvas on the student's behalf. They are only registered with `CANVAS_ALLOW_WRITE` on,
- * are annotated as destructive, and their description asks the model to confirm with the user first.
+ * Tools that act on Canvas on the student's behalf. They only run when writing is on for the user (otherwise
+ * they answer how to turn it on), are annotated as destructive, and their description asks the model to confirm with the user first.
  */
 import { z } from 'zod';
 import { SEND_HINTS, toolAnnotations } from '../../../src/mcp/annotations.js';
@@ -10,6 +10,14 @@ import type { CanvasContext } from './context.js';
 import { MAX_UPLOAD_MB, submitFileAssignment, uploadedFileFromArgs } from './upload.js';
 
 const id = z.union([z.string(), z.number()]);
+
+/** Fields of a file passed inside a tool call (submissions and message attachments). */
+export const FILE_FIELDS = {
+  file_name: z.string().trim().min(1).max(255).describe('Name with extension, e.g. report.txt'),
+  content: z.string().min(1).describe('File content: text, or base64 with encoding "base64"'),
+  encoding: z.enum(['text', 'base64']).default('text'),
+  content_type: z.string().min(1).optional().describe('MIME type; guessed from the extension'),
+} as const;
 
 /** Submission body for the chosen kind: text (HTML accepted) or a link. */
 export function submissionPayload(
@@ -49,10 +57,7 @@ export const CANVAS_WRITE_TOOLS: readonly ToolSpec<CanvasContext>[] = [
     shape: {
       course_id: id,
       assignment_id: id,
-      file_name: z.string().trim().min(1).max(255).describe('Name with extension, e.g. report.txt'),
-      content: z.string().min(1).describe('File content: text, or base64 with encoding "base64"'),
-      encoding: z.enum(['text', 'base64']).default('text'),
-      content_type: z.string().min(1).optional().describe('MIME type; guessed from the extension'),
+      ...FILE_FIELDS,
     },
     annotations: toolAnnotations('Submit file assignment', SEND_HINTS),
     run: ({ client }, args) => {

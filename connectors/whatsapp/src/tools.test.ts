@@ -9,7 +9,9 @@ import {
   allowedRecipient,
   compactContact,
   decodeHeaderText,
+  createWhatsAppCatalogServer,
   createWhatsAppMcpServer,
+  WHATSAPP_SEND_OFF_REASON,
   mediaResult,
   prepareRead,
   READ_TOOLS,
@@ -245,12 +247,27 @@ describe('annotations', () => {
   });
 });
 
+function sendToolNames(on: boolean): string[] {
+  return whatsappTools({ ...SETTINGS, enableSend: on }).map((t) => t.name);
+}
+
 describe('send_message and whatsappTools', () => {
-  it('exists only with ENABLE_SEND', () => {
-    expect(whatsappTools(SETTINGS).map((t) => t.name)).toEqual(READ_TOOLS.map((t) => t.name));
-    expect(whatsappTools({ ...SETTINGS, enableSend: true }).map((t) => t.name)).toContain(
-      'send_message',
-    );
+  it('is always listed and, without ENABLE_SEND, answers that sending is off without calling the bridge', async () => {
+    const names = sendToolNames;
+    expect(names(false)).toEqual([...READ_TOOLS.map((t) => t.name), 'send_message']);
+    expect(names(true)).toEqual(names(false));
+    const off = whatsappTools({ ...SETTINGS, enableSend: false }).at(-1)!;
+    expect(off.description).toContain(WHATSAPP_SEND_OFF_REASON);
+    const bridge = vi.fn();
+    const ctx = { ...context({}), bridge } as never;
+    const result = toToolResult(await off.run(ctx, { recipient: '1', text: 'x' }));
+    expect(result.isError).toBe(true);
+    expect(JSON.stringify(result.content)).toContain('ENABLE_SEND');
+    expect(bridge).not.toHaveBeenCalled();
+  });
+
+  it('createWhatsAppCatalogServer lists the tools without running any', () => {
+    expect(createWhatsAppCatalogServer(SETTINGS).isConnected()).toBe(false);
   });
 
   it('rejects a recipient outside the allowlist and requires explicit confirmation', async () => {

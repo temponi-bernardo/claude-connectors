@@ -6,14 +6,23 @@ import { toEnvVars, type EnvVars } from '../../../src/core/env.js';
 import { createRemoteHandler, type RemoteApp } from '../../../src/remote/handler.js';
 import { readOAuthSettings, resolveIssuer } from '../../../src/remote/oauth.js';
 import { canvasRemoteConnector, readCanvasRemoteSettings } from './remote.js';
+import { memoryWriteAccessStore, type WriteAccessStore } from './write-access.js';
 
 /** Builds the remote app: the issuer is `PUBLIC_URL` or, without it, the request origin (e.g. `*.workers.dev`). */
-export function createWorkerApp(env: EnvVars, origin: string): RemoteApp {
+export function createWorkerApp(env: EnvVars, origin: string, store: WriteAccessStore): RemoteApp {
+  const settings = readOAuthSettings(env, resolveIssuer(env, origin));
+  const access = { oauth: settings, store, now: () => Math.floor(Date.now() / 1000) };
   return {
-    settings: readOAuthSettings(env, resolveIssuer(env, origin)),
-    connector: canvasRemoteConnector(readCanvasRemoteSettings(env)),
-    now: () => Math.floor(Date.now() / 1000),
+    settings,
+    connector: canvasRemoteConnector(readCanvasRemoteSettings(env), access),
+    now: access.now,
   };
+}
+
+/** The `CANVAS_KV` binding that keeps write opt-ins; without it (misconfigured) opt-ins live in memory only. */
+export function writeAccessStoreFrom(env: Readonly<Record<string, unknown>>): WriteAccessStore {
+  const kv = env.CANVAS_KV as WriteAccessStore | undefined;
+  return kv ?? memoryWriteAccessStore();
 }
 
 /** Serves a Worker request; an invalid configuration becomes a 500 with the explanation. */
@@ -23,7 +32,7 @@ export async function handleWorkerFetch(
 ): Promise<Response> {
   let app: RemoteApp;
   try {
-    app = createWorkerApp(toEnvVars(env), new URL(request.url).origin);
+    app = createWorkerApp(toEnvVars(env), new URL(request.url).origin, writeAccessStoreFrom(env));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     return new Response(`Invalid Worker configuration: ${message}`, { status: 500 });

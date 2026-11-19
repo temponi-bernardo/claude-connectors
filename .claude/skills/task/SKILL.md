@@ -35,6 +35,10 @@ Target task: `$ARGUMENTS` (empty = the "Next task" at the top of `docs/ROADMAP.m
    touched the Gmail connector, `npm run gmail:deploy` (ADR 0014); without a token in the session, hand the
    command to the user. Before shipping a Worker, run `npm run gmail:dev` (or `worker:dev`) and `curl` `/`: the
    real runtime rejects things the Node tests accept (e.g. a non-function named export in the main module).
+   Every `*:deploy` script ends with `npm run smoke -- <connector>` (ADR 0027): if it fails, the published
+   `GET /tools` differs from `tool-contract.json` — fix it or `wrangler rollback`, never edit the contract to match
+   a broken deploy. Adding, removing or renaming a tool means updating that connector's `tool-contract.json` in
+   the same PR; a tool that depends on a flag or permission is gated with `gateToolSpecs()`, never left out.
    If it touched WhatsApp (`connectors/whatsapp/`), `pr:check` already runs `bridge:test` (Go 1.26+) and
    `whatsapp:build`; the deploy (`npm run whatsapp:deploy`, with Docker) belongs to whoever hosts it (ADR 0015).
 10. **Close the task:** ✅ in the ROADMAP, "Next task" updated, CHANGELOG entry if user-visible. This can go in

@@ -124,6 +124,9 @@ deploy (KV, secrets, Google Cloud) is in [connectors/gmail/README.md](../connect
 **WhatsApp** (ADR 0015) is published by whoever hosts it: `npm run whatsapp:deploy` (needs Docker for the bridge
 image). `pr:check` runs `npm run bridge:test` (Go 1.26+; with `GOTOOLCHAIN=auto` Go downloads the toolchain) and
 `npm run whatsapp:build` (bundle and image, without publishing).
+Every deploy script runs the post-deploy smoke test right after `wrangler deploy` (ADR 0027): `npm run smoke --
+<connector>` reads the published `GET /tools` and fails the command when it differs from the connector's
+`tool-contract.json` (roll back with `npx wrangler rollback --config connectors/<connector>/wrangler.toml`).
 
 ## Security in the flow
 

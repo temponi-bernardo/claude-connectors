@@ -3,6 +3,25 @@
 Plugin and remote server versions of the Canvas connector (ADR 0022). The repository changelog is
 [`CHANGELOG.md`](../../CHANGELOG.md).
 
+## Unreleased
+
+### Added
+
+- `send_message` and `reply_message` take attachments (up to 5 files of 5 MB, text or base64), uploaded to the
+  "conversation attachments" folder before sending; a refused or failed file sends nothing.
+- `/write-access`: a read-only connection turns writing on (or off) from a link, without a new Canvas token.
+- Public `GET /tools` (the server's `tools/list`) for the post-deploy smoke test.
+
+### Changed
+
+- Write tools are always listed; when writing is off they answer why and how to turn it on instead of
+  disappearing (ADR 0027).
+- `reply_to_conversation` is now `reply_message`.
+
+### Fixed
+
+- `find_recipients` promised a `send_message` that read-only connections could not see.
+
 ## 3.1.0 (2026-11-18)
 
 ### Added

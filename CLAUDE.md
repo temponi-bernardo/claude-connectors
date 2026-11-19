@@ -36,22 +36,23 @@ previous session left is in `docs/STATE.md` (injected at session start).
 
 ## Commands
 
-| Command                              | Does                                                                                  |
-| ------------------------------------ | ------------------------------------------------------------------------------------- |
-| `npm run check`                      | Format, lint, types, tests, docs, duplication and secrets                             |
-| `npm run pr:check -- "<title>"`      | PR gate (there is no CI): check, build, packages and commitlint                       |
-| `npm run docs:generate`              | Updates the generated blocks of `docs/FUNCTIONS.md` and creates new sections          |
-| `npm run docs:check`                 | Fails if docs and code diverge                                                        |
-| `npm test` / `npm run test:coverage` | Tests / with a 90% minimum coverage                                                   |
-| `npm run lint` / `npm run lint:fix`  | ESLint                                                                                |
-| `npm run format:fix`                 | Prettier                                                                              |
-| `npm run typecheck`                  | `tsc --noEmit`                                                                        |
-| `npm run dup:check`                  | jscpd                                                                                 |
-| `npm run build`                      | Validates `.mcp.json` (remote only) and generates each connector's `server/remote.js` |
-| `npm run worker:deploy`              | Deploys the remote Canvas to Cloudflare Workers (`worker:dev`: local)                 |
-| `npm run gmail:deploy`               | Deploys the remote Gmail to Cloudflare Workers (`gmail:dev`: local)                   |
-| `npm run whatsapp:deploy`            | Deploys WhatsApp (Workers + Containers); `whatsapp:build`: bundle and image only      |
-| `npm run bridge:test`                | WhatsApp Go bridge: gofmt, vet and tests (Go 1.26+, part of `pr:check`)               |
+| Command                              | Does                                                                                       |
+| ------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `npm run check`                      | Format, lint, types, tests, docs, duplication and secrets                                  |
+| `npm run pr:check -- "<title>"`      | PR gate (there is no CI): check, build, packages and commitlint                            |
+| `npm run docs:generate`              | Updates the generated blocks of `docs/FUNCTIONS.md` and creates new sections               |
+| `npm run docs:check`                 | Fails if docs and code diverge                                                             |
+| `npm test` / `npm run test:coverage` | Tests / with a 90% minimum coverage                                                        |
+| `npm run lint` / `npm run lint:fix`  | ESLint                                                                                     |
+| `npm run format:fix`                 | Prettier                                                                                   |
+| `npm run typecheck`                  | `tsc --noEmit`                                                                             |
+| `npm run dup:check`                  | jscpd                                                                                      |
+| `npm run build`                      | Validates `.mcp.json` (remote only) and generates each connector's `server/remote.js`      |
+| `npm run worker:deploy`              | Deploys the remote Canvas to Cloudflare Workers, then the smoke test (`worker:dev`: local) |
+| `npm run smoke -- <connector>`       | Post-deploy smoke: published `GET /tools` must equal `tool-contract.json` (ADR 0027)       |
+| `npm run gmail:deploy`               | Deploys the remote Gmail to Cloudflare Workers (`gmail:dev`: local)                        |
+| `npm run whatsapp:deploy`            | Deploys WhatsApp (Workers + Containers); `whatsapp:build`: bundle and image only           |
+| `npm run bridge:test`                | WhatsApp Go bridge: gofmt, vet and tests (Go 1.26+, part of `pr:check`)                    |
 
 ## Skills
 

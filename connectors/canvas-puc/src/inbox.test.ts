@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { CanvasConversation } from './canvas-types.js';
 import {
+  attachmentIdsField,
+  replyPayload,
   conversationNames,
   newMessagePayload,
   participantName,
@@ -161,5 +163,20 @@ describe('participantName', () => {
     expect(participantName({ id: 1, name: 'A', full_name: 'A B' })).toBe('A B');
     expect(participantName({ id: 1, name: 'A' })).toBe('A');
     expect(participantName({ id: 1 })).toBeUndefined();
+  });
+});
+
+describe('attachmentIdsField and replyPayload', () => {
+  it('adds attachment_ids as strings only when there are attachments', () => {
+    expect(attachmentIdsField(undefined)).toEqual({});
+    expect(attachmentIdsField([])).toEqual({});
+    expect(attachmentIdsField([1, '2'])).toEqual({ attachment_ids: ['1', '2'] });
+    expect(replyPayload('Hi', [3])).toEqual({ body: 'Hi', attachment_ids: ['3'] });
+    expect(replyPayload('Hi', undefined)).toEqual({ body: 'Hi' });
+  });
+
+  it('newMessagePayload carries the attachment ids', () => {
+    const msg = { recipients: [5], subject: 'S', body: 'B', attachment_ids: [7] };
+    expect(newMessagePayload(msg)).toMatchObject({ attachment_ids: ['7'] });
   });
 });

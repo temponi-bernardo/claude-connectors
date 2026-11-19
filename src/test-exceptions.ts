@@ -34,6 +34,27 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
       'Run `npm run build` and check that `server/remote.js` was regenerated and that a .mcp.json with "command" makes the build fail.',
   },
   {
+    name: 'sleepMs',
+    reason:
+      'Smoke CLI helper that only wraps setTimeout; the retry logic that uses it is tested with a fake sleep.',
+    manualTest:
+      'Run `npm run smoke -- canvas-puc` right after a deploy and watch it retry while it propagates.',
+  },
+  {
+    name: 'readSmokeCheck',
+    reason:
+      'Smoke CLI glue: reads files and environment variables and calls the tested smoke.ts functions.',
+    manualTest:
+      'Run `npm run smoke -- canvas-puc` and `SMOKE_URL=https://x npm run smoke -- gmail`; both resolve the address shown.',
+  },
+  {
+    name: 'runSmokeCli',
+    reason:
+      'Smoke CLI entry point: reads the files and the environment and calls the tested smoke.ts functions against the live Worker.',
+    manualTest:
+      'After a deploy run `npm run smoke -- canvas-puc`: it prints "✔ smoke canvas-puc"; edit tool-contract.json and it exits 1 listing the difference.',
+  },
+  {
     name: 'runBuildCli',
     reason: 'Build CLI entry point: it only lists the connectors and calls buildConnector.',
     manualTest: 'Run `npm run build` and check for one "✔ <connector>" line per connector.',

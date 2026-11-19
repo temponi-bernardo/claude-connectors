@@ -14294,6 +14294,17 @@ function mcpUnauthorizedResponse(issuer) {
     }
   });
 }
+var TOOL_CATALOG_PATH = "/tools";
+function toolsListRequest(origin) {
+  return new Request(`${origin}/mcp`, {
+    method: "POST",
+    headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" })
+  });
+}
+function serveToolCatalog(server, origin) {
+  return serveMcpRequest(server, toolsListRequest(origin));
+}
 
 // src/core/bytes.ts
 function byteView(bytes) {
@@ -18912,7 +18923,8 @@ function handleMcp(app, request) {
 }
 async function serveMcpWithStreaming(connector, grant, request) {
   const streamed = await streamToolQuietly(connector, grant.secret, request);
-  return streamed ?? serveMcpRequest(connector.createServer(grant.secret, grant.grants), request);
+  if (streamed) return streamed;
+  return serveMcpRequest(await connector.createServer(grant.secret, grant.grants), request);
 }
 async function streamToolQuietly(connector, secret, request) {
   if (!connector.streamTool) return null;
@@ -18938,8 +18950,17 @@ var REMOTE_ROUTES = {
   [`GET ${UPSTREAM_CALLBACK_PATH}`]: handleUpstreamCallback,
   "GET /mcp": handleMcp,
   "POST /mcp": handleMcp,
-  "DELETE /mcp": handleMcp
+  "DELETE /mcp": handleMcp,
+  [`GET ${TOOL_CATALOG_PATH}`]: handleToolCatalog
 };
+function handleToolCatalog(app, request) {
+  const catalog = app.connector.catalogServer;
+  if (!catalog) return Promise.resolve(new Response("Not found", { status: 404 }));
+  return serveToolCatalog(catalog(), new URL(request.url).origin);
+}
+function connectorPage(app, key) {
+  return app.connector.pages?.[key];
+}
 function withCors(response) {
   for (const [name, value] of Object.entries(CORS_HEADERS)) response.headers.set(name, value);
   return response;
@@ -18954,7 +18975,10 @@ async function routeRemoteRequest(app, request) {
     const preflight = new Response(null, { status: 204 });
     return allowsCors(path) ? withCors(preflight) : preflight;
   }
-  const route = REMOTE_ROUTES[`${request.method} ${path}`];
+  const key = `${request.method} ${path}`;
+  const route = REMOTE_ROUTES[key];
+  const page = route ? void 0 : connectorPage(app, key);
+  if (page) return page(request);
   if (!route) return new Response("Not found", { status: 404 });
   const response = await route(app, request);
   return allowsCors(path) ? withCors(response) : response;
@@ -26763,8 +26787,37 @@ function manifestVersion(manifest) {
   return typeof version2 === "string" && version2 !== "" ? version2 : FALLBACK_SERVER_VERSION;
 }
 
+// src/mcp/tool-gate.ts
+var UNAVAILABLE_TOOL_NOTE = "UNAVAILABLE on this connection:";
+function unavailableToolMessage(name, reason) {
+  return `${name} is unavailable on this connection: ${reason}`;
+}
+function disabledToolSpec(spec, reason) {
+  const text = unavailableToolMessage(spec.name, reason);
+  return {
+    ...spec,
+    description: `${spec.description} ${UNAVAILABLE_TOOL_NOTE} ${reason}`,
+    run: () => Promise.resolve(rawToolResult({ isError: true, content: [{ type: "text", text }] }))
+  };
+}
+function gateToolSpecs(specs, reason) {
+  return reason === null ? [...specs] : specs.map((spec) => disabledToolSpec(spec, reason));
+}
+function refuseListOnlyUse() {
+  throw new Error("This server only lists its tools; it cannot run them.");
+}
+function listOnlyContext() {
+  return new Proxy({}, { get: refuseListOnlyUse });
+}
+
 // connectors/canvas-puc/src/inbox.ts
 var CONVERSATION_PREVIEW_LENGTH = 300;
+function attachmentIdsField(ids) {
+  return ids?.length ? { attachment_ids: ids.map(String) } : {};
+}
+function replyPayload(body, ids) {
+  return { body, ...attachmentIdsField(ids) };
+}
 function toRecipient(r) {
   const roles = new Set(Object.values(r.common_courses ?? {}).flat());
   return { id: r.id, name: r.full_name ?? r.name, roles: [...roles] };
@@ -26811,7 +26864,8 @@ function newMessagePayload(msg) {
     body: msg.body,
     force_new: true,
     group_conversation: true,
-    ...msg.course_id !== void 0 ? { context_code: `course_${String(msg.course_id)}` } : {}
+    ...msg.course_id !== void 0 ? { context_code: `course_${String(msg.course_id)}` } : {},
+    ...attachmentIdsField(msg.attachment_ids)
   };
 }
 function sentConversation(created) {
@@ -26829,12 +26883,201 @@ function sentReply(c) {
   };
 }
 
+// connectors/canvas-puc/src/upload.ts
+var MAX_UPLOAD_MB = 5;
+var MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
+var CONTENT_TYPES = {
+  txt: "text/plain",
+  md: "text/markdown",
+  csv: "text/csv",
+  html: "text/html",
+  json: "application/json",
+  pdf: "application/pdf",
+  zip: "application/zip",
+  png: "image/png",
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+};
+function decodeUploadContent(content, encoding) {
+  if (encoding === "text") return new TextEncoder().encode(content);
+  const clean = content.replace(/\s+/g, "");
+  if (clean.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(clean)) {
+    throw new Error('The content is not valid base64; send text files with encoding "text".');
+  }
+  return Uint8Array.from(atob(clean), (c) => c.charCodeAt(0));
+}
+function fileExtension(name) {
+  const dot = name.lastIndexOf(".");
+  return dot > 0 ? name.slice(dot + 1).toLowerCase() : "";
+}
+function uploadContentType(name) {
+  return CONTENT_TYPES[fileExtension(name)] ?? "application/octet-stream";
+}
+function extensionRefusal(allowed, name) {
+  if (!allowed?.length) return null;
+  const ext = fileExtension(name);
+  if (allowed.some((a) => a.toLowerCase() === ext)) return null;
+  const which = ext ? `".${ext}"` : "no extension";
+  return `"${name}" has ${which}; the assignment only accepts: ${allowed.join(", ")}.`;
+}
+function uploadSizeRefusal(size) {
+  if (size === 0) return "The file is empty.";
+  if (size <= MAX_UPLOAD_BYTES) return null;
+  const mb = (size / 1024 / 1024).toFixed(1);
+  return `The file is ${mb} MB, above the ${MAX_UPLOAD_MB} MB limit; upload it in Canvas itself.`;
+}
+function uploadRefusal(assignment, name, size) {
+  const types = assignment.submission_types ?? [];
+  if (!types.includes("online_upload")) {
+    const label = assignment.name ?? String(assignment.id);
+    return `"${label}" does not accept file uploads (accepts: ${types.join(", ") || "none"}).`;
+  }
+  return extensionRefusal(assignment.allowed_extensions, name) ?? uploadSizeRefusal(size);
+}
+function onlineUploadPayload(fileIds) {
+  return { submission: { submission_type: "online_upload", file_ids: fileIds } };
+}
+function uploadedFileFromArgs(args) {
+  const name = args.file_name.trim();
+  const bytes = decodeUploadContent(args.content, args.encoding);
+  return { name, bytes, contentType: args.content_type ?? uploadContentType(name) };
+}
+async function uploadCanvasFile(client, request) {
+  const { file } = request;
+  const slot = await client.post(request.path, {
+    name: file.name,
+    size: file.bytes.length,
+    content_type: file.contentType,
+    ...request.extra
+  });
+  return client.upload(slot, file);
+}
+async function submitFileAssignment(client, base, file) {
+  const assignment = await client.get(base);
+  const refusal = uploadRefusal(assignment, file.name, file.bytes.length);
+  if (refusal !== null) throw new Error(refusal);
+  const uploaded = await uploadCanvasFile(client, { path: `${base}/submissions/self/files`, file });
+  const fileIds = [uploaded.id ?? ""];
+  const s = await client.post(
+    `${base}/submissions`,
+    onlineUploadPayload(fileIds)
+  );
+  const summary = { id: uploaded.id, name: uploaded.display_name, size: uploaded.size };
+  return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt, file: summary };
+}
+
+// connectors/canvas-puc/src/message-attachments.ts
+var MAX_MESSAGE_ATTACHMENTS = 5;
+var CONVERSATION_ATTACHMENTS_FOLDER = "conversation attachments";
+var USER_FILES_PATH = "/users/self/files";
+function attachmentsRefusal(files) {
+  for (const file of files) {
+    const refusal = uploadSizeRefusal(file.bytes.length);
+    if (refusal !== null) return `Attachment "${file.name}": ${refusal} Nothing was sent.`;
+  }
+  return null;
+}
+function prepareAttachments(list) {
+  const files = (list ?? []).map(uploadedFileFromArgs);
+  const refusal = attachmentsRefusal(files);
+  if (refusal !== null) throw new Error(refusal);
+  return files;
+}
+function attachmentUploadError(name, error2) {
+  return new Error(
+    `Could not upload attachment "${name}" (${errorMessage(error2)}). Nothing was sent.`
+  );
+}
+async function uploadMessageAttachment(client, file) {
+  const extra = { parent_folder_path: CONVERSATION_ATTACHMENTS_FOLDER, on_duplicate: "rename" };
+  try {
+    return await uploadCanvasFile(client, { path: USER_FILES_PATH, file, extra });
+  } catch (error2) {
+    throw attachmentUploadError(file.name, error2);
+  }
+}
+async function uploadMessageAttachments(client, files) {
+  const uploaded = [];
+  for (const file of files) uploaded.push(await uploadMessageAttachment(client, file));
+  return uploaded;
+}
+function attachmentIds(uploaded) {
+  return uploaded.map((file) => file.id ?? "").filter((id4) => id4 !== "");
+}
+function attachmentSummary(uploaded) {
+  return uploaded.map((f) => ({ id: f.id, name: f.display_name, size: f.size }));
+}
+var ATTACHMENTS_LIMIT_TEXT = `up to ${String(MAX_MESSAGE_ATTACHMENTS)} files of at most ${String(MAX_UPLOAD_MB)} MB each`;
+
+// connectors/canvas-puc/src/tools-write.ts
+var id2 = external_exports.union([external_exports.string(), external_exports.number()]);
+var FILE_FIELDS = {
+  file_name: external_exports.string().trim().min(1).max(255).describe("Name with extension, e.g. report.txt"),
+  content: external_exports.string().min(1).describe('File content: text, or base64 with encoding "base64"'),
+  encoding: external_exports.enum(["text", "base64"]).default("text"),
+  content_type: external_exports.string().min(1).optional().describe("MIME type; guessed from the extension")
+};
+function submissionPayload(kind, content) {
+  return kind === "text" ? { submission: { submission_type: "online_text_entry", body: content } } : { submission: { submission_type: "online_url", url: content } };
+}
+var CANVAS_WRITE_TOOLS = [
+  defineTool({
+    name: "submit_text_assignment",
+    description: "SUBMITS a text or link entry to an assignment. Real action, visible to the teacher: confirm with the user first.",
+    shape: {
+      course_id: id2,
+      assignment_id: id2,
+      type: external_exports.enum(["text", "url"]),
+      content: external_exports.string().min(1).describe("Text (HTML allowed) or the URL")
+    },
+    annotations: toolAnnotations("Submit text assignment", SEND_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}/submissions`;
+      const s = await client.post(
+        path,
+        submissionPayload(args.type, args.content)
+      );
+      return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt };
+    }
+  }),
+  defineTool({
+    name: "submit_file_assignment",
+    description: `SUBMITS a file to an assignment that accepts uploads (online_upload). Real action, visible to the teacher: show the file name and content and confirm with the user first. Pass the file in content: plain text with encoding "text" (e.g. a .txt report), or base64 with encoding "base64". At most ${MAX_UPLOAD_MB} MB; the extension must be in the assignment's allowed_extensions.`,
+    shape: {
+      course_id: id2,
+      assignment_id: id2,
+      ...FILE_FIELDS
+    },
+    annotations: toolAnnotations("Submit file assignment", SEND_HINTS),
+    run: ({ client }, args) => {
+      const base = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
+      return submitFileAssignment(client, base, uploadedFileFromArgs(args));
+    }
+  }),
+  defineTool({
+    name: "reply_to_discussion",
+    description: "POSTS a reply to a discussion forum. Real action, visible to the class: confirm with the user first.",
+    shape: { course_id: id2, topic_id: id2, message: external_exports.string().min(1) },
+    annotations: toolAnnotations("Reply to discussion", SEND_HINTS),
+    run: async ({ client }, args) => {
+      const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}/entries`;
+      const entry = await client.post(path, {
+        message: args.message
+      });
+      return { ok: true, id: entry.id, created_at: entry.created_at };
+    }
+  })
+];
+
 // connectors/canvas-puc/src/tools-inbox.ts
 var MAX_MESSAGE_RECIPIENTS = 20;
-var id2 = external_exports.union([external_exports.string(), external_exports.number()]);
+var id3 = external_exports.union([external_exports.string(), external_exports.number()]);
 var userId = external_exports.union([external_exports.number().int().positive(), external_exports.string().regex(/^\d+$/)]);
-var courseId2 = id2.describe("Course ID (see list_courses)");
-var conversationId = id2.describe("Conversation ID (see list_conversations)");
+var courseId2 = id3.describe("Course ID (see list_courses)");
+var conversationId = id3.describe("Conversation ID (see list_conversations)");
 var CANVAS_INBOX_READ_TOOLS = [
   defineTool({
     name: "find_recipients",
@@ -26881,176 +27124,53 @@ var CANVAS_INBOX_READ_TOOLS = [
     }
   })
 ];
+var attachment = external_exports.object(FILE_FIELDS);
+var attachments = external_exports.array(attachment).max(MAX_MESSAGE_ATTACHMENTS).optional().describe(`Files to attach, ${ATTACHMENTS_LIMIT_TEXT}; binaries in base64`);
+async function sendInboxMessage(client, args) {
+  const files = prepareAttachments(args.attachments);
+  const uploaded = await uploadMessageAttachments(client, files);
+  const payload = newMessagePayload({
+    recipients: args.recipient_ids,
+    subject: args.subject,
+    body: args.body,
+    course_id: args.course_id,
+    attachment_ids: attachmentIds(uploaded)
+  });
+  const created = await client.post("/conversations", payload);
+  return { ...sentConversation(created), attachments: attachmentSummary(uploaded) };
+}
+async function replyInboxMessage(client, args) {
+  const files = prepareAttachments(args.attachments);
+  const uploaded = await uploadMessageAttachments(client, files);
+  const path = `/conversations/${String(args.conversation_id)}/add_message`;
+  const payload = replyPayload(args.body, attachmentIds(uploaded));
+  const reply = await client.post(path, payload);
+  return { ...sentReply(reply), attachments: attachmentSummary(uploaded) };
+}
 var CANVAS_INBOX_WRITE_TOOLS = [
   defineTool({
     name: "send_message",
-    description: "SENDS a new Canvas inbox message to people (e.g. a teacher). Get user IDs with find_recipients. Real action, visible to the recipients: show the exact recipients, subject and text and confirm with the user first.",
+    description: `SENDS a new Canvas inbox message to people (e.g. a teacher), optionally with attachments (${ATTACHMENTS_LIMIT_TEXT}). Get user IDs with find_recipients. Real action, visible to the recipients: show the exact recipients, subject, text and file names and confirm with the user first.`,
     shape: {
       recipient_ids: external_exports.array(userId).min(1).max(MAX_MESSAGE_RECIPIENTS).describe("User IDs"),
       subject: external_exports.string().min(1).max(255),
       body: external_exports.string().min(1).describe("Plain text"),
-      course_id: courseId2.optional().describe("Course the message is about")
+      course_id: courseId2.optional().describe("Course the message is about"),
+      attachments
     },
     annotations: toolAnnotations("Send message", SEND_HINTS),
-    run: async ({ client }, args) => {
-      const payload = newMessagePayload({
-        recipients: args.recipient_ids,
-        subject: args.subject,
-        body: args.body,
-        course_id: args.course_id
-      });
-      return sentConversation(
-        await client.post("/conversations", payload)
-      );
-    }
+    run: ({ client }, args) => sendInboxMessage(client, args)
   }),
   defineTool({
-    name: "reply_to_conversation",
-    description: "SENDS a reply in an existing Canvas inbox conversation, to all its participants. Real action: show the text and confirm with the user first.",
-    shape: { conversation_id: conversationId, body: external_exports.string().min(1).describe("Plain text") },
-    annotations: toolAnnotations("Reply to conversation", SEND_HINTS),
-    run: async ({ client }, args) => {
-      const path = `/conversations/${String(args.conversation_id)}/add_message`;
-      return sentReply(await client.post(path, { body: args.body }));
-    }
-  })
-];
-
-// connectors/canvas-puc/src/upload.ts
-var MAX_UPLOAD_MB = 5;
-var MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;
-var CONTENT_TYPES = {
-  txt: "text/plain",
-  md: "text/markdown",
-  csv: "text/csv",
-  html: "text/html",
-  json: "application/json",
-  pdf: "application/pdf",
-  zip: "application/zip",
-  png: "image/png",
-  jpg: "image/jpeg",
-  jpeg: "image/jpeg",
-  docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  pptx: "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-};
-function decodeUploadContent(content, encoding) {
-  if (encoding === "text") return new TextEncoder().encode(content);
-  const clean = content.replace(/\s+/g, "");
-  if (clean.length % 4 !== 0 || !/^[A-Za-z0-9+/]*={0,2}$/.test(clean)) {
-    throw new Error('The content is not valid base64; send text files with encoding "text".');
-  }
-  return Uint8Array.from(atob(clean), (c) => c.charCodeAt(0));
-}
-function fileExtension(name) {
-  const dot = name.lastIndexOf(".");
-  return dot > 0 ? name.slice(dot + 1).toLowerCase() : "";
-}
-function uploadContentType(name) {
-  return CONTENT_TYPES[fileExtension(name)] ?? "application/octet-stream";
-}
-function extensionRefusal(allowed, name) {
-  if (!allowed?.length) return null;
-  const ext = fileExtension(name);
-  if (allowed.some((a) => a.toLowerCase() === ext)) return null;
-  const which = ext ? `".${ext}"` : "no extension";
-  return `"${name}" has ${which}; the assignment only accepts: ${allowed.join(", ")}.`;
-}
-function uploadSizeRefusal(size) {
-  if (size === 0) return "The file is empty.";
-  if (size <= MAX_UPLOAD_BYTES) return null;
-  const mb = (size / 1024 / 1024).toFixed(1);
-  return `The file is ${mb} MB, above the ${MAX_UPLOAD_MB} MB limit; submit it in Canvas itself.`;
-}
-function uploadRefusal(assignment, name, size) {
-  const types = assignment.submission_types ?? [];
-  if (!types.includes("online_upload")) {
-    const label = assignment.name ?? String(assignment.id);
-    return `"${label}" does not accept file uploads (accepts: ${types.join(", ") || "none"}).`;
-  }
-  return extensionRefusal(assignment.allowed_extensions, name) ?? uploadSizeRefusal(size);
-}
-function onlineUploadPayload(fileIds) {
-  return { submission: { submission_type: "online_upload", file_ids: fileIds } };
-}
-function uploadedFileFromArgs(args) {
-  const name = args.file_name.trim();
-  const bytes = decodeUploadContent(args.content, args.encoding);
-  return { name, bytes, contentType: args.content_type ?? uploadContentType(name) };
-}
-async function submitFileAssignment(client, base, file) {
-  const assignment = await client.get(base);
-  const refusal = uploadRefusal(assignment, file.name, file.bytes.length);
-  if (refusal !== null) throw new Error(refusal);
-  const slot = await client.post(`${base}/submissions/self/files`, {
-    name: file.name,
-    size: file.bytes.length,
-    content_type: file.contentType
-  });
-  const uploaded = await client.upload(slot, file);
-  const fileIds = [uploaded.id ?? ""];
-  const s = await client.post(
-    `${base}/submissions`,
-    onlineUploadPayload(fileIds)
-  );
-  const summary = { id: uploaded.id, name: uploaded.display_name, size: uploaded.size };
-  return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt, file: summary };
-}
-
-// connectors/canvas-puc/src/tools-write.ts
-var id3 = external_exports.union([external_exports.string(), external_exports.number()]);
-function submissionPayload(kind, content) {
-  return kind === "text" ? { submission: { submission_type: "online_text_entry", body: content } } : { submission: { submission_type: "online_url", url: content } };
-}
-var CANVAS_WRITE_TOOLS = [
-  defineTool({
-    name: "submit_text_assignment",
-    description: "SUBMITS a text or link entry to an assignment. Real action, visible to the teacher: confirm with the user first.",
+    name: "reply_message",
+    description: `SENDS a reply in an existing Canvas inbox conversation, to all its participants, optionally with attachments (${ATTACHMENTS_LIMIT_TEXT}). Real action: show the text and file names and confirm with the user first.`,
     shape: {
-      course_id: id3,
-      assignment_id: id3,
-      type: external_exports.enum(["text", "url"]),
-      content: external_exports.string().min(1).describe("Text (HTML allowed) or the URL")
+      conversation_id: conversationId,
+      body: external_exports.string().min(1).describe("Plain text"),
+      attachments
     },
-    annotations: toolAnnotations("Submit text assignment", SEND_HINTS),
-    run: async ({ client }, args) => {
-      const path = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}/submissions`;
-      const s = await client.post(
-        path,
-        submissionPayload(args.type, args.content)
-      );
-      return { ok: true, submitted_at: s.submitted_at, attempt: s.attempt };
-    }
-  }),
-  defineTool({
-    name: "submit_file_assignment",
-    description: `SUBMITS a file to an assignment that accepts uploads (online_upload). Real action, visible to the teacher: show the file name and content and confirm with the user first. Pass the file in content: plain text with encoding "text" (e.g. a .txt report), or base64 with encoding "base64". At most ${MAX_UPLOAD_MB} MB; the extension must be in the assignment's allowed_extensions.`,
-    shape: {
-      course_id: id3,
-      assignment_id: id3,
-      file_name: external_exports.string().trim().min(1).max(255).describe("Name with extension, e.g. report.txt"),
-      content: external_exports.string().min(1).describe('File content: text, or base64 with encoding "base64"'),
-      encoding: external_exports.enum(["text", "base64"]).default("text"),
-      content_type: external_exports.string().min(1).optional().describe("MIME type; guessed from the extension")
-    },
-    annotations: toolAnnotations("Submit file assignment", SEND_HINTS),
-    run: ({ client }, args) => {
-      const base = `/courses/${String(args.course_id)}/assignments/${String(args.assignment_id)}`;
-      return submitFileAssignment(client, base, uploadedFileFromArgs(args));
-    }
-  }),
-  defineTool({
-    name: "reply_to_discussion",
-    description: "POSTS a reply to a discussion forum. Real action, visible to the class: confirm with the user first.",
-    shape: { course_id: id3, topic_id: id3, message: external_exports.string().min(1) },
-    annotations: toolAnnotations("Reply to discussion", SEND_HINTS),
-    run: async ({ client }, args) => {
-      const path = `/courses/${String(args.course_id)}/discussion_topics/${String(args.topic_id)}/entries`;
-      const entry = await client.post(path, {
-        message: args.message
-      });
-      return { ok: true, id: entry.id, created_at: entry.created_at };
-    }
+    annotations: toolAnnotations("Reply message", SEND_HINTS),
+    run: ({ client }, args) => replyInboxMessage(client, args)
   })
 ];
 
@@ -27075,14 +27195,92 @@ var CANVAS_SERVER_INFO = {
   name: "canvas-puc",
   version: manifestVersion(plugin_default)
 };
-function canvasTools(allowWrite) {
-  const reads = [...CANVAS_READ_TOOLS, ...CANVAS_INBOX_READ_TOOLS];
-  return [...reads, ...allowWrite ? [...CANVAS_WRITE_TOOLS, ...CANVAS_INBOX_WRITE_TOOLS] : []];
+function canvasTools(writeBlock) {
+  const writes = gateToolSpecs([...CANVAS_WRITE_TOOLS, ...CANVAS_INBOX_WRITE_TOOLS], writeBlock);
+  return [...CANVAS_READ_TOOLS, ...CANVAS_INBOX_READ_TOOLS, ...writes];
 }
 function createCanvasMcpServer(specs, ctx) {
   const server = new McpServer({ ...CANVAS_SERVER_INFO });
   registerToolSpecs(server, specs, ctx);
   return server;
+}
+
+// connectors/canvas-puc/src/write-access.ts
+import { createHash as createHash2 } from "node:crypto";
+var WRITE_ACCESS_PATH = "/write-access";
+var WRITE_TICKET_TYP = "canvas-write-access";
+var WRITE_TICKET_TTL_SECONDS = 15 * 60;
+function tokenFingerprint(token) {
+  return createHash2("sha256").update(token, "utf8").digest("hex");
+}
+function writeAccessKey(fingerprint) {
+  return `write:${fingerprint}`;
+}
+async function hasStoredWriteOptIn(store, token) {
+  try {
+    return await store.get(writeAccessKey(tokenFingerprint(token))) === "on";
+  } catch {
+    return false;
+  }
+}
+function writeAccessUrl(deps, token) {
+  const claims = {
+    typ: WRITE_TICKET_TYP,
+    aud: deps.oauth.issuer,
+    exp: deps.now() + WRITE_TICKET_TTL_SECONDS,
+    fp: tokenFingerprint(token)
+  };
+  return `${deps.oauth.issuer}${WRITE_ACCESS_PATH}?t=${sealPayload(claims, deps.oauth.key)}`;
+}
+function openWriteTicket(deps, ticket) {
+  const expected = { typ: WRITE_TICKET_TYP, now: deps.now(), aud: deps.oauth.issuer };
+  const claims = openSealed(ticket, deps.oauth.key, expected);
+  return typeof claims?.fp === "string" ? claims.fp : null;
+}
+function renderWriteAccessPage(ticket, enabled) {
+  const state = enabled ? "on" : "off";
+  const action = enabled ? "off" : "on";
+  const button = enabled ? "Turn writing off" : "Allow writing";
+  const next = enabled ? " Go back to Claude and ask again (it applies within a minute)." : "";
+  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Canvas writing</title><style>${LOGIN_PAGE_CSS}</style></head><body><main>
+<h1>Canvas writing</h1>
+<p>Writing is <strong>${state}</strong> for this Canvas connection. With it on, Claude can send inbox messages, reply to discussions and submit assignments on your behalf, and it always asks before each action. No new token is needed.${next}</p>
+<form method="post" action="${WRITE_ACCESS_PATH}">
+<input type="hidden" name="t" value="${escapeHtml(ticket)}">
+<input type="hidden" name="action" value="${action}">
+<button type="submit">${button}</button>
+</form></main></body></html>`;
+}
+function expiredWriteAccessPage() {
+  return htmlResponse(
+    "<p>This link expired. Ask Claude again to send the message: it will give you a new link.</p>",
+    400
+  );
+}
+async function showWriteAccess(deps, request) {
+  const ticket = new URL(request.url).searchParams.get("t") ?? "";
+  const fingerprint = openWriteTicket(deps, ticket);
+  if (fingerprint === null) return expiredWriteAccessPage();
+  const enabled = await deps.store.get(writeAccessKey(fingerprint)) === "on";
+  return htmlResponse(renderWriteAccessPage(ticket, enabled));
+}
+async function submitWriteAccess(deps, request) {
+  const form = await readForm(request);
+  const ticket = form.get("t") ?? "";
+  const fingerprint = openWriteTicket(deps, ticket);
+  if (fingerprint === null) return expiredWriteAccessPage();
+  const key = writeAccessKey(fingerprint);
+  const enable = form.get("action") === "on";
+  await (enable ? deps.store.put(key, "on") : deps.store.delete(key));
+  return htmlResponse(renderWriteAccessPage(ticket, enable));
+}
+function memoryWriteAccessStore() {
+  const items = /* @__PURE__ */ new Map();
+  return {
+    get: (key) => Promise.resolve(items.get(key) ?? null),
+    put: (key, value) => Promise.resolve(void items.set(key, value)),
+    delete: (key) => Promise.resolve(void items.delete(key))
+  };
 }
 
 // connectors/canvas-puc/src/remote.ts
@@ -27185,8 +27383,18 @@ async function renewCanvasSecret(settings, token, now) {
   await renewCanvasToken(settings, token, now);
   return "kept";
 }
-function canWriteFor(settings, grants) {
-  return settings.allowWrite && grants.includes(CANVAS_WRITE_GRANT);
+var CANVAS_WRITE_OFF_REASON = "writing is turned off on this server (CANVAS_ALLOW_WRITE). Do it in Canvas itself.";
+function readOnlyConnectionReason(link) {
+  return `this Canvas connection is read-only. Ask the user to open ${link} and click "Allow writing" (no new Canvas token needed; it applies within a minute), then try again.`;
+}
+async function userAllowsWrite(access, grant) {
+  if (grant.grants.includes(CANVAS_WRITE_GRANT)) return true;
+  return hasStoredWriteOptIn(access.store, grant.secret);
+}
+async function canvasWriteBlock(settings, access, grant) {
+  if (!settings.allowWrite) return CANVAS_WRITE_OFF_REASON;
+  if (await userAllowsWrite(access, grant)) return null;
+  return readOnlyConnectionReason(writeAccessUrl(access, grant.secret));
 }
 function canvasClientFor(settings, token) {
   return createCanvasClient({ baseUrl: settings.baseUrl, token, fetchFn: settings.fetchFn });
@@ -27196,7 +27404,14 @@ async function streamCanvasTool(client, call) {
   const args = external_exports.object(downloadFileShape).parse(call.args);
   return streamCanvasFile(client, await resolveCanvasFile(client, args), args);
 }
-function canvasRemoteConnector(settings) {
+async function createCanvasUserServer(settings, access, grant) {
+  const block = await canvasWriteBlock(settings, access, grant);
+  return createCanvasMcpServer(canvasTools(block), {
+    client: canvasClientFor(settings, grant.secret),
+    now: () => /* @__PURE__ */ new Date()
+  });
+}
+function canvasRemoteConnector(settings, access) {
   return {
     login: {
       kind: "secret",
@@ -27204,21 +27419,28 @@ function canvasRemoteConnector(settings) {
       verify: (secret) => verifyCanvasToken(settings, secret)
     },
     renewSecret: (secret) => renewCanvasSecret(settings, secret, /* @__PURE__ */ new Date()),
-    createServer: (secret, grants) => createCanvasMcpServer(canvasTools(canWriteFor(settings, grants)), {
-      client: canvasClientFor(settings, secret),
-      now: () => /* @__PURE__ */ new Date()
-    }),
-    streamTool: (secret, call) => streamCanvasTool(canvasClientFor(settings, secret), call)
+    createServer: (secret, grants) => createCanvasUserServer(settings, access, { secret, grants }),
+    catalogServer: () => createCanvasMcpServer(canvasTools(null), listOnlyContext()),
+    streamTool: (secret, call) => streamCanvasTool(canvasClientFor(settings, secret), call),
+    pages: {
+      [`GET ${WRITE_ACCESS_PATH}`]: (request) => showWriteAccess(access, request),
+      [`POST ${WRITE_ACCESS_PATH}`]: (request) => submitWriteAccess(access, request)
+    }
   };
 }
 
 // connectors/canvas-puc/src/remote-main.ts
 function startCanvasRemoteServer() {
   const config2 = readRemoteServerConfig(process.env);
+  const access = {
+    oauth: config2.settings,
+    store: memoryWriteAccessStore(),
+    now: () => Math.floor(Date.now() / 1e3)
+  };
   const handler = createRemoteHandler({
     settings: config2.settings,
-    connector: canvasRemoteConnector(readCanvasRemoteSettings(process.env)),
-    now: () => Math.floor(Date.now() / 1e3)
+    connector: canvasRemoteConnector(readCanvasRemoteSettings(process.env), access),
+    now: access.now
   });
   startRemoteHttpServer({ handler, origin: config2.settings.issuer, port: config2.port });
   console.log(`Remote Canvas at ${config2.settings.issuer}/mcp (port ${String(config2.port)})`);

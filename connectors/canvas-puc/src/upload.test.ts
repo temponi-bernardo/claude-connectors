@@ -11,6 +11,7 @@ import {
   uploadRefusal,
   uploadSizeRefusal,
   uploadedFileFromArgs,
+  uploadCanvasFile,
 } from './upload.js';
 
 describe('decodeUploadContent', () => {
@@ -142,5 +143,26 @@ describe('submitFileAssignment', () => {
     );
     expect(fake.post).not.toHaveBeenCalled();
     expect(fake.upload).not.toHaveBeenCalled();
+  });
+});
+
+describe('uploadCanvasFile', () => {
+  it('asks the slot with the file fields plus the extras, then uploads to it', async () => {
+    const fake = fakeContext({
+      '/users/self/files': { upload_url: 'https://up.test/1' },
+      'https://up.test/1': { id: 4 },
+    });
+    const file = { name: 'a.txt', bytes: new Uint8Array([1, 2]), contentType: 'text/plain' };
+    const extra = { parent_folder_path: 'conversation attachments' };
+    await expect(
+      uploadCanvasFile(fake.ctx.client, { path: '/users/self/files', file, extra }),
+    ).resolves.toEqual({ id: 4 });
+    expect(fake.post).toHaveBeenCalledWith('/users/self/files', {
+      name: 'a.txt',
+      size: 2,
+      content_type: 'text/plain',
+      parent_folder_path: 'conversation attachments',
+    });
+    expect(fake.upload.mock.calls[0]![1]).toBe(file);
   });
 });

@@ -74,10 +74,23 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
      with each offset and joins the parts. In remote mode this path only answers what P09 step 2 does not stream.
   6. Inbox: `find_recipients` maps `GET /search/recipients` with `toRecipient()`; `list_conversations` and
      `get_conversation` (read without marking as read) use `toConversationSummary()` and `toConversationDetail()`
-     (`conversationNames()`, `participantName()`, `toConversationMessage()`). With writes enabled, `send_message`
-     accepts only numeric user IDs (at most `MAX_MESSAGE_RECIPIENTS`), builds the body with `newMessagePayload()`
-     and answers with `sentConversation()`; `reply_to_conversation` posts to `add_message` and answers with
-     `sentReply()`.
+     (`conversationNames()`, `participantName()`, `toConversationMessage()`). With writing on, `send_message`
+     accepts only numeric user IDs (at most `MAX_MESSAGE_RECIPIENTS`) and calls `sendInboxMessage()`;
+     `reply_message` calls `replyInboxMessage()`. Both first run `prepareAttachments()` (`uploadedFileFromArgs()`,
+     `attachmentsRefusal()`: at most `MAX_MESSAGE_ATTACHMENTS` files of `MAX_UPLOAD_BYTES`), so a refusal comes
+     before any upload; then `uploadMessageAttachments()` sends each file through `uploadMessageAttachment()` →
+     `uploadCanvasFile()` (`POST /users/self/files` with `parent_folder_path` = `CONVERSATION_ATTACHMENTS_FOLDER`,
+     then the client's `upload`); a failed upload throws `attachmentUploadError()` and nothing is sent. The body
+     carries `attachmentIds()` via `newMessagePayload()` / `replyPayload()` (`attachmentIdsField()`), and the
+     answer (`sentConversation()` / `sentReply()`) adds `attachmentSummary()`. Message bodies and file contents
+     are never logged.
+     6b. Writing off (ADR 0027): `createCanvasUserServer()` asks `canvasWriteBlock()` — `CANVAS_WRITE_OFF_REASON` when
+     the server flag is off; null when `userAllowsWrite()` (sign-in `write` grant, or `hasStoredWriteOptIn()` in
+     `CANVAS_KV`); otherwise `readOnlyConnectionReason()` with `writeAccessUrl()`. `canvasTools()` passes the
+     reason to `gateToolSpecs()`: the write tools stay listed and `disabledToolSpec()` answers each call with
+     `unavailableToolMessage()`. The user opens the link: `showWriteAccess()` opens the ticket
+     (`openWriteTicket()`) and renders `renderWriteAccessPage()`; `submitWriteAccess()` stores or deletes
+     `writeAccessKey()` of the `tokenFingerprint()`; a bad ticket gets `expiredWriteAccessPage()`.
   7. File submission (ADR 0026, writes only): `submit_file_assignment` builds the file with `uploadedFileFromArgs()`
      (`decodeUploadContent()`, `uploadContentType()` over `fileExtension()`) and calls `submitFileAssignment()`. It
      reads the assignment and `uploadRefusal()` refuses, before any upload, an assignment without `online_upload`,
@@ -189,8 +202,11 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      `streamedToolResponse()` writes the JSON-RPC result from `streamedResultFrame()` around the body encoded by
      `base64EncodeStream()` (`splitBase64Ready()`) and framed by `framedStream()`, so no file ever sits
      whole in the Worker's memory. Any other call, a refusal or a failure (warned) falls through to step 3.
-  3. The `createServer` of `canvasRemoteConnector()` builds the client with `canvasClientFor()`, and
-     `createCanvasMcpServer()` registers `canvasTools()`.
+  3. The `createServer` of `canvasRemoteConnector()` calls `createCanvasUserServer()`: it builds the client with
+     `canvasClientFor()`, decides the write tools with `canvasWriteBlock()` (P03 step 6b) and
+     `createCanvasMcpServer()` registers `canvasTools()` — every tool, always (ADR 0027). `routeRemoteRequest()`
+     serves the connector's own pages (`connectorPage()`: `/write-access`, from `writeAccessStoreFrom()`'s
+     `CANVAS_KV`) after the OAuth and MCP routes, without CORS.
   4. `serveMcpRequest()` handles the request sessionless, in JSON, and closes the server; the tool follows P03
      from step 2.
 - **Result:** the tool's response, with nothing stored on the server.
@@ -409,3 +425,24 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
   Gmail; invalid address or no recipient → error naming the field; attachments above 18 MB → error before
   downloading; unknown label → error suggesting `list_labels`; refusal from Gmail → `gmailHttpError()` with the
   detail.
+
+## P19 — Deploy a remote connector and smoke-test its tools
+
+- **Trigger:** `npm run worker:deploy`, `npm run gmail:deploy` or `npm run whatsapp:deploy` (ADR 0027).
+- **Steps:**
+  1. `wrangler deploy` publishes the Worker.
+  2. `npm run smoke -- <connector>` runs `runSmokeCli()`: `readSmokeCheck()` reads `wrangler.toml` and
+     `tool-contract.json` (`readToolContract()`, `contractEntryAsListed()`, `toolContractOf()`) and finds the address
+     with `workerBaseUrl()` (`SMOKE_URL`, else `wranglerValue()` of `PUBLIC_URL`, else
+     `<name>.<fetchWorkersSubdomain()>.workers.dev`).
+  3. `runSmokeCheck()` calls `smokeAttempt()` up to `SMOKE_ATTEMPTS` times, `SMOKE_RETRY_MS` apart (`sleepMs()`):
+     `fetchPublishedTools()` reads `GET /tools`, which the Worker answers with `handleToolCatalog()` (shared
+     handler) or `handleDefaultRequest()` (Gmail) through `serveToolCatalog()` and `toolsListRequest()` — the real
+     `tools/list` of a server built with `listOnlyContext()` (`refuseListOnlyUse()` on any use):
+     `createCanvasMcpServer()`, `createGmailServer()` or `createWhatsAppCatalogServer()`. `toolsFromListResponse()`
+     and `toolContractDiff()` compare it with the contract.
+- **Result:** `✔ smoke <connector>: N tools … match tool-contract.json`.
+- **Failures:** a missing, extra or differently annotated tool, or an unreachable Worker, after every attempt →
+  exit 1, the deploy command fails and prints the `wrangler rollback` command. The same comparison runs in the
+  unit tests (`contract.test.ts` of each connector, `unregisteredToolMentions()` over `snakeCaseWords()` and `toolTexts()`), so a
+  divergence is normally caught before deploying.

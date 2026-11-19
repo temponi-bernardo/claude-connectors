@@ -20,6 +20,20 @@ export interface NewMessage {
   readonly subject: string;
   readonly body: string;
   readonly course_id?: Id | undefined;
+  readonly attachment_ids?: readonly Id[] | undefined;
+}
+
+/** `attachment_ids` field of a message body, absent when there are no attachments. */
+export function attachmentIdsField(ids: readonly Id[] | undefined): { attachment_ids?: string[] } {
+  return ids?.length ? { attachment_ids: ids.map(String) } : {};
+}
+
+/** Body of `POST /conversations/:id/add_message`: the text and, when given, the attachment IDs. */
+export function replyPayload(
+  body: string,
+  ids: readonly Id[] | undefined,
+): Readonly<Record<string, unknown>> {
+  return { body, ...attachmentIdsField(ids) };
 }
 
 /** Person the user can message, with the distinct roles they have in shared courses. */
@@ -76,7 +90,7 @@ export function toConversationDetail(c: CanvasConversation): View {
   };
 }
 
-/** Body of `POST /conversations`: one new conversation shared by the given users. */
+/** Body of `POST /conversations`: one new conversation shared by the given users, with any attachments. */
 export function newMessagePayload(msg: NewMessage): Readonly<Record<string, unknown>> {
   return {
     recipients: msg.recipients.map(String),
@@ -85,6 +99,7 @@ export function newMessagePayload(msg: NewMessage): Readonly<Record<string, unkn
     force_new: true,
     group_conversation: true,
     ...(msg.course_id !== undefined ? { context_code: `course_${String(msg.course_id)}` } : {}),
+    ...attachmentIdsField(msg.attachment_ids),
   };
 }
 

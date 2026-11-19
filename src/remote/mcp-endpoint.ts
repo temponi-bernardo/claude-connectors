@@ -28,3 +28,20 @@ export function mcpUnauthorizedResponse(issuer: string): Response {
     },
   });
 }
+
+/** Path of the public tool catalog: the server's `tools/list` answer, with no user data (post-deploy smoke test). */
+export const TOOL_CATALOG_PATH = '/tools';
+
+/** JSON-RPC `tools/list` request, as an MCP client would POST it to `/mcp`. */
+export function toolsListRequest(origin: string): Request {
+  return new Request(`${origin}/mcp`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/list' }),
+  });
+}
+
+/** Answers the catalog route with the `tools/list` response of a server that only lists its tools. */
+export function serveToolCatalog(server: McpServer, origin: string): Promise<Response> {
+  return serveMcpRequest(server, toolsListRequest(origin));
+}

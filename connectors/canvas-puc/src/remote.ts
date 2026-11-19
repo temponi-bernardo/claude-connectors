@@ -12,6 +12,17 @@ import { streamCanvasFile } from './files.js';
 import { downloadFileShape } from './tools-read.js';
 import type { LoginPageText } from '../../../src/remote/login-page.js';
 import { canvasTools, createCanvasMcpServer } from './tools.js';
+import { listOnlyContext } from '../../../src/mcp/tool-gate.js';
+import type { SealedGrant } from '../../../src/remote/tokens.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import {
+  hasStoredWriteOptIn,
+  showWriteAccess,
+  submitWriteAccess,
+  WRITE_ACCESS_PATH,
+  writeAccessUrl,
+  type WriteAccessDeps,
+} from './write-access.js';
 
 /** PUC Minas Canvas, used when `CANVAS_BASE_URL` is not set. */
 export const DEFAULT_CANVAS_URL = 'https://pucminas.instructure.com';
@@ -192,9 +203,33 @@ export async function renewCanvasSecret(
   return 'kept';
 }
 
-/** Write tools only when the server allows writing AND this user opted in at login (old tokens: read-only). */
-export function canWriteFor(settings: CanvasRemoteSettings, grants: readonly string[]): boolean {
-  return settings.allowWrite && grants.includes(CANVAS_WRITE_GRANT);
+/** Why the write tools are off when the server operator turned writing off. */
+export const CANVAS_WRITE_OFF_REASON =
+  'writing is turned off on this server (CANVAS_ALLOW_WRITE). Do it in Canvas itself.';
+
+/** Why the write tools are off for a read-only connection, with the link that turns writing on (no new token). */
+export function readOnlyConnectionReason(link: string): string {
+  return `this Canvas connection is read-only. Ask the user to open ${link} and click "Allow writing" (no new Canvas token needed; it applies within a minute), then try again.`;
+}
+
+/** Says whether this user may write: the write option ticked at sign-in, or turned on later on the page. */
+export async function userAllowsWrite(
+  access: WriteAccessDeps,
+  grant: SealedGrant,
+): Promise<boolean> {
+  if (grant.grants.includes(CANVAS_WRITE_GRANT)) return true;
+  return hasStoredWriteOptIn(access.store, grant.secret);
+}
+
+/** Why the write tools are off for this user (null when they are on); they stay listed either way. */
+export async function canvasWriteBlock(
+  settings: CanvasRemoteSettings,
+  access: WriteAccessDeps,
+  grant: SealedGrant,
+): Promise<string | null> {
+  if (!settings.allowWrite) return CANVAS_WRITE_OFF_REASON;
+  if (await userAllowsWrite(access, grant)) return null;
+  return readOnlyConnectionReason(writeAccessUrl(access, grant.secret));
 }
 
 /** Canvas client of the server's Canvas, authorized with the user's token. */
@@ -212,8 +247,24 @@ export async function streamCanvasTool(
   return streamCanvasFile(client, await resolveCanvasFile(client, args), args);
 }
 
-/** Builds the remote Canvas connector for the HTTP server. */
-export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector {
+/** Creates the user's MCP server: every tool listed, the write ones refusing with the reason when off. */
+export async function createCanvasUserServer(
+  settings: CanvasRemoteSettings,
+  access: WriteAccessDeps,
+  grant: SealedGrant,
+): Promise<McpServer> {
+  const block = await canvasWriteBlock(settings, access, grant);
+  return createCanvasMcpServer(canvasTools(block), {
+    client: canvasClientFor(settings, grant.secret),
+    now: () => new Date(),
+  });
+}
+
+/** Builds the remote Canvas connector for the HTTP server; `access` backs the write-access page. */
+export function canvasRemoteConnector(
+  settings: CanvasRemoteSettings,
+  access: WriteAccessDeps,
+): RemoteConnector {
   return {
     login: {
       kind: 'secret',
@@ -221,11 +272,12 @@ export function canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteCon
       verify: (secret) => verifyCanvasToken(settings, secret),
     },
     renewSecret: (secret) => renewCanvasSecret(settings, secret, new Date()),
-    createServer: (secret, grants) =>
-      createCanvasMcpServer(canvasTools(canWriteFor(settings, grants)), {
-        client: canvasClientFor(settings, secret),
-        now: () => new Date(),
-      }),
+    createServer: (secret, grants) => createCanvasUserServer(settings, access, { secret, grants }),
+    catalogServer: () => createCanvasMcpServer(canvasTools(null), listOnlyContext()),
     streamTool: (secret, call) => streamCanvasTool(canvasClientFor(settings, secret), call),
+    pages: {
+      [`GET ${WRITE_ACCESS_PATH}`]: (request) => showWriteAccess(access, request),
+      [`POST ${WRITE_ACCESS_PATH}`]: (request) => submitWriteAccess(access, request),
+    },
   };
 }
