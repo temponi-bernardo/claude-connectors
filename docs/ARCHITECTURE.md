@@ -69,19 +69,20 @@ server.
 
 ## External services
 
-| Service                    | Used for                                       | Where the adapter is                                   | Secret                                                         |
-| -------------------------- | ---------------------------------------------- | ------------------------------------------------------ | -------------------------------------------------------------- |
-| Canvas LMS REST API        | Courses, assignments, grades, announcements... | `connectors/canvas-puc/src/client.ts`                  | User token, only sealed inside the OAuth tokens                |
-| Canvas access token        | The connector's only credential                | `connectors/canvas-puc/src/remote.ts`                  | Only sealed inside the OAuth tokens (`SEAL_KEY` on the server) |
-| Cloudflare Workers         | Running the remote connector                   | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml` | `SEAL_KEY` (Worker secret); deploy with `CLOUDFLARE_API_TOKEN` |
-| GitHub Pages               | Public site (home, privacy, terms)             | `docs/_config.yml`, `docs/_layouts/site.html`          | None (ADR 0012)                                                |
-| Google OAuth / OIDC        | Owner login and account linking                | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`  | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (Worker secrets)    |
-| Gmail API (`gmail.modify`) | Read, send, drafts, organize, trash            | `connectors/gmail/src/gmail-api.ts`                    | Refresh token sealed in KV with `TOKEN_ENC_KEY`                |
-| Workers KV / rate limit    | OAuth grants, accounts and limits (Gmail)      | `connectors/gmail/src/worker.ts`, `wrangler.toml`      | `CONSENT_SECRET`; optional `ALLOWED_EMAILS` (private mode)     |
-| GitHub OAuth App           | Owner login (WhatsApp)                         | `src/remote/github-login.ts`                           | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `ALLOWED_EMAILS`   |
-| Cloudflare Containers + DO | On-demand WhatsApp bridge                      | `connectors/whatsapp/src/container.ts`, `lifecycle.ts` | `BRIDGE_TOKEN` (Worker ↔ bridge)                               |
-| Cloudflare R2              | Encrypted session backup (WhatsApp)            | `connectors/whatsapp/src/snapshots.ts`                 | `SNAPSHOT_KEY` (container only)                                |
-| WhatsApp (whatsmeow)       | Messages of the paired number                  | `connectors/whatsapp/bridge/` (Go)                     | Device session, inside the snapshot                            |
+| Service                    | Used for                                           | Where the adapter is                                     | Secret                                                         |
+| -------------------------- | -------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------- |
+| Canvas LMS REST API        | Courses, assignments, grades, announcements...     | `connectors/canvas-puc/src/client.ts`                    | User token, only sealed inside the OAuth tokens                |
+| Canvas access token        | The connector's only credential                    | `connectors/canvas-puc/src/remote.ts`                    | Only sealed inside the OAuth tokens (`SEAL_KEY` on the server) |
+| Cloudflare Workers         | Running the remote connector                       | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml`   | `SEAL_KEY` (Worker secret); deploy with `CLOUDFLARE_API_TOKEN` |
+| GitHub Pages               | Public site (home, privacy, terms)                 | `docs/_config.yml`, `docs/_layouts/site.html`            | None (ADR 0012)                                                |
+| Google OAuth / OIDC        | Owner login and account linking                    | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`    | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (Worker secrets)    |
+| Gmail API (`gmail.modify`) | Read, send, drafts, organize, trash                | `connectors/gmail/src/gmail-api.ts`                      | Refresh token sealed in KV with `TOKEN_ENC_KEY`                |
+| Workers KV / rate limit    | OAuth grants, accounts and limits (Gmail)          | `connectors/gmail/src/worker.ts`, `wrangler.toml`        | `CONSENT_SECRET`; optional `ALLOWED_EMAILS` (private mode)     |
+| Workers KV (`CANVAS_KV`)   | Canvas write opt-ins made after sign-in (ADR 0027) | `connectors/canvas-puc/src/write-access.ts`, `worker.ts` | Key = SHA-256 of the Canvas token, never the token             |
+| GitHub OAuth App           | Owner login (WhatsApp)                             | `src/remote/github-login.ts`                             | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `ALLOWED_EMAILS`   |
+| Cloudflare Containers + DO | On-demand WhatsApp bridge                          | `connectors/whatsapp/src/container.ts`, `lifecycle.ts`   | `BRIDGE_TOKEN` (Worker ↔ bridge)                               |
+| Cloudflare R2              | Encrypted session backup (WhatsApp)                | `connectors/whatsapp/src/snapshots.ts`                   | `SNAPSHOT_KEY` (container only)                                |
+| WhatsApp (whatsmeow)       | Messages of the paired number                      | `connectors/whatsapp/bridge/` (Go)                       | Device session, inside the snapshot                            |
 
 No credentials in the repository or on the server: the Canvas token exists only sealed (AES-GCM with the
 `SEAL_KEY`) inside the OAuth tokens that Claude stores.

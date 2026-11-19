@@ -64,13 +64,21 @@ You can also add it directly as a custom connector on claude.ai, with the same `
    node -e "console.log(crypto.randomBytes(32).toString('base64'))" | npx wrangler secret put SEAL_KEY --config connectors/canvas-puc/wrangler.toml
    ```
 
-3. Deploy (and repeat after every merge that touches the connector):
+3. Once, create the KV namespace for write opt-ins and put its id in `wrangler.toml` (`CANVAS_KV`):
+
+   ```bash
+   npx wrangler kv namespace create CANVAS_KV --config connectors/canvas-puc/wrangler.toml
+   ```
+
+4. Deploy (and repeat after every merge that touches the connector). The script then runs the smoke test
+   (`npm run smoke -- canvas-puc`): it reads the published `GET /tools` and fails if the tools differ from
+   `tool-contract.json`:
 
    ```bash
    npm run worker:deploy
    ```
 
-4. The address is printed at the end of the deploy: `https://canvas-puc-remote.<your-account>.workers.dev`.
+5. The address is printed at the end of the deploy: `https://canvas-puc-remote.<your-account>.workers.dev`.
 
 `wrangler.toml` already enables writes (`CANVAS_ALLOW_WRITE=true`). The Worker never sleeps: it answers right away.
 To test locally first: `npm run worker:dev` (needs `SEAL_KEY`, e.g. `--var SEAL_KEY:<key>`).
@@ -88,14 +96,14 @@ docker build -t canvas-puc-remote connectors/canvas-puc
 docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes in base64> -e CANVAS_ALLOW_WRITE=true canvas-puc-remote
 ```
 
-| Variable               | Default                            | Purpose                                                                                                                                                       |
-| ---------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PUBLIC_URL`           | — (on the Worker: its own address) | Public https address (required on Docker)                                                                                                                     |
-| `SEAL_KEY`             | —                                  | OAuth seal key; changing it disconnects everyone                                                                                                              |
-| `PORT`                 | `8080`                             | HTTP port                                                                                                                                                     |
-| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Where OAuth may send the access back to                                                                                                                       |
-| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | The server's fixed Canvas instance                                                                                                                            |
-| `CANVAS_ALLOW_WRITE`   | off                                | `true` offers each user the write opt-in (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`, `send_message`, `reply_to_conversation`) |
+| Variable               | Default                            | Purpose                                                                                                                                               |
+| ---------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PUBLIC_URL`           | — (on the Worker: its own address) | Public https address (required on Docker)                                                                                                             |
+| `SEAL_KEY`             | —                                  | OAuth seal key; changing it disconnects everyone                                                                                                      |
+| `PORT`                 | `8080`                             | HTTP port                                                                                                                                             |
+| `OAUTH_REDIRECT_HOSTS` | `claude.ai,claude.com,localhost`   | Where OAuth may send the access back to                                                                                                               |
+| `CANVAS_BASE_URL`      | `https://pucminas.instructure.com` | The server's fixed Canvas instance                                                                                                                    |
+| `CANVAS_ALLOW_WRITE`   | off                                | `true` offers each user the write opt-in (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`, `send_message`, `reply_message`) |
 
 **Common problems:**
 
@@ -132,8 +140,24 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes 
 | `submit_text_assignment` | Submits text/a link (only with writes enabled; Claude confirms first)                                                                                         |
 | `submit_file_assignment` | Submits a file (up to 5 MB, text or base64) to an `online_upload` assignment, checking `allowed_extensions` (only with writes enabled; Claude confirms first) |
 | `reply_to_discussion`    | Replies to a forum (only with writes enabled; Claude confirms first)                                                                                          |
-| `send_message`           | Sends a new inbox message to up to 20 people by user ID (only with writes enabled; Claude confirms first)                                                     |
-| `reply_to_conversation`  | Replies in an inbox conversation (only with writes enabled; Claude confirms first)                                                                            |
+| `send_message`           | Sends a new inbox message to up to 20 people by user ID, with up to 5 attachments of 5 MB each (writing on; Claude confirms first)                            |
+| `reply_message`          | Replies in an inbox conversation, with up to 5 attachments of 5 MB each (writing on; Claude confirms first)                                                   |
+
+### Writing (send, reply, submit) and how to turn it on
+
+The write tools are **always listed**. When writing is off they do nothing and answer why (ADR 0027):
+
+- **Your connection is read-only** (you did not tick "Also allow Claude to send messages…" when connecting, or you
+  connected before that box existed): the answer carries a link to `/write-access`. Open it and click **Allow
+  writing** — no new Canvas token is needed; it applies within a minute. The same page turns writing off. The
+  link expires in 15 minutes and only works for your connection. The server stores only a SHA-256 fingerprint of
+  your token in Workers KV, never the token.
+- **The server has `CANVAS_ALLOW_WRITE` off**: nobody can write; do it in Canvas itself.
+
+Attachments of `send_message`/`reply_message` go inside the call (`file_name`, `content`, `encoding` `text` or
+`base64`), are all checked before anything is uploaded, then go through Canvas's three-step upload to your
+"conversation attachments" folder. If any upload fails, the message is not sent. Message text and file contents
+are never logged.
 
 ### Files embedded in assignments and pages
 

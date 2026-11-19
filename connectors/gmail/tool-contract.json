@@ -1,0 +1,96 @@
+{
+  "tools": [
+    {
+      "name": "archive",
+      "readOnly": false
+    },
+    {
+      "name": "create_draft",
+      "readOnly": false
+    },
+    {
+      "name": "delete_draft",
+      "readOnly": false
+    },
+    {
+      "name": "forward_email",
+      "readOnly": false
+    },
+    {
+      "name": "get_attachment_text",
+      "readOnly": true
+    },
+    {
+      "name": "get_message",
+      "readOnly": true
+    },
+    {
+      "name": "get_thread",
+      "readOnly": true
+    },
+    {
+      "name": "link_account",
+      "readOnly": false
+    },
+    {
+      "name": "list_accounts",
+      "readOnly": true
+    },
+    {
+      "name": "list_drafts",
+      "readOnly": true
+    },
+    {
+      "name": "list_labels",
+      "readOnly": true
+    },
+    {
+      "name": "mark_read",
+      "readOnly": false
+    },
+    {
+      "name": "reply_all_email",
+      "readOnly": false
+    },
+    {
+      "name": "reply_email",
+      "readOnly": false
+    },
+    {
+      "name": "search_threads",
+      "readOnly": true
+    },
+    {
+      "name": "send_draft",
+      "readOnly": false
+    },
+    {
+      "name": "send_email",
+      "readOnly": false
+    },
+    {
+      "name": "star",
+      "readOnly": false
+    },
+    {
+      "name": "trash",
+      "readOnly": false
+    },
+    {
+      "name": "unlink_account",
+      "readOnly": false
+    },
+    {
+      "name": "untrash",
+      "readOnly": false
+    },
+    {
+      "name": "update_draft",
+      "readOnly": false
+    },
+    {
+      "name": "update_labels",
+      "readOnly": false
+    }
+  ]
+}

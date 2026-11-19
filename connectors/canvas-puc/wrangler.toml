@@ -12,5 +12,11 @@ workers_dev = true
 CANVAS_BASE_URL = "https://pucminas.instructure.com"
 CANVAS_ALLOW_WRITE = "true"
 
+# Write opt-ins made after sign-in on /write-access: key `write:<SHA-256 of the Canvas token>` → "on".
+# Never the token itself. Replace the id with the one from `npx wrangler kv namespace create CANVAS_KV`.
+[[kv_namespaces]]
+binding = "CANVAS_KV"
+id = "ba47d2a0f5374b17a66c8fdb36ad7460"
+
 [observability]
 enabled = true

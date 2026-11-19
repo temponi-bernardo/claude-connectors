@@ -14,6 +14,7 @@ import {
   type RawToolResult,
   type ToolSpec,
 } from '../../../src/mcp/tools.js';
+import { gateToolSpecs, listOnlyContext } from '../../../src/mcp/tool-gate.js';
 import {
   bridgeJson,
   bridgePath,
@@ -319,9 +320,21 @@ export const READ_TOOLS: readonly ToolSpec<WhatsAppToolContext>[] = [
   getMediaTool,
 ];
 
-/** Active tools: the read tools and, only with `ENABLE_SEND`, the send tool. */
+/** Why `send_message` is off when the server runs without `ENABLE_SEND`. */
+export const WHATSAPP_SEND_OFF_REASON =
+  'sending is turned off on this server (ENABLE_SEND is not "true"); the owner turns it on in the Worker variables.';
+
+/** Every tool, always listed: without `ENABLE_SEND` the send tool answers each call that sending is off. */
 export function whatsappTools(settings: WhatsAppSettings): ToolSpec<WhatsAppToolContext>[] {
-  return settings.enableSend ? [...READ_TOOLS, sendMessageTool] : [...READ_TOOLS];
+  const sendBlock = settings.enableSend ? null : WHATSAPP_SEND_OFF_REASON;
+  return [...READ_TOOLS, ...gateToolSpecs([sendMessageTool], sendBlock)];
+}
+
+/** Server that only lists this deployment's tools (public catalog at `GET /tools`); none of them can run. */
+export function createWhatsAppCatalogServer(settings: WhatsAppSettings): McpServer {
+  const server = new McpServer({ ...WHATSAPP_SERVER_INFO });
+  registerToolSpecs(server, whatsappTools(settings), listOnlyContext());
+  return server;
 }
 
 /** Creates the WhatsApp MCP server with the active tools. */

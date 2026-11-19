@@ -13,7 +13,12 @@ import {
 import { envValue, toEnvVars } from '../../../src/core/env.js';
 import { manifestVersion } from '../../../src/mcp/server-version.js';
 import { registerToolSpecs } from '../../../src/mcp/tools.js';
-import { serveMcpRequest } from '../../../src/remote/mcp-endpoint.js';
+import { listOnlyContext } from '../../../src/mcp/tool-gate.js';
+import {
+  serveMcpRequest,
+  serveToolCatalog,
+  TOOL_CATALOG_PATH,
+} from '../../../src/remote/mcp-endpoint.js';
 import {
   DEFAULT_REDIRECT_HOSTS,
   isAllowedRedirect,
@@ -126,6 +131,9 @@ export async function handleDefaultRequest(
 ): Promise<Response> {
   const url = new URL(request.url);
   if (request.method === 'GET' && url.pathname === '/') return new Response('ok');
+  if (request.method === 'GET' && url.pathname === TOOL_CATALOG_PATH) {
+    return serveToolCatalog(createGmailServer(listOnlyContext()), url.origin);
+  }
   const route = GMAIL_ROUTES[`${request.method} ${url.pathname}`];
   if (!route || !env.OAUTH_PROVIDER)
     return messagePage('Not found', 'This page does not exist.', 404);

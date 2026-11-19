@@ -64,7 +64,7 @@ describe('helpers', () => {
 });
 
 describe('whatsappRemoteConnector', () => {
-  it('uses GitHub login and accepts only the owner', () => {
+  it('uses GitHub login and accepts only the owner', async () => {
     const connector = whatsappRemoteConnector(
       readWhatsAppSettings(VARS),
       () => Promise.resolve(new Response()),
@@ -73,7 +73,8 @@ describe('whatsappRemoteConnector', () => {
     expect(connector.login.kind).toBe('upstream');
     expect(connector.acceptsSecret?.('owner@example.dev')).toBe(true);
     expect(connector.acceptsSecret?.('x@y.z')).toBe(false);
-    expect(connector.createServer('owner@example.dev', []).server).toBeDefined();
+    expect((await connector.createServer('owner@example.dev', [])).server).toBeDefined();
+    expect(connector.catalogServer?.().server).toBeDefined();
   });
 });
 

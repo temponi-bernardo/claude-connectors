@@ -1,6 +1,11 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { describe, expect, it } from 'vitest';
-import { mcpUnauthorizedResponse, serveMcpRequest } from './mcp-endpoint.js';
+import {
+  mcpUnauthorizedResponse,
+  serveMcpRequest,
+  serveToolCatalog,
+  toolsListRequest,
+} from './mcp-endpoint.js';
 
 describe('serveMcpRequest', () => {
   it('answers in JSON without a session and closes the server', async () => {
@@ -33,5 +38,22 @@ describe('mcpUnauthorizedResponse', () => {
     expect(res.headers.get('www-authenticate')).toBe(
       'Bearer error="invalid_token", resource_metadata="https://x.dev/.well-known/oauth-protected-resource/mcp"',
     );
+  });
+});
+
+describe('toolsListRequest and serveToolCatalog', () => {
+  it('builds the JSON-RPC tools/list POST to /mcp', async () => {
+    const req = toolsListRequest('https://x.dev');
+    expect(req.url).toBe('https://x.dev/mcp');
+    expect(req.method).toBe('POST');
+    expect(await req.json()).toEqual({ jsonrpc: '2.0', id: 1, method: 'tools/list' });
+  });
+
+  it('answers with the server tools/list', async () => {
+    const server = new McpServer({ name: 't', version: '1' });
+    server.registerTool('listed', { description: 'x' }, () => ({ content: [] }));
+    const res = await serveToolCatalog(server, 'https://x.dev');
+    const body = (await res.json()) as { result: { tools: { name: string }[] } };
+    expect(body.result.tools.map((t) => t.name)).toEqual(['listed']);
   });
 });

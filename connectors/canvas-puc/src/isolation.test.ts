@@ -12,10 +12,12 @@ import { CANVAS_INBOX_WRITE_TOOLS } from './tools-inbox.js';
 import { canvasTools } from './tools.js';
 import { CANVAS_WRITE_TOOLS } from './tools-write.js';
 import { handleWorkerFetch } from './worker.js';
+import { memoryWriteAccessStore } from './write-access.js';
 
 const ORIGIN = 'https://canvas.isolation.test';
 const SEAL_KEY = randomBytes(32);
-const ENV = { SEAL_KEY: SEAL_KEY.toString('base64'), CANVAS_ALLOW_WRITE: 'true' };
+const CANVAS_KV = memoryWriteAccessStore();
+const ENV = { SEAL_KEY: SEAL_KEY.toString('base64'), CANVAS_ALLOW_WRITE: 'true', CANVAS_KV };
 
 /** Fake Canvas tokens of two users and the private data Canvas returns to each. */
 const USERS = {
@@ -57,8 +59,8 @@ function mcpCall(token: string, method: string, params: unknown = {}): Request {
   });
 }
 
-async function callTool(token: string, name: string): Promise<string> {
-  const res = await handleWorkerFetch(mcpCall(token, 'tools/call', { name, arguments: {} }), ENV);
+async function callTool(token: string, name: string, args: unknown = {}): Promise<string> {
+  const res = await handleWorkerFetch(mcpCall(token, 'tools/call', { name, arguments: args }), ENV);
   return res.text();
 }
 
@@ -112,21 +114,46 @@ describe('Canvas isolation between concurrent users in one isolate', () => {
 });
 
 describe('Canvas write tools are per-user opt-in', () => {
-  it('lists the send and submit tools only for a user who ticked the write option', async () => {
-    const readOnly = await toolNames(accessTokenFor(USERS.alice.canvasToken));
-    const writer = await toolNames(accessTokenFor(USERS.bob.canvasToken, [CANVAS_WRITE_GRANT]));
-    const writes = [...CANVAS_WRITE_TOOLS, ...CANVAS_INBOX_WRITE_TOOLS].map((tool) => tool.name);
-    expect(writes).toEqual(expect.arrayContaining(['send_message', 'submit_text_assignment']));
-    for (const name of writes) {
-      expect(readOnly).not.toContain(name);
-      expect(writer).toContain(name);
-    }
+  const message = { recipient_ids: [1], subject: 'S', body: 'B' };
+
+  it('lists the write tools for everyone but runs them only for a user who opted in', async () => {
+    vi.stubGlobal('fetch', vi.fn(fakeCanvas));
+    const readOnly = accessTokenFor(USERS.alice.canvasToken);
+    const writer = accessTokenFor(USERS.bob.canvasToken, [CANVAS_WRITE_GRANT]);
+    expect(await toolNames(readOnly)).toEqual(await toolNames(writer));
+    const refused = await callTool(readOnly, 'send_message', message);
+    expect(refused).toContain('isError');
+    expect(refused).toContain('send_message is unavailable on this connection');
+    expect(refused).toContain(`${ORIGIN}/write-access?t=`);
+    expect(refused).not.toContain(USERS.alice.canvasToken);
+    expect(vi.mocked(fetch)).not.toHaveBeenCalled();
+  });
+
+  it('turns writing on from the link, for that token only, without a new token', async () => {
+    vi.stubGlobal('fetch', vi.fn(fakeCanvas));
+    const alice = accessTokenFor(USERS.alice.canvasToken);
+    const bob = accessTokenFor(USERS.bob.canvasToken);
+    const refused = await callTool(alice, 'send_message', message);
+    const link = /https:\/\/[^\s"\\]+\/write-access\?t=[A-Za-z0-9_-]+/.exec(refused)![0];
+    const page = await handleWorkerFetch(new Request(link), ENV);
+    expect(await page.text()).toContain('Writing is <strong>off</strong>');
+    const ticket = new URL(link).searchParams.get('t')!;
+    const form = new URLSearchParams({ t: ticket, action: 'on' });
+    const post = new Request(`${ORIGIN}/write-access`, { method: 'POST', body: form });
+    expect(await (await handleWorkerFetch(post, ENV)).text()).toContain('<strong>on</strong>');
+    expect(await callTool(alice, 'send_message', message)).not.toContain('unavailable');
+    expect(await callTool(bob, 'send_message', message)).toContain('unavailable');
+  });
+
+  it('refuses an expired or forged link', async () => {
+    const res = await handleWorkerFetch(new Request(`${ORIGIN}/write-access?t=forged`), ENV);
+    expect(res.status).toBe(400);
   });
 
   it('marks every write tool as destructive and every other tool as read-only', () => {
-    const writes = new Set([...CANVAS_WRITE_TOOLS, ...CANVAS_INBOX_WRITE_TOOLS]);
-    for (const tool of canvasTools(true)) {
-      const hints = writes.has(tool) ? SEND_HINTS : READ_ONLY_HINTS;
+    const writes = new Set([...CANVAS_WRITE_TOOLS, ...CANVAS_INBOX_WRITE_TOOLS].map((t) => t.name));
+    for (const tool of canvasTools(null)) {
+      const hints = writes.has(tool.name) ? SEND_HINTS : READ_ONLY_HINTS;
       expect(tool.annotations).toMatchObject({
         readOnlyHint: hints.readOnlyHint,
         destructiveHint: hints.destructiveHint,

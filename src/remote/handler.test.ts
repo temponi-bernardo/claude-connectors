@@ -6,6 +6,8 @@ import {
   BROWSER_PAGE_PATHS,
   chosenGrants,
   REMOTE_ROUTES,
+  connectorPage,
+  handleToolCatalog,
   createRemoteHandler,
   handleAuthorizePage,
   handleAuthorizeSubmit,
@@ -728,5 +730,40 @@ describe('createRemoteHandler — delegated login (upstream)', () => {
     ).access_token;
     const res = await handleMcp(app, rpc(revoked, { jsonrpc: '2.0', id: 1, method: 'tools/list' }));
     expect(res.status).toBe(403);
+  });
+});
+
+function catalogWithOneTool(): McpServer {
+  const server = new McpServer({ name: 'c', version: '1' });
+  server.registerTool('public_tool', { description: 'x' }, () => ({ content: [] }));
+  return server;
+}
+
+describe('handleToolCatalog', () => {
+  it('serves the connector catalog without a token, or 404 without one', async () => {
+    const app = { ...makeApp(), connector: { ...connector, catalogServer: catalogWithOneTool } };
+    const res = await routeRemoteRequest(app, new Request(`${ISSUER}/tools`));
+    const body = (await res.json()) as { result: { tools: { name: string }[] } };
+    expect(body.result.tools.map((t) => t.name)).toEqual(['public_tool']);
+    expect(res.headers.get('access-control-allow-origin')).toBe('*');
+    const none = await handleToolCatalog(makeApp(), new Request(`${ISSUER}/tools`));
+    expect(none.status).toBe(404);
+  });
+});
+
+describe('connectorPage', () => {
+  it('serves the connector pages without CORS and never over an OAuth or MCP route', async () => {
+    const pages = {
+      'GET /own-page': () => Promise.resolve(new Response('own')),
+      'POST /token': () => Promise.resolve(new Response('hijack')),
+    };
+    const app = { ...makeApp(), connector: { ...connector, pages } };
+    expect(connectorPage(app, 'GET /own-page')).toBeDefined();
+    expect(connectorPage(makeApp(), 'GET /own-page')).toBeUndefined();
+    const own = await routeRemoteRequest(app, new Request(`${ISSUER}/own-page`));
+    expect(await own.text()).toBe('own');
+    expect(own.headers.get('access-control-allow-origin')).toBeNull();
+    const token = await routeRemoteRequest(app, new Request(`${ISSUER}/token`, { method: 'POST' }));
+    expect(await token.text()).not.toBe('hijack');
   });
 });

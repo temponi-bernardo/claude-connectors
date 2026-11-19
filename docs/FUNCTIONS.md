@@ -17,15 +17,18 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/canvas-puc/src/files.ts`: [`tooLargeMessage`](#toolargemessage), [`downloadRefusal`](#downloadrefusal), [`planCanvasDownload`](#plancanvasdownload), [`openCanvasChunk`](#opencanvaschunk), [`streamCanvasFile`](#streamcanvasfile), [`chunkToolResult`](#chunktoolresult), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`rawHtmlField`](#rawhtmlfield), [`linksField`](#linksfield), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
 - `connectors/canvas-puc/src/helpers.ts`: [`isoDaysFrom`](#isodaysfrom), [`dateOnly`](#dateonly), [`courseContextCodes`](#coursecontextcodes), [`courseNameMap`](#coursenamemap), [`participantNames`](#participantnames), [`isTextFile`](#istextfile), [`matchModuleItems`](#matchmoduleitems), [`activeCourses`](#activecourses), [`fetchOwnSubmission`](#fetchownsubmission), [`getAllOrEmpty`](#getallorempty)
-- `connectors/canvas-puc/src/inbox.ts`: [`toRecipient`](#torecipient), [`participantName`](#participantname), [`conversationNames`](#conversationnames), [`toConversationSummary`](#toconversationsummary), [`toConversationMessage`](#toconversationmessage), [`toConversationDetail`](#toconversationdetail), [`newMessagePayload`](#newmessagepayload), [`sentConversation`](#sentconversation), [`sentReply`](#sentreply)
+- `connectors/canvas-puc/src/inbox.ts`: [`attachmentIdsField`](#attachmentidsfield), [`replyPayload`](#replypayload), [`toRecipient`](#torecipient), [`participantName`](#participantname), [`conversationNames`](#conversationnames), [`toConversationSummary`](#toconversationsummary), [`toConversationMessage`](#toconversationmessage), [`toConversationDetail`](#toconversationdetail), [`newMessagePayload`](#newmessagepayload), [`sentConversation`](#sentconversation), [`sentReply`](#sentreply)
 - `connectors/canvas-puc/src/linked-files.ts`: [`isLinkedFileLink`](#islinkedfilelink), [`linkedFileKey`](#linkedfilekey), [`moduleItemLinks`](#moduleitemlinks), [`originLinks`](#originlinks), [`collectLinkedFiles`](#collectlinkedfiles), [`toLinkedFile`](#tolinkedfile), [`fetchLinkSources`](#fetchlinksources), [`linkSource`](#linksource), [`listLinkedFiles`](#listlinkedfiles), [`linkedOnlyRows`](#linkedonlyrows), [`linkedOnlyNote`](#linkedonlynote), [`listFilesWithLinked`](#listfileswithlinked)
 - `connectors/canvas-puc/src/links.ts`: [`hostMatches`](#hostmatches), [`isCanvasUrl`](#iscanvasurl), [`videoProviderOf`](#videoproviderof), [`canvasTargetOf`](#canvastargetof), [`canvasRefTarget`](#canvasreftarget), [`classifyCanvasRef`](#classifycanvasref), [`canvasHtml`](#canvashtml), [`redactVerifier`](#redactverifier)
+- `connectors/canvas-puc/src/message-attachments.ts`: [`attachmentsRefusal`](#attachmentsrefusal), [`prepareAttachments`](#prepareattachments), [`attachmentUploadError`](#attachmentuploaderror), [`uploadMessageAttachment`](#uploadmessageattachment), [`uploadMessageAttachments`](#uploadmessageattachments), [`attachmentIds`](#attachmentids), [`attachmentSummary`](#attachmentsummary)
 - `connectors/canvas-puc/src/remote-main.ts`: [`startCanvasRemoteServer`](#startcanvasremoteserver)
-- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`fetchCanvasSelf`](#fetchcanvasself), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`isCanvasTokenAlive`](#iscanvastokenalive), [`renewCanvasSecret`](#renewcanvassecret), [`canWriteFor`](#canwritefor), [`canvasClientFor`](#canvasclientfor), [`streamCanvasTool`](#streamcanvastool), [`canvasRemoteConnector`](#canvasremoteconnector)
+- `connectors/canvas-puc/src/remote.ts`: [`withCanvasUserAgent`](#withcanvasuseragent), [`readCanvasRemoteSettings`](#readcanvasremotesettings), [`canvasLoginText`](#canvaslogintext), [`fetchCanvasSelf`](#fetchcanvasself), [`verifyCanvasToken`](#verifycanvastoken), [`matchesVisibleToken`](#matchesvisibletoken), [`planTokenRenewal`](#plantokenrenewal), [`canvasTokenApi`](#canvastokenapi), [`renewCanvasToken`](#renewcanvastoken), [`isCanvasTokenAlive`](#iscanvastokenalive), [`renewCanvasSecret`](#renewcanvassecret), [`readOnlyConnectionReason`](#readonlyconnectionreason), [`userAllowsWrite`](#userallowswrite), [`canvasWriteBlock`](#canvaswriteblock), [`canvasClientFor`](#canvasclientfor), [`streamCanvasTool`](#streamcanvastool), [`createCanvasUserServer`](#createcanvasuserserver), [`canvasRemoteConnector`](#canvasremoteconnector)
+- `connectors/canvas-puc/src/tools-inbox.ts`: [`sendInboxMessage`](#sendinboxmessage), [`replyInboxMessage`](#replyinboxmessage)
 - `connectors/canvas-puc/src/tools-write.ts`: [`submissionPayload`](#submissionpayload)
 - `connectors/canvas-puc/src/tools.ts`: [`canvasTools`](#canvastools), [`createCanvasMcpServer`](#createcanvasmcpserver)
-- `connectors/canvas-puc/src/upload.ts`: [`decodeUploadContent`](#decodeuploadcontent), [`fileExtension`](#fileextension), [`uploadContentType`](#uploadcontenttype), [`extensionRefusal`](#extensionrefusal), [`uploadSizeRefusal`](#uploadsizerefusal), [`uploadRefusal`](#uploadrefusal), [`onlineUploadPayload`](#onlineuploadpayload), [`uploadedFileFromArgs`](#uploadedfilefromargs), [`submitFileAssignment`](#submitfileassignment)
-- `connectors/canvas-puc/src/worker.ts`: [`createWorkerApp`](#createworkerapp), [`handleWorkerFetch`](#handleworkerfetch)
+- `connectors/canvas-puc/src/upload.ts`: [`decodeUploadContent`](#decodeuploadcontent), [`fileExtension`](#fileextension), [`uploadContentType`](#uploadcontenttype), [`extensionRefusal`](#extensionrefusal), [`uploadSizeRefusal`](#uploadsizerefusal), [`uploadRefusal`](#uploadrefusal), [`onlineUploadPayload`](#onlineuploadpayload), [`uploadedFileFromArgs`](#uploadedfilefromargs), [`uploadCanvasFile`](#uploadcanvasfile), [`submitFileAssignment`](#submitfileassignment)
+- `connectors/canvas-puc/src/worker.ts`: [`createWorkerApp`](#createworkerapp), [`writeAccessStoreFrom`](#writeaccessstorefrom), [`handleWorkerFetch`](#handleworkerfetch)
+- `connectors/canvas-puc/src/write-access.ts`: [`tokenFingerprint`](#tokenfingerprint), [`writeAccessKey`](#writeaccesskey), [`hasStoredWriteOptIn`](#hasstoredwriteoptin), [`writeAccessUrl`](#writeaccessurl), [`openWriteTicket`](#openwriteticket), [`renderWriteAccessPage`](#renderwriteaccesspage), [`expiredWriteAccessPage`](#expiredwriteaccesspage), [`showWriteAccess`](#showwriteaccess), [`submitWriteAccess`](#submitwriteaccess), [`memoryWriteAccessStore`](#memorywriteaccessstore)
 - `connectors/gmail/src/access-token.ts`: [`accessTokenKey`](#accesstokenkey), [`forgetAccessToken`](#forgetaccesstoken), [`clearAccessTokenCache`](#clearaccesstokencache), [`relinkError`](#relinkerror), [`markAccountRevoked`](#markaccountrevoked), [`renewAccessToken`](#renewaccesstoken), [`getAccessToken`](#getaccesstoken)
 - `connectors/gmail/src/accounts.ts`: [`accountAlias`](#accountalias), [`aliasAccounts`](#aliasaccounts), [`noAccountsError`](#noaccountserror), [`resolveAccounts`](#resolveaccounts), [`writeAccessError`](#writeaccesserror), [`requireWriteAccess`](#requirewriteaccess)
 - `connectors/gmail/src/attachments.ts`: [`looksLikeText`](#looksliketext), [`detectAttachmentKind`](#detectattachmentkind), [`attachmentBytesToText`](#attachmentbytestotext), [`downloadAttachment`](#downloadattachment), [`readAttachmentText`](#readattachmenttext)
@@ -58,7 +61,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/whatsapp/src/pair-page.ts`: [`describePairStatus`](#describepairstatus), [`pairForm`](#pairform), [`pairingSection`](#pairingsection), [`maintenanceSection`](#maintenancesection), [`alertHtml`](#alerthtml), [`renderPairPage`](#renderpairpage)
 - `connectors/whatsapp/src/pair.ts`: [`parseCookies`](#parsecookies), [`pairCookie`](#paircookie), [`redirectWithCookies`](#redirectwithcookies), [`readPairSession`](#readpairsession), [`issuePairCsrf`](#issuepaircsrf), [`isTrustedPost`](#istrustedpost), [`startPairLogin`](#startpairlogin), [`isValidPairLogin`](#isvalidpairlogin), [`openPairSession`](#openpairsession), [`handlePairCallback`](#handlepaircallback), [`pairDeadline`](#pairdeadline), [`fetchPairStatus`](#fetchpairstatus), [`pairPage`](#pairpage), [`pairActionError`](#pairactionerror), [`handlePairPost`](#handlepairpost), [`routePairPost`](#routepairpost), [`isPairPath`](#ispairpath), [`routePairRequest`](#routepairrequest)
 - `connectors/whatsapp/src/snapshots.ts`: [`pumpInto`](#pumpinto), [`storedGeneration`](#storedgeneration), [`readUploadHeaders`](#readuploadheaders), [`storeSnapshot`](#storesnapshot), [`storeSnapshotResponse`](#storesnapshotresponse), [`archiveSnapshot`](#archivesnapshot), [`sameSecret`](#samesecret), [`acceptSnapshotPush`](#acceptsnapshotpush)
-- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`waitForSync`](#waitforsync), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
+- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`waitForSync`](#waitforsync), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppCatalogServer`](#createwhatsappcatalogserver), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
 - `connectors/whatsapp/src/worker-env.ts`: [`bridgeStub`](#bridgestub), [`bridgeFetchFor`](#bridgefetchfor)
 - `connectors/whatsapp/src/worker.ts`: [`unixNow`](#unixnow), [`githubSettingsFrom`](#githubsettingsfrom), [`whatsappRemoteConnector`](#whatsappremoteconnector), [`createWhatsAppApps`](#createwhatsappapps), [`handleWhatsAppFetch`](#handlewhatsappfetch), [`isSyncCronEnabled`](#issynccronenabled), [`runScheduledSync`](#runscheduledsync)
 - `src/core/bytes.ts`: [`byteView`](#byteview), [`concatBytes`](#concatbytes), [`utf16leToString`](#utf16letostring), [`bytesToBase64`](#bytestobase64)
@@ -73,11 +76,13 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`decompressBytes`](#decompressbytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
 - `src/mcp/annotations.ts`: [`toolAnnotations`](#toolannotations)
 - `src/mcp/server-version.ts`: [`manifestVersion`](#manifestversion)
+- `src/mcp/tool-contract.ts`: [`readToolContract`](#readtoolcontract), [`contractEntryAsListed`](#contractentryaslisted), [`toolsFromListResponse`](#toolsfromlistresponse), [`toolContractOf`](#toolcontractof), [`toolContractDiff`](#toolcontractdiff), [`snakeCaseWords`](#snakecasewords), [`toolTexts`](#tooltexts), [`unregisteredToolMentions`](#unregisteredtoolmentions)
+- `src/mcp/tool-gate.ts`: [`unavailableToolMessage`](#unavailabletoolmessage), [`disabledToolSpec`](#disabledtoolspec), [`gateToolSpecs`](#gatetoolspecs), [`refuseListOnlyUse`](#refuselistonlyuse), [`listOnlyContext`](#listonlycontext)
 - `src/mcp/tools.ts`: [`defineTool`](#definetool), [`textResult`](#textresult), [`rawToolResult`](#rawtoolresult), [`toToolResult`](#totoolresult), [`errorResult`](#errorresult), [`runToolSafely`](#runtoolsafely), [`registerToolSpecs`](#registertoolspecs), [`binaryContentBlock`](#binarycontentblock), [`base64ContentBlock`](#base64contentblock)
 - `src/remote/github-login.ts`: [`githubAuthorizeUrl`](#githubauthorizeurl), [`parseEmailList`](#parseemaillist), [`pickAllowedEmail`](#pickallowedemail), [`exchangeGithubCode`](#exchangegithubcode), [`fetchGithubEmails`](#fetchgithubemails), [`finishGithubLogin`](#finishgithublogin), [`githubUpstreamLogin`](#githubupstreamlogin)
-- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`chosenGrants`](#chosengrants), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`serveMcpWithStreaming`](#servemcpwithstreaming), [`streamToolQuietly`](#streamtoolquietly), [`withCors`](#withcors), [`allowsCors`](#allowscors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
+- `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`chosenGrants`](#chosengrants), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`serveMcpWithStreaming`](#servemcpwithstreaming), [`streamToolQuietly`](#streamtoolquietly), [`handleToolCatalog`](#handletoolcatalog), [`connectorPage`](#connectorpage), [`withCors`](#withcors), [`allowsCors`](#allowscors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
 - `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage), [`grantCheckbox`](#grantcheckbox)
-- `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse)
+- `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse), [`toolsListRequest`](#toolslistrequest), [`serveToolCatalog`](#servetoolcatalog)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
 - `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`resolveIssuer`](#resolveissuer), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
 - `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed), [`audienceMatches`](#audiencematches)
@@ -93,6 +98,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `tools/docs/markdown.ts`: [`firstGroup`](#firstgroup), [`stripCodeBlocks`](#stripcodeblocks), [`extractCalledNames`](#extractcallednames), [`sliceBetween`](#slicebetween), [`replaceBetween`](#replacebetween), [`extractFunctionSections`](#extractfunctionsections), [`buildSection`](#buildsection), [`extractProcessCitations`](#extractprocesscitations), [`extractDocumentedDirs`](#extractdocumenteddirs), [`extractBacktickedNames`](#extractbacktickednames)
 - `tools/docs/render.ts`: [`formatList`](#formatlist), [`renderGeneratedBlock`](#rendergeneratedblock), [`renderNewSection`](#rendernewsection), [`renderModuleIndex`](#rendermoduleindex), [`computeGeneratedData`](#computegenerateddata), [`closureOf`](#closureof), [`processesByFunction`](#processesbyfunction), [`replaceSectionBlock`](#replacesectionblock), [`appendSection`](#appendsection), [`insertBeforeDataTable`](#insertbeforedatatable), [`removeSection`](#removesection), [`removeEmptyModules`](#removeemptymodules), [`pruneOrphanSections`](#pruneorphansections), [`applyGenerated`](#applygenerated)
 - `tools/docs/run.ts`: [`readOptional`](#readoptional), [`readDocsTexts`](#readdocstexts), [`formatIssues`](#formatissues), [`runCheck`](#runcheck), [`generateFunctionsDoc`](#generatefunctionsdoc), [`runGenerate`](#rungenerate)
+- `tools/smoke/cli.ts`: [`sleepMs`](#sleepms), [`readSmokeCheck`](#readsmokecheck), [`runSmokeCli`](#runsmokecli)
+- `tools/smoke/smoke.ts`: [`wranglerValue`](#wranglervalue), [`workerBaseUrl`](#workerbaseurl), [`fetchWorkersSubdomain`](#fetchworkerssubdomain), [`fetchPublishedTools`](#fetchpublishedtools), [`smokeAttempt`](#smokeattempt), [`runSmokeCheck`](#runsmokecheck)
 
 <!-- index:end -->
 
@@ -2031,15 +2038,15 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/tools.ts`
-- **Signature:** `canvasTools(allowWrite: boolean): readonly ToolSpec<CanvasContext>[]`
-- **Used by:** `canvasRemoteConnector()`
+- **Signature:** `canvasTools(writeBlock: string | null): readonly ToolSpec<CanvasContext>[]`
+- **Used by:** `canvasRemoteConnector()`, `createCanvasUserServer()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
 
-- **Does:** Selects the Canvas tools to register.
-- **Input:** `allowWrite`: whether the write tools are included.
-- **Output:** `CANVAS_READ_TOOLS` and `CANVAS_INBOX_READ_TOOLS`, plus `CANVAS_WRITE_TOOLS` and `CANVAS_INBOX_WRITE_TOOLS` when `allowWrite` is `true`.
+- **Does:** Lists every Canvas tool, always: the write ones run when `writeBlock` is null and otherwise answer each call with that reason.
+- **Input:** `writeBlock`: why writing is off for this user (how to turn it on), or `null` when it is on.
+- **Output:** `CANVAS_READ_TOOLS`, `CANVAS_INBOX_READ_TOOLS`, then `CANVAS_WRITE_TOOLS` and `CANVAS_INBOX_WRITE_TOOLS` through `gateToolSpecs()`.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -2049,8 +2056,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/tools.ts`
 - **Signature:** `createCanvasMcpServer(specs: readonly ToolSpec<CanvasContext>[], ctx: CanvasContext): McpServer`
-- **Used by:** `canvasRemoteConnector()`
-- **Processes:** P03, P08, P09
+- **Used by:** `canvasRemoteConnector()`, `createCanvasUserServer()`
+- **Processes:** P03, P08, P09, P19
 
 <!-- generated:end -->
 
@@ -2069,7 +2076,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/core/env.ts`
 - **Signature:** `envValue(env: EnvVars, key: string): string | null`
 - **Used by:** `containerEnvVars()`, `publicOrigin()`, `readAllowedEmails()`, `readCanvasRemoteSettings()`, `readGmailSettings()`, `readIntInRange()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `readSendAllowlist()`, `readSendSettings()`, `readSleepAfter()`, `readWhatsAppSettings()`, `requiredSecret()`, `requireEnv()`, `resolveIssuer()`
-- **Processes:** P08, P10, P12, P13, P17
+- **Processes:** P08, P10, P12, P13, P17, P19
 
 <!-- generated:end -->
 
@@ -2103,7 +2110,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/core/env.ts`
 - **Signature:** `toEnvVars(env: Readonly<Record<string, unknown>>): EnvVars`
 - **Used by:** `connectors/whatsapp/src/container.ts (module)`, `createGmailDeps()`, `handleWhatsAppFetch()`, `handleWorkerFetch()`, `publicOrigin()`, `runScheduledSync()`
-- **Processes:** P08, P10, P12, P13, P17
+- **Processes:** P08, P10, P12, P13, P17, P19
 
 <!-- generated:end -->
 
@@ -2381,7 +2388,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `textResult(data: unknown, notes: readonly string[] = []): CallToolResult`
 - **Used by:** `connectors/canvas-puc/src/tools-read.ts (module)`, `listFilesWithLinked()`, `toToolResult()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
 
 <!-- generated:end -->
 
@@ -2398,7 +2405,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `errorResult(error: unknown): CallToolResult`
 - **Used by:** `runToolSafely()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
 
 <!-- generated:end -->
 
@@ -2415,7 +2422,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `async runToolSafely(spec: ToolSpec<C>, ctx: C, rawArgs: unknown): Promise<CallToolResult>`
 - **Used by:** `registerToolSpecs()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
 
 <!-- generated:end -->
 
@@ -2431,8 +2438,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `registerToolSpecs(server: McpServer, specs: readonly ToolSpec<C>[], ctx: C): void`
-- **Used by:** `createCanvasMcpServer()`, `createGmailServer()`, `createWhatsAppMcpServer()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14
+- **Used by:** `createCanvasMcpServer()`, `createGmailServer()`, `createWhatsAppCatalogServer()`, `createWhatsAppMcpServer()`
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
 
 <!-- generated:end -->
 
@@ -2448,8 +2455,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `rawToolResult(result: CallToolResult): RawToolResult`
-- **Used by:** `chunkToolResult()`, `connectors/canvas-puc/src/tools-read.ts (module)`, `listFilesWithLinked()`, `mediaResult()`
-- **Processes:** P03, P14
+- **Used by:** `chunkToolResult()`, `connectors/canvas-puc/src/tools-read.ts (module)`, `disabledToolSpec()`, `listFilesWithLinked()`, `mediaResult()`
+- **Processes:** P03, P08, P09, P13, P14, P19
 
 <!-- generated:end -->
 
@@ -2466,7 +2473,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `toToolResult(data: unknown): CallToolResult`
 - **Used by:** `runToolSafely()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
 
 <!-- generated:end -->
 
@@ -2526,7 +2533,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Starts the HTTP server of the remote Canvas connector.
 - **Input:** None (reads the process environment).
 - **Output:** Nothing.
-- **Effects:** Opens the HTTP port and writes to stdout.
+- **Effects:** Opens the HTTP port and writes to stdout; write opt-ins live in memory (`memoryWriteAccessStore()`).
 - **Errors:** Throws if `PUBLIC_URL` or `SEAL_KEY` is missing or invalid.
 
 ## `connectors/canvas-puc/src/remote.ts`
@@ -2587,15 +2594,15 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/remote.ts`
-- **Signature:** `canvasRemoteConnector(settings: CanvasRemoteSettings): RemoteConnector`
+- **Signature:** `canvasRemoteConnector(settings: CanvasRemoteSettings, access: WriteAccessDeps): RemoteConnector`
 - **Used by:** `createWorkerApp()`, `startCanvasRemoteServer()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
 
-- **Does:** Builds the Canvas `RemoteConnector` for the HTTP server.
-- **Input:** `settings`: remote-mode configuration.
-- **Output:** Page texts, token verification, per-token `McpServer` factory and expiry renewal (`renewCanvasToken()`).
+- **Does:** Builds the Canvas `RemoteConnector` for the HTTP server; `access` backs the write-access page.
+- **Input:** `settings`: remote-mode configuration; `access`: write-access dependencies (OAuth settings, opt-in store, clock).
+- **Output:** Page texts, token verification, per-user `McpServer` factory (`createCanvasUserServer()`), list-only `catalogServer`, `download_file` streaming, expiry renewal (`renewCanvasToken()`) and the `GET`/`POST /write-access` pages.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -2741,7 +2748,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/remote.ts`
 - **Signature:** `canvasClientFor(settings: CanvasRemoteSettings, token: string): CanvasClient`
-- **Used by:** `canvasRemoteConnector()`
+- **Used by:** `canvasRemoteConnector()`, `createCanvasUserServer()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
@@ -2769,21 +2776,72 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Canvas GET `/files/:id` and the download.
 - **Errors:** Rejects on invalid arguments (zod), on `resolveCanvasFile()` errors (never with the verifier) or Canvas errors; the remote handler then falls back to the MCP server.
 
-### `canWriteFor`
+### `readOnlyConnectionReason`
 
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/remote.ts`
-- **Signature:** `canWriteFor(settings: CanvasRemoteSettings, grants: readonly string[]): boolean`
+- **Signature:** `readOnlyConnectionReason(link: string): string`
+- **Used by:** `canvasWriteBlock()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Why the write tools are off for a read-only connection, with the link that turns writing on (no new token).
+- **Input:** `link`: the sealed write-access page URL (`writeAccessUrl()`).
+- **Output:** Reason text asking the user to open the link and click "Allow writing", then try again.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `userAllowsWrite`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/remote.ts`
+- **Signature:** `async userAllowsWrite(access: WriteAccessDeps, grant: SealedGrant): Promise<boolean>`
+- **Used by:** `canvasWriteBlock()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Says whether this user may write: the write option ticked at sign-in, or turned on later on the write-access page.
+- **Input:** `access`: write-access dependencies (store); `grant`: the user's sealed grant (secret and grants).
+- **Output:** `true` when the grants include `CANVAS_WRITE_GRANT` or the store holds the opt-in for the token's fingerprint.
+- **Effects:** KV read (through `hasStoredWriteOptIn()`) when the grant lacks the write permission.
+- **Errors:** None (a store failure counts as off).
+
+### `canvasWriteBlock`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/remote.ts`
+- **Signature:** `async canvasWriteBlock(settings: CanvasRemoteSettings, access: WriteAccessDeps, grant: SealedGrant): Promise<string | null>`
+- **Used by:** `createCanvasUserServer()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Why the write tools are off for this user, or null when they are on; the tools stay listed either way.
+- **Input:** `settings`: remote Canvas settings (`allowWrite`); `access`: write-access dependencies; `grant`: the user's sealed grant.
+- **Output:** `CANVAS_WRITE_OFF_REASON` when the server turned writing off; `null` when the user may write; otherwise `readOnlyConnectionReason()` with a fresh write-access link.
+- **Effects:** Like `userAllowsWrite()` (KV read).
+- **Errors:** None.
+
+### `createCanvasUserServer`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/remote.ts`
+- **Signature:** `async createCanvasUserServer(settings: CanvasRemoteSettings, access: WriteAccessDeps, grant: SealedGrant): Promise<McpServer>`
 - **Used by:** `canvasRemoteConnector()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
 
-- **Does:** Says whether a Canvas user gets the write tools: the server allows writing (`CANVAS_ALLOW_WRITE`) AND the user opted in at login (`write` grant). Old tokens have no grant and are read-only.
-- **Input:** `settings`; `grants`: permissions sealed in the token.
-- **Output:** `true`/`false`.
-- **Effects:** None.
+- **Does:** Creates the user's MCP server: every tool listed, the write ones refusing with the reason when writing is off.
+- **Input:** `settings`: remote Canvas settings; `access`: write-access dependencies; `grant`: the user's sealed grant (Canvas token and grants).
+- **Output:** `McpServer` with `canvasTools(block)` bound to a Canvas client for the user's token and a clock.
+- **Effects:** Like `canvasWriteBlock()` (KV read); the tools themselves only call Canvas when run.
 - **Errors:** None.
 
 ## `src/remote/handler.ts`
@@ -2811,8 +2869,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/handler.ts`
 - **Signature:** `htmlResponse(html: string, status = 200, formTarget: string | null = null): Response`
-- **Used by:** `consentPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `linkConfirmPage()`, `loginPageFor()`, `messagePage()`, `pairPage()`, `routePairRequest()`
-- **Processes:** P08, P10, P11, P13, P15
+- **Used by:** `consentPage()`, `expiredWriteAccessPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `linkConfirmPage()`, `loginPageFor()`, `messagePage()`, `pairPage()`, `routePairRequest()`, `showWriteAccess()`, `submitWriteAccess()`
+- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19
 
 <!-- generated:end -->
 
@@ -2828,8 +2886,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/handler.ts`
 - **Signature:** `async readForm(request: Request): Promise<URLSearchParams>`
-- **Used by:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`, `redeemConfirmedTicket()`, `submitAuthorize()`
-- **Processes:** P08, P10, P11, P13, P15
+- **Used by:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`, `redeemConfirmedTicket()`, `submitAuthorize()`, `submitWriteAccess()`
+- **Processes:** P03, P08, P09, P10, P11, P13, P15
 
 <!-- generated:end -->
 
@@ -2982,7 +3040,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/handler.ts`
 - **Signature:** `withCors(response: Response): Response`
 - **Used by:** `routeRemoteRequest()`
-- **Processes:** P08, P13
+- **Processes:** P08, P09, P13
 
 <!-- generated:end -->
 
@@ -2999,15 +3057,15 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/handler.ts`
 - **Signature:** `async routeRemoteRequest(app: RemoteApp, request: Request): Promise<Response>`
 - **Used by:** `createRemoteHandler()`
-- **Processes:** P08, P13
+- **Processes:** P08, P09, P13
 
 <!-- generated:end -->
 
-- **Does:** Picks the route by method and path.
+- **Does:** Picks the route by method and path; a connector page is used only when no core route matches.
 - **Input:** `app`; `request`.
-- **Output:** Route response, with CORS only on API routes (`allowsCors`); 204 on preflight; 404 on an unknown path.
-- **Effects:** Those of the chosen route.
-- **Errors:** Passes route errors through.
+- **Output:** Core route response, with CORS only on API routes (`allowsCors`); a connector page response (no CORS); 204 on preflight; 404 on an unknown path.
+- **Effects:** Those of the chosen route or page.
+- **Errors:** Passes route and page errors through.
 
 ### `createRemoteHandler`
 
@@ -3033,7 +3091,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/handler.ts`
 - **Signature:** `pageSecurityPolicy(formTarget: string | null): string`
 - **Used by:** `htmlResponse()`
-- **Processes:** P08, P10, P11, P13, P15
+- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19
 
 <!-- generated:end -->
 
@@ -3105,10 +3163,10 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Serves `/mcp`: a call the connector streams goes straight out; everything else goes to a new MCP server created for this request with the user's grant.
+- **Does:** Serves `/mcp`: a call the connector streams goes straight out; everything else goes to a new MCP server created (and awaited) for this request with the user's grant.
 - **Input:** `connector`; `grant`: the user's secret and permissions; `request`.
 - **Output:** `Response`.
-- **Effects:** Like `streamToolQuietly()` and `serveMcpRequest()`.
+- **Effects:** Like `streamToolQuietly()`, `connector.createServer()` and `serveMcpRequest()`.
 - **Errors:** None (failures become MCP responses).
 
 ### `streamToolQuietly`
@@ -3152,7 +3210,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/handler.ts`
 - **Signature:** `allowsCors(path: string): boolean`
 - **Used by:** `routeRemoteRequest()`
-- **Processes:** P08, P13
+- **Processes:** P08, P09, P13
 
 <!-- generated:end -->
 
@@ -3160,6 +3218,40 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `path`: request path without trailing slash.
 - **Output:** `true` for API routes.
 - **Effects:** None.
+- **Errors:** None.
+
+### `handleToolCatalog`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/handler.ts`
+- **Signature:** `handleToolCatalog(app: RemoteApp, request: Request): Promise<Response>`
+- **Used by:** `src/remote/handler.ts (module)`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** `GET /tools`: serves the public tool catalog (names, schemas, annotations; never user data).
+- **Input:** `app`: the remote app (its connector's `catalogServer`); `request`: the received request (origin).
+- **Output:** The `tools/list` JSON-RPC response of the catalog server, or 404 when the connector has no `catalogServer`.
+- **Effects:** Like `serveToolCatalog()` (in-process MCP round trip; no network, no user data).
+- **Errors:** None.
+
+### `connectorPage`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/handler.ts`
+- **Signature:** `connectorPage(app: RemoteApp, key: string): ((request: Request) => Promise<Response>) | undefined`
+- **Used by:** `routeRemoteRequest()`
+- **Processes:** P08, P09, P13
+
+<!-- generated:end -->
+
+- **Does:** Looks up the connector's own page for a `METHOD path` key.
+- **Input:** `app`: the remote app; `key`: `METHOD path` (e.g. `GET /write-access`).
+- **Output:** The page handler from `connector.pages`, or `undefined` when there is none.
+- **Effects:** None (pure).
 - **Errors:** None.
 
 ## `src/remote/login-page.ts`
@@ -3170,8 +3262,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/login-page.ts`
 - **Signature:** `escapeHtml(value: string): string`
-- **Used by:** `alertHtml()`, `consentPageBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`
-- **Processes:** P08, P10, P11, P13, P15
+- **Used by:** `alertHtml()`, `consentPageBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`, `renderWriteAccessPage()`
+- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19
 
 <!-- generated:end -->
 
@@ -3223,8 +3315,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/mcp-endpoint.ts`
 - **Signature:** `async serveMcpRequest(server: McpServer, request: Request): Promise<Response>`
-- **Used by:** `handleMcpApi()`, `serveMcpWithStreaming()`
-- **Processes:** P09, P10, P12, P14
+- **Used by:** `handleMcpApi()`, `serveMcpWithStreaming()`, `serveToolCatalog()`
+- **Processes:** P09, P10, P12, P14, P19
 
 <!-- generated:end -->
 
@@ -3250,6 +3342,40 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** 401 `Response` with `WWW-Authenticate` pointing to the resource metadata.
 - **Effects:** None (pure).
 - **Errors:** None.
+
+### `toolsListRequest`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/mcp-endpoint.ts`
+- **Signature:** `toolsListRequest(origin: string): Request`
+- **Used by:** `serveToolCatalog()`
+- **Processes:** P10, P19
+
+<!-- generated:end -->
+
+- **Does:** Builds the JSON-RPC `tools/list` request, as an MCP client would POST it to `/mcp`.
+- **Input:** `origin`: the server origin.
+- **Output:** `Request` `POST <origin>/mcp` with JSON content type, the MCP `accept` header and a `tools/list` body.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `serveToolCatalog`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/mcp-endpoint.ts`
+- **Signature:** `serveToolCatalog(server: McpServer, origin: string): Promise<Response>`
+- **Used by:** `handleDefaultRequest()`, `handleToolCatalog()`
+- **Processes:** P10, P19
+
+<!-- generated:end -->
+
+- **Does:** Answers the catalog route with the `tools/list` response of a server that only lists its tools.
+- **Input:** `server`: a list-only MCP server; `origin`: the request origin.
+- **Output:** `Response` with the JSON-RPC `tools/list` result.
+- **Effects:** Like `serveMcpRequest()`: connects and closes the server in process.
+- **Errors:** None (failures become MCP responses).
 
 ## `src/remote/node-server.ts`
 
@@ -3587,7 +3713,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/seal.ts`
 - **Signature:** `parseSealKey(raw: string | null, name = 'SEAL_KEY'): Buffer`
 - **Used by:** `readGmailSettings()`, `readOAuthSettings()`
-- **Processes:** P08, P10, P12, P13
+- **Processes:** P08, P10, P12, P13, P19
 
 <!-- generated:end -->
 
@@ -3603,8 +3729,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/seal.ts`
 - **Signature:** `sealPayload(payload: unknown, key: Buffer): string`
-- **Used by:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `showLinkConfirmation()`, `startPairLogin()`, `storeLinkRequest()`
-- **Processes:** P08, P10, P11, P12, P13, P15, P18
+- **Used by:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `showLinkConfirmation()`, `startPairLogin()`, `storeLinkRequest()`, `writeAccessUrl()`
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P15, P18
 
 <!-- generated:end -->
 
@@ -3621,7 +3747,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/seal.ts`
 - **Signature:** `unsealPayload(sealed: string, key: Buffer): Record<string, unknown> | null`
 - **Used by:** `openSealed()`
-- **Processes:** P08, P09, P10, P11, P12, P13, P14, P15, P18
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18
 
 <!-- generated:end -->
 
@@ -3637,8 +3763,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/seal.ts`
 - **Signature:** `openSealed(sealed: string, key: Buffer, expected: SealExpectation): SealedClaims | null`
-- **Used by:** `clientRedirectUris()`, `isConfirmedInThisBrowser()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openLinkTicket()`, `openOwnerAccounts()`, `readAccessGrant()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `takeLinkRequest()`
-- **Processes:** P08, P09, P10, P11, P12, P13, P14, P15, P18
+- **Used by:** `clientRedirectUris()`, `isConfirmedInThisBrowser()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openLinkTicket()`, `openOwnerAccounts()`, `openWriteTicket()`, `readAccessGrant()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `takeLinkRequest()`
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18
 
 <!-- generated:end -->
 
@@ -3655,7 +3781,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/seal.ts`
 - **Signature:** `audienceMatches(claims: Readonly<Record<string, unknown>>, expected: SealExpectation): boolean`
 - **Used by:** `openSealed()`
-- **Processes:** P08, P09, P10, P11, P12, P13, P14, P15, P18
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18
 
 <!-- generated:end -->
 
@@ -3827,15 +3953,15 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/canvas-puc/src/worker.ts`
-- **Signature:** `createWorkerApp(env: EnvVars, origin: string): RemoteApp`
+- **Signature:** `createWorkerApp(env: EnvVars, origin: string, store: WriteAccessStore): RemoteApp`
 - **Used by:** `handleWorkerFetch()`
 - **Processes:** P08
 
 <!-- generated:end -->
 
 - **Does:** Builds the remote Canvas app for the Worker.
-- **Input:** `env`: text variables; `origin`: request origin (issuer when there is no `PUBLIC_URL`).
-- **Output:** `RemoteApp` with OAuth, the Canvas connector and a clock in seconds.
+- **Input:** `env`: text variables; `origin`: request origin (issuer when there is no `PUBLIC_URL`); `store`: the write opt-in store.
+- **Output:** `RemoteApp` with OAuth, the Canvas connector (with its write-access dependencies) and a clock in seconds.
 - **Effects:** None (pure).
 - **Errors:** Those of `readOAuthSettings` (no `SEAL_KEY`).
 
@@ -3855,6 +3981,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** Response from the remote handler; 500 with the explanation if the configuration is invalid.
 - **Effects:** Those of the remote handler (network to Canvas).
 - **Errors:** None: an invalid configuration becomes 500.
+
+### `writeAccessStoreFrom`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/worker.ts`
+- **Signature:** `writeAccessStoreFrom(env: Readonly<Record<string, unknown>>): WriteAccessStore`
+- **Used by:** `handleWorkerFetch()`
+- **Processes:** P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Picks the store of the write opt-ins: the `CANVAS_KV` binding, or memory when it is missing (misconfigured).
+- **Input:** `env`: Worker bindings and variables.
+- **Output:** `WriteAccessStore`: the KV namespace, or `memoryWriteAccessStore()`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/canvas-puc/src/files.ts`
 
@@ -4852,7 +4995,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/config.ts`
 - **Signature:** `isEmailAddress(text: string): boolean`
 - **Used by:** `parseAllowedEmails()`, `parseMailAddress()`
-- **Processes:** P10, P12, P18
+- **Processes:** P10, P12, P18, P19
 
 <!-- generated:end -->
 
@@ -4869,7 +5012,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/config.ts`
 - **Signature:** `parseAllowedEmails(raw: string | null): string[] | null`
 - **Used by:** `readGmailSettings()`
-- **Processes:** P10, P12
+- **Processes:** P10, P12, P19
 
 <!-- generated:end -->
 
@@ -4886,7 +5029,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/config.ts`
 - **Signature:** `requiredSecret(env: EnvVars, name: string): string`
 - **Used by:** `readConsentSecret()`, `readGmailSettings()`
-- **Processes:** P10, P12
+- **Processes:** P10, P12, P19
 
 <!-- generated:end -->
 
@@ -4903,7 +5046,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/config.ts`
 - **Signature:** `readConsentSecret(env: EnvVars): string`
 - **Used by:** `readGmailSettings()`
-- **Processes:** P10, P12
+- **Processes:** P10, P12, P19
 
 <!-- generated:end -->
 
@@ -4920,7 +5063,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/config.ts`
 - **Signature:** `readGmailSettings(env: EnvVars): GmailSettings`
 - **Used by:** `createGmailDeps()`
-- **Processes:** P10, P12
+- **Processes:** P10, P12, P19
 
 <!-- generated:end -->
 
@@ -6054,7 +6197,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/pages.ts`
 - **Signature:** `pageDocument(title: string, body: string): string`
 - **Used by:** `consentPage()`, `linkConfirmPage()`, `messagePage()`
-- **Processes:** P10, P11
+- **Processes:** P10, P11, P19
 
 <!-- generated:end -->
 
@@ -6071,7 +6214,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/pages.ts`
 - **Signature:** `messagePage(title: string, message: string, status = 200): Response`
 - **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`, `notOwnerPage()`, `verifyOwnerThenLink()`
-- **Processes:** P10, P11
+- **Processes:** P10, P11, P19
 
 <!-- generated:end -->
 
@@ -6659,7 +6802,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/worker.ts`
 - **Signature:** `createGmailDeps(env: GmailWorkerEnv, origin: string): GmailDeps`
 - **Used by:** `handleDefaultRequest()`, `handleMcpApi()`
-- **Processes:** P10, P12
+- **Processes:** P10, P12, P19
 
 <!-- generated:end -->
 
@@ -6675,8 +6818,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/gmail/src/worker.ts`
 - **Signature:** `createGmailServer(deps: OwnerDeps): McpServer`
-- **Used by:** `handleMcpApi()`
-- **Processes:** P10, P12
+- **Used by:** `handleDefaultRequest()`, `handleMcpApi()`
+- **Processes:** P10, P12, P19
 
 <!-- generated:end -->
 
@@ -6693,7 +6836,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/worker.ts`
 - **Signature:** `configErrorResponse(error: unknown): Response`
 - **Used by:** `handleDefaultRequest()`, `handleMcpApi()`
-- **Processes:** P10, P12
+- **Processes:** P10, P12, P19
 
 <!-- generated:end -->
 
@@ -6727,13 +6870,13 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/worker.ts`
 - **Signature:** `async handleDefaultRequest(request: Request, env: GmailWorkerEnv): Promise<Response>`
 - **Used by:** `createGmailProvider()`
-- **Processes:** P10
+- **Processes:** P10, P19
 
 <!-- generated:end -->
 
 - **Does:** Handles the connector's own routes outside `/mcp`.
 - **Input:** `request`: received request. `env`: Worker variables, secrets and bindings, with `OAUTH_PROVIDER` injected by the library.
-- **Output:** 200 `ok` on `GET /`; the response of the matched route; 404 page if the route does not exist or `OAUTH_PROVIDER` is missing; 500 if the configuration is invalid.
+- **Output:** 200 `ok` on `GET /`; the public tool catalog on `GET /tools` (`serveToolCatalog()` with a list-only server); the response of the matched route; 404 page if the route does not exist or `OAUTH_PROVIDER` is missing; 500 if the configuration is invalid.
 - **Effects:** Those of the handled route: KV, `OAuthHelpers` (KV OAUTH_KV), network (Google) and cookies.
 - **Errors:** None: invalid configuration becomes 500; only propagates the unhandled errors of the link route (code exchange and `id_token`).
 
@@ -6761,7 +6904,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/gmail/src/worker.ts`
 - **Signature:** `publicOrigin(env: GmailWorkerEnv, request: Request): string`
 - **Used by:** `handleDefaultRequest()`, `handleGmailWorkerFetch()`, `handleMcpApi()`
-- **Processes:** P10, P12
+- **Processes:** P10, P12, P19
 
 <!-- generated:end -->
 
@@ -8889,14 +9032,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/tools.ts`
 - **Signature:** `whatsappTools(settings: WhatsAppSettings): ToolSpec<WhatsAppToolContext>[]`
-- **Used by:** `createWhatsAppMcpServer()`
-- **Processes:** P13, P14
+- **Used by:** `createWhatsAppCatalogServer()`, `createWhatsAppMcpServer()`
+- **Processes:** P13, P14, P19
 
 <!-- generated:end -->
 
-- **Does:** Active tools: the read tools and, only with `ENABLE_SEND`, the send tool.
-- **Input:** `settings`.
-- **Output:** List of `ToolSpec`.
+- **Does:** Lists every WhatsApp tool, always: without `ENABLE_SEND` the send tool answers each call that sending is off.
+- **Input:** `settings`: WhatsApp settings (`enableSend`).
+- **Output:** `READ_TOOLS` plus `send_message`, switched off with `WHATSAPP_SEND_OFF_REASON` when `enableSend` is false.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -8950,6 +9093,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** The bridge status, with `partial: true` if the wait ran out first.
 - **Effects:** Network: `POST /sync/wait` on the bridge.
 - **Errors:** Those of `bridgeJson`.
+
+### `createWhatsAppCatalogServer`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/tools.ts`
+- **Signature:** `createWhatsAppCatalogServer(settings: WhatsAppSettings): McpServer`
+- **Used by:** `whatsappRemoteConnector()`
+- **Processes:** P13, P19
+
+<!-- generated:end -->
+
+- **Does:** Creates a server that only lists this deployment's tools (public catalog at `GET /tools`); none of them can run.
+- **Input:** `settings`: WhatsApp settings (`enableSend`).
+- **Output:** `McpServer` with `whatsappTools(settings)` registered on `listOnlyContext()`.
+- **Effects:** None (pure).
+- **Errors:** None when created; running a tool throws through `refuseListOnlyUse()`.
 
 ## `connectors/whatsapp/src/worker-env.ts`
 
@@ -10882,14 +11042,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/inbox.ts`
 - **Signature:** `newMessagePayload(msg: NewMessage): Readonly<Record<string, unknown>>`
-- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`
+- **Used by:** `sendInboxMessage()`
 - **Processes:** P03
 
 <!-- generated:end -->
 
 - **Does:** Builds the `POST /conversations` body for one new group conversation.
-- **Input:** `msg`: recipients (user ids), subject, body and optional `course_id`.
-- **Output:** Body with `recipients` as strings, `force_new`, `group_conversation` and, with a course, `context_code`.
+- **Input:** `msg`: recipients (user ids), subject, body, optional `course_id` and optional `attachment_ids`.
+- **Output:** Body with `recipients` as strings, `force_new`, `group_conversation`, with a course `context_code` and, with attachments, `attachment_ids` (`attachmentIdsField()`).
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -10899,7 +11059,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/inbox.ts`
 - **Signature:** `sentConversation(created: readonly CanvasConversation[]): View`
-- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`
+- **Used by:** `sendInboxMessage()`
 - **Processes:** P03
 
 <!-- generated:end -->
@@ -10916,7 +11076,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/inbox.ts`
 - **Signature:** `sentReply(c: CanvasConversation): View`
-- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`
+- **Used by:** `replyInboxMessage()`
 - **Processes:** P03
 
 <!-- generated:end -->
@@ -10924,6 +11084,40 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Turns the `add_message` response into the reply result.
 - **Input:** `c`: conversation Canvas returned (newest message first).
 - **Output:** `{ ok, conversation_id, message_id, sent_at }`; ids/dates are `null` without messages.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `attachmentIdsField`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/inbox.ts`
+- **Signature:** `attachmentIdsField(ids: readonly Id[] | undefined): { attachment_ids?: string[] }`
+- **Used by:** `newMessagePayload()`, `replyPayload()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Builds the `attachment_ids` field of a message body, absent when there are no attachments.
+- **Input:** `ids`: uploaded file IDs, or `undefined`.
+- **Output:** `{ attachment_ids: string[] }` when there are IDs; `{}` otherwise.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `replyPayload`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/inbox.ts`
+- **Signature:** `replyPayload(body: string, ids: readonly Id[] | undefined): Readonly<Record<string, unknown>>`
+- **Used by:** `replyInboxMessage()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Builds the body of `POST /conversations/:id/add_message`: the text and, when given, the attachment IDs.
+- **Input:** `body`: plain text; `ids`: uploaded file IDs, or `undefined`.
+- **Output:** `{ body }` plus `attachment_ids` (via `attachmentIdsField()`).
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -11451,14 +11645,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/upload.ts`
 - **Signature:** `uploadSizeRefusal(size: number): string | null`
-- **Used by:** `uploadRefusal()`
+- **Used by:** `attachmentsRefusal()`, `uploadRefusal()`
 - **Processes:** P03
 
 <!-- generated:end -->
 
 - **Does:** Checks the size of a file to upload.
 - **Input:** `size`: the size in bytes.
-- **Output:** `The file is empty.`, a message above `MAX_UPLOAD_BYTES` (5 MB), or `null`.
+- **Output:** `The file is empty.`, `The file is N MB, above the 5 MB limit; upload it in Canvas itself.`, or `null`.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -11502,7 +11696,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/upload.ts`
 - **Signature:** `uploadedFileFromArgs(args: FileSubmissionArgs): UploadedBytes`
-- **Used by:** `connectors/canvas-puc/src/tools-write.ts (module)`
+- **Used by:** `connectors/canvas-puc/src/tools-write.ts (module)`, `prepareAttachments()`
 - **Processes:** P03
 
 <!-- generated:end -->
@@ -11527,8 +11721,25 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Submits a file to an assignment through Canvas's three-step upload, after checking the assignment.
 - **Input:** `client`: the Canvas client; `base`: `/courses/:c/assignments/:a`; `file`: the file to upload.
 - **Output:** `{ ok, submitted_at, attempt, file: { id, name, size } }`.
-- **Effects:** Network: `GET` the assignment, `POST .../submissions/self/files`, the upload (`client.upload`) and `POST .../submissions` — a real submission the teacher sees.
+- **Effects:** Network: `GET` the assignment, the three-step upload to `.../submissions/self/files` (`uploadCanvasFile()`) and `POST .../submissions` — a real submission the teacher sees.
 - **Errors:** Throws the `uploadRefusal()` message before uploading anything; propagates `CanvasApiError` and upload errors.
+
+### `uploadCanvasFile`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/upload.ts`
+- **Signature:** `async uploadCanvasFile(client: CanvasClient, request: CanvasUploadRequest): Promise<CanvasAttachment>`
+- **Used by:** `submitFileAssignment()`, `uploadMessageAttachment()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Runs Canvas's three-step upload: asks `path` for a slot, sends the file there and returns the confirmed file.
+- **Input:** `client`: the Canvas client; `request`: step-1 `path`, the `file` and optional `extra` step-1 fields (e.g. target folder).
+- **Output:** The uploaded `CanvasAttachment` (id, name, size).
+- **Effects:** Network: `POST <path>` (slot) and the upload to the slot (`client.upload`).
+- **Errors:** Propagates `CanvasApiError` and upload errors.
 
 ## `src/core/redact.ts`
 
@@ -11539,7 +11750,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/core/redact.ts`
 - **Signature:** `redactSecrets(text: string): string`
 - **Used by:** `errorResult()`, `handleUpstreamCallback()`, `loginPageFor()`, `messagePage()`, `redactForLog()`
-- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P16
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P16, P19
 
 <!-- generated:end -->
 
@@ -11572,8 +11783,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/redact.ts`
 - **Signature:** `errorMessage(error: unknown): string`
-- **Used by:** `errorResult()`, `handleAuthorizeSubmit()`, `handleUpstreamCallback()`, `logWarning()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14, P16
+- **Used by:** `attachmentUploadError()`, `errorResult()`, `handleAuthorizeSubmit()`, `handleUpstreamCallback()`, `logWarning()`
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P16, P19
 
 <!-- generated:end -->
 
@@ -11600,189 +11811,915 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** `console.warn`.
 - **Errors:** None.
 
+## `connectors/canvas-puc/src/message-attachments.ts`
+
+### `attachmentsRefusal`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/message-attachments.ts`
+- **Signature:** `attachmentsRefusal(files: readonly UploadedBytes[]): string | null`
+- **Used by:** `prepareAttachments()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Says why the files cannot be attached: the first empty or oversized one, by name.
+- **Input:** `files`: the decoded attachments.
+- **Output:** `Attachment "<name>": <uploadSizeRefusal()> Nothing was sent.`, or `null` when all can go.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `prepareAttachments`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/message-attachments.ts`
+- **Signature:** `prepareAttachments(list: readonly FileSubmissionArgs[] | undefined): UploadedBytes[]`
+- **Used by:** `replyInboxMessage()`, `sendInboxMessage()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Decodes and checks the attachments of a tool call before any upload.
+- **Input:** `list`: the `attachments` argument (`FileSubmissionArgs[]`), or `undefined`.
+- **Output:** The files to upload (`UploadedBytes[]`; empty without attachments).
+- **Effects:** None (pure).
+- **Errors:** Throws the `attachmentsRefusal()` message, or the `decodeUploadContent()` error on invalid base64.
+
+### `attachmentUploadError`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/message-attachments.ts`
+- **Signature:** `attachmentUploadError(name: string, error: unknown): Error`
+- **Used by:** `uploadMessageAttachment()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Builds the error of a failed attachment upload: which file, why, and that the message was not sent.
+- **Input:** `name`: file name; `error`: the upload failure.
+- **Output:** `Error` `Could not upload attachment "<name>" (<message>). Nothing was sent.`
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `uploadMessageAttachment`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/message-attachments.ts`
+- **Signature:** `async uploadMessageAttachment(client: CanvasClient, file: UploadedBytes): Promise<CanvasAttachment>`
+- **Used by:** `uploadMessageAttachments()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Uploads one attachment to the user's conversation attachments folder (steps 1–3).
+- **Input:** `client`: the Canvas client; `file`: the decoded attachment.
+- **Output:** The uploaded `CanvasAttachment`.
+- **Effects:** Network: `POST /users/self/files` (folder `conversation attachments`, rename on duplicate) and the upload.
+- **Errors:** Throws `attachmentUploadError()` on any failure.
+
+### `uploadMessageAttachments`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/message-attachments.ts`
+- **Signature:** `async uploadMessageAttachments(client: CanvasClient, files: readonly UploadedBytes[]): Promise<CanvasAttachment[]>`
+- **Used by:** `replyInboxMessage()`, `sendInboxMessage()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Uploads the attachments one by one, in order, stopping at the first failure.
+- **Input:** `client`: the Canvas client; `files`: the decoded attachments.
+- **Output:** The uploaded files, in order.
+- **Effects:** Network: like `uploadMessageAttachment()` per file.
+- **Errors:** Propagates the `attachmentUploadError()` of the first failure (later files are not uploaded).
+
+### `attachmentIds`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/message-attachments.ts`
+- **Signature:** `attachmentIds(uploaded: readonly CanvasAttachment[]): Id[]`
+- **Used by:** `replyInboxMessage()`, `sendInboxMessage()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Takes the IDs of the uploaded files, for the message's `attachment_ids`.
+- **Input:** `uploaded`: the uploaded files.
+- **Output:** Their IDs, without missing ones.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `attachmentSummary`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/message-attachments.ts`
+- **Signature:** `attachmentSummary(uploaded: readonly CanvasAttachment[]): readonly unknown[]`
+- **Used by:** `replyInboxMessage()`, `sendInboxMessage()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Builds the short view of the attached files returned to Claude.
+- **Input:** `uploaded`: the uploaded files.
+- **Output:** `{ id, name, size }` per file.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/canvas-puc/src/tools-inbox.ts`
+
+### `sendInboxMessage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/tools-inbox.ts`
+- **Signature:** `async sendInboxMessage(client: CanvasClient, args: SendMessageArgs): Promise<View>`
+- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Sends a new inbox message: checks and uploads the attachments first, then creates the conversation.
+- **Input:** `client`: the Canvas client; `args`: `recipient_ids`, `subject`, `body`, optional `course_id` and `attachments`.
+- **Output:** `sentConversation()` view plus `attachments` (`attachmentSummary()`).
+- **Effects:** Network: the attachment uploads, then `POST /conversations` — a real message the recipients see.
+- **Errors:** Throws before anything is uploaded when an attachment is refused; propagates upload errors (nothing sent) and `CanvasApiError`.
+
+### `replyInboxMessage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/tools-inbox.ts`
+- **Signature:** `async replyInboxMessage(client: CanvasClient, args: ReplyMessageArgs): Promise<View>`
+- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Replies in a conversation: checks and uploads the attachments first, then adds the message.
+- **Input:** `client`: the Canvas client; `args`: `conversation_id`, `body` and optional `attachments`.
+- **Output:** `sentReply()` view plus `attachments` (`attachmentSummary()`).
+- **Effects:** Network: the attachment uploads, then `POST /conversations/:id/add_message` — a real message all participants see.
+- **Errors:** Throws before anything is uploaded when an attachment is refused; propagates upload errors (nothing sent) and `CanvasApiError`.
+
+## `connectors/canvas-puc/src/write-access.ts`
+
+### `tokenFingerprint`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `tokenFingerprint(token: string): string`
+- **Used by:** `hasStoredWriteOptIn()`, `writeAccessUrl()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Computes the SHA-256 of the Canvas token in hex: identifies the connection without storing the token.
+- **Input:** `token`: the Canvas token.
+- **Output:** 64-character hex digest.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `writeAccessKey`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `writeAccessKey(fingerprint: string): string`
+- **Used by:** `hasStoredWriteOptIn()`, `showWriteAccess()`, `submitWriteAccess()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Builds the store key of a token's write opt-in.
+- **Input:** `fingerprint`: the token fingerprint.
+- **Output:** `write:<fingerprint>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `hasStoredWriteOptIn`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `async hasStoredWriteOptIn(store: WriteAccessStore, token: string): Promise<boolean>`
+- **Used by:** `userAllowsWrite()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Says whether this token's user turned writing on through the write-access page.
+- **Input:** `store`: the opt-in store; `token`: the Canvas token.
+- **Output:** `true` when the key `write:<fingerprint>` holds `on`.
+- **Effects:** KV read.
+- **Errors:** None (a store failure counts as off).
+
+### `writeAccessUrl`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `writeAccessUrl(deps: WriteAccessDeps, token: string): string`
+- **Used by:** `canvasWriteBlock()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Builds the link to the write-access page, carrying a sealed ticket with the token's fingerprint (never the token).
+- **Input:** `deps`: OAuth settings (issuer, seal key) and clock; `token`: the Canvas token.
+- **Output:** `<issuer>/write-access?t=<sealed ticket>`, valid for `WRITE_TICKET_TTL_SECONDS`.
+- **Effects:** None (pure apart from the clock and the seal's random IV).
+- **Errors:** None.
+
+### `openWriteTicket`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `openWriteTicket(deps: WriteAccessDeps, ticket: string): string | null`
+- **Used by:** `showWriteAccess()`, `submitWriteAccess()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Opens the ticket of the write-access page.
+- **Input:** `deps`: OAuth settings and clock; `ticket`: the sealed `t` value.
+- **Output:** The token fingerprint, or `null` when the ticket is invalid, expired or for another server.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `renderWriteAccessPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `renderWriteAccessPage(ticket: string, enabled: boolean): string`
+- **Used by:** `showWriteAccess()`, `submitWriteAccess()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Renders the HTML of the write-access page: the current state and one button to change it (no script).
+- **Input:** `ticket`: the sealed ticket (kept in a hidden field); `enabled`: whether writing is on.
+- **Output:** HTML page with a POST form to `/write-access` (`Allow writing` or `Turn writing off`).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `expiredWriteAccessPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `expiredWriteAccessPage(): Response`
+- **Used by:** `showWriteAccess()`, `submitWriteAccess()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Builds the page shown when the write-access link expired or was tampered with.
+- **Input:** None.
+- **Output:** 400 HTML response asking the user to ask Claude again for a new link.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `showWriteAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `async showWriteAccess(deps: WriteAccessDeps, request: Request): Promise<Response>`
+- **Used by:** `canvasRemoteConnector()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** `GET /write-access`: shows the writing state of the connection behind the ticket.
+- **Input:** `deps`: write-access dependencies; `request`: the request with `?t=<ticket>`.
+- **Output:** 200 page from `renderWriteAccessPage()`, or `expiredWriteAccessPage()` for a bad ticket.
+- **Effects:** KV read.
+- **Errors:** Propagates store errors.
+
+### `submitWriteAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `async submitWriteAccess(deps: WriteAccessDeps, request: Request): Promise<Response>`
+- **Used by:** `canvasRemoteConnector()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** `POST /write-access`: stores (or removes) the write opt-in of the connection behind the ticket.
+- **Input:** `deps`: write-access dependencies; `request`: form with `t` (ticket) and `action` (`on`/`off`).
+- **Output:** 200 page with the new state, or `expiredWriteAccessPage()` for a bad ticket.
+- **Effects:** KV write: `put write:<fingerprint> = on` or `delete`.
+- **Errors:** Propagates store errors.
+
+### `memoryWriteAccessStore`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/write-access.ts`
+- **Signature:** `memoryWriteAccessStore(): WriteAccessStore`
+- **Used by:** `startCanvasRemoteServer()`, `writeAccessStoreFrom()`
+- **Processes:** P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Creates a write opt-in store kept in memory (local Node server and tests).
+- **Input:** None.
+- **Output:** `WriteAccessStore` over a `Map`.
+- **Effects:** None (in-memory state only).
+- **Errors:** None.
+
+## `src/mcp/tool-contract.ts`
+
+### `readToolContract`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-contract.ts`
+- **Signature:** `readToolContract(json: unknown): ToolContractEntry[]`
+- **Used by:** `readSmokeCheck()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Reads a contract file (`{ "tools": [{ "name", "readOnly" }] }`).
+- **Input:** `json`: the parsed `tool-contract.json`.
+- **Output:** Contract entries normalized and sorted by name (`toolContractOf()`).
+- **Effects:** None (pure).
+- **Errors:** Throws `Invalid tool contract...` when it does not have that shape.
+
+### `contractEntryAsListed`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-contract.ts`
+- **Signature:** `contractEntryAsListed(entry: ToolContractEntry): ListedTool`
+- **Used by:** `readToolContract()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Turns a contract entry into the `tools/list` shape, so both sides are normalized the same way.
+- **Input:** `entry`: `{ name, readOnly }`.
+- **Output:** `{ name, annotations: { readOnlyHint } }`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `toolsFromListResponse`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-contract.ts`
+- **Signature:** `toolsFromListResponse(json: unknown): ListedTool[]`
+- **Used by:** `fetchPublishedTools()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Extracts the tools of a JSON-RPC `tools/list` response.
+- **Input:** `json`: the parsed response.
+- **Output:** `result.tools` as `ListedTool[]`.
+- **Effects:** None (pure).
+- **Errors:** Throws `tools/list did not return tools: ...` (first 300 characters) when it is an error or has no tool list.
+
+### `toolContractOf`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-contract.ts`
+- **Signature:** `toolContractOf(tools: readonly ListedTool[]): ToolContractEntry[]`
+- **Used by:** `fetchPublishedTools()`, `readToolContract()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Turns a `tools/list` answer into contract entries, sorted by name.
+- **Input:** `tools`: listed tools.
+- **Output:** `{ name, readOnly }[]`, `readOnly` true only when `readOnlyHint` is `true`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `toolContractDiff`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-contract.ts`
+- **Signature:** `toolContractDiff(expected: readonly ToolContractEntry[], listed: readonly ToolContractEntry[]): string[]`
+- **Used by:** `smokeAttempt()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Lists the differences between the expected and the listed tools.
+- **Input:** `expected`: the contract; `listed`: what the server lists.
+- **Output:** `missing tool: X`, `X: readOnly is A, expected B` and `unexpected tool: X` lines; empty when equal.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `snakeCaseWords`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-contract.ts`
+- **Signature:** `snakeCaseWords(text: string): string[]`
+- **Used by:** `unregisteredToolMentions()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Finds the distinct snake_case words of a text (the shape of a tool name, e.g. `send_message`).
+- **Input:** `text`: any text.
+- **Output:** Distinct words with at least one underscore.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `toolTexts`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-contract.ts`
+- **Signature:** `toolTexts(tool: DescribedTool): string[]`
+- **Used by:** `unregisteredToolMentions()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Collects every text the model reads about a tool: its description and its arguments' descriptions.
+- **Input:** `tool`: name, description and argument schemas.
+- **Output:** The description followed by each argument description (`''` when missing).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `unregisteredToolMentions`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-contract.ts`
+- **Signature:** `unregisteredToolMentions(tools: readonly DescribedTool[], ignore: readonly string[]): string[]`
+- **Used by:** —
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Finds tool-like words in descriptions that are not registered tools; argument names and the `ignore` list are not tool names.
+- **Input:** `tools`: the described tools; `ignore`: API terms that look like tool names (e.g. `online_upload`).
+- **Output:** `tool → word` lines; empty when every mention is registered.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `src/mcp/tool-gate.ts`
+
+### `unavailableToolMessage`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-gate.ts`
+- **Signature:** `unavailableToolMessage(name: string, reason: string): string`
+- **Used by:** `disabledToolSpec()`
+- **Processes:** P03, P08, P09, P13, P14, P19
+
+<!-- generated:end -->
+
+- **Does:** Builds the error text of a call to a switched-off tool: names the tool and how to turn it on.
+- **Input:** `name`: tool name; `reason`: why it is off.
+- **Output:** `<name> is unavailable on this connection: <reason>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `disabledToolSpec`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-gate.ts`
+- **Signature:** `disabledToolSpec(spec: ToolSpec<C>, reason: string): ToolSpec<C>`
+- **Used by:** `gateToolSpecs()`
+- **Processes:** P03, P08, P09, P13, P14, P19
+
+<!-- generated:end -->
+
+- **Does:** Returns the same tool, still listed, whose every call answers an error result with the reason (it never runs nor calls the service).
+- **Input:** `spec`: the tool; `reason`: why it is off (returned as is, so a sealed link stays usable).
+- **Output:** `ToolSpec` with `UNAVAILABLE_TOOL_NOTE` and the reason appended to the description and a `run` that returns `isError` with `unavailableToolMessage()`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `gateToolSpecs`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-gate.ts`
+- **Signature:** `gateToolSpecs(specs: readonly ToolSpec<C>[], reason: string | null): ToolSpec<C>[]`
+- **Used by:** `canvasTools()`, `whatsappTools()`
+- **Processes:** P03, P08, P09, P13, P14, P19
+
+<!-- generated:end -->
+
+- **Does:** Keeps the tools as they are when `reason` is null; otherwise switches each one off with that reason.
+- **Input:** `specs`: the tools; `reason`: why they are off, or `null`.
+- **Output:** A copy of `specs`, or each one through `disabledToolSpec()`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `refuseListOnlyUse`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-gate.ts`
+- **Signature:** `refuseListOnlyUse(): never`
+- **Used by:** `listOnlyContext()`
+- **Processes:** P03, P08, P09, P10, P13, P19
+
+<!-- generated:end -->
+
+- **Does:** Throws on any use of the list-only context.
+- **Input:** None.
+- **Output:** Never returns.
+- **Effects:** None.
+- **Errors:** Always throws `This server only lists its tools; it cannot run them.`
+
+### `listOnlyContext`
+
+<!-- generated:start -->
+
+- **File:** `src/mcp/tool-gate.ts`
+- **Signature:** `listOnlyContext(): never`
+- **Used by:** `canvasRemoteConnector()`, `createWhatsAppCatalogServer()`, `handleDefaultRequest()`
+- **Processes:** P03, P08, P09, P10, P13, P19
+
+<!-- generated:end -->
+
+- **Does:** Builds the context of a server that only lists its tools (public catalog); fits any context type.
+- **Input:** None.
+- **Output:** A `Proxy` whose every property read calls `refuseListOnlyUse()`.
+- **Effects:** None (pure).
+- **Errors:** None when created; any property access throws.
+
+## `tools/smoke/cli.ts`
+
+### `sleepMs`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/cli.ts`
+- **Signature:** `sleepMs(ms: number): Promise<void>`
+- **Used by:** `readSmokeCheck()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Waits `ms` milliseconds.
+- **Input:** `ms`: milliseconds.
+- **Output:** Promise resolved after the wait.
+- **Effects:** Timer.
+- **Errors:** None.
+
+### `readSmokeCheck`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/cli.ts`
+- **Signature:** `async readSmokeCheck(name: string): Promise<SmokeCheck>`
+- **Used by:** `runSmokeCli()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Reads the connector's `wrangler.toml` and `tool-contract.json` and resolves the published Worker address.
+- **Input:** `name`: connector folder under `connectors/`.
+- **Output:** `SmokeCheck` with `fetch`, `sleepMs`, the base URL and the expected tools.
+- **Effects:** Reads files; network to the Cloudflare API (`fetchWorkersSubdomain()`) unless `SMOKE_URL` is set; reads `SMOKE_URL`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`.
+- **Errors:** Throws on a missing file, invalid JSON or contract (`readToolContract()`), or a failed subdomain lookup.
+
+### `runSmokeCli`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/cli.ts`
+- **Signature:** `async runSmokeCli(): Promise<void>`
+- **Used by:** `tools/smoke/cli.ts (module)`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Runs the smoke test of the connector given on the command line and sets the exit code.
+- **Input:** None (reads `process.argv[2]`).
+- **Output:** Nothing.
+- **Effects:** Network (`GET <worker>/tools`, Cloudflare API); writes to stdout/stderr; sets `process.exitCode = 1` and prints the rollback command when the tools differ.
+- **Errors:** Rejects with the errors of `readSmokeCheck()`.
+
+## `tools/smoke/smoke.ts`
+
+### `wranglerValue`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/smoke.ts`
+- **Signature:** `wranglerValue(toml: string, key: string): string | null`
+- **Used by:** `workerBaseUrl()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Reads the value of a `key = "value"` line of a `wrangler.toml`.
+- **Input:** `toml`: file text; `key`: the key.
+- **Output:** The quoted value, or `null`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `workerBaseUrl`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/smoke.ts`
+- **Signature:** `workerBaseUrl(toml: string, subdomain: string, override?: string): string`
+- **Used by:** `readSmokeCheck()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Says where the Worker answers: `SMOKE_URL`, else `PUBLIC_URL` from the toml, else `<name>.<subdomain>.workers.dev`.
+- **Input:** `toml`: `wrangler.toml` text; `subdomain`: the account's `workers.dev` subdomain; `override`: `SMOKE_URL`, optional.
+- **Output:** Base URL without trailing slashes.
+- **Effects:** None (pure).
+- **Errors:** Throws when the toml has no `name` and there is no explicit URL.
+
+### `fetchWorkersSubdomain`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/smoke.ts`
+- **Signature:** `async fetchWorkersSubdomain(fetchFn: typeof fetch, account: CloudflareAccount): Promise<string>`
+- **Used by:** `readSmokeCheck()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Reads the account's `workers.dev` subdomain from the Cloudflare API.
+- **Input:** `fetchFn`: `fetch`; `account`: account ID and API token.
+- **Output:** The subdomain.
+- **Effects:** Network: `GET /client/v4/accounts/:id/workers/subdomain`.
+- **Errors:** Throws `Cloudflare did not return the workers.dev subdomain (<status>).` on a failure or empty answer.
+
+### `fetchPublishedTools`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/smoke.ts`
+- **Signature:** `async fetchPublishedTools(fetchFn: typeof fetch, baseUrl: string): Promise<ToolContractEntry[]>`
+- **Used by:** `smokeAttempt()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Reads the published catalog `GET <base>/tools` as contract entries.
+- **Input:** `fetchFn`: `fetch`; `baseUrl`: the Worker address.
+- **Output:** Contract entries sorted by name.
+- **Effects:** Network: `GET <base>/tools`.
+- **Errors:** Throws on a non-2xx status or a response without tools (`toolsFromListResponse()`).
+
+### `smokeAttempt`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/smoke.ts`
+- **Signature:** `async smokeAttempt(check: SmokeCheck): Promise<string[]>`
+- **Used by:** `runSmokeCheck()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Runs one smoke attempt: the differences with the contract, or the error as a single problem.
+- **Input:** `check`: fetch, sleep, base URL and expected tools.
+- **Output:** Problem lines; empty when the tools match.
+- **Effects:** Network: like `fetchPublishedTools()`.
+- **Errors:** None (errors become a problem line).
+
+### `runSmokeCheck`
+
+<!-- generated:start -->
+
+- **File:** `tools/smoke/smoke.ts`
+- **Signature:** `async runSmokeCheck(check: SmokeCheck): Promise<string[]>`
+- **Used by:** `runSmokeCli()`
+- **Processes:** P19
+
+<!-- generated:end -->
+
+- **Does:** Compares the published tools with the contract, retrying while they differ.
+- **Input:** `check`: fetch, sleep, base URL and expected tools.
+- **Output:** The last attempt's problems; empty when they match.
+- **Effects:** Network per attempt; up to `SMOKE_ATTEMPTS` attempts with `SMOKE_RETRY_MS` pauses.
+- **Errors:** None.
+
 ## Data and constants
 
-| Name                          | File                                        | What it is                                                                                                                                |
-| ----------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `CANVAS_USER_AGENT`           | `connectors/canvas-puc/src/remote.ts`       | User-Agent of the remote mode's calls to Canvas (Canvas returns 403 without a User-Agent).                                                |
-| `TOKEN_RENEWAL_SECONDS`       | `connectors/canvas-puc/src/remote.ts`       | How much each renewal extends the Canvas token: 30 days minus 1 hour (Canvas refuses more than 30 days ahead).                            |
-| `TEST_EXCEPTIONS`             | `src/test-exceptions.ts`                    | Single list of functions without automated tests, with reason and manual test.                                                            |
-| `DEFAULT_DOCS_CONFIG`         | `tools/docs/config.ts`                      | Default `docs:check` configuration; `docs.config.json` overrides it.                                                                      |
-| `MODULE_SCOPE_SUFFIX`         | `tools/docs/ast.ts`                         | Suffix of the label for a reference made outside a function (`arquivo (module)`).                                                         |
-| `WALK_IGNORED_DIRS`           | `tools/docs/inventory.ts`                   | Folders skipped when walking the disk without git.                                                                                        |
-| `GENERATED_START`             | `tools/docs/markdown.ts`                    | Start marker of the generated block in FUNCTIONS.md.                                                                                      |
-| `GENERATED_END`               | `tools/docs/markdown.ts`                    | End marker of the generated block.                                                                                                        |
-| `INDEX_START`                 | `tools/docs/markdown.ts`                    | Start marker of the per-module index.                                                                                                     |
-| `INDEX_END`                   | `tools/docs/markdown.ts`                    | End marker of the per-module index.                                                                                                       |
-| `PLACEHOLDER`                 | `tools/docs/markdown.ts`                    | `_fill_in_` text left in new manual fields.                                                                                               |
-| `MANUAL_FIELDS`               | `tools/docs/render.ts`                      | Fixed order of the manual fields (Does, Input, Output, Effects, Errors).                                                                  |
-| `HTML_SKIPPED_TAGS`           | `src/core/html.ts`                          | Tags whose content never reaches the text (`script`, `style`, `noscript`, `template`, `head`, `title`).                                   |
-| `HTML_BLOCK_TAGS`             | `src/core/html.ts`                          | Tags whose closing ends a line (`p`, `div`, `li`, `h1`–`h6`, `tr`).                                                                       |
-| `HTML_MEDIA_TAGS`             | `src/core/html.ts`                          | Media tags collected as references and the attribute holding their URL.                                                                   |
-| `HTML_KEPT_ATTRS`             | `src/core/html.ts`                          | Attributes kept on each reference (`title`, `alt`, `data-api-endpoint`, `data-media-id`...).                                              |
-| `HTML_TEXT_CLEANUPS`          | `src/core/html.ts`                          | Final cleanups of the text: non-breaking spaces, trailing spaces, repeated blank lines.                                                   |
-| `LIST_FILES_HINT`             | `connectors/canvas-puc/src/linked-files.ts` | Note added to every `list_files` answer: students do not see hidden files; use `links` or `list_linked_files`.                            |
-| `VIDEO_PROVIDERS`             | `connectors/canvas-puc/src/links.ts`        | Followable video providers (YouTube, Vimeo, Panopto, Stream, SharePoint and Drive, the last two only embedded).                           |
-| `PLAYER_TAGS`                 | `connectors/canvas-puc/src/links.ts`        | Tags that play media (`iframe`, `video`, `audio`, `source`, `embed`).                                                                     |
-| `CANVAS_PATH_PATTERNS`        | `connectors/canvas-puc/src/links.ts`        | Canvas URL paths (files, media, pages, assignments...) and the ids each one carries.                                                      |
-| `fileRefShape`                | `connectors/canvas-puc/src/tools-read.ts`   | File arguments of `download_file` and `read_file_text`: `file_id`, `url`, `course_id`.                                                    |
-| `CFB_SIGNATURE`               | `src/core/cfb.ts`                           | The first 8 bytes of every OLE/CFB file (the .doc container).                                                                             |
-| `CP1252_HIGH`                 | `src/core/word.ts`                          | Windows-1252 characters 0x80 to 0x9F, used when decoding the .doc's 8-bit text.                                                           |
-| `WORD_TEXT_REPLACEMENTS`      | `src/core/word.ts`                          | Replacements (regex → text) applied in order by `cleanWordText` to Word marks.                                                            |
-| `MAX_DOWNLOAD_BYTES`          | `connectors/canvas-puc/src/files.ts`        | Largest file `download_file` brings into the conversation (70 MB, in parts — ADR 0023, 0024).                                             |
-| `MAX_DOWNLOAD_MB`             | `connectors/canvas-puc/src/files.ts`        | The same limit in MB (70), used in the tool description and refusals.                                                                     |
-| `MAX_UPLOAD_BYTES`            | `connectors/canvas-puc/src/upload.ts`       | Largest file `submit_file_assignment` accepts (5 MB — ADR 0026).                                                                          |
-| `MAX_UPLOAD_MB`               | `connectors/canvas-puc/src/upload.ts`       | The same limit in MB (5), used in the tool description and refusals.                                                                      |
-| `MAX_CHUNK_BYTES`             | `connectors/canvas-puc/src/chunks.ts`       | Largest part `download_file` returns per call (8 MB; ADR 0024).                                                                           |
-| `downloadFileShape`           | `connectors/canvas-puc/src/tools-read.ts`   | Arguments of `download_file` (`fileRefShape` plus `offset`, `length`), shared with `streamCanvasTool()`.                                  |
-| `MAX_TEXT_CHARS`              | `connectors/canvas-puc/src/files.ts`        | Largest text returned by `read_file_text` (100,000 characters).                                                                           |
-| `CONNECTORS_DIR`              | `tools/bundle/bundle.ts`                    | Connectors folder relative to the root (`connectors`).                                                                                    |
-| `PLUGIN_DIR`                  | `tools/bundle/bundle.ts`                    | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                                                    |
-| `PLUGIN_MANIFEST_PATH`        | `tools/bundle/bundle.ts`                    | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.                                 |
-| `PLUGIN_MCP_CONFIG_PATH`      | `tools/bundle/bundle.ts`                    | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                                        |
-| `CANVAS_PAGE_SIZE`            | `connectors/canvas-puc/src/client.ts`       | Items per page requested from Canvas (`per_page`, the API maximum).                                                                       |
-| `CONVERSATION_PREVIEW_LENGTH` | `connectors/canvas-puc/src/inbox.ts`        | Maximum length of the last-message preview in `list_conversations`.                                                                       |
-| `MAX_MESSAGE_RECIPIENTS`      | `connectors/canvas-puc/src/tools-inbox.ts`  | Maximum recipients of one `send_message` (user IDs only).                                                                                 |
-| `CANVAS_INBOX_READ_TOOLS`     | `connectors/canvas-puc/src/tools-inbox.ts`  | Inbox read tools: `find_recipients`, `list_conversations`, `get_conversation`.                                                            |
-| `CANVAS_INBOX_WRITE_TOOLS`    | `connectors/canvas-puc/src/tools-inbox.ts`  | Inbox send tools (only with `CANVAS_ALLOW_WRITE`): `send_message`, `reply_to_conversation`.                                               |
-| `DEFAULT_MAX_ITEMS`           | `connectors/canvas-puc/src/client.ts`       | Default limit of items summed across pages in `getAll`.                                                                                   |
-| `DEFAULT_CANVAS_URL`          | `connectors/canvas-puc/src/remote.ts`       | PUC Minas Canvas URL, used without `CANVAS_BASE_URL`.                                                                                     |
-| `MAX_TEXT_LENGTH`             | `connectors/canvas-puc/src/format.ts`       | Maximum length of long texts returned to the model by `shortText`.                                                                        |
-| `ASSIGNMENT_BUCKETS`          | `connectors/canvas-puc/src/helpers.ts`      | `list_assignments` filters → Canvas API `bucket` (`all` does not filter).                                                                 |
-| `CANVAS_READ_TOOLS`           | `connectors/canvas-puc/src/tools-read.ts`   | Canvas read MCP tools (courses, assignments, grades, announcements etc.).                                                                 |
-| `CANVAS_WRITE_TOOLS`          | `connectors/canvas-puc/src/tools-write.ts`  | Write MCP tools (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`), only with `CANVAS_ALLOW_WRITE`; destructive. |
-| `CANVAS_SERVER_INFO`          | `connectors/canvas-puc/src/tools.ts`        | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                  |
-| `REMOTE_ENTRY`                | `tools/bundle/bundle.ts`                    | Entry of a connector's Node remote server (`src/remote-main.ts`).                                                                         |
-| `REMOTE_BUNDLE_PATH`          | `tools/bundle/bundle.ts`                    | Remote server bundle (`server/remote.js`), used by the Dockerfile.                                                                        |
-| `SEAL_KEY_BYTES`              | `src/remote/seal.ts`                        | Size of `SEAL_KEY` (32 bytes, AES-256).                                                                                                   |
-| `CLIENT_TTL_SECONDS`          | `src/remote/oauth.ts`                       | Lifetime of the registered `client_id` (10 years).                                                                                        |
-| `PENDING_TTL_SECONDS`         | `src/remote/tokens.ts`                      | Lifetime of the request sealed in the login form (15 minutes).                                                                            |
-| `CODE_TTL_SECONDS`            | `src/remote/tokens.ts`                      | Lifetime of the authorization code (5 minutes).                                                                                           |
-| `ACCESS_TTL_SECONDS`          | `src/remote/tokens.ts`                      | Lifetime of the access token (1 hour).                                                                                                    |
-| `REFRESH_TTL_SECONDS`         | `src/remote/tokens.ts`                      | Lifetime of the refresh token (30 days, like the PUC token).                                                                              |
-| `REVOKED_SECRET_DESCRIPTION`  | `src/remote/handler.ts`                     | `error_description` of the `invalid_grant` answered when the connector says the credential was revoked.                                   |
-| `LOGIN_PAGE_CSS`              | `src/remote/login-page.ts`                  | Style of the authorization page, with the tokens from `docs/UI.md`.                                                                       |
-| `CORS_HEADERS`                | `src/remote/handler.ts`                     | CORS headers of the remote endpoints (any origin; there are no cookies).                                                                  |
-| `REMOTE_ROUTES`               | `src/remote/handler.ts`                     | Table `MÉTODO caminho` → remote server function.                                                                                          |
-| `DEFAULT_REDIRECT_HOSTS`      | `src/remote/oauth.ts`                       | OAuth redirect hosts accepted by default (`claude.ai`, `claude.com`, `localhost`).                                                        |
-| `MAX_BODY_BYTES`              | `src/remote/node-server.ts`                 | Largest request body accepted by the remote server (1 MB).                                                                                |
-| `PDF_ESCAPES`                 | `src/core/pdf.ts`                           | Letter escapes of PDF literal strings (`\n`, `\t`...).                                                                                    |
-| `TJ_SPACE_THRESHOLD`          | `src/core/pdf.ts`                           | `TJ` adjustment from which it counts as a space between words.                                                                            |
-| `PDF_TEXT_OPERATORS`          | `src/core/pdf.ts`                           | PDF text operator → the text it produces.                                                                                                 |
-| `ACCESS_TOKEN_MARGIN_MS`      | `connectors/gmail/src/access-token.ts`      | Margin before expiry at which the Google access token is renewed.                                                                         |
-| `MAX_ATTACHMENT_BYTES`        | `connectors/gmail/src/attachments.ts`       | Largest attachment read as text (5 MB).                                                                                                   |
-| `MAX_ATTACHMENT_CHARS`        | `connectors/gmail/src/attachments.ts`       | Largest text returned from an attachment.                                                                                                 |
-| `GMAIL_MODIFY_SCOPE`          | `connectors/gmail/src/config.ts`            | The `gmail.modify` scope, the only data scope requested (read, send, organize; no permanent deletion).                                    |
-| `MIN_CONSENT_SECRET_CHARS`    | `connectors/gmail/src/config.ts`            | Minimum length of `CONSENT_SECRET`.                                                                                                       |
-| `UPSTREAM_USER_AGENT`         | `connectors/gmail/src/context.ts`           | User-Agent sent to Google and the Gmail API.                                                                                              |
-| `GMAIL_API_BASE`              | `connectors/gmail/src/gmail-api.ts`         | Gmail API base for the token's account.                                                                                                   |
-| `GMAIL_STATUS_MESSAGES`       | `connectors/gmail/src/gmail-api.ts`         | Actionable message per Gmail API HTTP status.                                                                                             |
-| `GOOGLE_AUTHORIZE_URL`        | `connectors/gmail/src/google-oauth.ts`      | Google authorization endpoint.                                                                                                            |
-| `GOOGLE_TOKEN_URL`            | `connectors/gmail/src/google-oauth.ts`      | Google token endpoint.                                                                                                                    |
-| `GOOGLE_CALLBACK_PATH`        | `connectors/gmail/src/google-oauth.ts`      | Google callback path (`/google/callback`).                                                                                                |
-| `GOOGLE_JWKS_URL`             | `connectors/gmail/src/id-token.ts`          | Public keys that sign Google's `id_token`.                                                                                                |
-| `GOOGLE_ISSUERS`              | `connectors/gmail/src/id-token.ts`          | Issuers accepted in the `id_token`.                                                                                                       |
-| `CLOCK_SKEW_SECONDS`          | `connectors/gmail/src/id-token.ts`          | Clock skew tolerated in the `id_token` validity.                                                                                          |
-| `LINK_STATE_PREFIX`           | `connectors/gmail/src/link-flow.ts`         | Prefix of the account-link `state` (`link.`).                                                                                             |
-| `LINK_COOKIE`                 | `connectors/gmail/src/link-flow.ts`         | `__Host-` cookie that binds the link to the browser.                                                                                      |
-| `LINK_TTL_SECONDS`            | `connectors/gmail/src/link-flow.ts`         | Lifetime of the link request (10 minutes).                                                                                                |
-| `LINK_REQUEST_TYP`            | `connectors/gmail/src/link-flow.ts`         | Seal type of the link request.                                                                                                            |
-| `MAX_MESSAGE_CHARS`           | `connectors/gmail/src/message-format.ts`    | Largest message body returned.                                                                                                            |
-| `MAX_THREAD_CHARS`            | `connectors/gmail/src/message-format.ts`    | Largest sum of a thread's bodies.                                                                                                         |
-| `MIN_MESSAGE_CHARS`           | `connectors/gmail/src/message-format.ts`    | Smallest slice per message in a long thread.                                                                                              |
-| `MESSAGE_HEADERS`             | `connectors/gmail/src/message-format.ts`    | Headers returned for each message.                                                                                                        |
-| `UNTRUSTED_NOTICE`            | `connectors/gmail/src/message-format.ts`    | Notice of untrusted email content (prompt injection).                                                                                     |
-| `GOOGLE_ACCOUNTS_ORIGIN`      | `connectors/gmail/src/pages.ts`             | Google origin allowed in the consent page's `form-action`.                                                                                |
-| `RATE_LIMIT_RETRY_SECONDS`    | `connectors/gmail/src/rate-limit.ts`        | `Retry-After` seconds in the 429 response.                                                                                                |
-| `GMAIL_ID`                    | `connectors/gmail/src/tools.ts`             | Zod schema of a Gmail API id (only URL-safe characters).                                                                                  |
-| `listAccountsTool`            | `connectors/gmail/src/tools.ts`             | The `list_accounts` tool.                                                                                                                 |
-| `searchThreadsTool`           | `connectors/gmail/src/tools.ts`             | The `search_threads` tool.                                                                                                                |
-| `getThreadTool`               | `connectors/gmail/src/tools.ts`             | The `get_thread` tool.                                                                                                                    |
-| `getMessageTool`              | `connectors/gmail/src/tools.ts`             | The `get_message` tool.                                                                                                                   |
-| `listLabelsTool`              | `connectors/gmail/src/tools.ts`             | The `list_labels` tool.                                                                                                                   |
-| `getAttachmentTextTool`       | `connectors/gmail/src/tools.ts`             | The `get_attachment_text` tool.                                                                                                           |
-| `GMAIL_TOOLS`                 | `connectors/gmail/src/tool-list.ts`         | All Gmail tools, in the order shown to Claude.                                                                                            |
-| `MAX_QUOTED_CHARS`            | `connectors/gmail/src/compose.ts`           | Largest excerpt of the original quoted in a reply (20 thousand characters).                                                               |
-| `FORWARD_SEPARATOR`           | `connectors/gmail/src/compose.ts`           | Line that opens the forwarded email block.                                                                                                |
-| `DRAFT_SHAPE`                 | `connectors/gmail/src/draft-tools.ts`       | Parameters of a draft's content (create and replace).                                                                                     |
-| `listDraftsTool`              | `connectors/gmail/src/draft-tools.ts`       | The `list_drafts` tool.                                                                                                                   |
-| `createDraftTool`             | `connectors/gmail/src/draft-tools.ts`       | The `create_draft` tool.                                                                                                                  |
-| `updateDraftTool`             | `connectors/gmail/src/draft-tools.ts`       | The `update_draft` tool.                                                                                                                  |
-| `sendDraftTool`               | `connectors/gmail/src/draft-tools.ts`       | The `send_draft` tool.                                                                                                                    |
-| `deleteDraftTool`             | `connectors/gmail/src/draft-tools.ts`       | The `delete_draft` tool.                                                                                                                  |
-| `MAX_GMAIL_ERROR_DETAIL`      | `connectors/gmail/src/gmail-api.ts`         | Largest Gmail error detail passed to the model (200 characters).                                                                          |
-| `TARGET_SHAPE`                | `connectors/gmail/src/mailbox-tools.ts`     | Target parameters of the organizing tools (`message_ids`, `thread_ids`).                                                                  |
-| `markReadTool`                | `connectors/gmail/src/mailbox-tools.ts`     | The `mark_read` tool.                                                                                                                     |
-| `archiveTool`                 | `connectors/gmail/src/mailbox-tools.ts`     | The `archive` tool.                                                                                                                       |
-| `starTool`                    | `connectors/gmail/src/mailbox-tools.ts`     | The `star` tool.                                                                                                                          |
-| `updateLabelsTool`            | `connectors/gmail/src/mailbox-tools.ts`     | The `update_labels` tool.                                                                                                                 |
-| `trashTool`                   | `connectors/gmail/src/mailbox-tools.ts`     | The `trash` tool.                                                                                                                         |
-| `untrashTool`                 | `connectors/gmail/src/mailbox-tools.ts`     | The `untrash` tool.                                                                                                                       |
-| `MAX_TARGET_MESSAGES`         | `connectors/gmail/src/mailbox.ts`           | Maximum messages per call of the organizing tools (50).                                                                                   |
-| `MAX_TARGET_THREADS`          | `connectors/gmail/src/mailbox.ts`           | Maximum threads per call of the organizing tools (20).                                                                                    |
-| `MAILBOX_ACTIONS`             | `connectors/gmail/src/mailbox.ts`           | System labels each action adds and removes (read, archive, star).                                                                         |
-| `MAX_ENCODED_WORD_BYTES`      | `connectors/gmail/src/mime.ts`              | Largest UTF-8 chunk of an RFC 2047 word (45 bytes, word ≤ 75).                                                                            |
-| `MAX_BODY_CHARS`              | `connectors/gmail/src/send-tools.ts`        | Largest email body accepted (100 thousand characters).                                                                                    |
-| `RECIPIENTS`                  | `connectors/gmail/src/send-tools.ts`        | Zod schema of a recipient list.                                                                                                           |
-| `BODY`                        | `connectors/gmail/src/send-tools.ts`        | Zod schema of the plain-text body.                                                                                                        |
-| `SUBJECT`                     | `connectors/gmail/src/send-tools.ts`        | Zod schema of the subject (up to 998 characters).                                                                                         |
-| `sendEmailTool`               | `connectors/gmail/src/send-tools.ts`        | The `send_email` tool.                                                                                                                    |
-| `replyEmailTool`              | `connectors/gmail/src/send-tools.ts`        | The `reply_email` tool.                                                                                                                   |
-| `replyAllEmailTool`           | `connectors/gmail/src/send-tools.ts`        | The `reply_all_email` tool.                                                                                                               |
-| `forwardEmailTool`            | `connectors/gmail/src/send-tools.ts`        | The `forward_email` tool.                                                                                                                 |
-| `MAX_RECIPIENTS`              | `connectors/gmail/src/send.ts`              | Maximum recipients (To + Cc + Bcc) in an email (100).                                                                                     |
-| `MAX_FORWARD_BYTES`           | `connectors/gmail/src/send.ts`              | Largest sum of attachments in a forward (18 MB).                                                                                          |
-| `ONE_ACCOUNT`                 | `connectors/gmail/src/tools.ts`             | Zod schema of the single-account `account` parameter.                                                                                     |
-| `CONFIRM_HINT`                | `connectors/gmail/src/tools.ts`             | Sentence of the write tools: confirm with the user and never act on an email's request.                                                   |
-| `GMAIL_SERVER_INFO`           | `connectors/gmail/src/worker.ts`            | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                  |
-| `GMAIL_SERVER_INSTRUCTIONS`   | `connectors/gmail/src/worker.ts`            | MCP server instructions (accounts and untrusted content).                                                                                 |
-| `ACCESS_TOKEN_TTL_SECONDS`    | `connectors/gmail/src/worker.ts`            | Lifetime of the access token issued to Claude (1 hour).                                                                                   |
-| `REFRESH_TOKEN_TTL_SECONDS`   | `connectors/gmail/src/worker.ts`            | Lifetime of the refresh token issued to Claude (30 days).                                                                                 |
-| `GMAIL_ROUTES`                | `connectors/gmail/src/worker.ts`            | The Worker's own routes: `MÉTODO caminho` → handler.                                                                                      |
-| `BRIDGE_ERROR_MESSAGES`       | `connectors/whatsapp/src/bridge-client.ts`  | User-facing messages (English) for the bridge's known error codes.                                                                        |
-| `WHATSAPP_DEFAULTS`           | `connectors/whatsapp/src/config.ts`         | Connector defaults: sleep after 5 min, 25 s per tool, 8 s waiting for sync, 10 sends per hour.                                            |
-| `BRIDGE_ENV_KEYS`             | `connectors/whatsapp/src/config.ts`         | Variables passed from the Worker to the bridge container (`bridge/API.md`).                                                               |
-| `SNAPSHOT_PUSH_URL`           | `connectors/whatsapp/src/config.ts`         | Internal address, intercepted by the Worker, to which the bridge sends the snapshot on `SIGTERM`.                                         |
-| `UNTRUSTED_NOTICE`            | `connectors/whatsapp/src/format.ts`         | Notice of untrusted third-party data that accompanies every result with messages or contacts.                                             |
-| `HIDDEN_CHAR_RANGES`          | `connectors/whatsapp/src/format.ts`         | Ranges of invisible characters (control, zero-width, bidi, BOM) removed by `sanitizeText`.                                                |
-| `SNAPSHOT_INTERVAL_MS`        | `connectors/whatsapp/src/lifecycle.ts`      | Minimum interval between usage-triggered snapshots (1 minute).                                                                            |
-| `SNAPSHOT_AFTER_PATHS`        | `connectors/whatsapp/src/lifecycle.ts`      | Bridge routes after which the database may have changed and a snapshot is worth trying.                                                   |
-| `SEND_HISTORY_KEY`            | `connectors/whatsapp/src/lifecycle.ts`      | Key, in the Durable Object storage, of the recent send timestamps (hourly limit).                                                         |
-| `PAIR_PAGE_CSS`               | `connectors/whatsapp/src/pair-page.ts`      | Style additions of the `/pair` page (large code, QR, secondary and danger buttons).                                                       |
-| `PAIR_SESSION_COOKIE`         | `connectors/whatsapp/src/pair.ts`           | Name of the `__Host-` cookie of the sealed `/pair` session.                                                                               |
-| `PAIR_NONCE_COOKIE`           | `connectors/whatsapp/src/pair.ts`           | Name of the `__Host-` cookie of the nonce that binds the `/pair` login to the browser.                                                    |
-| `PAIR_SESSION_TTL_SECONDS`    | `connectors/whatsapp/src/pair.ts`           | Lifetime of the `/pair` session and the anti-CSRF token (30 minutes).                                                                     |
-| `PAIR_LOGIN_TTL_SECONDS`      | `connectors/whatsapp/src/pair.ts`           | Lifetime of the in-progress `/pair` login (10 minutes).                                                                                   |
-| `PAIR_CALLBACK_PATH`          | `connectors/whatsapp/src/pair.ts`           | GitHub callback path for `/pair` (a subpath of the OAuth App callback).                                                                   |
-| `PAIR_ACTIONS`                | `connectors/whatsapp/src/pair.ts`           | `/pair` actions by path: code, QR, unlink and start over from scratch.                                                                    |
-| `SNAPSHOT_KEY_NAME`           | `connectors/whatsapp/src/snapshots.ts`      | Key of the current snapshot in the R2 bucket (`whatsapp/snapshot.was1`).                                                                  |
-| `WHATSAPP_INSTRUCTIONS`       | `connectors/whatsapp/src/tools.ts`          | MCP server instructions: what the connector is and the rule about untrusted content.                                                      |
-| `WHATSAPP_SERVER_INFO`        | `connectors/whatsapp/src/tools.ts`          | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                  |
-| `READ_TOOLS`                  | `connectors/whatsapp/src/tools.ts`          | Read tools (phase 1), always active.                                                                                                      |
-| `BRIDGE_INSTANCE_NAME`        | `connectors/whatsapp/src/worker-env.ts`     | Fixed name of the bridge's single Durable Object instance (single instance = single session).                                             |
-| `WHATSAPP_WORKER_HANDLERS`    | `connectors/whatsapp/src/worker.ts`         | Worker handlers (`fetch` and `scheduled`), exported by `index.ts` with the Durable Object.                                                |
-| `GITHUB_USER_AGENT`           | `src/remote/github-login.ts`                | User-Agent of the calls to GitHub (the API refuses requests without it).                                                                  |
-| `READ_ONLY_HINTS`             | `src/mcp/annotations.ts`                    | Hints of a read-only tool (`readOnlyHint: true`, idempotent, open world).                                                                 |
-| `SEND_HINTS`                  | `src/mcp/annotations.ts`                    | Hints of a tool that sends or publishes (email, message, submission): destructive, not idempotent.                                        |
-| `DESTRUCTIVE_HINTS`           | `src/mcp/annotations.ts`                    | Hints of a tool that deletes or overwrites (trash, draft, account link): destructive, idempotent.                                         |
-| `ORGANIZE_HINTS`              | `src/mcp/annotations.ts`                    | Hints of a reversible organizing tool (read, archive, star, labels, restore): writes, not destructive.                                    |
-| `CREATE_HINTS`                | `src/mcp/annotations.ts`                    | Hints of a tool that creates something without deleting (draft, link): writes, not destructive.                                           |
-| `FALLBACK_SERVER_VERSION`     | `src/mcp/server-version.ts`                 | Version announced when the plugin manifest has none (`0.0.0`).                                                                            |
-| `UPSTREAM_CALLBACK_PATH`      | `src/remote/handler.ts`                     | Callback path of the delegated login (`/oauth/callback`), registered with the provider.                                                   |
-| `BRIDGE_RETRY_MS`             | `connectors/whatsapp/src/bridge-client.ts`  | Wait between attempts while the bridge wakes up (750 ms).                                                                                 |
-| `GMAIL_SCOPES`                | `connectors/gmail/src/config.ts`            | Login and link scopes (`openid email` + Gmail read-only).                                                                                 |
-| `GOOGLE_REVOKE_URL`           | `connectors/gmail/src/google-oauth.ts`      | Google token revocation endpoint.                                                                                                         |
-| `LINK_TICKET_TYP`             | `connectors/gmail/src/link-flow.ts`         | Seal type of the link ticket issued by `link_account`.                                                                                    |
-| `OWNER_RECORD_TYP`            | `connectors/gmail/src/token-store.ts`       | Seal type of a user's accounts record.                                                                                                    |
-| `OWNER_RECORD_EXP`            | `connectors/gmail/src/token-store.ts`       | Technical expiry of the record's seal (year 2100).                                                                                        |
-| `MAX_LINKED_ACCOUNTS`         | `connectors/gmail/src/token-store.ts`       | Maximum Gmail accounts a user can link (10).                                                                                              |
-| `linkAccountTool`             | `connectors/gmail/src/tools.ts`             | The `link_account` tool.                                                                                                                  |
-| `unlinkAccountTool`           | `connectors/gmail/src/tools.ts`             | The `unlink_account` tool.                                                                                                                |
-| `SECRET_PATTERNS`             | `src/core/redact.ts`                        | Secret patterns removed by `redactSecrets` (Bearer, Canvas, Google, JWT, OAuth fields, long seals) and their masks.                       |
-| `EMAIL_PATTERN`               | `src/core/redact.ts`                        | Email address pattern masked in logs by `redactForLog`.                                                                                   |
-| `BROWSER_PAGE_PATHS`          | `src/remote/handler.ts`                     | Browser pages of the remote server (`/authorize`, `/oauth/callback`): no CORS headers.                                                    |
-| `LEGACY_AUDLESS_UNTIL`        | `src/remote/seal.ts`                        | Cutoff (2027-01-01 UTC) until which a seal issued before `aud` existed still opens; every older access/refresh token expires before it.   |
-| `CANVAS_WRITE_GRANT`          | `connectors/canvas-puc/src/remote.ts`       | Permission (`write`) a Canvas user opts into at login to get the send, reply and submit tools.                                            |
-| `CANVAS_WRITE_OPTION_LABEL`   | `connectors/canvas-puc/src/remote.ts`       | Label of the unticked write opt-in checkbox on the Canvas login page.                                                                     |
-| `LINK_CONFIRM_TYP`            | `connectors/gmail/src/link-flow.ts`         | Seal type of the Gmail link confirmation form (ticket `jti` + browser cookie hash).                                                       |
-| `OWNER_CHECK_SCOPES`          | `connectors/gmail/src/link-flow.ts`         | Scopes of the Gmail link owner check (`openid email`, no Gmail access).                                                                   |
+| Name                              | File                                               | What it is                                                                                                                                                                          |
+| --------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CANVAS_USER_AGENT`               | `connectors/canvas-puc/src/remote.ts`              | User-Agent of the remote mode's calls to Canvas (Canvas returns 403 without a User-Agent).                                                                                          |
+| `TOKEN_RENEWAL_SECONDS`           | `connectors/canvas-puc/src/remote.ts`              | How much each renewal extends the Canvas token: 30 days minus 1 hour (Canvas refuses more than 30 days ahead).                                                                      |
+| `TEST_EXCEPTIONS`                 | `src/test-exceptions.ts`                           | Single list of functions without automated tests, with reason and manual test.                                                                                                      |
+| `DEFAULT_DOCS_CONFIG`             | `tools/docs/config.ts`                             | Default `docs:check` configuration; `docs.config.json` overrides it.                                                                                                                |
+| `MODULE_SCOPE_SUFFIX`             | `tools/docs/ast.ts`                                | Suffix of the label for a reference made outside a function (`arquivo (module)`).                                                                                                   |
+| `WALK_IGNORED_DIRS`               | `tools/docs/inventory.ts`                          | Folders skipped when walking the disk without git.                                                                                                                                  |
+| `GENERATED_START`                 | `tools/docs/markdown.ts`                           | Start marker of the generated block in FUNCTIONS.md.                                                                                                                                |
+| `GENERATED_END`                   | `tools/docs/markdown.ts`                           | End marker of the generated block.                                                                                                                                                  |
+| `INDEX_START`                     | `tools/docs/markdown.ts`                           | Start marker of the per-module index.                                                                                                                                               |
+| `INDEX_END`                       | `tools/docs/markdown.ts`                           | End marker of the per-module index.                                                                                                                                                 |
+| `PLACEHOLDER`                     | `tools/docs/markdown.ts`                           | `_fill_in_` text left in new manual fields.                                                                                                                                         |
+| `MANUAL_FIELDS`                   | `tools/docs/render.ts`                             | Fixed order of the manual fields (Does, Input, Output, Effects, Errors).                                                                                                            |
+| `HTML_SKIPPED_TAGS`               | `src/core/html.ts`                                 | Tags whose content never reaches the text (`script`, `style`, `noscript`, `template`, `head`, `title`).                                                                             |
+| `HTML_BLOCK_TAGS`                 | `src/core/html.ts`                                 | Tags whose closing ends a line (`p`, `div`, `li`, `h1`–`h6`, `tr`).                                                                                                                 |
+| `HTML_MEDIA_TAGS`                 | `src/core/html.ts`                                 | Media tags collected as references and the attribute holding their URL.                                                                                                             |
+| `HTML_KEPT_ATTRS`                 | `src/core/html.ts`                                 | Attributes kept on each reference (`title`, `alt`, `data-api-endpoint`, `data-media-id`...).                                                                                        |
+| `HTML_TEXT_CLEANUPS`              | `src/core/html.ts`                                 | Final cleanups of the text: non-breaking spaces, trailing spaces, repeated blank lines.                                                                                             |
+| `LIST_FILES_HINT`                 | `connectors/canvas-puc/src/linked-files.ts`        | Note added to every `list_files` answer: students do not see hidden files; use `links` or `list_linked_files`.                                                                      |
+| `VIDEO_PROVIDERS`                 | `connectors/canvas-puc/src/links.ts`               | Followable video providers (YouTube, Vimeo, Panopto, Stream, SharePoint and Drive, the last two only embedded).                                                                     |
+| `PLAYER_TAGS`                     | `connectors/canvas-puc/src/links.ts`               | Tags that play media (`iframe`, `video`, `audio`, `source`, `embed`).                                                                                                               |
+| `CANVAS_PATH_PATTERNS`            | `connectors/canvas-puc/src/links.ts`               | Canvas URL paths (files, media, pages, assignments...) and the ids each one carries.                                                                                                |
+| `fileRefShape`                    | `connectors/canvas-puc/src/tools-read.ts`          | File arguments of `download_file` and `read_file_text`: `file_id`, `url`, `course_id`.                                                                                              |
+| `CFB_SIGNATURE`                   | `src/core/cfb.ts`                                  | The first 8 bytes of every OLE/CFB file (the .doc container).                                                                                                                       |
+| `CP1252_HIGH`                     | `src/core/word.ts`                                 | Windows-1252 characters 0x80 to 0x9F, used when decoding the .doc's 8-bit text.                                                                                                     |
+| `WORD_TEXT_REPLACEMENTS`          | `src/core/word.ts`                                 | Replacements (regex → text) applied in order by `cleanWordText` to Word marks.                                                                                                      |
+| `MAX_DOWNLOAD_BYTES`              | `connectors/canvas-puc/src/files.ts`               | Largest file `download_file` brings into the conversation (70 MB, in parts — ADR 0023, 0024).                                                                                       |
+| `MAX_DOWNLOAD_MB`                 | `connectors/canvas-puc/src/files.ts`               | The same limit in MB (70), used in the tool description and refusals.                                                                                                               |
+| `MAX_UPLOAD_BYTES`                | `connectors/canvas-puc/src/upload.ts`              | Largest file `submit_file_assignment` accepts (5 MB — ADR 0026).                                                                                                                    |
+| `MAX_UPLOAD_MB`                   | `connectors/canvas-puc/src/upload.ts`              | The same limit in MB (5), used in the tool description and refusals.                                                                                                                |
+| `MAX_CHUNK_BYTES`                 | `connectors/canvas-puc/src/chunks.ts`              | Largest part `download_file` returns per call (8 MB; ADR 0024).                                                                                                                     |
+| `downloadFileShape`               | `connectors/canvas-puc/src/tools-read.ts`          | Arguments of `download_file` (`fileRefShape` plus `offset`, `length`), shared with `streamCanvasTool()`.                                                                            |
+| `MAX_TEXT_CHARS`                  | `connectors/canvas-puc/src/files.ts`               | Largest text returned by `read_file_text` (100,000 characters).                                                                                                                     |
+| `CONNECTORS_DIR`                  | `tools/bundle/bundle.ts`                           | Connectors folder relative to the root (`connectors`).                                                                                                                              |
+| `PLUGIN_DIR`                      | `tools/bundle/bundle.ts`                           | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                                                                                              |
+| `PLUGIN_MANIFEST_PATH`            | `tools/bundle/bundle.ts`                           | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.                                                                           |
+| `PLUGIN_MCP_CONFIG_PATH`          | `tools/bundle/bundle.ts`                           | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                                                                                  |
+| `CANVAS_PAGE_SIZE`                | `connectors/canvas-puc/src/client.ts`              | Items per page requested from Canvas (`per_page`, the API maximum).                                                                                                                 |
+| `CONVERSATION_PREVIEW_LENGTH`     | `connectors/canvas-puc/src/inbox.ts`               | Maximum length of the last-message preview in `list_conversations`.                                                                                                                 |
+| `MAX_MESSAGE_RECIPIENTS`          | `connectors/canvas-puc/src/tools-inbox.ts`         | Maximum recipients of one `send_message` (user IDs only).                                                                                                                           |
+| `CANVAS_INBOX_READ_TOOLS`         | `connectors/canvas-puc/src/tools-inbox.ts`         | Inbox read tools: `find_recipients`, `list_conversations`, `get_conversation`.                                                                                                      |
+| `CANVAS_INBOX_WRITE_TOOLS`        | `connectors/canvas-puc/src/tools-inbox.ts`         | Inbox send tools `send_message`, `reply_message` (with attachments); always listed, refusing with the reason when writing is off for the user.                                      |
+| `DEFAULT_MAX_ITEMS`               | `connectors/canvas-puc/src/client.ts`              | Default limit of items summed across pages in `getAll`.                                                                                                                             |
+| `DEFAULT_CANVAS_URL`              | `connectors/canvas-puc/src/remote.ts`              | PUC Minas Canvas URL, used without `CANVAS_BASE_URL`.                                                                                                                               |
+| `MAX_TEXT_LENGTH`                 | `connectors/canvas-puc/src/format.ts`              | Maximum length of long texts returned to the model by `shortText`.                                                                                                                  |
+| `ASSIGNMENT_BUCKETS`              | `connectors/canvas-puc/src/helpers.ts`             | `list_assignments` filters → Canvas API `bucket` (`all` does not filter).                                                                                                           |
+| `CANVAS_READ_TOOLS`               | `connectors/canvas-puc/src/tools-read.ts`          | Canvas read MCP tools (courses, assignments, grades, announcements etc.).                                                                                                           |
+| `CANVAS_WRITE_TOOLS`              | `connectors/canvas-puc/src/tools-write.ts`         | Write MCP tools (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`); destructive; always listed, refusing with the reason when writing is off for the user. |
+| `CANVAS_SERVER_INFO`              | `connectors/canvas-puc/src/tools.ts`               | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                            |
+| `REMOTE_ENTRY`                    | `tools/bundle/bundle.ts`                           | Entry of a connector's Node remote server (`src/remote-main.ts`).                                                                                                                   |
+| `REMOTE_BUNDLE_PATH`              | `tools/bundle/bundle.ts`                           | Remote server bundle (`server/remote.js`), used by the Dockerfile.                                                                                                                  |
+| `SEAL_KEY_BYTES`                  | `src/remote/seal.ts`                               | Size of `SEAL_KEY` (32 bytes, AES-256).                                                                                                                                             |
+| `CLIENT_TTL_SECONDS`              | `src/remote/oauth.ts`                              | Lifetime of the registered `client_id` (10 years).                                                                                                                                  |
+| `PENDING_TTL_SECONDS`             | `src/remote/tokens.ts`                             | Lifetime of the request sealed in the login form (15 minutes).                                                                                                                      |
+| `CODE_TTL_SECONDS`                | `src/remote/tokens.ts`                             | Lifetime of the authorization code (5 minutes).                                                                                                                                     |
+| `ACCESS_TTL_SECONDS`              | `src/remote/tokens.ts`                             | Lifetime of the access token (1 hour).                                                                                                                                              |
+| `REFRESH_TTL_SECONDS`             | `src/remote/tokens.ts`                             | Lifetime of the refresh token (30 days, like the PUC token).                                                                                                                        |
+| `REVOKED_SECRET_DESCRIPTION`      | `src/remote/handler.ts`                            | `error_description` of the `invalid_grant` answered when the connector says the credential was revoked.                                                                             |
+| `LOGIN_PAGE_CSS`                  | `src/remote/login-page.ts`                         | Style of the authorization page, with the tokens from `docs/UI.md`.                                                                                                                 |
+| `CORS_HEADERS`                    | `src/remote/handler.ts`                            | CORS headers of the remote endpoints (any origin; there are no cookies).                                                                                                            |
+| `REMOTE_ROUTES`                   | `src/remote/handler.ts`                            | Table `MÉTODO caminho` → remote server function.                                                                                                                                    |
+| `DEFAULT_REDIRECT_HOSTS`          | `src/remote/oauth.ts`                              | OAuth redirect hosts accepted by default (`claude.ai`, `claude.com`, `localhost`).                                                                                                  |
+| `MAX_BODY_BYTES`                  | `src/remote/node-server.ts`                        | Largest request body accepted by the remote server (1 MB).                                                                                                                          |
+| `PDF_ESCAPES`                     | `src/core/pdf.ts`                                  | Letter escapes of PDF literal strings (`\n`, `\t`...).                                                                                                                              |
+| `TJ_SPACE_THRESHOLD`              | `src/core/pdf.ts`                                  | `TJ` adjustment from which it counts as a space between words.                                                                                                                      |
+| `PDF_TEXT_OPERATORS`              | `src/core/pdf.ts`                                  | PDF text operator → the text it produces.                                                                                                                                           |
+| `ACCESS_TOKEN_MARGIN_MS`          | `connectors/gmail/src/access-token.ts`             | Margin before expiry at which the Google access token is renewed.                                                                                                                   |
+| `MAX_ATTACHMENT_BYTES`            | `connectors/gmail/src/attachments.ts`              | Largest attachment read as text (5 MB).                                                                                                                                             |
+| `MAX_ATTACHMENT_CHARS`            | `connectors/gmail/src/attachments.ts`              | Largest text returned from an attachment.                                                                                                                                           |
+| `GMAIL_MODIFY_SCOPE`              | `connectors/gmail/src/config.ts`                   | The `gmail.modify` scope, the only data scope requested (read, send, organize; no permanent deletion).                                                                              |
+| `MIN_CONSENT_SECRET_CHARS`        | `connectors/gmail/src/config.ts`                   | Minimum length of `CONSENT_SECRET`.                                                                                                                                                 |
+| `UPSTREAM_USER_AGENT`             | `connectors/gmail/src/context.ts`                  | User-Agent sent to Google and the Gmail API.                                                                                                                                        |
+| `GMAIL_API_BASE`                  | `connectors/gmail/src/gmail-api.ts`                | Gmail API base for the token's account.                                                                                                                                             |
+| `GMAIL_STATUS_MESSAGES`           | `connectors/gmail/src/gmail-api.ts`                | Actionable message per Gmail API HTTP status.                                                                                                                                       |
+| `GOOGLE_AUTHORIZE_URL`            | `connectors/gmail/src/google-oauth.ts`             | Google authorization endpoint.                                                                                                                                                      |
+| `GOOGLE_TOKEN_URL`                | `connectors/gmail/src/google-oauth.ts`             | Google token endpoint.                                                                                                                                                              |
+| `GOOGLE_CALLBACK_PATH`            | `connectors/gmail/src/google-oauth.ts`             | Google callback path (`/google/callback`).                                                                                                                                          |
+| `GOOGLE_JWKS_URL`                 | `connectors/gmail/src/id-token.ts`                 | Public keys that sign Google's `id_token`.                                                                                                                                          |
+| `GOOGLE_ISSUERS`                  | `connectors/gmail/src/id-token.ts`                 | Issuers accepted in the `id_token`.                                                                                                                                                 |
+| `CLOCK_SKEW_SECONDS`              | `connectors/gmail/src/id-token.ts`                 | Clock skew tolerated in the `id_token` validity.                                                                                                                                    |
+| `LINK_STATE_PREFIX`               | `connectors/gmail/src/link-flow.ts`                | Prefix of the account-link `state` (`link.`).                                                                                                                                       |
+| `LINK_COOKIE`                     | `connectors/gmail/src/link-flow.ts`                | `__Host-` cookie that binds the link to the browser.                                                                                                                                |
+| `LINK_TTL_SECONDS`                | `connectors/gmail/src/link-flow.ts`                | Lifetime of the link request (10 minutes).                                                                                                                                          |
+| `LINK_REQUEST_TYP`                | `connectors/gmail/src/link-flow.ts`                | Seal type of the link request.                                                                                                                                                      |
+| `MAX_MESSAGE_CHARS`               | `connectors/gmail/src/message-format.ts`           | Largest message body returned.                                                                                                                                                      |
+| `MAX_THREAD_CHARS`                | `connectors/gmail/src/message-format.ts`           | Largest sum of a thread's bodies.                                                                                                                                                   |
+| `MIN_MESSAGE_CHARS`               | `connectors/gmail/src/message-format.ts`           | Smallest slice per message in a long thread.                                                                                                                                        |
+| `MESSAGE_HEADERS`                 | `connectors/gmail/src/message-format.ts`           | Headers returned for each message.                                                                                                                                                  |
+| `UNTRUSTED_NOTICE`                | `connectors/gmail/src/message-format.ts`           | Notice of untrusted email content (prompt injection).                                                                                                                               |
+| `GOOGLE_ACCOUNTS_ORIGIN`          | `connectors/gmail/src/pages.ts`                    | Google origin allowed in the consent page's `form-action`.                                                                                                                          |
+| `RATE_LIMIT_RETRY_SECONDS`        | `connectors/gmail/src/rate-limit.ts`               | `Retry-After` seconds in the 429 response.                                                                                                                                          |
+| `GMAIL_ID`                        | `connectors/gmail/src/tools.ts`                    | Zod schema of a Gmail API id (only URL-safe characters).                                                                                                                            |
+| `listAccountsTool`                | `connectors/gmail/src/tools.ts`                    | The `list_accounts` tool.                                                                                                                                                           |
+| `searchThreadsTool`               | `connectors/gmail/src/tools.ts`                    | The `search_threads` tool.                                                                                                                                                          |
+| `getThreadTool`                   | `connectors/gmail/src/tools.ts`                    | The `get_thread` tool.                                                                                                                                                              |
+| `getMessageTool`                  | `connectors/gmail/src/tools.ts`                    | The `get_message` tool.                                                                                                                                                             |
+| `listLabelsTool`                  | `connectors/gmail/src/tools.ts`                    | The `list_labels` tool.                                                                                                                                                             |
+| `getAttachmentTextTool`           | `connectors/gmail/src/tools.ts`                    | The `get_attachment_text` tool.                                                                                                                                                     |
+| `GMAIL_TOOLS`                     | `connectors/gmail/src/tool-list.ts`                | All Gmail tools, in the order shown to Claude.                                                                                                                                      |
+| `MAX_QUOTED_CHARS`                | `connectors/gmail/src/compose.ts`                  | Largest excerpt of the original quoted in a reply (20 thousand characters).                                                                                                         |
+| `FORWARD_SEPARATOR`               | `connectors/gmail/src/compose.ts`                  | Line that opens the forwarded email block.                                                                                                                                          |
+| `DRAFT_SHAPE`                     | `connectors/gmail/src/draft-tools.ts`              | Parameters of a draft's content (create and replace).                                                                                                                               |
+| `listDraftsTool`                  | `connectors/gmail/src/draft-tools.ts`              | The `list_drafts` tool.                                                                                                                                                             |
+| `createDraftTool`                 | `connectors/gmail/src/draft-tools.ts`              | The `create_draft` tool.                                                                                                                                                            |
+| `updateDraftTool`                 | `connectors/gmail/src/draft-tools.ts`              | The `update_draft` tool.                                                                                                                                                            |
+| `sendDraftTool`                   | `connectors/gmail/src/draft-tools.ts`              | The `send_draft` tool.                                                                                                                                                              |
+| `deleteDraftTool`                 | `connectors/gmail/src/draft-tools.ts`              | The `delete_draft` tool.                                                                                                                                                            |
+| `MAX_GMAIL_ERROR_DETAIL`          | `connectors/gmail/src/gmail-api.ts`                | Largest Gmail error detail passed to the model (200 characters).                                                                                                                    |
+| `TARGET_SHAPE`                    | `connectors/gmail/src/mailbox-tools.ts`            | Target parameters of the organizing tools (`message_ids`, `thread_ids`).                                                                                                            |
+| `markReadTool`                    | `connectors/gmail/src/mailbox-tools.ts`            | The `mark_read` tool.                                                                                                                                                               |
+| `archiveTool`                     | `connectors/gmail/src/mailbox-tools.ts`            | The `archive` tool.                                                                                                                                                                 |
+| `starTool`                        | `connectors/gmail/src/mailbox-tools.ts`            | The `star` tool.                                                                                                                                                                    |
+| `updateLabelsTool`                | `connectors/gmail/src/mailbox-tools.ts`            | The `update_labels` tool.                                                                                                                                                           |
+| `trashTool`                       | `connectors/gmail/src/mailbox-tools.ts`            | The `trash` tool.                                                                                                                                                                   |
+| `untrashTool`                     | `connectors/gmail/src/mailbox-tools.ts`            | The `untrash` tool.                                                                                                                                                                 |
+| `MAX_TARGET_MESSAGES`             | `connectors/gmail/src/mailbox.ts`                  | Maximum messages per call of the organizing tools (50).                                                                                                                             |
+| `MAX_TARGET_THREADS`              | `connectors/gmail/src/mailbox.ts`                  | Maximum threads per call of the organizing tools (20).                                                                                                                              |
+| `MAILBOX_ACTIONS`                 | `connectors/gmail/src/mailbox.ts`                  | System labels each action adds and removes (read, archive, star).                                                                                                                   |
+| `MAX_ENCODED_WORD_BYTES`          | `connectors/gmail/src/mime.ts`                     | Largest UTF-8 chunk of an RFC 2047 word (45 bytes, word ≤ 75).                                                                                                                      |
+| `MAX_BODY_CHARS`                  | `connectors/gmail/src/send-tools.ts`               | Largest email body accepted (100 thousand characters).                                                                                                                              |
+| `RECIPIENTS`                      | `connectors/gmail/src/send-tools.ts`               | Zod schema of a recipient list.                                                                                                                                                     |
+| `BODY`                            | `connectors/gmail/src/send-tools.ts`               | Zod schema of the plain-text body.                                                                                                                                                  |
+| `SUBJECT`                         | `connectors/gmail/src/send-tools.ts`               | Zod schema of the subject (up to 998 characters).                                                                                                                                   |
+| `sendEmailTool`                   | `connectors/gmail/src/send-tools.ts`               | The `send_email` tool.                                                                                                                                                              |
+| `replyEmailTool`                  | `connectors/gmail/src/send-tools.ts`               | The `reply_email` tool.                                                                                                                                                             |
+| `replyAllEmailTool`               | `connectors/gmail/src/send-tools.ts`               | The `reply_all_email` tool.                                                                                                                                                         |
+| `forwardEmailTool`                | `connectors/gmail/src/send-tools.ts`               | The `forward_email` tool.                                                                                                                                                           |
+| `MAX_RECIPIENTS`                  | `connectors/gmail/src/send.ts`                     | Maximum recipients (To + Cc + Bcc) in an email (100).                                                                                                                               |
+| `MAX_FORWARD_BYTES`               | `connectors/gmail/src/send.ts`                     | Largest sum of attachments in a forward (18 MB).                                                                                                                                    |
+| `ONE_ACCOUNT`                     | `connectors/gmail/src/tools.ts`                    | Zod schema of the single-account `account` parameter.                                                                                                                               |
+| `CONFIRM_HINT`                    | `connectors/gmail/src/tools.ts`                    | Sentence of the write tools: confirm with the user and never act on an email's request.                                                                                             |
+| `GMAIL_SERVER_INFO`               | `connectors/gmail/src/worker.ts`                   | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                            |
+| `GMAIL_SERVER_INSTRUCTIONS`       | `connectors/gmail/src/worker.ts`                   | MCP server instructions (accounts and untrusted content).                                                                                                                           |
+| `ACCESS_TOKEN_TTL_SECONDS`        | `connectors/gmail/src/worker.ts`                   | Lifetime of the access token issued to Claude (1 hour).                                                                                                                             |
+| `REFRESH_TOKEN_TTL_SECONDS`       | `connectors/gmail/src/worker.ts`                   | Lifetime of the refresh token issued to Claude (30 days).                                                                                                                           |
+| `GMAIL_ROUTES`                    | `connectors/gmail/src/worker.ts`                   | The Worker's own routes: `MÉTODO caminho` → handler.                                                                                                                                |
+| `BRIDGE_ERROR_MESSAGES`           | `connectors/whatsapp/src/bridge-client.ts`         | User-facing messages (English) for the bridge's known error codes.                                                                                                                  |
+| `WHATSAPP_DEFAULTS`               | `connectors/whatsapp/src/config.ts`                | Connector defaults: sleep after 5 min, 25 s per tool, 8 s waiting for sync, 10 sends per hour.                                                                                      |
+| `BRIDGE_ENV_KEYS`                 | `connectors/whatsapp/src/config.ts`                | Variables passed from the Worker to the bridge container (`bridge/API.md`).                                                                                                         |
+| `SNAPSHOT_PUSH_URL`               | `connectors/whatsapp/src/config.ts`                | Internal address, intercepted by the Worker, to which the bridge sends the snapshot on `SIGTERM`.                                                                                   |
+| `UNTRUSTED_NOTICE`                | `connectors/whatsapp/src/format.ts`                | Notice of untrusted third-party data that accompanies every result with messages or contacts.                                                                                       |
+| `HIDDEN_CHAR_RANGES`              | `connectors/whatsapp/src/format.ts`                | Ranges of invisible characters (control, zero-width, bidi, BOM) removed by `sanitizeText`.                                                                                          |
+| `SNAPSHOT_INTERVAL_MS`            | `connectors/whatsapp/src/lifecycle.ts`             | Minimum interval between usage-triggered snapshots (1 minute).                                                                                                                      |
+| `SNAPSHOT_AFTER_PATHS`            | `connectors/whatsapp/src/lifecycle.ts`             | Bridge routes after which the database may have changed and a snapshot is worth trying.                                                                                             |
+| `SEND_HISTORY_KEY`                | `connectors/whatsapp/src/lifecycle.ts`             | Key, in the Durable Object storage, of the recent send timestamps (hourly limit).                                                                                                   |
+| `PAIR_PAGE_CSS`                   | `connectors/whatsapp/src/pair-page.ts`             | Style additions of the `/pair` page (large code, QR, secondary and danger buttons).                                                                                                 |
+| `PAIR_SESSION_COOKIE`             | `connectors/whatsapp/src/pair.ts`                  | Name of the `__Host-` cookie of the sealed `/pair` session.                                                                                                                         |
+| `PAIR_NONCE_COOKIE`               | `connectors/whatsapp/src/pair.ts`                  | Name of the `__Host-` cookie of the nonce that binds the `/pair` login to the browser.                                                                                              |
+| `PAIR_SESSION_TTL_SECONDS`        | `connectors/whatsapp/src/pair.ts`                  | Lifetime of the `/pair` session and the anti-CSRF token (30 minutes).                                                                                                               |
+| `PAIR_LOGIN_TTL_SECONDS`          | `connectors/whatsapp/src/pair.ts`                  | Lifetime of the in-progress `/pair` login (10 minutes).                                                                                                                             |
+| `PAIR_CALLBACK_PATH`              | `connectors/whatsapp/src/pair.ts`                  | GitHub callback path for `/pair` (a subpath of the OAuth App callback).                                                                                                             |
+| `PAIR_ACTIONS`                    | `connectors/whatsapp/src/pair.ts`                  | `/pair` actions by path: code, QR, unlink and start over from scratch.                                                                                                              |
+| `SNAPSHOT_KEY_NAME`               | `connectors/whatsapp/src/snapshots.ts`             | Key of the current snapshot in the R2 bucket (`whatsapp/snapshot.was1`).                                                                                                            |
+| `WHATSAPP_INSTRUCTIONS`           | `connectors/whatsapp/src/tools.ts`                 | MCP server instructions: what the connector is and the rule about untrusted content.                                                                                                |
+| `WHATSAPP_SERVER_INFO`            | `connectors/whatsapp/src/tools.ts`                 | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                            |
+| `READ_TOOLS`                      | `connectors/whatsapp/src/tools.ts`                 | Read tools (phase 1), always active.                                                                                                                                                |
+| `BRIDGE_INSTANCE_NAME`            | `connectors/whatsapp/src/worker-env.ts`            | Fixed name of the bridge's single Durable Object instance (single instance = single session).                                                                                       |
+| `WHATSAPP_WORKER_HANDLERS`        | `connectors/whatsapp/src/worker.ts`                | Worker handlers (`fetch` and `scheduled`), exported by `index.ts` with the Durable Object.                                                                                          |
+| `GITHUB_USER_AGENT`               | `src/remote/github-login.ts`                       | User-Agent of the calls to GitHub (the API refuses requests without it).                                                                                                            |
+| `READ_ONLY_HINTS`                 | `src/mcp/annotations.ts`                           | Hints of a read-only tool (`readOnlyHint: true`, idempotent, open world).                                                                                                           |
+| `SEND_HINTS`                      | `src/mcp/annotations.ts`                           | Hints of a tool that sends or publishes (email, message, submission): destructive, not idempotent.                                                                                  |
+| `DESTRUCTIVE_HINTS`               | `src/mcp/annotations.ts`                           | Hints of a tool that deletes or overwrites (trash, draft, account link): destructive, idempotent.                                                                                   |
+| `ORGANIZE_HINTS`                  | `src/mcp/annotations.ts`                           | Hints of a reversible organizing tool (read, archive, star, labels, restore): writes, not destructive.                                                                              |
+| `CREATE_HINTS`                    | `src/mcp/annotations.ts`                           | Hints of a tool that creates something without deleting (draft, link): writes, not destructive.                                                                                     |
+| `FALLBACK_SERVER_VERSION`         | `src/mcp/server-version.ts`                        | Version announced when the plugin manifest has none (`0.0.0`).                                                                                                                      |
+| `UPSTREAM_CALLBACK_PATH`          | `src/remote/handler.ts`                            | Callback path of the delegated login (`/oauth/callback`), registered with the provider.                                                                                             |
+| `BRIDGE_RETRY_MS`                 | `connectors/whatsapp/src/bridge-client.ts`         | Wait between attempts while the bridge wakes up (750 ms).                                                                                                                           |
+| `GMAIL_SCOPES`                    | `connectors/gmail/src/config.ts`                   | Login and link scopes (`openid email` + Gmail read-only).                                                                                                                           |
+| `GOOGLE_REVOKE_URL`               | `connectors/gmail/src/google-oauth.ts`             | Google token revocation endpoint.                                                                                                                                                   |
+| `LINK_TICKET_TYP`                 | `connectors/gmail/src/link-flow.ts`                | Seal type of the link ticket issued by `link_account`.                                                                                                                              |
+| `OWNER_RECORD_TYP`                | `connectors/gmail/src/token-store.ts`              | Seal type of a user's accounts record.                                                                                                                                              |
+| `OWNER_RECORD_EXP`                | `connectors/gmail/src/token-store.ts`              | Technical expiry of the record's seal (year 2100).                                                                                                                                  |
+| `MAX_LINKED_ACCOUNTS`             | `connectors/gmail/src/token-store.ts`              | Maximum Gmail accounts a user can link (10).                                                                                                                                        |
+| `linkAccountTool`                 | `connectors/gmail/src/tools.ts`                    | The `link_account` tool.                                                                                                                                                            |
+| `unlinkAccountTool`               | `connectors/gmail/src/tools.ts`                    | The `unlink_account` tool.                                                                                                                                                          |
+| `SECRET_PATTERNS`                 | `src/core/redact.ts`                               | Secret patterns removed by `redactSecrets` (Bearer, Canvas, Google, JWT, OAuth fields, long seals) and their masks.                                                                 |
+| `EMAIL_PATTERN`                   | `src/core/redact.ts`                               | Email address pattern masked in logs by `redactForLog`.                                                                                                                             |
+| `BROWSER_PAGE_PATHS`              | `src/remote/handler.ts`                            | Browser pages of the remote server (`/authorize`, `/oauth/callback`): no CORS headers.                                                                                              |
+| `LEGACY_AUDLESS_UNTIL`            | `src/remote/seal.ts`                               | Cutoff (2027-01-01 UTC) until which a seal issued before `aud` existed still opens; every older access/refresh token expires before it.                                             |
+| `CANVAS_WRITE_GRANT`              | `connectors/canvas-puc/src/remote.ts`              | Permission (`write`) a Canvas user opts into at login so the send, reply and submit tools run (also possible later on `/write-access`).                                             |
+| `CANVAS_WRITE_OPTION_LABEL`       | `connectors/canvas-puc/src/remote.ts`              | Label of the unticked write opt-in checkbox on the Canvas login page.                                                                                                               |
+| `LINK_CONFIRM_TYP`                | `connectors/gmail/src/link-flow.ts`                | Seal type of the Gmail link confirmation form (ticket `jti` + browser cookie hash).                                                                                                 |
+| `OWNER_CHECK_SCOPES`              | `connectors/gmail/src/link-flow.ts`                | Scopes of the Gmail link owner check (`openid email`, no Gmail access).                                                                                                             |
+| `TOOL_CONTRACT_FILE`              | `tools/smoke/smoke.ts`                             | Contract file of each connector, relative to its folder (`tool-contract.json`).                                                                                                     |
+| `SMOKE_ATTEMPTS`                  | `tools/smoke/smoke.ts`                             | Attempts of the post-deploy smoke test (4): a fresh deploy can take seconds to reach every location.                                                                                |
+| `SMOKE_RETRY_MS`                  | `tools/smoke/smoke.ts`                             | Pause between smoke attempts (5000 ms).                                                                                                                                             |
+| `UNAVAILABLE_TOOL_NOTE`           | `src/mcp/tool-gate.ts`                             | Marker (`UNAVAILABLE on this connection:`) appended to the description of a listed but switched-off tool.                                                                           |
+| `TOOL_CATALOG_PATH`               | `src/remote/mcp-endpoint.ts`                       | Path of the public tool catalog (`/tools`): the `tools/list` answer, no user data.                                                                                                  |
+| `MAX_MESSAGE_ATTACHMENTS`         | `connectors/canvas-puc/src/message-attachments.ts` | Most files one inbox message may carry (5).                                                                                                                                         |
+| `CONVERSATION_ATTACHMENTS_FOLDER` | `connectors/canvas-puc/src/message-attachments.ts` | Canvas folder of the user's inbox attachments (`conversation attachments`, the API's `parent_folder_path`).                                                                         |
+| `USER_FILES_PATH`                 | `connectors/canvas-puc/src/message-attachments.ts` | Step-1 upload endpoint of a file in the user's own files (`/users/self/files`).                                                                                                     |
+| `ATTACHMENTS_LIMIT_TEXT`          | `connectors/canvas-puc/src/message-attachments.ts` | Text of the attachments limit (`up to 5 files of at most 5 MB each`), for the tool descriptions.                                                                                    |
+| `CANVAS_WRITE_OFF_REASON`         | `connectors/canvas-puc/src/remote.ts`              | Why the write tools refuse when the operator turned writing off (`CANVAS_ALLOW_WRITE`).                                                                                             |
+| `FILE_FIELDS`                     | `connectors/canvas-puc/src/tools-write.ts`         | Zod fields of a file inside a tool call (`file_name`, `content`, `encoding`, `content_type`), shared by submissions and message attachments.                                        |
+| `WRITE_ACCESS_PATH`               | `connectors/canvas-puc/src/write-access.ts`        | Path of the page that turns Canvas writing on or off for a connection (`/write-access`).                                                                                            |
+| `WRITE_TICKET_TYP`                | `connectors/canvas-puc/src/write-access.ts`        | Seal type of the write-access link ticket (`canvas-write-access`).                                                                                                                  |
+| `WRITE_TICKET_TTL_SECONDS`        | `connectors/canvas-puc/src/write-access.ts`        | Lifetime of the write-access link (15 minutes).                                                                                                                                     |
+| `WHATSAPP_SEND_OFF_REASON`        | `connectors/whatsapp/src/tools.ts`                 | Why `send_message` refuses when the server runs without `ENABLE_SEND`.                                                                                                              |

@@ -5,7 +5,12 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { errorMessage, logWarning, redactSecrets } from '../core/redact.js';
 import { escapeHtml, renderLoginPage, type LoginPageText } from './login-page.js';
-import { mcpUnauthorizedResponse, serveMcpRequest } from './mcp-endpoint.js';
+import {
+  mcpUnauthorizedResponse,
+  serveMcpRequest,
+  serveToolCatalog,
+  TOOL_CATALOG_PATH,
+} from './mcp-endpoint.js';
 import {
   readToolCallRequest,
   streamedToolResponse,
@@ -53,7 +58,14 @@ export type SecretRenewal = 'kept' | 'revoked';
 export interface RemoteConnector {
   readonly login: SecretLogin | UpstreamLogin;
   /** Creates the MCP server with the tools bound to the user's credential and the permissions they opted into. */
-  readonly createServer: (secret: string, grants: readonly string[]) => McpServer;
+  readonly createServer: (
+    secret: string,
+    grants: readonly string[],
+  ) => McpServer | Promise<McpServer>;
+  /** Optional: server that only lists the tools, for the public catalog at `GET /tools` (no credential). */
+  readonly catalogServer?: () => McpServer;
+  /** Optional: the connector's own browser pages (`METHOD path` → handler), served without CORS. */
+  readonly pages?: Readonly<Record<string, (request: Request) => Promise<Response>>>;
   /** Optional: extends the credential lifetime at the service on each OAuth refresh. */
   readonly renewSecret?: (secret: string) => Promise<SecretRenewal>;
   /** Optional: checks on each `/mcp` whether the secret is still valid (e.g. email still on the owner's list). */
@@ -288,7 +300,8 @@ export async function serveMcpWithStreaming(
   request: Request,
 ): Promise<Response> {
   const streamed = await streamToolQuietly(connector, grant.secret, request);
-  return streamed ?? serveMcpRequest(connector.createServer(grant.secret, grant.grants), request);
+  if (streamed) return streamed;
+  return serveMcpRequest(await connector.createServer(grant.secret, grant.grants), request);
 }
 
 /** Streamed response of a `tools/call` the connector takes; `null` (with a warning on failure) otherwise. */
@@ -326,7 +339,23 @@ export const REMOTE_ROUTES: Readonly<Record<string, RemoteRoute>> = {
   'GET /mcp': handleMcp,
   'POST /mcp': handleMcp,
   'DELETE /mcp': handleMcp,
+  [`GET ${TOOL_CATALOG_PATH}`]: handleToolCatalog,
 };
+
+/** `GET /tools`: the public tool catalog (names, schemas, annotations; never user data), or 404 without one. */
+export function handleToolCatalog(app: RemoteApp, request: Request): Promise<Response> {
+  const catalog = app.connector.catalogServer;
+  if (!catalog) return Promise.resolve(new Response('Not found', { status: 404 }));
+  return serveToolCatalog(catalog(), new URL(request.url).origin);
+}
+
+/** The connector's own page for `METHOD path`, or undefined when it has none. */
+export function connectorPage(
+  app: RemoteApp,
+  key: string,
+): ((request: Request) => Promise<Response>) | undefined {
+  return app.connector.pages?.[key];
+}
 
 /** Adds the CORS headers to a response. */
 export function withCors(response: Response): Response {
@@ -349,7 +378,11 @@ export async function routeRemoteRequest(app: RemoteApp, request: Request): Prom
     const preflight = new Response(null, { status: 204 });
     return allowsCors(path) ? withCors(preflight) : preflight;
   }
-  const route = REMOTE_ROUTES[`${request.method} ${path}`];
+  const key = `${request.method} ${path}`;
+  const route = REMOTE_ROUTES[key];
+  // A connector page never shadows an OAuth or MCP route; pages are navigated to, so they get no CORS.
+  const page = route ? undefined : connectorPage(app, key);
+  if (page) return page(request);
   if (!route) return new Response('Not found', { status: 404 });
   const response = await route(app, request);
   return allowsCors(path) ? withCors(response) : response;

@@ -26,24 +26,37 @@ async function run(name: string, args: unknown, routes: Routes = {}) {
   return { result: (await tool(name).run(fake.ctx, args)) as never, ...fake };
 }
 
-function toolNames(allowWrite: boolean): string[] {
-  return canvasTools(allowWrite).map((t) => t.name);
+function toolNames(block: string | null): string[] {
+  return canvasTools(block).map((t) => t.name);
 }
 
 describe('canvasTools', () => {
-  it('includes write tools only when allowed and repeats no names', () => {
-    expect(toolNames(false)).not.toContain('submit_text_assignment');
-    expect(toolNames(true)).toContain('reply_to_discussion');
-    expect(new Set(toolNames(true)).size).toBe(toolNames(true).length);
+  it('lists the write tools whether writing is on or off and repeats no names', () => {
+    expect(toolNames('off for a test')).toEqual(toolNames(null));
+    expect(toolNames(null)).toContain('send_message');
+    expect(new Set(toolNames(null)).size).toBe(toolNames(null).length);
+  });
+
+  it('makes each write tool refuse with the reason, without calling Canvas, when writing is off', async () => {
+    const fake = fakeContext({});
+    const off = canvasTools('reconnect to allow it');
+    for (const spec of off.filter((t) => !t.annotations.readOnlyHint)) {
+      expect(spec.description).toContain('UNAVAILABLE on this connection: reconnect to allow it');
+      const result = toToolResult(await spec.run(fake.ctx, {}));
+      expect(result.isError).toBe(true);
+      expect(JSON.stringify(result.content)).toContain(`${spec.name} is unavailable`);
+    }
+    expect(fake.post).not.toHaveBeenCalled();
+    expect(fake.upload).not.toHaveBeenCalled();
   });
 
   it('has no local login tools', () => {
-    expect(toolNames(true)).toContain('upcoming_assignments');
-    expect(toolNames(true)).not.toContain('conectar_canvas');
+    expect(toolNames(null)).toContain('upcoming_assignments');
+    expect(toolNames(null)).not.toContain('conectar_canvas');
   });
 
   it('uses the English tool names, in order', () => {
-    expect(toolNames(true)).toEqual([
+    expect(toolNames(null)).toEqual([
       'whoami',
       'list_courses',
       'upcoming_assignments',
@@ -68,7 +81,7 @@ describe('canvasTools', () => {
       'submit_file_assignment',
       'reply_to_discussion',
       'send_message',
-      'reply_to_conversation',
+      'reply_message',
     ]);
   });
 
@@ -91,7 +104,7 @@ describe('CANVAS_SERVER_INFO', () => {
 
 describe('createCanvasMcpServer', () => {
   it('creates the MCP server with the tools registered', () => {
-    const server = createCanvasMcpServer(canvasTools(false), fakeContext({}).ctx);
+    const server = createCanvasMcpServer(canvasTools(null), fakeContext({}).ctx);
     expect(server).toBeInstanceOf(McpServer);
     expect(server.isConnected()).toBe(false);
   });
