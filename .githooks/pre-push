@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
-# Full check (there is no CI, ADR 0006). If it is slow, that is a sign to optimize, not to skip.
+# Only the protected branches: main changes only through a PR. Git passes the refs on stdin.
+# The full check runs once per PR, in `npm run pr:check` (ADR 0029): no second copy here.
 set -e
-npm run -s check
+sh "$(dirname "$0")/protected-branches.sh"

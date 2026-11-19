@@ -2,23 +2,40 @@
 // Exit 2 = block and return the reason to Claude. See docs/WORKFLOW.md and CLAUDE.md.
 import { readFileSync } from 'node:fs';
 
+// `git` followed directly by the subcommand, global options allowed in between (git -C dir push), so text that
+// only mentions git and push (a heredoc, `git hook pre-push`, `git stash push`) does not match.
+const GIT_OPTIONS = String.raw`\bgit(?:\s+(?:-[Cc]\s+\S+|--?[\w-]+(?:=\S+)?))*\s+`;
+/** Pattern for `git <one of names> ...<rest>` within one command segment. */
+function gitSubcommand(names, rest) {
+  return new RegExp(`${GIT_OPTIONS}(?:${names})\\b[^|;&\\n]*${rest}`);
+}
+// The protected branch only as a whole refspec (origin main, HEAD:main, +main, refs/heads/main), never inside
+// a name like fix/main-menu.
+const PROTECTED_REFSPEC = String.raw`\s\+?(?:\S*:)?\+?(?:refs\/heads\/)?(?:main|master)(?=\s|$|[;&|])`;
+
 const RULES = [
   {
-    pattern:
-      /\bgit\b[^|;&]*\bpush\b[^|;&]*(\s--force(?!-with-lease)\b|\s-f\b|\s--force-with-lease\b)/,
+    pattern: gitSubcommand(
+      'push',
+      String.raw`(\s--force(?!-with-lease)\b|\s-f\b|\s--force-with-lease\b)`,
+    ),
     reason: 'force push is forbidden (docs/WORKFLOW.md).',
   },
   {
-    pattern: /\bgit\b[^|;&]*\bpush\b[^|;&]*\b(main|master)\b/,
+    pattern: gitSubcommand('push', PROTECTED_REFSPEC),
     reason: 'direct push to main is forbidden: open a PR (docs/WORKFLOW.md).',
   },
   {
-    pattern: /\bgit\b[^|;&]*\b(commit|push|merge)\b[^|;&]*(\s--no-verify\b|\s-n\b)/,
+    pattern: gitSubcommand('commit|push|merge', String.raw`(\s--no-verify\b|\s-n\b)`),
     reason: '--no-verify is forbidden: fix what the hook reported.',
   },
   {
-    pattern: /\bgit\b[^|;&]*\bbranch\b[^|;&]*\s-D\s+(main|master)\b/,
+    pattern: gitSubcommand('branch', String.raw`\s-D\s+(main|master)(?=\s|$|[;&|])`),
     reason: 'do not delete main.',
+  },
+  {
+    pattern: /\bgh\s+workflow\s+(run|enable)\b|actions\/workflows\/\S+\/(enable|dispatches)\b/,
+    reason: 'GitHub Actions is not used: the checks run locally (ADR 0006).',
   },
   {
     pattern:

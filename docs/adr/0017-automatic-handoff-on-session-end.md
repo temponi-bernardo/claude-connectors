@@ -1,6 +1,6 @@
 # 0017 — Automatic handoff on SessionEnd
 
-- **Status:** Accepted
+- **Status:** Superseded by [0029](0029-lean-claude-code-layer.md)
 - **Date:** 2026-11-14
 - **Related:** complements ADRs 0004 and 0005 (handoff in `docs/STATE.md`)
 

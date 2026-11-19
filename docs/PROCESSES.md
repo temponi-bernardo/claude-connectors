@@ -8,7 +8,7 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
 
 ## P01 — Check the documentation (`npm run docs:check`)
 
-- **Trigger:** `npm run docs:check`, `npm run check`, the `pre-push` hook, `pr:check` and the Claude Code `Stop` hook.
+- **Trigger:** `npm run docs:check`, `npm run check`, the `pre-commit` hook and `pr:check`.
 - **Steps:**
   1. `runDocsCli()` reads the command (`check` by default) and calls `runCheck()`.
   2. `runCheck()` loads the configuration with `loadDocsConfig()`, builds the inventory with `buildInventory()`
@@ -133,7 +133,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 
 ## P06 — Local PR gate (`npm run pr:check`)
 
-- **Trigger:** before opening and before merging a PR (there is no CI, ADR 0006).
+- **Trigger:** once per PR, after the last commit; reused for the merge (there is no CI, ADR 0006).
 - **Steps:**
   1. `scripts/pr-check.sh` requires the PR title and runs `npm run check` (includes P01 via `runDocsCli()`).
   2. Runs P05 (`npm run build`) and fails if the connectors' versioned bundle changes without a commit.
