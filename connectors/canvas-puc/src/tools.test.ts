@@ -268,7 +268,7 @@ describe('read tools', () => {
     };
     const { result } = await run('list_files', { course_id: 1, include_linked: true }, routes);
     const content = toToolResult(result).content;
-    expect((content[0] as { text: string }).text).toContain('"linked_only": true');
+    expect((content[0] as { text: string }).text).toContain('"linked_only":true');
     expect((content[1] as { text: string }).text).toContain('1 file(s)');
   });
 
