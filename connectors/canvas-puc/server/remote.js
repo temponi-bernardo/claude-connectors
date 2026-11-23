@@ -21639,6 +21639,22 @@ function isRangeAnswer(res, chunk) {
   return res.status === 206 && range.startsWith(`bytes ${chunk.start}-`);
 }
 
+// src/core/time.ts
+var MINUTE_MS = 6e4;
+function zoneOffsetMinutes(instant, timeZone) {
+  const label = new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "longOffset" }).formatToParts(instant).find((part) => part.type === "timeZoneName")?.value;
+  const match = /GMT([+-])(\d{2}):(\d{2})/.exec(label ?? "");
+  if (!match) return 0;
+  const minutes = Number(match[2]) * 60 + Number(match[3]);
+  return match[1] === "-" ? -minutes : minutes;
+}
+function startOfDayIn(instant, timeZone) {
+  const local = new Date(instant.getTime() + zoneOffsetMinutes(instant, timeZone) * MINUTE_MS);
+  const midnight = Date.UTC(local.getUTCFullYear(), local.getUTCMonth(), local.getUTCDate());
+  const guess = new Date(midnight - zoneOffsetMinutes(instant, timeZone) * MINUTE_MS);
+  return new Date(midnight - zoneOffsetMinutes(guess, timeZone) * MINUTE_MS);
+}
+
 // connectors/canvas-puc/src/helpers.ts
 var ASSIGNMENT_BUCKETS = {
   all: void 0,
@@ -21649,6 +21665,11 @@ var ASSIGNMENT_BUCKETS = {
 };
 function isoDaysFrom(now, days) {
   return new Date(now.getTime() + days * 864e5).toISOString();
+}
+var CANVAS_TIME_ZONE = "America/Sao_Paulo";
+function plannerWindow(now, days) {
+  const start = startOfDayIn(now, CANVAS_TIME_ZONE);
+  return { start_date: start.toISOString(), end_date: isoDaysFrom(start, days + 1) };
 }
 function dateOnly(iso) {
   return iso.slice(0, 10);
@@ -21858,6 +21879,8 @@ function redactVerifier(text) {
 // connectors/canvas-puc/src/client.ts
 var CANVAS_PAGE_SIZE = 100;
 var DEFAULT_MAX_ITEMS = 200;
+var CANVAS_TIMEOUT_MS = 3e4;
+var CANVAS_GRAPHQL_PATH = "/api/graphql";
 function unauthorizedMessage(baseUrl) {
   return `Canvas rejected the token (expired or revoked). Generate a new one at ${baseUrl}/profile/settings and reconnect the connector in Claude's settings.`;
 }
@@ -21870,7 +21893,8 @@ function sendCanvasRequest(deps, req) {
       Accept: "application/json",
       ...hasBody ? { "Content-Type": "application/json" } : {}
     },
-    ...hasBody ? { body: JSON.stringify(req.body) } : {}
+    ...hasBody ? { body: JSON.stringify(req.body) } : {},
+    signal: AbortSignal.timeout(CANVAS_TIMEOUT_MS)
   });
 }
 function canvasApiError(message, status, tokenRejected = false) {
@@ -21883,8 +21907,18 @@ function canvasErrorStatus(error2) {
 function isPermissionDenial(body) {
   return /"status"\s*:\s*"unauthorized"/.test(body);
 }
+function networkFailure(error2, req) {
+  if (error2?.name !== "TimeoutError") return error2;
+  const seconds = CANVAS_TIMEOUT_MS / 1e3;
+  return canvasApiError(
+    `Canvas did not answer within ${seconds} s on ${req.method} ${req.path}. Try again in a moment.`,
+    504
+  );
+}
 async function requestCanvas(deps, req) {
-  const res = await sendCanvasRequest(deps, req);
+  const res = await sendCanvasRequest(deps, req).catch((error2) => {
+    throw networkFailure(error2, req);
+  });
   if (res.ok) return res;
   const text = await res.text().catch(() => "");
   if (res.status === 401 && !isPermissionDenial(text)) {
@@ -21941,6 +21975,28 @@ async function confirmUpload(deps, res) {
   const text = await res.text().catch(() => "");
   throw new Error(`Canvas rejected the file upload (${res.status}): ${text.slice(0, 300)}`);
 }
+function isReadOnlyGraphql(document) {
+  const code = document.replace(/#[^\n]*/g, "").trim();
+  if (/\b(mutation|subscription)\b/.test(code)) return false;
+  return code.startsWith("{") || /^query\b/.test(code);
+}
+function graphqlData(envelope) {
+  const first = envelope.errors?.[0];
+  if (!first && envelope.data !== null && envelope.data !== void 0) return envelope.data;
+  const reason = first?.message ?? "empty answer";
+  throw canvasApiError(`Canvas GraphQL error: ${reason.slice(0, 300)}`, 400);
+}
+async function queryCanvasGraphql(deps, query) {
+  if (!isReadOnlyGraphql(query.document)) {
+    throw new Error(
+      "Only read-only GraphQL queries are allowed: this connector never changes Canvas through GraphQL."
+    );
+  }
+  const body = { query: query.document, variables: query.variables ?? {} };
+  const path = `${deps.baseUrl}${CANVAS_GRAPHQL_PATH}`;
+  const res = await requestCanvas(deps, { method: "POST", path, body });
+  return graphqlData(await res.json());
+}
 function createCanvasClient(deps) {
   return {
     baseUrl: deps.baseUrl,
@@ -21954,7 +22010,8 @@ function createCanvasClient(deps) {
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
     fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers),
-    upload: async (slot, file) => confirmUpload(deps, await postUploadForm(deps.fetchFn, slot, file))
+    upload: async (slot, file) => confirmUpload(deps, await postUploadForm(deps.fetchFn, slot, file)),
+    query: (document, variables) => queryCanvasGraphql(deps, { document, ...variables ? { variables } : {} })
   };
 }
 
@@ -22108,9 +22165,19 @@ function toSubmissionFlags(flags) {
     graded: flags.graded
   };
 }
+var PLANNER_TYPE_NAMES = {
+  assessment_request: "peer_review"
+};
+function plannerItemType(plannableType) {
+  return plannableType === void 0 ? void 0 : PLANNER_TYPE_NAMES[plannableType] ?? plannableType;
+}
+function reviewStatus(workflowState) {
+  return workflowState === "completed" ? "completed" : "pending";
+}
 function toPlannerItem(i, baseUrl) {
+  const isReview = i.plannable_type === "assessment_request";
   return {
-    type: i.plannable_type,
+    type: plannerItemType(i.plannable_type),
     title: i.plannable?.title ?? i.plannable?.name,
     course: i.context_name,
     course_id: i.course_id,
@@ -22118,7 +22185,8 @@ function toPlannerItem(i, baseUrl) {
     date: i.plannable_date,
     points: i.plannable?.points_possible,
     submission: toSubmissionFlags(i.submissions),
-    url: i.html_url ? `${baseUrl}${i.html_url}` : void 0
+    url: i.html_url ? `${baseUrl}${i.html_url}` : void 0,
+    ...isReview ? { status: reviewStatus(i.plannable?.workflow_state) } : {}
   };
 }
 function toAssignmentSummary(a) {
@@ -22371,6 +22439,168 @@ async function listFilesWithLinked(client, courseId3, listed) {
   return rawToolResult(textResult([...listed, ...extra], [linkedOnlyNote(extra.length)]));
 }
 
+// connectors/canvas-puc/src/peer-reviews.ts
+var PEER_REVIEWS_QUERY = `query PeerReviews($id: ID!) {
+  assignment(id: $id) {
+    _id name dueAt htmlUrl
+    course { _id name }
+    peerReviews { enabled anonymousReviews dueAt }
+    assessmentRequestsForCurrentUser {
+      _id anonymousId workflowState available
+      user { _id name }
+      submission { submissionType url submittedAt attachments { displayName url } }
+    }
+  }
+}`;
+var canvasIdSchema = external_exports.union([
+  external_exports.string().regex(/^\d{1,20}$/, "must be a numeric Canvas id"),
+  external_exports.number().int().positive()
+]);
+function revieweeName(req, anonymous) {
+  if (req.user?.name) return req.user.name;
+  return anonymous ? "Anonymous (the instructor turned on anonymous peer reviews, so Canvas hides the name)" : "Unknown (Canvas did not return the name)";
+}
+function assignmentPageUrl(a, baseUrl) {
+  const course = a.course?._id ? `/courses/${a.course._id}` : "";
+  return `${baseUrl}${course}/assignments/${a._id}`;
+}
+function reviewedSubmissionPath(anonymous, req) {
+  if (anonymous && req.anonymousId) return `/anonymous_submissions/${req.anonymousId}`;
+  return req.user?._id ? `/submissions/${req.user._id}` : null;
+}
+function reviewPageUrl(a, req, baseUrl) {
+  const page = assignmentPageUrl(a, baseUrl);
+  const submission = reviewedSubmissionPath(a.peerReviews?.anonymousReviews === true, req);
+  return submission ? `${page}${submission}` : a.htmlUrl ?? page;
+}
+function peerSubmissionView(sub) {
+  if (!sub) return null;
+  const view = {
+    type: sub.submissionType ?? null,
+    url: sub.url ?? null,
+    submitted_at: sub.submittedAt ?? null
+  };
+  if (sub.url) return view;
+  const attachments2 = (sub.attachments ?? []).map((file) => ({
+    name: file.displayName ?? null,
+    url: file.url ?? null
+  }));
+  return { ...view, attachments: attachments2 };
+}
+function orNull(value) {
+  return value ?? null;
+}
+function peerReviewAssignmentFields(a) {
+  const course = a.course ?? { _id: null, name: null };
+  const reviews = a.peerReviews ?? {};
+  return {
+    course: orNull(course.name),
+    course_id: course._id,
+    assignment: orNull(a.name),
+    assignment_id: a._id,
+    due_at: orNull(reviews.dueAt),
+    assignment_due_at: orNull(a.dueAt),
+    anonymous: reviews.anonymousReviews === true
+  };
+}
+function toPeerReview(a, req, baseUrl) {
+  const fields = peerReviewAssignmentFields(a);
+  return {
+    ...fields,
+    reviewee: revieweeName(req, fields.anonymous === true),
+    status: reviewStatus(req.workflowState),
+    available: orNull(req.available),
+    submission: peerSubmissionView(req.submission),
+    review_url: reviewPageUrl(a, req, baseUrl)
+  };
+}
+function peerReviewsOf(a, baseUrl) {
+  return (a.assessmentRequestsForCurrentUser ?? []).map((req) => toPeerReview(a, req, baseUrl));
+}
+function reviewRank(review) {
+  return review.status === "pending" ? 0 : 1;
+}
+function reviewDueTime(review) {
+  const time3 = typeof review.due_at === "string" ? Date.parse(review.due_at) : Number.NaN;
+  return Number.isNaN(time3) ? Number.MAX_SAFE_INTEGER : time3;
+}
+function sortPeerReviews(reviews) {
+  return [...reviews].sort(
+    (x, y) => reviewRank(x) - reviewRank(y) || reviewDueTime(x) - reviewDueTime(y)
+  );
+}
+function peerReviewDenial(status, target) {
+  if (status === 401 || status === 403) {
+    return `Canvas refused to show the peer reviews of ${target} (HTTP ${status}): this route is not available for a student account.`;
+  }
+  if (status === 404) {
+    return `${target} was not found or is not visible to you (HTTP 404): check course_id and assignment_id with list_courses and list_assignments.`;
+  }
+  return null;
+}
+function explainPeerReviewError(error2, target) {
+  if (error2.tokenRejected) return error2;
+  const status = canvasErrorStatus(error2);
+  const message = peerReviewDenial(status, target);
+  return message && status !== null ? canvasApiError(message, status) : error2;
+}
+async function fetchPeerReviewAssignment(client, assignmentId) {
+  const data = await client.query(
+    PEER_REVIEWS_QUERY,
+    { id: String(assignmentId) }
+  );
+  if (data.assignment) return data.assignment;
+  const target = `assignment ${String(assignmentId)}`;
+  throw canvasApiError(peerReviewDenial(404, target) ?? target, 404);
+}
+async function peerReviewAssignmentIds(client, courseId3) {
+  const path = `/courses/${String(courseId3)}/assignments`;
+  const list = await client.getAll(path, { order_by: "due_at" });
+  return list.filter((a) => a.peer_reviews === true).map((a) => a.id);
+}
+async function listCoursePeerReviews(client, courseId3) {
+  try {
+    const ids = await peerReviewAssignmentIds(client, courseId3);
+    const assignments = await Promise.all(ids.map((id4) => fetchPeerReviewAssignment(client, id4)));
+    return assignments.flatMap((a) => peerReviewsOf(a, client.baseUrl));
+  } catch (error2) {
+    throw explainPeerReviewError(error2, `course ${String(courseId3)}`);
+  }
+}
+async function assignmentPeerReviews(client, args) {
+  const assignmentId = String(args.assignment_id);
+  const a = await fetchPeerReviewAssignment(client, assignmentId);
+  if (args.course_id !== void 0 && a.course?._id !== String(args.course_id)) {
+    const target = `assignment ${assignmentId} in course ${String(args.course_id)}`;
+    throw canvasApiError(peerReviewDenial(404, target) ?? target, 404);
+  }
+  return peerReviewsOf(a, client.baseUrl);
+}
+async function sweepPeerReviews(client) {
+  const courses = await activeCourses(client);
+  const unavailable = [];
+  const lists = await Promise.all(
+    courses.map(
+      (c) => listCoursePeerReviews(client, c.id).catch((error2) => {
+        if (error2.tokenRejected) throw error2;
+        unavailable.push({ course_id: c.id, reason: errorMessage(error2) });
+        return [];
+      })
+    )
+  );
+  const peer_reviews = sortPeerReviews(lists.flat());
+  return unavailable.length > 0 ? { peer_reviews, unavailable } : { peer_reviews };
+}
+async function listPeerReviews(client, args) {
+  if (args.assignment_id !== void 0) {
+    return { peer_reviews: sortPeerReviews(await assignmentPeerReviews(client, args)) };
+  }
+  if (args.course_id !== void 0) {
+    return { peer_reviews: sortPeerReviews(await listCoursePeerReviews(client, args.course_id)) };
+  }
+  return sweepPeerReviews(client);
+}
+
 // connectors/canvas-puc/src/tools-read.ts
 var id = external_exports.union([external_exports.string(), external_exports.number()]);
 var courseId = id.describe("Course ID (see list_courses)");
@@ -22409,16 +22639,13 @@ var CANVAS_READ_TOOLS = [
   }),
   defineTool({
     name: "upcoming_assignments",
-    description: "What is due in the next days across all courses: assignments, quizzes and events (the student's planner).",
+    description: "What is due from today (00:00 S\xE3o Paulo time) through the next days across all courses: every item of the student's planner \u2014 assignments, quizzes, discussions, events, notes and peer reviews to do (type peer_review; details with list_peer_reviews).",
     shape: {
-      days: external_exports.number().int().min(1).max(120).optional().describe("Window in days (default 14)")
+      days: external_exports.number().int().min(1).max(120).optional().describe("Days after today (default 14)")
     },
     annotations: toolAnnotations("Upcoming assignments", READ_ONLY_HINTS),
     run: async ({ client, now }, args) => {
-      const params = {
-        start_date: now().toISOString(),
-        end_date: isoDaysFrom(now(), args.days ?? 14)
-      };
+      const params = plannerWindow(now(), args.days ?? 14);
       const items = await client.getAll("/planner/items", params);
       return items.map((i) => toPlannerItem(i, client.baseUrl));
     }
@@ -22460,6 +22687,16 @@ var CANVAS_READ_TOOLS = [
         ...rawHtmlField("description_html", assignment.description, args.raw_html === true)
       };
     }
+  }),
+  defineTool({
+    name: "list_peer_reviews",
+    description: "Peer reviews the student must do (pending and completed): course, assignment, review due date, who is reviewed (Canvas hides the name when the instructor made reviews anonymous), the URL or files the reviewee sent and the link to the review page. Read-only: it never submits a review. Without course_id, sweeps every active course.",
+    shape: {
+      course_id: canvasIdSchema.optional().describe("Course ID (see list_courses); omit to sweep every active course"),
+      assignment_id: canvasIdSchema.optional().describe("Assignment ID, to read a single assignment")
+    },
+    annotations: toolAnnotations("List peer reviews", READ_ONLY_HINTS),
+    run: ({ client }, args) => listPeerReviews(client, args)
   }),
   defineTool({
     name: "get_grades",
