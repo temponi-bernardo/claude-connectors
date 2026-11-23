@@ -1,6 +1,6 @@
 {
   "name": "claude-connectors",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Remote MCP connectors for Claude, installed from the plugin marketplace: PUC Minas Canvas, multi-account Gmail and self-hosted WhatsApp.",
   "type": "module",
   "private": true,
