@@ -26,9 +26,11 @@ Target task: `$ARGUMENTS` (empty = the "Next task" at the top of `docs/ROADMAP.m
    lint-staged and `docs:check`; `pre-push` only guards `main` and runs gitleaks (ADR 0029). While working, run just the tests of
    what you touched (`npx vitest run <path>`).
 7. **`npm run pr:check -- "<PR title>"` once**, after the last commit: it is the CI of the delivery (there is no
-   GitHub CI, ADR 0006). Red: fix, commit and run it again. Do not use `--no-verify`; fix the cause. In a Claude
-   Code cloud session the Docker daemon is installed but stopped, and `whatsapp:build` needs it even in dry-run:
-   start it first with `(dockerd > /dev/null 2>&1 &)` and wait until `docker info` answers.
+   GitHub CI, ADR 0006). Red: fix, commit and run it again. Do not use `--no-verify`; fix the cause. It builds the
+   WhatsApp container image (`whatsapp:image`) only when the diff touches its sources (`Dockerfile`, `bridge/`,
+   `NOTICE.md`, `.dockerignore`, `wrangler.toml`, `scripts/docker-proxy-ca.sh`). Then Docker is needed; in a
+   Claude Code cloud session the daemon is installed but stopped: start it with `(dockerd > /dev/null 2>&1 &)`
+   and wait until `docker info` answers (`pr:check` already routes the build through `docker-proxy-ca.sh`).
 8. **`/review-pr`** once: the `reviewer` agent reviews the whole PR, you fix once (rerun `pr:check` if code
    changed). No loop.
 9. **PR:** `gh pr create` with a conventional title, body from the template (`.github/PULL_REQUEST_TEMPLATE.md`),

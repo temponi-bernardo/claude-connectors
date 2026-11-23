@@ -139,10 +139,15 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Trigger:** once per PR, after the last commit; reused for the merge (there is no CI, ADR 0006).
 - **Steps:**
   1. `scripts/pr-check.sh` requires the PR title and runs `npm run check` (includes P01 via `runDocsCli()`).
-  2. Runs P05 (`npm run build`) and fails if the connectors' versioned bundle changes without a commit.
-  3. Runs `npm run plugin:validate` (`scripts/plugin-validate.sh`): `claude plugin validate --strict` on the
+  2. Runs `npm run bridge:test` and `npm run whatsapp:build` (WhatsApp Worker bundle, no Docker). Then
+     `tools/pr-check/cli.ts` (`runPrCheckCli()`) lists the changed files since the merge-base with `origin/main`
+     (`listChangedFiles()`, `runGit()`, `splitGitLines()`) and `whatsAppImageDecision()` (`touchesWhatsAppImage()`) checks them
+     against `WHATSAPP_IMAGE_INPUTS`: on `build` it runs `npm run whatsapp:image` (fails with how to start Docker when
+     `docker info` fails), on `skip` it prints why it skipped; any other answer stops `pr:check`.
+  3. Runs P05 (`npm run build`) and fails if the connectors' versioned bundle changes without a commit.
+  4. Runs `npm run plugin:validate` (`scripts/plugin-validate.sh`): `claude plugin validate --strict` on the
      marketplace and on each `connectors/<name>/plugin`; any warning fails (needs the Claude Code CLI, ADR 0022).
-  4. Runs commitlint on the branch commits since `origin/main` and on the PR title.
+  5. Runs commitlint on the branch commits since `origin/main` and on the PR title.
 - **Result:** `✔ pr:check green`, the condition for Claude to squash merge.
 - **Failures:** any failing step stops the script with a non-zero exit code.
 

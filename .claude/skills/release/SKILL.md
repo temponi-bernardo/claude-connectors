@@ -30,8 +30,8 @@ no GitHub Actions: release-please runs through the local CLI).
    (edit the release-please branch; it keeps manual edits to the CHANGELOG).
 5. **Merge** the release PR without asking for confirmation (`gh pr merge --squash`), like any PR with a green
    `pr:check` (`docs/WORKFLOW.md`). Never create a tag by hand. The PR title is `chore(release): release main`
-   (`group-pull-request-title-pattern`), so commitlint passes. In a cloud session, run `pr:check` with
-   `WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh"` (see step 7) so `whatsapp:build` works.
+   (`group-pull-request-title-pattern`), so commitlint passes. `pr:check` builds the WhatsApp image only
+   when its sources change (a release PR usually does not), through `scripts/docker-proxy-ca.sh`.
 6. **Tag and draft:** after the merge,
    `npx release-please github-release --draft --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`
    creates the drafts with the notes for `vX.Y.Z` (and `<name>-vX.Y.Z` for each released plugin); GitHub creates

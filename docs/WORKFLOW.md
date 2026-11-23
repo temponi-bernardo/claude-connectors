@@ -137,11 +137,19 @@ The **remote connector** (ADR 0010) does not depend on a release: after a merge 
 deploy (KV, secrets, Google Cloud) is in [connectors/gmail/README.md](../connectors/gmail/README.md).
 **WhatsApp** (ADR 0015) is published by whoever hosts it: `npm run whatsapp:deploy` (needs Docker for the bridge
 image). `pr:check` runs `npm run bridge:test` (Go 1.26+; with `GOTOOLCHAIN=auto` Go downloads the toolchain) and
-`npm run whatsapp:build` (bundle and image, without publishing). In a cloud session (Claude Code on the web) the
-image build cannot reach the Go module proxy, because the build container does not trust the session's TLS proxy
-CA: start `dockerd` if `docker info` fails, and prefix the command (`pr:check`, `whatsapp:build` or
-`whatsapp:deploy`) with `WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh"`. The script trusts the CA in the
-image's build stage only, in a temporary copy of the context; the published image never carries it.
+`npm run whatsapp:build` (the Worker bundle, `--containers-rollout=none`, no Docker). It builds the container
+image (`npm run whatsapp:image`, needs Docker) only when the diff since the merge-base with `origin/main`, or an
+uncommitted file, touches its sources (`WHATSAPP_IMAGE_INPUTS`: `Dockerfile`, `.dockerignore`, `NOTICE.md`,
+`wrangler.toml`, `bridge/`, `scripts/docker-proxy-ca.sh`); otherwise it prints why it skipped. When the image is
+needed and `docker info` fails, it stops and says how to start Docker. In a cloud session (Claude Code on the web)
+the image build cannot reach the Go module proxy, because the build container does not trust the session's TLS
+proxy CA: start `dockerd` if `docker info` fails; `pr:check` already uses `scripts/docker-proxy-ca.sh`, and for
+`whatsapp:image` or `whatsapp:deploy` prefix the command with
+`WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh"`. The script trusts the CA in the image's build stage only,
+in a temporary copy of the context; the published image never carries it. Trade-off: a change outside those
+inputs that still breaks the image (e.g. the Dockerfile's base image moving in its registry, or a new wrangler
+version) is no longer caught by `pr:check`; it surfaces at the next `whatsapp:image` or `whatsapp:deploy`, which
+always build the full image. Run `npm run whatsapp:image` by hand when in doubt.
 Every deploy script runs the post-deploy smoke test right after `wrangler deploy` (ADR 0027): `npm run smoke --
 <connector>` reads the published `GET /tools` and fails the command when it differs from the connector's
 `tool-contract.json` (roll back with `npx wrangler rollback --config connectors/<connector>/wrangler.toml`).
