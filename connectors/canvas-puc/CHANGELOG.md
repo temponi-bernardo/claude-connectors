@@ -28,6 +28,15 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
   `status`.
 - Every Canvas call now times out after 30 s with a clear message instead of hanging.
 
+## [3.3.0](https://github.com/temponi-bernardo/claude-connectors/compare/canvas-puc-v3.2.0...canvas-puc-v3.3.0) (2026-11-23)
+
+
+### Added
+
+* **canvas:** list peer reviews and start upcoming_assignments at 00:00 today ([#80](https://github.com/temponi-bernardo/claude-connectors/issues/80)) ([ecf01d8](https://github.com/temponi-bernardo/claude-connectors/commit/ecf01d80a70e7697b2d35db10ab84062b1a85730))
+* **canvas:** save tokens with compact JSON and a changed_since cursor ([#79](https://github.com/temponi-bernardo/claude-connectors/issues/79)) ([2b2ab85](https://github.com/temponi-bernardo/claude-connectors/commit/2b2ab852df9d5b497c237645a29e20dfa7c3ca59))
+* **skills:** refresh outdated plan routines without changing their state ([#83](https://github.com/temponi-bernardo/claude-connectors/issues/83)) ([6441a94](https://github.com/temponi-bernardo/claude-connectors/commit/6441a948c1e2ab64bfbfdbb21abba61af803cc74))
+
 ## [3.2.0](https://github.com/temponi-bernardo/claude-connectors/compare/canvas-puc-v3.1.0...canvas-puc-v3.2.0) (2026-11-23)
 
 ### Added
