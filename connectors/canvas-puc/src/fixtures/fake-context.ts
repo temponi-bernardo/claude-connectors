@@ -20,6 +20,12 @@ type GetFn = (path: string, params?: QueryParams) => Promise<unknown>;
 type PostFn = (path: string, body: unknown) => Promise<unknown>;
 type TextFn = (url: string) => Promise<unknown>;
 type UploadFn = (slot: CanvasUploadSlot, file: UploadedBytes) => Promise<unknown>;
+type QueryFn = (document: string, variables?: Record<string, unknown>) => Promise<unknown>;
+
+/** Route key of a GraphQL query: `graphql:` plus its variables as JSON (`graphql:{"id":"7"}`). */
+export function graphqlRoute(variables: Record<string, unknown> = {}): string {
+  return `graphql:${JSON.stringify(variables)}`;
+}
 
 /** Fake context with the mocks exposed for assertions. */
 export interface FakeContext {
@@ -32,6 +38,8 @@ export interface FakeContext {
   readonly fetchStream: Mock<TextFn>;
   /** Answers with the route keyed by the slot's `upload_url`. */
   readonly upload: Mock<UploadFn>;
+  /** Answers with the route keyed by `graphqlRoute(variables)`. */
+  readonly query: Mock<QueryFn>;
 }
 
 /** Creates a context with a fake client and a clock fixed at 2026-11-05T12:00:00Z. */
@@ -43,6 +51,7 @@ export function fakeContext(routes: Routes = {}): FakeContext {
   const fetchBytes = vi.fn<TextFn>((url) => answer(routes, url));
   const fetchStream = vi.fn<TextFn>((url) => answer(routes, url));
   const upload = vi.fn<UploadFn>((slot) => answer(routes, slot.upload_url));
+  const query = vi.fn<QueryFn>((_document, variables) => answer(routes, graphqlRoute(variables)));
   const client = {
     baseUrl: 'https://x.test',
     get,
@@ -52,9 +61,10 @@ export function fakeContext(routes: Routes = {}): FakeContext {
     fetchBytes,
     fetchStream,
     upload,
+    query,
   } as unknown as CanvasClient;
   const ctx: CanvasContext = { client, now: () => new Date('2026-11-05T12:00:00Z') };
-  return { ctx, get, getAll, post, fetchText, fetchBytes, fetchStream, upload };
+  return { ctx, get, getAll, post, fetchText, fetchBytes, fetchStream, upload, query };
 }
 
 /** Text blocks of a tool result: the JSON rows parsed and the notes after them. */

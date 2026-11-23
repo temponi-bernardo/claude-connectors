@@ -4,7 +4,8 @@ import { FALLBACK_SERVER_VERSION } from '../../../src/mcp/server-version.js';
 import { toToolResult, type ToolSpec } from '../../../src/mcp/tools.js';
 import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
 import type { CanvasContext } from './context.js';
-import { fakeContext, resultParts, type Routes } from './fixtures/fake-context.js';
+import { fakeContext, graphqlRoute, resultParts, type Routes } from './fixtures/fake-context.js';
+import { ANONYMOUS_ASSIGNMENT, PLANNER_WITH_PEER_REVIEW } from './fixtures/peer-reviews.js';
 import { CANVAS_INBOX_READ_TOOLS, CANVAS_INBOX_WRITE_TOOLS } from './tools-inbox.js';
 import { CANVAS_READ_TOOLS } from './tools-read.js';
 import { CANVAS_WRITE_TOOLS, submissionPayload } from './tools-write.js';
@@ -62,6 +63,7 @@ describe('canvasTools', () => {
       'upcoming_assignments',
       'list_assignments',
       'get_assignment',
+      'list_peer_reviews',
       'get_grades',
       'list_announcements',
       'list_modules',
@@ -130,21 +132,42 @@ describe('read tools', () => {
     expect(all.getAll.mock.calls[0]![1]).toMatchObject({ enrollment_state: undefined });
   });
 
-  it('upcoming_assignments uses the day window starting now', async () => {
+  it('upcoming_assignments starts the window at 00:00 of today in São Paulo', async () => {
     const { result, getAll } = await run(
       'upcoming_assignments',
       { days: 7 },
       { '/planner/items': [{ html_url: '/x' }] },
     );
     expect(getAll.mock.calls[0]![1]).toEqual({
-      start_date: '2026-11-05T12:00:00.000Z',
-      end_date: '2026-11-12T12:00:00.000Z',
+      start_date: '2026-11-05T03:00:00.000Z',
+      end_date: '2026-11-13T03:00:00.000Z',
     });
     expect(result).toEqual([expect.objectContaining({ url: 'https://x.test/x' })]);
     const byDefault = await run('upcoming_assignments', {}, { '/planner/items': [] });
     expect(byDefault.getAll.mock.calls[0]![1]).toMatchObject({
-      end_date: '2026-11-19T12:00:00.000Z',
+      end_date: '2026-11-20T03:00:00.000Z',
     });
+  });
+
+  it('upcoming_assignments keeps peer reviews from the planner, typed peer_review', async () => {
+    const { result } = await run(
+      'upcoming_assignments',
+      {},
+      { '/planner/items': PLANNER_WITH_PEER_REVIEW },
+    );
+    expect((result as { type: string }[]).map((i) => i.type)).toEqual([
+      'peer_review',
+      'assignment',
+    ]);
+  });
+
+  it('list_peer_reviews validates the ids and reads one assignment', async () => {
+    const routes = { [graphqlRoute({ id: '7001' })]: { assignment: ANONYMOUS_ASSIGNMENT } };
+    const { result, post } = await run('list_peer_reviews', { assignment_id: '7001' }, routes);
+    expect((result as { peer_reviews: unknown[] }).peer_reviews).toHaveLength(2);
+    expect(post).not.toHaveBeenCalled();
+    await expect(run('list_peer_reviews', { course_id: '1/../2' })).rejects.toThrow();
+    expect(tool('list_peer_reviews').annotations.readOnlyHint).toBe(true);
   });
 
   it('list_assignments maps the filter to a bucket', async () => {

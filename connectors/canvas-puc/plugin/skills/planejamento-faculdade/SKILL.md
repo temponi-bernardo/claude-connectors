@@ -60,7 +60,8 @@ Artifact tool with `action: "list"`) and look for the title "Plano do Semestre <
 
 Current term only: `list_courses` (active courses). Then, per course, in parallel where possible:
 
-- **Canvas** — `get_grades` (per course), `upcoming_assignments` (`days: 45`), `list_assignments` and
+- **Canvas** — `get_grades` (per course), `upcoming_assignments` (`days: 45`; peer reviews come as
+  `type: "peer_review"`, detailed by `list_peer_reviews`), `list_assignments` and
   `get_assignment` (rubric, `submitted` status, due date), `list_announcements` (`days: 30`, every course,
   including general spaces), `get_calendar` (today to the end of the term), the **syllabus** ("plano de
   ensino") through `list_modules` / `list_files` (`search: "plano"`) / `read_file_text` (or `download_file`

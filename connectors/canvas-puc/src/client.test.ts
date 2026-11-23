@@ -11,7 +11,14 @@ import {
   fetchDownload,
   fetchFileBytes,
   fetchPlainText,
+  graphqlData,
+  networkFailure,
+  readCanvasJson,
+  requestCanvasJson,
+  isReadOnlyGraphql,
+  queryCanvasGraphql,
   requestCanvas,
+  CANVAS_TIMEOUT_MS,
   sendCanvasRequest,
   unauthorizedMessage,
   type ClientDeps,
@@ -58,6 +65,13 @@ describe('sendCanvasRequest', () => {
     });
   });
 
+  it('limits every call with a timeout signal', async () => {
+    const f = fakeFetch(json({}));
+    await sendCanvasRequest(deps(f), { method: 'GET', path: '/a' });
+    expect(f.mock.calls[0]![1]?.signal).toBeInstanceOf(AbortSignal);
+    expect(CANVAS_TIMEOUT_MS).toBeGreaterThanOrEqual(10_000);
+  });
+
   it('sends no body on GET', async () => {
     const f = fakeFetch(json({}));
     await sendCanvasRequest(deps(f), { method: 'GET', path: '/a' });
@@ -66,6 +80,23 @@ describe('sendCanvasRequest', () => {
 });
 
 describe('requestCanvas', () => {
+  it('turns a timeout into a clear 504 error and keeps other network errors', async () => {
+    const timeout = Object.assign(new Error('aborted'), { name: 'TimeoutError' });
+    const slow = vi.fn(() => Promise.reject(timeout)) as unknown as typeof fetch;
+    const req = { method: 'GET', path: '/a' } as const;
+    const error: unknown = await requestCanvas({ ...deps(fakeFetch()), fetchFn: slow }, req).catch(
+      (e: unknown) => e,
+    );
+    expect(String(error)).toContain('did not answer within');
+    expect(canvasErrorStatus(error)).toBe(504);
+    const down = vi.fn(() =>
+      Promise.reject(new TypeError('fetch failed')),
+    ) as unknown as typeof fetch;
+    await expect(requestCanvas({ ...deps(fakeFetch()), fetchFn: down }, req)).rejects.toThrow(
+      'fetch failed',
+    );
+  });
+
   it('returns the response on success', async () => {
     const res = await requestCanvas(deps(fakeFetch(json({ ok: 1 }))), {
       method: 'GET',
@@ -271,7 +302,7 @@ describe('createCanvasClient', () => {
     expect(String(f.mock.calls[0]![0])).toBe('https://up.test/u');
   });
 
-  it('exposes get, getAll with per_page, post, fetchText and fetchBytes', async () => {
+  it('exposes get, getAll with per_page, post, fetchText, fetchBytes and query', async () => {
     const f = fakeFetch(
       json({ g: 1 }),
       json([1]),
@@ -279,6 +310,7 @@ describe('createCanvasClient', () => {
       new Response('txt'),
       new Response(new Uint8Array([7])),
       new Response('s'),
+      json({ data: { q: 1 } }),
     );
     const client = createCanvasClient(deps(f));
     await expect(client.get('/g')).resolves.toEqual({ g: 1 });
@@ -288,6 +320,77 @@ describe('createCanvasClient', () => {
     await expect(client.fetchText('https://f.test/x')).resolves.toBe('txt');
     expect(Array.from(await client.fetchBytes('https://f.test/y'))).toEqual([7]);
     await expect((await client.fetchStream('https://f.test/z')).text()).resolves.toBe('s');
+    await expect(client.query('{ q }')).resolves.toEqual({ q: 1 });
     expect(client.baseUrl).toBe('https://x.test');
+  });
+});
+
+describe('networkFailure', () => {
+  it('rewrites only a timeout, as a 504 that names the request', () => {
+    const req = { method: 'GET', path: '/planner/items' } as const;
+    const timeout = networkFailure(Object.assign(new Error('x'), { name: 'TimeoutError' }), req);
+    expect(canvasErrorStatus(timeout)).toBe(504);
+    expect(String(timeout)).toContain('GET /planner/items');
+    const other = new TypeError('fetch failed');
+    expect(networkFailure(other, req)).toBe(other);
+    expect(networkFailure(null, req)).toBeNull();
+  });
+});
+
+describe('readCanvasJson and requestCanvasJson', () => {
+  const req = { method: 'GET', path: '/slow' } as const;
+
+  it('reads the JSON body of an answer', async () => {
+    await expect(readCanvasJson(json({ a: 1 }), req)).resolves.toEqual({ a: 1 });
+    await expect(requestCanvasJson(deps(fakeFetch(json([2]))), req)).resolves.toEqual([2]);
+  });
+
+  it('turns a timeout while reading the body into the clear 504', async () => {
+    const timeout = Object.assign(new Error('aborted'), { name: 'TimeoutError' });
+    const stuck = { json: () => Promise.reject(timeout) } as unknown as Response;
+    const error: unknown = await readCanvasJson(stuck, req).catch((e: unknown) => e);
+    expect(canvasErrorStatus(error)).toBe(504);
+    await expect(readCanvasJson(new Response('not json'), req)).rejects.toThrow(SyntaxError);
+  });
+});
+
+describe('isReadOnlyGraphql', () => {
+  it('accepts queries and refuses mutations and subscriptions anywhere in the document', () => {
+    expect(isReadOnlyGraphql('{ a }')).toBe(true);
+    expect(isReadOnlyGraphql('# note\n query Q($id: ID!) { a(id: $id) { b } }')).toBe(true);
+    expect(isReadOnlyGraphql('mutation { x }')).toBe(false);
+    expect(isReadOnlyGraphql('query A { a } mutation B { x }')).toBe(false);
+    expect(isReadOnlyGraphql('subscription { s }')).toBe(false);
+    expect(isReadOnlyGraphql('fragment F on A { a }')).toBe(false);
+  });
+});
+
+describe('graphqlData', () => {
+  it('returns the data, or fails with the first GraphQL error', () => {
+    expect(graphqlData({ data: { a: 1 } })).toEqual({ a: 1 });
+    expect(() => graphqlData({ errors: [{ message: 'bad field' }] })).toThrow('bad field');
+    expect(() => graphqlData({ data: null })).toThrow('empty answer');
+  });
+});
+
+describe('queryCanvasGraphql', () => {
+  it('posts the query and variables to /api/graphql, outside /api/v1', async () => {
+    const f = fakeFetch(json({ data: { ok: true } }));
+    const data = await queryCanvasGraphql(deps(f), { document: '{ ok }', variables: { id: '1' } });
+    expect(data).toEqual({ ok: true });
+    const [url, init] = f.mock.calls[0]!;
+    expect(String(url)).toBe('https://x.test/api/graphql');
+    expect(init).toMatchObject({
+      method: 'POST',
+      body: '{"query":"{ ok }","variables":{"id":"1"}}',
+    });
+  });
+
+  it('refuses a mutation without calling Canvas', async () => {
+    const f = fakeFetch();
+    await expect(queryCanvasGraphql(deps(f), { document: 'mutation { x }' })).rejects.toThrow(
+      'read-only',
+    );
+    expect(f).not.toHaveBeenCalled();
   });
 });

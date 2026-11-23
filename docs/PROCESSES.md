@@ -45,8 +45,23 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
      a `title` and hints from `toolAnnotations()`: read tools are `readOnlyHint`, write tools `destructiveHint`.
   2. The call goes through `runToolSafely()`; the `ToolSpec` created by `defineTool()` validates the arguments.
   3. The tool uses the client: `requestCanvas()` sends the request with `sendCanvasRequest()`
-     (`buildUrl()` + `Authorization: Bearer`); listings follow the pages with `collectPages()` and `parseNextLink()`.
-     Helpers such as `activeCourses()`, `fetchOwnSubmission()` and `getAllOrEmpty()` compose lookups.
+     (`buildUrl()` + `Authorization: Bearer`, cut at `CANVAS_TIMEOUT_MS`; `networkFailure()` turns a timeout into a
+     504, also while reading the body with `readCanvasJson()` / `requestCanvasJson()`); listings follow the pages with `collectPages()` and `parseNextLink()`. The client's `query` posts
+     read-only GraphQL with `queryCanvasGraphql()` (`isReadOnlyGraphql()` refuses mutations before any call;
+     `graphqlData()` turns GraphQL errors into exceptions). Helpers such as `activeCourses()`,
+     `fetchOwnSubmission()` and `getAllOrEmpty()` compose lookups.
+     `upcoming_assignments` asks the planner for `plannerWindow()`: from 00:00 of today in São Paulo
+     (`startOfDayIn()` over `zoneOffsetMinutes()` and `parseOffsetLabel()`), so items due earlier today stay in; every planner type is kept
+     and `plannerItemType()` names `assessment_request` `peer_review`, with `reviewStatus()`.
+     `list_peer_reviews` runs `listPeerReviews()` (ids validated by `canvasIdSchema`): one assignment with
+     `assignmentPeerReviews()`, one course with `listCoursePeerReviews()` or every active course with
+     `sweepPeerReviews()`, at most `PEER_REVIEW_CONCURRENCY` calls at once (`mapWithLimit()`, `drainQueue()`). A course lists its assignments with `peerReviewAssignmentIds()` (paginated) and reads
+     each peer-review assignment with `fetchPeerReviewAssignment()` (GraphQL `assessmentRequestsForCurrentUser`,
+     the only route that lists a student's reviews to do). `peerReviewsOf()` → `toPeerReview()`
+     (`peerReviewAssignmentFields()`, `orNull()`, `revieweeName()`, `peerSubmissionView()`, `reviewPageUrl()` with
+     `assignmentPageUrl()` and `reviewedSubmissionPath()`) builds each view and `sortPeerReviews()` (`reviewRank()`,
+     `reviewDueTime()`) puts pending first. A 401/403/404 becomes a clear message with `explainPeerReviewError()`
+     (`peerReviewDenial()`); while sweeping, a refused course goes to `unavailable`.
   4. Responses become lean objects with English keys (`toCourse()`, `toPlannerItem()`, `toAssignmentDetail()`
      etc.), with HTML converted by `htmlToText()`. Content HTML (assignments, pages, forums with
      `flattenDiscussion()`, announcements with `toAnnouncement()`) goes through `canvasHtml()` (ADR 0025):

@@ -12,6 +12,12 @@ export const CANVAS_PAGE_SIZE = 100;
 /** Default cap on items gathered across pages, so huge lists are not swept. */
 export const DEFAULT_MAX_ITEMS = 200;
 
+/** Time limit of each Canvas API call, so a stuck request does not hold the tool forever. */
+export const CANVAS_TIMEOUT_MS = 30_000;
+
+/** Canvas GraphQL endpoint, relative to the base URL (it lives outside `/api/v1`). */
+export const CANVAS_GRAPHQL_PATH = '/api/graphql';
+
 /** An API request (path relative to `/api/v1` or an absolute pagination URL). */
 export interface CanvasRequest {
   readonly method: 'GET' | 'POST';
@@ -40,6 +46,17 @@ export interface CanvasClient {
   readonly fetchStream: (url: string, headers?: Record<string, string>) => Promise<Response>;
   /** Sends a file to an upload slot and returns the confirmed Canvas file (upload steps 2 and 3). */
   readonly upload: <T>(slot: CanvasUploadSlot, file: UploadedBytes) => Promise<T>;
+  /** Runs a read-only GraphQL query (never a mutation) and returns its `data`. */
+  readonly query: <T>(document: string, variables?: GraphqlVariables) => Promise<T>;
+}
+
+/** Variables of a GraphQL query. */
+export type GraphqlVariables = Readonly<Record<string, unknown>>;
+
+/** A GraphQL query: the document and its variables. */
+export interface GraphqlQuery {
+  readonly document: string;
+  readonly variables?: GraphqlVariables;
 }
 
 /** 401 message: the token expired or was revoked; tells the user to generate another and reconnect. */
@@ -58,6 +75,7 @@ export function sendCanvasRequest(deps: ClientDeps, req: CanvasRequest): Promise
       ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
     },
     ...(hasBody ? { body: JSON.stringify(req.body) } : {}),
+    signal: AbortSignal.timeout(CANVAS_TIMEOUT_MS),
   });
 }
 
@@ -88,9 +106,21 @@ export function isPermissionDenial(body: string): boolean {
   return /"status"\s*:\s*"unauthorized"/.test(body);
 }
 
+/** Turns a timed-out call into a `CanvasApiError` 504 with a clear message; other errors pass unchanged. */
+export function networkFailure(error: unknown, req: CanvasRequest): unknown {
+  if ((error as Partial<Error> | null)?.name !== 'TimeoutError') return error;
+  const seconds = CANVAS_TIMEOUT_MS / 1000;
+  return canvasApiError(
+    `Canvas did not answer within ${seconds} s on ${req.method} ${req.path}. Try again in a moment.`,
+    504,
+  );
+}
+
 /** Sends the request and throws a `CanvasApiError` on any status outside 2xx (token refused on a bare 401). */
 export async function requestCanvas(deps: ClientDeps, req: CanvasRequest): Promise<Response> {
-  const res = await sendCanvasRequest(deps, req);
+  const res = await sendCanvasRequest(deps, req).catch((error: unknown) => {
+    throw networkFailure(error, req);
+  });
   if (res.ok) return res;
   const text = await res.text().catch(() => '');
   if (res.status === 401 && !isPermissionDenial(text)) {
@@ -98,6 +128,20 @@ export async function requestCanvas(deps: ClientDeps, req: CanvasRequest): Promi
   }
   const message = `Canvas ${res.status} on ${req.method} ${req.path}: ${text.slice(0, 300)}`;
   throw canvasApiError(message, res.status);
+}
+
+/** Reads a JSON body; a timeout while reading it becomes the same clear 504 as `networkFailure()`. */
+export async function readCanvasJson<T>(res: Response, req: CanvasRequest): Promise<T> {
+  try {
+    return (await res.json()) as T;
+  } catch (error) {
+    throw networkFailure(error, req);
+  }
+}
+
+/** Sends the request and reads its JSON body (both under the call's timeout). */
+export async function requestCanvasJson<T>(deps: ClientDeps, req: CanvasRequest): Promise<T> {
+  return readCanvasJson<T>(await requestCanvas(deps, req), req);
 }
 
 /** Fetches every page of a listing by following the `Link` header, up to `max` items. */
@@ -110,7 +154,7 @@ export async function collectPages<T>(
   let req: CanvasRequest | null = first;
   while (req && items.length < max) {
     const res = await requestCanvas(deps, req);
-    const data = (await res.json()) as T | T[];
+    const data = await readCanvasJson<T | T[]>(res, req);
     items.push(...(Array.isArray(data) ? data : [data]));
     const next = parseNextLink(res.headers.get('link'));
     req = next ? { method: 'GET', path: next } : null;
@@ -185,30 +229,70 @@ export async function confirmUpload<T>(deps: ClientDeps, res: Response): Promise
   if (res.ok) return (await res.json()) as T;
   const location = res.headers.get('location');
   if (res.status >= 300 && res.status < 400 && location) {
-    return (await (await requestCanvas(deps, { method: 'POST', path: location })).json()) as T;
+    return requestCanvasJson<T>(deps, { method: 'POST', path: location });
   }
   const text = await res.text().catch(() => '');
   throw new Error(`Canvas rejected the file upload (${res.status}): ${text.slice(0, 300)}`);
+}
+
+/**
+ * Guard for the connector's own constant GraphQL documents: accepts a document that starts with `{` or `query`
+ * and has no `mutation`/`subscription` keyword. A keyword check, not a parser: never pass it text from outside.
+ */
+export function isReadOnlyGraphql(document: string): boolean {
+  const code = document.replace(/#[^\n]*/g, '').trim();
+  if (/\b(mutation|subscription)\b/.test(code)) return false;
+  return code.startsWith('{') || /^query\b/.test(code);
+}
+
+/** Envelope of a GraphQL answer. */
+export interface GraphqlEnvelope<T> {
+  readonly data?: T | null;
+  readonly errors?: readonly { readonly message?: string }[];
+}
+
+/** The `data` of a GraphQL answer, or a `CanvasApiError` 400 with the first error (GraphQL answers 200 on errors). */
+export function graphqlData<T>(envelope: GraphqlEnvelope<T>): T {
+  const first = envelope.errors?.[0];
+  if (!first && envelope.data !== null && envelope.data !== undefined) return envelope.data;
+  const reason = first?.message ?? 'empty answer';
+  throw canvasApiError(`Canvas GraphQL error: ${reason.slice(0, 300)}`, 400);
+}
+
+/** Posts one of the connector's GraphQL queries to Canvas; a document that fails `isReadOnlyGraphql()` never leaves. */
+export async function queryCanvasGraphql<T>(deps: ClientDeps, query: GraphqlQuery): Promise<T> {
+  if (!isReadOnlyGraphql(query.document)) {
+    throw new Error(
+      'Only read-only GraphQL queries are allowed: this connector never changes Canvas through GraphQL.',
+    );
+  }
+  const body = { query: query.document, variables: query.variables ?? {} };
+  const path = `${deps.baseUrl}${CANVAS_GRAPHQL_PATH}`;
+  return graphqlData(
+    await requestCanvasJson<GraphqlEnvelope<T>>(deps, { method: 'POST', path, body }),
+  );
 }
 
 /** Creates the Canvas client. */
 export function createCanvasClient(deps: ClientDeps): CanvasClient {
   return {
     baseUrl: deps.baseUrl,
-    get: async <T>(path: string, params: QueryParams = {}) =>
-      (await (await requestCanvas(deps, { method: 'GET', path, params })).json()) as T,
+    get: <T>(path: string, params: QueryParams = {}) =>
+      requestCanvasJson<T>(deps, { method: 'GET', path, params }),
     getAll: <T>(path: string, params: QueryParams = {}, max = DEFAULT_MAX_ITEMS) =>
       collectPages<T>(
         deps,
         { method: 'GET', path, params: { per_page: CANVAS_PAGE_SIZE, ...params } },
         max,
       ),
-    post: async <T>(path: string, body: unknown) =>
-      (await (await requestCanvas(deps, { method: 'POST', path, body })).json()) as T,
+    post: <T>(path: string, body: unknown) =>
+      requestCanvasJson<T>(deps, { method: 'POST', path, body }),
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
     fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers),
     upload: async <T>(slot: CanvasUploadSlot, file: UploadedBytes) =>
       confirmUpload<T>(deps, await postUploadForm(deps.fetchFn, slot, file)),
+    query: <T>(document: string, variables?: GraphqlVariables) =>
+      queryCanvasGraphql<T>(deps, { document, ...(variables ? { variables } : {}) }),
   };
 }

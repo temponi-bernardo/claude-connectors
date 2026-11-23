@@ -7,6 +7,10 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 
 ### Added
 
+- `list_peer_reviews`: peer reviews the student must do (pending and completed), with course, assignment, review
+  due date, reviewee (Canvas hides the name when the instructor made the reviews anonymous), the URL or files the
+  reviewee sent and the link to the review page. Without `course_id` it sweeps every active course; read-only
+  (ADR 0032).
 - `changed_since` on `list_assignments`, `list_announcements`, `list_discussions` and `list_conversations`: only
   what changed after the cursor, plus a `checked_at` note for the next call (ADR 0031). `/planejamento-faculdade`
   uses it in update mode, so refreshing the plan reads only the changes.
@@ -14,6 +18,13 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 ### Changed
 
 - Tool results are compact JSON, which cuts the tokens of every call.
+
+### Fixed
+
+- `upcoming_assignments` starts at 00:00 of today (São Paulo time) instead of "now", so a peer review or
+  assignment due earlier today is no longer left out; peer reviews come as `type: "peer_review"` with a
+  `status`.
+- Every Canvas call now times out after 30 s with a clear message instead of hanging.
 
 ## [3.2.0](https://github.com/temponi-bernardo/claude-connectors/compare/canvas-puc-v3.1.0...canvas-puc-v3.2.0) (2026-11-23)
 

@@ -78,7 +78,8 @@ este artefato (mesmo se estiver compartilhado), sem mudar quem pode vê-lo.
 {{shared block}}
 
 Tarefa: alerta de tarefas não enviadas (somente leitura; não republicar o artefato).
-1. upcoming_assignments (days: 7) e list_assignments (filter: "unsubmitted") das matérias acima.
+1. upcoming_assignments (days: 7), list_assignments (filter: "unsubmitted") das matérias acima e
+   list_peer_reviews (avaliações por pares com status "pending" também contam como pendência).
 2. Para cada tarefa com submitted: false, confirmar com get_assignment e classificar pelo prazo:
    🔴 até 27 h · 🟠 até 72 h · 🟡 até 7 dias.
 3. Para cada 🔴 e 🟠, explicar: o que é, prazo (dd/mm hh:mm, horário de Brasília), pontos, como entregar,

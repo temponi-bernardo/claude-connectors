@@ -78,10 +78,28 @@ export function toSubmissionFlags(flags: CanvasSubmissionFlags | false | undefin
   };
 }
 
-/** Item of the student's planner (assignment, quiz, event) with an absolute link. */
+/** Planner types renamed for the model; every other `plannable_type` passes unchanged. */
+export const PLANNER_TYPE_NAMES: Readonly<Record<string, string>> = {
+  assessment_request: 'peer_review',
+};
+
+/** Name of a planner item type for the model (`assessment_request` → `peer_review`). */
+export function plannerItemType(plannableType: string | undefined): string | undefined {
+  return plannableType === undefined
+    ? undefined
+    : (PLANNER_TYPE_NAMES[plannableType] ?? plannableType);
+}
+
+/** Status of a peer review: `completed` when Canvas says so, `pending` otherwise. */
+export function reviewStatus(workflowState: string | null | undefined): 'pending' | 'completed' {
+  return workflowState === 'completed' ? 'completed' : 'pending';
+}
+
+/** Item of the student's planner (assignment, quiz, event, peer review...) with an absolute link. */
 export function toPlannerItem(i: CanvasPlannerItem, baseUrl: string): View {
+  const isReview = i.plannable_type === 'assessment_request';
   return {
-    type: i.plannable_type,
+    type: plannerItemType(i.plannable_type),
     title: i.plannable?.title ?? i.plannable?.name,
     course: i.context_name,
     course_id: i.course_id,
@@ -90,6 +108,7 @@ export function toPlannerItem(i: CanvasPlannerItem, baseUrl: string): View {
     points: i.plannable?.points_possible,
     submission: toSubmissionFlags(i.submissions),
     url: i.html_url ? `${baseUrl}${i.html_url}` : undefined,
+    ...(isReview ? { status: reviewStatus(i.plannable?.workflow_state) } : {}),
   };
 }
 

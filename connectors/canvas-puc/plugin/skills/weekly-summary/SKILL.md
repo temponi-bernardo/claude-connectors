@@ -9,7 +9,9 @@ Build a short, actionable overview. Read-only: nothing here submits or changes a
 
 ## Gather
 
-1. `upcoming_assignments` with `days: 7` (or the period the user asks for).
+1. `upcoming_assignments` with `days: 7` (or the period the user asks for). The window starts at 00:00 today,
+   so something due earlier today is still listed. Items with `type: "peer_review"` are peer reviews the user
+   must do: get the details with `list_peer_reviews` (course, reviewee, the link they sent, the review page).
 2. `list_announcements` with `days: 7`, from all active courses.
 3. `get_grades` to see what was graded recently.
 4. If there is a sign of late work (an assignment past its due date with no submission), confirm it with
@@ -29,9 +31,12 @@ In the user's language, in this order, leaving out empty sections:
 1. **Overdue** — course, assignment, how late it is.
 2. **Due in the next 7 days** — a table with weekday and date, course, assignment and whether it was already
    submitted, sorted by due date. Highlight what is due within 48 h.
-3. **New announcements** — one line per announcement: course, title and the gist (due date change, exam, room),
+3. **Peer reviews to do** — from `list_peer_reviews` (`status: "pending"`): course, assignment, due date, who to
+   review (or "anonymous" when Canvas hides the name), the link they sent and `review_url`. Read-only: never
+   submit a review for the user.
+4. **New announcements** — one line per announcement: course, title and the gist (due date change, exam, room),
    plus the attached files and videos by name.
-4. **New grades** — course, activity and grade.
+5. **New grades** — course, activity and grade.
 
 Close with a suggestion of where to start (the nearest due date or the heaviest piece of work) and offer
 `/prepare-submission` for the chosen assignment.

@@ -129,9 +129,10 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes 
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `whoami`                    | Profile (connection test)                                                                                                                                     |
 | `list_courses`              | Courses with current grade                                                                                                                                    |
-| `upcoming_assignments`      | What's due in the next few days, across all courses                                                                                                           |
+| `upcoming_assignments`      | What's due from today (00:00 São Paulo time) through the next days, across all courses: every planner item, including peer reviews (`type: "peer_review"`)    |
 | `list_assignments`          | A course's assignments with status (filters: upcoming, overdue...); `changed_since` returns only those edited, submitted or graded since then                 |
 | `get_assignment`            | Instructions (with `[link N]` marks), `links` to embedded files/videos/pages, rubric, deadlines and feedback; `raw_html` for debugging                        |
+| `list_peer_reviews`         | Peer reviews to do (pending and completed): course, assignment, due date, reviewee (hidden when anonymous), the URL or files they sent and the review link    |
 | `get_grades`                | Grade summary or grades per assignment                                                                                                                        |
 | `list_announcements`        | Recent announcements, with their `links`; `changed_since` returns only new ones                                                                               |
 | `list_modules`              | Modules and items                                                                                                                                             |

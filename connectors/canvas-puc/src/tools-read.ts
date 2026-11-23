@@ -28,6 +28,7 @@ import * as f from './format.js';
 import * as h from './helpers.js';
 import { listFilesWithLinked, listLinkedFiles, LIST_FILES_HINT } from './linked-files.js';
 import { canvasHtml } from './links.js';
+import { canvasIdSchema, listPeerReviews } from './peer-reviews.js';
 
 const id = z.union([z.string(), z.number()]);
 const courseId = id.describe('Course ID (see list_courses)');
@@ -91,16 +92,13 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   defineTool({
     name: 'upcoming_assignments',
     description:
-      "What is due in the next days across all courses: assignments, quizzes and events (the student's planner).",
+      "What is due from today (00:00 São Paulo time) through the next days across all courses: every item of the student's planner — assignments, quizzes, discussions, events, notes and peer reviews to do (type peer_review; details with list_peer_reviews).",
     shape: {
-      days: z.number().int().min(1).max(120).optional().describe('Window in days (default 14)'),
+      days: z.number().int().min(1).max(120).optional().describe('Days after today (default 14)'),
     },
     annotations: toolAnnotations('Upcoming assignments', READ_ONLY_HINTS),
     run: async ({ client, now }, args) => {
-      const params = {
-        start_date: now().toISOString(),
-        end_date: h.isoDaysFrom(now(), args.days ?? 14),
-      };
+      const params = h.plannerWindow(now(), args.days ?? 14);
       const items = await client.getAll<CanvasPlannerItem>('/planner/items', params);
       return items.map((i) => f.toPlannerItem(i, client.baseUrl));
     },
@@ -147,6 +145,21 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
         ...f.rawHtmlField('description_html', assignment.description, args.raw_html === true),
       };
     },
+  }),
+  defineTool({
+    name: 'list_peer_reviews',
+    description:
+      'Peer reviews the student must do (pending and completed): course, assignment, review due date, who is reviewed (Canvas hides the name when the instructor made reviews anonymous), the URL or files the reviewee sent and the link to the review page. Read-only: it never submits a review. Without course_id, sweeps every active course.',
+    shape: {
+      course_id: canvasIdSchema
+        .optional()
+        .describe('Course ID (see list_courses); omit to sweep every active course'),
+      assignment_id: canvasIdSchema
+        .optional()
+        .describe('Assignment ID, to read a single assignment'),
+    },
+    annotations: toolAnnotations('List peer reviews', READ_ONLY_HINTS),
+    run: ({ client }, args) => listPeerReviews(client, args),
   }),
   defineTool({
     name: 'get_grades',
