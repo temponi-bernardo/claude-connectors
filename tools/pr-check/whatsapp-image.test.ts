@@ -2,7 +2,13 @@ import { rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { commitFile, createTempRepo, git } from '../hooks/fixtures/hook-test-utils.js';
-import { listChangedFiles, runGit, splitGitLines, touchesWhatsAppImage } from './whatsapp-image.js';
+import {
+  listChangedFiles,
+  runGit,
+  splitGitLines,
+  touchesWhatsAppImage,
+  whatsAppImageDecision,
+} from './whatsapp-image.js';
 
 describe('touchesWhatsAppImage', () => {
   it.each([
@@ -31,6 +37,13 @@ describe('touchesWhatsAppImage', () => {
 
   it('skips the image for an empty diff', () => {
     expect(touchesWhatsAppImage([])).toBe(false);
+  });
+});
+
+describe('whatsAppImageDecision', () => {
+  it('answers build when an image input changed and skip otherwise', () => {
+    expect(whatsAppImageDecision(['connectors/whatsapp/Dockerfile'])).toBe('build');
+    expect(whatsAppImageDecision(['docs/README.md'])).toBe('skip');
   });
 });
 

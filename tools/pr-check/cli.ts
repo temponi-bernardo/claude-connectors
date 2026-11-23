@@ -3,13 +3,13 @@
  * `base` (default `origin/main`), plus uncommitted and untracked files, touches the WhatsApp image inputs, and
  * `skip` otherwise. Called by `scripts/pr-check.sh`.
  */
-import { listChangedFiles, touchesWhatsAppImage } from './whatsapp-image.js';
+import { listChangedFiles, whatsAppImageDecision } from './whatsapp-image.js';
 
 /** Prints the WhatsApp image decision for the current repository. */
 function runPrCheckCli(): void {
   const base = process.argv[3] ?? 'origin/main';
   const files = listChangedFiles(process.cwd(), base);
-  process.stdout.write(touchesWhatsAppImage(files) ? 'build\n' : 'skip\n');
+  process.stdout.write(`${whatsAppImageDecision(files)}\n`);
 }
 
 runPrCheckCli();

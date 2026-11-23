@@ -27,6 +27,11 @@ export function touchesWhatsAppImage(files: string[]): boolean {
   );
 }
 
+/** The word `pr:check` acts on: `build` when the image inputs changed, `skip` otherwise. */
+export function whatsAppImageDecision(files: string[]): 'build' | 'skip' {
+  return touchesWhatsAppImage(files) ? 'build' : 'skip';
+}
+
 /** Joins the outputs of several `git ... --name-only` commands into unique, non-empty paths. */
 export function splitGitLines(outputs: string[]): string[] {
   const paths = outputs.flatMap((output) => output.split('\n')).map((line) => line.trim());

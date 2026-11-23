@@ -144,8 +144,12 @@ uncommitted file, touches its sources (`WHATSAPP_IMAGE_INPUTS`: `Dockerfile`, `.
 needed and `docker info` fails, it stops and says how to start Docker. In a cloud session (Claude Code on the web)
 the image build cannot reach the Go module proxy, because the build container does not trust the session's TLS
 proxy CA: start `dockerd` if `docker info` fails; `pr:check` already uses `scripts/docker-proxy-ca.sh`, and for
-`whatsapp:image` or `whatsapp:deploy` prefix the command with `WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh"`. The script trusts the CA in the
-image's build stage only, in a temporary copy of the context; the published image never carries it.
+`whatsapp:image` or `whatsapp:deploy` prefix the command with
+`WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh"`. The script trusts the CA in the image's build stage only,
+in a temporary copy of the context; the published image never carries it. Trade-off: a change outside those
+inputs that still breaks the image (e.g. the Dockerfile's base image moving in its registry, or a new wrangler
+version) is no longer caught by `pr:check`; it surfaces at the next `whatsapp:image` or `whatsapp:deploy`, which
+always build the full image. Run `npm run whatsapp:image` by hand when in doubt.
 Every deploy script runs the post-deploy smoke test right after `wrangler deploy` (ADR 0027): `npm run smoke --
 <connector>` reads the published `GET /tools` and fails the command when it differs from the connector's
 `tool-contract.json` (roll back with `npx wrangler rollback --config connectors/<connector>/wrangler.toml`).

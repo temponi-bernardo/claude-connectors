@@ -57,7 +57,7 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
   {
     name: 'runPrCheckCli',
     reason:
-      'pr:check CLI entry point: reads argv and the working directory and prints the decision of the tested touchesWhatsAppImage/listChangedFiles.',
+      'pr:check CLI entry point: reads argv and the working directory and prints the decision of the tested whatsAppImageDecision/listChangedFiles.',
     manualTest:
       'Run `npx tsx tools/pr-check/cli.ts whatsapp-image`: it prints "skip"; append a line to connectors/whatsapp/bridge/go.mod and it prints "build".',
   },

@@ -114,7 +114,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `tools/docs/render.ts`: [`formatList`](#formatlist), [`renderGeneratedBlock`](#rendergeneratedblock), [`renderNewSection`](#rendernewsection), [`renderModuleIndex`](#rendermoduleindex), [`computeGeneratedData`](#computegenerateddata), [`closureOf`](#closureof), [`processesByFunction`](#processesbyfunction), [`replaceSectionBlock`](#replacesectionblock), [`appendSection`](#appendsection), [`insertBeforeDataTable`](#insertbeforedatatable), [`removeSection`](#removesection), [`removeEmptyModules`](#removeemptymodules), [`pruneOrphanSections`](#pruneorphansections), [`applyGenerated`](#applygenerated)
 - `tools/docs/run.ts`: [`readOptional`](#readoptional), [`readDocsTexts`](#readdocstexts), [`formatIssues`](#formatissues), [`runCheck`](#runcheck), [`generateFunctionsDoc`](#generatefunctionsdoc), [`runGenerate`](#rungenerate)
 - `tools/pr-check/cli.ts`: [`runPrCheckCli`](#runprcheckcli)
-- `tools/pr-check/whatsapp-image.ts`: [`touchesWhatsAppImage`](#toucheswhatsappimage), [`splitGitLines`](#splitgitlines), [`runGit`](#rungit), [`listChangedFiles`](#listchangedfiles)
+- `tools/pr-check/whatsapp-image.ts`: [`touchesWhatsAppImage`](#toucheswhatsappimage), [`whatsAppImageDecision`](#whatsappimagedecision), [`splitGitLines`](#splitgitlines), [`runGit`](#rungit), [`listChangedFiles`](#listchangedfiles)
 - `tools/smoke/cli.ts`: [`sleepMs`](#sleepms), [`readSmokeCheck`](#readsmokecheck), [`runSmokeCli`](#runsmokecli)
 - `tools/smoke/smoke.ts`: [`wranglerValue`](#wranglervalue), [`workerBaseUrl`](#workerbaseurl), [`fetchWorkersSubdomain`](#fetchworkerssubdomain), [`fetchPublishedTools`](#fetchpublishedtools), [`smokeAttempt`](#smokeattempt), [`runSmokeCheck`](#runsmokecheck)
 
@@ -14738,7 +14738,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `tools/pr-check/whatsapp-image.ts`
 - **Signature:** `touchesWhatsAppImage(files: string[]): boolean`
-- **Used by:** `runPrCheckCli()`
+- **Used by:** `whatsAppImageDecision()`
 - **Processes:** P06
 
 <!-- generated:end -->
@@ -14799,6 +14799,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** Unique paths relative to the repository root.
 - **Effects:** Runs `git merge-base`, `git diff --name-only` (twice) and `git ls-files --others --exclude-standard`.
 - **Errors:** Throws (via `runGit()`) when `base` does not exist.
+
+### `whatsAppImageDecision`
+
+<!-- generated:start -->
+
+- **File:** `tools/pr-check/whatsapp-image.ts`
+- **Signature:** `whatsAppImageDecision(files: string[]): 'build' | 'skip'`
+- **Used by:** `runPrCheckCli()`
+- **Processes:** P06
+
+<!-- generated:end -->
+
+- **Does:** Turns the changed files into the word `pr:check` acts on for the WhatsApp image step.
+- **Input:** `files`: changed paths, relative to the repository root.
+- **Output:** `build` when `touchesWhatsAppImage()` is true, else `skip`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## Data and constants
 

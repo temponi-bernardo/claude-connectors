@@ -26,7 +26,9 @@ echo "→ WhatsApp Go bridge"
 npm run -s bridge:test
 echo "→ WhatsApp Worker bundle"
 npm run -s whatsapp:build >/dev/null
-if [ "$(npx --no-install tsx tools/pr-check/cli.ts whatsapp-image)" = "build" ]; then
+# A failing decision (no origin/main, shallow clone, git or tsx missing) stops pr:check: never skip by default.
+image=$(npx --no-install tsx tools/pr-check/cli.ts whatsapp-image)
+if [ "$image" = "build" ]; then
   echo "→ WhatsApp container image (the diff touches its sources)"
   if ! docker info >/dev/null 2>&1; then
     echo "[pr:check] the diff changes the WhatsApp container image (Dockerfile, bridge/, NOTICE.md," >&2
@@ -36,8 +38,11 @@ if [ "$(npx --no-install tsx tools/pr-check/cli.ts whatsapp-image)" = "build" ];
     exit 1
   fi
   WRANGLER_DOCKER_BIN="${WRANGLER_DOCKER_BIN:-$PWD/scripts/docker-proxy-ca.sh}" npm run -s whatsapp:image >/dev/null
-else
+elif [ "$image" = "skip" ]; then
   echo "→ WhatsApp container image: skipped, the diff does not touch its sources (Dockerfile, bridge/, NOTICE.md, .dockerignore, wrangler.toml)"
+else
+  echo "[pr:check] could not decide whether to build the WhatsApp image (got \"$image\")." >&2
+  exit 1
 fi
 echo "→ connector build"
 npm run -s build
