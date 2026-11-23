@@ -49,6 +49,11 @@ Target task: `$ARGUMENTS` (empty = the "Next task" at the top of `docs/ROADMAP.m
     the same PR; a tool that depends on a flag or permission is gated with `gateToolSpecs()`, never left out.
     If it touched WhatsApp (`connectors/whatsapp/`), `pr:check` already runs `bridge:test` (Go 1.26+) and
     `whatsapp:build`; the deploy (`npm run whatsapp:deploy`, with Docker) belongs to whoever hosts it (ADR 0015).
+    When the owner asks Claude to deploy it from a cloud session: start Docker (`(dockerd > /dev/null 2>&1 &)`,
+    wait for `docker info`) and run `WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh" npm run whatsapp:deploy`;
+    without the wrapper, `go mod download` in the image fails on the session's TLS proxy CA (`docs/WORKFLOW.md`).
+    In auto mode, deploys run only after the user explicitly asks for them; if the session blocks one, say so and
+    ask, instead of handing the command over as if access were missing.
 11. **Close the task:** ✅ in the ROADMAP, "Next task" updated, CHANGELOG entry if user-visible. This can go in
     the same PR (preferred) or in an immediate `docs(docs): ...` PR.
 12. **`/handoff`**: overwrite `docs/STATE.md` (local, never committed) and tell the user to run `/clear`.
