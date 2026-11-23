@@ -10,7 +10,7 @@
   },
   "scripts": {
     "prepare": "git config core.hooksPath .githooks || true",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p connectors/canvas-puc/src/plan/page/tsconfig.json --noEmit",
     "build": "tsx tools/bundle/cli.ts",
     "worker:dev": "wrangler dev --config connectors/canvas-puc/wrangler.toml",
     "worker:deploy": "wrangler deploy --config connectors/canvas-puc/wrangler.toml && npm run -s smoke -- canvas-puc",
@@ -34,7 +34,8 @@
     "docs:check": "tsx tools/docs/cli.ts check",
     "secrets:check": "sh scripts/secrets-check.sh",
     "check": "npm run format && npm run lint && npm run typecheck && npm run test:coverage && npm run docs:check && npm run dup:check && npm run secrets:check",
-    "pr:check": "sh scripts/pr-check.sh"
+    "pr:check": "sh scripts/pr-check.sh",
+    "plan:e2e": "node scripts/plan-e2e.mjs"
   },
   "lint-staged": {
     "*.{ts,js,mjs,cjs}": [
@@ -56,6 +57,7 @@
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.14.0",
     "jscpd": "^5.4.2",
+    "jsdom": "^26.1.0",
     "lint-staged": "^17.6.0",
     "prettier": "^3.9.10",
     "ts-morph": "^28.0.0",

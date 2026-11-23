@@ -1,0 +1,1407 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Plano do Semestre</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Plano do Semestre — template of the /planejamento-faculdade skill. Data lives only in #plan-data. */
+      :root {
+        --paper: #f6f3ec;
+        --sheet: #fffdf8;
+        --ink: #1f1d19;
+        --soft-ink: #625c51;
+        --rule: #e2dccf;
+        --accent: #0d6b68;
+        --accent-wash: #dcefed;
+        --high: #b3361f;
+        --high-wash: #f9e4dd;
+        --warn: #9a5b00;
+        --warn-wash: #f7ead2;
+        --ok: #2b7347;
+        --ok-wash: #e0f0e4;
+        --none: #6b6458;
+        --none-wash: #efebe2;
+        --seg-sure: #0d6b68;
+        --seg-pend: #6fb3ad;
+        --seg-open: #e6e0d3;
+        --seg-lost: #b9b1a2;
+        --font-display: 'Bricolage Grotesque', 'Avenir Next', 'Segoe UI', sans-serif;
+        --font-body: 'Manrope', 'Segoe UI', 'Helvetica Neue', sans-serif;
+        --font-mono: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+        color-scheme: light;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --paper: #111412;
+          --sheet: #191d1b;
+          --ink: #ece8df;
+          --soft-ink: #a8a194;
+          --rule: #2c312e;
+          --accent: #5cc4bc;
+          --accent-wash: #16302e;
+          --high: #ff8a70;
+          --high-wash: #3a1f19;
+          --warn: #f0b55a;
+          --warn-wash: #352812;
+          --ok: #74d39a;
+          --ok-wash: #16301f;
+          --none: #b4ad9f;
+          --none-wash: #24282a;
+          --seg-sure: #5cc4bc;
+          --seg-pend: #2f7d77;
+          --seg-open: #2b302d;
+          --seg-lost: #4a4f4b;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme='dark'] {
+        --paper: #111412;
+        --sheet: #191d1b;
+        --ink: #ece8df;
+        --soft-ink: #a8a194;
+        --rule: #2c312e;
+        --accent: #5cc4bc;
+        --accent-wash: #16302e;
+        --high: #ff8a70;
+        --high-wash: #3a1f19;
+        --warn: #f0b55a;
+        --warn-wash: #352812;
+        --ok: #74d39a;
+        --ok-wash: #16301f;
+        --none: #b4ad9f;
+        --none-wash: #24282a;
+        --seg-sure: #5cc4bc;
+        --seg-pend: #2f7d77;
+        --seg-open: #2b302d;
+        --seg-lost: #4a4f4b;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+      }
+      html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font: 15px/1.55 var(--font-body);
+        overflow-wrap: anywhere;
+        overflow-x: clip;
+      }
+      .lvl-high {
+        --tone: var(--high);
+        --tone-wash: var(--high-wash);
+      }
+      .lvl-warn {
+        --tone: var(--warn);
+        --tone-wash: var(--warn-wash);
+      }
+      .lvl-ok {
+        --tone: var(--ok);
+        --tone-wash: var(--ok-wash);
+      }
+      .lvl-none {
+        --tone: var(--none);
+        --tone-wash: var(--none-wash);
+      }
+      .page {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 28px max(16px, env(safe-area-inset-right)) calc(56px + env(safe-area-inset-bottom))
+          max(16px, env(safe-area-inset-left));
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 34px;
+      }
+      .page > *,
+      .card,
+      .slot,
+      .ask,
+      .chip,
+      .items,
+      .item > * {
+        min-width: 0;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-display);
+        margin: 0;
+        letter-spacing: -0.015em;
+        text-wrap: balance;
+      }
+      h1 {
+        font-size: clamp(28px, 5vw, 44px);
+        font-weight: 800;
+        line-height: 1.05;
+      }
+      h2 {
+        font-size: 21px;
+        font-weight: 800;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 2px 12px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid var(--ink);
+      }
+      h2 small {
+        font: 500 13px var(--font-body);
+        color: var(--soft-ink);
+      }
+      h3 {
+        font-size: 17px;
+        font-weight: 800;
+      }
+      .num {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+      }
+      .eyebrow {
+        font: 600 12px var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        margin: 0;
+      }
+      .lede {
+        color: var(--soft-ink);
+        margin: 0;
+        max-width: 72ch;
+      }
+      .lede b {
+        color: var(--ink);
+      }
+      header {
+        display: grid;
+        gap: 10px;
+      }
+      .assumptions {
+        font-size: 13.5px;
+        background: var(--sheet);
+        border: 1px dashed var(--rule);
+        border-radius: 14px;
+        padding: 12px 16px;
+        display: grid;
+        gap: 6px;
+      }
+      .assumptions p {
+        margin: 0;
+        color: var(--soft-ink);
+      }
+      .assumptions strong {
+        color: var(--ink);
+      }
+      .section-note {
+        font-size: 13px;
+        color: var(--soft-ink);
+        margin: 8px 0 12px;
+      }
+      .risk {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .chip {
+        display: grid;
+        gap: 2px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: var(--tone-wash);
+        color: var(--ink);
+        text-decoration: none;
+        border: 2px solid transparent;
+      }
+      .chip:hover,
+      .chip:focus-visible {
+        border-color: var(--tone);
+        outline: none;
+      }
+      .chip-code {
+        font: 800 18px var(--font-display);
+      }
+      .chip-need {
+        font: 600 14px var(--font-mono);
+        color: var(--tone);
+      }
+      .chip-level {
+        font-size: 12px;
+        color: var(--soft-ink);
+      }
+      .today-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+        gap: 12px;
+        margin-top: 12px;
+      }
+      .slot {
+        background: var(--sheet);
+        border: 1px solid var(--rule);
+        border-radius: 14px;
+        padding: 14px 16px;
+        display: grid;
+        gap: 6px;
+        align-content: start;
+      }
+      .slot.critical {
+        border: 2px solid var(--high);
+        background: linear-gradient(var(--high-wash), var(--sheet) 70%);
+      }
+      .slot .when {
+        font: 600 12px var(--font-mono);
+        color: var(--soft-ink);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .slot.critical .when {
+        color: var(--high);
+      }
+      .slot p,
+      .slot ol {
+        margin: 0;
+      }
+      .slot ol {
+        padding-left: 20px;
+        display: grid;
+        gap: 4px;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 14px;
+        font-size: 12px;
+        color: var(--soft-ink);
+        margin: 10px 0 14px;
+      }
+      .legend i {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        margin-right: 5px;
+        vertical-align: -2px;
+      }
+      .legend .seg-open {
+        outline: 1px solid var(--rule);
+      }
+      .legend .goal-key {
+        width: 3px;
+        background: var(--ink);
+      }
+      .courses {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(310px, 100%), 1fr));
+        gap: 14px;
+      }
+      .card {
+        background: var(--sheet);
+        border: 1px solid var(--rule);
+        border-radius: 16px;
+        padding: 16px 18px;
+        display: grid;
+        gap: 12px;
+        align-content: start;
+        box-shadow: inset 0 5px 0 var(--tone);
+        scroll-margin-top: 16px;
+      }
+      .card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        padding-top: 4px;
+      }
+      .card-name {
+        margin: 0;
+        font-size: 13px;
+        color: var(--soft-ink);
+      }
+      .pill {
+        font: 600 11px var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: var(--tone-wash);
+        color: var(--tone);
+        white-space: nowrap;
+      }
+      .need {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .need-big {
+        font-size: 34px;
+        font-weight: 600;
+        line-height: 1;
+        color: var(--tone);
+      }
+      .need-label {
+        font-size: 13px;
+        color: var(--soft-ink);
+      }
+      .bar-wrap {
+        padding-top: 18px;
+      }
+      .bar {
+        position: relative;
+        display: flex;
+        height: 14px;
+        border-radius: 7px;
+        background: var(--seg-open);
+      }
+      .seg {
+        height: 100%;
+      }
+      .seg:first-child {
+        border-radius: 7px 0 0 7px;
+      }
+      .seg-sure {
+        background: var(--seg-sure);
+      }
+      .seg-pend {
+        background: repeating-linear-gradient(
+          -45deg,
+          var(--seg-pend) 0 3px,
+          var(--seg-sure) 3px 6px
+        );
+      }
+      .seg-open {
+        background: var(--seg-open);
+      }
+      .seg-lost {
+        background: var(--seg-lost);
+        border-radius: 0 7px 7px 0;
+      }
+      .bar .goal {
+        position: absolute;
+        top: -6px;
+        bottom: -6px;
+        width: 3px;
+        margin-left: -1px;
+        background: var(--ink);
+        border-radius: 2px;
+        font: 600 11px var(--font-mono);
+        color: transparent;
+      }
+      .bar .goal::before {
+        content: 'meta ' attr(data-label);
+        position: absolute;
+        bottom: calc(100% + 2px);
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        color: var(--ink);
+      }
+      .facts {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 4px;
+        font-size: 14px;
+      }
+      .facts li {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        border-bottom: 1px dotted var(--rule);
+        padding-bottom: 3px;
+      }
+      .facts li span:first-child {
+        flex: 1 1 12ch;
+      }
+      .facts li span:last-child {
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .path {
+        margin: 0;
+        font-size: 13.5px;
+        background: var(--tone-wash);
+        border-radius: 10px;
+        padding: 8px 12px;
+      }
+      .path b {
+        color: var(--tone);
+      }
+      .rules {
+        font-size: 13.5px;
+        color: var(--soft-ink);
+      }
+      .rules summary {
+        cursor: pointer;
+        font-weight: 700;
+        color: var(--ink);
+      }
+      .rules ul {
+        margin: 6px 0 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 5px;
+      }
+      .rule-source {
+        font-size: 12px;
+        font-style: italic;
+      }
+      .days {
+        background: var(--sheet);
+        border: 1px solid var(--rule);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .day {
+        display: grid;
+        grid-template-columns: 88px minmax(0, 1fr);
+        gap: 12px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--rule);
+      }
+      .day:first-child {
+        border-top: none;
+      }
+      .day .date {
+        font: 500 13px var(--font-mono);
+        color: var(--soft-ink);
+      }
+      .day .date b {
+        display: block;
+        font: 800 20px var(--font-display);
+        color: var(--ink);
+      }
+      .day.past {
+        opacity: 0.5;
+      }
+      .day.now {
+        background: var(--accent-wash);
+        box-shadow: inset 4px 0 0 var(--accent);
+      }
+      .day.clash {
+        background: var(--high-wash);
+        box-shadow: inset 4px 0 0 var(--high);
+      }
+      .clash-note {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--high);
+      }
+      .focus {
+        margin: 0;
+        font-weight: 700;
+        font-size: 13.5px;
+      }
+      .items {
+        display: grid;
+        gap: 6px;
+      }
+      .item {
+        display: grid;
+        grid-template-columns: 22px auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--rule);
+        border-left: 4px solid var(--tone);
+        background: var(--sheet);
+      }
+      .item.optional {
+        border-style: dashed;
+        border-left-style: dashed;
+      }
+      .item input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        accent-color: var(--accent);
+        cursor: pointer;
+      }
+      .item label {
+        cursor: pointer;
+      }
+      .item .tag {
+        font: 600 11px var(--font-mono);
+        color: var(--tone);
+        min-width: 36px;
+      }
+      .item .time {
+        font: 500 12px var(--font-mono);
+        color: var(--soft-ink);
+        margin-left: 8px;
+        white-space: nowrap;
+      }
+      .item .meta {
+        font: 500 12px var(--font-mono);
+        color: var(--soft-ink);
+        white-space: nowrap;
+      }
+      .item .meta:empty {
+        display: none;
+      }
+      .item.done label {
+        text-decoration: line-through;
+        color: var(--soft-ink);
+      }
+      .item.dropped {
+        opacity: 0.6;
+      }
+      .progress {
+        font: 500 13px var(--font-mono);
+        color: var(--accent);
+      }
+      .sync[data-state='error'] {
+        color: var(--high);
+      }
+      .asks {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .ask {
+        background: var(--sheet);
+        border: 1px solid var(--rule);
+        border-left: 4px solid var(--tone);
+        border-radius: 12px;
+        padding: 10px 14px;
+        display: grid;
+        gap: 4px;
+        font-size: 14px;
+      }
+      .ask p {
+        margin: 0;
+      }
+      .ask .tag {
+        font: 600 11px var(--font-mono);
+        color: var(--tone);
+      }
+      .waiting {
+        justify-self: start;
+        font: 600 11px var(--font-mono);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: var(--accent-wash);
+        color: var(--accent);
+      }
+      .empty {
+        color: var(--soft-ink);
+        margin: 0;
+      }
+      .plan-error {
+        border: 2px solid var(--high);
+        border-radius: 12px;
+        padding: 12px 16px;
+        background: var(--high-wash);
+      }
+      footer {
+        font-size: 12.5px;
+        color: var(--soft-ink);
+        border-top: 1px solid var(--rule);
+        padding-top: 12px;
+      }
+      footer p {
+        margin: 0 0 4px;
+      }
+      .missing-sources {
+        font-weight: 700;
+      }
+      a:focus-visible,
+      summary:focus-visible,
+      input:focus-visible {
+        outline: 3px solid var(--accent);
+        outline-offset: 2px;
+        border-radius: 4px;
+      }
+      @media (max-width: 640px) {
+        .page {
+          padding-top: max(18px, env(safe-area-inset-top));
+          gap: 26px;
+        }
+        .risk {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .day {
+          grid-template-columns: minmax(0, 1fr);
+          gap: 6px;
+          padding: 10px 12px;
+        }
+        .day .date b {
+          display: inline;
+          margin-right: 6px;
+        }
+        .item {
+          grid-template-columns: 24px auto minmax(0, 1fr);
+          align-items: start;
+        }
+        .item input {
+          width: 20px;
+          height: 20px;
+        }
+        .item .meta {
+          grid-column: 3;
+          white-space: normal;
+        }
+        .facts li {
+          flex-wrap: wrap;
+        }
+        .facts li span:last-child {
+          margin-left: auto;
+        }
+        .card {
+          padding: 14px;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header>
+        <p class="eyebrow">PUC Minas · Canvas</p>
+        <h1 id="plan-title">Plano do Semestre</h1>
+        <p class="lede" id="plan-situation"></p>
+        <div class="assumptions" id="plan-assumptions" aria-label="Premissas"></div>
+        <p class="plan-error" id="plan-error" role="alert" hidden></p>
+      </header>
+
+      <section aria-labelledby="h-risk">
+        <h2 id="h-risk">Onde está o risco <small>quanto falta para a meta</small></h2>
+        <nav class="risk" id="risk-list" aria-label="Matérias por risco"></nav>
+      </section>
+
+      <section aria-labelledby="h-today">
+        <h2 id="h-today">Hoje e amanhã <small id="today-range"></small></h2>
+        <div class="today-grid" id="today-list"></div>
+      </section>
+
+      <section aria-labelledby="h-study">
+        <h2 id="h-study">
+          Plano de estudo dia a dia <small class="progress" id="study-progress"></small>
+        </h2>
+        <p class="section-note">
+          De hoje ao fim do semestre, na ordem da prova mais próxima e do risco. Itens tracejados só
+          valem se precisar de recuperação. <span class="sync" aria-live="polite"></span>
+        </p>
+        <div class="days" id="study-list"></div>
+      </section>
+
+      <section aria-labelledby="h-courses">
+        <h2 id="h-courses">Matérias <small>pontos garantidos × em aberto</small></h2>
+        <div class="legend" aria-hidden="true">
+          <span><i class="seg-sure"></i>garantido</span>
+          <span><i class="seg-pend"></i>enviado, sem nota (estimado)</span>
+          <span><i class="seg-open"></i>em aberto</span>
+          <span><i class="seg-lost"></i>perdido ou incerto</span>
+          <span><i class="goal-key"></i>meta</span>
+        </div>
+        <div class="courses" id="course-list"></div>
+      </section>
+
+      <section aria-labelledby="h-timeline">
+        <h2 id="h-timeline">
+          Linha do tempo <small class="progress" id="timeline-progress"></small>
+        </h2>
+        <p class="section-note">
+          Prazos e provas por dia. Marque o que já foi feito.
+          <span class="sync" aria-live="polite"></span>
+        </p>
+        <div class="days" id="timeline-list"></div>
+      </section>
+
+      <section aria-labelledby="h-questions">
+        <h2 id="h-questions">Perguntar aos professores</h2>
+        <div class="asks" id="question-list"></div>
+      </section>
+
+      <footer id="plan-footer"></footer>
+    </main>
+    <script id="plan-data" type="application/json">
+      {}
+    </script>
+    <script>
+// Generated by `npm run build` from connectors/canvas-puc/src/plan — do not edit by hand.
+"use strict";
+(() => {
+  // connectors/canvas-puc/src/plan/page/checks.ts
+  var SYNC_MESSAGES = {
+    loading: "Carregando as marcações salvas…",
+    account: "Marcações salvas na sua conta: seguem nas atualizações do plano e em qualquer dispositivo.",
+    local: "Marcações salvas só neste navegador; seguem nas atualizações do plano.",
+    error: "Não consegui salvar na sua conta agora; a marcação ficou neste navegador e vai na próxima alteração."
+  };
+  var ACCOUNT_TIMEOUT_MS = 1e4;
+  function toCheckMap(value) {
+    if (typeof value !== "object" || value === null || Array.isArray(value)) return {};
+    const map = {};
+    for (const [id, v] of Object.entries(value)) if (typeof v === "boolean") map[id] = v;
+    return map;
+  }
+  function parseStoredChecks(text) {
+    try {
+      return toCheckMap(text === null ? {} : JSON.parse(text));
+    } catch {
+      return {};
+    }
+  }
+  function mergeChecks(local, remote, touched) {
+    const mine = {};
+    for (const id of touched) if (id in local) mine[id] = local[id] === true;
+    return { ...local, ...remote, ...mine };
+  }
+  function hasLocalOnly(local, remote, touched) {
+    return Object.keys(local).some((id) => !(id in remote) || touched.has(id));
+  }
+  function localChecksKey(planKey) {
+    return `planejamento-faculdade:${planKey}`;
+  }
+  function readLocalChecks(storage, planKey) {
+    try {
+      return parseStoredChecks(storage?.getItem(localChecksKey(planKey)) ?? null);
+    } catch {
+      return {};
+    }
+  }
+  function pauseMs(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  function createCheckStore(options) {
+    return {
+      ...options,
+      wait: options.wait ?? pauseMs,
+      saved: readLocalChecks(options.storage, options.key),
+      touched: /* @__PURE__ */ new Set(),
+      boxes: /* @__PURE__ */ new Map(),
+      remote: null,
+      writing: false,
+      dirty: false,
+      listeners: []
+    };
+  }
+  function writeLocalChecks(store) {
+    try {
+      store.storage?.setItem(localChecksKey(store.key), JSON.stringify(store.saved));
+    } catch {
+    }
+  }
+  function applyCheck(store, id) {
+    const entry = store.boxes.get(id);
+    if (!entry) return;
+    const checked = id in store.saved ? store.saved[id] === true : entry.def;
+    entry.box.checked = checked;
+    entry.row.classList.toggle("done", checked);
+  }
+  function refreshChecks(store) {
+    for (const id of store.boxes.keys()) applyCheck(store, id);
+    store.listeners.forEach((listener) => {
+      listener();
+    });
+  }
+  function onCheckChange(store, id, checked) {
+    store.saved[id] = checked;
+    store.touched.add(id);
+    refreshChecks(store);
+    writeLocalChecks(store);
+    store.dirty = true;
+    void flushChecks(store);
+  }
+  function registerCheck(store, item, view) {
+    const { box, row } = view;
+    store.boxes.set(item.id, { box, row, def: item.def });
+    applyCheck(store, item.id);
+    box.addEventListener("change", () => {
+      onCheckChange(store, item.id, box.checked);
+    });
+  }
+  function errorCode(error) {
+    const code = error?.code;
+    return typeof code === "string" ? code : void 0;
+  }
+  async function retryOnUnavailable(call, wait) {
+    try {
+      return await call();
+    } catch (error) {
+      if (errorCode(error) !== "unavailable") throw error;
+      await wait(600 + Math.floor(Math.random() * 800));
+      return call();
+    }
+  }
+  async function writeChecksOnce(store, remote) {
+    try {
+      await retryOnUnavailable(() => remote.set({ checks: { ...store.saved }, v: 1 }), store.wait);
+      store.status("account");
+      return true;
+    } catch {
+      store.dirty = true;
+      store.status("error");
+      return false;
+    }
+  }
+  async function flushChecks(store) {
+    const remote = store.remote;
+    if (!remote || store.writing) return;
+    while (store.dirty) {
+      store.writing = true;
+      store.dirty = false;
+      const sent = await writeChecksOnce(store, remote);
+      store.writing = false;
+      if (!sent) return;
+    }
+  }
+  function remoteChecksOf(snap) {
+    return snap.exists ? toCheckMap(snap.data()?.checks) : {};
+  }
+  function onRemoteSnapshot(store, snap) {
+    if (store.writing || snap.metadata?.hasPendingWrites === true) return;
+    const remote = remoteChecksOf(snap);
+    const changed = Object.keys(remote).filter((id) => store.saved[id] !== remote[id]);
+    if (changed.length === 0) return;
+    for (const id of changed) store.saved[id] = remote[id] === true;
+    refreshChecks(store);
+    writeLocalChecks(store);
+  }
+  async function accountDocument(claude, planKey) {
+    const [db, user] = await Promise.all([claude.use("db"), claude.use("user")]);
+    const uid = user ? await user.id() : null;
+    return db && uid ? db.collection(`data/users/${uid}`).doc(planKey) : null;
+  }
+  async function adoptAccount(store, ref) {
+    const remote = remoteChecksOf(await retryOnUnavailable(() => ref.get(), store.wait));
+    const localOnly = hasLocalOnly(store.saved, remote, store.touched);
+    store.saved = mergeChecks(store.saved, remote, store.touched);
+    refreshChecks(store);
+    writeLocalChecks(store);
+    store.remote = ref;
+    if (localOnly) {
+      store.dirty = true;
+      await flushChecks(store);
+    } else store.status("account");
+    ref.onSnapshot(
+      (snap) => {
+        onRemoteSnapshot(store, snap);
+      },
+      () => void 0
+    );
+  }
+  async function connectAccount(store, claude) {
+    if (!claude || typeof claude.use !== "function") {
+      store.status("local");
+      return;
+    }
+    store.status("loading");
+    const timer = setTimeout(() => {
+      if (!store.remote) store.status("local");
+    }, ACCOUNT_TIMEOUT_MS);
+    try {
+      const ref = await accountDocument(claude, store.key);
+      if (ref) await adoptAccount(store, ref);
+      else store.status("local");
+    } catch {
+      store.status("local");
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  // connectors/canvas-puc/src/plan/page/dom.ts
+  function createEl(doc, tag, options = {}) {
+    const el = doc.createElement(tag);
+    if (options.className) el.className = options.className;
+    if (options.text !== void 0) el.textContent = options.text;
+    return el;
+  }
+  function richTextRuns(text) {
+    const parts = text.split("**");
+    if (parts.length % 2 === 0) return [{ bold: false, text }];
+    return parts.map((part, index) => ({ bold: index % 2 === 1, text: part })).filter((run) => run.text.length > 0);
+  }
+  function appendRichText(parent, text) {
+    const doc = parent.ownerDocument;
+    for (const run of richTextRuns(text)) {
+      parent.append(run.bold ? createEl(doc, "b", { text: run.text }) : doc.createTextNode(run.text));
+    }
+    return parent;
+  }
+  function createRichEl(doc, tag, text) {
+    const el = createEl(doc, tag);
+    appendRichText(el, text);
+    return el;
+  }
+  function requireEl(doc, id) {
+    const el = doc.getElementById(id);
+    if (!el) throw new Error(`The plan template has no #${id}: rebuild it with npm run build.`);
+    return el;
+  }
+
+  // connectors/canvas-puc/src/plan/page/format.ts
+  var PLAN_TIME_ZONE = "America/Sao_Paulo";
+  var WEEKDAYS_PT = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+  function formatDayMonth(isoDate) {
+    return `${isoDate.slice(8, 10)}/${isoDate.slice(5, 7)}`;
+  }
+  function weekdayOf(isoDate) {
+    const [year, month, day] = isoDate.split("-").map(Number);
+    const index = new Date(Date.UTC(year ?? 1970, (month ?? 1) - 1, day ?? 1)).getUTCDay();
+    return WEEKDAYS_PT[index] ?? "";
+  }
+  function saoPauloParts(instant) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: PLAN_TIME_ZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23"
+    }).formatToParts(instant);
+    return Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  }
+  function formatStamp(isoInstant) {
+    const p = saoPauloParts(new Date(isoInstant));
+    return `${p.day ?? ""}/${p.month ?? ""}/${p.year ?? ""}, ${p.hour ?? ""}h${p.minute ?? ""}`;
+  }
+  function saoPauloToday(now) {
+    const p = saoPauloParts(now);
+    return `${p.year ?? ""}-${p.month ?? ""}-${p.day ?? ""}`;
+  }
+
+  // connectors/canvas-puc/src/plan/plan-points.ts
+  var BAR_SEGMENT_KINDS = ["sure", "pend", "open", "lost"];
+  var RISK_THRESHOLDS = { ok: 0.3, warn: 0.6 };
+  function roundPoints(value) {
+    return Math.round(value * 10) / 10;
+  }
+  function formatPoints(value) {
+    return roundPoints(value).toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+  }
+  function pointsTotal(points) {
+    return points.sure + points.pend + points.open + points.lost;
+  }
+  function pointsMissing(points, goal) {
+    return roundPoints(Math.max(0, goal - points.sure - points.pend));
+  }
+  function riskLevel(points, goal, needsRecovery = false) {
+    const missing = pointsMissing(points, goal);
+    if (missing === 0) return "ok";
+    if (needsRecovery || missing > points.open) return "high";
+    const share = missing / points.open;
+    if (share <= RISK_THRESHOLDS.ok) return "ok";
+    return share <= RISK_THRESHOLDS.warn ? "warn" : "high";
+  }
+  function barSegments(points) {
+    const total = pointsTotal(points);
+    if (total <= 0) return [{ kind: "open", percent: 100 }];
+    let used = 0;
+    return BAR_SEGMENT_KINDS.map((kind, index) => {
+      const last = index === BAR_SEGMENT_KINDS.length - 1;
+      const percent = last ? 100 - used : Math.round(points[kind] / total * 1e6) / 1e4;
+      used += percent;
+      return { kind, percent: Math.max(0, Math.round(percent * 1e4) / 1e4) };
+    });
+  }
+
+  // connectors/canvas-puc/src/plan/plan-embed.ts
+  function planTitle(term) {
+    return `Plano do Semestre ${term}`;
+  }
+
+  // connectors/canvas-puc/src/plan/page/render-header.ts
+  var LEVEL_LABELS = {
+    high: "Risco alto",
+    warn: "Atenção",
+    ok: "Tranquila"
+  };
+  var ASSUMPTION_LABELS = {
+    informed: "Informado por você",
+    estimate: "Estimativas usadas",
+    change: "Mudanças recentes de data"
+  };
+  function courseLevels(plan) {
+    return new Map(
+      plan.courses.map((c) => [c.code, riskLevel(c.points, c.goal ?? plan.goal, c.needsRecovery)])
+    );
+  }
+  function levelClass(levels, code) {
+    return `lvl-${levels.get(code) ?? "none"}`;
+  }
+  function situationText(plan) {
+    const n = plan.courses.length;
+    const custom = plan.courses.some((c) => c.goal !== void 0 && c.goal !== plan.goal);
+    return [
+      `${plan.program} · PUC Minas · ${n} ${n === 1 ? "matéria" : "matérias"}.`,
+      `Situação em ${formatStamp(plan.generatedAt)}, a partir de: ${plan.sources.join(", ")}.`,
+      `Para aprovar: **${formatPoints(plan.goal)} de 100** pontos em cada matéria${custom ? " (salvo onde o plano de ensino diz outra meta)" : ""}.`
+    ].join(" ");
+  }
+  function renderHeader(doc, plan) {
+    requireEl(doc, "plan-title").textContent = planTitle(plan.term);
+    appendRichText(requireEl(doc, "plan-situation"), situationText(plan));
+    const box = requireEl(doc, "plan-assumptions");
+    for (const [kind, label] of Object.entries(ASSUMPTION_LABELS)) {
+      const texts = plan.assumptions.filter((a) => a.kind === kind).map((a) => a.text);
+      if (texts.length === 0) continue;
+      const row = createEl(doc, "p");
+      row.append(createEl(doc, "strong", { text: `${label}: ` }));
+      texts.forEach((t, i) => appendRichText(row, i === 0 ? t : ` · ${t}`));
+      box.append(row);
+    }
+    box.hidden = plan.assumptions.length === 0;
+  }
+  function renderRiskChips(doc, plan) {
+    const list = requireEl(doc, "risk-list");
+    const levels = courseLevels(plan);
+    for (const course of plan.courses) {
+      const level = levels.get(course.code) ?? "ok";
+      const missing = pointsMissing(course.points, course.goal ?? plan.goal);
+      const chip = createEl(doc, "a", { className: `chip ${levelClass(levels, course.code)}` });
+      chip.href = `#curso-${course.id}`;
+      chip.append(createEl(doc, "span", { className: "chip-code", text: course.code }));
+      chip.append(
+        createEl(doc, "span", {
+          className: "chip-need",
+          text: `faltam ${formatPoints(missing)} pts`
+        })
+      );
+      chip.append(createEl(doc, "span", { className: "chip-level", text: LEVEL_LABELS[level] }));
+      list.append(chip);
+    }
+  }
+  function renderFooter(doc, plan) {
+    const footer = requireEl(doc, "plan-footer");
+    footer.append(
+      createEl(doc, "p", {
+        text: `Fontes: ${plan.sources.join(", ")} · consultadas em ${formatStamp(plan.generatedAt)} (horário de Brasília).`
+      })
+    );
+    if (plan.missingSources.length > 0) {
+      footer.append(
+        createEl(doc, "p", {
+          className: "missing-sources",
+          text: `Fontes não conectadas: ${plan.missingSources.join(", ")}.`
+        })
+      );
+    }
+  }
+
+  // connectors/canvas-puc/src/plan/page/render-courses.ts
+  var SEGMENT_LABELS = {
+    sure: "garantidos",
+    pend: "enviados sem nota",
+    open: "em aberto",
+    lost: "perdidos ou incertos"
+  };
+  function assessmentValueText(a) {
+    const score = a.score === null ? "—" : `${a.estimated ? "≈" : ""}${formatPoints(a.score)}`;
+    return `${score} / ${formatPoints(a.max)}`;
+  }
+  function assessmentTitleText(a) {
+    const date = a.date ? ` · ${formatDayMonth(a.date)}` : "";
+    return `${a.title}${date}${a.informedByStudent ? " · informado por você" : ""}`;
+  }
+  function barLabel(course, goal) {
+    const parts = Object.keys(SEGMENT_LABELS).filter((kind) => course.points[kind] > 0).map((kind) => `${formatPoints(course.points[kind])} ${SEGMENT_LABELS[kind]}`);
+    return `${course.code}: ${parts.join(", ")}; meta ${formatPoints(goal)}`;
+  }
+  function renderPointsBar(doc, course, goal) {
+    const bar = createEl(doc, "div", { className: "bar" });
+    bar.setAttribute("role", "img");
+    bar.setAttribute("aria-label", barLabel(course, goal));
+    for (const segment of barSegments(course.points)) {
+      const span = createEl(doc, "span", { className: `seg seg-${segment.kind}` });
+      span.style.width = `${segment.percent}%`;
+      bar.append(span);
+    }
+    const marker = createEl(doc, "span", { className: "goal" });
+    marker.dataset.label = formatPoints(goal);
+    marker.style.left = `${Math.min(100, goal)}%`;
+    bar.append(marker);
+    return bar;
+  }
+  function renderNeed(doc, course, goal) {
+    const p = course.points;
+    const need = createEl(doc, "div", { className: "need" });
+    need.append(
+      createEl(doc, "span", {
+        className: "need-big num",
+        text: formatPoints(pointsMissing(p, goal))
+      })
+    );
+    need.append(
+      createEl(doc, "span", {
+        className: "need-label",
+        text: `pts faltando · garantido ${formatPoints(p.sure + p.pend)} · máx. possível ${formatPoints(p.sure + p.pend + p.open)}`
+      })
+    );
+    return need;
+  }
+  function renderAssessments(doc, course) {
+    const list = createEl(doc, "ul", { className: "facts" });
+    for (const a of course.assessments) {
+      const li = createEl(doc, "li");
+      li.append(createEl(doc, "span", { text: assessmentTitleText(a) }));
+      li.append(createEl(doc, "span", { className: "num", text: assessmentValueText(a) }));
+      list.append(li);
+    }
+    return list;
+  }
+  function renderRules(doc, course) {
+    const details = createEl(doc, "details", { className: "rules" });
+    details.append(createEl(doc, "summary", { text: `Regras e avisos (${course.rules.length})` }));
+    const list = createEl(doc, "ul");
+    for (const rule of course.rules) {
+      const li = createRichEl(doc, "li", rule.text);
+      li.append(
+        createEl(doc, "span", {
+          className: "rule-source",
+          text: ` — ${rule.source}, ${formatDayMonth(rule.date)}`
+        })
+      );
+      list.append(li);
+    }
+    details.append(list);
+    return details;
+  }
+  function renderCardHead(doc, course, label) {
+    const head = createEl(doc, "div", { className: "card-head" });
+    const names = createEl(doc, "div");
+    names.append(createEl(doc, "h3", { text: course.code }));
+    const teacher = course.teacher ? ` · ${course.teacher}` : "";
+    names.append(createEl(doc, "p", { className: "card-name", text: `${course.name}${teacher}` }));
+    head.append(names, createEl(doc, "span", { className: "pill", text: label }));
+    return head;
+  }
+  function renderCourses(doc, plan) {
+    const grid = requireEl(doc, "course-list");
+    for (const course of plan.courses) {
+      const goal = course.goal ?? plan.goal;
+      const level = riskLevel(course.points, goal, course.needsRecovery);
+      const card = createEl(doc, "article", { className: `card lvl-${level}` });
+      card.id = `curso-${course.id}`;
+      const path = createRichEl(doc, "p", `Caminho até a meta: ${course.path}`);
+      path.className = "path";
+      const barWrap = createEl(doc, "div", { className: "bar-wrap" });
+      barWrap.append(renderPointsBar(doc, course, goal));
+      card.append(
+        renderCardHead(doc, course, LEVEL_LABELS[level]),
+        renderNeed(doc, course, goal),
+        barWrap
+      );
+      card.append(renderAssessments(doc, course), path, renderRules(doc, course));
+      grid.append(card);
+    }
+  }
+
+  // connectors/canvas-puc/src/plan/page/render-days.ts
+  function dayRowClass(date, today, conflict) {
+    let when = "";
+    if (date < today) when = " past";
+    else if (date === today) when = " now";
+    return `day${when}${conflict ? " clash" : ""}`;
+  }
+  function progressText(boxes, verb) {
+    const live = boxes.filter((box) => !box.disabled);
+    return `${live.filter((box) => box.checked).length} de ${live.length} ${verb}`;
+  }
+  function renderChecklistItem(ctx, entry, parent) {
+    const { doc } = ctx;
+    const dropped = entry.status === "dropped";
+    const row = createEl(doc, "div", {
+      className: `item ${levelClass(ctx.levels, entry.course)}${entry.optional ? " optional" : ""}${dropped ? " dropped" : ""}`
+    });
+    const box = createEl(doc, "input");
+    box.type = "checkbox";
+    box.id = `chk-${entry.id}`;
+    box.disabled = dropped;
+    const label = createEl(doc, "label", {
+      text: dropped ? `${entry.title} (cancelado)` : entry.title
+    });
+    label.htmlFor = box.id;
+    if (entry.time) label.append(createEl(doc, "span", { className: "time", text: entry.time }));
+    row.append(box, createEl(doc, "span", { className: "tag", text: entry.course }), label);
+    row.append(createEl(doc, "span", { className: "meta", text: entry.meta ?? "" }));
+    registerCheck(ctx.store, { id: entry.id, def: entry.status === "done" }, { box, row });
+    parent.append(row);
+    return box;
+  }
+  function renderDayRow(ctx, date, conflict) {
+    const { doc } = ctx;
+    const row = createEl(doc, "div", {
+      className: date ? dayRowClass(date, ctx.today, conflict !== void 0) : "day undated"
+    });
+    const when = createEl(doc, "div", { className: "date" });
+    when.append(createEl(doc, "b", { text: date ? formatDayMonth(date) : "?" }));
+    when.append(doc.createTextNode(date ? weekdayOf(date) : "sem data"));
+    const items = createEl(doc, "div", { className: "items" });
+    if (conflict) items.append(createEl(doc, "p", { className: "clash-note", text: conflict }));
+    row.append(when, items);
+    return [row, items];
+  }
+  function renderStudy(ctx, days) {
+    const list = requireEl(ctx.doc, "study-list");
+    const boxes = [];
+    for (const day of days) {
+      const [row, items] = renderDayRow(ctx, day.date);
+      items.append(createEl(ctx.doc, "p", { className: "focus", text: day.focus }));
+      for (const item of day.items) {
+        const entry = { ...item, id: item.id ?? "", title: item.task, meta: item.duration };
+        boxes.push(renderChecklistItem(ctx, entry, items));
+      }
+      list.append(row);
+    }
+    return boxes;
+  }
+  function timelineEntry(item) {
+    return { ...item, id: item.id ?? "", meta: item.points };
+  }
+  function renderTimeline(ctx, days, undated) {
+    const list = requireEl(ctx.doc, "timeline-list");
+    const boxes = [];
+    for (const day of days) {
+      const [row, items] = renderDayRow(ctx, day.date, day.conflict);
+      for (const item of day.items) boxes.push(renderChecklistItem(ctx, timelineEntry(item), items));
+      list.append(row);
+    }
+    if (undated.length > 0) {
+      const [row, items] = renderDayRow(ctx, null);
+      list.append(row);
+      for (const item of undated) boxes.push(renderChecklistItem(ctx, timelineEntry(item), items));
+    }
+    return boxes;
+  }
+  function renderToday(doc, plan) {
+    const { from, to, blocks } = plan.focus;
+    const range = from === to ? "" : ` → ${weekdayOf(to)} ${formatDayMonth(to)}`;
+    requireEl(doc, "today-range").textContent = `${weekdayOf(from)} ${formatDayMonth(from)}${range}`;
+    const grid = requireEl(doc, "today-list");
+    for (const block of blocks) {
+      const slot = createEl(doc, "div", { className: `slot${block.critical ? " critical" : ""}` });
+      slot.append(createEl(doc, "span", { className: "when", text: block.label }));
+      slot.append(createEl(doc, "h3", { text: block.title }));
+      if (block.text) slot.append(createRichEl(doc, "p", block.text));
+      if (block.steps.length > 0) {
+        const steps = createEl(doc, "ol");
+        for (const step of block.steps) steps.append(createRichEl(doc, "li", step));
+        slot.append(steps);
+      }
+      grid.append(slot);
+    }
+    if (blocks.length === 0)
+      grid.append(
+        createEl(doc, "p", { className: "empty", text: "Nada vence nem tem prova nesses dias." })
+      );
+  }
+  function renderQuestions(doc, plan) {
+    const list = requireEl(doc, "question-list");
+    const levels = courseLevels(plan);
+    for (const q of plan.questions) {
+      const card = createEl(doc, "div", { className: `ask ${levelClass(levels, q.course)}` });
+      card.append(createEl(doc, "span", { className: "tag", text: q.course }));
+      card.append(createRichEl(doc, "p", q.text));
+      if (q.status === "sent") {
+        const since = q.sentOn ? ` (enviada em ${formatDayMonth(q.sentOn)})` : "";
+        card.append(
+          createEl(doc, "span", { className: "waiting", text: `aguardando resposta${since}` })
+        );
+      }
+      list.append(card);
+    }
+    if (plan.questions.length === 0)
+      list.append(createEl(doc, "p", { className: "empty", text: "Nenhuma pergunta em aberto." }));
+  }
+
+  // connectors/canvas-puc/src/plan/page/main.ts
+  function readEmbeddedPlan(doc) {
+    return JSON.parse(requireEl(doc, "plan-data").textContent || "null");
+  }
+  function showSyncState(doc, state) {
+    doc.querySelectorAll(".sync").forEach((el) => {
+      el.textContent = SYNC_MESSAGES[state];
+      el.dataset.state = state;
+    });
+  }
+  function renderPlanSections(ctx, plan) {
+    const { doc } = ctx;
+    renderHeader(doc, plan);
+    renderRiskChips(doc, plan);
+    renderToday(doc, plan);
+    const study = renderStudy(ctx, plan.study);
+    renderCourses(doc, plan);
+    const timeline = renderTimeline(ctx, plan.timeline, plan.undated);
+    renderQuestions(doc, plan);
+    renderFooter(doc, plan);
+    return [study, timeline];
+  }
+  function updateCounters(doc, study, timeline) {
+    requireEl(doc, "study-progress").textContent = progressText(study, "feitos");
+    requireEl(doc, "timeline-progress").textContent = progressText(timeline, "concluídos");
+  }
+  async function bootPlanPage(env) {
+    const { doc } = env;
+    const plan = readEmbeddedPlan(doc);
+    function status(state) {
+      showSyncState(doc, state);
+    }
+    const store = createCheckStore({ key: plan.planKey, storage: env.storage, status });
+    const ctx = { doc, today: saoPauloToday(env.now), levels: courseLevels(plan), store };
+    const [study, timeline] = renderPlanSections(ctx, plan);
+    store.listeners.push(() => {
+      updateCounters(doc, study, timeline);
+    });
+    updateCounters(doc, study, timeline);
+    await connectAccount(store, env.claude);
+  }
+  function safeLocalStorage(win) {
+    try {
+      return win.localStorage;
+    } catch {
+      return null;
+    }
+  }
+  function startPlanPage(win) {
+    const env = {
+      doc: win.document,
+      now: /* @__PURE__ */ new Date(),
+      storage: safeLocalStorage(win),
+      claude: win.claude
+    };
+    return bootPlanPage(env).catch((error) => {
+      const note = win.document.getElementById("plan-error");
+      if (note) {
+        note.hidden = false;
+        note.textContent = `Não consegui montar o plano: ${error.message}`;
+      }
+    });
+  }
+
+  // connectors/canvas-puc/src/plan/page/entry.ts
+  void startPlanPage(window);
+})();
+</script>
+  </body>
+</html>

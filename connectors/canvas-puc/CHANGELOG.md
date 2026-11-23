@@ -7,6 +7,11 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 
 ### Added
 
+- `/planejamento-faculdade` skill: builds and updates the "Plano do Semestre AAAA/S" artifact (risk per course, today and
+  tomorrow, day-by-day study plan, course cards with a points bar, timeline, questions for instructors) from
+  Canvas plus the optional `gmail` and `whatsapp` plugins, read-only; persistent checklists with stable ids
+  (browser + artifact database); `scripts/plan.mjs` validates, builds and extracts the page; offers three daily
+  routines (ADR 0030).
 - `prepare_attachment_upload`: returns a one-time `curl` that uploads a local file (up to 25 MB) straight to
   Canvas, with no base64 in the call; `send_message` and `reply_message` take its `id` in `file_ids` (ADR 0028).
 - `file_ids` on `send_message` and `reply_message`: attach Canvas files by id; files outside "conversation

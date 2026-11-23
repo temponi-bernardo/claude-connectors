@@ -12,6 +12,9 @@ export default tseslint.config(
       'tools/**/fixtures/**',
       'connectors/*/src/fixtures/**',
       'connectors/*/server/**',
+      // Generated /planejamento-faculdade skill files (npm run build)
+      'connectors/*/plugin/skills/*/scripts/**',
+      'connectors/*/plugin/skills/*/assets/**',
     ],
   },
   js.configs.recommended,
@@ -35,6 +38,22 @@ export default tseslint.config(
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
     },
+  },
+  {
+    // The plan page runtime runs in the browser: its own TypeScript project with the DOM lib.
+    files: ['connectors/canvas-puc/src/plan/page/**/*.ts'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+        project: ['connectors/canvas-puc/src/plan/page/tsconfig.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+  {
+    // Functions passed to Playwright's page.evaluate run in the browser.
+    files: ['scripts/plan-e2e.mjs'],
+    languageOptions: { globals: { ...globals.node, ...globals.browser } },
   },
   {
     files: ['**/*.test.ts'],
