@@ -17,11 +17,15 @@ import {
   toModule,
   toModuleItem,
   toPlannerItem,
+  plannerItemType,
+  reviewStatus,
   toProfile,
   toRubricCriterion,
   toSubmissionDetail,
   toSubmissionFlags,
 } from './format.js';
+
+import { PLANNER_WITH_PEER_REVIEW } from './fixtures/peer-reviews.js';
 
 const BASE = 'https://c.test';
 
@@ -111,6 +115,47 @@ describe('toPlannerItem', () => {
       url: undefined,
     });
     expect(toPlannerItem({}, 'b')).toMatchObject({ title: undefined, points: undefined });
+  });
+});
+
+describe('plannerItemType', () => {
+  it('names a peer review peer_review and keeps every other planner type', () => {
+    expect(plannerItemType('assessment_request')).toBe('peer_review');
+    for (const type of [
+      'assignment',
+      'quiz',
+      'discussion_topic',
+      'calendar_event',
+      'planner_note',
+    ]) {
+      expect(plannerItemType(type)).toBe(type);
+    }
+    expect(plannerItemType(undefined)).toBeUndefined();
+  });
+});
+
+describe('reviewStatus', () => {
+  it('is completed only when Canvas says so', () => {
+    expect(reviewStatus('completed')).toBe('completed');
+    expect(reviewStatus('assigned')).toBe('pending');
+    expect(reviewStatus(null)).toBe('pending');
+  });
+});
+
+describe('toPlannerItem with a peer review', () => {
+  it('keeps the real planner peer review with type peer_review, status and link', () => {
+    const [review, assignment] = PLANNER_WITH_PEER_REVIEW.map((i) => toPlannerItem(i, BASE));
+    expect(review).toMatchObject({
+      type: 'peer_review',
+      title: 'Apresentação de Artigo Científico',
+      course_id: 501,
+      date: '2026-11-23T03:00:00Z',
+      status: 'pending',
+      submission: null,
+      url: `${BASE}/courses/501/assignments/7001/anonymous_submissions/aBcDe`,
+    });
+    expect(assignment).toMatchObject({ type: 'assignment', title: 'Prova 3' });
+    expect(assignment).not.toHaveProperty('status');
   });
 });
 

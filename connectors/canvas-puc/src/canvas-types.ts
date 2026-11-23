@@ -32,6 +32,8 @@ export interface CanvasSubmissionFlags {
 }
 
 export interface CanvasPlannerItem {
+  readonly context_type?: string;
+  /** `assignment`, `quiz`, `discussion_topic`, `calendar_event`, `planner_note`, `assessment_request` (peer review)... */
   readonly plannable_type?: string;
   readonly plannable_id?: Id;
   readonly plannable_date?: string;
@@ -39,9 +41,13 @@ export interface CanvasPlannerItem {
   readonly course_id?: Id;
   readonly html_url?: string;
   readonly plannable?: {
+    readonly id?: Id;
     readonly title?: string;
     readonly name?: string;
     readonly points_possible?: number | null;
+    readonly todo_date?: string;
+    /** On a peer review: `assigned` (pending) or `completed`. */
+    readonly workflow_state?: string;
   };
   readonly submissions?: CanvasSubmissionFlags | false;
 }
@@ -97,6 +103,8 @@ export interface CanvasAssignment {
   readonly submission_types?: readonly string[];
   readonly allowed_extensions?: readonly string[];
   readonly html_url?: string;
+  /** `true` when the assignment has peer reviews. */
+  readonly peer_reviews?: boolean;
   readonly rubric?: readonly CanvasRubricCriterion[];
   readonly submission?: CanvasSubmission;
 }
@@ -207,4 +215,44 @@ export interface CanvasConversation {
   readonly context_name?: string;
   readonly participants?: readonly CanvasConversationParticipant[];
   readonly messages?: readonly CanvasConversationMessage[];
+}
+
+/** A file attached to a submission, as the GraphQL API returns it. */
+export interface GqlAttachment {
+  readonly displayName?: string | null;
+  readonly url?: string | null;
+}
+
+/** The reviewed submission of a peer review (GraphQL `Submission`). */
+export interface GqlPeerSubmission {
+  readonly submissionType?: string | null;
+  readonly url?: string | null;
+  readonly submittedAt?: string | null;
+  readonly attachments?: readonly GqlAttachment[] | null;
+}
+
+/** A peer review assigned to the student (GraphQL `AssessmentRequest`); `user` is null when reviews are anonymous. */
+export interface GqlAssessmentRequest {
+  readonly _id: string;
+  readonly anonymousId?: string | null;
+  /** `assigned` (pending) or `completed`. */
+  readonly workflowState?: string | null;
+  readonly available?: boolean | null;
+  readonly user?: { readonly _id: string; readonly name?: string | null } | null;
+  readonly submission?: GqlPeerSubmission | null;
+}
+
+/** An assignment with the peer reviews the signed-in student must do (GraphQL `Assignment`). */
+export interface GqlPeerReviewAssignment {
+  readonly _id: string;
+  readonly name?: string | null;
+  readonly dueAt?: string | null;
+  readonly htmlUrl?: string | null;
+  readonly course?: { readonly _id: string; readonly name?: string | null } | null;
+  readonly peerReviews?: {
+    readonly enabled?: boolean | null;
+    readonly anonymousReviews?: boolean | null;
+    readonly dueAt?: string | null;
+  } | null;
+  readonly assessmentRequestsForCurrentUser?: readonly GqlAssessmentRequest[] | null;
 }

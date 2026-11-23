@@ -12,7 +12,24 @@ import {
   isoDaysFrom,
   matchModuleItems,
   participantNames,
+  plannerWindow,
 } from './helpers.js';
+
+describe('plannerWindow', () => {
+  it('starts at 00:00 of today in São Paulo and ends at the end of the last day', () => {
+    expect(plannerWindow(new Date('2026-11-23T14:30:00Z'), 7)).toEqual({
+      start_date: '2026-11-23T03:00:00.000Z',
+      end_date: '2026-12-01T03:00:00.000Z',
+    });
+  });
+
+  it('keeps an item due at 00:00 today inside the window late at night', () => {
+    // 23:50 on the 23rd in São Paulo (02:50Z on the 24th): the window still starts on the 23rd.
+    const window = plannerWindow(new Date('2026-11-24T02:50:00Z'), 1);
+    expect(window.start_date).toBe('2026-11-23T03:00:00.000Z');
+    expect(window.start_date <= '2026-11-23T03:00:00Z').toBe(true);
+  });
+});
 
 describe('isoDaysFrom and dateOnly', () => {
   it('adds and subtracts days and extracts the date', () => {

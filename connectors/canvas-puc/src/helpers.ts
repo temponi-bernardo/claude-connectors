@@ -1,6 +1,7 @@
 /**
  * Helpers of the Canvas tools: dates, filters and composite lookups.
  */
+import { startOfDayIn } from '../../../src/core/time.js';
 import type { CanvasClient } from './client.js';
 import type {
   CanvasCourse,
@@ -22,6 +23,15 @@ export const ASSIGNMENT_BUCKETS: Readonly<Record<string, string | undefined>> = 
 /** ISO date/time `days` days after (or before, if negative) `now`. */
 export function isoDaysFrom(now: Date, days: number): string {
   return new Date(now.getTime() + days * 86_400_000).toISOString();
+}
+
+/** Time zone of PUC Minas: the student's "today" starts at 00:00 here. */
+export const CANVAS_TIME_ZONE = 'America/Sao_Paulo';
+
+/** Planner window: from 00:00 of today in São Paulo to the end of the day `days` days later. */
+export function plannerWindow(now: Date, days: number): { start_date: string; end_date: string } {
+  const start = startOfDayIn(now, CANVAS_TIME_ZONE);
+  return { start_date: start.toISOString(), end_date: isoDaysFrom(start, days + 1) };
 }
 
 /** The `YYYY-MM-DD` part of an ISO date. */
