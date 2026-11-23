@@ -16,12 +16,19 @@ rest=()
 for ((i = 0; i < ${#args[@]} - 1; i++)); do
   case "${args[$i]}" in
     -f | --file) i=$((i + 1)); dockerfile="${args[$i]}" ;;
+    -f=* | --file=*) dockerfile="${args[$i]#*=}" ;;
     *) rest+=("${args[$i]}") ;;
   esac
 done
 
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
+# wrangler passes `-f -` and pipes the Dockerfile on stdin: keep it before anything else runs.
+if [ "$dockerfile" = "-" ]; then
+  cat >"$tmp.Dockerfile"
+  dockerfile="$tmp.Dockerfile"
+  trap 'rm -rf "$tmp" "$tmp.Dockerfile"' EXIT
+fi
 cp -a "$ctx/." "$tmp/"
 cp "$ca" "$tmp/ccr-proxy-ca.crt"
 if [ -f "$tmp/.dockerignore" ]; then printf '\n!ccr-proxy-ca.crt\n' >>"$tmp/.dockerignore"; fi
