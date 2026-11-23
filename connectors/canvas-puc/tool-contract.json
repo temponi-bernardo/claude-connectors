@@ -65,6 +65,10 @@
       "readOnly": true
     },
     {
+      "name": "list_peer_reviews",
+      "readOnly": true
+    },
+    {
       "name": "prepare_attachment_upload",
       "readOnly": false
     },

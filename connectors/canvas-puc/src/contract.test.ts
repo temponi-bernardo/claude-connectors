@@ -18,7 +18,7 @@ import { handleWorkerFetch } from './worker.js';
 import { memoryWriteAccessStore } from './write-access.js';
 
 /** Canvas API terms that look like tool names but are field values. */
-const CANVAS_API_TERMS = ['front_page', 'online_upload', 'allowed_extensions'];
+const CANVAS_API_TERMS = ['front_page', 'online_upload', 'allowed_extensions', 'peer_review'];
 
 const EXPECTED = readToolContract(contract);
 const ENV = {
