@@ -5,6 +5,8 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 
 ## Unreleased
 
+## [3.3.0](https://github.com/temponi-bernardo/claude-connectors/compare/canvas-puc-v3.2.0...canvas-puc-v3.3.0) (2026-11-23)
+
 ### Added
 
 - `list_peer_reviews`: peer reviews the student must do (pending and completed), with course, assignment, review

@@ -1,6 +1,6 @@
 {
-  ".": "0.2.0",
-  "connectors/canvas-puc": "3.2.0",
+  ".": "0.2.1",
+  "connectors/canvas-puc": "3.3.0",
   "connectors/gmail": "2.0.0",
   "connectors/whatsapp": "2.0.0"
 }
