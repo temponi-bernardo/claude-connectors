@@ -137,6 +137,18 @@ Offer the three routines in `references/routines.md`. Create them only after a "
 first and never duplicate a name (offer to update the existing ones instead). Each prompt is filled in from
 the template there and is fully self-contained.
 
+**Update mode: refresh outdated routines.** After publishing, call `list_triggers` and find this plan's
+routines by name (the table in `references/routines.md`). If the morning or night routine's prompt does not
+contain `changed_since`, it predates the cursor: offer once, in one line, to update it. On a "sim", replace only
+the `prompt` (`update_trigger` with `prompt` alone) with the current template, filled in from the plan.
+
+- **Never change the state.** A disabled routine stays disabled; never send `enabled`, never change the schedule
+  or the name. The student may keep only one routine on (e.g. only the night one) on purpose.
+- **Never create a missing routine in update mode.** A routine that is not there was declined or deleted.
+- Only a routine this skill creates (create mode, after a "sim") starts enabled.
+- If the host cannot update a prompt in place, say so and leave the routine as it is; never delete and
+  recreate it.
+
 ## 7. Answer
 
 Short, pt-BR: the artifact link; the 3 most urgent items of the next 48 h; each course at risk with the

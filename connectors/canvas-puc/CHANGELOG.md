@@ -14,6 +14,8 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 - `changed_since` on `list_assignments`, `list_announcements`, `list_discussions` and `list_conversations`: only
   what changed after the cursor, plus a `checked_at` note for the next call (ADR 0031). `/planejamento-faculdade`
   uses it in update mode, so refreshing the plan reads only the changes.
+- `/planejamento-faculdade` update mode offers to refresh morning and night routines created before the cursor.
+  It changes only their prompt: a disabled routine stays disabled and a deleted one is not recreated.
 
 ### Changed
 

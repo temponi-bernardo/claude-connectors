@@ -4,6 +4,11 @@ Offer them at the end of create mode (or after a new semester). Create them with
 (`create_trigger`) only after the student says yes. Call `list_triggers` first: never create a second routine
 with the same name — offer to update the existing one (new prompt, same schedule) instead.
 
+Updating an existing routine changes **only its prompt** (`update_trigger` with `prompt` alone): never its
+`enabled` state, schedule or name. A routine the student disabled stays disabled, and one they deleted is not
+recreated. Only routines created now by the skill start enabled. In update mode, the skill offers this for
+morning and night routines whose prompt lacks `changed_since` (SKILL.md, section 6).
+
 | Name                                      | Schedule (`cron_expression`)            |
 | ----------------------------------------- | --------------------------------------- |
 | Faculdade: Plano do semestre (manhã)      | `CRON_TZ=America/Sao_Paulo 59 6 * * *`  |
@@ -91,5 +96,6 @@ Tarefa: alerta de tarefas não enviadas (somente leitura; não republicar o arte
 ## New semester
 
 When `list_courses` shows a new term, `/planejamento-faculdade` builds a new plan (new `planKey` and artifact) and
-offers to update the three routines with the new artifact link, courses and groups (`update_trigger`, or
-delete and recreate when the host has no update), keeping the names and schedules.
+offers to update the existing routines with the new artifact link, courses and groups (`update_trigger` with
+`prompt` alone), keeping the names, schedules and `enabled` state. If the host cannot update a prompt in place,
+say so and leave the routine as it is: deleting and recreating would turn a disabled routine back on.
