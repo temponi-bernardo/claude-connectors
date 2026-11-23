@@ -27606,7 +27606,7 @@ var CANVAS_INBOX_WRITE_TOOLS = [
 // connectors/canvas-puc/plugin/.claude-plugin/plugin.json
 var plugin_default = {
   name: "canvas-puc",
-  version: "3.2.0",
+  version: "3.3.0",
   description: "Assignments, deadlines, grades, announcements, modules, files and inbox messages from PUC Minas Canvas, straight from the cloud: sign in with a Canvas access token the first time.",
   author: {
     name: "Bernardo Temponi",
