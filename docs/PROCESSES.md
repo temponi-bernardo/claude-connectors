@@ -495,7 +495,10 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      left-out items (`carryPreviousItems()`, `carryDays()`), `validatePlan()` checks the rules (`checkPointSums()`,
      `checkPlanDates()`, `checkPlanIds()`, `checkCourseRefs()`) and `injectPlan()` puts `serializePlanJson()` into
      the template from P05.
-  4. Claude publishes the page as a private artifact with the `db` and `user` capabilities.
+  4. Claude publishes the page as a private artifact with the `db` and `user` capabilities. In update mode, the
+     Canvas listings take `changed_since` = previous `generatedAt` − 24 h (P03 step 8), and the skill offers to
+     refresh morning and night routines whose prompt lacks `changed_since`: `update_trigger` with the prompt only,
+     never `enabled`, the schedule or the name, and never recreating a deleted routine.
   5. In the browser, `startPlanPage()` → `bootPlanPage()` reads `readEmbeddedPlan()`, renders with
      `renderPlanSections()` (header, risk chips, today, study, cards with `barSegments()` and `riskLevel()`,
      timeline, questions, footer) using only `createEl()`/`appendRichText()`, and wires the checklists:
