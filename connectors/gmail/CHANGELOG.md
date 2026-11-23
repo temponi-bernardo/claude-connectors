@@ -15,8 +15,8 @@ Plugin and remote server versions of the Gmail connector (ADR 0022). The reposit
 ### Changed
 
 - Tool descriptions, messages and pages are in English (#45).
-- `send_message` and the other gated tools stay listed; the tool contract is checked by tests and by the
-  post-deploy smoke test (#67).
+- Public `GET /tools` and a tool contract (`tool-contract.json`) checked by tests and by the post-deploy smoke
+  test (#67).
 
 ### Security
 
