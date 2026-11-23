@@ -35,3 +35,4 @@ that marks the old one as "Superseded by NNNN". Template in [0000-template.md](0
 | [0028](0028-canvas-attachments-by-reference.md)           | Canvas message attachments by reference and direct upload         | Accepted                            | 2026-11-19 |
 | [0029](0029-lean-claude-code-layer.md)                    | Lean Claude Code layer: checks once per PR, no hidden model calls | Accepted                            | 2026-11-19 |
 | [0030](0030-semester-plan-skill-with-generated-script.md) | Semester plan skill renders a fixed template from validated JSON  | Accepted                            | 2026-11-23 |
+| [0031](0031-canvas-graphql-read-only-peer-reviews.md)     | Read-only Canvas GraphQL for the student's peer reviews           | Accepted                            | 2026-11-23 |

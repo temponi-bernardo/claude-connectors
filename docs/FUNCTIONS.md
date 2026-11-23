@@ -13,7 +13,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - `connectors/canvas-puc/src/attachment-refs.ts`: [`attachmentCountRefusal`](#attachmentcountrefusal), [`conversationFolderId`](#conversationfolderid), [`fetchAttachmentFile`](#fetchattachmentfile), [`needsConversationCopy`](#needsconversationcopy), [`copyToConversationFolder`](#copytoconversationfolder), [`resolveFileAttachments`](#resolvefileattachments), [`collectMessageAttachments`](#collectmessageattachments), [`shellQuote`](#shellquote), [`curlUploadCommand`](#curluploadcommand), [`prepareAttachmentUpload`](#prepareattachmentupload)
 - `connectors/canvas-puc/src/chunks.ts`: [`planDownloadChunk`](#plandownloadchunk), [`chunkDescription`](#chunkdescription), [`chunkMimeType`](#chunkmimetype), [`chunkUri`](#chunkuri), [`rangeHeaders`](#rangeheaders), [`isRangeAnswer`](#israngeanswer)
-- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`canvasApiError`](#canvasapierror), [`canvasErrorStatus`](#canvaserrorstatus), [`isPermissionDenial`](#ispermissiondenial), [`networkFailure`](#networkfailure), [`requestCanvas`](#requestcanvas), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`uploadForm`](#uploadform), [`postUploadForm`](#postuploadform), [`confirmUpload`](#confirmupload), [`isReadOnlyGraphql`](#isreadonlygraphql), [`graphqlData`](#graphqldata), [`queryCanvasGraphql`](#querycanvasgraphql), [`createCanvasClient`](#createcanvasclient)
+- `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`canvasApiError`](#canvasapierror), [`canvasErrorStatus`](#canvaserrorstatus), [`isPermissionDenial`](#ispermissiondenial), [`networkFailure`](#networkfailure), [`requestCanvas`](#requestcanvas), [`readCanvasJson`](#readcanvasjson), [`requestCanvasJson`](#requestcanvasjson), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`uploadForm`](#uploadform), [`postUploadForm`](#postuploadform), [`confirmUpload`](#confirmupload), [`isReadOnlyGraphql`](#isreadonlygraphql), [`graphqlData`](#graphqldata), [`queryCanvasGraphql`](#querycanvasgraphql), [`createCanvasClient`](#createcanvasclient)
 - `connectors/canvas-puc/src/file-ref.ts`: [`fileRefFromUrl`](#filereffromurl), [`fileRefFromArgs`](#filereffromargs), [`fileLookupPlan`](#filelookupplan), [`fileAccessReason`](#fileaccessreason), [`fileAccessError`](#fileaccesserror), [`resolveCanvasFile`](#resolvecanvasfile)
 - `connectors/canvas-puc/src/files.ts`: [`tooLargeMessage`](#toolargemessage), [`downloadRefusal`](#downloadrefusal), [`planCanvasDownload`](#plancanvasdownload), [`openCanvasChunk`](#opencanvaschunk), [`streamCanvasFile`](#streamcanvasfile), [`chunkToolResult`](#chunktoolresult), [`downloadCanvasFile`](#downloadcanvasfile), [`readCanvasFileText`](#readcanvasfiletext)
 - `connectors/canvas-puc/src/format.ts`: [`shortText`](#shorttext), [`rawHtmlField`](#rawhtmlfield), [`linksField`](#linksfield), [`toProfile`](#toprofile), [`toCourse`](#tocourse), [`toSubmissionFlags`](#tosubmissionflags), [`plannerItemType`](#planneritemtype), [`reviewStatus`](#reviewstatus), [`toPlannerItem`](#toplanneritem), [`toAssignmentSummary`](#toassignmentsummary), [`toRubricCriterion`](#torubriccriterion), [`toFileInfo`](#tofileinfo), [`toSubmissionDetail`](#tosubmissiondetail), [`toAssignmentDetail`](#toassignmentdetail), [`toGradeRow`](#tograderow), [`toEnrollmentGrade`](#toenrollmentgrade), [`toAnnouncement`](#toannouncement), [`toModuleItem`](#tomoduleitem), [`toModule`](#tomodule), [`toDiscussionSummary`](#todiscussionsummary), [`flattenDiscussion`](#flattendiscussion), [`toCalendarEvent`](#tocalendarevent)
@@ -79,6 +79,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`waitForSync`](#waitforsync), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppCatalogServer`](#createwhatsappcatalogserver), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
 - `connectors/whatsapp/src/worker-env.ts`: [`bridgeStub`](#bridgestub), [`bridgeFetchFor`](#bridgefetchfor)
 - `connectors/whatsapp/src/worker.ts`: [`unixNow`](#unixnow), [`githubSettingsFrom`](#githubsettingsfrom), [`whatsappRemoteConnector`](#whatsappremoteconnector), [`createWhatsAppApps`](#createwhatsappapps), [`handleWhatsAppFetch`](#handlewhatsappfetch), [`isSyncCronEnabled`](#issynccronenabled), [`runScheduledSync`](#runscheduledsync)
+- `src/core/async.ts`: [`drainQueue`](#drainqueue), [`mapWithLimit`](#mapwithlimit)
 - `src/core/bytes.ts`: [`byteView`](#byteview), [`concatBytes`](#concatbytes), [`utf16leToString`](#utf16letostring), [`bytesToBase64`](#bytestobase64)
 - `src/core/cfb.ts`: [`isCfb`](#iscfb), [`readCfbHeader`](#readcfbheader), [`cfbSector`](#cfbsector), [`sectorWords`](#sectorwords), [`fatSectorIds`](#fatsectorids), [`followChain`](#followchain), [`readRegularChain`](#readregularchain), [`parseDirectory`](#parsedirectory), [`openCfb`](#opencfb), [`readMiniStream`](#readministream), [`readCfbStream`](#readcfbstream)
 - `src/core/env.ts`: [`envValue`](#envvalue), [`parseFlag`](#parseflag), [`toEnvVars`](#toenvvars)
@@ -87,7 +88,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `src/core/pdf.ts`: [`bytesToLatin1`](#bytestolatin1), [`isPdf`](#ispdf), [`streamDataStart`](#streamdatastart), [`trimStreamEol`](#trimstreameol), [`readRawObject`](#readrawobject), [`listRawObjects`](#listrawobjects), [`decodePdfStream`](#decodepdfstream), [`splitObjectStream`](#splitobjectstream), [`storePdfObject`](#storepdfobject), [`readPdfObjects`](#readpdfobjects), [`pdfRefs`](#pdfrefs), [`dictRefs`](#dictrefs), [`collectPdfPages`](#collectpdfpages), [`orderedPages`](#orderedpages), [`utf16beHexToString`](#utf16behextostring), [`readBfChars`](#readbfchars), [`readBfRanges`](#readbfranges), [`rangeTarget`](#rangetarget), [`parseToUnicodeCMap`](#parsetounicodecmap), [`addFontRefs`](#addfontrefs), [`fontResourceRefs`](#fontresourcerefs), [`fontCMaps`](#fontcmaps), [`decodePdfText`](#decodepdftext), [`readLiteralString`](#readliteralstring), [`readEscape`](#readescape), [`readHexString`](#readhexstring), [`skipPdfSpace`](#skippdfspace), [`nextPdfToken`](#nextpdftoken), [`readPdfWord`](#readpdfword), [`wrapString`](#wrapstring), [`classifyWord`](#classifyword), [`showArrayText`](#showarraytext), [`lastOperandText`](#lastoperandtext), [`moveText`](#movetext), [`applyTextOperator`](#applytextoperator), [`feedPdfToken`](#feedpdftoken), [`contentStreamText`](#contentstreamtext), [`tidyPdfText`](#tidypdftext), [`pdfToText`](#pdftotext)
 - `src/core/redact.ts`: [`redactSecrets`](#redactsecrets), [`redactForLog`](#redactforlog), [`errorMessage`](#errormessage), [`logWarning`](#logwarning)
 - `src/core/stream.ts`: [`splitBase64Ready`](#splitbase64ready), [`base64EncodeStream`](#base64encodestream), [`byteLimitStream`](#bytelimitstream), [`byteRangeStream`](#byterangestream), [`framedStream`](#framedstream), [`readLimitedBytes`](#readlimitedbytes)
-- `src/core/time.ts`: [`zoneOffsetMinutes`](#zoneoffsetminutes), [`startOfDayIn`](#startofdayin)
+- `src/core/time.ts`: [`parseOffsetLabel`](#parseoffsetlabel), [`zoneOffsetMinutes`](#zoneoffsetminutes), [`startOfDayIn`](#startofdayin)
 - `src/core/word.ts`: [`docxXmlToText`](#docxxmltotext), [`docxToText`](#docxtotext), [`cp1252ToString`](#cp1252tostring), [`parsePieceTable`](#parsepiecetable), [`pieceText`](#piecetext), [`cleanWordText`](#cleanwordtext), [`docToText`](#doctotext), [`wordKind`](#wordkind), [`wordToText`](#wordtotext)
 - `src/core/zip.ts`: [`findEndOfCentralDirectory`](#findendofcentraldirectory), [`listZipEntries`](#listzipentries), [`zipEntryBytes`](#zipentrybytes), [`decompressBytes`](#decompressbytes), [`inflateRaw`](#inflateraw), [`readZipEntry`](#readzipentry)
 - `src/mcp/annotations.ts`: [`toolAnnotations`](#toolannotations)
@@ -1404,7 +1405,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/client.ts`
 - **Signature:** `async requestCanvas(deps: ClientDeps, req: CanvasRequest): Promise<Response>`
-- **Used by:** `collectPages()`, `confirmUpload()`, `createCanvasClient()`, `queryCanvasGraphql()`
+- **Used by:** `collectPages()`, `requestCanvasJson()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
@@ -1523,7 +1524,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/canvas-puc/src/client.ts`
 - **Signature:** `networkFailure(error: unknown, req: CanvasRequest): unknown`
-- **Used by:** `requestCanvas()`
+- **Used by:** `readCanvasJson()`, `requestCanvas()`
 - **Processes:** P03, P08, P09
 
 <!-- generated:end -->
@@ -1584,6 +1585,40 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** The `data` of the answer.
 - **Effects:** Network: one POST to Canvas GraphQL (a read).
 - **Errors:** Error (without calling Canvas) for a mutation or subscription; `CanvasApiError` from `requestCanvas()` or `graphqlData()`.
+
+### `readCanvasJson`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/client.ts`
+- **Signature:** `async readCanvasJson(res: Response, req: CanvasRequest): Promise<T>`
+- **Used by:** `collectPages()`, `requestCanvasJson()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Reads the JSON body of a Canvas answer under the call's timeout.
+- **Input:** `res`: answer; `req`: the request (for the message).
+- **Output:** The parsed body.
+- **Effects:** Reads the body stream.
+- **Errors:** A timeout while reading becomes the 504 of `networkFailure()`; invalid JSON throws `SyntaxError`.
+
+### `requestCanvasJson`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/client.ts`
+- **Signature:** `async requestCanvasJson(deps: ClientDeps, req: CanvasRequest): Promise<T>`
+- **Used by:** `confirmUpload()`, `createCanvasClient()`, `queryCanvasGraphql()`
+- **Processes:** P03, P08, P09
+
+<!-- generated:end -->
+
+- **Does:** Sends a request with `requestCanvas()` and reads its JSON body with `readCanvasJson()`.
+- **Input:** `deps`: client dependencies; `req`: request.
+- **Output:** The parsed body.
+- **Effects:** Network: one Canvas call.
+- **Errors:** Same as `requestCanvas()` and `readCanvasJson()`.
 
 ## `connectors/canvas-puc/src/format.ts`
 
@@ -15155,7 +15190,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 <!-- generated:end -->
 
-- **Does:** Clear message for a status Canvas uses to refuse (401/403: route not available for a student account) or hide (404) a resource.
+- **Does:** Clear message for a status Canvas uses to refuse (401/403: the route may be closed to students, or the course unpublished or restricted) or hide (404) a resource.
 - **Input:** `status`: HTTP status; `target`: what was asked ("course 1").
 - **Output:** Message, or `null` for any other status.
 - **Effects:** None (pure).
@@ -15316,6 +15351,59 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** `RangeError` for an unknown time zone.
 
+### `parseOffsetLabel`
+
+<!-- generated:start -->
+
+- **File:** `src/core/time.ts`
+- **Signature:** `parseOffsetLabel(label: string | undefined): number`
+- **Used by:** `zoneOffsetMinutes()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Reads the minutes of an `Intl` `longOffset` label, refusing anything unexpected instead of guessing UTC.
+- **Input:** `label`: `GMT`, `GMT-03:00`, `GMT+05:30`...
+- **Output:** Minutes from UTC.
+- **Effects:** None (pure).
+- **Errors:** `RangeError` for any other label.
+
+## `src/core/async.ts`
+
+### `drainQueue`
+
+<!-- generated:start -->
+
+- **File:** `src/core/async.ts`
+- **Signature:** `async drainQueue(queue: WorkQueue<T, R>, fn: (item: T) => Promise<R>): Promise<void>`
+- **Used by:** `mapWithLimit()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** One worker of `mapWithLimit()`: takes the next item from the shared queue until none is left, storing each result at its index.
+- **Input:** `queue`: items, results and next index; `fn`: async work.
+- **Output:** Nothing; fills `queue.results`.
+- **Effects:** Mutates `queue`; whatever `fn` does.
+- **Errors:** Rejects with the first error of `fn`.
+
+### `mapWithLimit`
+
+<!-- generated:start -->
+
+- **File:** `src/core/async.ts`
+- **Signature:** `async mapWithLimit(items: readonly T[], limit: number, fn: (item: T) => Promise<R>): Promise<R[]>`
+- **Used by:** `listCoursePeerReviews()`, `sweepPeerReviews()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Maps a list with an async function running at most `limit` calls at once (results in input order).
+- **Input:** `items`: list; `limit`: max calls at once (at least 1); `fn`: async work.
+- **Output:** Results in input order.
+- **Effects:** Whatever `fn` does.
+- **Errors:** Rejects with the first error of `fn`.
+
 ## Data and constants
 
 | Name                              | File                                                    | What it is                                                                                                                                                                                   |
@@ -15362,6 +15450,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `PLANNER_TYPE_NAMES`              | `connectors/canvas-puc/src/format.ts`                   | Planner types renamed for the model (`assessment_request` → `peer_review`).                                                                                                                  |
 | `CANVAS_TIME_ZONE`                | `connectors/canvas-puc/src/helpers.ts`                  | Time zone of PUC Minas (`America/Sao_Paulo`): the planner window starts at 00:00 here.                                                                                                       |
 | `PEER_REVIEWS_QUERY`              | `connectors/canvas-puc/src/peer-reviews.ts`             | GraphQL query of an assignment with `assessmentRequestsForCurrentUser` (peer reviews the student must do).                                                                                   |
+| `PEER_REVIEW_CONCURRENCY`         | `connectors/canvas-puc/src/peer-reviews.ts`             | Canvas calls running at once per level of the peer-review sweep (courses, then assignments).                                                                                                 |
 | `canvasIdSchema`                  | `connectors/canvas-puc/src/peer-reviews.ts`             | Zod schema of a numeric Canvas id (string of digits or positive integer).                                                                                                                    |
 | `CONVERSATION_PREVIEW_LENGTH`     | `connectors/canvas-puc/src/inbox.ts`                    | Maximum length of the last-message preview in `list_conversations`.                                                                                                                          |
 | `MAX_MESSAGE_RECIPIENTS`          | `connectors/canvas-puc/src/tools-inbox.ts`              | Maximum recipients of one `send_message` (user IDs only).                                                                                                                                    |

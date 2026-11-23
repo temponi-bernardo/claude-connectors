@@ -46,16 +46,16 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
   2. The call goes through `runToolSafely()`; the `ToolSpec` created by `defineTool()` validates the arguments.
   3. The tool uses the client: `requestCanvas()` sends the request with `sendCanvasRequest()`
      (`buildUrl()` + `Authorization: Bearer`, cut at `CANVAS_TIMEOUT_MS`; `networkFailure()` turns a timeout into a
-     504); listings follow the pages with `collectPages()` and `parseNextLink()`. The client's `query` posts
+     504, also while reading the body with `readCanvasJson()` / `requestCanvasJson()`); listings follow the pages with `collectPages()` and `parseNextLink()`. The client's `query` posts
      read-only GraphQL with `queryCanvasGraphql()` (`isReadOnlyGraphql()` refuses mutations before any call;
      `graphqlData()` turns GraphQL errors into exceptions). Helpers such as `activeCourses()`,
      `fetchOwnSubmission()` and `getAllOrEmpty()` compose lookups.
      `upcoming_assignments` asks the planner for `plannerWindow()`: from 00:00 of today in São Paulo
-     (`startOfDayIn()` over `zoneOffsetMinutes()`), so items due earlier today stay in; every planner type is kept
+     (`startOfDayIn()` over `zoneOffsetMinutes()` and `parseOffsetLabel()`), so items due earlier today stay in; every planner type is kept
      and `plannerItemType()` names `assessment_request` `peer_review`, with `reviewStatus()`.
      `list_peer_reviews` runs `listPeerReviews()` (ids validated by `canvasIdSchema`): one assignment with
      `assignmentPeerReviews()`, one course with `listCoursePeerReviews()` or every active course with
-     `sweepPeerReviews()`. A course lists its assignments with `peerReviewAssignmentIds()` (paginated) and reads
+     `sweepPeerReviews()`, at most `PEER_REVIEW_CONCURRENCY` calls at once (`mapWithLimit()`, `drainQueue()`). A course lists its assignments with `peerReviewAssignmentIds()` (paginated) and reads
      each peer-review assignment with `fetchPeerReviewAssignment()` (GraphQL `assessmentRequestsForCurrentUser`,
      the only route that lists a student's reviews to do). `peerReviewsOf()` → `toPeerReview()`
      (`peerReviewAssignmentFields()`, `orNull()`, `revieweeName()`, `peerSubmissionView()`, `reviewPageUrl()` with
