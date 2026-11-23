@@ -18449,7 +18449,7 @@ function defineTool(def) {
   };
 }
 function textResult(data, notes = []) {
-  const text = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+  const text = typeof data === "string" ? data : JSON.stringify(data);
   return { content: [text, ...notes].map((t) => ({ type: "text", text: t })) };
 }
 var RAW_RESULT = /* @__PURE__ */ Symbol("rawToolResult");
@@ -22068,6 +22068,41 @@ function toolAnnotations(title, hints) {
   return { title, ...hints };
 }
 
+// connectors/canvas-puc/src/changes.ts
+var changedSinceArg = external_exports.string().datetime({ offset: true }).optional().describe(
+  "Only return items created or changed at or after this ISO time (the cursor a previous call returned); omit for everything"
+);
+function latestStamp(stamps) {
+  const times = stamps.map((s) => s ? Date.parse(s) : NaN).filter((t) => !Number.isNaN(t));
+  return times.length > 0 ? Math.max(...times) : NaN;
+}
+function keepChanged(items, since, stampsOf) {
+  if (since === void 0) return items;
+  const cursor = Date.parse(since);
+  return items.filter((item) => {
+    const latest = latestStamp(stampsOf(item));
+    return Number.isNaN(latest) || latest >= cursor;
+  });
+}
+function assignmentStamps(a) {
+  return [a.updated_at, a.submission?.submitted_at, a.submission?.graded_at];
+}
+function announcementStamps(a) {
+  return [a.posted_at];
+}
+function topicStamps(t) {
+  return [t.posted_at, t.last_reply_at];
+}
+function conversationStamps(c) {
+  return [c.last_message_at];
+}
+function checkedAtNote(now) {
+  return `checked_at=${now.toISOString()} (pass it as changed_since next time to get only what changed)`;
+}
+function withCheckedAt(data, now) {
+  return rawToolResult(textResult(data, [checkedAtNote(now)]));
+}
+
 // connectors/canvas-puc/src/format.ts
 var MAX_TEXT_LENGTH = 3e3;
 function shortText(html) {
@@ -22425,13 +22460,15 @@ var CANVAS_READ_TOOLS = [
   }),
   defineTool({
     name: "list_assignments",
-    description: "List the assignments of a course with due date, submission status and score.",
+    description: "List the assignments of a course with due date, submission status and score. With changed_since, only those edited, submitted or graded since then.",
     shape: {
       course_id: courseId,
-      filter: external_exports.enum(["all", "upcoming", "past", "unsubmitted", "overdue"]).optional()
+      filter: external_exports.enum(["all", "upcoming", "past", "unsubmitted", "overdue"]).optional(),
+      changed_since: changedSinceArg
     },
     annotations: toolAnnotations("List assignments", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
+    run: async ({ client, now }, args) => {
+      const checkedAt = now();
       const params = {
         include: ["submission"],
         order_by: "due_at",
@@ -22441,7 +22478,8 @@ var CANVAS_READ_TOOLS = [
         `/courses/${String(args.course_id)}/assignments`,
         params
       );
-      return list.map(toAssignmentSummary);
+      const changed = keepChanged(list, args.changed_since, assignmentStamps);
+      return withCheckedAt(changed.map(toAssignmentSummary), checkedAt);
     }
   }),
   defineTool({
@@ -22485,25 +22523,30 @@ var CANVAS_READ_TOOLS = [
   }),
   defineTool({
     name: "list_announcements",
-    description: "Recent announcements of one course or of every active course.",
+    description: "Recent announcements of one course or of every active course. With changed_since, only those posted since then.",
     shape: {
       course_id: courseId.optional().describe("When omitted, searches every active course"),
       days: external_exports.number().int().min(1).max(365).optional().describe("Days back (default 30)"),
-      raw_html: rawHtml
+      raw_html: rawHtml,
+      changed_since: changedSinceArg
     },
     annotations: toolAnnotations("List announcements", READ_ONLY_HINTS),
     run: async ({ client, now }, args) => {
+      const checkedAt = now();
       const ids = args.course_id !== void 0 ? [args.course_id] : (await activeCourses(client)).map((c) => c.id);
-      if (ids.length === 0) return [];
+      if (ids.length === 0) return withCheckedAt([], checkedAt);
       const params = {
         context_codes: courseContextCodes(ids),
-        start_date: isoDaysFrom(now(), -(args.days ?? 30)),
-        end_date: now().toISOString()
+        start_date: isoDaysFrom(checkedAt, -(args.days ?? 30)),
+        end_date: checkedAt.toISOString()
       };
-      return (await client.getAll("/announcements", params)).map((a) => ({
+      const list = await client.getAll("/announcements", params);
+      const changed = keepChanged(list, args.changed_since, announcementStamps);
+      const views = changed.map((a) => ({
         ...toAnnouncement(a, client.baseUrl),
         ...rawHtmlField("message_html", a.message, args.raw_html === true)
       }));
+      return withCheckedAt(views, checkedAt);
     }
   }),
   defineTool({
@@ -22580,12 +22623,15 @@ var CANVAS_READ_TOOLS = [
   }),
   defineTool({
     name: "list_discussions",
-    description: "List the discussion forums of a course.",
-    shape: { course_id: courseId },
+    description: "List the discussion forums of a course. With changed_since, only those posted or replied to since then.",
+    shape: { course_id: courseId, changed_since: changedSinceArg },
     annotations: toolAnnotations("List discussions", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
+    run: async ({ client, now }, args) => {
+      const checkedAt = now();
       const path = `/courses/${String(args.course_id)}/discussion_topics`;
-      return (await client.getAll(path)).map(toDiscussionSummary);
+      const list = await client.getAll(path);
+      const changed = keepChanged(list, args.changed_since, topicStamps);
+      return withCheckedAt(changed.map(toDiscussionSummary), checkedAt);
     }
   }),
   defineTool({
@@ -27188,20 +27234,23 @@ var CANVAS_INBOX_READ_TOOLS = [
   }),
   defineTool({
     name: "list_conversations",
-    description: "List the Canvas inbox conversations (messages), newest first.",
+    description: "List the Canvas inbox conversations (messages), newest first. With changed_since, only those with a message since then.",
     shape: {
       scope: external_exports.enum(["inbox", "unread", "starred", "sent", "archived"]).optional(),
-      limit: external_exports.number().int().min(1).max(100).optional().describe("Default 20")
+      limit: external_exports.number().int().min(1).max(100).optional().describe("Default 20"),
+      changed_since: changedSinceArg
     },
     annotations: toolAnnotations("List conversations", READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
+    run: async ({ client, now }, args) => {
+      const checkedAt = now();
       const params = { scope: args.scope ?? "inbox" };
       const list = await client.getAll(
         "/conversations",
         params,
         args.limit ?? 20
       );
-      return list.map(toConversationSummary);
+      const changed = keepChanged(list, args.changed_since, conversationStamps);
+      return withCheckedAt(changed.map(toConversationSummary), checkedAt);
     }
   }),
   defineTool({
