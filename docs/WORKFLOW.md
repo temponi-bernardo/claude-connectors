@@ -126,6 +126,11 @@ get. The flow belongs to the `/release` skill:
    drafts for the plugins in the release PR.
 5. Publish the draft whenever you want. There is no attachment: the plugin points to the remote server (ADR 0013).
 
+A package whose manifest version has no GitHub release yet (e.g. bumped by hand) has no baseline: release-please
+then reads the whole history and can propose a wrong major. Dry-run first (`release-pr --dry-run`); if a version
+is wrong, pin it with `release-as` on that package in `release-please-config.json` for that one release, and
+remove the pin in the post-release PR (otherwise every later release PR proposes the same version again).
+
 The **remote connector** (ADR 0010) does not depend on a release: after a merge that touches the connector, run
 `npm run worker:deploy` on `main` (needs `CLOUDFLARE_API_TOKEN`). To test first, `npm run worker:dev`. The
 **remote Gmail** (ADR 0014) follows the same path with `npm run gmail:deploy` / `npm run gmail:dev`; the first
