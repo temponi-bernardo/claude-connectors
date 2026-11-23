@@ -55,6 +55,13 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
       'After a deploy run `npm run smoke -- canvas-puc`: it prints "✔ smoke canvas-puc"; edit tool-contract.json and it exits 1 listing the difference.',
   },
   {
+    name: 'runPrCheckCli',
+    reason:
+      'pr:check CLI entry point: reads argv and the working directory and prints the decision of the tested touchesWhatsAppImage/listChangedFiles.',
+    manualTest:
+      'Run `npx tsx tools/pr-check/cli.ts whatsapp-image`: it prints "skip"; append a line to connectors/whatsapp/bridge/go.mod and it prints "build".',
+  },
+  {
     name: 'runPlanCli',
     reason:
       'Entry point of the /planejamento-faculdade script: wires the real file system into runPlanCommand (tested with an in-memory PlanIo).',

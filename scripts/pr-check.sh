@@ -2,7 +2,11 @@
 # Local PR gate: replaces GitHub Actions CI, which is disabled in this repository
 # (ADR 0006 — no Actions cost). Runs what the CI jobs used to run:
 #   1. npm run check (format, lint, types, tests with coverage, docs, duplication, gitleaks)
-#   2. npm run bridge:test (WhatsApp Go bridge: gofmt, vet, tests) and npm run whatsapp:build (Worker bundle)
+#   2. npm run bridge:test (WhatsApp Go bridge: gofmt, vet, tests) and npm run whatsapp:build (Worker bundle,
+#      without Docker); npm run whatsapp:image (container image, needs Docker) only when the diff since the
+#      merge-base with origin/main, or an uncommitted file, touches the image inputs
+#      (tools/pr-check/whatsapp-image.ts). Docker builds go through scripts/docker-proxy-ca.sh, a pass-through
+#      outside cloud sessions.
 #   3. npm run build (each connector's plugin points to a remote server and the bundle compiles) and
 #      checks that the versioned bundle (server/remote.js) is committed and current
 #   4. claude plugin validate --strict on the marketplace and on each connector plugin (ADR 0022)
@@ -22,6 +26,19 @@ echo "→ WhatsApp Go bridge"
 npm run -s bridge:test
 echo "→ WhatsApp Worker bundle"
 npm run -s whatsapp:build >/dev/null
+if [ "$(npx --no-install tsx tools/pr-check/cli.ts whatsapp-image)" = "build" ]; then
+  echo "→ WhatsApp container image (the diff touches its sources)"
+  if ! docker info >/dev/null 2>&1; then
+    echo "[pr:check] the diff changes the WhatsApp container image (Dockerfile, bridge/, NOTICE.md," >&2
+    echo "  .dockerignore, wrangler.toml or scripts/docker-proxy-ca.sh), so pr:check must build it, but Docker is" >&2
+    echo "  not available (docker info failed). Start Docker (Docker Desktop, or sudo systemctl start docker);" >&2
+    echo "  in a cloud session start dockerd in the background. Then run pr:check again." >&2
+    exit 1
+  fi
+  WRANGLER_DOCKER_BIN="${WRANGLER_DOCKER_BIN:-$PWD/scripts/docker-proxy-ca.sh}" npm run -s whatsapp:image >/dev/null
+else
+  echo "→ WhatsApp container image: skipped, the diff does not touch its sources (Dockerfile, bridge/, NOTICE.md, .dockerignore, wrangler.toml)"
+fi
 echo "→ connector build"
 npm run -s build
 if ! git diff --quiet -- connectors || [ -n "$(git ls-files --others --exclude-standard connectors)" ]; then
