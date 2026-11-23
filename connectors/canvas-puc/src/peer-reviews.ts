@@ -6,6 +6,7 @@
  * student must do, pending and completed, with the reviewed submission (checked on a real student account).
  */
 import { z } from 'zod';
+import { mapWithLimit } from '../../../src/core/async.js';
 import { errorMessage } from '../../../src/core/redact.js';
 import {
   canvasApiError,
@@ -36,6 +37,9 @@ export const PEER_REVIEWS_QUERY = `query PeerReviews($id: ID!) {
     }
   }
 }`;
+
+/** Canvas calls running at once per level of the sweep (courses, then assignments): spares rate limits. */
+export const PEER_REVIEW_CONCURRENCY = 3;
 
 /** A Canvas id: digits only (string or positive integer), so it cannot change the path it goes into. */
 export const canvasIdSchema = z.union([
@@ -168,7 +172,7 @@ export function sortPeerReviews<T extends View>(reviews: readonly T[]): T[] {
 /** Clear message for a status Canvas uses to refuse or hide a resource; `null` for any other status. */
 export function peerReviewDenial(status: number | null, target: string): string | null {
   if (status === 401 || status === 403) {
-    return `Canvas refused to show the peer reviews of ${target} (HTTP ${status}): this route is not available for a student account.`;
+    return `Canvas refused access to the peer reviews of ${target} (HTTP ${status}): the route may be closed to student accounts, or the course may be unpublished or restricted.`;
   }
   if (status === 404) {
     return `${target} was not found or is not visible to you (HTTP 404): check course_id and assignment_id with list_courses and list_assignments.`;
@@ -209,7 +213,9 @@ export async function peerReviewAssignmentIds(client: CanvasClient, courseId: Id
 export async function listCoursePeerReviews(client: CanvasClient, courseId: Id): Promise<View[]> {
   try {
     const ids = await peerReviewAssignmentIds(client, courseId);
-    const assignments = await Promise.all(ids.map((id) => fetchPeerReviewAssignment(client, id)));
+    const assignments = await mapWithLimit(ids, PEER_REVIEW_CONCURRENCY, (id) =>
+      fetchPeerReviewAssignment(client, id),
+    );
     return assignments.flatMap((a) => peerReviewsOf(a, client.baseUrl));
   } catch (error) {
     throw explainPeerReviewError(error, `course ${String(courseId)}`);
@@ -234,14 +240,12 @@ export async function assignmentPeerReviews(
 export async function sweepPeerReviews(client: CanvasClient): Promise<PeerReviewList> {
   const courses = await activeCourses(client);
   const unavailable: { course_id: Id; reason: string }[] = [];
-  const lists = await Promise.all(
-    courses.map((c) =>
-      listCoursePeerReviews(client, c.id).catch((error: unknown) => {
-        if ((error as Partial<CanvasApiError>).tokenRejected) throw error;
-        unavailable.push({ course_id: c.id, reason: errorMessage(error) });
-        return [];
-      }),
-    ),
+  const lists = await mapWithLimit(courses, PEER_REVIEW_CONCURRENCY, (c) =>
+    listCoursePeerReviews(client, c.id).catch((error: unknown) => {
+      if ((error as Partial<CanvasApiError>).tokenRejected) throw error;
+      unavailable.push({ course_id: c.id, reason: errorMessage(error) });
+      return [];
+    }),
   );
   const peer_reviews = sortPeerReviews(lists.flat());
   return unavailable.length > 0 ? { peer_reviews, unavailable } : { peer_reviews };

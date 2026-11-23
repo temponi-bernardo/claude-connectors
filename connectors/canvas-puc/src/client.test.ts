@@ -13,6 +13,8 @@ import {
   fetchPlainText,
   graphqlData,
   networkFailure,
+  readCanvasJson,
+  requestCanvasJson,
   isReadOnlyGraphql,
   queryCanvasGraphql,
   requestCanvas,
@@ -332,6 +334,23 @@ describe('networkFailure', () => {
     const other = new TypeError('fetch failed');
     expect(networkFailure(other, req)).toBe(other);
     expect(networkFailure(null, req)).toBeNull();
+  });
+});
+
+describe('readCanvasJson and requestCanvasJson', () => {
+  const req = { method: 'GET', path: '/slow' } as const;
+
+  it('reads the JSON body of an answer', async () => {
+    await expect(readCanvasJson(json({ a: 1 }), req)).resolves.toEqual({ a: 1 });
+    await expect(requestCanvasJson(deps(fakeFetch(json([2]))), req)).resolves.toEqual([2]);
+  });
+
+  it('turns a timeout while reading the body into the clear 504', async () => {
+    const timeout = Object.assign(new Error('aborted'), { name: 'TimeoutError' });
+    const stuck = { json: () => Promise.reject(timeout) } as unknown as Response;
+    const error: unknown = await readCanvasJson(stuck, req).catch((e: unknown) => e);
+    expect(canvasErrorStatus(error)).toBe(504);
+    await expect(readCanvasJson(new Response('not json'), req)).rejects.toThrow(SyntaxError);
   });
 });
 

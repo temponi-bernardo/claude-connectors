@@ -17,6 +17,7 @@ import {
   listCoursePeerReviews,
   listPeerReviews,
   PEER_REVIEWS_QUERY,
+  PEER_REVIEW_CONCURRENCY,
   peerReviewAssignmentIds,
   peerReviewDenial,
   peerReviewsOf,
@@ -51,6 +52,13 @@ describe('PEER_REVIEWS_QUERY', () => {
     expect(PEER_REVIEWS_QUERY).toMatch(/^query /);
     expect(PEER_REVIEWS_QUERY).not.toMatch(/mutation/);
     expect(PEER_REVIEWS_QUERY).toContain('assessmentRequestsForCurrentUser');
+  });
+});
+
+describe('PEER_REVIEW_CONCURRENCY', () => {
+  it('keeps the sweep gentle on Canvas', () => {
+    expect(PEER_REVIEW_CONCURRENCY).toBeGreaterThanOrEqual(1);
+    expect(PEER_REVIEW_CONCURRENCY).toBeLessThanOrEqual(6);
   });
 });
 
@@ -205,8 +213,8 @@ describe('sortPeerReviews', () => {
 
 describe('peerReviewDenial and explainPeerReviewError', () => {
   it('explains 401/403 as a route not available to students and 404 as not found', () => {
-    expect(peerReviewDenial(403, 'course 1')).toMatch(/not available for a student account/);
-    expect(peerReviewDenial(401, 'course 1')).toMatch(/not available for a student account/);
+    expect(peerReviewDenial(403, 'course 1')).toMatch(/may be closed to student accounts/);
+    expect(peerReviewDenial(401, 'course 1')).toMatch(/may be closed to student accounts/);
     expect(peerReviewDenial(404, 'assignment 2')).toMatch(/assignment 2 was not found/);
     expect(peerReviewDenial(500, 'x')).toBeNull();
     expect(peerReviewDenial(null, 'x')).toBeNull();
@@ -214,7 +222,7 @@ describe('peerReviewDenial and explainPeerReviewError', () => {
 
   it('keeps the status, passes a rejected token and other errors unchanged', () => {
     const explained = explainPeerReviewError(canvasApiError('raw', 403), 'course 1');
-    expect(String(explained)).toMatch(/not available for a student account/);
+    expect(String(explained)).toMatch(/may be closed to student accounts/);
     expect(canvasErrorStatus(explained)).toBe(403);
     const token = canvasApiError('reconnect', 401, true);
     expect(explainPeerReviewError(token, 'course 1')).toBe(token);
@@ -309,7 +317,7 @@ describe('listPeerReviews', () => {
     expect(result.unavailable).toEqual([
       {
         course_id: 502,
-        reason: expect.stringMatching(/not available for a student account/) as unknown,
+        reason: expect.stringMatching(/may be closed to student accounts/) as unknown,
       },
     ]);
   });

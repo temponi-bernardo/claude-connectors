@@ -130,6 +130,20 @@ export async function requestCanvas(deps: ClientDeps, req: CanvasRequest): Promi
   throw canvasApiError(message, res.status);
 }
 
+/** Reads a JSON body; a timeout while reading it becomes the same clear 504 as `networkFailure()`. */
+export async function readCanvasJson<T>(res: Response, req: CanvasRequest): Promise<T> {
+  try {
+    return (await res.json()) as T;
+  } catch (error) {
+    throw networkFailure(error, req);
+  }
+}
+
+/** Sends the request and reads its JSON body (both under the call's timeout). */
+export async function requestCanvasJson<T>(deps: ClientDeps, req: CanvasRequest): Promise<T> {
+  return readCanvasJson<T>(await requestCanvas(deps, req), req);
+}
+
 /** Fetches every page of a listing by following the `Link` header, up to `max` items. */
 export async function collectPages<T>(
   deps: ClientDeps,
@@ -140,7 +154,7 @@ export async function collectPages<T>(
   let req: CanvasRequest | null = first;
   while (req && items.length < max) {
     const res = await requestCanvas(deps, req);
-    const data = (await res.json()) as T | T[];
+    const data = await readCanvasJson<T | T[]>(res, req);
     items.push(...(Array.isArray(data) ? data : [data]));
     const next = parseNextLink(res.headers.get('link'));
     req = next ? { method: 'GET', path: next } : null;
@@ -215,13 +229,16 @@ export async function confirmUpload<T>(deps: ClientDeps, res: Response): Promise
   if (res.ok) return (await res.json()) as T;
   const location = res.headers.get('location');
   if (res.status >= 300 && res.status < 400 && location) {
-    return (await (await requestCanvas(deps, { method: 'POST', path: location })).json()) as T;
+    return requestCanvasJson<T>(deps, { method: 'POST', path: location });
   }
   const text = await res.text().catch(() => '');
   throw new Error(`Canvas rejected the file upload (${res.status}): ${text.slice(0, 300)}`);
 }
 
-/** Says whether a GraphQL document only reads: a query, with no mutation, subscription or bare fragment. */
+/**
+ * Guard for the connector's own constant GraphQL documents: accepts a document that starts with `{` or `query`
+ * and has no `mutation`/`subscription` keyword. A keyword check, not a parser: never pass it text from outside.
+ */
 export function isReadOnlyGraphql(document: string): boolean {
   const code = document.replace(/#[^\n]*/g, '').trim();
   if (/\b(mutation|subscription)\b/.test(code)) return false;
@@ -242,7 +259,7 @@ export function graphqlData<T>(envelope: GraphqlEnvelope<T>): T {
   throw canvasApiError(`Canvas GraphQL error: ${reason.slice(0, 300)}`, 400);
 }
 
-/** Posts a read-only GraphQL query to Canvas; refuses anything that could change data without calling Canvas. */
+/** Posts one of the connector's GraphQL queries to Canvas; a document that fails `isReadOnlyGraphql()` never leaves. */
 export async function queryCanvasGraphql<T>(deps: ClientDeps, query: GraphqlQuery): Promise<T> {
   if (!isReadOnlyGraphql(query.document)) {
     throw new Error(
@@ -251,24 +268,25 @@ export async function queryCanvasGraphql<T>(deps: ClientDeps, query: GraphqlQuer
   }
   const body = { query: query.document, variables: query.variables ?? {} };
   const path = `${deps.baseUrl}${CANVAS_GRAPHQL_PATH}`;
-  const res = await requestCanvas(deps, { method: 'POST', path, body });
-  return graphqlData((await res.json()) as GraphqlEnvelope<T>);
+  return graphqlData(
+    await requestCanvasJson<GraphqlEnvelope<T>>(deps, { method: 'POST', path, body }),
+  );
 }
 
 /** Creates the Canvas client. */
 export function createCanvasClient(deps: ClientDeps): CanvasClient {
   return {
     baseUrl: deps.baseUrl,
-    get: async <T>(path: string, params: QueryParams = {}) =>
-      (await (await requestCanvas(deps, { method: 'GET', path, params })).json()) as T,
+    get: <T>(path: string, params: QueryParams = {}) =>
+      requestCanvasJson<T>(deps, { method: 'GET', path, params }),
     getAll: <T>(path: string, params: QueryParams = {}, max = DEFAULT_MAX_ITEMS) =>
       collectPages<T>(
         deps,
         { method: 'GET', path, params: { per_page: CANVAS_PAGE_SIZE, ...params } },
         max,
       ),
-    post: async <T>(path: string, body: unknown) =>
-      (await (await requestCanvas(deps, { method: 'POST', path, body })).json()) as T,
+    post: <T>(path: string, body: unknown) =>
+      requestCanvasJson<T>(deps, { method: 'POST', path, body }),
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
     fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers),
