@@ -21641,12 +21641,16 @@ function isRangeAnswer(res, chunk) {
 
 // src/core/time.ts
 var MINUTE_MS = 6e4;
-function zoneOffsetMinutes(instant, timeZone) {
-  const label = new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "longOffset" }).formatToParts(instant).find((part) => part.type === "timeZoneName")?.value;
-  const match = /GMT([+-])(\d{2}):(\d{2})/.exec(label ?? "");
-  if (!match) return 0;
+function parseOffsetLabel(label) {
+  if (label === "GMT") return 0;
+  const match = /^GMT([+-])(\d{2}):(\d{2})$/.exec(label ?? "");
+  if (!match) throw new RangeError(`Unexpected time zone offset label: ${String(label)}`);
   const minutes = Number(match[2]) * 60 + Number(match[3]);
   return match[1] === "-" ? -minutes : minutes;
+}
+function zoneOffsetMinutes(instant, timeZone) {
+  const label = new Intl.DateTimeFormat("en-US", { timeZone, timeZoneName: "longOffset" }).formatToParts(instant).find((part) => part.type === "timeZoneName")?.value;
+  return parseOffsetLabel(label);
 }
 function startOfDayIn(instant, timeZone) {
   const local = new Date(instant.getTime() + zoneOffsetMinutes(instant, timeZone) * MINUTE_MS);
@@ -21927,12 +21931,22 @@ async function requestCanvas(deps, req) {
   const message = `Canvas ${res.status} on ${req.method} ${req.path}: ${text.slice(0, 300)}`;
   throw canvasApiError(message, res.status);
 }
+async function readCanvasJson(res, req) {
+  try {
+    return await res.json();
+  } catch (error2) {
+    throw networkFailure(error2, req);
+  }
+}
+async function requestCanvasJson(deps, req) {
+  return readCanvasJson(await requestCanvas(deps, req), req);
+}
 async function collectPages(deps, first, max) {
   const items = [];
   let req = first;
   while (req && items.length < max) {
     const res = await requestCanvas(deps, req);
-    const data = await res.json();
+    const data = await readCanvasJson(res, req);
     items.push(...Array.isArray(data) ? data : [data]);
     const next = parseNextLink(res.headers.get("link"));
     req = next ? { method: "GET", path: next } : null;
@@ -21970,7 +21984,7 @@ async function confirmUpload(deps, res) {
   if (res.ok) return await res.json();
   const location = res.headers.get("location");
   if (res.status >= 300 && res.status < 400 && location) {
-    return await (await requestCanvas(deps, { method: "POST", path: location })).json();
+    return requestCanvasJson(deps, { method: "POST", path: location });
   }
   const text = await res.text().catch(() => "");
   throw new Error(`Canvas rejected the file upload (${res.status}): ${text.slice(0, 300)}`);
@@ -21994,19 +22008,20 @@ async function queryCanvasGraphql(deps, query) {
   }
   const body = { query: query.document, variables: query.variables ?? {} };
   const path = `${deps.baseUrl}${CANVAS_GRAPHQL_PATH}`;
-  const res = await requestCanvas(deps, { method: "POST", path, body });
-  return graphqlData(await res.json());
+  return graphqlData(
+    await requestCanvasJson(deps, { method: "POST", path, body })
+  );
 }
 function createCanvasClient(deps) {
   return {
     baseUrl: deps.baseUrl,
-    get: async (path, params = {}) => await (await requestCanvas(deps, { method: "GET", path, params })).json(),
+    get: (path, params = {}) => requestCanvasJson(deps, { method: "GET", path, params }),
     getAll: (path, params = {}, max = DEFAULT_MAX_ITEMS) => collectPages(
       deps,
       { method: "GET", path, params: { per_page: CANVAS_PAGE_SIZE, ...params } },
       max
     ),
-    post: async (path, body) => await (await requestCanvas(deps, { method: "POST", path, body })).json(),
+    post: (path, body) => requestCanvasJson(deps, { method: "POST", path, body }),
     fetchText: (url) => fetchPlainText(deps.fetchFn, url),
     fetchBytes: (url) => fetchFileBytes(deps.fetchFn, url),
     fetchStream: (url, headers) => fetchDownload(deps.fetchFn, url, headers),
@@ -22439,6 +22454,21 @@ async function listFilesWithLinked(client, courseId3, listed) {
   return rawToolResult(textResult([...listed, ...extra], [linkedOnlyNote(extra.length)]));
 }
 
+// src/core/async.ts
+async function drainQueue(queue, fn) {
+  while (queue.next < queue.items.length) {
+    const index = queue.next;
+    queue.next += 1;
+    queue.results[index] = await fn(queue.items[index]);
+  }
+}
+async function mapWithLimit(items, limit, fn) {
+  const queue = { items, results: new Array(items.length), next: 0 };
+  const workers = Math.max(1, Math.min(limit, items.length));
+  await Promise.all(Array.from({ length: workers }, () => drainQueue(queue, fn)));
+  return queue.results;
+}
+
 // connectors/canvas-puc/src/peer-reviews.ts
 var PEER_REVIEWS_QUERY = `query PeerReviews($id: ID!) {
   assignment(id: $id) {
@@ -22452,6 +22482,7 @@ var PEER_REVIEWS_QUERY = `query PeerReviews($id: ID!) {
     }
   }
 }`;
+var PEER_REVIEW_CONCURRENCY = 3;
 var canvasIdSchema = external_exports.union([
   external_exports.string().regex(/^\d{1,20}$/, "must be a numeric Canvas id"),
   external_exports.number().int().positive()
@@ -22531,7 +22562,7 @@ function sortPeerReviews(reviews) {
 }
 function peerReviewDenial(status, target) {
   if (status === 401 || status === 403) {
-    return `Canvas refused to show the peer reviews of ${target} (HTTP ${status}): this route is not available for a student account.`;
+    return `Canvas refused access to the peer reviews of ${target} (HTTP ${status}): the route may be closed to student accounts, or the course may be unpublished or restricted.`;
   }
   if (status === 404) {
     return `${target} was not found or is not visible to you (HTTP 404): check course_id and assignment_id with list_courses and list_assignments.`;
@@ -22561,7 +22592,11 @@ async function peerReviewAssignmentIds(client, courseId3) {
 async function listCoursePeerReviews(client, courseId3) {
   try {
     const ids = await peerReviewAssignmentIds(client, courseId3);
-    const assignments = await Promise.all(ids.map((id4) => fetchPeerReviewAssignment(client, id4)));
+    const assignments = await mapWithLimit(
+      ids,
+      PEER_REVIEW_CONCURRENCY,
+      (id4) => fetchPeerReviewAssignment(client, id4)
+    );
     return assignments.flatMap((a) => peerReviewsOf(a, client.baseUrl));
   } catch (error2) {
     throw explainPeerReviewError(error2, `course ${String(courseId3)}`);
@@ -22579,14 +22614,14 @@ async function assignmentPeerReviews(client, args) {
 async function sweepPeerReviews(client) {
   const courses = await activeCourses(client);
   const unavailable = [];
-  const lists = await Promise.all(
-    courses.map(
-      (c) => listCoursePeerReviews(client, c.id).catch((error2) => {
-        if (error2.tokenRejected) throw error2;
-        unavailable.push({ course_id: c.id, reason: errorMessage(error2) });
-        return [];
-      })
-    )
+  const lists = await mapWithLimit(
+    courses,
+    PEER_REVIEW_CONCURRENCY,
+    (c) => listCoursePeerReviews(client, c.id).catch((error2) => {
+      if (error2.tokenRejected) throw error2;
+      unavailable.push({ course_id: c.id, reason: errorMessage(error2) });
+      return [];
+    })
   );
   const peer_reviews = sortPeerReviews(lists.flat());
   return unavailable.length > 0 ? { peer_reviews, unavailable } : { peer_reviews };
