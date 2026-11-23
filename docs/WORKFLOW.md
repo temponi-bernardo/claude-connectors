@@ -137,7 +137,11 @@ The **remote connector** (ADR 0010) does not depend on a release: after a merge 
 deploy (KV, secrets, Google Cloud) is in [connectors/gmail/README.md](../connectors/gmail/README.md).
 **WhatsApp** (ADR 0015) is published by whoever hosts it: `npm run whatsapp:deploy` (needs Docker for the bridge
 image). `pr:check` runs `npm run bridge:test` (Go 1.26+; with `GOTOOLCHAIN=auto` Go downloads the toolchain) and
-`npm run whatsapp:build` (bundle and image, without publishing).
+`npm run whatsapp:build` (bundle and image, without publishing). In a cloud session (Claude Code on the web) the
+image build cannot reach the Go module proxy, because the build container does not trust the session's TLS proxy
+CA: start `dockerd` if `docker info` fails, and prefix the command (`pr:check`, `whatsapp:build` or
+`whatsapp:deploy`) with `WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh"`. The script trusts the CA in the
+image's build stage only, in a temporary copy of the context; the published image never carries it.
 Every deploy script runs the post-deploy smoke test right after `wrangler deploy` (ADR 0027): `npm run smoke --
 <connector>` reads the published `GET /tools` and fails the command when it differs from the connector's
 `tool-contract.json` (roll back with `npx wrangler rollback --config connectors/<connector>/wrangler.toml`).

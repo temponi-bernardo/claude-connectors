@@ -30,8 +30,8 @@ no GitHub Actions: release-please runs through the local CLI).
    (edit the release-please branch; it keeps manual edits to the CHANGELOG).
 5. **Merge** the release PR without asking for confirmation (`gh pr merge --squash`), like any PR with a green
    `pr:check` (`docs/WORKFLOW.md`). Never create a tag by hand. The PR title is `chore(release): release main`
-   (`group-pull-request-title-pattern`), so commitlint passes; a Docker-less session cannot run
-   `whatsapp:build` (run the other `pr:check` steps by hand and say so in the PR).
+   (`group-pull-request-title-pattern`), so commitlint passes. In a cloud session, run `pr:check` with
+   `WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh"` (see step 7) so `whatsapp:build` works.
 6. **Tag and draft:** after the merge,
    `npx release-please github-release --draft --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`
    creates the drafts with the notes for `vX.Y.Z` (and `<name>-vX.Y.Z` for each released plugin); GitHub creates
@@ -41,6 +41,11 @@ no GitHub Actions: release-please runs through the local CLI).
    publishes each draft on GitHub (Releases page).
 7. **Remote server:** if the release touched the connector, run `npm run worker:deploy` on `main` (needs
    `CLOUDFLARE_API_TOKEN`); without it, whoever installed from the marketplace stays on the old Worker version.
+   Same for `npm run gmail:deploy` and `npm run whatsapp:deploy` when their plugin was released; every deploy
+   ends with the smoke test. WhatsApp needs Docker: in a cloud session (proxy CA at `/root/.ccr/ca-bundle.crt`)
+   start `dockerd` if `docker info` fails and run
+   `WRANGLER_DOCKER_BIN="$PWD/scripts/docker-proxy-ca.sh" npm run whatsapp:deploy`, which trusts the proxy CA in
+   the image's build stage only (`docs/WORKFLOW.md`).
 8. **After:** confirm that `package.json` and each `plugin.json` have the same version as
    `.release-please-manifest.json` on `main` (`npm test` checks the plugins) and that `npm run plugin:validate`
    passes; open a new empty "Unreleased" section in the CHANGELOG if release-please did not; ROADMAP: mark the
