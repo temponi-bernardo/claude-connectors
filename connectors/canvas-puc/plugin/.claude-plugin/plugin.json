@@ -9,13 +9,6 @@
   "homepage": "https://temponi-bernardo.github.io/claude-connectors/",
   "repository": "https://github.com/temponi-bernardo/claude-connectors",
   "license": "MIT",
-  "keywords": [
-    "canvas",
-    "lms",
-    "puc-minas",
-    "education",
-    "assignments",
-    "grades"
-  ],
+  "keywords": ["canvas", "lms", "puc-minas", "education", "assignments", "grades"],
   "privacyPolicyUrl": "https://temponi-bernardo.github.io/claude-connectors/privacy.html"
 }
