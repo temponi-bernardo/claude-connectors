@@ -20,6 +20,7 @@ import type {
   CanvasSubmission,
 } from './canvas-types.js';
 import type { CanvasContext } from './context.js';
+import * as changes from './changes.js';
 import { MAX_CHUNK_BYTES } from './chunks.js';
 import { resolveCanvasFile } from './file-ref.js';
 import { downloadCanvasFile, MAX_DOWNLOAD_MB, readCanvasFileText } from './files.js';
@@ -106,13 +107,16 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   }),
   defineTool({
     name: 'list_assignments',
-    description: 'List the assignments of a course with due date, submission status and score.',
+    description:
+      'List the assignments of a course with due date, submission status and score. With changed_since, only those edited, submitted or graded since then.',
     shape: {
       course_id: courseId,
       filter: z.enum(['all', 'upcoming', 'past', 'unsubmitted', 'overdue']).optional(),
+      changed_since: changes.changedSinceArg,
     },
     annotations: toolAnnotations('List assignments', READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
+    run: async ({ client, now }, args) => {
+      const checkedAt = now();
       const params = {
         include: ['submission'],
         order_by: 'due_at',
@@ -122,7 +126,8 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
         `/courses/${String(args.course_id)}/assignments`,
         params,
       );
-      return list.map(f.toAssignmentSummary);
+      const changed = changes.keepChanged(list, args.changed_since, changes.assignmentStamps);
+      return changes.withCheckedAt(changed.map(f.toAssignmentSummary), checkedAt);
     },
   }),
   defineTool({
@@ -168,28 +173,40 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   }),
   defineTool({
     name: 'list_announcements',
-    description: 'Recent announcements of one course or of every active course.',
+    description:
+      'Recent announcements of one course or of every active course. With changed_since, only those posted since then.',
     shape: {
       course_id: courseId.optional().describe('When omitted, searches every active course'),
-      days: z.number().int().min(1).max(365).optional().describe('Days back (default 30)'),
+      days: z
+        .number()
+        .int()
+        .min(1)
+        .max(365)
+        .optional()
+        .describe('Days back (default 30; ignored with changed_since, which sets the start)'),
       raw_html: rawHtml,
+      changed_since: changes.changedSinceArg,
     },
     annotations: toolAnnotations('List announcements', READ_ONLY_HINTS),
     run: async ({ client, now }, args) => {
+      const checkedAt = now();
       const ids =
         args.course_id !== undefined
           ? [args.course_id]
           : (await h.activeCourses(client)).map((c) => c.id);
-      if (ids.length === 0) return [];
+      if (ids.length === 0) return changes.withCheckedAt([], checkedAt);
       const params = {
         context_codes: h.courseContextCodes(ids),
-        start_date: h.isoDaysFrom(now(), -(args.days ?? 30)),
-        end_date: now().toISOString(),
+        start_date: args.changed_since ?? h.isoDaysFrom(checkedAt, -(args.days ?? 30)),
+        end_date: checkedAt.toISOString(),
       };
-      return (await client.getAll<CanvasAnnouncement>('/announcements', params)).map((a) => ({
+      const list = await client.getAll<CanvasAnnouncement>('/announcements', params);
+      const changed = changes.keepChanged(list, args.changed_since, changes.announcementStamps);
+      const views = changed.map((a) => ({
         ...f.toAnnouncement(a, client.baseUrl),
         ...f.rawHtmlField('message_html', a.message, args.raw_html === true),
       }));
+      return changes.withCheckedAt(views, checkedAt);
     },
   }),
   defineTool({
@@ -276,12 +293,16 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   }),
   defineTool({
     name: 'list_discussions',
-    description: 'List the discussion forums of a course.',
-    shape: { course_id: courseId },
+    description:
+      'List the discussion forums of a course. With changed_since, only those posted or replied to since then.',
+    shape: { course_id: courseId, changed_since: changes.changedSinceArg },
     annotations: toolAnnotations('List discussions', READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
+    run: async ({ client, now }, args) => {
+      const checkedAt = now();
       const path = `/courses/${String(args.course_id)}/discussion_topics`;
-      return (await client.getAll<CanvasDiscussionTopic>(path)).map(f.toDiscussionSummary);
+      const list = await client.getAll<CanvasDiscussionTopic>(path);
+      const changed = changes.keepChanged(list, args.changed_since, changes.topicStamps);
+      return changes.withCheckedAt(changed.map(f.toDiscussionSummary), checkedAt);
     },
   }),
   defineTool({

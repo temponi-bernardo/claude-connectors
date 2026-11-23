@@ -43,9 +43,12 @@ describe('defineTool', () => {
 });
 
 describe('textResult', () => {
-  it('keeps strings and serializes objects', () => {
+  it('keeps strings and serializes objects as compact JSON (fewer tokens)', () => {
     expect(textResult('hi').content).toEqual([{ type: 'text', text: 'hi' }]);
-    expect(textResult({ a: 1 }).content[0]).toEqual({ type: 'text', text: '{\n  "a": 1\n}' });
+    expect(textResult({ a: 1, b: [2] }).content[0]).toEqual({
+      type: 'text',
+      text: '{"a":1,"b":[2]}',
+    });
   });
 
   it('appends notes as extra blocks', () => {

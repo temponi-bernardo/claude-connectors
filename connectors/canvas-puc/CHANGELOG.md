@@ -5,6 +5,16 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 
 ## Unreleased
 
+### Added
+
+- `changed_since` on `list_assignments`, `list_announcements`, `list_discussions` and `list_conversations`: only
+  what changed after the cursor, plus a `checked_at` note for the next call (ADR 0031). `/planejamento-faculdade`
+  uses it in update mode, so refreshing the plan reads only the changes.
+
+### Changed
+
+- Tool results are compact JSON, which cuts the tokens of every call.
+
 ## [3.2.0](https://github.com/temponi-bernardo/claude-connectors/compare/canvas-puc-v3.1.0...canvas-puc-v3.2.0) (2026-11-23)
 
 ### Added

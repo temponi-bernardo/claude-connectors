@@ -40,9 +40,9 @@ export function defineTool<C, S extends z.ZodRawShape>(def: ToolDefinition<C, S>
   };
 }
 
-/** Converts a tool return value into a text MCP result (indented JSON if it is not a string). */
+/** Converts a tool return value into a text MCP result (compact JSON if it is not a string: fewer tokens). */
 export function textResult(data: unknown, notes: readonly string[] = []): CallToolResult {
-  const text = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+  const text = typeof data === 'string' ? data : JSON.stringify(data);
   return { content: [text, ...notes].map((t) => ({ type: 'text' as const, text: t })) };
 }
 

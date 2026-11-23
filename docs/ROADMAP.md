@@ -50,6 +50,7 @@ The MVP is the Canvas connector installed from the marketplace and used day to d
 | F2.11 | Public, multi-user, read-only remote Gmail (ADR 0014, 0016)                 | ✅     | Code, tests and docs in the PR; Worker published and both accounts linked on claude.ai                                |
 | F2.12 | Gmail with full management: send, reply, drafts, organize (ADR 0019)        | ✅     | Code, tests and docs in the PR; `gmail.modify` scope at Google, deploy, and relinked accounts sending via claude.ai   |
 | F2.13 | Canvas: links of HTML content and files hidden from `list_files` (ADR 0025) | ✅     | `get_assignment(294409, 1408627)` lists the review PDF and the video; `download_file` brings the PDF; Worker deployed |
+| F2.14 | Canvas token savings: compact JSON and `changed_since` cursor (ADR 0031)    | ✅     | Four listings return only changes since the cursor with a `checked_at` note; plan update mode uses it                 |
 
 ## Phase 3 — Personal WhatsApp (self-host)
 
