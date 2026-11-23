@@ -9,12 +9,6 @@
   "homepage": "https://temponi-bernardo.github.io/claude-connectors/",
   "repository": "https://github.com/temponi-bernardo/claude-connectors",
   "license": "MIT",
-  "keywords": [
-    "whatsapp",
-    "messaging",
-    "chat",
-    "self-hosted",
-    "cloudflare"
-  ],
+  "keywords": ["whatsapp", "messaging", "chat", "self-hosted", "cloudflare"],
   "privacyPolicyUrl": "https://temponi-bernardo.github.io/claude-connectors/privacy.html"
 }
