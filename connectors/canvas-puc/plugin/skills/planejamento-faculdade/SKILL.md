@@ -77,6 +77,14 @@ Current term only: `list_courses` (active courses). Then, per course, in paralle
   `get_messages` (`limit: 40`) per mapped group and keep only academic facts: dates, rooms, points,
   postponements, forwarded notices.
 
+**Update mode reads only the changes (saves tokens).** Take the cursor from `previous.json`: its
+`generatedAt` minus 24 hours (a safety margin; repeats are harmless, gaps are not). Pass it as `changed_since` to
+`list_assignments`, `list_announcements`, `list_discussions` and `list_conversations`; they return only what was
+edited, submitted, graded, posted, replied to or messaged since then, so call `get_assignment` /
+`get_conversation` only for those. Everything not returned stays as in `previous.json`. Still read `get_grades`,
+`upcoming_assignments` and `get_calendar` in full (they are short and have no cursor). Create mode reads
+everything, without `changed_since`.
+
 **Source priority:** Canvas > instructor email > forwarded WhatsApp notice. A WhatsApp fact is always
 written "segundo o grupo de X (DD/MM)" and never overrides Canvas. When sources disagree, keep the Canvas
 value, write the divergence as a rule and add a question for the instructor.

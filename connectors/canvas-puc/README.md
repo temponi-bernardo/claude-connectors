@@ -130,23 +130,23 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes 
 | `whoami`                    | Profile (connection test)                                                                                                                                     |
 | `list_courses`              | Courses with current grade                                                                                                                                    |
 | `upcoming_assignments`      | What's due from today (00:00 São Paulo time) through the next days, across all courses: every planner item, including peer reviews (`type: "peer_review"`)    |
-| `list_assignments`          | A course's assignments with status (filters: upcoming, overdue...)                                                                                            |
+| `list_assignments`          | A course's assignments with status (filters: upcoming, overdue...); `changed_since` returns only those edited, submitted or graded since then                 |
 | `get_assignment`            | Instructions (with `[link N]` marks), `links` to embedded files/videos/pages, rubric, deadlines and feedback; `raw_html` for debugging                        |
 | `list_peer_reviews`         | Peer reviews to do (pending and completed): course, assignment, due date, reviewee (hidden when anonymous), the URL or files they sent and the review link    |
 | `get_grades`                | Grade summary or grades per assignment                                                                                                                        |
-| `list_announcements`        | Recent announcements, with their `links`                                                                                                                      |
+| `list_announcements`        | Recent announcements, with their `links`; `changed_since` returns only new ones                                                                               |
 | `list_modules`              | Modules and items                                                                                                                                             |
 | `get_page`                  | Content of a page, with its `links`; `raw_html` for debugging                                                                                                 |
 | `list_files`                | Files with download link, plus a note that hidden files are not listed; `include_linked` adds the files only linked from the content                          |
 | `list_linked_files`         | Every file and video the course content points to (assignments, pages, forums, modules), once each                                                            |
 | `read_file_text`            | Content of text/code files, including `.doc` and `.docx`, by `file_id` or Canvas file `url`                                                                   |
 | `download_file`             | Brings a PDF, slides or image (up to 70 MB; above 8 MB, in parts), by `file_id` or Canvas file `url`, even if hidden from `list_files`                        |
-| `list_discussions`          | Course discussion forums                                                                                                                                      |
+| `list_discussions`          | Course discussion forums; `changed_since` returns only those posted or replied to since then                                                                  |
 | `get_discussion`            | Posts in a forum, with the `links` of the prompt and of each post                                                                                             |
 | `get_calendar`              | Calendar events                                                                                                                                               |
 | `search`                    | Search across assignments, pages, files and modules                                                                                                           |
 | `find_recipients`           | Finds people to message (teachers, TAs, classmates) and their user ID                                                                                         |
-| `list_conversations`        | Inbox conversations (inbox, unread, starred, sent, archived)                                                                                                  |
+| `list_conversations`        | Inbox conversations (inbox, unread, starred, sent, archived); `changed_since` returns only those with new messages                                            |
 | `get_conversation`          | Reads a conversation with all messages, without marking it as read                                                                                            |
 | `submit_text_assignment`    | Submits text/a link (only with writes enabled; Claude confirms first)                                                                                         |
 | `submit_file_assignment`    | Submits a file (up to 5 MB, text or base64) to an `online_upload` assignment, checking `allowed_extensions` (only with writes enabled; Claude confirms first) |
@@ -154,6 +154,12 @@ docker run -p 8080:8080 -e PUBLIC_URL=https://your-domain -e SEAL_KEY=<32 bytes 
 | `send_message`              | Sends a new inbox message to up to 20 people by user ID, with up to 5 attachments of 5 MB each (writing on; Claude confirms first)                            |
 | `reply_message`             | Replies in an inbox conversation, with up to 5 attachments of 5 MB each (writing on; Claude confirms first)                                                   |
 | `prepare_attachment_upload` | Returns a one-time `curl` that uploads a local file (up to 25 MB) to your private inbox attachments folder; its `id` goes in `file_ids` (writing on)          |
+
+### Saving tokens: `changed_since` (ADR 0031)
+
+The four listings above end with a `checked_at=<ISO>` note. Pass it back as `changed_since` and they return only
+what changed after it. Nothing is stored on the server: the cursor travels with the call, and the snapshot is
+kept by the client (e.g. the semester plan). Every result is compact JSON.
 
 ### Writing (send, reply, submit) and how to turn it on
 

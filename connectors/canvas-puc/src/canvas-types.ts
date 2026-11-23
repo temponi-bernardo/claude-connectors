@@ -75,6 +75,7 @@ export interface CanvasSubmission {
   readonly assignment_id?: Id;
   readonly workflow_state?: string;
   readonly submitted_at?: string | null;
+  readonly graded_at?: string | null;
   readonly score?: number | null;
   readonly grade?: string | null;
   readonly late?: boolean;
@@ -99,6 +100,7 @@ export interface CanvasAssignment {
   readonly due_at?: string | null;
   readonly unlock_at?: string | null;
   readonly lock_at?: string | null;
+  readonly updated_at?: string | null;
   readonly points_possible?: number | null;
   readonly submission_types?: readonly string[];
   readonly allowed_extensions?: readonly string[];
@@ -151,6 +153,7 @@ export interface CanvasDiscussionTopic {
   readonly html_url?: string;
   readonly discussion_subentry_count?: number;
   readonly unread_count?: number;
+  readonly posted_at?: string | null;
   readonly last_reply_at?: string | null;
   readonly assignment?: { readonly due_at?: string | null };
 }

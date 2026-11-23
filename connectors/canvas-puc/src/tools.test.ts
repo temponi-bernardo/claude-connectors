@@ -4,7 +4,7 @@ import { FALLBACK_SERVER_VERSION } from '../../../src/mcp/server-version.js';
 import { toToolResult, type ToolSpec } from '../../../src/mcp/tools.js';
 import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
 import type { CanvasContext } from './context.js';
-import { fakeContext, graphqlRoute, type Routes } from './fixtures/fake-context.js';
+import { fakeContext, graphqlRoute, resultParts, type Routes } from './fixtures/fake-context.js';
 import { ANONYMOUS_ASSIGNMENT, PLANNER_WITH_PEER_REVIEW } from './fixtures/peer-reviews.js';
 import { CANVAS_INBOX_READ_TOOLS, CANVAS_INBOX_WRITE_TOOLS } from './tools-inbox.js';
 import { CANVAS_READ_TOOLS } from './tools-read.js';
@@ -178,10 +178,55 @@ describe('read tools', () => {
       routes,
     );
     expect(getAll.mock.calls[0]![1]).toMatchObject({ bucket: 'overdue' });
-    expect(result).toEqual([expect.objectContaining({ id: 9 })]);
+    expect(resultParts(result).rows).toEqual([expect.objectContaining({ id: 9 })]);
     expect(
       (await run('list_assignments', { course_id: 1 }, routes)).getAll.mock.calls[0]![1],
     ).toMatchObject({ bucket: undefined });
+  });
+
+  it('list_assignments with changed_since returns only what changed and a new cursor', async () => {
+    const routes = {
+      '/courses/1/assignments': [
+        { id: 1, updated_at: '2026-11-01T00:00:00Z' },
+        {
+          id: 2,
+          updated_at: '2026-10-01T00:00:00Z',
+          submission: { graded_at: '2026-11-04T00:00:00Z' },
+        },
+        { id: 3, updated_at: '2026-10-01T00:00:00Z' },
+      ],
+    };
+    const args = { course_id: 1, changed_since: '2026-11-01T00:00:00Z' };
+    const { rows, notes } = resultParts((await run('list_assignments', args, routes)).result);
+    expect((rows as { id: number }[]).map((r) => r.id)).toEqual([1, 2]);
+    expect(notes).toEqual([expect.stringContaining('checked_at=2026-11-05T12:00:00.000Z')]);
+  });
+
+  it('list_announcements and list_discussions filter by changed_since', async () => {
+    const since = '2026-11-01T00:00:00Z';
+    const ann = await run(
+      'list_announcements',
+      { course_id: 1, changed_since: since },
+      {
+        '/announcements': [
+          { id: 1, posted_at: '2026-10-30T00:00:00Z' },
+          { id: 2, posted_at: '2026-11-02T00:00:00Z' },
+        ],
+      },
+    );
+    expect(resultParts(ann.result).rows).toEqual([expect.objectContaining({ id: 2 })]);
+    expect(ann.getAll.mock.calls[0]![1]).toMatchObject({ start_date: since });
+    const topics = await run(
+      'list_discussions',
+      { course_id: 1, changed_since: since },
+      {
+        '/courses/1/discussion_topics': [
+          { id: 1, posted_at: '2026-09-01T00:00:00Z', last_reply_at: '2026-11-03T00:00:00Z' },
+          { id: 2, posted_at: '2026-09-01T00:00:00Z', last_reply_at: null },
+        ],
+      },
+    );
+    expect(resultParts(topics.result).rows).toEqual([expect.objectContaining({ id: 1 })]);
   });
 
   it('get_assignment combines the assignment and the submission', async () => {
@@ -232,21 +277,26 @@ describe('read tools', () => {
       context_codes: ['course_1'],
       start_date: '2026-10-06T12:00:00.000Z',
     });
-    expect(all.result).toEqual([expect.objectContaining({ text: 'hi', links: [] })]);
-    expect(all.result[0]).not.toHaveProperty('message_html');
+    const allRows: object[] = resultParts(all.result).rows;
+    expect(allRows).toEqual([expect.objectContaining({ text: 'hi', links: [] })]);
+    expect(allRows[0]).not.toHaveProperty('message_html');
     const raw = await run(
       'list_announcements',
       { course_id: 1, raw_html: true },
       { '/announcements': [{ id: 5, message: '<b>hi</b>' }] },
     );
-    expect(raw.result).toEqual([expect.objectContaining({ message_html: '<b>hi</b>' })]);
+    expect(resultParts(raw.result).rows).toEqual([
+      expect.objectContaining({ message_html: '<b>hi</b>' }),
+    ]);
     const one = await run(
       'list_announcements',
       { course_id: 3, days: 1 },
       { '/announcements': [] },
     );
     expect(one.getAll.mock.calls[0]![1]).toMatchObject({ context_codes: ['course_3'] });
-    expect((await run('list_announcements', {}, { '/courses': [] })).result).toEqual([]);
+    expect(
+      resultParts((await run('list_announcements', {}, { '/courses': [] })).result).rows,
+    ).toEqual([]);
   });
 
   it('list_modules, list_discussions and list_files map the lists', async () => {
@@ -259,15 +309,12 @@ describe('read tools', () => {
         )
       ).result,
     ).toEqual([expect.objectContaining({ name: 'M' })]);
-    expect(
-      (
-        await run(
-          'list_discussions',
-          { course_id: 1 },
-          { '/courses/1/discussion_topics': [{ id: 1 }] },
-        )
-      ).result,
-    ).toHaveLength(1);
+    const topics = await run(
+      'list_discussions',
+      { course_id: 1 },
+      { '/courses/1/discussion_topics': [{ id: 1 }] },
+    );
+    expect(resultParts(topics.result).rows).toHaveLength(1);
     const files = await run(
       'list_files',
       { course_id: 1, search: 'pdf' },
@@ -291,7 +338,7 @@ describe('read tools', () => {
     };
     const { result } = await run('list_files', { course_id: 1, include_linked: true }, routes);
     const content = toToolResult(result).content;
-    expect((content[0] as { text: string }).text).toContain('"linked_only": true');
+    expect((content[0] as { text: string }).text).toContain('"linked_only":true');
     expect((content[1] as { text: string }).text).toContain('1 file(s)');
   });
 

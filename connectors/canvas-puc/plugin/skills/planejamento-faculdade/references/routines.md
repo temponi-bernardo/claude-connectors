@@ -49,6 +49,9 @@ este artefato (mesmo se estiver compartilhado), sem mudar quem pode vê-lo.
 2. Coletar de novo (Canvas: notas, prazos de 45 dias, envios, avisos, calendário, caixa de entrada e
    enviados; Gmail dos últimos 30 dias de pucminas.br/sga.pucminas.br e professores; WhatsApp: últimas ~40
    mensagens dos grupos mapeados) e aplicar só o que mudou, mantendo todos os ids e nunca apagando item.
+   Para gastar menos tokens: changed_since = generatedAt do plano extraído menos 24 h, em list_assignments,
+   list_announcements, list_discussions e list_conversations; get_assignment/get_conversation só para o que
+   voltar. O resto fica como estava no plano.
 3. Modelo de pontos por matéria (total 100): sure (com nota) + pend (enviado sem nota, estimado) + open
    (ainda dá para ganhar) + lost (perdido ou incerto) = 100. Faltam = max(0, meta − sure − pend); meta 60
    salvo plano de ensino. Nível: Tranquila se faltam ≤ 30% do open; Atenção até 60%; Risco alto acima,

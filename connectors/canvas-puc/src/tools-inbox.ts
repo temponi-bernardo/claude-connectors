@@ -14,6 +14,7 @@ import {
 import { defineTool, type ToolSpec } from '../../../src/mcp/tools.js';
 import type { CanvasConversation, CanvasRecipient, Id } from './canvas-types.js';
 import type { CanvasClient } from './client.js';
+import { changedSinceArg, conversationStamps, keepChanged, withCheckedAt } from './changes.js';
 import type { CanvasContext } from './context.js';
 import type { View } from './format.js';
 import * as inbox from './inbox.js';
@@ -60,20 +61,30 @@ export const CANVAS_INBOX_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
   }),
   defineTool({
     name: 'list_conversations',
-    description: 'List the Canvas inbox conversations (messages), newest first.',
+    description:
+      'List the Canvas inbox conversations (messages), newest first. With changed_since, only those with a message since then.',
     shape: {
       scope: z.enum(['inbox', 'unread', 'starred', 'sent', 'archived']).optional(),
-      limit: z.number().int().min(1).max(100).optional().describe('Default 20'),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe('Conversations read, newest first (default 20; 100 with changed_since)'),
+      changed_since: changedSinceArg,
     },
     annotations: toolAnnotations('List conversations', READ_ONLY_HINTS),
-    run: async ({ client }, args) => {
+    run: async ({ client, now }, args) => {
+      const checkedAt = now();
       const params = { scope: args.scope ?? 'inbox' };
       const list = await client.getAll<CanvasConversation>(
         '/conversations',
         params,
-        args.limit ?? 20,
+        args.limit ?? (args.changed_since === undefined ? 20 : 100),
       );
-      return list.map(inbox.toConversationSummary);
+      const changed = keepChanged(list, args.changed_since, conversationStamps);
+      return withCheckedAt(changed.map(inbox.toConversationSummary), checkedAt);
     },
   }),
   defineTool({

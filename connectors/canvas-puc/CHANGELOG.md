@@ -9,7 +9,15 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 
 - `list_peer_reviews`: peer reviews the student must do (pending and completed), with course, assignment, review
   due date, reviewee (Canvas hides the name when the instructor made the reviews anonymous), the URL or files the
-  reviewee sent and the link to the review page. Without `course_id` it sweeps every active course; read-only.
+  reviewee sent and the link to the review page. Without `course_id` it sweeps every active course; read-only
+  (ADR 0032).
+- `changed_since` on `list_assignments`, `list_announcements`, `list_discussions` and `list_conversations`: only
+  what changed after the cursor, plus a `checked_at` note for the next call (ADR 0031). `/planejamento-faculdade`
+  uses it in update mode, so refreshing the plan reads only the changes.
+
+### Changed
+
+- Tool results are compact JSON, which cuts the tokens of every call.
 
 ### Fixed
 

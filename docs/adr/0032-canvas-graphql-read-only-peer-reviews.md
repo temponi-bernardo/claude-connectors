@@ -1,4 +1,4 @@
-# 0031 — Read-only Canvas GraphQL for the student's peer reviews
+# 0032 — Read-only Canvas GraphQL for the student's peer reviews
 
 - **Status:** Accepted
 - **Date:** 2026-11-23

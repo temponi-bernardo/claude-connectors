@@ -119,7 +119,12 @@ Process template: see [DOCUMENTATION.md](DOCUMENTATION.md#process).
      (`POST .../submissions/self/files`), sends the file with the client's `upload`: `postUploadForm()` posts
      `uploadForm()` to the signed URL without the token or redirects, and `confirmUpload()` reads the file or
      confirms a 3xx at its `Location` with the token. Last, it posts `onlineUploadPayload()` to `.../submissions`.
-  8. `toToolResult()` returns the JSON (via `textResult()`) or the ready-made result to Claude; any error becomes
+  8. Change detection: `list_assignments`, `list_announcements`, `list_discussions` and `list_conversations` take
+     `changed_since` (`changedSinceArg`). `keepChanged()` drops the items whose latest date (`latestStamp()` over
+     `assignmentStamps()`, `announcementStamps()`, `topicStamps()` or `conversationStamps()`) is before it, and
+     `withCheckedAt()` appends `checkedAtNote()` with the time taken before reading Canvas: the cursor for the next
+     call. Stateless: nothing about the user is stored server side.
+  9. `toToolResult()` returns compact JSON (via `textResult()`) or the ready-made result to Claude; any error becomes
      `errorResult()` with the message.
 - **Result:** Claude receives only the useful fields, with absolute links and clean text.
 - **Failures:** a 401 that refuses the token becomes `unauthorizedMessage()` (generate another token and reconnect);
