@@ -16,7 +16,10 @@ no GitHub Actions: release-please runs through the local CLI).
 2. **Human changelog:** read the "Unreleased" section of `CHANGELOG.md`. Is anything missing that the `feat`/`fix`
    commits since the last tag point to (`git log <last-tag>..origin/main --oneline`)? Complete it in a
    `docs(release): ...` PR before going on.
-3. **Release PR:** `npx release-please release-pr --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`
+3. **Release PR:** dry-run first (`release-pr --dry-run`, it takes minutes: run it in the background with a log). A
+   package with no GitHub release for its manifest version gets a wrong bump: pin it with `release-as` in
+   `release-please-config.json` (own PR) and remove the pin after the release (`docs/WORKFLOW.md`). Then
+   `npx release-please release-pr --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`
    opens or updates the PR (`gh pr list --label "autorelease: pending"`). Open the PR and check: proposed version
    consistent with the commits (feat → minor, fix → patch, BREAKING → major), readable generated CHANGELOG.
    The PR covers the root package (`.` → `package.json`, `vX.Y.Z`) and each plugin package
