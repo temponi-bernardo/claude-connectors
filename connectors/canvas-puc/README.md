@@ -53,7 +53,9 @@ and every token refresh goes to Canvas, so access stops at once. Changing `SEAL_
   marketplace add instructor emails and course groups when connected (otherwise the plan says which sources are
   missing). Every connector is used read-only. At the end it offers three routines: "Faculdade: Plano do
   semestre (manhã)" at 06:59, "(noite)" at 19:29 and "Faculdade: Alerta de tarefas não enviadas" at 20:59
-  (America/Sao_Paulo). The page comes from a fixed template; the skill only writes JSON and runs
+  (America/Sao_Paulo). In update mode it reads only what changed since the last plan (`changed_since`, ADR 0031)
+  and offers to refresh morning and night routines created before that; it changes only their prompt, so a
+  routine the student disabled stays disabled and a deleted one is not recreated. The page comes from a fixed template; the skill only writes JSON and runs
   `scripts/plan.mjs` (validate, build, extract), generated from `src/plan/` by `npm run build` (ADR 0030).
 
 You can also ask in natural language ("what's due this week?"): Claude picks the right skill.
