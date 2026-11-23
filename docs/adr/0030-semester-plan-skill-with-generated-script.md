@@ -6,7 +6,7 @@
 
 ## Context
 
-The `/planejamento` skill (canvas-puc) publishes and keeps updating a "Plano do Semestre" artifact: an HTML page
+The `/planejamento-faculdade` skill (canvas-puc) publishes and keeps updating a "Plano do Semestre" artifact: an HTML page
 with risk per course, a study plan, a timeline and checklists whose ticks must survive every update. Routines
 republish it twice a day without a person watching. Text from Canvas, email and WhatsApp is untrusted and goes
 into the page. A model that rewrites the HTML on each run drifts in layout, can break the page, can lose the

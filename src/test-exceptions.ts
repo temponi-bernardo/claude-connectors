@@ -57,16 +57,16 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
   {
     name: 'runPlanCli',
     reason:
-      'Entry point of the /planejamento script: wires the real file system into runPlanCommand (tested with an in-memory PlanIo).',
+      'Entry point of the /planejamento-faculdade script: wires the real file system into runPlanCommand (tested with an in-memory PlanIo).',
     manualTest:
-      'Run `node connectors/canvas-puc/plugin/skills/planejamento/scripts/plan.mjs build connectors/canvas-puc/src/fixtures/plan-sample.json --out /tmp/p.html` and then `extract /tmp/p.html --out /tmp/p.json`.',
+      'Run `node connectors/canvas-puc/plugin/skills/planejamento-faculdade/scripts/plan.mjs build connectors/canvas-puc/src/fixtures/plan-sample.json --out /tmp/p.html` and then `extract /tmp/p.html --out /tmp/p.json`.',
   },
   {
     name: 'buildPlanSkill',
     reason:
       'Build CLI glue: runs esbuild and writes the plan script and template; the pieces are tested in plan-skill.test.ts, which also checks the versioned files are current.',
     manualTest:
-      'Run `npm run build` and check that `git status` shows no change under connectors/canvas-puc/plugin/skills/planejamento/.',
+      'Run `npm run build` and check that `git status` shows no change under connectors/canvas-puc/plugin/skills/planejamento-faculdade/.',
   },
   {
     name: 'runBuildCli',

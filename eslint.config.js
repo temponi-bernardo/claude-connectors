@@ -12,7 +12,7 @@ export default tseslint.config(
       'tools/**/fixtures/**',
       'connectors/*/src/fixtures/**',
       'connectors/*/server/**',
-      // Generated /planejamento skill files (npm run build)
+      // Generated /planejamento-faculdade skill files (npm run build)
       'connectors/*/plugin/skills/*/scripts/**',
       'connectors/*/plugin/skills/*/assets/**',
     ],

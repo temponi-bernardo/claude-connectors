@@ -38,7 +38,7 @@ Large test data goes in `tools/<tool>/fixtures/` or `src/<module>/fixtures/` (ig
 
 ## Browser code
 
-The `/planejamento` page runtime (`connectors/canvas-puc/src/plan/page/`) is tested in jsdom: the test file
+The `/planejamento-faculdade` page runtime (`connectors/canvas-puc/src/plan/page/`) is tested in jsdom: the test file
 starts with `// @vitest-environment jsdom` and loads the template with `loadPlanDocument()` from
 `page/fixtures/plan-dom.ts` (which also fakes the artifact runtime). Layout, real scrolling and the dark theme
 need a browser: `npm run plan:e2e` (`scripts/plan-e2e.mjs`) builds the fictitious plan and checks it in
@@ -47,10 +47,10 @@ template, the CSS or the runtime changes.
 
 ## Commands
 
-| Command                               | Does                                             |
-| ------------------------------------- | ------------------------------------------------ |
-| `npm test`                            | Runs everything once                             |
-| `npm run test:watch`                  | Interactive mode                                 |
-| `npm run test:coverage`               | With coverage and thresholds (what `check` runs) |
-| `npx vitest run path/to/file.test.ts` | A single file                                    |
-| `npm run plan:e2e`                    | `/planejamento` page in Chromium (Playwright)    |
+| Command                               | Does                                                    |
+| ------------------------------------- | ------------------------------------------------------- |
+| `npm test`                            | Runs everything once                                    |
+| `npm run test:watch`                  | Interactive mode                                        |
+| `npm run test:coverage`               | With coverage and thresholds (what `check` runs)        |
+| `npx vitest run path/to/file.test.ts` | A single file                                           |
+| `npm run plan:e2e`                    | `/planejamento-faculdade` page in Chromium (Playwright) |

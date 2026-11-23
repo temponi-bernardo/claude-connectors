@@ -7,7 +7,7 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 
 ### Added
 
-- `/planejamento` skill: builds and updates the "Plano do Semestre AAAA/S" artifact (risk per course, today and
+- `/planejamento-faculdade` skill: builds and updates the "Plano do Semestre AAAA/S" artifact (risk per course, today and
   tomorrow, day-by-day study plan, course cards with a points bar, timeline, questions for instructors) from
   Canvas plus the optional `gmail` and `whatsapp` plugins, read-only; persistent checklists with stable ids
   (browser + artifact database); `scripts/plan.mjs` validates, builds and extracts the page; offers three daily

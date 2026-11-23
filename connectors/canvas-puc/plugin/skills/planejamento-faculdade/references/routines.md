@@ -1,4 +1,4 @@
-# Routines of `/planejamento`
+# Routines of `/planejamento-faculdade`
 
 Offer them at the end of create mode (or after a new semester). Create them with the host's scheduling tool
 (`create_trigger`) only after the student says yes. Call `list_triggers` first: never create a second routine
@@ -43,7 +43,7 @@ Cada chamada que falhar: uma tentativa extra; depois, seguir sem ela e relatar.
 ```text
 {{shared block}}
 
-Tarefa: atualizar o plano com a skill /planejamento em modo atualização. Autorização explícita: republicar
+Tarefa: atualizar o plano com a skill /planejamento-faculdade em modo atualização. Autorização explícita: republicar
 este artefato (mesmo se estiver compartilhado), sem mudar quem pode vê-lo.
 1. Ler o artefato, salvar o HTML e extrair o JSON com `node <skill>/scripts/plan.mjs extract`.
 2. Coletar de novo (Canvas: notas, prazos de 45 dias, envios, avisos, calendário, caixa de entrada e
@@ -86,6 +86,6 @@ Tarefa: alerta de tarefas não enviadas (somente leitura; não republicar o arte
 
 ## New semester
 
-When `list_courses` shows a new term, `/planejamento` builds a new plan (new `planKey` and artifact) and
+When `list_courses` shows a new term, `/planejamento-faculdade` builds a new plan (new `planKey` and artifact) and
 offers to update the three routines with the new artifact link, courses and groups (`update_trigger`, or
 delete and recreate when the host has no update), keeping the names and schedules.

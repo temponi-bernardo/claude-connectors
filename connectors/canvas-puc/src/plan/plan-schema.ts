@@ -1,5 +1,5 @@
 /**
- * Data model of the "Plano do Semestre" artifact (the `/planejamento` skill): one JSON block that the page
+ * Data model of the "Plano do Semestre" artifact (the `/planejamento-faculdade` skill): one JSON block that the page
  * template renders. The shapes are zod schemas so the CLI validates the JSON at the edge; the page only
  * imports the inferred types.
  */

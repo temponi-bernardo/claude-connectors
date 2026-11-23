@@ -9,7 +9,7 @@ import { replaceDocument } from './fixtures/plan-dom.js';
 
 const ASSET = join(
   resolve(import.meta.dirname, '..', '..', '..'),
-  'plugin/skills/planejamento/assets/plan-template.html',
+  'plugin/skills/planejamento-faculdade/assets/plan-template.html',
 );
 
 /** The runtime script inlined in a built template (its last plain `<script>`). */

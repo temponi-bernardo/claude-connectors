@@ -11,7 +11,7 @@
       rel="stylesheet"
     />
     <style>
-      /* Plano do Semestre — template of the /planejamento skill. Data lives only in #plan-data. */
+      /* Plano do Semestre — template of the /planejamento-faculdade skill. Data lives only in #plan-data. */
       :root {
         --paper: #f6f3ec;
         --sheet: #fffdf8;
@@ -779,7 +779,7 @@
     return Object.keys(local).some((id) => !(id in remote) || touched.has(id));
   }
   function localChecksKey(planKey) {
-    return `planejamento:${planKey}`;
+    return `planejamento-faculdade:${planKey}`;
   }
   function readLocalChecks(storage, planKey) {
     try {

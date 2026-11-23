@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Browser test of the /planejamento page (npm run plan:e2e): builds the fictitious plan with the versioned
+// Browser test of the /planejamento-faculdade page (npm run plan:e2e): builds the fictitious plan with the versioned
 // script and template, serves it on localhost and checks it in Chromium with Playwright: no console errors,
 // counters, one chip and card per course, bars adding up to 100%, ticks kept after a reload and after the plan
 // is regenerated with the same ids, no horizontal scroll at 390 px and the dark theme.
@@ -12,7 +12,10 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 
 const ROOT = resolve(import.meta.dirname, '..');
-const SCRIPT = join(ROOT, 'connectors/canvas-puc/plugin/skills/planejamento/scripts/plan.mjs');
+const SCRIPT = join(
+  ROOT,
+  'connectors/canvas-puc/plugin/skills/planejamento-faculdade/scripts/plan.mjs',
+);
 const SAMPLE = join(ROOT, 'connectors/canvas-puc/src/fixtures/plan-sample.json');
 const failures = [];
 

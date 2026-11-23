@@ -18,7 +18,7 @@ import {
 } from './bundle.js';
 import { buildPlanTemplate, hasPlanSkill, planCliBundleOptions } from './plan-skill.js';
 
-/** Writes the `/planejamento` skill's generated script and page template. */
+/** Writes the `/planejamento-faculdade` skill's generated script and page template. */
 async function buildPlanSkill(dir: string): Promise<void> {
   const skillDir = join(dir, PLAN_SKILL_DIR);
   const cliOut = join(skillDir, PLAN_SOURCES.cliOut);

@@ -45,7 +45,7 @@ and every token refresh goes to Canvas, so access stops at once. Changing `SEAL_
 - **`/weekly-summary`** — the week's due dates, overdue work, announcements and grades.
 - **`/prepare-submission`** — instructions, rubric, checklist, plan and review; submits only after confirmation.
 - **`/study-course`** — module summary, concepts, review questions and a plan up to the exam.
-- **`/planejamento`** — the "Plano do Semestre AAAA/S" artifact (pt-BR): where the risk is (points missing to
+- **`/planejamento-faculdade`** — the "Plano do Semestre AAAA/S" artifact (pt-BR): where the risk is (points missing to
   pass, 60 by default or the syllabus goal), today and tomorrow, a day-by-day study plan, one card per course
   with a stacked points bar and a concrete path to the goal, a timeline of deadlines and exams, and questions
   for instructors. Checklists keep their ticks across plan updates, in the browser and, when signed in, in the

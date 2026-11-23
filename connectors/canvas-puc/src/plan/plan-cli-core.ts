@@ -1,5 +1,5 @@
 /**
- * Commands of the `/planejamento` script (`node scripts/plan.mjs <command>`): validate the plan JSON, build the
+ * Commands of the `/planejamento-faculdade` script (`node scripts/plan.mjs <command>`): validate the plan JSON, build the
  * page from the template (reusing the previous version's ids), extract the JSON of a published page and print
  * a short summary. File access comes in through `PlanIo`, so the commands are tested without touching disk.
  */

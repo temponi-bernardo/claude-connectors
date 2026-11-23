@@ -29,7 +29,7 @@ export default defineConfig({
         'tools/**/fixtures/**',
         'connectors/*/src/fixtures/**',
         'connectors/*/src/plan/page/fixtures/**',
-        // Entry of the /planejamento script: exception in src/test-exceptions.ts
+        // Entry of the /planejamento-faculdade script: exception in src/test-exceptions.ts
         'connectors/*/src/plan/plan-cli.ts',
         '**/*.d.ts',
         // Ponto de entrada do servidor Node: exceção em src/test-exceptions.ts

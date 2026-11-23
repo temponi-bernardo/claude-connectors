@@ -128,7 +128,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
   3. If there is a `src/remote-main.ts`, bundles the remote server with esbuild (`bundleOptions()`) into
      `connectors/<nome>/server/remote.js`, used by the Dockerfile (P08). The Worker compiles straight from `src/`.
   4. If `hasPlanSkill()` (canvas-puc), `buildPlanSkill()` bundles the plan script (`planCliBundleOptions()`) into
-     `plugin/skills/planejamento/scripts/plan.mjs` and writes the page template from `buildPlanTemplate()`
+     `plugin/skills/planejamento-faculdade/scripts/plan.mjs` and writes the page template from `buildPlanTemplate()`
      (`planRuntimeBundleOptions()` + `inlinePlanRuntime()`) into `assets/plan-template.html` (P20).
 - **Result:** plugin checked and remote bundle (and plan skill files) updated in the connector folder.
 - **Failures:** a `.mcp.json` with a local server or an insecure URL, or a compile error, aborts with the list of
@@ -455,9 +455,9 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
   unit tests (`contract.test.ts` of each connector, `unregisteredToolMentions()` over `snakeCaseWords()` and `toolTexts()`), so a
   divergence is normally caught before deploying.
 
-## P20 — Semester plan (`/planejamento`)
+## P20 — Semester plan (`/planejamento-faculdade`)
 
-- **Trigger:** the student types `/planejamento` (or asks for the semester plan), or one of its three routines
+- **Trigger:** the student types `/planejamento-faculdade` (or asks for the semester plan), or one of its three routines
   fires (morning, night, unsent-assignment alert).
 - **Steps:**
   1. The skill detects the connectors (`whoami`, `list_accounts`, `whatsapp_status`); Canvas is required, Gmail

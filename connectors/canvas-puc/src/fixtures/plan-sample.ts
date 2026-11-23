@@ -1,4 +1,4 @@
-/** Fictitious plan for the `/planejamento` tests (no real student, course or instructor data). */
+/** Fictitious plan for the `/planejamento-faculdade` tests (no real student, course or instructor data). */
 import sample from './plan-sample.json' with { type: 'json' };
 import type { PlanData } from '../plan/plan-schema.js';
 

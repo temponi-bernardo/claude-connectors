@@ -72,7 +72,7 @@ export function extractPlan(html: string): unknown {
   const json = blocks.length === 1 ? blocks[0]?.[2] : undefined;
   if (json === undefined) {
     throw new Error(
-      'No single plan-data block in this page: it was not built by the /planejamento script.',
+      'No single plan-data block in this page: it was not built by the /planejamento-faculdade script.',
     );
   }
   return JSON.parse(json) as unknown;

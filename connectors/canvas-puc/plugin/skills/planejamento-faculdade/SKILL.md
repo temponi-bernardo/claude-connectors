@@ -1,9 +1,9 @@
 ---
-name: planejamento
-description: Builds and keeps up to date the "Plano do Semestre AAAA/S" artifact for any PUC Minas student — risk per course (points missing to pass), what is due today and tomorrow, a day-by-day study plan, course cards with a points bar, a timeline of deadlines and exams with persistent checklists, and questions for instructors — from Canvas plus, when connected, this marketplace's Gmail and WhatsApp connectors. Read-only on every connector. Use when the user types /planejamento or asks for a semester plan, how many points they still need, or to update the plan, in any language, e.g. "monta meu plano do semestre", "quanto falta pra eu passar?" or "atualiza o plano da faculdade".
+name: planejamento-faculdade
+description: Builds and keeps up to date the "Plano do Semestre AAAA/S" artifact for any PUC Minas student — risk per course (points missing to pass), what is due today and tomorrow, a day-by-day study plan, course cards with a points bar, a timeline of deadlines and exams with persistent checklists, and questions for instructors — from Canvas plus, when connected, this marketplace's Gmail and WhatsApp connectors. Read-only on every connector. Use when the user types /planejamento-faculdade or asks for a semester plan, how many points they still need, or to update the plan, in any language, e.g. "monta meu plano do semestre", "quanto falta pra eu passar?" or "atualiza o plano da faculdade".
 ---
 
-# Plano do Semestre (`/planejamento`)
+# Plano do Semestre (`/planejamento-faculdade`)
 
 Builds or updates one private artifact, "Plano do Semestre AAAA/S", in pt-BR. All data goes into one JSON
 file; the page comes from the fixed template next to this file. **Never write or edit the HTML by hand.**

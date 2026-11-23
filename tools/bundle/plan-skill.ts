@@ -1,5 +1,5 @@
 /**
- * Build of the `/planejamento` skill files (canvas-puc): the plan script bundled to `scripts/plan.mjs` and the
+ * Build of the `/planejamento-faculdade` skill files (canvas-puc): the plan script bundled to `scripts/plan.mjs` and the
  * page template with its runtime inlined to `assets/plan-template.html`. Both are generated and versioned,
  * like `server/remote.js`; `pr:check` fails when they are stale.
  */

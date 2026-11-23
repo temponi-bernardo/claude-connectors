@@ -1,5 +1,5 @@
 /**
- * Entry of the `/planejamento` script, bundled to `plugin/skills/planejamento/scripts/plan.mjs` by `npm run build`:
+ * Entry of the `/planejamento-faculdade` script, bundled to `plugin/skills/planejamento-faculdade/scripts/plan.mjs` by `npm run build`:
  * wires the real file system into the tested commands of plan-cli-core.ts.
  */
 import { readFileSync, writeFileSync } from 'node:fs';

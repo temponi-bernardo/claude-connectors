@@ -1,10 +1,10 @@
-// The /planejamento skill text: it names only real tools of this marketplace's connectors and no write tool.
+// The /planejamento-faculdade skill text: it names only real tools of this marketplace's connectors and no write tool.
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const ROOT = resolve(import.meta.dirname, '..', '..', '..', '..');
-const SKILL = join(ROOT, 'connectors', 'canvas-puc', 'plugin', 'skills', 'planejamento');
+const SKILL = join(ROOT, 'connectors', 'canvas-puc', 'plugin', 'skills', 'planejamento-faculdade');
 const TEXT = [
   readFileSync(join(SKILL, 'SKILL.md'), 'utf8'),
   ...readdirSync(join(SKILL, 'references')).map((f) =>
@@ -26,9 +26,11 @@ const CONNECTORS = ['canvas-puc', 'gmail', 'whatsapp'] as const;
 const TOOLS = new Map(CONNECTORS.map((c) => [c, contract(c)]));
 const ALL = [...TOOLS.values()].flat();
 
-describe('/planejamento skill text', () => {
+describe('/planejamento-faculdade skill text', () => {
   it('has the skill frontmatter of the plugin', () => {
-    expect(TEXT).toMatch(/^---\nname: planejamento\ndescription: .*\/planejamento.*\n---/);
+    expect(TEXT).toMatch(
+      /^---\nname: planejamento-faculdade\ndescription: .*\/planejamento-faculdade.*\n---/,
+    );
   });
   it('names only tools that exist in the connector contracts', () => {
     const prefixed = [...TEXT.matchAll(/mcp__(canvas-puc|gmail|whatsapp)__([a-z_]+)/g)];

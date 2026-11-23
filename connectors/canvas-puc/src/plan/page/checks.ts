@@ -106,7 +106,7 @@ export function hasLocalOnly(
 
 /** Storage key of a plan's ticks in this browser. */
 export function localChecksKey(planKey: string): string {
-  return `planejamento:${planKey}`;
+  return `planejamento-faculdade:${planKey}`;
 }
 
 /** Ticks saved in this browser for a plan; empty when storage is missing or blocked. */

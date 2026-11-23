@@ -22,8 +22,8 @@ export const PLUGIN_MCP_CONFIG_PATH = join(PLUGIN_DIR, '.mcp.json');
 export const REMOTE_ENTRY = join('src', 'remote-main.ts');
 export const REMOTE_BUNDLE_PATH = join('server', 'remote.js');
 
-/** `/planejamento` skill folder, relative to the connector folder. */
-export const PLAN_SKILL_DIR = join(PLUGIN_DIR, 'skills', 'planejamento');
+/** `/planejamento-faculdade` skill folder, relative to the connector folder. */
+export const PLAN_SKILL_DIR = join(PLUGIN_DIR, 'skills', 'planejamento-faculdade');
 
 /** Sources (relative to the connector) and outputs (relative to the skill folder). */
 export const PLAN_SOURCES = {

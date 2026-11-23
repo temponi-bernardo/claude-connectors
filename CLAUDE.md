@@ -43,20 +43,20 @@ sweeping the code. Next task: top of `docs/ROADMAP.md`. Where the previous sessi
 
 ## Commands
 
-| Command                                         | Does                                                                                    |
-| ----------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `npm run check`                                 | Format, lint, types, tests with coverage, docs, duplication and secrets                 |
-| `npm run pr:check -- "<title>"`                 | PR gate, once per PR: check, build, bridge, plugin validation and commitlint            |
-| `npm run docs:generate` / `docs:check`          | Updates the generated blocks of the docs / fails if docs and code diverge               |
-| `npm test` / `npm run test:coverage`            | Tests / with a 90% minimum coverage                                                     |
-| `npm run lint:fix` / `format:fix` / `typecheck` | ESLint / Prettier / `tsc --noEmit`                                                      |
-| `npm run dup:check` / `secrets:check`           | jscpd / gitleaks                                                                        |
-| `npm run build`                                 | Validates `.mcp.json` (remote only) and generates each connector's `server/remote.js`   |
-| `npm run worker:deploy` / `worker:dev`          | Deploys the remote Canvas to Cloudflare Workers, then the smoke test / runs it local    |
-| `npm run gmail:deploy` / `gmail:dev`            | Same for the remote Gmail                                                               |
-| `npm run whatsapp:deploy` / `whatsapp:build`    | Deploys WhatsApp (Workers + Containers) / bundle and image only                         |
-| `npm run smoke -- <connector>`                  | Post-deploy smoke: published `GET /tools` must equal `tool-contract.json` (ADR 0027)    |
-| `npm run bridge:test`                           | WhatsApp Go bridge: gofmt, vet and tests (Go 1.26+, part of `pr:check`)                 |
-| `npm run plan:e2e`                              | `/planejamento` page in Chromium (Playwright): run when its template or runtime changes |
+| Command                                         | Does                                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `npm run check`                                 | Format, lint, types, tests with coverage, docs, duplication and secrets                           |
+| `npm run pr:check -- "<title>"`                 | PR gate, once per PR: check, build, bridge, plugin validation and commitlint                      |
+| `npm run docs:generate` / `docs:check`          | Updates the generated blocks of the docs / fails if docs and code diverge                         |
+| `npm test` / `npm run test:coverage`            | Tests / with a 90% minimum coverage                                                               |
+| `npm run lint:fix` / `format:fix` / `typecheck` | ESLint / Prettier / `tsc --noEmit`                                                                |
+| `npm run dup:check` / `secrets:check`           | jscpd / gitleaks                                                                                  |
+| `npm run build`                                 | Validates `.mcp.json` (remote only) and generates each connector's `server/remote.js`             |
+| `npm run worker:deploy` / `worker:dev`          | Deploys the remote Canvas to Cloudflare Workers, then the smoke test / runs it local              |
+| `npm run gmail:deploy` / `gmail:dev`            | Same for the remote Gmail                                                                         |
+| `npm run whatsapp:deploy` / `whatsapp:build`    | Deploys WhatsApp (Workers + Containers) / bundle and image only                                   |
+| `npm run smoke -- <connector>`                  | Post-deploy smoke: published `GET /tools` must equal `tool-contract.json` (ADR 0027)              |
+| `npm run bridge:test`                           | WhatsApp Go bridge: gofmt, vet and tests (Go 1.26+, part of `pr:check`)                           |
+| `npm run plan:e2e`                              | `/planejamento-faculdade` page in Chromium (Playwright): run when its template or runtime changes |
 
 Hooks, skills and agents: `docs/WORKFLOW.md` → "Claude Code context cycle".
