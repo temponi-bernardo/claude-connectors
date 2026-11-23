@@ -3,6 +3,7 @@
   "release-type": "node",
   "include-component-in-tag": false,
   "draft": true,
+  "group-pull-request-title-pattern": "chore(release): release ${branch}",
   "changelog-path": "CHANGELOG.md",
   "bump-minor-pre-major": true,
   "bump-patch-for-minor-pre-major": true,

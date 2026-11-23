@@ -29,12 +29,16 @@ no GitHub Actions: release-please runs through the local CLI).
 4. **Move "Unreleased"** into the version in the release PR if the human text is better than the generated one
    (edit the release-please branch; it keeps manual edits to the CHANGELOG).
 5. **Merge** the release PR without asking for confirmation (`gh pr merge --squash`), like any PR with a green
-   `pr:check` (`docs/WORKFLOW.md`). Never create a tag by hand.
+   `pr:check` (`docs/WORKFLOW.md`). Never create a tag by hand. The PR title is `chore(release): release main`
+   (`group-pull-request-title-pattern`), so commitlint passes; a Docker-less session cannot run
+   `whatsapp:build` (run the other `pr:check` steps by hand and say so in the PR).
 6. **Tag and draft:** after the merge,
    `npx release-please github-release --draft --token "$(gh auth token)" --repo-url temponi-bernardo/claude-connectors`
-   creates the `vX.Y.Z` tag (and `<name>-vX.Y.Z` for each released plugin) and the draft with the notes. There is
+   creates the drafts with the notes for `vX.Y.Z` (and `<name>-vX.Y.Z` for each released plugin); GitHub creates
+   the tags only when a draft is published, and the next release PR needs them as its baseline. There is
    no attachment: the plugin points to the remote server (ADR 0013). Publishing is the person's decision
-   (`gh release edit vX.Y.Z --draft=false`).
+   (`gh release edit vX.Y.Z --draft=false`). Cloud sessions may be refused release edits: then the person
+   publishes each draft on GitHub (Releases page).
 7. **Remote server:** if the release touched the connector, run `npm run worker:deploy` on `main` (needs
    `CLOUDFLARE_API_TOKEN`); without it, whoever installed from the marketplace stays on the old Worker version.
 8. **After:** confirm that `package.json` and each `plugin.json` have the same version as
