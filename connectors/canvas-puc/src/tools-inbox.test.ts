@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { ToolSpec } from '../../../src/mcp/tools.js';
 import type { CanvasContext } from './context.js';
-import { fakeContext, type Routes } from './fixtures/fake-context.js';
+import { fakeContext, resultParts, type Routes } from './fixtures/fake-context.js';
 import {
   CANVAS_INBOX_READ_TOOLS,
   CANVAS_INBOX_WRITE_TOOLS,
@@ -39,10 +39,25 @@ describe('inbox read tools', () => {
   it('list_conversations uses the inbox scope and 20 items by default', async () => {
     const routes = { '/conversations': [{ id: 1, subject: 'S' }] };
     const { result, getAll } = await runInbox('list_conversations', {}, routes);
-    expect(result).toMatchObject([{ id: 1, subject: 'S' }]);
+    expect(resultParts(result).rows).toMatchObject([{ id: 1, subject: 'S' }]);
     expect(getAll).toHaveBeenCalledWith('/conversations', { scope: 'inbox' }, 20);
     const sent = await runInbox('list_conversations', { scope: 'sent', limit: 5 }, routes);
     expect(sent.getAll).toHaveBeenCalledWith('/conversations', { scope: 'sent' }, 5);
+  });
+
+  it('list_conversations with changed_since keeps only conversations with newer messages', async () => {
+    const routes = {
+      '/conversations': [
+        { id: 1, last_message_at: '2026-11-04T00:00:00Z' },
+        { id: 2, last_message_at: '2026-10-04T00:00:00Z' },
+      ],
+    };
+    const args = { changed_since: '2026-11-01T00:00:00-03:00' };
+    const { rows, notes } = resultParts(
+      (await runInbox('list_conversations', args, routes)).result,
+    );
+    expect(rows).toEqual([expect.objectContaining({ id: 1 })]);
+    expect(notes[0]).toContain('checked_at=');
   });
 
   it('get_conversation reads it without marking it as read', async () => {

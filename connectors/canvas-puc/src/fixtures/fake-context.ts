@@ -5,6 +5,7 @@ import { vi, type Mock } from 'vitest';
 import type { CanvasClient, CanvasUploadSlot, UploadedBytes } from '../client.js';
 import type { CanvasContext } from '../context.js';
 import type { QueryParams } from '../../../../src/core/http.js';
+import { toToolResult } from '../../../../src/mcp/tools.js';
 
 /** Responses by path; an `Error` as the value makes the call fail. */
 export type Routes = Record<string, unknown>;
@@ -54,4 +55,10 @@ export function fakeContext(routes: Routes = {}): FakeContext {
   } as unknown as CanvasClient;
   const ctx: CanvasContext = { client, now: () => new Date('2026-11-05T12:00:00Z') };
   return { ctx, get, getAll, post, fetchText, fetchBytes, fetchStream, upload };
+}
+
+/** Text blocks of a tool result: the JSON rows parsed and the notes after them. */
+export function resultParts(result: unknown): { rows: never; notes: string[] } {
+  const [first, ...rest] = toToolResult(result).content.map((c) => (c as { text: string }).text);
+  return { rows: JSON.parse(first ?? 'null') as never, notes: rest };
 }

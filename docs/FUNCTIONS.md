@@ -12,6 +12,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- index:start -->
 
 - `connectors/canvas-puc/src/attachment-refs.ts`: [`attachmentCountRefusal`](#attachmentcountrefusal), [`conversationFolderId`](#conversationfolderid), [`fetchAttachmentFile`](#fetchattachmentfile), [`needsConversationCopy`](#needsconversationcopy), [`copyToConversationFolder`](#copytoconversationfolder), [`resolveFileAttachments`](#resolvefileattachments), [`collectMessageAttachments`](#collectmessageattachments), [`shellQuote`](#shellquote), [`curlUploadCommand`](#curluploadcommand), [`prepareAttachmentUpload`](#prepareattachmentupload)
+- `connectors/canvas-puc/src/changes.ts`: [`latestStamp`](#lateststamp), [`keepChanged`](#keepchanged), [`assignmentStamps`](#assignmentstamps), [`announcementStamps`](#announcementstamps), [`topicStamps`](#topicstamps), [`conversationStamps`](#conversationstamps), [`checkedAtNote`](#checkedatnote), [`withCheckedAt`](#withcheckedat)
 - `connectors/canvas-puc/src/chunks.ts`: [`planDownloadChunk`](#plandownloadchunk), [`chunkDescription`](#chunkdescription), [`chunkMimeType`](#chunkmimetype), [`chunkUri`](#chunkuri), [`rangeHeaders`](#rangeheaders), [`isRangeAnswer`](#israngeanswer)
 - `connectors/canvas-puc/src/client.ts`: [`unauthorizedMessage`](#unauthorizedmessage), [`sendCanvasRequest`](#sendcanvasrequest), [`canvasApiError`](#canvasapierror), [`canvasErrorStatus`](#canvaserrorstatus), [`isPermissionDenial`](#ispermissiondenial), [`requestCanvas`](#requestcanvas), [`collectPages`](#collectpages), [`fetchDownload`](#fetchdownload), [`fetchPlainText`](#fetchplaintext), [`fetchFileBytes`](#fetchfilebytes), [`uploadForm`](#uploadform), [`postUploadForm`](#postuploadform), [`confirmUpload`](#confirmupload), [`createCanvasClient`](#createcanvasclient)
 - `connectors/canvas-puc/src/file-ref.ts`: [`fileRefFromUrl`](#filereffromurl), [`fileRefFromArgs`](#filereffromargs), [`fileLookupPlan`](#filelookupplan), [`fileAccessReason`](#fileaccessreason), [`fileAccessError`](#fileaccesserror), [`resolveCanvasFile`](#resolvecanvasfile)
@@ -2404,14 +2405,14 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `textResult(data: unknown, notes: readonly string[] = []): CallToolResult`
-- **Used by:** `connectors/canvas-puc/src/tools-read.ts (module)`, `listFilesWithLinked()`, `toToolResult()`
+- **Used by:** `connectors/canvas-puc/src/tools-read.ts (module)`, `listFilesWithLinked()`, `toToolResult()`, `withCheckedAt()`
 - **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
 
 <!-- generated:end -->
 
 - **Does:** Converts a tool's return value into a text MCP result.
 - **Input:** `data`: text or serializable value; `notes`: extra texts (default empty).
-- **Output:** `CallToolResult` with one text block (indented JSON if not a string) plus one per note.
+- **Output:** `CallToolResult` with one text block (compact JSON if not a string, to save tokens) plus one per note.
 - **Effects:** None (pure).
 - **Errors:** Throws if `data` is not JSON-serializable (e.g. circular reference).
 
@@ -2472,7 +2473,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `rawToolResult(result: CallToolResult): RawToolResult`
-- **Used by:** `chunkToolResult()`, `connectors/canvas-puc/src/tools-read.ts (module)`, `disabledToolSpec()`, `listFilesWithLinked()`, `mediaResult()`
+- **Used by:** `chunkToolResult()`, `connectors/canvas-puc/src/tools-read.ts (module)`, `disabledToolSpec()`, `listFilesWithLinked()`, `mediaResult()`, `withCheckedAt()`
 - **Processes:** P03, P08, P09, P13, P14, P19
 
 <!-- generated:end -->
@@ -14817,6 +14818,144 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** None.
 
+## `connectors/canvas-puc/src/changes.ts`
+
+### `latestStamp`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/changes.ts`
+- **Signature:** `latestStamp(stamps: Stamps): number`
+- **Used by:** `keepChanged()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Picks the latest valid timestamp among an item's dates.
+- **Input:** `stamps`: ISO dates, possibly `null`/`undefined` or invalid.
+- **Output:** Milliseconds of the latest valid date, or `NaN` when none is valid.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `keepChanged`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/changes.ts`
+- **Signature:** `keepChanged(items: readonly T[], since: string | undefined, stampsOf: (item: T) => Stamps): readonly T[]`
+- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`, `connectors/canvas-puc/src/tools-read.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Keeps the items changed at or after the `changed_since` cursor; items with no date stay, so nothing is missed.
+- **Input:** `items`; `since`: ISO cursor or `undefined`; `stampsOf`: reads the dates of an item.
+- **Output:** The same array when there is no cursor, else the filtered items.
+- **Effects:** None (pure).
+- **Errors:** None (`changedSinceArg` validates the cursor before).
+
+### `assignmentStamps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/changes.ts`
+- **Signature:** `assignmentStamps(a: CanvasAssignment): Stamps`
+- **Used by:** `connectors/canvas-puc/src/tools-read.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Lists the dates that change an assignment for the student.
+- **Input:** `a`: Canvas assignment with `include[]=submission`.
+- **Output:** `[updated_at, submission.submitted_at, submission.graded_at]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `announcementStamps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/changes.ts`
+- **Signature:** `announcementStamps(a: CanvasAnnouncement): Stamps`
+- **Used by:** `connectors/canvas-puc/src/tools-read.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Lists the date of an announcement.
+- **Input:** `a`: Canvas announcement.
+- **Output:** `[posted_at]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `topicStamps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/changes.ts`
+- **Signature:** `topicStamps(t: CanvasDiscussionTopic): Stamps`
+- **Used by:** `connectors/canvas-puc/src/tools-read.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Lists the dates of a discussion forum.
+- **Input:** `t`: Canvas discussion topic.
+- **Output:** `[posted_at, last_reply_at]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `conversationStamps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/changes.ts`
+- **Signature:** `conversationStamps(c: CanvasConversation): Stamps`
+- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Lists the date of the last message of an inbox conversation.
+- **Input:** `c`: Canvas conversation.
+- **Output:** `[last_message_at]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `checkedAtNote`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/changes.ts`
+- **Signature:** `checkedAtNote(now: Date): string`
+- **Used by:** `withCheckedAt()`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Builds the note that gives the model the cursor for its next call.
+- **Input:** `now`: time taken before reading Canvas.
+- **Output:** `checked_at=<ISO> (pass it as changed_since ...)`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `withCheckedAt`
+
+<!-- generated:start -->
+
+- **File:** `connectors/canvas-puc/src/changes.ts`
+- **Signature:** `withCheckedAt(data: unknown, now: Date): RawToolResult`
+- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`, `connectors/canvas-puc/src/tools-read.ts (module)`
+- **Processes:** P03
+
+<!-- generated:end -->
+
+- **Does:** Wraps a listing with the `checked_at` note.
+- **Input:** `data`: the views; `now`: the cursor time.
+- **Output:** `RawToolResult`: compact JSON block plus the note block.
+- **Effects:** None (pure).
+- **Errors:** None.
+
 ## Data and constants
 
 | Name                              | File                                                    | What it is                                                                                                                                                                                   |
@@ -14859,6 +14998,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `PLUGIN_MCP_CONFIG_PATH`          | `tools/bundle/bundle.ts`                                | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                                                                                           |
 | `CANVAS_PAGE_SIZE`                | `connectors/canvas-puc/src/client.ts`                   | Items per page requested from Canvas (`per_page`, the API maximum).                                                                                                                          |
 | `CONVERSATION_PREVIEW_LENGTH`     | `connectors/canvas-puc/src/inbox.ts`                    | Maximum length of the last-message preview in `list_conversations`.                                                                                                                          |
+| `changedSinceArg`                 | `connectors/canvas-puc/src/changes.ts`                  | Optional `changed_since` argument (ISO with offset) of `list_assignments`, `list_announcements`, `list_discussions` and `list_conversations`.                                                |
 | `MAX_MESSAGE_RECIPIENTS`          | `connectors/canvas-puc/src/tools-inbox.ts`              | Maximum recipients of one `send_message` (user IDs only).                                                                                                                                    |
 | `CANVAS_INBOX_READ_TOOLS`         | `connectors/canvas-puc/src/tools-inbox.ts`              | Inbox read tools: `find_recipients`, `list_conversations`, `get_conversation`.                                                                                                               |
 | `CANVAS_INBOX_WRITE_TOOLS`        | `connectors/canvas-puc/src/tools-inbox.ts`              | Inbox send tools `send_message`, `reply_message` (with attachments); always listed, refusing with the reason when writing is off for the user.                                               |
