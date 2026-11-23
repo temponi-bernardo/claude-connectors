@@ -55,6 +55,20 @@ export const TEST_EXCEPTIONS: readonly TestException[] = [
       'After a deploy run `npm run smoke -- canvas-puc`: it prints "✔ smoke canvas-puc"; edit tool-contract.json and it exits 1 listing the difference.',
   },
   {
+    name: 'runPlanCli',
+    reason:
+      'Entry point of the /planejamento script: wires the real file system into runPlanCommand (tested with an in-memory PlanIo).',
+    manualTest:
+      'Run `node connectors/canvas-puc/plugin/skills/planejamento/scripts/plan.mjs build connectors/canvas-puc/src/fixtures/plan-sample.json --out /tmp/p.html` and then `extract /tmp/p.html --out /tmp/p.json`.',
+  },
+  {
+    name: 'buildPlanSkill',
+    reason:
+      'Build CLI glue: runs esbuild and writes the plan script and template; the pieces are tested in plan-skill.test.ts, which also checks the versioned files are current.',
+    manualTest:
+      'Run `npm run build` and check that `git status` shows no change under connectors/canvas-puc/plugin/skills/planejamento/.',
+  },
+  {
     name: 'runBuildCli',
     reason: 'Build CLI entry point: it only lists the connectors and calls buildConnector.',
     manualTest: 'Run `npm run build` and check for one "✔ <connector>" line per connector.',

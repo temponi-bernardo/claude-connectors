@@ -127,7 +127,10 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      a fixed `https://` URL (no `${user_config.*}`), or one with a local `command`.
   3. If there is a `src/remote-main.ts`, bundles the remote server with esbuild (`bundleOptions()`) into
      `connectors/<nome>/server/remote.js`, used by the Dockerfile (P08). The Worker compiles straight from `src/`.
-- **Result:** plugin checked and remote bundle updated in the connector folder.
+  4. If `hasPlanSkill()` (canvas-puc), `buildPlanSkill()` bundles the plan script (`planCliBundleOptions()`) into
+     `plugin/skills/planejamento/scripts/plan.mjs` and writes the page template from `buildPlanTemplate()`
+     (`planRuntimeBundleOptions()` + `inlinePlanRuntime()`) into `assets/plan-template.html` (P20).
+- **Result:** plugin checked and remote bundle (and plan skill files) updated in the connector folder.
 - **Failures:** a `.mcp.json` with a local server or an insecure URL, or a compile error, aborts with the list of
   problems.
 
@@ -451,3 +454,31 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
   exit 1, the deploy command fails and prints the `wrangler rollback` command. The same comparison runs in the
   unit tests (`contract.test.ts` of each connector, `unregisteredToolMentions()` over `snakeCaseWords()` and `toolTexts()`), so a
   divergence is normally caught before deploying.
+
+## P20 — Semester plan (`/planejamento`)
+
+- **Trigger:** the student types `/planejamento` (or asks for the semester plan), or one of its three routines
+  fires (morning, night, unsent-assignment alert).
+- **Steps:**
+  1. The skill detects the connectors (`whoami`, `list_accounts`, `whatsapp_status`); Canvas is required, Gmail
+     and WhatsApp are optional and go to `missingSources` when absent. Everything is read-only.
+  2. Update mode: the published page is saved and `runPlanCommand()` runs `extract` (`runExtract()`,
+     `extractPlan()`, `validatePlan()`) to recover the plan JSON with its ids.
+  3. Claude writes the plan JSON (format in the skill's `references/plan-json.md`) and runs `build`
+     (`runBuild()`): `planSchema` checks the shape, `readPreviousPlan()` reads `--previous`, `mergeWithPrevious()`
+     reuses ids (`assignPlanIds()`, `previousIdIndex()`, `planIdEntries()`, `stableItemId()`) and carries over
+     left-out items (`carryPreviousItems()`, `carryDays()`), `validatePlan()` checks the rules (`checkPointSums()`,
+     `checkPlanDates()`, `checkPlanIds()`, `checkCourseRefs()`) and `injectPlan()` puts `serializePlanJson()` into
+     the template from P05.
+  4. Claude publishes the page as a private artifact with the `db` and `user` capabilities.
+  5. In the browser, `startPlanPage()` → `bootPlanPage()` reads `readEmbeddedPlan()`, renders with
+     `renderPlanSections()` (header, risk chips, today, study, cards with `barSegments()` and `riskLevel()`,
+     timeline, questions, footer) using only `createEl()`/`appendRichText()`, and wires the checklists:
+     `createCheckStore()` loads localStorage, `registerCheck()` keys each box by its stable id, and
+     `connectAccount()` → `accountDocument()` / `adoptAccount()` merge with `data/users/<uid>/<planKey>`
+     (`mergeChecks()`), write with `flushChecks()` (`retryOnUnavailable()`) and follow other devices with
+     `onRemoteSnapshot()`.
+- **Result:** an up-to-date "Plano do Semestre" whose ticks survive reloads, plan updates and devices.
+- **Failures:** Canvas not connected → the skill stops and points to `/setup-canvas`; an invalid plan → `build`
+  writes nothing and lists the errors; broken page data → `#plan-error` shows the message; no account → the
+  ticks stay in this browser (`local` state).

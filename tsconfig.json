@@ -26,5 +26,6 @@
     "vitest.config.ts",
     "eslint.config.js",
     "commitlint.config.js"
-  ]
+  ],
+  "exclude": ["connectors/canvas-puc/src/plan/page/**"]
 }

@@ -17,3 +17,7 @@ Nothing runs on your computer. The server code and the full guide live one folde
 - `/weekly-summary` — assignments due, overdue work, announcements and grades for the week.
 - `/prepare-submission` — description, rubric, checklist, plan and review; submits only with confirmation.
 - `/study-course` — module summaries, key concepts, review questions and a plan up to the exam.
+- `/planejamento` — builds and keeps the "Plano do Semestre AAAA/S" artifact: risk per course, today and
+  tomorrow, a day-by-day study plan, course cards with a points bar, a timeline with persistent checklists and
+  questions for instructors. Optional sources: the `gmail` and `whatsapp` plugins of this marketplace; it offers
+  three daily routines (morning, night and an unsent-assignment alert). Read-only on every connector.

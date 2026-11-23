@@ -47,6 +47,11 @@ Node).
   `pair` and `tools` act through injected ports (testable with fakes) and only `container.ts`/`index.ts` touch the
   runtime.
 - `src/core/` also holds format readers used by more than one connector (Word, ZIP, PDF).
+- The `/planejamento` code in `connectors/canvas-puc/src/plan/` never runs on the server: `plan-cli.ts` is
+  bundled into the skill's `scripts/plan.mjs` and `page/` (browser code, own tsconfig with the DOM lib) is
+  inlined into `assets/plan-template.html` (ADR 0030). `page/` imports only the pure plan modules
+  (`plan-schema` types, `plan-points`, `plan-embed`); the page talks to the outside only through the artifact
+  runtime (`claude.use('db')`, `claude.use('user')`) and localStorage.
 - `core` never imports Node (`node:fs`, `node:http`) or libraries with effects; `core` tests use no mocks.
 
 ## Data flow
@@ -57,11 +62,12 @@ as JSON text. Details in [PROCESSES.md](PROCESSES.md) (P03–P05).
 
 ## Installation and deploy
 
-| Piece                      | How it reaches the user                                                           | Decision |
-| -------------------------- | --------------------------------------------------------------------------------- | -------- |
-| Marketplace plugin         | Claude → Add marketplace `temponi-bernardo/claude-connectors`                     | ADR 0013 |
-| Server (Cloudflare Worker) | `npm run worker:deploy` compiles `src/worker.ts` and publishes                    | ADR 0010 |
-| Node server (Docker)       | Alternative: `npm run build` generates `server/remote.js`, used by the Dockerfile | ADR 0009 |
+| Piece                      | How it reaches the user                                                                                            | Decision |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- |
+| Marketplace plugin         | Claude → Add marketplace `temponi-bernardo/claude-connectors`                                                      | ADR 0013 |
+| Server (Cloudflare Worker) | `npm run worker:deploy` compiles `src/worker.ts` and publishes                                                     | ADR 0010 |
+| Node server (Docker)       | Alternative: `npm run build` generates `server/remote.js`, used by the Dockerfile                                  | ADR 0009 |
+| `/planejamento` files      | `npm run build` generates `scripts/plan.mjs` and `assets/plan-template.html` in the skill, shipped with the plugin | ADR 0030 |
 
 The plugin lives in `connectors/<name>/plugin/` (ADR 0020) and has only `.claude-plugin/plugin.json`, skills and
 `.mcp.json` (an `http` server with the Worker URL). `npm run build` (P05) rejects any `.mcp.json` with a local
@@ -105,7 +111,7 @@ Dev: `esbuild` (Dockerfile bundle) and `wrangler` (Worker, ADR 0010), plus the t
 ## Internal tooling (`tools/`)
 
 `tools/docs/` is the documentation checker/generator, `tools/hooks/` tests the Claude Code hooks and
-`tools/bundle/` checks the plugins and builds the server bundle. They follow the same rules as product code
+`tools/bundle/` checks the plugins and builds the server bundle and the `/planejamento` skill files. They follow the same rules as product code
 (documentation, tests, lint) but do not ship in the server.
 
 ## Decisions

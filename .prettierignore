@@ -7,3 +7,7 @@ tools/**/fixtures/**
 
 # Generated remote server bundle (npm run build), versioned for the Dockerfile
 connectors/*/server/
+
+# Generated /planejamento skill files (npm run build), versioned like server/
+connectors/*/plugin/skills/*/scripts/
+connectors/*/plugin/skills/*/assets/
