@@ -1,7 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import { startOfDayIn, zoneOffsetMinutes } from './time.js';
+import { parseOffsetLabel, startOfDayIn, zoneOffsetMinutes } from './time.js';
 
 const SP = 'America/Sao_Paulo';
+
+describe('parseOffsetLabel', () => {
+  it('reads GMT, negative and positive offsets', () => {
+    expect(parseOffsetLabel('GMT')).toBe(0);
+    expect(parseOffsetLabel('GMT-03:00')).toBe(-180);
+    expect(parseOffsetLabel('GMT+05:30')).toBe(330);
+  });
+
+  it('refuses any other label instead of guessing zero', () => {
+    for (const label of [undefined, '', 'UTC', 'GMT-3', 'xGMT+01:00']) {
+      expect(() => parseOffsetLabel(label)).toThrow(RangeError);
+    }
+  });
+});
 
 describe('zoneOffsetMinutes', () => {
   it('reads the offset of a zone at an instant', () => {
