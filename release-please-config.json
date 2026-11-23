@@ -57,7 +57,6 @@
     "connectors/canvas-puc": {
       "package-name": "canvas-puc",
       "component": "canvas-puc",
-      "release-as": "3.2.0",
       "release-type": "simple",
       "include-component-in-tag": true,
       "extra-files": [

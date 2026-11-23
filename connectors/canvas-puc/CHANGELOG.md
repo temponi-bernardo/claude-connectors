@@ -5,6 +5,8 @@ Plugin and remote server versions of the Canvas connector (ADR 0022). The reposi
 
 ## Unreleased
 
+## [3.2.0](https://github.com/temponi-bernardo/claude-connectors/compare/canvas-puc-v3.1.0...canvas-puc-v3.2.0) (2026-11-23)
+
 ### Added
 
 - `/planejamento-faculdade` skill: builds and updates the "Plano do Semestre AAAA/S" artifact (risk per course, today and
