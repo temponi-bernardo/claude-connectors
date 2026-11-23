@@ -22526,7 +22526,7 @@ var CANVAS_READ_TOOLS = [
     description: "Recent announcements of one course or of every active course. With changed_since, only those posted since then.",
     shape: {
       course_id: courseId.optional().describe("When omitted, searches every active course"),
-      days: external_exports.number().int().min(1).max(365).optional().describe("Days back (default 30)"),
+      days: external_exports.number().int().min(1).max(365).optional().describe("Days back (default 30; ignored with changed_since, which sets the start)"),
       raw_html: rawHtml,
       changed_since: changedSinceArg
     },
@@ -22537,7 +22537,7 @@ var CANVAS_READ_TOOLS = [
       if (ids.length === 0) return withCheckedAt([], checkedAt);
       const params = {
         context_codes: courseContextCodes(ids),
-        start_date: isoDaysFrom(checkedAt, -(args.days ?? 30)),
+        start_date: args.changed_since ?? isoDaysFrom(checkedAt, -(args.days ?? 30)),
         end_date: checkedAt.toISOString()
       };
       const list = await client.getAll("/announcements", params);
@@ -27237,7 +27237,7 @@ var CANVAS_INBOX_READ_TOOLS = [
     description: "List the Canvas inbox conversations (messages), newest first. With changed_since, only those with a message since then.",
     shape: {
       scope: external_exports.enum(["inbox", "unread", "starred", "sent", "archived"]).optional(),
-      limit: external_exports.number().int().min(1).max(100).optional().describe("Default 20"),
+      limit: external_exports.number().int().min(1).max(100).optional().describe("Conversations read, newest first (default 20; 100 with changed_since)"),
       changed_since: changedSinceArg
     },
     annotations: toolAnnotations("List conversations", READ_ONLY_HINTS),
@@ -27247,7 +27247,7 @@ var CANVAS_INBOX_READ_TOOLS = [
       const list = await client.getAll(
         "/conversations",
         params,
-        args.limit ?? 20
+        args.limit ?? (args.changed_since === void 0 ? 20 : 100)
       );
       const changed = keepChanged(list, args.changed_since, conversationStamps);
       return withCheckedAt(changed.map(toConversationSummary), checkedAt);

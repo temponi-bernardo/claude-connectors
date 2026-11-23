@@ -65,7 +65,13 @@ export const CANVAS_INBOX_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
       'List the Canvas inbox conversations (messages), newest first. With changed_since, only those with a message since then.',
     shape: {
       scope: z.enum(['inbox', 'unread', 'starred', 'sent', 'archived']).optional(),
-      limit: z.number().int().min(1).max(100).optional().describe('Default 20'),
+      limit: z
+        .number()
+        .int()
+        .min(1)
+        .max(100)
+        .optional()
+        .describe('Conversations read, newest first (default 20; 100 with changed_since)'),
       changed_since: changedSinceArg,
     },
     annotations: toolAnnotations('List conversations', READ_ONLY_HINTS),
@@ -75,7 +81,7 @@ export const CANVAS_INBOX_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
       const list = await client.getAll<CanvasConversation>(
         '/conversations',
         params,
-        args.limit ?? 20,
+        args.limit ?? (args.changed_since === undefined ? 20 : 100),
       );
       const changed = keepChanged(list, args.changed_since, conversationStamps);
       return withCheckedAt(changed.map(inbox.toConversationSummary), checkedAt);

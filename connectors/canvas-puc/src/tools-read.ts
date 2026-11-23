@@ -177,7 +177,13 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
       'Recent announcements of one course or of every active course. With changed_since, only those posted since then.',
     shape: {
       course_id: courseId.optional().describe('When omitted, searches every active course'),
-      days: z.number().int().min(1).max(365).optional().describe('Days back (default 30)'),
+      days: z
+        .number()
+        .int()
+        .min(1)
+        .max(365)
+        .optional()
+        .describe('Days back (default 30; ignored with changed_since, which sets the start)'),
       raw_html: rawHtml,
       changed_since: changes.changedSinceArg,
     },
@@ -191,7 +197,7 @@ export const CANVAS_READ_TOOLS: readonly ToolSpec<CanvasContext>[] = [
       if (ids.length === 0) return changes.withCheckedAt([], checkedAt);
       const params = {
         context_codes: h.courseContextCodes(ids),
-        start_date: h.isoDaysFrom(checkedAt, -(args.days ?? 30)),
+        start_date: args.changed_since ?? h.isoDaysFrom(checkedAt, -(args.days ?? 30)),
         end_date: checkedAt.toISOString(),
       };
       const list = await client.getAll<CanvasAnnouncement>('/announcements', params);

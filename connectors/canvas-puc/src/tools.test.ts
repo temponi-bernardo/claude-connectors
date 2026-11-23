@@ -192,6 +192,7 @@ describe('read tools', () => {
       },
     );
     expect(resultParts(ann.result).rows).toEqual([expect.objectContaining({ id: 2 })]);
+    expect(ann.getAll.mock.calls[0]![1]).toMatchObject({ start_date: since });
     const topics = await run(
       'list_discussions',
       { course_id: 1, changed_since: since },

@@ -58,6 +58,8 @@ describe('inbox read tools', () => {
     );
     expect(rows).toEqual([expect.objectContaining({ id: 1 })]);
     expect(notes[0]).toContain('checked_at=');
+    const fetched = await runInbox('list_conversations', args, routes);
+    expect(fetched.getAll).toHaveBeenCalledWith('/conversations', { scope: 'inbox' }, 100);
   });
 
   it('get_conversation reads it without marking it as read', async () => {

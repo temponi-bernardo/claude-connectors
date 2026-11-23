@@ -34,5 +34,6 @@ the client (the plan artifact, `generatedAt`).
 - Positive: smaller results everywhere; a plan update reads only deltas; nothing new is stored.
 - Negative / accepted costs: items with no date are always returned (conservative); `checked_at` uses the
   server clock, so callers that build their own cursor should subtract a margin. Canvas is still read in full;
-  only the result is filtered.
+  only the result is filtered. With a cursor, `list_announcements` searches from the cursor (not the last
+  `days`) and `list_conversations` reads up to 100 conversations, so older changes are not cut off.
 - Docs that change: PROCESSES (P03 step 8), FUNCTIONS, connector README, `/planejamento-faculdade` skill.
