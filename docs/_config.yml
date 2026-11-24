@@ -1,9 +1,0 @@
-# Public GitHub Pages site (ADR 0012). Source: branch `main`, folder `/docs`.
-# Only the site pages are published: the internal documentation (*.md and adr/) is left out.
-title: Claude Connectors
-description: MCP connectors for Claude, starting with the PUC Minas Canvas.
-lang: en
-exclude:
-  - '*.md'
-  - adr
-  - STATE.md

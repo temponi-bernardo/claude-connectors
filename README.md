@@ -19,7 +19,7 @@ server, and you sign in the first time, on an OAuth page.
 
 ## Site
 
-The service's public page, privacy policy and terms: <https://temponi-bernardo.github.io/claude-connectors/>.
+The service's public page, privacy policy and terms: <https://claude-connectors-site.bftemponi.workers.dev/>.
 
 ## About this repository
 
