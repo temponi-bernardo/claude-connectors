@@ -15,6 +15,8 @@ const ROOT = join(import.meta.dirname, '..');
 const ALLOWED_MODULE_STATE: Readonly<Record<string, string>> = {
   'connectors/gmail/src/access-token.ts#accessTokenCache':
     'Keyed by owner AND account email (accessTokenKey); isolation.test.ts proves user B never gets user A’s token.',
+  'connectors/spotify/src/access-token.ts#spotifyTokenCache':
+    'Keyed by owner (the Spotify account); connectors/spotify/src/isolation.test.ts proves user B never gets user A’s token.',
 };
 
 /** Source files of the shared code and of every connector (tests and fixtures excluded). */

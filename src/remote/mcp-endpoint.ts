@@ -45,3 +45,15 @@ export function toolsListRequest(origin: string): Request {
 export function serveToolCatalog(server: McpServer, origin: string): Promise<Response> {
   return serveMcpRequest(server, toolsListRequest(origin));
 }
+
+/** Serves the public routes every Worker connector shares: `GET /` (health) and `GET /tools` (catalog); null otherwise. */
+export function serveCommonRoute(
+  request: Request,
+  catalogServer: () => McpServer,
+): Promise<Response> | null {
+  if (request.method !== 'GET') return null;
+  const url = new URL(request.url);
+  if (url.pathname === '/') return Promise.resolve(new Response('ok'));
+  if (url.pathname === TOOL_CATALOG_PATH) return serveToolCatalog(catalogServer(), url.origin);
+  return null;
+}

@@ -24,6 +24,8 @@ find everything here without scanning the code. When docs and code diverge, `npm
 | Know how to report a vulnerability                         | [../SECURITY.md](../SECURITY.md)                        |
 | Know how user data is kept apart (isolation map)           | [security/isolation.md](security/isolation.md)          |
 | Prepare a connector for Anthropic's Connectors Directory   | [DIRECTORY-LISTING.md](DIRECTORY-LISTING.md)            |
+| Know which Spotify endpoints exist in 2026 (and what not)  | [SPOTIFY-API.md](SPOTIFY-API.md)                        |
+| See the Spotify use-case brainstorm                        | [SPOTIFY-IDEAS.md](SPOTIFY-IDEAS.md)                    |
 
 ## Who checks what
 

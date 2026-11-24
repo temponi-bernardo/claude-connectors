@@ -8,6 +8,8 @@ MCP connectors for Claude that run in the cloud and install from the plugin mark
 | ----------------------------------------------- | ---------------------------------------------------------------------------- |
 | [`canvas-puc`](connectors/canvas-puc/README.md) | PUC Minas's Canvas LMS: due dates, assignments, grades, announcements, files |
 | [`gmail`](connectors/gmail/README.md)           | Multi-account Gmail: read, send, reply, forward, drafts and organize         |
+| [`spotify`](connectors/spotify/README.md)       | Spotify with your own app: library, playlists, cleanups with preview/backup  |
+| [`whatsapp`](connectors/whatsapp/README.md)     | Personal WhatsApp through your own server (self-host)                        |
 
 ## Install in Claude
 

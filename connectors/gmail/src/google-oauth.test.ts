@@ -1,17 +1,17 @@
+import { oauthErrorCode } from '../../../src/remote/worker-kit.js';
 import { describe, expect, it } from 'vitest';
 import { fakeFetch, testDeps, tokenRoute, type RecordedCall } from './fixtures/fake-google.js';
 import {
   exchangeGoogleCode,
   googleAuthorizeUrl,
-  googleErrorCode,
   GoogleTokenError,
   googleRedirectUri,
   parseGoogleTokens,
   postGoogleToken,
-  randomToken,
   refreshGoogleToken,
   revokeGoogleToken,
 } from './google-oauth.js';
+import { randomToken } from '../../../src/remote/worker-kit.js';
 
 const BASE = {
   clientId: 'cid',
@@ -75,11 +75,11 @@ describe('token responses', () => {
     expect(() => parseGoogleTokens(null)).toThrow(GoogleTokenError);
   });
 
-  it('googleErrorCode uses the error field or the status', async () => {
+  it('oauthErrorCode uses the error field or the status', async () => {
     const denied = Response.json({ error: 'invalid_grant' }, { status: 400 });
-    expect(await googleErrorCode(denied)).toBe('invalid_grant');
-    expect(await googleErrorCode(Response.json({}, { status: 500 }))).toBe('http_500');
-    expect(await googleErrorCode(new Response('x', { status: 502 }))).toBe('http_502');
+    expect(await oauthErrorCode(denied)).toBe('invalid_grant');
+    expect(await oauthErrorCode(Response.json({}, { status: 500 }))).toBe('http_500');
+    expect(await oauthErrorCode(new Response('x', { status: 502 }))).toBe('http_502');
   });
 });
 

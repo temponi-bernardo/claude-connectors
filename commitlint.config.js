@@ -26,6 +26,7 @@ export default {
         'site',
         'gmail',
         'whatsapp',
+        'spotify',
       ],
     ],
     'scope-empty': [2, 'never'],

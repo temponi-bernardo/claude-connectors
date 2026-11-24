@@ -2,6 +2,7 @@
  * Google OAuth (the upstream authorization server): authorization URL with `state`, PKCE S256 and `nonce`,
  * code exchange and access token refresh with the refresh token.
  */
+import { oauthErrorCode } from '../../../src/remote/worker-kit.js';
 import { UPSTREAM_USER_AGENT, type GmailDeps } from './context.js';
 
 /** Google authorization endpoint. */
@@ -76,11 +77,6 @@ export function googleAuthorizeUrl(params: GoogleAuthorizeParams): string {
   return url.toString();
 }
 
-/** Random base64url text with `bytes` bytes of entropy (state, nonce, PKCE verifier). */
-export function randomToken(bytes = 32): string {
-  return Buffer.from(crypto.getRandomValues(new Uint8Array(bytes))).toString('base64url');
-}
-
 /** Validates the token endpoint success JSON; throws if the access token is missing. */
 export function parseGoogleTokens(body: unknown): GoogleTokens {
   const data = (typeof body === 'object' && body !== null ? body : {}) as Record<string, unknown>;
@@ -92,17 +88,6 @@ export function parseGoogleTokens(body: unknown): GoogleTokens {
     idToken: typeof data.id_token === 'string' ? data.id_token : null,
     scope: typeof data.scope === 'string' ? data.scope : '',
   };
-}
-
-/** OAuth error code of a Google failure response (`error`), or `http_<status>`. */
-export async function googleErrorCode(response: Response): Promise<string> {
-  try {
-    const body = (await response.json()) as { error?: unknown };
-    if (typeof body.error === 'string') return body.error;
-  } catch {
-    // body is not JSON: use the status
-  }
-  return `http_${response.status}`;
 }
 
 /** Posts a form to the Google token endpoint with the client credentials. */
@@ -123,7 +108,7 @@ export async function postGoogleToken(
     },
     body: body.toString(),
   });
-  if (!response.ok) throw new GoogleTokenError(await googleErrorCode(response));
+  if (!response.ok) throw new GoogleTokenError(await oauthErrorCode(response));
   return parseGoogleTokens(await response.json());
 }
 

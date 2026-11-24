@@ -3,9 +3,8 @@
  * AES-256-GCM (`TOKEN_ENC_KEY`) together with the user id, checked on read: one user's record never opens
  * for another. The KV key holds only the hash of the id.
  */
-import { createHash } from 'node:crypto';
 import { openSealed, sealPayload } from '../../../src/remote/seal.js';
-import type { KvStore } from './context.js';
+import { sha256Hex, type KvStore } from '../../../src/remote/worker-kit.js';
 
 /** Seal type of a user's account record. */
 export const OWNER_RECORD_TYP = 'gmail_owner';
@@ -27,11 +26,6 @@ export interface LinkedAccount {
   /** Link date in ISO 8601. */
   readonly linkedAt: string;
   readonly status: LinkStatus;
-}
-
-/** SHA-256 in hex (KV only keeps hashes of ids, `state` and cookies). */
-export function sha256Hex(text: string): string {
-  return createHash('sha256').update(text).digest('hex');
 }
 
 /** KV key of the user record (hash of the Google id, `sub`). */

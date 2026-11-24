@@ -1,7 +1,7 @@
 {
   "name": "claude-connectors",
   "version": "0.2.1",
-  "description": "Remote MCP connectors for Claude, installed from the plugin marketplace: PUC Minas Canvas, multi-account Gmail and self-hosted WhatsApp.",
+  "description": "Remote MCP connectors for Claude, installed from the plugin marketplace: PUC Minas Canvas, multi-account Gmail, self-hosted WhatsApp and Spotify.",
   "type": "module",
   "private": true,
   "license": "MIT",
@@ -20,6 +20,8 @@
     "whatsapp:deploy": "wrangler deploy --config connectors/whatsapp/wrangler.toml && npm run -s smoke -- whatsapp",
     "whatsapp:build": "wrangler deploy --dry-run --containers-rollout=none --config connectors/whatsapp/wrangler.toml",
     "whatsapp:image": "wrangler deploy --dry-run --config connectors/whatsapp/wrangler.toml",
+    "spotify:dev": "wrangler dev --config connectors/spotify/wrangler.toml",
+    "spotify:deploy": "wrangler deploy --config connectors/spotify/wrangler.toml && npm run -s smoke -- spotify",
     "smoke": "tsx tools/smoke/cli.ts",
     "bridge:test": "sh scripts/bridge-test.sh",
     "plugin:validate": "sh scripts/plugin-validate.sh",

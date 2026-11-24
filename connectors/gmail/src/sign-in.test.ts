@@ -16,7 +16,6 @@ import type { GoogleTokens } from './google-oauth.js';
 import { loadOwnerAccounts } from './token-store.js';
 import {
   accessDeniedPage,
-  authorizationErrorResponse,
   beginGoogleSignIn,
   completeSignIn,
   finishSignIn,
@@ -25,6 +24,7 @@ import {
   submitAuthorize,
   type SignInData,
 } from './sign-in.js';
+import { authorizationErrorResponse } from '../../../src/remote/pages.js';
 
 const AUTH: AuthRequest = {
   responseType: 'code',

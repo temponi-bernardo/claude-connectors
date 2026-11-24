@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { sealPayload } from '../../../src/remote/seal.js';
-import { FakeKv } from './fixtures/fake-kv.js';
+import { FakeKv } from '../../../src/remote/fixtures/fake-kv.js';
 import { TEST_OWNER, TEST_TOKEN_KEY, testAccount } from './fixtures/fake-google.js';
 import {
   loadOwnerAccounts,
@@ -9,10 +9,10 @@ import {
   ownerKey,
   saveOwnerAccounts,
   sealOwnerAccounts,
-  sha256Hex,
   toLinkedAccount,
   upsertAccount,
 } from './token-store.js';
+import { sha256Hex } from '../../../src/remote/worker-kit.js';
 
 const ACCOUNT = testAccount('owner@example.com');
 

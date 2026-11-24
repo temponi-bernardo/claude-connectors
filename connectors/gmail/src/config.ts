@@ -4,6 +4,7 @@
  */
 import { envValue, type EnvVars } from '../../../src/core/env.js';
 import { parseSealKey } from '../../../src/remote/seal.js';
+import { readConsentSecret, requiredSecret } from '../../../src/remote/worker-kit.js';
 
 /**
  * Gmail management scope (the only data scope requested): read, send, drafts, labels and trash. It does not
@@ -18,9 +19,6 @@ export const GMAIL_SCOPES: readonly string[] = ['openid', 'email', GMAIL_MODIFY_
 export function hasModifyScope(scope: string): boolean {
   return scope.split(' ').includes(GMAIL_MODIFY_SCOPE);
 }
-
-/** Minimum length of the secret that signs the remembered-consent cookie. */
-export const MIN_CONSENT_SECRET_CHARS = 32;
 
 /** Validated connector settings. */
 export interface GmailSettings {
@@ -47,22 +45,6 @@ export function parseAllowedEmails(raw: string | null): string[] | null {
   if (!emails.every(isEmailAddress))
     throw new Error('ALLOWED_EMAILS has an item that is not an email.');
   return emails;
-}
-
-/** Reads a required variable; throws explaining how to set it. */
-export function requiredSecret(env: EnvVars, name: string): string {
-  const value = envValue(env, name);
-  if (value === null) throw new Error(`Set the secret ${name}: npx wrangler secret put ${name}`);
-  return value;
-}
-
-/** Reads the remembered-consent secret and enforces the minimum length. */
-export function readConsentSecret(env: EnvVars): string {
-  const secret = requiredSecret(env, 'CONSENT_SECRET');
-  if (secret.length < MIN_CONSENT_SECRET_CHARS) {
-    throw new Error(`CONSENT_SECRET must have at least ${MIN_CONSENT_SECRET_CHARS} characters.`);
-  }
-  return secret;
 }
 
 /** Builds the settings from the Worker secrets. */
