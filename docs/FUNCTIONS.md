@@ -49,26 +49,25 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/gmail/src/accounts.ts`: [`accountAlias`](#accountalias), [`aliasAccounts`](#aliasaccounts), [`noAccountsError`](#noaccountserror), [`resolveAccounts`](#resolveaccounts), [`writeAccessError`](#writeaccesserror), [`requireWriteAccess`](#requirewriteaccess)
 - `connectors/gmail/src/attachments.ts`: [`looksLikeText`](#looksliketext), [`detectAttachmentKind`](#detectattachmentkind), [`attachmentBytesToText`](#attachmentbytestotext), [`downloadAttachment`](#downloadattachment), [`readAttachmentText`](#readattachmenttext)
 - `connectors/gmail/src/compose.ts`: [`prefixSubject`](#prefixsubject), [`threadingHeaders`](#threadingheaders), [`uniqueAddresses`](#uniqueaddresses), [`replyToList`](#replytolist), [`replyRecipients`](#replyrecipients), [`quotedText`](#quotedtext), [`forwardedText`](#forwardedtext), [`replyEmail`](#replyemail), [`forwardEmail`](#forwardemail)
-- `connectors/gmail/src/config.ts`: [`hasModifyScope`](#hasmodifyscope), [`isEmailAddress`](#isemailaddress), [`parseAllowedEmails`](#parseallowedemails), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`readGmailSettings`](#readgmailsettings), [`isEmailAllowed`](#isemailallowed)
+- `connectors/gmail/src/config.ts`: [`hasModifyScope`](#hasmodifyscope), [`isEmailAddress`](#isemailaddress), [`parseAllowedEmails`](#parseallowedemails), [`readGmailSettings`](#readgmailsettings), [`isEmailAllowed`](#isemailallowed)
 - `connectors/gmail/src/draft-tools.ts`: [`draftArgs`](#draftargs)
 - `connectors/gmail/src/drafts.ts`: [`draftSummary`](#draftsummary), [`listDrafts`](#listdrafts), [`prepareDraftEmail`](#preparedraftemail), [`draftIds`](#draftids), [`createDraft`](#createdraft), [`updateDraft`](#updatedraft), [`sendDraft`](#senddraft), [`deleteDraft`](#deletedraft)
 - `connectors/gmail/src/gmail-api.ts`: [`gmailUrl`](#gmailurl), [`gmailHttpError`](#gmailhttperror), [`gmailErrorDetail`](#gmailerrordetail), [`sendGmailRequest`](#sendgmailrequest), [`readGmailJson`](#readgmailjson), [`gmailCall`](#gmailcall), [`gmailGet`](#gmailget), [`gmailWrite`](#gmailwrite)
-- `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`randomToken`](#randomtoken), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken), [`revokeGoogleToken`](#revokegoogletoken)
+- `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken), [`revokeGoogleToken`](#revokegoogletoken)
 - `connectors/gmail/src/id-token.ts`: [`decodeJwtJson`](#decodejwtjson), [`decodeJwt`](#decodejwt), [`idTokenProblems`](#idtokenproblems), [`checkIdTokenClaims`](#checkidtokenclaims), [`fetchGoogleKey`](#fetchgooglekey), [`verifyRs256`](#verifyrs256), [`verifyGoogleIdToken`](#verifygoogleidtoken)
 - `connectors/gmail/src/link-flow.ts`: [`nowSeconds`](#nowseconds), [`issueLinkUrl`](#issuelinkurl), [`openLinkTicket`](#openlinkticket), [`usedTicketKey`](#usedticketkey), [`redeemLinkTicket`](#redeemlinkticket), [`showLinkConfirmation`](#showlinkconfirmation), [`isConfirmedInThisBrowser`](#isconfirmedinthisbrowser), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`invalidTicketPage`](#invalidticketpage), [`redeemConfirmedTicket`](#redeemconfirmedticket), [`storeLinkRequest`](#storelinkrequest), [`linkStageUrl`](#linkstageurl), [`beginLinkStage`](#beginlinkstage), [`startAccountLink`](#startaccountlink), [`notOwnerPage`](#notownerpage), [`verifyOwnerThenLink`](#verifyownerthenlink), [`takeLinkRequest`](#takelinkrequest), [`linkRefusalReason`](#linkrefusalreason), [`storeGoogleAccount`](#storegoogleaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
 - `connectors/gmail/src/mailbox-tools.ts`: [`toggleAction`](#toggleaction), [`writableTargets`](#writabletargets), [`runMailboxAction`](#runmailboxaction)
 - `connectors/gmail/src/mailbox.ts`: [`mailTargets`](#mailtargets), [`checkLabelChange`](#checklabelchange), [`resolveLabelIds`](#resolvelabelids), [`fetchLabels`](#fetchlabels), [`applyLabelChange`](#applylabelchange), [`targetCounts`](#targetcounts), [`moveToTrash`](#movetotrash)
 - `connectors/gmail/src/message-format.ts`: [`base64UrlToBytes`](#base64urltobytes), [`partCharset`](#partcharset), [`decodePartBody`](#decodepartbody), [`headerValues`](#headervalues), [`flattenParts`](#flattenparts), [`isBodyPart`](#isbodypart), [`messageBodyText`](#messagebodytext), [`messageAttachments`](#messageattachments), [`truncateText`](#truncatetext), [`internalDateIso`](#internaldateiso), [`pickHeaders`](#pickheaders), [`formatMessage`](#formatmessage), [`perMessageLimit`](#permessagelimit), [`formatThread`](#formatthread), [`summarizeThread`](#summarizethread)
 - `connectors/gmail/src/mime.ts`: [`splitAddressList`](#splitaddresslist), [`parseMailAddress`](#parsemailaddress), [`parseAddressList`](#parseaddresslist), [`parseRecipients`](#parserecipients), [`cleanHeaderText`](#cleanheadertext), [`isPrintableAscii`](#isprintableascii), [`encodeHeaderWord`](#encodeheaderword), [`formatMailAddress`](#formatmailaddress), [`addressHeader`](#addressheader), [`messageIdList`](#messageidlist), [`mimeHeaderLines`](#mimeheaderlines), [`wrapBase64`](#wrapbase64), [`textPart`](#textpart), [`safeMimeType`](#safemimetype), [`attachmentPart`](#attachmentpart), [`buildMimeMessage`](#buildmimemessage), [`toRawMessage`](#torawmessage)
-- `connectors/gmail/src/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`maskEmail`](#maskemail), [`linkConfirmBody`](#linkconfirmbody), [`linkConfirmPage`](#linkconfirmpage), [`consentPageBody`](#consentpagebody), [`copyConsentHeaders`](#copyconsentheaders), [`consentPage`](#consentpage), [`redirectWith`](#redirectwith)
-- `connectors/gmail/src/rate-limit.ts`: [`isRateLimited`](#isratelimited), [`rateLimitedResponse`](#ratelimitedresponse)
+- `connectors/gmail/src/pages.ts`: [`maskEmail`](#maskemail), [`linkConfirmBody`](#linkconfirmbody), [`linkConfirmPage`](#linkconfirmpage), [`consentPageBody`](#consentpagebody), [`consentPage`](#consentpage)
 - `connectors/gmail/src/search.ts`: [`encodeMultiPageToken`](#encodemultipagetoken), [`decodeMultiPageToken`](#decodemultipagetoken), [`fetchThreadMetadata`](#fetchthreadmetadata), [`searchAccount`](#searchaccount), [`threadDate`](#threaddate), [`sortByDateDesc`](#sortbydatedesc), [`pagesToFetch`](#pagestofetch), [`searchThreads`](#searchthreads)
 - `connectors/gmail/src/send-tools.ts`: [`replyTool`](#replytool)
 - `connectors/gmail/src/send.ts`: [`checkRecipientLimit`](#checkrecipientlimit), [`composeEmail`](#composeemail), [`mimeBoundary`](#mimeboundary), [`gmailMessageResource`](#gmailmessageresource), [`fetchFullMessage`](#fetchfullmessage), [`prepareReply`](#preparereply), [`forwardAttachments`](#forwardattachments), [`prepareForward`](#prepareforward), [`sendPrepared`](#sendprepared), [`sentResult`](#sentresult)
-- `connectors/gmail/src/sign-in.ts`: [`accessDeniedPage`](#accessdeniedpage), [`authorizationErrorResponse`](#authorizationerrorresponse), [`beginGoogleSignIn`](#begingooglesignin), [`showAuthorize`](#showauthorize), [`submitAuthorize`](#submitauthorize), [`linkSignedInAccount`](#linksignedinaccount), [`completeSignIn`](#completesignin), [`finishSignIn`](#finishsignin)
-- `connectors/gmail/src/token-store.ts`: [`sha256Hex`](#sha256hex), [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
+- `connectors/gmail/src/sign-in.ts`: [`accessDeniedPage`](#accessdeniedpage), [`beginGoogleSignIn`](#begingooglesignin), [`showAuthorize`](#showauthorize), [`submitAuthorize`](#submitauthorize), [`linkSignedInAccount`](#linksignedinaccount), [`completeSignIn`](#completesignin), [`finishSignIn`](#finishsignin)
+- `connectors/gmail/src/token-store.ts`: [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
 - `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`resolveWritableAccount`](#resolvewritableaccount), [`accountBase`](#accountbase), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
-- `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
+- `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`createGmailProvider`](#creategmailprovider), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
 - `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
 - `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`normalizeRecipient`](#normalizerecipient), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
 - `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
@@ -103,9 +102,12 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse), [`toolsListRequest`](#toolslistrequest), [`serveToolCatalog`](#servetoolcatalog)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
 - `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`resolveIssuer`](#resolveissuer), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
+- `src/remote/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`copyConsentHeaders`](#copyconsentheaders), [`redirectWith`](#redirectwith), [`authorizationErrorResponse`](#authorizationerrorresponse)
+- `src/remote/rate-limit.ts`: [`isRateLimited`](#isratelimited), [`rateLimitedResponse`](#ratelimitedresponse)
 - `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed), [`audienceMatches`](#audiencematches)
 - `src/remote/streamed-tool.ts`: [`asJsonObject`](#asjsonobject), [`parseToolCallRequest`](#parsetoolcallrequest), [`readToolCallRequest`](#readtoolcallrequest), [`streamedResultFrame`](#streamedresultframe), [`streamedToolResponse`](#streamedtoolresponse)
 - `src/remote/tokens.ts`: [`grantFromClaims`](#grantfromclaims), [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessGrant`](#readaccessgrant)
+- `src/remote/worker-kit.ts`: [`randomToken`](#randomtoken), [`sha256Hex`](#sha256hex), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`configErrorResponse`](#configerrorresponse), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath)
 - `tools/bundle/bundle.ts`: [`listConnectors`](#listconnectors), [`isRemoteMcpUrl`](#isremotemcpurl), [`mcpServerProblems`](#mcpserverproblems), [`pluginMcpProblems`](#pluginmcpproblems), [`bundleOptions`](#bundleoptions)
 - `tools/bundle/cli.ts`: [`buildPlanSkill`](#buildplanskill), [`buildConnector`](#buildconnector), [`runBuildCli`](#runbuildcli)
 - `tools/bundle/plan-skill.ts`: [`hasPlanSkill`](#hasplanskill), [`planCliBundleOptions`](#planclibundleoptions), [`planRuntimeBundleOptions`](#planruntimebundleoptions), [`inlinePlanRuntime`](#inlineplanruntime), [`buildPlanTemplate`](#buildplantemplate)
@@ -5213,40 +5215,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** Throws if any item is not an email.
 
-### `requiredSecret`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/config.ts`
-- **Signature:** `requiredSecret(env: EnvVars, name: string): string`
-- **Used by:** `readConsentSecret()`, `readGmailSettings()`
-- **Processes:** P10, P12, P19
-
-<!-- generated:end -->
-
-- **Does:** Reads a required Worker variable.
-- **Input:** `env`: Worker text variables. `name`: variable name.
-- **Output:** The variable's value, trimmed.
-- **Effects:** None (pure).
-- **Errors:** Throws with the `wrangler secret put` command if the variable is missing, empty or a placeholder.
-
-### `readConsentSecret`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/config.ts`
-- **Signature:** `readConsentSecret(env: EnvVars): string`
-- **Used by:** `readGmailSettings()`
-- **Processes:** P10, P12, P19
-
-<!-- generated:end -->
-
-- **Does:** Reads the remembered-consent secret with the required minimum length.
-- **Input:** `env`: Worker text variables.
-- **Output:** The value of `CONSENT_SECRET`.
-- **Effects:** None (pure).
-- **Errors:** Throws if the secret has fewer than 32 characters. Propagates the error of `requiredSecret()`.
-
 ### `readGmailSettings`
 
 <!-- generated:start -->
@@ -5470,23 +5438,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `params`: client, redirect, scopes, `state`, PKCE challenge, `nonce`, `offline` and optional `loginHint`.
 - **Output:** The authorization URL with PKCE S256 and account selection.
 - **Effects:** None (pure).
-- **Errors:** None.
-
-### `randomToken`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/google-oauth.ts`
-- **Signature:** `randomToken(bytes = 32): string`
-- **Used by:** `beginGoogleSignIn()`, `beginLinkStage()`, `completeSignIn()`, `issueLinkUrl()`, `mimeBoundary()`, `showLinkConfirmation()`, `storeLinkRequest()`
-- **Processes:** P10, P11, P18
-
-<!-- generated:end -->
-
-- **Does:** Generates a random base64url string (state, nonce, PKCE verifier).
-- **Input:** `bytes`: entropy bytes; default 32.
-- **Output:** The random base64url string.
-- **Effects:** Reads the cryptographic random generator.
 - **Errors:** None.
 
 ### `parseGoogleTokens`
@@ -6381,40 +6332,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 ## `connectors/gmail/src/pages.ts`
 
-### `pageDocument`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/pages.ts`
-- **Signature:** `pageDocument(title: string, body: string): string`
-- **Used by:** `consentPage()`, `linkConfirmPage()`, `messagePage()`
-- **Processes:** P10, P11, P19
-
-<!-- generated:end -->
-
-- **Does:** Builds a page's full HTML document.
-- **Input:** `title`: title (escaped here). `body`: HTML body already escaped by the caller.
-- **Output:** HTML with `lang="pt-BR"`, title and inline style.
-- **Effects:** None (pure).
-- **Errors:** None.
-
-### `messagePage`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/pages.ts`
-- **Signature:** `messagePage(title: string, message: string, status = 200): Response`
-- **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`, `notOwnerPage()`, `verifyOwnerThenLink()`
-- **Processes:** P10, P11, P19
-
-<!-- generated:end -->
-
-- **Does:** Builds a simple notice page.
-- **Input:** `title`: plain-text title. `message`: plain-text message. `status`: HTTP code (default 200).
-- **Output:** HTML response with the given status, restrictive CSP and `no-store`; title escaped, message redacted (`redactSecrets`) and escaped.
-- **Effects:** None (pure).
-- **Errors:** None.
-
 ### `consentPageBody`
 
 <!-- generated:start -->
@@ -6430,23 +6347,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Input:** `details`: OAuth client description (name, destination, whether it is loopback). `handle`: consent transaction identifier.
 - **Output:** HTML with who is asking, where the access goes, a loopback notice when applicable and the Allow/Deny form; all escaped.
 - **Effects:** None (pure).
-- **Errors:** None.
-
-### `copyConsentHeaders`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/pages.ts`
-- **Signature:** `copyConsentHeaders(response: Response, headers: Headers): Response`
-- **Used by:** `consentPage()`
-- **Processes:** P10
-
-<!-- generated:end -->
-
-- **Does:** Copies the consent transaction headers into the response.
-- **Input:** `response`: page response. `headers`: OAuth library headers (cookies and anti-framing).
-- **Output:** The same response with the cookies appended and the other headers copied, except `content-type`, CSP and `set-cookie`.
-- **Effects:** Mutates the headers of the received response.
 - **Errors:** None.
 
 ### `consentPage`
@@ -6465,23 +6365,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** HTML 200 page with a CSP that only allows the form to target Google and the client's redirect origin, plus the transaction headers.
 - **Effects:** None (pure).
 - **Errors:** Throws `TypeError` if `details.redirectUri` is not a valid URL.
-
-### `redirectWith`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/pages.ts`
-- **Signature:** `redirectWith(location: string, headers: Headers = new Headers()): Response`
-- **Used by:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `beginLinkStage()`, `finishSignIn()`, `submitAuthorize()`
-- **Processes:** P10, P11
-
-<!-- generated:end -->
-
-- **Does:** Builds a 302 redirect with the given headers.
-- **Input:** `location`: destination. `headers`: headers to keep, such as transaction cookies (default empty).
-- **Output:** Bodiless 302 response, with `Location` and `cache-control: no-store`.
-- **Effects:** Mutates the received `headers` object.
-- **Errors:** None.
 
 ### `maskEmail`
 
@@ -6535,40 +6418,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Errors:** None.
 
 ## `connectors/gmail/src/rate-limit.ts`
-
-### `isRateLimited`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/rate-limit.ts`
-- **Signature:** `async isRateLimited(limiter: RateLimiter | undefined, key: string): Promise<boolean>`
-- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`
-- **Processes:** P10, P12
-
-<!-- generated:end -->
-
-- **Does:** Tells whether the session exceeded the request limit.
-- **Input:** `limiter`: Workers rate limiting binding, or undefined. `key`: session key (OAuth session id).
-- **Output:** True if the binding refused; false if it accepted or there is no binding.
-- **Effects:** Counts the request in the rate limiting binding.
-- **Errors:** None of its own; binding failures propagate.
-
-### `rateLimitedResponse`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/rate-limit.ts`
-- **Signature:** `rateLimitedResponse(): Response`
-- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`
-- **Processes:** P10, P12
-
-<!-- generated:end -->
-
-- **Does:** Builds the too-many-requests response.
-- **Input:** None.
-- **Output:** 429 JSON response (`rate_limited`) with `Retry-After: 60`.
-- **Effects:** None (pure).
-- **Errors:** None.
 
 ## `connectors/gmail/src/search.ts`
 
@@ -6709,23 +6558,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Errors:** Throws an invalid `page_token` error; propagates the errors of `gmailGet` from any account.
 
 ## `connectors/gmail/src/sign-in.ts`
-
-### `authorizationErrorResponse`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/sign-in.ts`
-- **Signature:** `authorizationErrorResponse(error: unknown): Response`
-- **Used by:** `finishSignIn()`, `showAuthorize()`, `submitAuthorize()`
-- **Processes:** P10
-
-<!-- generated:end -->
-
-- **Does:** Converts an authorization error into a response.
-- **Input:** `error`: error caught in the authorization flow.
-- **Output:** 302 redirect to the client if the `AuthorizationError` says where to; otherwise a 400 page with the error description or a generic message.
-- **Effects:** None (pure).
-- **Errors:** None.
 
 ### `beginGoogleSignIn`
 
@@ -7020,23 +6852,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None.
 - **Errors:** None.
 
-### `configErrorResponse`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/worker.ts`
-- **Signature:** `configErrorResponse(error: unknown): Response`
-- **Used by:** `handleDefaultRequest()`, `handleMcpApi()`
-- **Processes:** P10, P12, P19
-
-<!-- generated:end -->
-
-- **Does:** Builds the Worker's invalid-configuration response.
-- **Input:** `error`: error thrown while reading the settings.
-- **Output:** 500 plain-text response with the error message (never a secret's value).
-- **Effects:** None (pure).
-- **Errors:** None.
-
 ### `handleMcpApi`
 
 <!-- generated:start -->
@@ -7071,40 +6886,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Those of the handled route: KV, `OAuthHelpers` (KV OAUTH_KV), network (Google) and cookies.
 - **Errors:** None: invalid configuration becomes 500; only propagates the unhandled errors of the link route (code exchange and `id_token`).
 
-### `checkClientRegistration`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/worker.ts`
-- **Signature:** `checkClientRegistration(options: ClientRegistrationCallbackOptions): ClientRegistrationCallbackResult | undefined`
-- **Used by:** `createGmailProvider()`
-- **Processes:** P10
-
-<!-- generated:end -->
-
-- **Does:** Decides whether a client's dynamic registration is accepted.
-- **Input:** `options`: metadata of the client requesting registration.
-- **Output:** Undefined if all redirect URIs are Claude's or localhost; otherwise an `invalid_redirect_uri` error with status 400.
-- **Effects:** None (pure).
-- **Errors:** None.
-
-### `publicOrigin`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/worker.ts`
-- **Signature:** `publicOrigin(env: GmailWorkerEnv, request: Request): string`
-- **Used by:** `handleDefaultRequest()`, `handleGmailWorkerFetch()`, `handleMcpApi()`
-- **Processes:** P10, P12, P19
-
-<!-- generated:end -->
-
-- **Does:** Computes the connector's canonical public origin.
-- **Input:** `env`: Worker variables (optional `PUBLIC_URL`). `request`: received request.
-- **Output:** Origin of `PUBLIC_URL` without trailing slash; without it, the request's origin.
-- **Effects:** None (pure).
-- **Errors:** Throws `TypeError` if `PUBLIC_URL` is not a valid URL.
-
 ### `createGmailProvider`
 
 <!-- generated:start -->
@@ -7138,40 +6919,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** 429 if the IP exceeded the limit outside `/mcp`; otherwise the OAuth provider's response.
 - **Effects:** Per-IP rate limiting binding; those of the provider and the routes.
 - **Errors:** Propagates those of the OAuth library.
-
-### `clientIpKey`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/worker.ts`
-- **Signature:** `clientIpKey(request: Request): string`
-- **Used by:** `handleGmailWorkerFetch()`
-- **Processes:** P10
-
-<!-- generated:end -->
-
-- **Does:** Builds the public limit key from the client IP.
-- **Input:** `request`: request.
-- **Output:** `ip:<cf-connecting-ip>` or `ip:unknown`.
-- **Effects:** None (pure).
-- **Errors:** None.
-
-### `isMcpPath`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/worker.ts`
-- **Signature:** `isMcpPath(request: Request): boolean`
-- **Used by:** `handleGmailWorkerFetch()`
-- **Processes:** P10
-
-<!-- generated:end -->
-
-- **Does:** Tells whether the route is the token-protected `/mcp`.
-- **Input:** `request`: request.
-- **Output:** `true` for `/mcp` and subpaths.
-- **Effects:** None (pure).
-- **Errors:** None.
 
 ## `src/core/pdf.ts`
 
@@ -9804,23 +9551,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** New list with the account at the end.
 - **Effects:** None (pure).
 - **Errors:** Throws if it would exceed `MAX_LINKED_ACCOUNTS`.
-
-### `sha256Hex`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/token-store.ts`
-- **Signature:** `sha256Hex(text: string): string`
-- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerKey()`, `showLinkConfirmation()`, `storeLinkRequest()`, `takeLinkRequest()`, `usedTicketKey()`
-- **Processes:** P10, P11, P12, P18
-
-<!-- generated:end -->
-
-- **Does:** Computes SHA-256 in hexadecimal.
-- **Input:** `text`: text to hash.
-- **Output:** 64 hexadecimal characters.
-- **Effects:** None (pure).
-- **Errors:** None.
 
 ## `connectors/gmail/src/compose.ts`
 
@@ -15542,6 +15272,284 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** The instant of local midnight.
 - **Effects:** None (pure).
 - **Errors:** `RangeError` for an unknown time zone.
+
+## `src/remote/pages.ts`
+
+### `pageDocument`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `pageDocument(title: string, body: string): string`
+- **Used by:** `consentPage()`, `linkConfirmPage()`, `messagePage()`
+- **Processes:** P10, P11, P19
+
+<!-- generated:end -->
+
+- **Does:** Builds a page's full HTML document.
+- **Input:** `title`: title (escaped here). `body`: HTML body already escaped by the caller.
+- **Output:** HTML with `lang="pt-BR"`, title and inline style.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `messagePage`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `messagePage(title: string, message: string, status = 200): Response`
+- **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`, `notOwnerPage()`, `verifyOwnerThenLink()`
+- **Processes:** P10, P11, P19
+
+<!-- generated:end -->
+
+- **Does:** Builds a simple notice page.
+- **Input:** `title`: plain-text title. `message`: plain-text message. `status`: HTTP code (default 200).
+- **Output:** HTML response with the given status, restrictive CSP and `no-store`; title escaped, message redacted (`redactSecrets`) and escaped.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `copyConsentHeaders`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `copyConsentHeaders(response: Response, headers: Headers): Response`
+- **Used by:** `consentPage()`
+- **Processes:** P10
+
+<!-- generated:end -->
+
+- **Does:** Copies the consent transaction headers into the response.
+- **Input:** `response`: page response. `headers`: OAuth library headers (cookies and anti-framing).
+- **Output:** The same response with the cookies appended and the other headers copied, except `content-type`, CSP and `set-cookie`.
+- **Effects:** Mutates the headers of the received response.
+- **Errors:** None.
+
+### `redirectWith`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `redirectWith(location: string, headers: Headers = new Headers()): Response`
+- **Used by:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `beginLinkStage()`, `finishSignIn()`, `submitAuthorize()`
+- **Processes:** P10, P11
+
+<!-- generated:end -->
+
+- **Does:** Builds a 302 redirect with the given headers.
+- **Input:** `location`: destination. `headers`: headers to keep, such as transaction cookies (default empty).
+- **Output:** Bodiless 302 response, with `Location` and `cache-control: no-store`.
+- **Effects:** Mutates the received `headers` object.
+- **Errors:** None.
+
+### `authorizationErrorResponse`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `authorizationErrorResponse(error: unknown): Response`
+- **Used by:** `finishSignIn()`, `showAuthorize()`, `submitAuthorize()`
+- **Processes:** P10
+
+<!-- generated:end -->
+
+- **Does:** Converts an authorization error into a response.
+- **Input:** `error`: error caught in the authorization flow.
+- **Output:** 302 redirect to the client if the `AuthorizationError` says where to; otherwise a 400 page with the error description or a generic message.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `src/remote/rate-limit.ts`
+
+### `isRateLimited`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/rate-limit.ts`
+- **Signature:** `async isRateLimited(limiter: RateLimiter | undefined, key: string): Promise<boolean>`
+- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`
+- **Processes:** P10, P12
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the session exceeded the request limit.
+- **Input:** `limiter`: Workers rate limiting binding, or undefined. `key`: session key (OAuth session id).
+- **Output:** True if the binding refused; false if it accepted or there is no binding.
+- **Effects:** Counts the request in the rate limiting binding.
+- **Errors:** None of its own; binding failures propagate.
+
+### `rateLimitedResponse`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/rate-limit.ts`
+- **Signature:** `rateLimitedResponse(): Response`
+- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`
+- **Processes:** P10, P12
+
+<!-- generated:end -->
+
+- **Does:** Builds the too-many-requests response.
+- **Input:** None.
+- **Output:** 429 JSON response (`rate_limited`) with `Retry-After: 60`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `src/remote/worker-kit.ts`
+
+### `randomToken`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `randomToken(bytes = 32): string`
+- **Used by:** `beginGoogleSignIn()`, `beginLinkStage()`, `completeSignIn()`, `issueLinkUrl()`, `mimeBoundary()`, `showLinkConfirmation()`, `storeLinkRequest()`
+- **Processes:** P10, P11, P18
+
+<!-- generated:end -->
+
+- **Does:** Generates a random base64url string (state, nonce, PKCE verifier).
+- **Input:** `bytes`: entropy bytes; default 32.
+- **Output:** The random base64url string.
+- **Effects:** Reads the cryptographic random generator.
+- **Errors:** None.
+
+### `sha256Hex`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `sha256Hex(text: string): string`
+- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerKey()`, `showLinkConfirmation()`, `storeLinkRequest()`, `takeLinkRequest()`, `usedTicketKey()`
+- **Processes:** P10, P11, P12, P18
+
+<!-- generated:end -->
+
+- **Does:** Computes SHA-256 in hexadecimal.
+- **Input:** `text`: text to hash.
+- **Output:** 64 hexadecimal characters.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `requiredSecret`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `requiredSecret(env: EnvVars, name: string): string`
+- **Used by:** `readConsentSecret()`, `readGmailSettings()`
+- **Processes:** P10, P12, P19
+
+<!-- generated:end -->
+
+- **Does:** Reads a required Worker variable.
+- **Input:** `env`: Worker text variables. `name`: variable name.
+- **Output:** The variable's value, trimmed.
+- **Effects:** None (pure).
+- **Errors:** Throws with the `wrangler secret put` command if the variable is missing, empty or a placeholder.
+
+### `readConsentSecret`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `readConsentSecret(env: EnvVars): string`
+- **Used by:** `readGmailSettings()`
+- **Processes:** P10, P12, P19
+
+<!-- generated:end -->
+
+- **Does:** Reads the remembered-consent secret with the required minimum length.
+- **Input:** `env`: Worker text variables.
+- **Output:** The value of `CONSENT_SECRET`.
+- **Effects:** None (pure).
+- **Errors:** Throws if the secret has fewer than 32 characters. Propagates the error of `requiredSecret()`.
+
+### `configErrorResponse`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `configErrorResponse(error: unknown): Response`
+- **Used by:** `handleDefaultRequest()`, `handleMcpApi()`
+- **Processes:** P10, P12, P19
+
+<!-- generated:end -->
+
+- **Does:** Builds the Worker's invalid-configuration response.
+- **Input:** `error`: error thrown while reading the settings.
+- **Output:** 500 plain-text response with the error message (never a secret's value).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `checkClientRegistration`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `checkClientRegistration(options: ClientRegistrationCallbackOptions): ClientRegistrationCallbackResult | undefined`
+- **Used by:** `createGmailProvider()`
+- **Processes:** P10
+
+<!-- generated:end -->
+
+- **Does:** Decides whether a client's dynamic registration is accepted.
+- **Input:** `options`: metadata of the client requesting registration.
+- **Output:** Undefined if all redirect URIs are Claude's or localhost; otherwise an `invalid_redirect_uri` error with status 400.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `publicOrigin`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `publicOrigin(env: Readonly<Record<string, unknown>>, request: Request): string`
+- **Used by:** `handleDefaultRequest()`, `handleGmailWorkerFetch()`, `handleMcpApi()`
+- **Processes:** P10, P12, P19
+
+<!-- generated:end -->
+
+- **Does:** Computes the connector's canonical public origin.
+- **Input:** `env`: Worker variables (optional `PUBLIC_URL`). `request`: received request.
+- **Output:** Origin of `PUBLIC_URL` without trailing slash; without it, the request's origin.
+- **Effects:** None (pure).
+- **Errors:** Throws `TypeError` if `PUBLIC_URL` is not a valid URL.
+
+### `clientIpKey`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `clientIpKey(request: Request): string`
+- **Used by:** `handleGmailWorkerFetch()`
+- **Processes:** P10
+
+<!-- generated:end -->
+
+- **Does:** Builds the public limit key from the client IP.
+- **Input:** `request`: request.
+- **Output:** `ip:<cf-connecting-ip>` or `ip:unknown`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `isMcpPath`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `isMcpPath(request: Request): boolean`
+- **Used by:** `handleGmailWorkerFetch()`
+- **Processes:** P10
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the route is the token-protected `/mcp`.
+- **Input:** `request`: request.
+- **Output:** `true` for `/mcp` and subpaths.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## Data and constants
 

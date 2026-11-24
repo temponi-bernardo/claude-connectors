@@ -6,9 +6,9 @@ import { generateKeyPairSync, sign, type KeyObject } from 'node:crypto';
 import { aliasAccounts, type AccountRef } from '../accounts.js';
 import type { GmailSettings } from '../config.js';
 import type { Fetcher, OwnerDeps } from '../context.js';
-import type { RateLimiter } from '../rate-limit.js';
 import { saveOwnerAccounts, type LinkedAccount } from '../token-store.js';
-import { FakeKv } from './fake-kv.js';
+import { FakeKv } from '../../../../src/remote/fixtures/fake-kv.js';
+export { countingLimiter } from '../../../../src/remote/fixtures/limiter.js';
 
 /** Test seal key (32 bytes). */
 export const TEST_TOKEN_KEY = Buffer.alloc(32, 7);
@@ -161,18 +161,6 @@ export async function linkedTestDeps(
   const accounts = emails.map((email) => testAccount(email));
   await saveOwnerAccounts(deps.kv, TEST_TOKEN_KEY, { owner: TEST_OWNER, accounts });
   return deps;
-}
-
-/** Fake limiter that lets the first `allowed` calls per key through. */
-export function countingLimiter(allowed: number): RateLimiter & { keys: string[] } {
-  const keys: string[] = [];
-  return {
-    keys,
-    limit: ({ key }) => {
-      keys.push(key);
-      return Promise.resolve({ success: keys.filter((k) => k === key).length <= allowed });
-    },
-  };
 }
 
 /** Test accounts with aliases (`owner`, `music`), as the tools see them. */

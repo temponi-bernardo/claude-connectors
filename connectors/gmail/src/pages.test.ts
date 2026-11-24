@@ -3,14 +3,16 @@ import { describe, expect, it } from 'vitest';
 import {
   consentPage,
   consentPageBody,
-  copyConsentHeaders,
   linkConfirmBody,
   linkConfirmPage,
   maskEmail,
+} from './pages.js';
+import {
+  copyConsentHeaders,
   messagePage,
   pageDocument,
   redirectWith,
-} from './pages.js';
+} from '../../../src/remote/pages.js';
 
 const DETAILS = {
   clientId: 'c1',

@@ -4,13 +4,8 @@
  * consent, Google sign-in and account linking. It only runs when a request arrives.
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import {
-  OAuthProvider,
-  type ClientRegistrationCallbackOptions,
-  type ClientRegistrationCallbackResult,
-  type OAuthHelpers,
-} from '@cloudflare/workers-oauth-provider';
-import { envValue, toEnvVars } from '../../../src/core/env.js';
+import { OAuthProvider, type OAuthHelpers } from '@cloudflare/workers-oauth-provider';
+import { toEnvVars } from '../../../src/core/env.js';
 import { manifestVersion } from '../../../src/mcp/server-version.js';
 import { registerToolSpecs } from '../../../src/mcp/tools.js';
 import { listOnlyContext } from '../../../src/mcp/tool-gate.js';
@@ -20,10 +15,18 @@ import {
   TOOL_CATALOG_PATH,
 } from '../../../src/remote/mcp-endpoint.js';
 import {
-  DEFAULT_REDIRECT_HOSTS,
-  isAllowedRedirect,
-  readRedirectUris,
-} from '../../../src/remote/oauth.js';
+  isRateLimited,
+  rateLimitedResponse,
+  type RateLimiter,
+} from '../../../src/remote/rate-limit.js';
+import { messagePage } from '../../../src/remote/pages.js';
+import {
+  checkClientRegistration,
+  clientIpKey,
+  configErrorResponse,
+  isMcpPath,
+  publicOrigin,
+} from '../../../src/remote/worker-kit.js';
 import { readGmailSettings } from './config.js';
 import type { GmailDeps, KvStore, OwnerDeps } from './context.js';
 import { GOOGLE_CALLBACK_PATH } from './google-oauth.js';
@@ -33,8 +36,6 @@ import {
   showLinkConfirmation,
   startAccountLink,
 } from './link-flow.js';
-import { messagePage } from './pages.js';
-import { isRateLimited, rateLimitedResponse, type RateLimiter } from './rate-limit.js';
 import { finishSignIn, showAuthorize, submitAuthorize, type GrantProps } from './sign-in.js';
 import { GMAIL_TOOLS } from './tool-list.js';
 import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
@@ -84,12 +85,6 @@ export function createGmailServer(deps: OwnerDeps): McpServer {
   );
   registerToolSpecs(server, GMAIL_TOOLS, deps);
   return server;
-}
-
-/** 500 response for an invalid configuration (the message names the missing secret, never the value). */
-export function configErrorResponse(error: unknown): Response {
-  const message = error instanceof Error ? error.message : String(error);
-  return new Response(`Invalid Worker configuration: ${message}`, { status: 500 });
 }
 
 /** `/mcp` already authenticated by the library: applies the per-session limit and serves with the MCP server. */
@@ -146,25 +141,6 @@ export async function handleDefaultRequest(
   return route(deps, env.OAUTH_PROVIDER, request);
 }
 
-/** Refuses dynamic registration of clients whose callback is not Claude's (claude.ai, claude.com, localhost). */
-export function checkClientRegistration(
-  options: ClientRegistrationCallbackOptions,
-): ClientRegistrationCallbackResult | undefined {
-  const uris = readRedirectUris(options.clientMetadata);
-  if (uris?.every((uri) => isAllowedRedirect(uri, DEFAULT_REDIRECT_HOSTS))) return undefined;
-  return {
-    code: 'invalid_redirect_uri',
-    description: 'Missing or disallowed redirect URI.',
-    status: 400,
-  };
-}
-
-/** Canonical public origin: `PUBLIC_URL` (no trailing slash) or, without it, the request origin. */
-export function publicOrigin(env: GmailWorkerEnv, request: Request): string {
-  const configured = envValue(toEnvVars(env), 'PUBLIC_URL');
-  return configured ? new URL(configured).origin : new URL(request.url).origin;
-}
-
 /** Creates the OAuth provider that wraps the whole Worker, with the given origin's `/mcp` as the resource. */
 export function createGmailProvider(origin: string): OAuthProvider<GmailWorkerEnv> {
   return new OAuthProvider<GmailWorkerEnv>({
@@ -184,17 +160,6 @@ export function createGmailProvider(origin: string): OAuthProvider<GmailWorkerEn
     refreshTokenTTL: REFRESH_TOKEN_TTL_SECONDS,
     clientRegistrationCallback: checkClientRegistration,
   });
-}
-
-/** Public limit key: the client IP reported by Cloudflare (or `unknown`). */
-export function clientIpKey(request: Request): string {
-  return `ip:${request.headers.get('cf-connecting-ip') ?? 'unknown'}`;
-}
-
-/** Tells whether the route is token-protected (`/mcp`), which has the per-session limit instead of the per-IP one. */
-export function isMcpPath(request: Request): boolean {
-  const { pathname } = new URL(request.url);
-  return pathname === '/mcp' || pathname.startsWith('/mcp/');
 }
 
 /** Worker `fetch`: per-IP limit outside `/mcp`, then the public-origin provider (nothing runs outside this). */

@@ -76,11 +76,6 @@ export function googleAuthorizeUrl(params: GoogleAuthorizeParams): string {
   return url.toString();
 }
 
-/** Random base64url text with `bytes` bytes of entropy (state, nonce, PKCE verifier). */
-export function randomToken(bytes = 32): string {
-  return Buffer.from(crypto.getRandomValues(new Uint8Array(bytes))).toString('base64url');
-}
-
 /** Validates the token endpoint success JSON; throws if the access token is missing. */
 export function parseGoogleTokens(body: unknown): GoogleTokens {
   const data = (typeof body === 'object' && body !== null ? body : {}) as Record<string, unknown>;

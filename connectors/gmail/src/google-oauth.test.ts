@@ -8,10 +8,10 @@ import {
   googleRedirectUri,
   parseGoogleTokens,
   postGoogleToken,
-  randomToken,
   refreshGoogleToken,
   revokeGoogleToken,
 } from './google-oauth.js';
+import { randomToken } from '../../../src/remote/worker-kit.js';
 
 const BASE = {
   clientId: 'cid',

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { countingLimiter } from './fixtures/fake-google.js';
+import { countingLimiter } from './fixtures/limiter.js';
 import { isRateLimited, rateLimitedResponse } from './rate-limit.js';
 
 describe('isRateLimited', () => {

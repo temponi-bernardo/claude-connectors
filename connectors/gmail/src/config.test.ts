@@ -5,10 +5,9 @@ import {
   isEmailAddress,
   isEmailAllowed,
   parseAllowedEmails,
-  readConsentSecret,
   readGmailSettings,
-  requiredSecret,
 } from './config.js';
+import { readConsentSecret, requiredSecret } from '../../../src/remote/worker-kit.js';
 import { TEST_SETTINGS } from './fixtures/fake-google.js';
 
 const KEY = Buffer.alloc(32, 1).toString('base64');

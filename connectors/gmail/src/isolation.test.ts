@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { aliasAccounts, type AccountRef } from './accounts.js';
 import { clearAccessTokenCache, getAccessToken } from './access-token.js';
 import type { Fetcher } from './context.js';
-import { FakeKv } from './fixtures/fake-kv.js';
+import { FakeKv } from '../../../src/remote/fixtures/fake-kv.js';
 import {
   fakeFetch,
   TEST_TOKEN_KEY,

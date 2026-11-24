@@ -5,7 +5,6 @@
  * away. Any Google account may sign in, unless `ALLOWED_EMAILS` restricts it (private mode).
  */
 import {
-  AuthorizationError,
   authorizationErrorRedirect,
   type AuthRequest,
   type OAuthHelpers,
@@ -18,12 +17,17 @@ import {
   exchangeGoogleCode,
   googleAuthorizeUrl,
   googleRedirectUri,
-  randomToken,
   type GoogleTokens,
 } from './google-oauth.js';
 import { verifyGoogleIdToken, type GoogleIdentity } from './id-token.js';
 import { linkRefusalReason, storeGoogleAccount } from './link-flow.js';
-import { consentPage, messagePage, redirectWith } from './pages.js';
+import { consentPage } from './pages.js';
+import {
+  authorizationErrorResponse,
+  messagePage,
+  redirectWith,
+} from '../../../src/remote/pages.js';
+import { randomToken } from '../../../src/remote/worker-kit.js';
 
 /** Data kept (encrypted) by the library between the trip to Google and the return. */
 export interface SignInData {
@@ -45,16 +49,6 @@ export function accessDeniedPage(): Response {
     'This Google account is not authorized for this connector.',
     403,
   );
-}
-
-/** Response to an authorization error: back to the client when the library says where, otherwise a page. */
-export function authorizationErrorResponse(error: unknown): Response {
-  if (error instanceof AuthorizationError && error.redirectTo) {
-    return redirectWith(error.redirectTo);
-  }
-  const message =
-    error instanceof AuthorizationError ? error.description : 'Invalid authorization request.';
-  return messagePage('Could not connect', message, 400);
 }
 
 /** Starts the Google sign-in asking for identity and Gmail (`gmail.modify`) with a refresh token. */

@@ -28,6 +28,7 @@ export default defineConfig({
         'tools/**/cli.ts',
         'tools/**/fixtures/**',
         'connectors/*/src/fixtures/**',
+        'src/**/fixtures/**',
         'connectors/*/src/plan/page/fixtures/**',
         // Entry of the /planejamento-faculdade script: exception in src/test-exceptions.ts
         'connectors/*/src/plan/plan-cli.ts',
