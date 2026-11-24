@@ -47,7 +47,11 @@ Ask what the user wants to do:
 
 ## 3. Link another account
 
-Call `link_account` and give the link to the user, warning that:
+The simplest way: tell the user to click **Connect** on the Gmail connector in Claude's settings. After the Google
+sign-in, the **Your Gmail accounts in Claude** page lists the linked accounts, with **Add another Gmail account**,
+**Remove** and **Done, back to Claude**.
+
+Otherwise, call `link_account` and give the link to the user, warning that:
 
 - it works **only once** and for **10 minutes**;
 - it must be opened in the browser, choosing the Google account they want to add;
