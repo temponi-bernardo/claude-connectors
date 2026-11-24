@@ -8,17 +8,17 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = true
 
 # Claude's OAuth tokens, clients and grants (managed by @cloudflare/workers-oauth-provider).
-# Replace the id with the one from `npx wrangler kv namespace create OAUTH_KV --config connectors/spotify/wrangler.toml`.
+# Namespace "spotify-oauth" (separate from Gmail's OAUTH_KV). Another host: `npx wrangler kv namespace create spotify-oauth`.
 [[kv_namespaces]]
 binding = "OAUTH_KV"
-id = "00000000000000000000000000000000"
+id = "83992717217b4139872630a7ba81f743"
 
 # Per-user vault (app credentials, refresh token, snapshots, genre cache, plans, backups), all sealed with
 # AES-256-GCM (TOKEN_ENC_KEY) and keyed by a hash of the user.
-# Replace the id with the one from `npx wrangler kv namespace create SPOTIFY_KV --config connectors/spotify/wrangler.toml`.
+# Namespace "spotify-vault". Another host: `npx wrangler kv namespace create spotify-vault`.
 [[kv_namespaces]]
 binding = "SPOTIFY_KV"
-id = "00000000000000000000000000000001"
+id = "fbead7f55c474f2893a71cda88b2334b"
 
 # Per-OAuth-session limit on /mcp: 120 requests per minute.
 [[ratelimits]]
