@@ -4,6 +4,9 @@ import { sealPayload } from '../../../src/remote/seal.js';
 import { fakeBridge, READY_STATUS } from './fixtures/fakes.js';
 import {
   pairCookie,
+  changeAccess,
+  fetchPairAccess,
+  searchAccessCandidates,
   fetchPairStatus,
   handlePairCallback,
   handlePairPost,
@@ -25,6 +28,7 @@ import {
   routePairPost,
   routePairRequest,
   startPairLogin,
+  type PairAction,
   type PairApp,
 } from './pair.js';
 
@@ -252,5 +256,112 @@ describe('pairActionError', () => {
   it('turns any failure into a page error', () => {
     expect(pairActionError(new Error('down'))).toEqual({ error: 'down' });
     expect(pairActionError('text')).toEqual({ error: 'text' });
+  });
+});
+
+describe('chat access actions', () => {
+  const GROUP = { jid: '120363000000000001@g.us', name: 'Turma', group: true };
+
+  function accessApp(routes: Routes = {}) {
+    let stored: unknown = { mode: 'all', entries: [] };
+    const app = makeApp({
+      '/__access': (init) => {
+        if (init?.method === 'PUT') stored = JSON.parse(init.body as string);
+        return Response.json(stored);
+      },
+      ...routes,
+    });
+    return { app, stored: () => stored };
+  }
+
+  function action(path: string): PairAction {
+    const found = PAIR_ACTIONS[path];
+    if (!found) throw new Error(path);
+    return found;
+  }
+
+  it('fetchPairAccess reads the list and becomes null if the Durable Object fails', async () => {
+    expect(await fetchPairAccess(accessApp().app)).toEqual({ mode: 'all', entries: [] });
+    expect(await fetchPairAccess(makeApp())).toBeNull();
+  });
+
+  it('switches the mode and refuses an unknown one', async () => {
+    const { app, stored } = accessApp();
+    const mode = action('/pair/access/mode');
+    expect(await mode(app, new URLSearchParams({ mode: 'selected' }))).toHaveProperty('message');
+    expect(stored()).toEqual({ mode: 'selected', entries: [] });
+    expect(await mode(app, new URLSearchParams({ mode: 'x' }))).toHaveProperty('error');
+  });
+
+  it('adds and removes a chat, refusing an invalid JID', async () => {
+    const { app, stored } = accessApp();
+    const add = action('/pair/access/add');
+    expect(await add(app, new URLSearchParams({ jid: GROUP.jid, name: 'Turma' }))).toHaveProperty(
+      'message',
+    );
+    expect(stored()).toEqual({ mode: 'all', entries: [GROUP] });
+    expect(await add(app, new URLSearchParams({ jid: 'x@evil' }))).toHaveProperty('error');
+    await action('/pair/access/remove')(app, new URLSearchParams({ jid: GROUP.jid }));
+    expect(stored()).toEqual({ mode: 'all', entries: [] });
+  });
+
+  it('searches chats and contacts; an empty query lists only recent chats', async () => {
+    const paths: string[] = [];
+    const { app } = accessApp({
+      '/chats': (_init, path) => {
+        paths.push(path);
+        return Response.json({ chats: [{ ...GROUP, is_group: true, last_message_at: null }] });
+      },
+      '/contacts': (_init, path) => {
+        paths.push(path);
+        return Response.json({
+          contacts: [{ jid: '5531999999999@s.whatsapp.net', name: 'Ana', push_name: null }],
+        });
+      },
+    });
+    const search = action('/pair/access/search');
+    const found = await search(app, new URLSearchParams({ query: 'tu' }));
+    expect(found.candidates?.map((entry) => entry.jid)).toEqual([
+      GROUP.jid,
+      '5531999999999@s.whatsapp.net',
+    ]);
+    expect(found.query).toBe('tu');
+    await search(app, new URLSearchParams({ query: '' }));
+    expect(paths.filter((path) => path.startsWith('/contacts'))).toHaveLength(1);
+  });
+
+  it('the page shows the access section through handlePairPost', async () => {
+    const { app } = accessApp();
+    const res = await handlePairPost(
+      app,
+      post(app, '/pair/access/add', { fields: { jid: GROUP.jid, name: 'Turma' } }),
+      OWNER,
+    );
+    const html = await res.text();
+    expect(html).toContain('Chat access');
+    expect(html).toContain('Turma');
+  });
+});
+
+describe('changeAccess and searchAccessCandidates', () => {
+  it('changeAccess reads, changes and saves the list', async () => {
+    let stored: unknown = { mode: 'all', entries: [] };
+    const app = makeApp({
+      '/__access': (init) => {
+        if (init?.method === 'PUT') stored = JSON.parse(init.body as string);
+        return Response.json(stored);
+      },
+    });
+    const done = await changeAccess(app, (list) => ({ ...list, mode: 'selected' }), 'ok');
+    expect(done).toEqual({ message: 'ok' });
+    expect(stored).toEqual({ mode: 'selected', entries: [] });
+  });
+
+  it('searchAccessCandidates trims the query and lists recent chats', async () => {
+    const app = makeApp({ '/chats': () => Response.json({ chats: [] }) });
+    expect(await searchAccessCandidates(app, new URLSearchParams({ query: '  ' }))).toEqual({
+      query: '',
+      candidates: [],
+    });
   });
 });

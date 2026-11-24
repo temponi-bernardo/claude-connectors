@@ -69,15 +69,16 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/gmail/src/token-store.ts`: [`sha256Hex`](#sha256hex), [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
 - `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`resolveWritableAccount`](#resolvewritableaccount), [`accountBase`](#accountbase), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
 - `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
+- `connectors/whatsapp/src/access.ts`: [`parseAccessEntry`](#parseaccessentry), [`parseAccessEntries`](#parseaccessentries), [`parseAccessList`](#parseaccesslist), [`isChatAllowed`](#ischatallowed), [`accessRefusal`](#accessrefusal), [`requireChatAccess`](#requirechataccess), [`withAccessEntry`](#withaccessentry), [`withoutAccessEntry`](#withoutaccessentry), [`withAccessMode`](#withaccessmode), [`accessEntryFrom`](#accessentryfrom), [`markChatAccess`](#markchataccess), [`filterAllowedMessages`](#filterallowedmessages), [`mergeCandidates`](#mergecandidates), [`fetchAccessList`](#fetchaccesslist), [`saveAccessList`](#saveaccesslist)
 - `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
 - `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`normalizeRecipient`](#normalizerecipient), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
 - `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
 - `connectors/whatsapp/src/format.ts`: [`isHiddenChar`](#ishiddenchar), [`sanitizeText`](#sanitizetext), [`untrusted`](#untrusted), [`compactMessage`](#compactmessage), [`compactChat`](#compactchat), [`partialSyncWarning`](#partialsyncwarning), [`compactStatus`](#compactstatus)
-- `connectors/whatsapp/src/lifecycle.ts`: [`withBridgeToken`](#withbridgetoken), [`fetchBridge`](#fetchbridge), [`readBridgePhase`](#readbridgephase), [`restoreRequestInit`](#restorerequestinit), [`ensureRestored`](#ensurerestored), [`snapshotBridge`](#snapshotbridge), [`planSend`](#plansend), [`guardSend`](#guardsend), [`forwardInit`](#forwardinit), [`createBridgeLifecycle`](#createbridgelifecycle), [`logSnapshotFailure`](#logsnapshotfailure), [`resetBridge`](#resetbridge), [`routeBridgeRequest`](#routebridgerequest)
-- `connectors/whatsapp/src/pair-page.ts`: [`describePairStatus`](#describepairstatus), [`pairForm`](#pairform), [`pairingSection`](#pairingsection), [`maintenanceSection`](#maintenancesection), [`alertHtml`](#alerthtml), [`renderPairPage`](#renderpairpage)
-- `connectors/whatsapp/src/pair.ts`: [`parseCookies`](#parsecookies), [`pairCookie`](#paircookie), [`redirectWithCookies`](#redirectwithcookies), [`readPairSession`](#readpairsession), [`issuePairCsrf`](#issuepaircsrf), [`isTrustedPost`](#istrustedpost), [`startPairLogin`](#startpairlogin), [`isValidPairLogin`](#isvalidpairlogin), [`openPairSession`](#openpairsession), [`handlePairCallback`](#handlepaircallback), [`pairDeadline`](#pairdeadline), [`fetchPairStatus`](#fetchpairstatus), [`pairPage`](#pairpage), [`pairActionError`](#pairactionerror), [`handlePairPost`](#handlepairpost), [`routePairPost`](#routepairpost), [`isPairPath`](#ispairpath), [`routePairRequest`](#routepairrequest)
+- `connectors/whatsapp/src/lifecycle.ts`: [`withBridgeToken`](#withbridgetoken), [`fetchBridge`](#fetchbridge), [`readBridgePhase`](#readbridgephase), [`restoreRequestInit`](#restorerequestinit), [`ensureRestored`](#ensurerestored), [`snapshotBridge`](#snapshotbridge), [`planSend`](#plansend), [`guardSend`](#guardsend), [`forwardInit`](#forwardinit), [`createBridgeLifecycle`](#createbridgelifecycle), [`logSnapshotFailure`](#logsnapshotfailure), [`resetBridge`](#resetbridge), [`handleAccessRoute`](#handleaccessroute), [`routeBridgeRequest`](#routebridgerequest)
+- `connectors/whatsapp/src/pair-page.ts`: [`describePairStatus`](#describepairstatus), [`pairForm`](#pairform), [`pairingSection`](#pairingsection), [`maintenanceSection`](#maintenancesection), [`accessEntryRow`](#accessentryrow), [`accessModeRadio`](#accessmoderadio), [`accessModeForm`](#accessmodeform), [`accessSearchHtml`](#accesssearchhtml), [`accessSection`](#accesssection), [`alertHtml`](#alerthtml), [`renderPairPage`](#renderpairpage)
+- `connectors/whatsapp/src/pair.ts`: [`parseCookies`](#parsecookies), [`pairCookie`](#paircookie), [`redirectWithCookies`](#redirectwithcookies), [`readPairSession`](#readpairsession), [`issuePairCsrf`](#issuepaircsrf), [`isTrustedPost`](#istrustedpost), [`startPairLogin`](#startpairlogin), [`isValidPairLogin`](#isvalidpairlogin), [`openPairSession`](#openpairsession), [`handlePairCallback`](#handlepaircallback), [`pairDeadline`](#pairdeadline), [`fetchPairStatus`](#fetchpairstatus), [`fetchPairAccess`](#fetchpairaccess), [`pairPage`](#pairpage), [`pairActionError`](#pairactionerror), [`changeAccess`](#changeaccess), [`searchAccessCandidates`](#searchaccesscandidates), [`handlePairPost`](#handlepairpost), [`routePairPost`](#routepairpost), [`isPairPath`](#ispairpath), [`routePairRequest`](#routepairrequest)
 - `connectors/whatsapp/src/snapshots.ts`: [`pumpInto`](#pumpinto), [`storedGeneration`](#storedgeneration), [`readUploadHeaders`](#readuploadheaders), [`storeSnapshot`](#storesnapshot), [`storeSnapshotResponse`](#storesnapshotresponse), [`archiveSnapshot`](#archivesnapshot), [`sameSecret`](#samesecret), [`acceptSnapshotPush`](#acceptsnapshotpush)
-- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`waitForSync`](#waitforsync), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppCatalogServer`](#createwhatsappcatalogserver), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
+- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`waitForSync`](#waitforsync), [`prepareRead`](#prepareread), [`runRead`](#runread), [`loadAccess`](#loadaccess), [`runChatRead`](#runchatread), [`searchAllowedMessages`](#searchallowedmessages), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppCatalogServer`](#createwhatsappcatalogserver), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
 - `connectors/whatsapp/src/worker-env.ts`: [`bridgeStub`](#bridgestub), [`bridgeFetchFor`](#bridgefetchfor)
 - `connectors/whatsapp/src/worker.ts`: [`unixNow`](#unixnow), [`githubSettingsFrom`](#githubsettingsfrom), [`whatsappRemoteConnector`](#whatsappremoteconnector), [`createWhatsAppApps`](#createwhatsappapps), [`handleWhatsAppFetch`](#handlewhatsappfetch), [`isSyncCronEnabled`](#issynccronenabled), [`runScheduledSync`](#runscheduledsync)
 - `src/core/async.ts`: [`drainQueue`](#drainqueue), [`mapWithLimit`](#mapwithlimit)
@@ -3436,7 +3437,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/login-page.ts`
 - **Signature:** `escapeHtml(value: string): string`
-- **Used by:** `alertHtml()`, `consentPageBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`, `renderWriteAccessPage()`
+- **Used by:** `accessEntryRow()`, `accessSearchHtml()`, `accessSection()`, `alertHtml()`, `consentPageBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`, `renderWriteAccessPage()`
 - **Processes:** P03, P08, P09, P10, P11, P13, P15, P19
 
 <!-- generated:end -->
@@ -7914,7 +7915,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/bridge-client.ts`
 - **Signature:** `async bridgeJson(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<T>`
-- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `fetchPairStatus()`, `waitForSync()`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `fetchAccessList()`, `fetchPairStatus()`, `saveAccessList()`, `searchAccessCandidates()`, `searchAllowedMessages()`, `waitForSync()`
 - **Processes:** P13, P14, P15
 
 <!-- generated:end -->
@@ -7931,8 +7932,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/bridge-client.ts`
 - **Signature:** `bridgePath(path: string, params: Readonly<Record<string, string | number | undefined>>): string`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `waitForSync()`
-- **Processes:** P14
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `searchAccessCandidates()`, `searchAllowedMessages()`, `waitForSync()`
+- **Processes:** P14, P15
 
 <!-- generated:end -->
 
@@ -8053,7 +8054,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/whatsapp/src/config.ts`
 - **Signature:** `normalizePhone(raw: string): string | null`
 - **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `normalizeRecipient()`
-- **Processes:** P13, P15, P17
+- **Processes:** P13, P14, P15, P17
 
 <!-- generated:end -->
 
@@ -8171,8 +8172,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/config.ts`
 - **Signature:** `normalizeRecipient(raw: string): string | null`
-- **Used by:** `allowedRecipient()`, `readSendAllowlist()`
-- **Processes:** P13, P17
+- **Used by:** `allowedRecipient()`, `parseAccessEntry()`, `readSendAllowlist()`
+- **Processes:** P13, P14, P15, P17
 
 <!-- generated:end -->
 
@@ -8210,7 +8211,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `isHiddenChar(char: string): boolean`
 - **Used by:** `sanitizeText()`
-- **Processes:** P14
+- **Processes:** P13, P14, P15
 
 <!-- generated:end -->
 
@@ -8226,8 +8227,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `sanitizeText(text: string | null | undefined, max = MAX_TEXT_CHARS): string`
-- **Used by:** `compactChat()`, `compactContact()`, `compactMessage()`, `connectors/whatsapp/src/tools.ts (module)`, `mediaResult()`
-- **Processes:** P14
+- **Used by:** `compactChat()`, `compactContact()`, `compactMessage()`, `connectors/whatsapp/src/tools.ts (module)`, `mediaResult()`, `parseAccessEntry()`
+- **Processes:** P13, P14, P15
 
 <!-- generated:end -->
 
@@ -8243,7 +8244,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `untrusted(data: T): { readonly notice: string; readonly data: T }`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `searchAllowedMessages()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -8260,7 +8261,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `compactMessage(message: BridgeMessage): Record<string, unknown>`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `searchAllowedMessages()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -8546,6 +8547,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network to the container; R2; Durable Object storage; may schedule a snapshot.
 - **Errors:** Those of `ensureRestored`, `fetchBridge` and of the snapshot/reset.
 
+### `handleAccessRoute`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/lifecycle.ts`
+- **Signature:** `async handleAccessRoute(host: BridgeHost, request: Request): Promise<Response>`
+- **Used by:** `routeBridgeRequest()`
+- **Processes:** P14, P15
+
+<!-- generated:end -->
+
+- **Does:** Serves the internal `/__access` route of the Durable Object: GET reads the access list, PUT validates and saves it.
+- **Input:** `host`: bridge host (storage); `request`: GET or PUT with the list as JSON.
+- **Output:** `Response` with the list (`parseAccessList()` applied); 400 `bad_request` if the PUT body is not a JSON object.
+- **Effects:** Reads/writes `ACCESS_LIST_KEY` in the Durable Object storage; never wakes the container.
+- **Errors:** None (invalid JSON becomes the 400).
+
 ## `connectors/whatsapp/src/pair-page.ts`
 
 ### `describePairStatus`
@@ -8571,7 +8589,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/pair-page.ts`
 - **Signature:** `pairForm(action: string, csrf: string, body: string): string`
-- **Used by:** `maintenanceSection()`, `pairingSection()`
+- **Used by:** `accessEntryRow()`, `accessModeForm()`, `accessSearchHtml()`, `maintenanceSection()`, `pairingSection()`
 - **Processes:** P13, P15
 
 <!-- generated:end -->
@@ -8647,6 +8665,91 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Renders the complete `/pair` page.
 - **Input:** `view`: e-mail, CSRF, status and action result.
 - **Output:** Page HTML (with a 20 s refresh if it shows a code or QR).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessEntryRow`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessEntryRow(entry: AccessEntry, action: string, view: PairPageView): string`
+- **Used by:** `accessSearchHtml()`, `accessSection()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** One chat line of the access section: name, kind and JID, with an Allow/Remove form or an "Allowed" note.
+- **Input:** `entry`: chat; `action`: form path (empty = no button); `view`: page view (CSRF token).
+- **Output:** HTML of the `<li>`, with escaped texts.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessModeRadio`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessModeRadio(list: AccessList, mode: AccessList['mode'], text: string): string`
+- **Used by:** `accessModeForm()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** One radio option of the access mode, checked when it is the current mode.
+- **Input:** `list`: access list; `mode`: `all` or `selected`; `text`: label.
+- **Output:** HTML of the labeled radio.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessModeForm`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessModeForm(list: AccessList, view: PairPageView): string`
+- **Used by:** `accessSection()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** Form that switches the access mode (every chat or only the allowed ones).
+- **Input:** `list`: access list; `view`: page view (CSRF token).
+- **Output:** HTML of the form posting to `/pair/access/mode`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessSearchHtml`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessSearchHtml(list: AccessList, view: PairPageView): string`
+- **Used by:** `accessSection()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** Chat search form and its results; chats already allowed show a note instead of a button.
+- **Input:** `list`: access list; `view`: page view (`query`, `candidates`, CSRF token).
+- **Output:** HTML of the form and, after a search, the results or "No chats or contacts found".
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessSection`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessSection(view: PairPageView): string`
+- **Used by:** `renderPairPage()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** "Chat access" block of `/pair`: mode summary, mode form, allowed chats with Remove and the search to allow more.
+- **Input:** `view`: page view with `access` (null = could not read).
+- **Output:** HTML of the section.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -8811,7 +8914,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/pair.ts`
 - **Signature:** `pairDeadline(app: PairApp): number`
-- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `fetchPairStatus()`
+- **Used by:** `changeAccess()`, `connectors/whatsapp/src/pair.ts (module)`, `fetchPairAccess()`, `fetchPairStatus()`, `searchAccessCandidates()`
 - **Processes:** P13, P15
 
 <!-- generated:end -->
@@ -8957,6 +9060,57 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `{ error: mensagem }`.
 - **Effects:** None (pure).
 - **Errors:** None.
+
+### `fetchPairAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair.ts`
+- **Signature:** `async fetchPairAccess(app: PairApp): Promise<AccessList | null>`
+- **Used by:** `pairPage()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** Reads the access list for the `/pair` page.
+- **Input:** `app`: `/pair` dependencies.
+- **Output:** The `AccessList`, or null if the Durable Object does not answer in time.
+- **Effects:** Calls the Durable Object `/__access` (does not wake the container).
+- **Errors:** None (failures become null).
+
+### `changeAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair.ts`
+- **Signature:** `async changeAccess(app: PairApp, change: (list: AccessList) => AccessList, message: string): Promise<Partial<PairPageView>>`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Reads the access list, applies a change and saves it.
+- **Input:** `app`: `/pair` dependencies; `change`: pure list transformation; `message`: confirmation text.
+- **Output:** `{ message }` for the page.
+- **Effects:** Reads and writes the list through `/__access`.
+- **Errors:** Bridge/Durable Object failures and a full list (`withAccessEntry()`) throw; `handlePairPost()` shows them as errors.
+
+### `searchAccessCandidates`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair.ts`
+- **Signature:** `async searchAccessCandidates(app: PairApp, form: URLSearchParams): Promise<Partial<PairPageView>>`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Finds chats (most recent when the query is empty) and, with a query, contacts the owner can allow.
+- **Input:** `app`: `/pair` dependencies; `form`: `query` (trimmed, up to 100 characters).
+- **Output:** `{ query, candidates }` with entries from `mergeCandidates()`.
+- **Effects:** Calls the bridge `/chats` and `/contacts` (wakes the container).
+- **Errors:** Bridge failures throw (shown as page errors).
 
 ## `connectors/whatsapp/src/snapshots.ts`
 
@@ -9104,7 +9258,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/tools.ts`
 - **Signature:** `toolDeadline(ctx: WhatsAppToolContext): number`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `runRead()`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `loadAccess()`, `runRead()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -9155,7 +9309,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/tools.ts`
 - **Signature:** `async runRead(ctx: WhatsAppToolContext, query: (deadline: number) => Promise<T>): Promise<T | { readonly warning: string; readonly result: T }>`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `runChatRead()`, `searchAllowedMessages()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -9301,6 +9455,57 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `McpServer` with `whatsappTools(settings)` registered on `listOnlyContext()`.
 - **Effects:** None (pure).
 - **Errors:** None when created; running a tool throws through `refuseListOnlyUse()`.
+
+### `loadAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/tools.ts`
+- **Signature:** `loadAccess(ctx: WhatsAppToolContext): Promise<AccessList>`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `runChatRead()`, `searchAllowedMessages()`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Reads the owner's access list within the tool call deadline.
+- **Input:** `ctx`: tool context.
+- **Output:** The `AccessList`.
+- **Effects:** Calls the Durable Object `/__access` (does not wake the container).
+- **Errors:** Durable Object failure or timeout throws.
+
+### `runChatRead`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/tools.ts`
+- **Signature:** `async runChatRead(ctx: WhatsAppToolContext, chatJid: string, query: (deadline: number) => Promise<T>): Promise<T | { readonly warning: string; readonly result: T }>`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Runs a read of one chat only if the chat is in the access list; the refusal comes before waking the container.
+- **Input:** `ctx`: tool context; `chatJid`: chat JID; `query`: the read, given the deadline.
+- **Output:** The read result, as in `runRead()`.
+- **Effects:** Reads the access list, then as `runRead()`.
+- **Errors:** Chat outside the list → error pointing to `/pair`; otherwise as `runRead()`.
+
+### `searchAllowedMessages`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/tools.ts`
+- **Signature:** `async searchAllowedMessages(ctx: WhatsAppToolContext, args: { readonly query: string; readonly chat_jid?: string | undefined; readonly limit: number }): Promise<unknown>`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Runs `search_messages` restricted to the access list: with `chat_jid`, requires the chat; without it, asks for up to 100 results and keeps only allowed chats.
+- **Input:** `ctx`: tool context; `args`: `query`, optional `chat_jid`, `limit`.
+- **Output:** Untrusted-wrapped `{ messages }`, at most `limit`.
+- **Effects:** Reads the access list and calls the bridge `/search`.
+- **Errors:** Chat outside the list → error pointing to `/pair`; bridge errors as in `runRead()`.
 
 ## `connectors/whatsapp/src/worker-env.ts`
 
@@ -15543,6 +15748,263 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** `RangeError` for an unknown time zone.
 
+## `connectors/whatsapp/src/access.ts`
+
+### `parseAccessEntry`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `parseAccessEntry(raw: unknown): AccessEntry | null`
+- **Used by:** `accessEntryFrom()`, `mergeCandidates()`, `parseAccessEntries()`
+- **Processes:** P13, P14, P15
+
+<!-- generated:end -->
+
+- **Does:** Validates one stored or submitted chat entry.
+- **Input:** `raw`: unknown value with `jid` and `name`.
+- **Output:** `AccessEntry` (JID normalized, name cleaned and capped, `group` from the JID suffix), or null.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `parseAccessEntries`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `parseAccessEntries(raw: unknown): AccessEntry[]`
+- **Used by:** `parseAccessList()`
+- **Processes:** P13, P14, P15
+
+<!-- generated:end -->
+
+- **Does:** Valid entries of a stored list, without duplicates and within `MAX_ACCESS_ENTRIES`.
+- **Input:** `raw`: unknown value (array expected).
+- **Output:** Array of `AccessEntry`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `parseAccessList`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `parseAccessList(raw: unknown): AccessList`
+- **Used by:** `fetchAccessList()`, `handleAccessRoute()`
+- **Processes:** P13, P14, P15
+
+<!-- generated:end -->
+
+- **Does:** Reads the stored access list: nothing saved keeps everything open; a corrupt value fails closed.
+- **Input:** `raw`: value from the Durable Object storage or a PUT body.
+- **Output:** `AccessList`: `OPEN_ACCESS` if undefined/null; mode `selected` with no entries if the mode is invalid.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `isChatAllowed`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `isChatAllowed(list: AccessList, jid: string): boolean`
+- **Used by:** `filterAllowedMessages()`, `markChatAccess()`, `requireChatAccess()`
+- **Processes:** P14, P17
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the connector may read and send to a chat.
+- **Input:** `list`: access list; `jid`: chat JID.
+- **Output:** `true` in mode `all` or when the JID is listed.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessRefusal`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `accessRefusal(pairUrl: string): string`
+- **Used by:** `requireChatAccess()`
+- **Processes:** P14, P17
+
+<!-- generated:end -->
+
+- **Does:** Refusal text for a chat outside the access list.
+- **Input:** `pairUrl`: `/pair` address.
+- **Output:** Message telling the owner where to allow the chat.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `requireChatAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `requireChatAccess(list: AccessList, jid: string, pairUrl: string): void`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `runChatRead()`, `searchAllowedMessages()`
+- **Processes:** P14, P17
+
+<!-- generated:end -->
+
+- **Does:** Guards a chat read or send with the access list.
+- **Input:** `list`: access list; `jid`: chat JID; `pairUrl`: `/pair` address.
+- **Output:** Nothing.
+- **Effects:** None (pure).
+- **Errors:** Chat outside the list → `Error` with `accessRefusal()`.
+
+### `withAccessEntry`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `withAccessEntry(list: AccessList, entry: AccessEntry): AccessList`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `parseAccessEntries()`
+- **Processes:** P13, P14, P15
+
+<!-- generated:end -->
+
+- **Does:** Adds a chat to the list, or refreshes its name if already there.
+- **Input:** `list`: access list; `entry`: chat.
+- **Output:** New `AccessList` (order kept).
+- **Effects:** None (pure).
+- **Errors:** Adding past `MAX_ACCESS_ENTRIES` throws.
+
+### `withoutAccessEntry`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `withoutAccessEntry(list: AccessList, jid: string): AccessList`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Removes a chat from the list.
+- **Input:** `list`: access list; `jid`: chat JID.
+- **Output:** New `AccessList`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `withAccessMode`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `withAccessMode(list: AccessList, mode: AccessMode): AccessList`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Switches the access mode, keeping the entries.
+- **Input:** `list`: access list; `mode`: `all` or `selected`.
+- **Output:** New `AccessList`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessEntryFrom`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `accessEntryFrom(form: URLSearchParams): AccessEntry | null`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Builds an entry from the `/pair` form.
+- **Input:** `form`: `jid` (number or JID) and `name`.
+- **Output:** `AccessEntry`, or null if the JID is invalid.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `markChatAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `markChatAccess(list: AccessList, chats: readonly Record<string, unknown>[]): Record<string, unknown>[]`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** In mode `selected`, flags each compact chat with `allowed` and drops the last-message preview of chats outside the list.
+- **Input:** `list`: access list; `chats`: compact chats.
+- **Output:** New array (unchanged copy in mode `all`).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `filterAllowedMessages`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `filterAllowedMessages(list: AccessList, messages: readonly T[]): T[]`
+- **Used by:** `searchAllowedMessages()`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Keeps only compact messages whose `chat` is allowed.
+- **Input:** `list`: access list; `messages`: compact messages.
+- **Output:** Filtered array.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `mergeCandidates`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `mergeCandidates(chats: readonly BridgeChat[], contacts: readonly Readonly<Record<string, string | null>>[]): AccessEntry[]`
+- **Used by:** `searchAccessCandidates()`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Joins chat and contact search results into access entries, without repeating a JID.
+- **Input:** `chats`: bridge chats; `contacts`: bridge contacts.
+- **Output:** Array of `AccessEntry` (chats first).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `fetchAccessList`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `async fetchAccessList(bridge: BridgeFetch, deadline: number): Promise<AccessList>`
+- **Used by:** `changeAccess()`, `fetchPairAccess()`, `loadAccess()`
+- **Processes:** P13, P14, P15
+
+<!-- generated:end -->
+
+- **Does:** Reads the access list from the Durable Object.
+- **Input:** `bridge`: Durable Object fetch; `deadline`: Unix ms.
+- **Output:** `AccessList` (through `parseAccessList()`).
+- **Effects:** GET `/__access` on the Durable Object (does not wake the container).
+- **Errors:** Timeout or error response throws `BridgeError`/`Error`.
+
+### `saveAccessList`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `async saveAccessList(bridge: BridgeFetch, list: AccessList, deadline: number): Promise<void>`
+- **Used by:** `changeAccess()`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Saves the access list in the Durable Object.
+- **Input:** `bridge`: Durable Object fetch; `list`: access list; `deadline`: Unix ms.
+- **Output:** Nothing.
+- **Effects:** PUT `/__access` (Durable Object storage).
+- **Errors:** Timeout or error response throws.
+
 ## Data and constants
 
 | Name                              | File                                                    | What it is                                                                                                                                                                                   |
@@ -15706,6 +16168,11 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `PAIR_LOGIN_TTL_SECONDS`          | `connectors/whatsapp/src/pair.ts`                       | Lifetime of the in-progress `/pair` login (10 minutes).                                                                                                                                      |
 | `PAIR_CALLBACK_PATH`              | `connectors/whatsapp/src/pair.ts`                       | GitHub callback path for `/pair` (a subpath of the OAuth App callback).                                                                                                                      |
 | `PAIR_ACTIONS`                    | `connectors/whatsapp/src/pair.ts`                       | `/pair` actions by path: code, QR, unlink and start over from scratch.                                                                                                                       |
+| `ACCESS_LIST_KEY`                 | `connectors/whatsapp/src/access.ts`                     | Key, in the Durable Object storage, of the owner's chat access list.                                                                                                                         |
+| `ACCESS_ROUTE`                    | `connectors/whatsapp/src/access.ts`                     | Internal Durable Object route (`/__access`) that reads (GET) and saves (PUT) the access list without waking the container.                                                                   |
+| `MAX_ACCESS_ENTRIES`              | `connectors/whatsapp/src/access.ts`                     | Most chats the access list holds (200).                                                                                                                                                      |
+| `OPEN_ACCESS`                     | `connectors/whatsapp/src/access.ts`                     | Access list before the owner saves anything: mode `all`, every chat open.                                                                                                                    |
+| `ACCESS_ACTIONS`                  | `connectors/whatsapp/src/pair.ts`                       | `/pair` chat access actions: mode, add, remove and search.                                                                                                                                   |
 | `SNAPSHOT_KEY_NAME`               | `connectors/whatsapp/src/snapshots.ts`                  | Key of the current snapshot in the R2 bucket (`whatsapp/snapshot.was1`).                                                                                                                     |
 | `WHATSAPP_INSTRUCTIONS`           | `connectors/whatsapp/src/tools.ts`                      | MCP server instructions: what the connector is and the rule about untrusted content.                                                                                                         |
 | `WHATSAPP_SERVER_INFO`            | `connectors/whatsapp/src/tools.ts`                      | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                                     |

@@ -62,6 +62,7 @@ The MVP is the Canvas connector installed from the marketplace and used day to d
 | F3.3 | Restrict container egress to WhatsApp hosts (`allowedHosts`)                          | ⬜     | Bridge connects with `enableInternet = false` and only WhatsApp hosts, or an ADR saying why not |
 | F3.4 | Sending enabled to any contact or group, with quoting (ADR 0015)                      | ✅     | `ENABLE_SEND` on, optional allowlist, confirmation and limit kept; Worker and Go tests          |
 | F3.5 | Evaluate sending media over WhatsApp                                                  | ⬜     | Image/document sent with thumbnail and checked type, or an ADR saying why not                   |
+| F3.6 | Chat access list managed by the owner on `/pair` (ADR 0033)                           | ✅     | Reads and sends refused outside the list in mode `selected`; Worker tests; skill and docs       |
 
 ## Phase 4 — Anthropic plugin standard and English
 

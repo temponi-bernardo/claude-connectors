@@ -352,23 +352,30 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Steps:**
   1. `handleMcp()` opens the access token and checks with `acceptsSecret` whether the email is still on the list; the
      `createServer` builds `createWhatsAppMcpServer()` with `whatsappTools()` (read; sending only with `ENABLE_SEND`).
-  2. The tool runs in `runRead()` with the deadline from `toolDeadline()`: `prepareRead()` calls `waitForSync()`, which
+  2. The owner's chat access list (ADR 0033) comes first: `loadAccess()` reads it with `fetchAccessList()` from the
+     Durable Object (`parseAccessList()`). `runChatRead()` (`get_messages`, `get_media`) calls
+     `requireChatAccess()` (`isChatAllowed()`, `accessRefusal()`) before waking the container;
+     `searchAllowedMessages()` refuses a `chat_jid` outside the list and keeps only allowed chats with
+     `filterAllowedMessages()`; `list_chats` flags chats with `markChatAccess()`; `get_access_list` only shows it.
+  3. The tool runs in `runRead()` with the deadline from `toolDeadline()`: `prepareRead()` calls `waitForSync()`, which
      requests `POST /sync/wait` with the budget from `syncWaitBudget()`, and, if pairing is needed, returns the `/pair`
      address. `withDeadline()` cuts off anything past the ceiling. `whatsapp_status` also calls `waitForSync()` (not
      `GET /status`), so a container that just woke up reports its connection once it reconnects instead of
      `connected: false`; if the wait runs out, `compactStatus()` adds the `warning`.
-  3. Bridge calls go through `bridgeJson()`/`callBridge()` (`bridgePath()`, `jsonPost()`), which use
+  4. Bridge calls go through `bridgeJson()`/`callBridge()` (`bridgePath()`, `jsonPost()`), which use
      `bridgeFetchFor()` over the single stub from `bridgeStub()`. Errors become text with `bridgeErrorFrom()`;
      deadline overruns, `bridgeTimeoutMessage()`.
-  4. In the Durable Object, `routeBridgeRequest()` (built by `createBridgeLifecycle()`) calls `ensureRestored()`:
+  5. In the Durable Object, `routeBridgeRequest()` (built by `createBridgeLifecycle()`) answers `/__access` with
+     `handleAccessRoute()` without waking the container; for the other routes it calls `ensureRestored()`:
      `readBridgePhase()` and, if the bridge just woke up, `restoreRequestInit()` sends the R2 snapshot. Then
      `fetchBridge()` forwards with `withBridgeToken()` and `forwardInit()`.
-  5. The response is reduced by `compactChat()`, `compactMessage()`, `compactContact()` or `compactStatus()` (text
+  6. The response is reduced by `compactChat()`, `compactMessage()`, `compactContact()` or `compactStatus()` (text
      cleaned by `sanitizeText()` and `isHiddenChar()`) and wrapped by `untrusted()`; `partialSyncWarning()` adds the
      partial-result notice. Media becomes an MCP block in `mediaResult()` (`binaryContentBlock()`, `bytesToBase64()`).
 - **Result:** compact response, with ISO dates with time zone and the untrusted-content notice.
 - **Failures:** slow cold start → `Timed out waiting for WhatsApp…: try again in a moment`; a snapshot that does not open → `bad_snapshot` error
-  (the bridge never restarts from scratch on its own); email removed from the list → 403.
+  (the bridge never restarts from scratch on its own); email removed from the list → 403; chat outside the access
+  list → refusal pointing to `/pair`.
 
 ## P15 — Pair the number (`/pair`)
 
@@ -380,14 +387,23 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      `redirectWithCookies()`). On return, `handlePairCallback()` checks with `isValidPairLogin()`, completes with
      `finishGithubLogin()` and `openPairSession()` stores the session.
   3. `pairPage()` shows `renderPairPage()` with the status from `fetchPairStatus()` (`describePairStatus()`,
-     `pairingSection()`, `maintenanceSection()`, `pairForm()`, `alertHtml()`) and a token from `issuePairCsrf()`.
+     `pairingSection()`, `maintenanceSection()`, `pairForm()`, `alertHtml()`), the access list from
+     `fetchPairAccess()` (`accessSection()`, `accessModeForm()`, `accessModeRadio()`, `accessSearchHtml()`,
+     `accessEntryRow()`) and a token from `issuePairCsrf()`.
   4. Each POST goes through `routePairPost()` and `handlePairPost()`: `isTrustedPost()` checks the token and `Origin`, and the
      `PAIR_ACTIONS` action calls the bridge (`/pair/code` with `normalizePhone()`, `/pair/qr`, `/logout`, or
      `/__reset`, which reaches `resetBridge()` and `archiveSnapshot()`), with the deadline from `pairDeadline()`; a failure becomes
      `pairActionError()`.
-- **Result:** pairing code (or QR) on screen; once typed on the phone, the bridge stays connected.
+  5. Chat access (`ACCESS_ACTIONS`, ADR 0033): `searchAccessCandidates()` asks the bridge for `/chats` and, with a
+     query, `/contacts`, merged by `mergeCandidates()`; Allow, Remove and the mode go through `changeAccess()`, which
+     reads the list, applies `withAccessEntry()` (with `accessEntryFrom()` and `parseAccessEntry()`),
+     `withoutAccessEntry()` or `withAccessMode()` and saves it with `saveAccessList()`; the Durable Object
+     validates it again in `handleAccessRoute()` (`parseAccessEntries()`).
+- **Result:** pairing code (or QR) on screen; once typed on the phone, the bridge stays connected. The access list
+  is saved in the Durable Object and applies to the next tool call.
 - **Failures:** stale form or from another origin → 403; invalid number → notice on the page; bridge not responding →
-  `Could not read the WhatsApp status right now.`.
+  `Could not read the WhatsApp status right now.`; invalid chat or more than `MAX_ACCESS_ENTRIES` → notice on the
+  page.
 
 ## P16 — Save and restore the session (snapshots in R2)
 
@@ -414,19 +430,19 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Trigger:** `send_message` with `confirmed_by_user: true`; or a Cron Trigger equal to `SYNC_CRON`.
 - **Steps:**
   1. Sending: `allowedRecipient()` normalizes the recipient with `normalizeRecipient()` (number, contact, LID or
-     group) and, if `SEND_ALLOWLIST` has items, requires it to be on it; `reply_to_message_id` becomes `reply_to`.
+     group) and, if `SEND_ALLOWLIST` has items, requires it to be on it; then `requireChatAccess()` applies the
+     owner's access list (ADR 0033); `reply_to_message_id` becomes `reply_to`.
      In the Durable Object, `guardSend()` applies `planSend()` with the stored history before forwarding
      `/send`. The bridge checks recipient and allowlist, looks up the quoted message (`GetQuoted`) and applies the limit
      again before sending.
   2. Cron: `runScheduledSync()` only acts if `isSyncCronEnabled()`; wakes the bridge with `/sync/wait`, requests
      `/__snapshot` and lets the container sleep after `SLEEP_AFTER`.
 - **Result:** at most `SEND_MAX_PER_HOUR` sends per hour, to any contact or group (or only the
-  allowlist, if set), each confirmed by the owner; with cron, history stays up to date even without use.
-- **Failures:** invalid recipient or outside the list → refused without calling the bridge; unknown quoted message →
-  `quoted_not_found` without using the quota; limit exceeded → 429 with the wait in seconds.
-- **Result:** at most `SEND_MAX_PER_HOUR` sends per hour, only to the allowlist; with cron, history stays up to date
+  allowlist, if set, and the owner's access list), each confirmed by the owner; with cron, history stays up to date
   even without use.
-- **Failures:** recipient outside the list → refused without calling the bridge; limit exceeded → 429 with the wait in seconds.
+- **Failures:** invalid recipient, outside `SEND_ALLOWLIST` or outside the access list → refused without calling the
+  bridge; unknown quoted message → `quoted_not_found` without using the quota; limit exceeded → 429 with the wait
+  in seconds.
 
 ## P18 — Manage Gmail: send, reply, forward, drafts and organize
 

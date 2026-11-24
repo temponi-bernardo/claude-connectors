@@ -1,5 +1,8 @@
 # Glossary
 
+**Access list** — WhatsApp chats (contacts and groups) Claude may read and message, chosen by the owner on
+`/pair`; mode `all` or `selected` (ADR 0033).
+
 **ADR** — Architecture Decision Record; a short record of an architecture decision, its context and
 consequences. Lives in `docs/adr/`.
 
