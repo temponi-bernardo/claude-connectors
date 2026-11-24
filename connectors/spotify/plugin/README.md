@@ -2,8 +2,8 @@
 
 Claude plugin for Spotify with your own Spotify app. It connects Claude to the remote MCP server at
 `https://spotify-remote.bftemponi.workers.dev/mcp` (see `.mcp.json`) and adds usage skills in `skills/`. Nothing
-runs on your computer. The server code and the full guide live one folder up, in
-[`connectors/spotify/`](../README.md).
+runs on your computer. The service page, privacy policy and terms are on the
+[project site](https://temponi-bernardo.github.io/claude-connectors/).
 
 ## Install
 

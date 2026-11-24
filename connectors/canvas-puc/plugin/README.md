@@ -2,8 +2,8 @@
 
 Claude plugin for the PUC Minas Canvas LMS. It connects Claude to the remote MCP server at
 `https://canvas-puc-remote.bftemponi.workers.dev/mcp` (see `.mcp.json`) and adds usage skills in `skills/`.
-Nothing runs on your computer. The server code and the full guide live one folder up, in
-[`connectors/canvas-puc/`](../README.md).
+Nothing runs on your computer. The service page, privacy policy and terms are on the
+[project site](https://temponi-bernardo.github.io/claude-connectors/).
 
 ## Install
 
@@ -19,5 +19,5 @@ Nothing runs on your computer. The server code and the full guide live one folde
 - `/study-course` — module summaries, key concepts, review questions and a plan up to the exam.
 - `/planejamento-faculdade` — builds and keeps the "Plano do Semestre AAAA/S" artifact: risk per course, today and
   tomorrow, a day-by-day study plan, course cards with a points bar, a timeline with persistent checklists and
-  questions for instructors. Optional sources: the `gmail` and `whatsapp` plugins of this marketplace; it offers
+  questions for instructors. Optional source: the `gmail` plugin of this marketplace; it offers
   three daily routines (morning, night and an unsent-assignment alert). Read-only on every connector.

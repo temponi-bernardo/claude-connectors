@@ -1,8 +1,0 @@
-title = "gitleaks - project configuration"
-
-[extend]
-useDefault = true
-
-[allowlist]
-description = "Arquivos sem segredos reais"
-paths = ['''\.env\.example$''', '''package-lock\.json$''', '''docs/.*\.md$''']

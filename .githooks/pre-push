@@ -1,8 +1,0 @@
-#!/usr/bin/env sh
-# Two fast barriers before anything reaches GitHub:
-#   1. the protected branches: main changes only through a PR (git passes the refs on stdin);
-#   2. gitleaks (`secrets:check`, a few seconds): a secret must not reach the remote, even on a task branch.
-# The rest of the full check runs once per PR, in `npm run pr:check` (ADR 0029).
-set -e
-sh "$(dirname "$0")/protected-branches.sh"
-npm run -s secrets:check

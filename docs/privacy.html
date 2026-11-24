@@ -9,11 +9,10 @@ description: What data the Claude Connectors connectors access, where it is kept
 
 <p>
   This policy applies to the connectors of the Claude Connectors project, maintained by Bernardo
-  Temponi, currently the <strong>Canvas PUC Minas</strong>, <strong>Gmail</strong>,
-  <strong>Spotify</strong> and <strong>WhatsApp</strong> connectors. They run only in the cloud and
-  are used through the marketplace plugin or as a custom connector in claude.ai, Cowork, the mobile
-  app and Claude Code. Canvas, Gmail and Spotify run on the project's server; WhatsApp runs on a
-  server that each person publishes in their own account (see the WhatsApp section).
+  Temponi, currently the <strong>Canvas PUC Minas</strong>, <strong>Gmail</strong> and
+  <strong>Spotify</strong> connectors. They run only in the cloud, on the project's server, and are
+  used through the marketplace plugin or as a custom connector in claude.ai, Cowork, the mobile app
+  and Claude Code.
 </p>
 
 <h2>What data is accessed in Canvas</h2>
@@ -98,34 +97,6 @@ description: What data the Claude Connectors connectors access, where it is kept
   <li>Spotify content is used only to answer what you ask; it is not used to train AI models.</li>
 </ul>
 
-<h2>WhatsApp</h2>
-<ul>
-  <li>
-    <strong>Self-host:</strong> there is no project server for WhatsApp. Each person publishes the
-    connector in their own Cloudflare account (a Worker and a Container) and pairs their own number.
-    Nothing from your WhatsApp, not even the credentials, reaches the project maintainer.
-  </li>
-  <li>
-    <strong>What is accessed:</strong> chats, messages, contacts and media of the paired number, and
-    sending text when you ask (one message at a time, with your confirmation and an hourly limit).
-  </li>
-  <li>
-    <strong>What is stored:</strong> the WhatsApp session and the message database stay on the
-    Container's disk and, when it sleeps, become an encrypted backup (AES-256-GCM, with the
-    <code>SNAPSHOT_KEY</code> that only you have) in the R2 bucket of your Cloudflare account.
-  </li>
-  <li>
-    <strong>Who gets in:</strong> Claude's access and the pairing page require a GitHub sign-in with
-    an email address from the list you configured (<code>ALLOWED_EMAILS</code>); only the owner gets
-    in.
-  </li>
-  <li>
-    <strong>How to delete:</strong> on the <code>/pair</code> page, unlink the device or start over
-    from scratch; or delete the Worker and the R2 bucket in your Cloudflare account. On your phone,
-    remove the device in WhatsApp → Linked devices.
-  </li>
-</ul>
-
 <h2>Canvas credentials</h2>
 <ul>
   <li>
@@ -154,10 +125,6 @@ description: What data the Claude Connectors connectors access, where it is kept
   <li>
     <strong>Spotify:</strong> receives the sign-in with your Spotify account and the calls made on
     your behalf through your own app.
-  </li>
-  <li>
-    <strong>WhatsApp (Meta) and GitHub:</strong> with self-hosted WhatsApp, your server talks to
-    WhatsApp as a linked device, and GitHub receives your owner sign-in.
   </li>
   <li>
     <strong>Anthropic (Claude):</strong> receives the result of each tool you use in the
