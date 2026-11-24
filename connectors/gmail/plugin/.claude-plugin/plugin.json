@@ -2,7 +2,6 @@
   "name": "gmail",
   "version": "2.0.0",
   "description": "Multi-account Gmail, straight from the cloud: search, read, attachment text, send, reply, forward, drafts, labels, archive and trash (no permanent delete). Claude asks for confirmation before sending or deleting. Sign in with Google the first time; ask Claude for a link to add more accounts.",
-  "icon": "./icon.png",
   "author": {
     "name": "Bernardo Temponi",
     "url": "https://github.com/temponi-bernardo"
@@ -10,6 +9,5 @@
   "homepage": "https://claude-connectors-site.bftemponi.workers.dev/",
   "repository": "https://github.com/temponi-bernardo/claude-connectors",
   "license": "MIT",
-  "keywords": ["gmail", "email", "google", "multi-account", "inbox"],
-  "privacyPolicyUrl": "https://claude-connectors-site.bftemponi.workers.dev/privacy.html"
+  "keywords": ["gmail", "email", "google", "multi-account", "inbox"]
 }
