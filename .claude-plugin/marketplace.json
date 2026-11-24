@@ -1,6 +1,6 @@
 {
   "name": "claude-connectors",
-  "owner": { "name": "Bernardo Temponi" },
+  "owner": { "name": "Bernardo Temponi", "url": "https://github.com/temponi-bernardo" },
   "metadata": {
     "description": "MCP connectors for Claude: PUC Minas Canvas, multi-account Gmail and Spotify (bring your own app)."
   },
@@ -9,6 +9,7 @@
       "name": "canvas-puc",
       "source": "./connectors/canvas-puc/plugin",
       "description": "PUC Minas Canvas LMS in the cloud: due dates, assignments, grades, announcements, modules, files, discussions and inbox messages. Nothing is installed on your computer.",
+      "author": { "name": "Bernardo Temponi", "url": "https://github.com/temponi-bernardo" },
       "category": "education",
       "tags": ["canvas", "lms", "education", "puc-minas"]
     },
@@ -16,6 +17,7 @@
       "name": "gmail",
       "source": "./connectors/gmail/plugin",
       "description": "Multi-account Gmail in the cloud: read, search, send, reply, forward, drafts, labels, archive and trash, with confirmation before sending or deleting. Nothing is installed on your computer.",
+      "author": { "name": "Bernardo Temponi", "url": "https://github.com/temponi-bernardo" },
       "category": "productivity",
       "tags": ["gmail", "email", "google", "productivity"]
     },
@@ -23,6 +25,7 @@
       "name": "spotify",
       "source": "./connectors/spotify/plugin",
       "description": "Spotify in the cloud with your own Spotify app: search, Liked Songs, playlists (read, create, edit, sort, split, merge), follows, history, top items and playback, plus bulk cleanups with preview, automatic backups and restore. Nothing is installed on your computer.",
+      "author": { "name": "Bernardo Temponi", "url": "https://github.com/temponi-bernardo" },
       "category": "entertainment",
       "tags": ["spotify", "music", "playlists", "library"]
     }
