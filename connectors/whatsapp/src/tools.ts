@@ -24,6 +24,8 @@ import {
   type BridgeFetch,
 } from './bridge-client.js';
 import {
+  ACCESS_SEARCH_WINDOW,
+  accessSearchWarning,
   fetchAccessList,
   filterAllowedMessages,
   markChatAccess,
@@ -211,12 +213,13 @@ export async function searchAllowedMessages(
 ): Promise<unknown> {
   const access = await loadAccess(ctx);
   if (args.chat_jid) requireChatAccess(access, args.chat_jid, ctx.pairUrl);
-  const limit = access.mode === 'all' ? args.limit : 100;
+  const limit = access.mode === 'all' ? args.limit : ACCESS_SEARCH_WINDOW;
   return runRead(ctx, async (deadline) => {
     const path = bridgePath('/search', { query: args.query, chat_jid: args.chat_jid, limit });
     const page = await bridgeJson<{ messages: BridgeMessage[] }>(ctx.bridge, path, { deadline });
-    const messages = filterAllowedMessages(access, page.messages.map(compactMessage));
-    return untrusted({ messages: messages.slice(0, args.limit) });
+    const kept = filterAllowedMessages(access, page.messages.map(compactMessage));
+    const warning = accessSearchWarning(page.messages.length, kept.length, args.limit);
+    return untrusted({ messages: kept.slice(0, args.limit), ...(warning ? { warning } : {}) });
   });
 }
 

@@ -132,6 +132,19 @@ export function filterAllowedMessages<T extends { readonly chat?: unknown }>(
   return messages.filter((message) => isChatAllowed(list, String(message.chat)));
 }
 
+/** Bridge results a whole-store search asks for in mode `selected`, before keeping only allowed chats. */
+export const ACCESS_SEARCH_WINDOW = 100;
+
+/** Warning when the search window was full and filtering left fewer results than asked: some may be missing. */
+export function accessSearchWarning(
+  fetched: number,
+  kept: number,
+  requested: number,
+): string | null {
+  if (fetched < ACCESS_SEARCH_WINDOW || kept >= requested) return null;
+  return `Only the ${ACCESS_SEARCH_WINDOW} best matches across all chats were checked and most were in chats outside the access list, so results from allowed chats may be missing. Search again with chat_jid set to one allowed chat (see get_access_list).`;
+}
+
 /** Search results for the `/pair` page: chats and contacts as entries, without repeating a JID. */
 export function mergeCandidates(
   chats: readonly BridgeChat[],

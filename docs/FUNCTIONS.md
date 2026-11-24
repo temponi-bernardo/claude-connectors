@@ -69,7 +69,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/gmail/src/token-store.ts`: [`sha256Hex`](#sha256hex), [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
 - `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`resolveWritableAccount`](#resolvewritableaccount), [`accountBase`](#accountbase), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
 - `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`configErrorResponse`](#configerrorresponse), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`createGmailProvider`](#creategmailprovider), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
-- `connectors/whatsapp/src/access.ts`: [`parseAccessEntry`](#parseaccessentry), [`parseAccessEntries`](#parseaccessentries), [`parseAccessList`](#parseaccesslist), [`isChatAllowed`](#ischatallowed), [`accessRefusal`](#accessrefusal), [`requireChatAccess`](#requirechataccess), [`withAccessEntry`](#withaccessentry), [`withoutAccessEntry`](#withoutaccessentry), [`withAccessMode`](#withaccessmode), [`accessEntryFrom`](#accessentryfrom), [`markChatAccess`](#markchataccess), [`filterAllowedMessages`](#filterallowedmessages), [`mergeCandidates`](#mergecandidates), [`fetchAccessList`](#fetchaccesslist), [`saveAccessList`](#saveaccesslist)
+- `connectors/whatsapp/src/access.ts`: [`parseAccessEntry`](#parseaccessentry), [`parseAccessEntries`](#parseaccessentries), [`parseAccessList`](#parseaccesslist), [`isChatAllowed`](#ischatallowed), [`accessRefusal`](#accessrefusal), [`requireChatAccess`](#requirechataccess), [`withAccessEntry`](#withaccessentry), [`withoutAccessEntry`](#withoutaccessentry), [`withAccessMode`](#withaccessmode), [`accessEntryFrom`](#accessentryfrom), [`markChatAccess`](#markchataccess), [`filterAllowedMessages`](#filterallowedmessages), [`accessSearchWarning`](#accesssearchwarning), [`mergeCandidates`](#mergecandidates), [`fetchAccessList`](#fetchaccesslist), [`saveAccessList`](#saveaccesslist)
 - `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
 - `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`normalizeRecipient`](#normalizerecipient), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
 - `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
@@ -9503,7 +9503,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **Does:** Runs `search_messages` restricted to the access list: with `chat_jid`, requires the chat; without it, asks for up to 100 results and keeps only allowed chats.
 - **Input:** `ctx`: tool context; `args`: `query`, optional `chat_jid`, `limit`.
-- **Output:** Untrusted-wrapped `{ messages }`, at most `limit`.
+- **Output:** Untrusted-wrapped `{ messages }`, at most `limit`, plus `warning` from `accessSearchWarning()` when allowed results may be missing.
 - **Effects:** Reads the access list and calls the bridge `/search`.
 - **Errors:** Chat outside the list → error pointing to `/pair`; bridge errors as in `runRead()`.
 
@@ -16005,6 +16005,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** PUT `/__access` (Durable Object storage).
 - **Errors:** Timeout or error response throws.
 
+### `accessSearchWarning`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `accessSearchWarning(fetched: number, kept: number, requested: number): string | null`
+- **Used by:** `searchAllowedMessages()`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Warning for a whole-store search in mode `selected` whose window (`ACCESS_SEARCH_WINDOW`) was full and whose filtering left fewer results than asked.
+- **Input:** `fetched`: bridge results; `kept`: results in allowed chats; `requested`: the caller's `limit`.
+- **Output:** Warning text suggesting `chat_jid`, or null.
+- **Effects:** None (pure).
+- **Errors:** None.
+
 ## Data and constants
 
 | Name                              | File                                                    | What it is                                                                                                                                                                                   |
@@ -16171,6 +16188,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `ACCESS_LIST_KEY`                 | `connectors/whatsapp/src/access.ts`                     | Key, in the Durable Object storage, of the owner's chat access list.                                                                                                                         |
 | `ACCESS_ROUTE`                    | `connectors/whatsapp/src/access.ts`                     | Internal Durable Object route (`/__access`) that reads (GET) and saves (PUT) the access list without waking the container.                                                                   |
 | `MAX_ACCESS_ENTRIES`              | `connectors/whatsapp/src/access.ts`                     | Most chats the access list holds (200).                                                                                                                                                      |
+| `ACCESS_SEARCH_WINDOW`            | `connectors/whatsapp/src/access.ts`                     | Bridge results a whole-store `search_messages` asks for in mode `selected` before keeping only allowed chats (100).                                                                          |
 | `OPEN_ACCESS`                     | `connectors/whatsapp/src/access.ts`                     | Access list before the owner saves anything: mode `all`, every chat open.                                                                                                                    |
 | `ACCESS_ACTIONS`                  | `connectors/whatsapp/src/pair.ts`                       | `/pair` chat access actions: mode, add, remove and search.                                                                                                                                   |
 | `SNAPSHOT_KEY_NAME`               | `connectors/whatsapp/src/snapshots.ts`                  | Key of the current snapshot in the R2 bucket (`whatsapp/snapshot.was1`).                                                                                                                     |

@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import { fakeBridge } from './fixtures/fakes.js';
 import {
   accessEntryFrom,
+  ACCESS_SEARCH_WINDOW,
   accessRefusal,
+  accessSearchWarning,
   fetchAccessList,
   filterAllowedMessages,
   isChatAllowed,
@@ -161,5 +163,13 @@ describe('parseAccessEntry and parseAccessEntries', () => {
   it('keeps valid entries once, in order', () => {
     expect(parseAccessEntries([ANA, GROUP, ANA, {}])).toEqual([ANA, GROUP]);
     expect(parseAccessEntries('x')).toEqual([]);
+  });
+});
+
+describe('accessSearchWarning', () => {
+  it('warns only when the window was full and filtering left fewer results than asked', () => {
+    expect(accessSearchWarning(ACCESS_SEARCH_WINDOW, 2, 20)).toContain('chat_jid');
+    expect(accessSearchWarning(ACCESS_SEARCH_WINDOW, 20, 20)).toBeNull();
+    expect(accessSearchWarning(ACCESS_SEARCH_WINDOW - 1, 0, 20)).toBeNull();
   });
 });

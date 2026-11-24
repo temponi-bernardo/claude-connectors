@@ -356,7 +356,7 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      Durable Object (`parseAccessList()`). `runChatRead()` (`get_messages`, `get_media`) calls
      `requireChatAccess()` (`isChatAllowed()`, `accessRefusal()`) before waking the container;
      `searchAllowedMessages()` refuses a `chat_jid` outside the list and keeps only allowed chats with
-     `filterAllowedMessages()`; `list_chats` flags chats with `markChatAccess()`; `get_access_list` only shows it.
+     `filterAllowedMessages()`, warning with `accessSearchWarning()` when results may be missing; `list_chats` flags chats with `markChatAccess()`; `get_access_list` only shows it.
   3. The tool runs in `runRead()` with the deadline from `toolDeadline()`: `prepareRead()` calls `waitForSync()`, which
      requests `POST /sync/wait` with the budget from `syncWaitBudget()`, and, if pairing is needed, returns the `/pair`
      address. `withDeadline()` cuts off anything past the ceiling. `whatsapp_status` also calls `waitForSync()` (not

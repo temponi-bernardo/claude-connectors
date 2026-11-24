@@ -415,6 +415,16 @@ describe('chat access list', () => {
     };
     expect(result.data.messages.map((message) => message.id)).toEqual(['m2']);
     expect(asked).toContain('limit=100');
+    expect(result).not.toHaveProperty('data.warning');
+    const full = restricted({
+      '/search': () =>
+        Response.json({
+          messages: Array.from({ length: 100 }, (_, i) => ({ ...MESSAGE, id: `m${i}` })),
+        }),
+    });
+    expect(await searchAllowedMessages(full, { query: 'x', limit: 5 })).toHaveProperty(
+      'data.warning',
+    );
     await expect(
       searchAllowedMessages(ctx, { query: 'x', chat_jid: MESSAGE.chat_jid, limit: 5 }),
     ).rejects.toThrow('access list');

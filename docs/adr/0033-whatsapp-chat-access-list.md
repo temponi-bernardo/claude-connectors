@@ -25,7 +25,8 @@ Worker variable that needs a redeploy to change.
 4. **Enforced in the Worker tools**, in mode `selected`:
    - `get_messages`, `get_media` and `send_message` refuse a chat outside the list before waking the container;
    - `search_messages` refuses a `chat_jid` outside the list and, without one, asks the bridge for up to 100
-     results and keeps only allowed chats;
+     results and keeps only allowed chats, with a `warning` suggesting `chat_jid` when that window was full and
+     fewer results than asked were left;
    - `list_chats` and `search_contacts` still list everything (so Claude can help the owner pick chats), but
      `list_chats` flags `allowed` and hides the last-message preview of chats outside the list.
 5. `SEND_ALLOWLIST` stays as a deploy-time ceiling: a send must pass both lists.
