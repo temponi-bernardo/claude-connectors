@@ -1,6 +1,6 @@
 /**
  * Spotify connector settings, read from the Worker secrets and variables. Pure: it only validates text. The
- * host owns no Spotify app: each user brings their own Client ID and Secret (ADR 0033).
+ * host owns no Spotify app: each user brings their own Client ID and Secret (ADR 0034).
  */
 import { envValue, type EnvVars } from '../../../src/core/env.js';
 import { parseSealKey } from '../../../src/remote/seal.js';

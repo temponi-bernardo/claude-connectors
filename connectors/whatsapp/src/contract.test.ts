@@ -16,8 +16,8 @@ import { readWhatsAppSettings } from './config.js';
 import { whatsappTools } from './tools.js';
 import { whatsappRemoteConnector } from './worker.js';
 
-/** Pagination fields of the bridge that look like tool names. */
-const WHATSAPP_API_TERMS = ['next_cursor', 'next_before'];
+/** Response fields (bridge pagination, access page address) that look like tool names. */
+const WHATSAPP_API_TERMS = ['next_cursor', 'next_before', 'manage_at'];
 
 const EXPECTED = readToolContract(contract);
 const ISSUER = 'https://wa.test';

@@ -10,7 +10,9 @@ result and the "Not the owner of this link" refusal, `connectors/gmail/src/pages
 permission as an unticked checkbox (`grantCheckbox()`, class `.option`: inline checkbox, normal weight), e.g. the
 Canvas write opt-in. WhatsApp's
 `/pair` page (`renderPairPage()` in `connectors/whatsapp/src/pair-page.ts`, ADR 0015) uses `LOGIN_PAGE_CSS` plus
-`PAIR_PAGE_CSS` (pairing code in a large mono font, QR on a white background, `secondary` and `danger` buttons).
+`PAIR_PAGE_CSS` (pairing code in a large mono font, QR on a white background, `secondary` and `danger` buttons,
+and the `.list` rows of the "Chat access" section: name with kind and JID in `--muted`, compact Allow/Remove
+button; mode as `.option` radios; ADR 0033).
 States: needs pairing (code and QR forms), connecting, connected, no response from the bridge, error
 (`role="alert"`) and message (`role="status"`); with a code or QR on screen, it reloads every 20 s; the CSP allows
 only `img-src data:` for the QR.

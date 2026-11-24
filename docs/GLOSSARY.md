@@ -1,5 +1,8 @@
 # Glossary
 
+**Access list** — WhatsApp chats (contacts and groups) Claude may read and message, chosen by the owner on
+`/pair`; mode `all` or `selected` (ADR 0033).
+
 **ADR** — Architecture Decision Record; a short record of an architecture decision, its context and
 consequences. Lives in `docs/adr/`.
 
@@ -20,7 +23,7 @@ the marketplace plugin that points to it and the tools for Claude.
 operations stop at the budget and continue on the next call.
 
 **Plan (Spotify)** — A stored batch change (`plan_id`) produced by a `preview_*` tool and run by `apply_plan`
-after the user's OK; valid for 10 minutes, resumable, backed up before removals (ADR 0033).
+after the user's OK; valid for 10 minutes, resumable, backed up before removals (ADR 0034).
 
 **Snapshot (Spotify)** — The user's Liked Songs or one playlist read into their vault, possibly over several
 calls, so previews work on the whole collection.

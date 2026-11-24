@@ -54,7 +54,7 @@ sweeping the code. Next task: top of `docs/ROADMAP.md`. Where the previous sessi
 | `npm run build`                                 | Validates `.mcp.json` (remote only) and generates each connector's `server/remote.js`               |
 | `npm run worker:deploy` / `worker:dev`          | Deploys the remote Canvas to Cloudflare Workers, then the smoke test / runs it local                |
 | `npm run gmail:deploy` / `gmail:dev`            | Same for the remote Gmail                                                                           |
-| `npm run spotify:deploy` / `spotify:dev`        | Same for the remote Spotify (each user brings their own Spotify app, ADR 0033)                      |
+| `npm run spotify:deploy` / `spotify:dev`        | Same for the remote Spotify (each user brings their own Spotify app, ADR 0034)                      |
 | `npm run whatsapp:deploy` / `whatsapp:build`    | Deploys WhatsApp (Workers + Containers) / Worker bundle only, no Docker (`whatsapp:image`: image)   |
 | `npm run smoke -- <connector>`                  | Post-deploy smoke: published `GET /tools` must equal `tool-contract.json` (ADR 0027)                |
 | `npm run bridge:test`                           | WhatsApp Go bridge: gofmt, vet and tests (Go 1.26+, part of `pr:check`)                             |

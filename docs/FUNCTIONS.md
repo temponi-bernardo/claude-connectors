@@ -98,15 +98,16 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/spotify/src/tools-smart.ts`: [`genresLoading`](#genresloading), [`readySource`](#readysource), [`previewDraft`](#previewdraft), [`previewSourceDraft`](#previewsourcedraft), [`applyOutput`](#applyoutput)
 - `connectors/spotify/src/vault.ts`: [`ownerHash`](#ownerhash), [`vaultKey`](#vaultkey), [`readVault`](#readvault), [`writeVault`](#writevault), [`deleteVault`](#deletevault), [`vaultOf`](#vaultof), [`deletePrefix`](#deleteprefix), [`eraseOwner`](#eraseowner)
 - `connectors/spotify/src/worker.ts`: [`spotifySleep`](#spotifysleep), [`createSpotifyDeps`](#createspotifydeps), [`createSpotifyServer`](#createspotifyserver), [`handleSpotifyMcp`](#handlespotifymcp), [`spotifyOwnerDeps`](#spotifyownerdeps), [`handleSpotifyDefault`](#handlespotifydefault), [`createSpotifyProvider`](#createspotifyprovider), [`handleSpotifyWorkerFetch`](#handlespotifyworkerfetch)
+- `connectors/whatsapp/src/access.ts`: [`parseAccessEntry`](#parseaccessentry), [`parseAccessEntries`](#parseaccessentries), [`parseAccessList`](#parseaccesslist), [`isChatAllowed`](#ischatallowed), [`accessRefusal`](#accessrefusal), [`requireChatAccess`](#requirechataccess), [`withAccessEntry`](#withaccessentry), [`withoutAccessEntry`](#withoutaccessentry), [`withAccessMode`](#withaccessmode), [`accessEntryFrom`](#accessentryfrom), [`markChatAccess`](#markchataccess), [`filterAllowedMessages`](#filterallowedmessages), [`accessSearchWarning`](#accesssearchwarning), [`mergeCandidates`](#mergecandidates), [`fetchAccessList`](#fetchaccesslist), [`saveAccessList`](#saveaccesslist)
 - `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
 - `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`normalizeRecipient`](#normalizerecipient), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
 - `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
 - `connectors/whatsapp/src/format.ts`: [`isHiddenChar`](#ishiddenchar), [`sanitizeText`](#sanitizetext), [`untrusted`](#untrusted), [`compactMessage`](#compactmessage), [`compactChat`](#compactchat), [`partialSyncWarning`](#partialsyncwarning), [`compactStatus`](#compactstatus)
-- `connectors/whatsapp/src/lifecycle.ts`: [`withBridgeToken`](#withbridgetoken), [`fetchBridge`](#fetchbridge), [`readBridgePhase`](#readbridgephase), [`restoreRequestInit`](#restorerequestinit), [`ensureRestored`](#ensurerestored), [`snapshotBridge`](#snapshotbridge), [`planSend`](#plansend), [`guardSend`](#guardsend), [`forwardInit`](#forwardinit), [`createBridgeLifecycle`](#createbridgelifecycle), [`logSnapshotFailure`](#logsnapshotfailure), [`resetBridge`](#resetbridge), [`routeBridgeRequest`](#routebridgerequest)
-- `connectors/whatsapp/src/pair-page.ts`: [`describePairStatus`](#describepairstatus), [`pairForm`](#pairform), [`pairingSection`](#pairingsection), [`maintenanceSection`](#maintenancesection), [`alertHtml`](#alerthtml), [`renderPairPage`](#renderpairpage)
-- `connectors/whatsapp/src/pair.ts`: [`parseCookies`](#parsecookies), [`pairCookie`](#paircookie), [`redirectWithCookies`](#redirectwithcookies), [`readPairSession`](#readpairsession), [`issuePairCsrf`](#issuepaircsrf), [`isTrustedPost`](#istrustedpost), [`startPairLogin`](#startpairlogin), [`isValidPairLogin`](#isvalidpairlogin), [`openPairSession`](#openpairsession), [`handlePairCallback`](#handlepaircallback), [`pairDeadline`](#pairdeadline), [`fetchPairStatus`](#fetchpairstatus), [`pairPage`](#pairpage), [`pairActionError`](#pairactionerror), [`handlePairPost`](#handlepairpost), [`routePairPost`](#routepairpost), [`isPairPath`](#ispairpath), [`routePairRequest`](#routepairrequest)
+- `connectors/whatsapp/src/lifecycle.ts`: [`withBridgeToken`](#withbridgetoken), [`fetchBridge`](#fetchbridge), [`readBridgePhase`](#readbridgephase), [`restoreRequestInit`](#restorerequestinit), [`ensureRestored`](#ensurerestored), [`snapshotBridge`](#snapshotbridge), [`planSend`](#plansend), [`guardSend`](#guardsend), [`forwardInit`](#forwardinit), [`createBridgeLifecycle`](#createbridgelifecycle), [`logSnapshotFailure`](#logsnapshotfailure), [`resetBridge`](#resetbridge), [`handleAccessRoute`](#handleaccessroute), [`routeBridgeRequest`](#routebridgerequest)
+- `connectors/whatsapp/src/pair-page.ts`: [`describePairStatus`](#describepairstatus), [`pairForm`](#pairform), [`pairingSection`](#pairingsection), [`maintenanceSection`](#maintenancesection), [`accessEntryRow`](#accessentryrow), [`accessModeRadio`](#accessmoderadio), [`accessModeForm`](#accessmodeform), [`accessSearchHtml`](#accesssearchhtml), [`accessSection`](#accesssection), [`alertHtml`](#alerthtml), [`renderPairPage`](#renderpairpage)
+- `connectors/whatsapp/src/pair.ts`: [`parseCookies`](#parsecookies), [`pairCookie`](#paircookie), [`redirectWithCookies`](#redirectwithcookies), [`readPairSession`](#readpairsession), [`issuePairCsrf`](#issuepaircsrf), [`isTrustedPost`](#istrustedpost), [`startPairLogin`](#startpairlogin), [`isValidPairLogin`](#isvalidpairlogin), [`openPairSession`](#openpairsession), [`handlePairCallback`](#handlepaircallback), [`pairDeadline`](#pairdeadline), [`fetchPairStatus`](#fetchpairstatus), [`fetchPairAccess`](#fetchpairaccess), [`pairPage`](#pairpage), [`pairActionError`](#pairactionerror), [`changeAccess`](#changeaccess), [`searchAccessCandidates`](#searchaccesscandidates), [`handlePairPost`](#handlepairpost), [`routePairPost`](#routepairpost), [`isPairPath`](#ispairpath), [`routePairRequest`](#routepairrequest)
 - `connectors/whatsapp/src/snapshots.ts`: [`pumpInto`](#pumpinto), [`storedGeneration`](#storedgeneration), [`readUploadHeaders`](#readuploadheaders), [`storeSnapshot`](#storesnapshot), [`storeSnapshotResponse`](#storesnapshotresponse), [`archiveSnapshot`](#archivesnapshot), [`sameSecret`](#samesecret), [`acceptSnapshotPush`](#acceptsnapshotpush)
-- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`waitForSync`](#waitforsync), [`prepareRead`](#prepareread), [`runRead`](#runread), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppCatalogServer`](#createwhatsappcatalogserver), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
+- `connectors/whatsapp/src/tools.ts`: [`toolDeadline`](#tooldeadline), [`syncWaitBudget`](#syncwaitbudget), [`waitForSync`](#waitforsync), [`prepareRead`](#prepareread), [`runRead`](#runread), [`loadAccess`](#loadaccess), [`runChatRead`](#runchatread), [`searchAllowedMessages`](#searchallowedmessages), [`compactContact`](#compactcontact), [`decodeHeaderText`](#decodeheadertext), [`mediaResult`](#mediaresult), [`allowedRecipient`](#allowedrecipient), [`whatsappTools`](#whatsapptools), [`createWhatsAppCatalogServer`](#createwhatsappcatalogserver), [`createWhatsAppMcpServer`](#createwhatsappmcpserver)
 - `connectors/whatsapp/src/worker-env.ts`: [`bridgeStub`](#bridgestub), [`bridgeFetchFor`](#bridgefetchfor)
 - `connectors/whatsapp/src/worker.ts`: [`unixNow`](#unixnow), [`githubSettingsFrom`](#githubsettingsfrom), [`whatsappRemoteConnector`](#whatsappremoteconnector), [`createWhatsAppApps`](#createwhatsappapps), [`handleWhatsAppFetch`](#handlewhatsappfetch), [`isSyncCronEnabled`](#issynccronenabled), [`runScheduledSync`](#runscheduledsync)
 - `src/core/async.ts`: [`drainQueue`](#drainqueue), [`mapWithLimit`](#mapwithlimit)
@@ -3468,7 +3469,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/login-page.ts`
 - **Signature:** `escapeHtml(value: string): string`
-- **Used by:** `alertHtml()`, `appSetupSteps()`, `consentPageBody()`, `credentialsBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`, `renderWriteAccessPage()`
+- **Used by:** `accessEntryRow()`, `accessSearchHtml()`, `accessSection()`, `alertHtml()`, `appSetupSteps()`, `consentPageBody()`, `credentialsBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`, `renderWriteAccessPage()`
 - **Processes:** P03, P08, P09, P10, P11, P13, P15, P19, P21, P22
 
 <!-- generated:end -->
@@ -6447,6 +6448,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None.
 - **Errors:** None.
 
+## `connectors/gmail/src/rate-limit.ts`
+
 ## `connectors/gmail/src/search.ts`
 
 ### `encodeMultiPageToken`
@@ -7689,7 +7692,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/bridge-client.ts`
 - **Signature:** `async bridgeJson(bridge: BridgeFetch, path: string, options: { readonly init?: RequestInit; readonly deadline: number }): Promise<T>`
-- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `fetchPairStatus()`, `waitForSync()`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `fetchAccessList()`, `fetchPairStatus()`, `saveAccessList()`, `searchAccessCandidates()`, `searchAllowedMessages()`, `waitForSync()`
 - **Processes:** P13, P14, P15
 
 <!-- generated:end -->
@@ -7706,8 +7709,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/bridge-client.ts`
 - **Signature:** `bridgePath(path: string, params: Readonly<Record<string, string | number | undefined>>): string`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `waitForSync()`
-- **Processes:** P14
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `searchAccessCandidates()`, `searchAllowedMessages()`, `waitForSync()`
+- **Processes:** P14, P15
 
 <!-- generated:end -->
 
@@ -7828,7 +7831,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/whatsapp/src/config.ts`
 - **Signature:** `normalizePhone(raw: string): string | null`
 - **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `normalizeRecipient()`
-- **Processes:** P13, P15, P17
+- **Processes:** P13, P14, P15, P17
 
 <!-- generated:end -->
 
@@ -7946,8 +7949,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/config.ts`
 - **Signature:** `normalizeRecipient(raw: string): string | null`
-- **Used by:** `allowedRecipient()`, `readSendAllowlist()`
-- **Processes:** P13, P17
+- **Used by:** `allowedRecipient()`, `parseAccessEntry()`, `readSendAllowlist()`
+- **Processes:** P13, P14, P15, P17
 
 <!-- generated:end -->
 
@@ -7985,7 +7988,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `isHiddenChar(char: string): boolean`
 - **Used by:** `sanitizeText()`
-- **Processes:** P14
+- **Processes:** P13, P14, P15
 
 <!-- generated:end -->
 
@@ -8001,8 +8004,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `sanitizeText(text: string | null | undefined, max = MAX_TEXT_CHARS): string`
-- **Used by:** `compactChat()`, `compactContact()`, `compactMessage()`, `connectors/whatsapp/src/tools.ts (module)`, `mediaResult()`
-- **Processes:** P14
+- **Used by:** `compactChat()`, `compactContact()`, `compactMessage()`, `connectors/whatsapp/src/tools.ts (module)`, `mediaResult()`, `parseAccessEntry()`
+- **Processes:** P13, P14, P15
 
 <!-- generated:end -->
 
@@ -8018,7 +8021,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `untrusted(data: T): { readonly notice: string; readonly data: T }`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `searchAllowedMessages()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -8035,7 +8038,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/format.ts`
 - **Signature:** `compactMessage(message: BridgeMessage): Record<string, unknown>`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `searchAllowedMessages()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -8321,6 +8324,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network to the container; R2; Durable Object storage; may schedule a snapshot.
 - **Errors:** Those of `ensureRestored`, `fetchBridge` and of the snapshot/reset.
 
+### `handleAccessRoute`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/lifecycle.ts`
+- **Signature:** `async handleAccessRoute(host: BridgeHost, request: Request): Promise<Response>`
+- **Used by:** `routeBridgeRequest()`
+- **Processes:** P14, P15
+
+<!-- generated:end -->
+
+- **Does:** Serves the internal `/__access` route of the Durable Object: GET reads the access list, PUT validates and saves it.
+- **Input:** `host`: bridge host (storage); `request`: GET or PUT with the list as JSON.
+- **Output:** `Response` with the list (`parseAccessList()` applied); 400 `bad_request` if the PUT body is not a JSON object.
+- **Effects:** Reads/writes `ACCESS_LIST_KEY` in the Durable Object storage; never wakes the container.
+- **Errors:** None (invalid JSON becomes the 400).
+
 ## `connectors/whatsapp/src/pair-page.ts`
 
 ### `describePairStatus`
@@ -8346,7 +8366,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/pair-page.ts`
 - **Signature:** `pairForm(action: string, csrf: string, body: string): string`
-- **Used by:** `maintenanceSection()`, `pairingSection()`
+- **Used by:** `accessEntryRow()`, `accessModeForm()`, `accessSearchHtml()`, `maintenanceSection()`, `pairingSection()`
 - **Processes:** P13, P15
 
 <!-- generated:end -->
@@ -8422,6 +8442,91 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Renders the complete `/pair` page.
 - **Input:** `view`: e-mail, CSRF, status and action result.
 - **Output:** Page HTML (with a 20 s refresh if it shows a code or QR).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessEntryRow`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessEntryRow(entry: AccessEntry, action: string, view: PairPageView): string`
+- **Used by:** `accessSearchHtml()`, `accessSection()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** One chat line of the access section: name, kind and JID, with an Allow/Remove form or an "Allowed" note.
+- **Input:** `entry`: chat; `action`: form path (empty = no button); `view`: page view (CSRF token).
+- **Output:** HTML of the `<li>`, with escaped texts.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessModeRadio`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessModeRadio(list: AccessList, mode: AccessList['mode'], text: string): string`
+- **Used by:** `accessModeForm()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** One radio option of the access mode, checked when it is the current mode.
+- **Input:** `list`: access list; `mode`: `all` or `selected`; `text`: label.
+- **Output:** HTML of the labeled radio.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessModeForm`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessModeForm(list: AccessList, view: PairPageView): string`
+- **Used by:** `accessSection()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** Form that switches the access mode (every chat or only the allowed ones).
+- **Input:** `list`: access list; `view`: page view (CSRF token).
+- **Output:** HTML of the form posting to `/pair/access/mode`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessSearchHtml`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessSearchHtml(list: AccessList, view: PairPageView): string`
+- **Used by:** `accessSection()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** Chat search form and its results; chats already allowed show a note instead of a button.
+- **Input:** `list`: access list; `view`: page view (`query`, `candidates`, CSRF token).
+- **Output:** HTML of the form and, after a search, the results or "No chats or contacts found".
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `accessSection`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair-page.ts`
+- **Signature:** `accessSection(view: PairPageView): string`
+- **Used by:** `renderPairPage()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** "Chat access" block of `/pair`: mode summary, mode form, allowed chats with Remove and the search to allow more.
+- **Input:** `view`: page view with `access` (null = could not read).
+- **Output:** HTML of the section.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -8586,7 +8691,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/pair.ts`
 - **Signature:** `pairDeadline(app: PairApp): number`
-- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `fetchPairStatus()`
+- **Used by:** `changeAccess()`, `connectors/whatsapp/src/pair.ts (module)`, `fetchPairAccess()`, `fetchPairStatus()`, `searchAccessCandidates()`
 - **Processes:** P13, P15
 
 <!-- generated:end -->
@@ -8732,6 +8837,57 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `{ error: mensagem }`.
 - **Effects:** None (pure).
 - **Errors:** None.
+
+### `fetchPairAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair.ts`
+- **Signature:** `async fetchPairAccess(app: PairApp): Promise<AccessList | null>`
+- **Used by:** `pairPage()`
+- **Processes:** P13, P15
+
+<!-- generated:end -->
+
+- **Does:** Reads the access list for the `/pair` page.
+- **Input:** `app`: `/pair` dependencies.
+- **Output:** The `AccessList`, or null if the Durable Object does not answer in time.
+- **Effects:** Calls the Durable Object `/__access` (does not wake the container).
+- **Errors:** None (failures become null).
+
+### `changeAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair.ts`
+- **Signature:** `async changeAccess(app: PairApp, change: (list: AccessList) => AccessList, message: string): Promise<Partial<PairPageView>>`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Reads the access list, applies a change and saves it.
+- **Input:** `app`: `/pair` dependencies; `change`: pure list transformation; `message`: confirmation text.
+- **Output:** `{ message }` for the page.
+- **Effects:** Reads and writes the list through `/__access`.
+- **Errors:** Bridge/Durable Object failures and a full list (`withAccessEntry()`) throw; `handlePairPost()` shows them as errors.
+
+### `searchAccessCandidates`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/pair.ts`
+- **Signature:** `async searchAccessCandidates(app: PairApp, form: URLSearchParams): Promise<Partial<PairPageView>>`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Finds chats (most recent when the query is empty) and, with a query, contacts the owner can allow.
+- **Input:** `app`: `/pair` dependencies; `form`: `query` (trimmed, up to 100 characters).
+- **Output:** `{ query, candidates }` with entries from `mergeCandidates()`.
+- **Effects:** Calls the bridge `/chats` and `/contacts` (wakes the container).
+- **Errors:** Bridge failures throw (shown as page errors).
 
 ## `connectors/whatsapp/src/snapshots.ts`
 
@@ -8879,7 +9035,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/tools.ts`
 - **Signature:** `toolDeadline(ctx: WhatsAppToolContext): number`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `runRead()`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `loadAccess()`, `runRead()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -8930,7 +9086,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/whatsapp/src/tools.ts`
 - **Signature:** `async runRead(ctx: WhatsAppToolContext, query: (deadline: number) => Promise<T>): Promise<T | { readonly warning: string; readonly result: T }>`
-- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `runChatRead()`, `searchAllowedMessages()`
 - **Processes:** P14
 
 <!-- generated:end -->
@@ -9076,6 +9232,57 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `McpServer` with `whatsappTools(settings)` registered on `listOnlyContext()`.
 - **Effects:** None (pure).
 - **Errors:** None when created; running a tool throws through `refuseListOnlyUse()`.
+
+### `loadAccess`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/tools.ts`
+- **Signature:** `loadAccess(ctx: WhatsAppToolContext): Promise<AccessList>`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `runChatRead()`, `searchAllowedMessages()`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Reads the owner's access list within the tool call deadline.
+- **Input:** `ctx`: tool context.
+- **Output:** The `AccessList`.
+- **Effects:** Calls the Durable Object `/__access` (does not wake the container).
+- **Errors:** Durable Object failure or timeout throws.
+
+### `runChatRead`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/tools.ts`
+- **Signature:** `async runChatRead(ctx: WhatsAppToolContext, chatJid: string, query: (deadline: number) => Promise<T>): Promise<T | { readonly warning: string; readonly result: T }>`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Runs a read of one chat only if the chat is in the access list; the refusal comes before waking the container.
+- **Input:** `ctx`: tool context; `chatJid`: chat JID; `query`: the read, given the deadline.
+- **Output:** The read result, as in `runRead()`.
+- **Effects:** Reads the access list, then as `runRead()`.
+- **Errors:** Chat outside the list → error pointing to `/pair`; otherwise as `runRead()`.
+
+### `searchAllowedMessages`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/tools.ts`
+- **Signature:** `async searchAllowedMessages(ctx: WhatsAppToolContext, args: { readonly query: string; readonly chat_jid?: string | undefined; readonly limit: number }): Promise<unknown>`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Runs `search_messages` restricted to the access list: with `chat_jid`, requires the chat; without it, asks for up to 100 results and keeps only allowed chats.
+- **Input:** `ctx`: tool context; `args`: `query`, optional `chat_jid`, `limit`.
+- **Output:** Untrusted-wrapped `{ messages }`, at most `limit`, plus `warning` from `accessSearchWarning()` when allowed results may be missing.
+- **Effects:** Reads the access list and calls the bridge `/search`.
+- **Errors:** Chat outside the list → error pointing to `/pair`; bridge errors as in `runRead()`.
 
 ## `connectors/whatsapp/src/worker-env.ts`
 
@@ -15301,334 +15508,279 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** `RangeError` for an unknown time zone.
 
-## `src/remote/pages.ts`
+## `connectors/whatsapp/src/access.ts`
 
-### `pageDocument`
+### `parseAccessEntry`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/pages.ts`
-- **Signature:** `pageDocument(title: string, body: string): string`
-- **Used by:** `consentPage()`, `credentialsPage()`, `linkConfirmPage()`, `messagePage()`
-- **Processes:** P10, P11, P19, P21, P22
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `parseAccessEntry(raw: unknown): AccessEntry | null`
+- **Used by:** `accessEntryFrom()`, `mergeCandidates()`, `parseAccessEntries()`
+- **Processes:** P13, P14, P15
 
 <!-- generated:end -->
 
-- **Does:** Builds a page's full HTML document.
-- **Input:** `title`: title (escaped here). `body`: HTML body already escaped by the caller.
-- **Output:** HTML with `lang="pt-BR"`, title and inline style.
+- **Does:** Validates one stored or submitted chat entry.
+- **Input:** `raw`: unknown value with `jid` and `name`.
+- **Output:** `AccessEntry` (JID normalized, name cleaned and capped, `group` from the JID suffix), or null.
 - **Effects:** None (pure).
 - **Errors:** None.
 
-### `messagePage`
+### `parseAccessEntries`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/pages.ts`
-- **Signature:** `messagePage(title: string, message: string, status = 200): Response`
-- **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `expiredConnectionPage()`, `finishAccountLink()`, `handleDefaultRequest()`, `handleSpotifyDefault()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`, `notOwnerPage()`, `spotifyFailurePage()`, `verifyOwnerThenLink()`
-- **Processes:** P10, P11, P19, P21, P22
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `parseAccessEntries(raw: unknown): AccessEntry[]`
+- **Used by:** `parseAccessList()`
+- **Processes:** P13, P14, P15
 
 <!-- generated:end -->
 
-- **Does:** Builds a simple notice page.
-- **Input:** `title`: plain-text title. `message`: plain-text message. `status`: HTTP code (default 200).
-- **Output:** HTML response with the given status, restrictive CSP and `no-store`; title escaped, message redacted (`redactSecrets`) and escaped.
+- **Does:** Valid entries of a stored list, without duplicates and within `MAX_ACCESS_ENTRIES`.
+- **Input:** `raw`: unknown value (array expected).
+- **Output:** Array of `AccessEntry`.
 - **Effects:** None (pure).
 - **Errors:** None.
 
-### `copyConsentHeaders`
+### `parseAccessList`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/pages.ts`
-- **Signature:** `copyConsentHeaders(response: Response, headers: Headers): Response`
-- **Used by:** `consentPage()`, `credentialsPage()`
-- **Processes:** P10, P21
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `parseAccessList(raw: unknown): AccessList`
+- **Used by:** `fetchAccessList()`, `handleAccessRoute()`
+- **Processes:** P13, P14, P15
 
 <!-- generated:end -->
 
-- **Does:** Copies the consent transaction headers into the response.
-- **Input:** `response`: page response. `headers`: OAuth library headers (cookies and anti-framing).
-- **Output:** The same response with the cookies appended and the other headers copied, except `content-type`, CSP and `set-cookie`.
-- **Effects:** Mutates the headers of the received response.
-- **Errors:** None.
-
-### `redirectWith`
-
-<!-- generated:start -->
-
-- **File:** `src/remote/pages.ts`
-- **Signature:** `redirectWith(location: string, headers: Headers = new Headers()): Response`
-- **Used by:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `beginLinkStage()`, `beginSpotifyAuthorization()`, `finishSignIn()`, `readConsentForm()`, `resumeSpotifySignIn()`
-- **Processes:** P10, P11, P21
-
-<!-- generated:end -->
-
-- **Does:** Builds a 302 redirect with the given headers.
-- **Input:** `location`: destination. `headers`: headers to keep, such as transaction cookies (default empty).
-- **Output:** Bodiless 302 response, with `Location` and `cache-control: no-store`.
-- **Effects:** Mutates the received `headers` object.
-- **Errors:** None.
-
-### `authorizationErrorResponse`
-
-<!-- generated:start -->
-
-- **File:** `src/remote/pages.ts`
-- **Signature:** `authorizationErrorResponse(error: unknown): Response`
-- **Used by:** `finishSignIn()`, `showAuthorize()`, `showSpotifyAuthorize()`, `spotifyFailurePage()`, `submitAuthorize()`, `submitSpotifyAuthorize()`
-- **Processes:** P10, P21
-
-<!-- generated:end -->
-
-- **Does:** Converts an authorization error into a response.
-- **Input:** `error`: error caught in the authorization flow.
-- **Output:** 302 redirect to the client if the `AuthorizationError` says where to; otherwise a 400 page with the error description or a generic message.
+- **Does:** Reads the stored access list: nothing saved keeps everything open; a corrupt value fails closed.
+- **Input:** `raw`: value from the Durable Object storage or a PUT body.
+- **Output:** `AccessList`: `OPEN_ACCESS` if undefined/null; mode `selected` with no entries if the mode is invalid.
 - **Effects:** None (pure).
 - **Errors:** None.
 
-### `readConsentForm`
+### `isChatAllowed`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/pages.ts`
-- **Signature:** `async readConsentForm(oauth: OAuthHelpers, request: Request): Promise<ConsentForm>`
-- **Used by:** `submitAuthorize()`, `submitSpotifyAuthorize()`
-- **Processes:** P10, P21
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `isChatAllowed(list: AccessList, jid: string): boolean`
+- **Used by:** `filterAllowedMessages()`, `markChatAccess()`, `requireChatAccess()`
+- **Processes:** P14, P17
 
 <!-- generated:end -->
 
-- **Does:** Reads a consent form; anything but `decision=approve` denies the consent and redirects back to the client.
-- **Input:** `oauth`: the OAuth library helpers; `request`: the posted form (read from a clone).
-- **Output:** `ConsentForm`: fields, handle and `denied` (the redirect back) or null when approved.
-- **Effects:** Reads the request body; on denial, the OAuth library's consent state (cookie, KV).
-- **Errors:** Throws the library's `AuthorizationError` when the handle is missing, unbound, expired or used.
-
-## `src/remote/rate-limit.ts`
-
-### `isRateLimited`
-
-<!-- generated:start -->
-
-- **File:** `src/remote/rate-limit.ts`
-- **Signature:** `async isRateLimited(limiter: RateLimiter | undefined, key: string): Promise<boolean>`
-- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyMcp()`, `handleSpotifyWorkerFetch()`
-- **Processes:** P10, P12, P22
-
-<!-- generated:end -->
-
-- **Does:** Tells whether the session exceeded the request limit.
-- **Input:** `limiter`: Workers rate limiting binding, or undefined. `key`: session key (OAuth session id).
-- **Output:** True if the binding refused; false if it accepted or there is no binding.
-- **Effects:** Counts the request in the rate limiting binding.
-- **Errors:** None of its own; binding failures propagate.
-
-### `rateLimitedResponse`
-
-<!-- generated:start -->
-
-- **File:** `src/remote/rate-limit.ts`
-- **Signature:** `rateLimitedResponse(): Response`
-- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyMcp()`, `handleSpotifyWorkerFetch()`
-- **Processes:** P10, P12, P22
-
-<!-- generated:end -->
-
-- **Does:** Builds the too-many-requests response.
-- **Input:** None.
-- **Output:** 429 JSON response (`rate_limited`) with `Retry-After: 60`.
+- **Does:** Tells whether the connector may read and send to a chat.
+- **Input:** `list`: access list; `jid`: chat JID.
+- **Output:** `true` in mode `all` or when the JID is listed.
 - **Effects:** None (pure).
 - **Errors:** None.
 
-## `src/remote/worker-kit.ts`
-
-### `randomToken`
+### `accessRefusal`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `randomToken(bytes = 32): string`
-- **Used by:** `beginGoogleSignIn()`, `beginLinkStage()`, `completeSignIn()`, `completeSpotifySignIn()`, `createPlan()`, `issueLinkUrl()`, `mimeBoundary()`, `saveBackup()`, `showLinkConfirmation()`, `storeLinkRequest()`
-- **Processes:** P10, P11, P18, P21, P23, P24
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `accessRefusal(pairUrl: string): string`
+- **Used by:** `requireChatAccess()`
+- **Processes:** P14, P17
 
 <!-- generated:end -->
 
-- **Does:** Generates a random base64url string (state, nonce, PKCE verifier).
-- **Input:** `bytes`: entropy bytes; default 32.
-- **Output:** The random base64url string.
-- **Effects:** Reads the cryptographic random generator.
-- **Errors:** None.
-
-### `sha256Hex`
-
-<!-- generated:start -->
-
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `sha256Hex(text: string): string`
-- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerHash()`, `ownerKey()`, `showLinkConfirmation()`, `storeLinkRequest()`, `takeLinkRequest()`, `usedTicketKey()`
-- **Processes:** P10, P11, P12, P18, P21, P22, P23, P24, P25
-
-<!-- generated:end -->
-
-- **Does:** Computes SHA-256 in hexadecimal.
-- **Input:** `text`: text to hash.
-- **Output:** 64 hexadecimal characters.
+- **Does:** Refusal text for a chat outside the access list.
+- **Input:** `pairUrl`: `/pair` address.
+- **Output:** Message telling the owner where to allow the chat.
 - **Effects:** None (pure).
 - **Errors:** None.
 
-### `requiredSecret`
+### `requireChatAccess`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `requiredSecret(env: EnvVars, name: string): string`
-- **Used by:** `readConsentSecret()`, `readGmailSettings()`
-- **Processes:** P10, P12, P19
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `requireChatAccess(list: AccessList, jid: string, pairUrl: string): void`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`, `runChatRead()`, `searchAllowedMessages()`
+- **Processes:** P14, P17
 
 <!-- generated:end -->
 
-- **Does:** Reads a required Worker variable.
-- **Input:** `env`: Worker text variables. `name`: variable name.
-- **Output:** The variable's value, trimmed.
+- **Does:** Guards a chat read or send with the access list.
+- **Input:** `list`: access list; `jid`: chat JID; `pairUrl`: `/pair` address.
+- **Output:** Nothing.
 - **Effects:** None (pure).
-- **Errors:** Throws with the `wrangler secret put` command if the variable is missing, empty or a placeholder.
+- **Errors:** Chat outside the list → `Error` with `accessRefusal()`.
 
-### `readConsentSecret`
+### `withAccessEntry`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `readConsentSecret(env: EnvVars): string`
-- **Used by:** `readGmailSettings()`
-- **Processes:** P10, P12, P19
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `withAccessEntry(list: AccessList, entry: AccessEntry): AccessList`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`, `parseAccessEntries()`
+- **Processes:** P13, P14, P15
 
 <!-- generated:end -->
 
-- **Does:** Reads the remembered-consent secret with the required minimum length.
-- **Input:** `env`: Worker text variables.
-- **Output:** The value of `CONSENT_SECRET`.
+- **Does:** Adds a chat to the list, or refreshes its name if already there.
+- **Input:** `list`: access list; `entry`: chat.
+- **Output:** New `AccessList` (order kept).
 - **Effects:** None (pure).
-- **Errors:** Throws if the secret has fewer than 32 characters. Propagates the error of `requiredSecret()`.
+- **Errors:** Adding past `MAX_ACCESS_ENTRIES` throws.
 
-### `configErrorResponse`
-
-<!-- generated:start -->
-
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `configErrorResponse(error: unknown): Response`
-- **Used by:** `buildOrConfigError()`
-- **Processes:** P10, P12, P19, P22
-
-<!-- generated:end -->
-
-- **Does:** Builds the Worker's invalid-configuration response.
-- **Input:** `error`: error thrown while reading the settings.
-- **Output:** 500 plain-text response with the error message (never a secret's value).
-- **Effects:** None (pure).
-- **Errors:** None.
-
-### `checkClientRegistration`
+### `withoutAccessEntry`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `checkClientRegistration(options: ClientRegistrationCallbackOptions): ClientRegistrationCallbackResult | undefined`
-- **Used by:** `createGmailProvider()`, `createSpotifyProvider()`
-- **Processes:** P10, P21, P22
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `withoutAccessEntry(list: AccessList, jid: string): AccessList`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
 
 <!-- generated:end -->
 
-- **Does:** Decides whether a client's dynamic registration is accepted.
-- **Input:** `options`: metadata of the client requesting registration.
-- **Output:** Undefined if all redirect URIs are Claude's or localhost; otherwise an `invalid_redirect_uri` error with status 400.
+- **Does:** Removes a chat from the list.
+- **Input:** `list`: access list; `jid`: chat JID.
+- **Output:** New `AccessList`.
 - **Effects:** None (pure).
 - **Errors:** None.
 
-### `publicOrigin`
+### `withAccessMode`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `publicOrigin(env: Readonly<Record<string, unknown>>, request: Request): string`
-- **Used by:** `handleDefaultRequest()`, `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyDefault()`, `handleSpotifyWorkerFetch()`, `spotifyOwnerDeps()`
-- **Processes:** P10, P12, P19, P22
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `withAccessMode(list: AccessList, mode: AccessMode): AccessList`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
 
 <!-- generated:end -->
 
-- **Does:** Computes the connector's canonical public origin.
-- **Input:** `env`: Worker variables (optional `PUBLIC_URL`). `request`: received request.
-- **Output:** Origin of `PUBLIC_URL` without trailing slash; without it, the request's origin.
-- **Effects:** None (pure).
-- **Errors:** Throws `TypeError` if `PUBLIC_URL` is not a valid URL.
-
-### `clientIpKey`
-
-<!-- generated:start -->
-
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `clientIpKey(request: Request): string`
-- **Used by:** `handleGmailWorkerFetch()`, `handleSpotifyWorkerFetch()`
-- **Processes:** P10, P22
-
-<!-- generated:end -->
-
-- **Does:** Builds the public limit key from the client IP.
-- **Input:** `request`: request.
-- **Output:** `ip:<cf-connecting-ip>` or `ip:unknown`.
+- **Does:** Switches the access mode, keeping the entries.
+- **Input:** `list`: access list; `mode`: `all` or `selected`.
+- **Output:** New `AccessList`.
 - **Effects:** None (pure).
 - **Errors:** None.
 
-### `isMcpPath`
+### `accessEntryFrom`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `isMcpPath(request: Request): boolean`
-- **Used by:** `handleGmailWorkerFetch()`, `handleSpotifyWorkerFetch()`
-- **Processes:** P10, P22
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `accessEntryFrom(form: URLSearchParams): AccessEntry | null`
+- **Used by:** `connectors/whatsapp/src/pair.ts (module)`
+- **Processes:** P15
 
 <!-- generated:end -->
 
-- **Does:** Tells whether the route is the token-protected `/mcp`.
-- **Input:** `request`: request.
-- **Output:** `true` for `/mcp` and subpaths.
+- **Does:** Builds an entry from the `/pair` form.
+- **Input:** `form`: `jid` (number or JID) and `name`.
+- **Output:** `AccessEntry`, or null if the JID is invalid.
 - **Effects:** None (pure).
 - **Errors:** None.
 
-### `oauthErrorCode`
+### `markChatAccess`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `async oauthErrorCode(response: Response): Promise<string>`
-- **Used by:** `postGoogleToken()`, `postSpotifyToken()`
-- **Processes:** P10, P11, P12, P18, P21, P22, P23
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `markChatAccess(list: AccessList, chats: readonly Record<string, unknown>[]): Record<string, unknown>[]`
+- **Used by:** `connectors/whatsapp/src/tools.ts (module)`
+- **Processes:** P14
 
 <!-- generated:end -->
 
-- **Does:** OAuth error code of a failed token-endpoint response (`error` field), or `http_<status>`.
-- **Input:** `response`: the failed token-endpoint response.
-- **Output:** The `error` text, or `http_<status>` when the body is not JSON or has no `error`.
-- **Effects:** Reads the response body.
-- **Errors:** None (a non-JSON body falls back to the status).
+- **Does:** In mode `selected`, flags each compact chat with `allowed` and drops the last-message preview of chats outside the list.
+- **Input:** `list`: access list; `chats`: compact chats.
+- **Output:** New array (unchanged copy in mode `all`).
+- **Effects:** None (pure).
+- **Errors:** None.
 
-### `buildOrConfigError`
+### `filterAllowedMessages`
 
 <!-- generated:start -->
 
-- **File:** `src/remote/worker-kit.ts`
-- **Signature:** `buildOrConfigError(build: () => T): T | Response`
-- **Used by:** `handleDefaultRequest()`, `handleMcpApi()`, `handleSpotifyDefault()`, `handleSpotifyMcp()`
-- **Processes:** P10, P12, P19, P22
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `filterAllowedMessages(list: AccessList, messages: readonly T[]): T[]`
+- **Used by:** `searchAllowedMessages()`
+- **Processes:** P14
 
 <!-- generated:end -->
 
-- **Does:** Runs a dependency builder; an invalid configuration becomes the 500 page instead of an exception.
-- **Input:** `build`: function that builds the dependencies (may throw on missing secrets).
-- **Output:** The built value, or the `configErrorResponse()` 500 response.
-- **Effects:** None (pure apart from what `build` does).
-- **Errors:** None (the builder's error becomes the response).
+- **Does:** Keeps only compact messages whose `chat` is allowed.
+- **Input:** `list`: access list; `messages`: compact messages.
+- **Output:** Filtered array.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `mergeCandidates`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `mergeCandidates(chats: readonly BridgeChat[], contacts: readonly Readonly<Record<string, string | null>>[]): AccessEntry[]`
+- **Used by:** `searchAccessCandidates()`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Joins chat and contact search results into access entries, without repeating a JID.
+- **Input:** `chats`: bridge chats; `contacts`: bridge contacts.
+- **Output:** Array of `AccessEntry` (chats first).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `fetchAccessList`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `async fetchAccessList(bridge: BridgeFetch, deadline: number): Promise<AccessList>`
+- **Used by:** `changeAccess()`, `fetchPairAccess()`, `loadAccess()`
+- **Processes:** P13, P14, P15
+
+<!-- generated:end -->
+
+- **Does:** Reads the access list from the Durable Object.
+- **Input:** `bridge`: Durable Object fetch; `deadline`: Unix ms.
+- **Output:** `AccessList` (through `parseAccessList()`).
+- **Effects:** GET `/__access` on the Durable Object (does not wake the container).
+- **Errors:** Timeout or error response throws `BridgeError`/`Error`.
+
+### `saveAccessList`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `async saveAccessList(bridge: BridgeFetch, list: AccessList, deadline: number): Promise<void>`
+- **Used by:** `changeAccess()`
+- **Processes:** P15
+
+<!-- generated:end -->
+
+- **Does:** Saves the access list in the Durable Object.
+- **Input:** `bridge`: Durable Object fetch; `list`: access list; `deadline`: Unix ms.
+- **Output:** Nothing.
+- **Effects:** PUT `/__access` (Durable Object storage).
+- **Errors:** Timeout or error response throws.
+
+### `accessSearchWarning`
+
+<!-- generated:start -->
+
+- **File:** `connectors/whatsapp/src/access.ts`
+- **Signature:** `accessSearchWarning(fetched: number, kept: number, requested: number): string | null`
+- **Used by:** `searchAllowedMessages()`
+- **Processes:** P14
+
+<!-- generated:end -->
+
+- **Does:** Warning for a whole-store search in mode `selected` whose window (`ACCESS_SEARCH_WINDOW`) was full and whose filtering left fewer results than asked.
+- **Input:** `fetched`: bridge results; `kept`: results in allowed chats; `requested`: the caller's `limit`.
+- **Output:** Warning text suggesting `chat_jid`, or null.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## `connectors/spotify/src/access-token.ts`
 
@@ -15717,6 +15869,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Reads/writes Workers KV (the user's sealed vault).
 - **Errors:** Throws the not-connected error (asks the user to reconnect) when the user has no stored account.
 
+### `saveRotatedRefreshToken`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `async saveRotatedRefreshToken(deps: OwnerDeps, refreshToken: string): Promise<void>`
+- **Used by:** `renewSpotifyAccessToken()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Saves a rotated refresh token onto the account as it is now (re-read, so a concurrent change is kept).
+- **Input:** `deps`: user dependencies; `refreshToken`: the new token from Spotify.
+- **Output:** Nothing (no write when the account was erased meanwhile).
+- **Effects:** Reads/writes Workers KV (the user's sealed account).
+- **Errors:** None.
+
 ### `renewSpotifyAccessToken`
 
 <!-- generated:start -->
@@ -15767,23 +15936,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `Promise<string>`.
 - **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault).
 - **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
-
-### `saveRotatedRefreshToken`
-
-<!-- generated:start -->
-
-- **File:** `connectors/spotify/src/access-token.ts`
-- **Signature:** `async saveRotatedRefreshToken(deps: OwnerDeps, refreshToken: string): Promise<void>`
-- **Used by:** `renewSpotifyAccessToken()`
-- **Processes:** P22, P23
-
-<!-- generated:end -->
-
-- **Does:** Saves a rotated refresh token onto the account as it is now (re-read, so a concurrent change is kept).
-- **Input:** `deps`: user dependencies; `refreshToken`: the new token from Spotify.
-- **Output:** Nothing (no write when the account was erased meanwhile).
-- **Effects:** Reads/writes Workers KV (the user's sealed account).
-- **Errors:** None.
 
 ## `connectors/spotify/src/account-store.ts`
 
@@ -16010,6 +16162,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
 - **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
 
+### `checkPlaylistUnchanged`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async checkPlaylistUnchanged(deps: OwnerDeps, step: PlanStep): Promise<void>`
+- **Used by:** `runReplaceChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Refuses to rewrite a playlist whose version changed since the preview (it would drop the new items).
+- **Input:** `deps`: user dependencies; `step`: the plan step (only rewrite steps with `expectedSnapshotId` are checked).
+- **Output:** Nothing.
+- **Effects:** Network (one Spotify Web API request, within the budget).
+- **Errors:** Throws `Error` "… changed since the preview; nothing was rewritten" on a different `snapshot_id`; `SpotifyApiError` on Spotify failures.
+
 ### `runReplaceChunk`
 
 <!-- generated:start -->
@@ -16162,23 +16331,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `Promise<ApplyOutcome>`.
 - **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
 - **Errors:** Spotify failures it does not handle propagate (`SpotifyApiError`, `SpotifyTokenError`).
-
-### `checkPlaylistUnchanged`
-
-<!-- generated:start -->
-
-- **File:** `connectors/spotify/src/apply.ts`
-- **Signature:** `async checkPlaylistUnchanged(deps: OwnerDeps, step: PlanStep): Promise<void>`
-- **Used by:** `runReplaceChunk()`
-- **Processes:** P23
-
-<!-- generated:end -->
-
-- **Does:** Refuses to rewrite a playlist whose version changed since the preview (it would drop the new items).
-- **Input:** `deps`: user dependencies; `step`: the plan step (only rewrite steps with `expectedSnapshotId` are checked).
-- **Output:** Nothing.
-- **Effects:** Network (one Spotify Web API request, within the budget).
-- **Errors:** Throws `Error` "… changed since the preview; nothing was rewritten" on a different `snapshot_id`; `SpotifyApiError` on Spotify failures.
 
 ## `connectors/spotify/src/backups.ts`
 
@@ -17834,6 +17986,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** Throws `Error` "".
 
+### `rewriteStep`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `rewriteStep(snapshot: SourceSnapshot, playlistId: string, uris: readonly string[]): PlanStep`
+- **Used by:** `dedupeDraft()`, `sortDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Step that rewrites a playlist with the given order, only if it is still the version the preview read.
+- **Input:** `snapshot`: the playlist snapshot the preview used; `playlistId`: its id; `uris`: the new order.
+- **Output:** A `playlist_replace` step carrying `expectedSnapshotId`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
 ### `dedupeDraft`
 
 <!-- generated:start -->
@@ -17950,23 +18119,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** A new playlist with every track of the sources, optionally without duplicates (same song).
 - **Input:** `snapshots`: `readonly SourceSnapshot[]`; `merge`: `{ readonly name: string; readonly dedupe: boolean }`.
 - **Output:** `PlanDraft`.
-- **Effects:** None (pure).
-- **Errors:** None.
-
-### `rewriteStep`
-
-<!-- generated:start -->
-
-- **File:** `connectors/spotify/src/smart.ts`
-- **Signature:** `rewriteStep(snapshot: SourceSnapshot, playlistId: string, uris: readonly string[]): PlanStep`
-- **Used by:** `dedupeDraft()`, `sortDraft()`
-- **Processes:** P23
-
-<!-- generated:end -->
-
-- **Does:** Step that rewrites a playlist with the given order, only if it is still the version the preview read.
-- **Input:** `snapshot`: the playlist snapshot the preview used; `playlistId`: its id; `uris`: the new order.
-- **Output:** A `playlist_replace` step carrying `expectedSnapshotId`.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -18592,23 +18744,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
 - **Errors:** Throws `Error` "Could not list all your playlists within one call; raise SPOTIFY_CALL_BUDGET on the Worker…"; `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
 
-### `stalePlaylists`
-
-<!-- generated:start -->
-
-- **File:** `connectors/spotify/src/stale.ts`
-- **Signature:** `stalePlaylists(own: readonly PlaylistInfo[], scan: { readonly cache: LastAddedCache; readonly cutoff: string; readonly includeEmpty: boolean }): { playlist: PlaylistInfo; lastAdded: string }[]`
-- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`
-- **Processes:** —
-
-<!-- generated:end -->
-
-- **Does:** Own playlists older than the cutoff (ISO), and empty ones when asked. Pure.
-- **Input:** `own`: `readonly PlaylistInfo[]`; `scan`: `{ readonly cache: LastAddedCache; readonly cutoff: string; readonly includeEmpty: boolean }`.
-- **Output:** `{ playlist: PlaylistInfo; lastAdded: string }[]`.
-- **Effects:** None (pure).
-- **Errors:** None.
-
 ### `currentVersions`
 
 <!-- generated:start -->
@@ -18623,6 +18758,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Keeps only the cache entries of the playlists' current versions (old versions are dropped). Pure.
 - **Input:** `cache`: the stored last-added cache (or null); `own`: the user's own playlists.
 - **Output:** A new cache with one entry per current `snapshot_id` already known.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `stalePlaylists`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/stale.ts`
+- **Signature:** `stalePlaylists(own: readonly PlaylistInfo[], scan: { readonly cache: LastAddedCache; readonly cutoff: string; readonly includeEmpty: boolean }): { playlist: PlaylistInfo; lastAdded: string }[]`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Own playlists older than the cutoff (ISO), and empty ones when asked. Pure.
+- **Input:** `own`: `readonly PlaylistInfo[]`; `scan`: `{ readonly cache: LastAddedCache; readonly cutoff: string; readonly includeEmpty: boolean }`.
+- **Output:** `{ playlist: PlaylistInfo; lastAdded: string }[]`.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -19137,23 +19289,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Reads/writes Workers KV (the user's sealed vault).
 - **Errors:** None.
 
-### `applyOutput`
-
-<!-- generated:start -->
-
-- **File:** `connectors/spotify/src/tools-smart.ts`
-- **Signature:** `applyOutput(outcome: Awaited<ReturnType<typeof runPlan>>): Record<string, unknown>`
-- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
-- **Processes:** P23
-
-<!-- generated:end -->
-
-- **Does:** Answer of an apply call.
-- **Input:** `outcome`: `Awaited<ReturnType<typeof runPlan>>`.
-- **Output:** `Record<string, unknown>`.
-- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
-- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
-
 ### `previewSourceDraft`
 
 <!-- generated:start -->
@@ -19170,6 +19305,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** The loading answer while the source is incomplete, otherwise the preview (or `nothing_to_do`).
 - **Effects:** Network (Spotify Web API, within the budget); reads/writes Workers KV (snapshot and plan).
 - **Errors:** Throws `SpotifyApiError` on Spotify failures (e.g. 403 for a playlist that is not yours) and what `build` throws.
+
+### `applyOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-smart.ts`
+- **Signature:** `applyOutput(outcome: Awaited<ReturnType<typeof runPlan>>): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Answer of an apply call.
+- **Input:** `outcome`: `Awaited<ReturnType<typeof runPlan>>`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
 
 ## `connectors/spotify/src/vault.ts`
 
@@ -19311,6 +19463,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 ## `connectors/spotify/src/worker.ts`
 
+### `spotifySleep`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `spotifySleep(ms: number): Promise<void>`
+- **Used by:** `createSpotifyDeps()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Waits the given milliseconds (used to honour `Retry-After`).
+- **Input:** `ms`: milliseconds to wait.
+- **Output:** A promise that resolves after the wait.
+- **Effects:** Timer (`setTimeout`).
+- **Errors:** None.
+
 ### `createSpotifyDeps`
 
 <!-- generated:start -->
@@ -19361,6 +19530,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `Promise<Response>`.
 - **Effects:** Network (Spotify accounts service or Web API); may wait (Retry-After).
 - **Errors:** Spotify failures it does not handle propagate (`SpotifyApiError`, `SpotifyTokenError`).
+
+### `spotifyOwnerDeps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `spotifyOwnerDeps(env: SpotifyWorkerEnv, request: Request, props: GrantProps): OwnerDeps`
+- **Used by:** `handleSpotifyMcp()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** The authenticated user's dependencies, with a fresh request budget and the OAuth helpers.
+- **Input:** `env`: Worker bindings and secrets; `request`: the `/mcp` request (for the public origin); `props`: Claude's grant (`owner`, `sid`).
+- **Output:** `OwnerDeps` for that user, with `budget.remaining` = `SPOTIFY_CALL_BUDGET`.
+- **Effects:** None (reads the environment).
+- **Errors:** Throws when `TOKEN_ENC_KEY` or `SPOTIFY_CALL_BUDGET` is invalid (turned into a 500 by `buildOrConfigError()`).
 
 ### `handleSpotifyDefault`
 
@@ -19413,39 +19599,334 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network (Spotify accounts service or Web API); may wait (Retry-After).
 - **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
 
-### `spotifySleep`
+## `src/remote/pages.ts`
+
+### `readConsentForm`
 
 <!-- generated:start -->
 
-- **File:** `connectors/spotify/src/worker.ts`
-- **Signature:** `spotifySleep(ms: number): Promise<void>`
-- **Used by:** `createSpotifyDeps()`
-- **Processes:** P22
+- **File:** `src/remote/pages.ts`
+- **Signature:** `async readConsentForm(oauth: OAuthHelpers, request: Request): Promise<ConsentForm>`
+- **Used by:** `submitAuthorize()`, `submitSpotifyAuthorize()`
+- **Processes:** P10, P21
 
 <!-- generated:end -->
 
-- **Does:** Waits the given milliseconds (used to honour `Retry-After`).
-- **Input:** `ms`: milliseconds to wait.
-- **Output:** A promise that resolves after the wait.
-- **Effects:** Timer (`setTimeout`).
+- **Does:** Reads a consent form; anything but `decision=approve` denies the consent and redirects back to the client.
+- **Input:** `oauth`: the OAuth library helpers; `request`: the posted form (read from a clone).
+- **Output:** `ConsentForm`: fields, handle and `denied` (the redirect back) or null when approved.
+- **Effects:** Reads the request body; on denial, the OAuth library's consent state (cookie, KV).
+- **Errors:** Throws the library's `AuthorizationError` when the handle is missing, unbound, expired or used.
+
+### `pageDocument`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `pageDocument(title: string, body: string): string`
+- **Used by:** `consentPage()`, `credentialsPage()`, `linkConfirmPage()`, `messagePage()`
+- **Processes:** P10, P11, P19, P21, P22
+
+<!-- generated:end -->
+
+- **Does:** Builds a page's full HTML document.
+- **Input:** `title`: title (escaped here). `body`: HTML body already escaped by the caller.
+- **Output:** HTML with `lang="pt-BR"`, title and inline style.
+- **Effects:** None (pure).
 - **Errors:** None.
 
-### `spotifyOwnerDeps`
+### `messagePage`
 
 <!-- generated:start -->
 
-- **File:** `connectors/spotify/src/worker.ts`
-- **Signature:** `spotifyOwnerDeps(env: SpotifyWorkerEnv, request: Request, props: GrantProps): OwnerDeps`
-- **Used by:** `handleSpotifyMcp()`
-- **Processes:** P22
+- **File:** `src/remote/pages.ts`
+- **Signature:** `messagePage(title: string, message: string, status = 200): Response`
+- **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `expiredConnectionPage()`, `finishAccountLink()`, `handleDefaultRequest()`, `handleSpotifyDefault()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`, `notOwnerPage()`, `spotifyFailurePage()`, `verifyOwnerThenLink()`
+- **Processes:** P10, P11, P19, P21, P22
 
 <!-- generated:end -->
 
-- **Does:** The authenticated user's dependencies, with a fresh request budget and the OAuth helpers.
-- **Input:** `env`: Worker bindings and secrets; `request`: the `/mcp` request (for the public origin); `props`: Claude's grant (`owner`, `sid`).
-- **Output:** `OwnerDeps` for that user, with `budget.remaining` = `SPOTIFY_CALL_BUDGET`.
-- **Effects:** None (reads the environment).
-- **Errors:** Throws when `TOKEN_ENC_KEY` or `SPOTIFY_CALL_BUDGET` is invalid (turned into a 500 by `buildOrConfigError()`).
+- **Does:** Builds a simple notice page.
+- **Input:** `title`: plain-text title. `message`: plain-text message. `status`: HTTP code (default 200).
+- **Output:** HTML response with the given status, restrictive CSP and `no-store`; title escaped, message redacted (`redactSecrets`) and escaped.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `copyConsentHeaders`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `copyConsentHeaders(response: Response, headers: Headers): Response`
+- **Used by:** `consentPage()`, `credentialsPage()`
+- **Processes:** P10, P21
+
+<!-- generated:end -->
+
+- **Does:** Copies the consent transaction headers into the response.
+- **Input:** `response`: page response. `headers`: OAuth library headers (cookies and anti-framing).
+- **Output:** The same response with the cookies appended and the other headers copied, except `content-type`, CSP and `set-cookie`.
+- **Effects:** Mutates the headers of the received response.
+- **Errors:** None.
+
+### `redirectWith`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `redirectWith(location: string, headers: Headers = new Headers()): Response`
+- **Used by:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `beginLinkStage()`, `beginSpotifyAuthorization()`, `finishSignIn()`, `readConsentForm()`, `resumeSpotifySignIn()`
+- **Processes:** P10, P11, P21
+
+<!-- generated:end -->
+
+- **Does:** Builds a 302 redirect with the given headers.
+- **Input:** `location`: destination. `headers`: headers to keep, such as transaction cookies (default empty).
+- **Output:** Bodiless 302 response, with `Location` and `cache-control: no-store`.
+- **Effects:** Mutates the received `headers` object.
+- **Errors:** None.
+
+### `authorizationErrorResponse`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `authorizationErrorResponse(error: unknown): Response`
+- **Used by:** `finishSignIn()`, `showAuthorize()`, `showSpotifyAuthorize()`, `spotifyFailurePage()`, `submitAuthorize()`, `submitSpotifyAuthorize()`
+- **Processes:** P10, P21
+
+<!-- generated:end -->
+
+- **Does:** Converts an authorization error into a response.
+- **Input:** `error`: error caught in the authorization flow.
+- **Output:** 302 redirect to the client if the `AuthorizationError` says where to; otherwise a 400 page with the error description or a generic message.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `src/remote/worker-kit.ts`
+
+### `oauthErrorCode`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `async oauthErrorCode(response: Response): Promise<string>`
+- **Used by:** `postGoogleToken()`, `postSpotifyToken()`
+- **Processes:** P10, P11, P12, P18, P21, P22, P23
+
+<!-- generated:end -->
+
+- **Does:** OAuth error code of a failed token-endpoint response (`error` field), or `http_<status>`.
+- **Input:** `response`: the failed token-endpoint response.
+- **Output:** The `error` text, or `http_<status>` when the body is not JSON or has no `error`.
+- **Effects:** Reads the response body.
+- **Errors:** None (a non-JSON body falls back to the status).
+
+### `buildOrConfigError`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `buildOrConfigError(build: () => T): T | Response`
+- **Used by:** `handleDefaultRequest()`, `handleMcpApi()`, `handleSpotifyDefault()`, `handleSpotifyMcp()`
+- **Processes:** P10, P12, P19, P22
+
+<!-- generated:end -->
+
+- **Does:** Runs a dependency builder; an invalid configuration becomes the 500 page instead of an exception.
+- **Input:** `build`: function that builds the dependencies (may throw on missing secrets).
+- **Output:** The built value, or the `configErrorResponse()` 500 response.
+- **Effects:** None (pure apart from what `build` does).
+- **Errors:** None (the builder's error becomes the response).
+
+### `randomToken`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `randomToken(bytes = 32): string`
+- **Used by:** `beginGoogleSignIn()`, `beginLinkStage()`, `completeSignIn()`, `completeSpotifySignIn()`, `createPlan()`, `issueLinkUrl()`, `mimeBoundary()`, `saveBackup()`, `showLinkConfirmation()`, `storeLinkRequest()`
+- **Processes:** P10, P11, P18, P21, P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Generates a random base64url string (state, nonce, PKCE verifier).
+- **Input:** `bytes`: entropy bytes; default 32.
+- **Output:** The random base64url string.
+- **Effects:** Reads the cryptographic random generator.
+- **Errors:** None.
+
+### `sha256Hex`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `sha256Hex(text: string): string`
+- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerHash()`, `ownerKey()`, `showLinkConfirmation()`, `storeLinkRequest()`, `takeLinkRequest()`, `usedTicketKey()`
+- **Processes:** P10, P11, P12, P18, P21, P22, P23, P24, P25
+
+<!-- generated:end -->
+
+- **Does:** Computes SHA-256 in hexadecimal.
+- **Input:** `text`: text to hash.
+- **Output:** 64 hexadecimal characters.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `requiredSecret`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `requiredSecret(env: EnvVars, name: string): string`
+- **Used by:** `readConsentSecret()`, `readGmailSettings()`
+- **Processes:** P10, P12, P19
+
+<!-- generated:end -->
+
+- **Does:** Reads a required Worker variable.
+- **Input:** `env`: Worker text variables. `name`: variable name.
+- **Output:** The variable's value, trimmed.
+- **Effects:** None (pure).
+- **Errors:** Throws with the `wrangler secret put` command if the variable is missing, empty or a placeholder.
+
+### `readConsentSecret`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `readConsentSecret(env: EnvVars): string`
+- **Used by:** `readGmailSettings()`
+- **Processes:** P10, P12, P19
+
+<!-- generated:end -->
+
+- **Does:** Reads the remembered-consent secret with the required minimum length.
+- **Input:** `env`: Worker text variables.
+- **Output:** The value of `CONSENT_SECRET`.
+- **Effects:** None (pure).
+- **Errors:** Throws if the secret has fewer than 32 characters. Propagates the error of `requiredSecret()`.
+
+### `configErrorResponse`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `configErrorResponse(error: unknown): Response`
+- **Used by:** `buildOrConfigError()`
+- **Processes:** P10, P12, P19, P22
+
+<!-- generated:end -->
+
+- **Does:** Builds the Worker's invalid-configuration response.
+- **Input:** `error`: error thrown while reading the settings.
+- **Output:** 500 plain-text response with the error message (never a secret's value).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `checkClientRegistration`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `checkClientRegistration(options: ClientRegistrationCallbackOptions): ClientRegistrationCallbackResult | undefined`
+- **Used by:** `createGmailProvider()`, `createSpotifyProvider()`
+- **Processes:** P10, P21, P22
+
+<!-- generated:end -->
+
+- **Does:** Decides whether a client's dynamic registration is accepted.
+- **Input:** `options`: metadata of the client requesting registration.
+- **Output:** Undefined if all redirect URIs are Claude's or localhost; otherwise an `invalid_redirect_uri` error with status 400.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `publicOrigin`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `publicOrigin(env: Readonly<Record<string, unknown>>, request: Request): string`
+- **Used by:** `handleDefaultRequest()`, `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyDefault()`, `handleSpotifyWorkerFetch()`, `spotifyOwnerDeps()`
+- **Processes:** P10, P12, P19, P22
+
+<!-- generated:end -->
+
+- **Does:** Computes the connector's canonical public origin.
+- **Input:** `env`: Worker variables (optional `PUBLIC_URL`). `request`: received request.
+- **Output:** Origin of `PUBLIC_URL` without trailing slash; without it, the request's origin.
+- **Effects:** None (pure).
+- **Errors:** Throws `TypeError` if `PUBLIC_URL` is not a valid URL.
+
+### `clientIpKey`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `clientIpKey(request: Request): string`
+- **Used by:** `handleGmailWorkerFetch()`, `handleSpotifyWorkerFetch()`
+- **Processes:** P10, P22
+
+<!-- generated:end -->
+
+- **Does:** Builds the public limit key from the client IP.
+- **Input:** `request`: request.
+- **Output:** `ip:<cf-connecting-ip>` or `ip:unknown`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `isMcpPath`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `isMcpPath(request: Request): boolean`
+- **Used by:** `handleGmailWorkerFetch()`, `handleSpotifyWorkerFetch()`
+- **Processes:** P10, P22
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the route is the token-protected `/mcp`.
+- **Input:** `request`: request.
+- **Output:** `true` for `/mcp` and subpaths.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `src/remote/rate-limit.ts`
+
+### `isRateLimited`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/rate-limit.ts`
+- **Signature:** `async isRateLimited(limiter: RateLimiter | undefined, key: string): Promise<boolean>`
+- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyMcp()`, `handleSpotifyWorkerFetch()`
+- **Processes:** P10, P12, P22
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the session exceeded the request limit.
+- **Input:** `limiter`: Workers rate limiting binding, or undefined. `key`: session key (OAuth session id).
+- **Output:** True if the binding refused; false if it accepted or there is no binding.
+- **Effects:** Counts the request in the rate limiting binding.
+- **Errors:** None of its own; binding failures propagate.
+
+### `rateLimitedResponse`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/rate-limit.ts`
+- **Signature:** `rateLimitedResponse(): Response`
+- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyMcp()`, `handleSpotifyWorkerFetch()`
+- **Processes:** P10, P12, P22
+
+<!-- generated:end -->
+
+- **Does:** Builds the too-many-requests response.
+- **Input:** None.
+- **Output:** 429 JSON response (`rate_limited`) with `Retry-After: 60`.
+- **Effects:** None (pure).
+- **Errors:** None.
 
 ## Data and constants
 
@@ -19610,6 +20091,12 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `PAIR_LOGIN_TTL_SECONDS`            | `connectors/whatsapp/src/pair.ts`                       | Lifetime of the in-progress `/pair` login (10 minutes).                                                                                                                                      |
 | `PAIR_CALLBACK_PATH`                | `connectors/whatsapp/src/pair.ts`                       | GitHub callback path for `/pair` (a subpath of the OAuth App callback).                                                                                                                      |
 | `PAIR_ACTIONS`                      | `connectors/whatsapp/src/pair.ts`                       | `/pair` actions by path: code, QR, unlink and start over from scratch.                                                                                                                       |
+| `ACCESS_LIST_KEY`                   | `connectors/whatsapp/src/access.ts`                     | Key, in the Durable Object storage, of the owner's chat access list.                                                                                                                         |
+| `ACCESS_ROUTE`                      | `connectors/whatsapp/src/access.ts`                     | Internal Durable Object route (`/__access`) that reads (GET) and saves (PUT) the access list without waking the container.                                                                   |
+| `MAX_ACCESS_ENTRIES`                | `connectors/whatsapp/src/access.ts`                     | Most chats the access list holds (200).                                                                                                                                                      |
+| `ACCESS_SEARCH_WINDOW`              | `connectors/whatsapp/src/access.ts`                     | Bridge results a whole-store `search_messages` asks for in mode `selected` before keeping only allowed chats (100).                                                                          |
+| `OPEN_ACCESS`                       | `connectors/whatsapp/src/access.ts`                     | Access list before the owner saves anything: mode `all`, every chat open.                                                                                                                    |
+| `ACCESS_ACTIONS`                    | `connectors/whatsapp/src/pair.ts`                       | `/pair` chat access actions: mode, add, remove and search.                                                                                                                                   |
 | `SNAPSHOT_KEY_NAME`                 | `connectors/whatsapp/src/snapshots.ts`                  | Key of the current snapshot in the R2 bucket (`whatsapp/snapshot.was1`).                                                                                                                     |
 | `WHATSAPP_INSTRUCTIONS`             | `connectors/whatsapp/src/tools.ts`                      | MCP server instructions: what the connector is and the rule about untrusted content.                                                                                                         |
 | `WHATSAPP_SERVER_INFO`              | `connectors/whatsapp/src/tools.ts`                      | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                                     |

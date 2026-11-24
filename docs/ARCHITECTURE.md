@@ -11,7 +11,7 @@ demand, with owner login through GitHub ([ADR 0015](adr/0015-whatsapp-on-cloudfl
 **Spotify** connector (`connectors/spotify/`) reuses the Gmail model, but each user brings their own Spotify app
 (Client ID and Secret pasted on the connector page) and every piece of user state lives in a per-user sealed
 vault in Workers KV; batch changes are two-step plans with automatic backups
-([ADR 0033](adr/0033-spotify-with-each-users-own-app.md)).
+([ADR 0034](adr/0034-spotify-with-each-users-own-app.md)).
 
 ## Layers
 
@@ -70,7 +70,7 @@ as JSON text. Details in [PROCESSES.md](PROCESSES.md) (P03–P05).
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- |
 | Marketplace plugin              | Claude → Add marketplace `temponi-bernardo/claude-connectors`                                                      | ADR 0013 |
 | Server (Cloudflare Worker)      | `npm run worker:deploy` compiles `src/worker.ts` and publishes                                                     | ADR 0010 |
-| Spotify Worker                  | `npm run spotify:deploy` publishes `connectors/spotify` and runs the smoke test                                    | ADR 0033 |
+| Spotify Worker                  | `npm run spotify:deploy` publishes `connectors/spotify` and runs the smoke test                                    | ADR 0034 |
 | Node server (Docker)            | Alternative: `npm run build` generates `server/remote.js`, used by the Dockerfile                                  | ADR 0009 |
 | `/planejamento-faculdade` files | `npm run build` generates `scripts/plan.mjs` and `assets/plan-template.html` in the skill, shipped with the plugin | ADR 0030 |
 

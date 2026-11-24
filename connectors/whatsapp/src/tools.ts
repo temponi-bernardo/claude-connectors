@@ -23,6 +23,15 @@ import {
   withDeadline,
   type BridgeFetch,
 } from './bridge-client.js';
+import {
+  ACCESS_SEARCH_WINDOW,
+  accessSearchWarning,
+  fetchAccessList,
+  filterAllowedMessages,
+  markChatAccess,
+  requireChatAccess,
+  type AccessList,
+} from './access.js';
 import { normalizeRecipient, type WhatsAppSettings } from './config.js';
 import {
   compactChat,
@@ -109,6 +118,21 @@ export async function runRead<T>(
   );
 }
 
+/** Reads the owner's access list within this call's deadline. */
+export function loadAccess(ctx: WhatsAppToolContext): Promise<AccessList> {
+  return fetchAccessList(ctx.bridge, toolDeadline(ctx));
+}
+
+/** Read of one chat: refuses a chat outside the access list before waking the container, then runs the read. */
+export async function runChatRead<T>(
+  ctx: WhatsAppToolContext,
+  chatJid: string,
+  query: (deadline: number) => Promise<T>,
+): Promise<T | { readonly warning: string; readonly result: T }> {
+  requireChatAccess(await loadAccess(ctx), chatJid, ctx.pairUrl);
+  return runRead(ctx, query);
+}
+
 const statusTool = defineTool({
   name: 'whatsapp_status',
   description:
@@ -124,7 +148,7 @@ const statusTool = defineTool({
 const listChatsTool = defineTool({
   name: 'list_chats',
   description:
-    'List WhatsApp chats, most recent first, with last message preview. Optional name/number filter.',
+    'List WhatsApp chats, most recent first, with last message preview. Optional name/number filter. When the owner restricted access, each chat has `allowed`; chats outside the list show no preview and cannot be read or messaged.',
   shape: {
     query: z.string().max(100).optional().describe('Filter by chat name or phone number'),
     limit: z.number().int().min(1).max(100).default(20),
@@ -143,7 +167,8 @@ const listChatsTool = defineTool({
         path,
         { deadline },
       );
-      return untrusted({ chats: page.chats.map(compactChat), next_cursor: page.next_cursor });
+      const chats = markChatAccess(await loadAccess(ctx), page.chats.map(compactChat));
+      return untrusted({ chats, next_cursor: page.next_cursor });
     }),
 });
 
@@ -157,7 +182,7 @@ const getMessagesTool = defineTool({
   },
   annotations: toolAnnotations('Get messages', READ_ONLY_HINTS),
   run: (ctx: WhatsAppToolContext, args) =>
-    runRead(ctx, async (deadline) => {
+    runChatRead(ctx, args.chat_jid, async (deadline) => {
       const path = bridgePath('/messages', {
         chat_jid: args.chat_jid,
         limit: args.limit,
@@ -181,25 +206,34 @@ const getMessagesTool = defineTool({
     }),
 });
 
+/** Searches messages, restricted to the chats in the access list (a whole-store search asks for more and filters). */
+export async function searchAllowedMessages(
+  ctx: WhatsAppToolContext,
+  args: { readonly query: string; readonly chat_jid?: string | undefined; readonly limit: number },
+): Promise<unknown> {
+  const access = await loadAccess(ctx);
+  if (args.chat_jid) requireChatAccess(access, args.chat_jid, ctx.pairUrl);
+  const limit = access.mode === 'all' ? args.limit : ACCESS_SEARCH_WINDOW;
+  return runRead(ctx, async (deadline) => {
+    const path = bridgePath('/search', { query: args.query, chat_jid: args.chat_jid, limit });
+    const page = await bridgeJson<{ messages: BridgeMessage[] }>(ctx.bridge, path, { deadline });
+    const kept = filterAllowedMessages(access, page.messages.map(compactMessage));
+    const warning = accessSearchWarning(page.messages.length, kept.length, args.limit);
+    return untrusted({ messages: kept.slice(0, args.limit), ...(warning ? { warning } : {}) });
+  });
+}
+
 const searchMessagesTool = defineTool({
   name: 'search_messages',
-  description: 'Full-text search in stored WhatsApp messages, optionally within one chat.',
+  description:
+    'Full-text search in stored WhatsApp messages, optionally within one chat. Only chats the owner allowed are searched.',
   shape: {
     query: z.string().min(1).max(200),
     chat_jid: z.string().min(3).max(200).optional(),
     limit: z.number().int().min(1).max(100).default(20),
   },
   annotations: toolAnnotations('Search messages', READ_ONLY_HINTS),
-  run: (ctx: WhatsAppToolContext, args) =>
-    runRead(ctx, async (deadline) => {
-      const path = bridgePath('/search', {
-        query: args.query,
-        chat_jid: args.chat_jid,
-        limit: args.limit,
-      });
-      const page = await bridgeJson<{ messages: BridgeMessage[] }>(ctx.bridge, path, { deadline });
-      return untrusted({ messages: page.messages.map(compactMessage) });
-    }),
+  run: searchAllowedMessages,
 });
 
 const searchContactsTool = defineTool({
@@ -260,7 +294,7 @@ const getMediaTool = defineTool({
   shape: { chat_jid: z.string().min(3).max(200), message_id: z.string().min(1).max(200) },
   annotations: toolAnnotations('Get media', READ_ONLY_HINTS),
   run: (ctx: WhatsAppToolContext, args) =>
-    runRead(ctx, async (deadline) => {
+    runChatRead(ctx, args.chat_jid, async (deadline) => {
       const path = bridgePath('/media', { chat_jid: args.chat_jid, message_id: args.message_id });
       const res = await callBridge(ctx.bridge, path, { deadline });
       return mediaResult(res, new Uint8Array(await res.arrayBuffer()), args.message_id);
@@ -302,11 +336,24 @@ const sendMessageTool = defineTool({
   annotations: toolAnnotations('Send message', SEND_HINTS),
   run: async (ctx: WhatsAppToolContext, args) => {
     const recipient = allowedRecipient(ctx.settings, args.recipient);
+    requireChatAccess(await loadAccess(ctx), recipient, ctx.pairUrl);
     const quote = args.reply_to_message_id ? { reply_to: args.reply_to_message_id } : {};
     return bridgeJson(ctx.bridge, '/send', {
       init: jsonPost({ recipient, text: args.text, ...quote }),
       deadline: toolDeadline(ctx),
     });
+  },
+});
+
+const getAccessListTool = defineTool({
+  name: 'get_access_list',
+  description:
+    "The owner's chat access list: mode `all` (every chat) or `selected` (only the listed contacts and groups can be read or messaged). Only the owner changes it, on the page in `manage_at`; this tool cannot.",
+  shape: {},
+  annotations: toolAnnotations('Get access list', READ_ONLY_HINTS),
+  run: async (ctx: WhatsAppToolContext) => {
+    const access = await loadAccess(ctx);
+    return untrusted({ ...access, manage_at: ctx.pairUrl });
   },
 });
 
@@ -318,6 +365,7 @@ export const READ_TOOLS: readonly ToolSpec<WhatsAppToolContext>[] = [
   searchMessagesTool,
   searchContactsTool,
   getMediaTool,
+  getAccessListTool,
 ];
 
 /** Why `send_message` is off when the server runs without `ENABLE_SEND`. */

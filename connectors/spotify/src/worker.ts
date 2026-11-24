@@ -1,5 +1,5 @@
 /**
- * Entry point of the remote Spotify connector on Cloudflare Workers (ADR 0033): `@cloudflare/workers-oauth-provider`
+ * Entry point of the remote Spotify connector on Cloudflare Workers (ADR 0034): `@cloudflare/workers-oauth-provider`
  * is Claude's OAuth 2.1 server (DCR, PKCE, tokens in KV) and protects `/mcp`; the connector's own routes show the
  * credentials page and receive Spotify's return. Each user brings their own Spotify app. Runs only on requests.
  */

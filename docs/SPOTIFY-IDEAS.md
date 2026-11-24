@@ -1,6 +1,6 @@
 # Spotify connector — use-case brainstorm
 
-Ideas collected before closing the scope of F5.1 ([ADR 0033](adr/0033-spotify-with-each-users-own-app.md)).
+Ideas collected before closing the scope of F5.1 ([ADR 0034](adr/0034-spotify-with-each-users-own-app.md)).
 "Built" means a tool or skill exists; "Later" means feasible but left out; "Not possible" means the 2026 API does
 not support it ([SPOTIFY-API.md](SPOTIFY-API.md)).
 

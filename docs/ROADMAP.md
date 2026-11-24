@@ -63,6 +63,7 @@ The MVP is the Canvas connector installed from the marketplace and used day to d
 | F3.3 | Restrict container egress to WhatsApp hosts (`allowedHosts`)                          | ⬜     | Bridge connects with `enableInternet = false` and only WhatsApp hosts, or an ADR saying why not |
 | F3.4 | Sending enabled to any contact or group, with quoting (ADR 0015)                      | ✅     | `ENABLE_SEND` on, optional allowlist, confirmation and limit kept; Worker and Go tests          |
 | F3.5 | Evaluate sending media over WhatsApp                                                  | ⬜     | Image/document sent with thumbnail and checked type, or an ADR saying why not                   |
+| F3.6 | Chat access list managed by the owner on `/pair` (ADR 0033)                           | ✅     | Reads and sends refused outside the list in mode `selected`; Worker tests; skill and docs       |
 
 ## Phase 4 — Anthropic plugin standard and English
 
@@ -89,12 +90,12 @@ risks in [security/isolation.md](security/isolation.md).
 
 ## Phase 5 — Spotify (each user's own app)
 
-Decision in [ADR 0033](adr/0033-spotify-with-each-users-own-app.md); API checked in [SPOTIFY-API.md](SPOTIFY-API.md);
+Decision in [ADR 0034](adr/0034-spotify-with-each-users-own-app.md); API checked in [SPOTIFY-API.md](SPOTIFY-API.md);
 ideas in [SPOTIFY-IDEAS.md](SPOTIFY-IDEAS.md).
 
 | Id   | Task                                                                                         | Status | Done when                                                                                                                        |
 | ---- | -------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| F5.1 | `spotify` connector: own-app sign-in, sealed vault, full library/playlists, plans, backups   | ✅     | `pr:check` green; isolation, crypto, refresh, pagination, 429 and preview/apply tests; ADR 0033 and API validation in `docs/`    |
+| F5.1 | `spotify` connector: own-app sign-in, sealed vault, full library/playlists, plans, backups   | ✅     | `pr:check` green; isolation, crypto, refresh, pagination, 429 and preview/apply tests; ADR 0034 and API validation in `docs/`    |
 | F5.2 | Publish the Spotify Worker and connect the owner's account                                   | ⬜     | KV ids in `wrangler.toml`, `TOKEN_ENC_KEY` set, `npm run spotify:deploy` smoke green, `list_liked_tracks` answering on claude.ai |
 | F5.3 | Run the motivating cleanup for real ("only Chris Cornell + electronic") and tune genre terms | ⬜     | Preview checked by the owner, applied, backup restorable; genre-term notes added to `/limpar-curtidas` if needed                 |
 

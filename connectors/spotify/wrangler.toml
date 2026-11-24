@@ -1,4 +1,4 @@
-# Remote Spotify connector on Cloudflare Workers (ADR 0033): each user brings their own Spotify app.
+# Remote Spotify connector on Cloudflare Workers (ADR 0034): each user brings their own Spotify app.
 # On demand: no Containers, Cron Triggers, Durable Object alarms or polling. State lives only in Workers KV.
 # Step-by-step deploy and secrets in connectors/spotify/README.md.
 name = "spotify-remote"

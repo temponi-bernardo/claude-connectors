@@ -16,3 +16,4 @@ live one folder up, in [`connectors/whatsapp/`](../README.md).
 - `/whatsapp-summary` — what happened in chats and groups in the period.
 - `/whatsapp-pending` — chats waiting for your reply.
 - `/search-whatsapp` — address, PIX key, link, document or media in the messages.
+- `/whatsapp-access` — which chats Claude may read and message, and how to allow or remove them on `/pair`.

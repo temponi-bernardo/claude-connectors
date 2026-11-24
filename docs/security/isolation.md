@@ -50,7 +50,7 @@ grants)`) with a Canvas client bound to that token; `serveMcpRequest()` closes i
    theirs is linked.
 6. **Response/log** — `errorResult()` and `messagePage()` redact secrets.
 
-### Spotify (`connectors/spotify/src/worker.ts`, ADR 0033)
+### Spotify (`connectors/spotify/src/worker.ts`, ADR 0034)
 
 1. **Auth** — `@cloudflare/workers-oauth-provider` validates the token and gives `ctx.props` (`owner`, `sid`).
    The owner is whatever account Spotify's `/me` returned for a code exchanged with the user's own app: it

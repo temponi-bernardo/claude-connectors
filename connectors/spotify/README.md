@@ -5,7 +5,7 @@ library** of whoever installs it: search, Liked Songs and playlists in full, edi
 top items, playback, and bulk cleanups with a preview, an automatic backup and restore. Each person connects with
 **their own Spotify app**, so nobody shares a quota or the 5-user limit of development-mode apps. It runs on
 Cloudflare Workers **only when a request arrives**; state lives in Workers KV, encrypted per user. Decision in
-[ADR 0033](../../docs/adr/0033-spotify-with-each-users-own-app.md); what the 2026 Web API allows in
+[ADR 0034](../../docs/adr/0034-spotify-with-each-users-own-app.md); what the 2026 Web API allows in
 [SPOTIFY-API.md](../../docs/SPOTIFY-API.md).
 
 ## For users (a new friend, ~5 minutes)

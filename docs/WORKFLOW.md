@@ -135,7 +135,7 @@ The **remote connector** (ADR 0010) does not depend on a release: after a merge 
 `npm run worker:deploy` on `main` (needs `CLOUDFLARE_API_TOKEN`). To test first, `npm run worker:dev`. The
 **remote Gmail** (ADR 0014) follows the same path with `npm run gmail:deploy` / `npm run gmail:dev`; the first
 deploy (KV, secrets, Google Cloud) is in [connectors/gmail/README.md](../connectors/gmail/README.md).
-The **Spotify** connector (ADR 0033) is the same: `npm run spotify:deploy` / `npm run spotify:dev`; first deploy
+The **Spotify** connector (ADR 0034) is the same: `npm run spotify:deploy` / `npm run spotify:dev`; first deploy
 (KV ids and `TOKEN_ENC_KEY`) in [connectors/spotify/README.md](../connectors/spotify/README.md).
 **WhatsApp** (ADR 0015) is published by whoever hosts it: `npm run whatsapp:deploy` (needs Docker for the bridge
 image). `pr:check` runs `npm run bridge:test` (Go 1.26+; with `GOTOOLCHAIN=auto` Go downloads the toolchain) and

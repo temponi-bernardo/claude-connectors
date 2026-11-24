@@ -1,4 +1,4 @@
-# 0033 — Spotify connector with each user's own Spotify app and two-step batch changes
+# 0034 — Spotify connector with each user's own Spotify app and two-step batch changes
 
 - **Status:** Accepted
 - **Date:** 2026-11-24
