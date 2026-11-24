@@ -5,6 +5,11 @@ Plugin and remote server versions of the WhatsApp connector (ADR 0022). The repo
 
 ## Unreleased
 
+### Added
+
+- Chat access list (ADR 0033): on `/pair`, the owner chooses which contacts and groups Claude may read and
+  message; `get_access_list` tool and `/whatsapp-access` skill.
+
 ## [2.0.0](https://github.com/temponi-bernardo/claude-connectors/compare/whatsapp-v1.0.0...whatsapp-v2.0.0) (2026-11-23)
 
 ### ⚠ BREAKING CHANGES

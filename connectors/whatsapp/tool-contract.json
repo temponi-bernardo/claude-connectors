@@ -1,6 +1,10 @@
 {
   "tools": [
     {
+      "name": "get_access_list",
+      "readOnly": true
+    },
+    {
       "name": "get_media",
       "readOnly": true
     },

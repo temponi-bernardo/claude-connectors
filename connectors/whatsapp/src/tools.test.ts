@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { FALLBACK_SERVER_VERSION } from '../../../src/mcp/server-version.js';
 import { toToolResult, type ToolSpec } from '../../../src/mcp/tools.js';
 import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' };
+import { OPEN_ACCESS } from './access.js';
 import { readWhatsAppSettings, type WhatsAppSettings } from './config.js';
 import { fakeBridge, READY_STATUS } from './fixtures/fakes.js';
 import { UNTRUSTED_NOTICE } from './format.js';
@@ -12,6 +13,9 @@ import {
   createWhatsAppCatalogServer,
   createWhatsAppMcpServer,
   WHATSAPP_SEND_OFF_REASON,
+  loadAccess,
+  runChatRead,
+  searchAllowedMessages,
   mediaResult,
   prepareRead,
   READ_TOOLS,
@@ -47,7 +51,11 @@ type Routes = Parameters<typeof fakeBridge>[0];
 
 function context(routes: Routes, settings: Partial<WhatsAppSettings> = {}): WhatsAppToolContext {
   return {
-    bridge: fakeBridge({ '/sync/wait': () => Response.json(READY_STATUS), ...routes }),
+    bridge: fakeBridge({
+      '/sync/wait': () => Response.json(READY_STATUS),
+      '/__access': () => Response.json(OPEN_ACCESS),
+      ...routes,
+    }),
     settings: { ...SETTINGS, ...settings },
     pairUrl: 'https://wa.example.dev/pair',
     now: () => Date.now(),
@@ -346,5 +354,93 @@ describe('WHATSAPP_SERVER_INFO', () => {
   it('announces the version of the plugin manifest', () => {
     expect(WHATSAPP_SERVER_INFO.version).toBe(manifest.version);
     expect(WHATSAPP_SERVER_INFO.version).not.toBe(FALLBACK_SERVER_VERSION);
+  });
+});
+
+describe('chat access list', () => {
+  const GROUP = '120363000000000001@g.us';
+  const SELECTED = { mode: 'selected', entries: [{ jid: GROUP, name: 'Turma', group: true }] };
+  function restricted(routes: Routes = {}): WhatsAppToolContext {
+    return context({ '/__access': () => Response.json(SELECTED), ...routes });
+  }
+
+  it('loadAccess reads the list from the Durable Object', async () => {
+    expect(await loadAccess(restricted())).toEqual(SELECTED);
+  });
+
+  it('runChatRead refuses a chat outside the list without waking the bridge', async () => {
+    const ctx = restricted();
+    await expect(runChatRead(ctx, MESSAGE.chat_jid, () => Promise.resolve(1))).rejects.toThrow(
+      'access list',
+    );
+    expect((ctx.bridge as ReturnType<typeof fakeBridge>).paths).toEqual(['/__access']);
+    await expect(runChatRead(ctx, GROUP, () => Promise.resolve(1))).resolves.toBe(1);
+  });
+
+  it('get_messages and get_media refuse a chat outside the list', async () => {
+    const args = { chat_jid: MESSAGE.chat_jid, message_id: 'm1', limit: 5 };
+    await expect(run('get_messages', restricted(), args)).rejects.toThrow('access list');
+    await expect(run('get_media', restricted(), args)).rejects.toThrow('access list');
+  });
+
+  it('list_chats flags chats and hides the preview of chats outside the list', async () => {
+    const chats = [
+      { jid: GROUP, name: 'Turma', is_group: true, last_message_at: null },
+      {
+        jid: MESSAGE.chat_jid,
+        name: 'Ana',
+        is_group: false,
+        last_message_at: null,
+        last_message: { from_me: false, sender_name: 'Ana', text: 'segredo', type: 'text' },
+      },
+    ];
+    const ctx = restricted({ '/chats': () => Response.json({ chats, next_cursor: null }) });
+    const result = (await run('list_chats', ctx, { limit: 20 })) as {
+      data: { chats: Record<string, unknown>[] };
+    };
+    expect(result.data.chats.map((chat) => chat.allowed)).toEqual([true, false]);
+    expect(JSON.stringify(result)).not.toContain('segredo');
+  });
+
+  it('search_messages keeps only allowed chats and refuses a chat outside the list', async () => {
+    let asked = '';
+    const ctx = restricted({
+      '/search': (_init, path) => {
+        asked = path;
+        return Response.json({ messages: [MESSAGE, { ...MESSAGE, id: 'm2', chat_jid: GROUP }] });
+      },
+    });
+    const result = (await searchAllowedMessages(ctx, { query: 'x', limit: 1 })) as {
+      data: { messages: { id: string }[] };
+    };
+    expect(result.data.messages.map((message) => message.id)).toEqual(['m2']);
+    expect(asked).toContain('limit=100');
+    expect(result).not.toHaveProperty('data.warning');
+    const full = restricted({
+      '/search': () =>
+        Response.json({
+          messages: Array.from({ length: 100 }, (_, i) => ({ ...MESSAGE, id: `m${i}` })),
+        }),
+    });
+    expect(await searchAllowedMessages(full, { query: 'x', limit: 5 })).toHaveProperty(
+      'data.warning',
+    );
+    await expect(
+      searchAllowedMessages(ctx, { query: 'x', chat_jid: MESSAGE.chat_jid, limit: 5 }),
+    ).rejects.toThrow('access list');
+  });
+
+  it('send_message refuses a recipient outside the list before calling the bridge', async () => {
+    const ctx = restricted({ '/send': () => Response.json({ id: 'x' }) });
+    const args = { recipient: '5531999999999', text: 'oi', confirmed_by_user: true };
+    await expect(run('send_message', ctx, args)).rejects.toThrow('access list');
+    expect((ctx.bridge as ReturnType<typeof fakeBridge>).paths).not.toContain('/send');
+  });
+
+  it('get_access_list shows the list and where the owner manages it', async () => {
+    const result = await run('get_access_list', restricted());
+    expect(result).toMatchObject({
+      data: { ...SELECTED, manage_at: 'https://wa.example.dev/pair' },
+    });
   });
 });
