@@ -3,7 +3,7 @@
 ## Next task
 
 **F6.2 — Private source repository with the full history** (Phase 6, ADR 0035). The owner first creates the empty
-private repository `temponi-bernardo/claude-connectors-src` and installs the Claude GitHub App on it. Still open:
+private repository `temponi-bernardo/ia-conectors-src` and installs the Claude GitHub App on it. Still open:
 F5.2 (Spotify: the owner creates their Spotify app and `list_liked_tracks` answers on claude.ai). F3.2 (WhatsApp
 publish) is paused by ADR 0035. The Connectors Directory submission steps left for the owner are in
 [DIRECTORY-LISTING.md](DIRECTORY-LISTING.md).
@@ -109,7 +109,7 @@ public repository is only slimmed (F6.5) after F6.2–F6.4 are proven.
 | Id   | Task                                                                                                                                                 | Status | Done when                                                                                                                                                        |
 | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | F6.1 | Decision and plan: ADR 0035 and this phase                                                                                                           | ✅     | ADR accepted; F3.2 paused                                                                                                                                        |
-| F6.2 | Private repo `claude-connectors-src` with the full history (`git push --mirror`); Claude GitHub App on it; cloud sessions use it                     | ⬜     | `pr:check` green and `npm run smoke` passing for all four connectors from a clone of the private repo                                                            |
+| F6.2 | Private repo `ia-conectors-src` with the full history (`git push --mirror`); Claude GitHub App on it; cloud sessions use it                          | ⬜     | `pr:check` green and `npm run smoke` passing for all four connectors from a clone of the private repo                                                            |
 | F6.3 | `npm run marketplace:publish` in the private repo: build, copy `canvas-puc`/`gmail`/`spotify` plugin folders and the site, public manifest, validate | ⬜     | Tested command produces the public tree; `claude plugin validate --strict` green on it; no source file outside `plugin/` and the site copied                     |
 | F6.4 | WhatsApp private to the owner: private marketplace `claude-connectors-private` in the private repo                                                   | ⬜     | `whatsapp_status` answers on claude.ai after installing from the private marketplace (fallback recorded if only the custom connector URL works)                  |
 | F6.5 | Slim the public repo in one revertible PR: only manifest, Canvas, Gmail and Spotify plugins, site, README, LICENSE; WhatsApp out of `privacy.html`   | ⬜     | `claude plugin validate --strict` green; Pages home, privacy and terms answer 200 at the same URLs; no history rewrite                                           |

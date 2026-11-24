@@ -32,7 +32,7 @@ Facts that shape the decision:
 
 Split in two repositories, keeping the public name: **`temponi-bernardo/claude-connectors` stays public as a thin
 marketplace** (marketplace manifest, the `canvas-puc`, `gmail` and `spotify` plugin folders, the Pages site, README, MIT
-license), and **a new private repository `temponi-bernardo/claude-connectors-src` holds the full history and all
+license), and **a new private repository `temponi-bernardo/ia-conectors-src` holds the full history and all
 development** (code, tests, tooling, internal docs, Claude Code layer, deploys and releases). A local, tested
 `npm run marketplace:publish` command in the private repository copies the built plugin folders and the site into a
 checkout of the public one. **WhatsApp leaves the public marketplace** and is served to the owner only, from a
