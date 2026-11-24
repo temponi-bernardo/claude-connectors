@@ -53,7 +53,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/gmail/src/draft-tools.ts`: [`draftArgs`](#draftargs)
 - `connectors/gmail/src/drafts.ts`: [`draftSummary`](#draftsummary), [`listDrafts`](#listdrafts), [`prepareDraftEmail`](#preparedraftemail), [`draftIds`](#draftids), [`createDraft`](#createdraft), [`updateDraft`](#updatedraft), [`sendDraft`](#senddraft), [`deleteDraft`](#deletedraft)
 - `connectors/gmail/src/gmail-api.ts`: [`gmailUrl`](#gmailurl), [`gmailHttpError`](#gmailhttperror), [`gmailErrorDetail`](#gmailerrordetail), [`sendGmailRequest`](#sendgmailrequest), [`readGmailJson`](#readgmailjson), [`gmailCall`](#gmailcall), [`gmailGet`](#gmailget), [`gmailWrite`](#gmailwrite)
-- `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`parseGoogleTokens`](#parsegoogletokens), [`googleErrorCode`](#googleerrorcode), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken), [`revokeGoogleToken`](#revokegoogletoken)
+- `connectors/gmail/src/google-oauth.ts`: [`googleRedirectUri`](#googleredirecturi), [`googleAuthorizeUrl`](#googleauthorizeurl), [`parseGoogleTokens`](#parsegoogletokens), [`postGoogleToken`](#postgoogletoken), [`exchangeGoogleCode`](#exchangegooglecode), [`refreshGoogleToken`](#refreshgoogletoken), [`revokeGoogleToken`](#revokegoogletoken)
 - `connectors/gmail/src/id-token.ts`: [`decodeJwtJson`](#decodejwtjson), [`decodeJwt`](#decodejwt), [`idTokenProblems`](#idtokenproblems), [`checkIdTokenClaims`](#checkidtokenclaims), [`fetchGoogleKey`](#fetchgooglekey), [`verifyRs256`](#verifyrs256), [`verifyGoogleIdToken`](#verifygoogleidtoken)
 - `connectors/gmail/src/link-flow.ts`: [`nowSeconds`](#nowseconds), [`issueLinkUrl`](#issuelinkurl), [`openLinkTicket`](#openlinkticket), [`usedTicketKey`](#usedticketkey), [`redeemLinkTicket`](#redeemlinkticket), [`showLinkConfirmation`](#showlinkconfirmation), [`isConfirmedInThisBrowser`](#isconfirmedinthisbrowser), [`linkRequestKey`](#linkrequestkey), [`readCookie`](#readcookie), [`linkCookie`](#linkcookie), [`invalidTicketPage`](#invalidticketpage), [`redeemConfirmedTicket`](#redeemconfirmedticket), [`storeLinkRequest`](#storelinkrequest), [`linkStageUrl`](#linkstageurl), [`beginLinkStage`](#beginlinkstage), [`startAccountLink`](#startaccountlink), [`notOwnerPage`](#notownerpage), [`verifyOwnerThenLink`](#verifyownerthenlink), [`takeLinkRequest`](#takelinkrequest), [`linkRefusalReason`](#linkrefusalreason), [`storeGoogleAccount`](#storegoogleaccount), [`linkFromCode`](#linkfromcode), [`linkSafely`](#linksafely), [`finishAccountLink`](#finishaccountlink)
 - `connectors/gmail/src/mailbox-tools.ts`: [`toggleAction`](#toggleaction), [`writableTargets`](#writabletargets), [`runMailboxAction`](#runmailboxaction)
@@ -68,6 +68,36 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/gmail/src/token-store.ts`: [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
 - `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`resolveWritableAccount`](#resolvewritableaccount), [`accountBase`](#accountbase), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
 - `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`createGmailProvider`](#creategmailprovider), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
+- `connectors/spotify/src/access-token.ts`: [`forgetSpotifyAccessToken`](#forgetspotifyaccesstoken), [`clearSpotifyTokenCache`](#clearspotifytokencache), [`notConnectedError`](#notconnectederror), [`reconnectError`](#reconnecterror), [`requireAccount`](#requireaccount), [`renewSpotifyAccessToken`](#renewspotifyaccesstoken), [`isTerminalTokenError`](#isterminaltokenerror), [`getSpotifyAccessToken`](#getspotifyaccesstoken)
+- `connectors/spotify/src/account-store.ts`: [`toSpotifyAccount`](#tospotifyaccount), [`loadAccount`](#loadaccount), [`saveAccount`](#saveaccount), [`deleteAccount`](#deleteaccount), [`refreshExpiryIso`](#refreshexpiryiso), [`maskCredential`](#maskcredential)
+- `connectors/spotify/src/apply.ts`: [`advancePlan`](#advanceplan), [`playlistItemCount`](#playlistitemcount), [`addPlaylistUris`](#addplaylisturis), [`createUserPlaylist`](#createuserplaylist), [`currentStep`](#currentstep), [`currentChunk`](#currentchunk), [`runAddChunk`](#runaddchunk), [`runReplaceChunk`](#runreplacechunk), [`runCreateChunk`](#runcreatechunk), [`runPlanChunk`](#runplanchunk), [`resumedPlaylistId`](#resumedplaylistid), [`reconcilePlan`](#reconcileplan), [`backupBeforeApply`](#backupbeforeapply), [`touchedSources`](#touchedsources), [`forgetTouchedSources`](#forgettouchedsources), [`runPlan`](#runplan)
+- `connectors/spotify/src/backups.ts`: [`toBackupTrack`](#tobackuptrack), [`toBackupPlaylist`](#tobackupplaylist), [`backupEntry`](#backupentry), [`listBackups`](#listbackups), [`saveBackup`](#savebackup), [`requireBackup`](#requirebackup), [`deleteBackup`](#deletebackup), [`deleteAllBackups`](#deleteallbackups), [`backupPage`](#backuppage)
+- `connectors/spotify/src/catalog.ts`: [`textField`](#textfield), [`parseArtistRefs`](#parseartistrefs), [`trackAlbum`](#trackalbum), [`parseTrack`](#parsetrack), [`parseAddedTrack`](#parseaddedtrack), [`playlistTotal`](#playlisttotal), [`parsePlaylist`](#parseplaylist), [`releaseYear`](#releaseyear), [`trackOutput`](#trackoutput), [`addedTrackOutput`](#addedtrackoutput), [`playlistOutput`](#playlistoutput), [`catalogExtras`](#catalogextras), [`catalogItemOutput`](#catalogitemoutput)
+- `connectors/spotify/src/config.ts`: [`parseCallBudget`](#parsecallbudget), [`readSpotifySettings`](#readspotifysettings), [`isSpotifyAppCredential`](#isspotifyappcredential)
+- `connectors/spotify/src/genres.ts`: [`loadGenreCache`](#loadgenrecache), [`saveGenreCache`](#savegenrecache), [`fetchArtistGenres`](#fetchartistgenres), [`missingArtistIds`](#missingartistids), [`ensureGenres`](#ensuregenres)
+- `connectors/spotify/src/library-write.ts`: [`isArtistUri`](#isartisturi), [`uriId`](#uriid), [`writeLibraryUris`](#writelibraryuris), [`writeArtistFollows`](#writeartistfollows), [`writeLibraryChunk`](#writelibrarychunk), [`libraryContains`](#librarycontains), [`chunkList`](#chunklist)
+- `connectors/spotify/src/pages.ts`: [`appSetupSteps`](#appsetupsteps), [`credentialsBody`](#credentialsbody), [`credentialsPage`](#credentialspage)
+- `connectors/spotify/src/paging.ts`: [`readPagingObject`](#readpagingobject), [`cursorAfter`](#cursorafter), [`nextPageOffset`](#nextpageoffset), [`fetchOffsetPage`](#fetchoffsetpage), [`collectOffsetPages`](#collectoffsetpages)
+- `connectors/spotify/src/plans.ts`: [`isDestructiveStep`](#isdestructivestep), [`planItemCount`](#planitemcount), [`loadPlans`](#loadplans), [`savePlans`](#saveplans), [`createPlan`](#createplan), [`requirePlan`](#requireplan), [`storePlan`](#storeplan), [`previewOutput`](#previewoutput)
+- `connectors/spotify/src/rules.ts`: [`foldText`](#foldtext), [`matchesArtist`](#matchesartist), [`trackGenres`](#trackgenres), [`matchesGenre`](#matchesgenre), [`matchesWho`](#matcheswho), [`matchesYear`](#matchesyear), [`matchesAdded`](#matchesadded), [`matchesFilter`](#matchesfilter), [`needsGenres`](#needsgenres), [`songTitleKey`](#songtitlekey), [`songKey`](#songkey), [`preferredCopy`](#preferredcopy), [`findDuplicates`](#findduplicates), [`trackKeyValue`](#trackkeyvalue), [`sortTracks`](#sorttracks), [`groupTracks`](#grouptracks), [`artistIdsOf`](#artistidsof)
+- `connectors/spotify/src/sign-in.ts`: [`credentialsProblem`](#credentialsproblem), [`pageTargets`](#pagetargets), [`showSpotifyAuthorize`](#showspotifyauthorize), [`sealPendingApp`](#sealpendingapp), [`openPendingApp`](#openpendingapp), [`credentialsRetryPage`](#credentialsretrypage), [`beginSpotifyAuthorization`](#beginspotifyauthorization), [`submitSpotifyAuthorize`](#submitspotifyauthorize), [`fetchSpotifyIdentity`](#fetchspotifyidentity), [`expiredConnectionPage`](#expiredconnectionpage), [`spotifyFailurePage`](#spotifyfailurepage), [`connectSpotifyAccount`](#connectspotifyaccount), [`completeSpotifySignIn`](#completespotifysignin), [`resumeSpotifySignIn`](#resumespotifysignin), [`finishSpotifySignIn`](#finishspotifysignin)
+- `connectors/spotify/src/smart.ts`: [`planDraft`](#plandraft), [`trackSample`](#tracksample), [`hasCriteria`](#hascriteria), [`tracksToRemove`](#trackstoremove), [`filterLikedDraft`](#filterlikeddraft), [`likedRemoval`](#likedremoval), [`likedBefore`](#likedbefore), [`playlistBefore`](#playlistbefore), [`checkNoLocalFiles`](#checknolocalfiles), [`dedupeDraft`](#dedupedraft), [`unavailableDraft`](#unavailabledraft), [`splitGroups`](#splitgroups), [`uniqueTrackUris`](#uniquetrackuris), [`createStep`](#createstep), [`splitDraft`](#splitdraft), [`mergeDraft`](#mergedraft)
+- `connectors/spotify/src/sources.ts`: [`sourceKey`](#sourcekey), [`sourceRequest`](#sourcerequest), [`fetchPlaylistInfo`](#fetchplaylistinfo), [`isSnapshotReusable`](#issnapshotreusable), [`emptySnapshot`](#emptysnapshot), [`advanceSnapshot`](#advancesnapshot), [`sourceVersion`](#sourceversion), [`loadSource`](#loadsource), [`loadingStatus`](#loadingstatus), [`loadCompleteSource`](#loadcompletesource), [`isLoading`](#isloading), [`forgetSource`](#forgetsource)
+- `connectors/spotify/src/spotify-api.ts`: [`retryAfterSeconds`](#retryafterseconds), [`decideRetry`](#decideretry), [`retryableDecision`](#retryabledecision), [`rateLimitDecision`](#ratelimitdecision), [`spotifyRequestInit`](#spotifyrequestinit), [`sendSpotifyAttempt`](#sendspotifyattempt), [`readSpotifyBody`](#readspotifybody), [`spotifyCall`](#spotifycall)
+- `connectors/spotify/src/spotify-errors.ts`: [`spendCall`](#spendcall), [`spotifyErrorDetail`](#spotifyerrordetail), [`forbiddenMessage`](#forbiddenmessage), [`notFoundMessage`](#notfoundmessage), [`rateLimitMessage`](#ratelimitmessage), [`spotifyHttpError`](#spotifyhttperror)
+- `connectors/spotify/src/spotify-oauth.ts`: [`spotifyRedirectUri`](#spotifyredirecturi), [`spotifyAuthorizeUrl`](#spotifyauthorizeurl), [`parseSpotifyTokens`](#parsespotifytokens), [`postSpotifyToken`](#postspotifytoken), [`exchangeSpotifyCode`](#exchangespotifycode), [`refreshSpotifyToken`](#refreshspotifytoken)
+- `connectors/spotify/src/stale.ts`: [`fetchAllPlaylists`](#fetchallplaylists), [`fetchLastAdded`](#fetchlastadded), [`fillLastAdded`](#filllastadded), [`scanOwnPlaylists`](#scanownplaylists), [`stalePlaylists`](#staleplaylists)
+- `connectors/spotify/src/tool-kit.ts`: [`toTrackFilter`](#totrackfilter), [`spotifyIdOf`](#spotifyidof), [`sourceRefOf`](#sourcerefof), [`currentUserId`](#currentuserid)
+- `connectors/spotify/src/tools-account.ts`: [`revokeClaudeGrants`](#revokeclaudegrants)
+- `connectors/spotify/src/tools-backup.ts`: [`restoreSteps`](#restoresteps), [`restoreDraft`](#restoredraft)
+- `connectors/spotify/src/tools-catalog.ts`: [`searchOutput`](#searchoutput), [`artistReleases`](#artistreleases), [`nowPlayingOutput`](#nowplayingoutput)
+- `connectors/spotify/src/tools-library.ts`: [`withGenres`](#withgenres)
+- `connectors/spotify/src/tools-organize.ts`: [`copiedTracks`](#copiedtracks), [`copyLikedDraft`](#copylikeddraft), [`loadMergeSources`](#loadmergesources), [`sortDraft`](#sortdraft), [`mergePreviewDraft`](#mergepreviewdraft), [`sourcePreviewDraft`](#sourcepreviewdraft), [`staleDraft`](#staledraft)
+- `connectors/spotify/src/tools-player.ts`: [`deviceQuery`](#devicequery), [`deviceOutput`](#deviceoutput), [`playBody`](#playbody), [`playerCommandTool`](#playercommandtool)
+- `connectors/spotify/src/tools-playlists.ts`: [`playlistItemsPage`](#playlistitemspage), [`playlistDetailsBody`](#playlistdetailsbody), [`firstTrackPerQuery`](#firsttrackperquery), [`checkCoverImage`](#checkcoverimage)
+- `connectors/spotify/src/tools-smart.ts`: [`genresLoading`](#genresloading), [`readySource`](#readysource), [`previewDraft`](#previewdraft), [`previewSourceDraft`](#previewsourcedraft), [`applyOutput`](#applyoutput)
+- `connectors/spotify/src/vault.ts`: [`ownerHash`](#ownerhash), [`vaultKey`](#vaultkey), [`readVault`](#readvault), [`writeVault`](#writevault), [`deleteVault`](#deletevault), [`vaultOf`](#vaultof), [`deletePrefix`](#deleteprefix), [`eraseOwner`](#eraseowner)
+- `connectors/spotify/src/worker.ts`: [`spotifySleep`](#spotifysleep), [`createSpotifyDeps`](#createspotifydeps), [`createSpotifyServer`](#createspotifyserver), [`handleSpotifyMcp`](#handlespotifymcp), [`spotifyOwnerDeps`](#spotifyownerdeps), [`handleSpotifyDefault`](#handlespotifydefault), [`createSpotifyProvider`](#createspotifyprovider), [`handleSpotifyWorkerFetch`](#handlespotifyworkerfetch)
 - `connectors/whatsapp/src/bridge-client.ts`: [`bridgeErrorFrom`](#bridgeerrorfrom), [`withDeadline`](#withdeadline), [`bridgeTimeoutMessage`](#bridgetimeoutmessage), [`shouldRetryBridge`](#shouldretrybridge), [`attemptBridge`](#attemptbridge), [`callBridge`](#callbridge), [`bridgeJson`](#bridgejson), [`bridgePath`](#bridgepath), [`jsonPost`](#jsonpost)
 - `connectors/whatsapp/src/config.ts`: [`requireEnv`](#requireenv), [`readIntInRange`](#readintinrange), [`readSleepAfter`](#readsleepafter), [`normalizePhone`](#normalizephone), [`normalizeRecipient`](#normalizerecipient), [`readSendAllowlist`](#readsendallowlist), [`readAllowedEmails`](#readallowedemails), [`readTimingSettings`](#readtimingsettings), [`readSendSettings`](#readsendsettings), [`readWhatsAppSettings`](#readwhatsappsettings), [`containerEnvVars`](#containerenvvars)
 - `connectors/whatsapp/src/container.ts`: [`workersFixedLength`](#workersfixedlength)
@@ -99,15 +129,15 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `src/remote/github-login.ts`: [`githubAuthorizeUrl`](#githubauthorizeurl), [`parseEmailList`](#parseemaillist), [`pickAllowedEmail`](#pickallowedemail), [`exchangeGithubCode`](#exchangegithubcode), [`fetchGithubEmails`](#fetchgithubemails), [`finishGithubLogin`](#finishgithublogin), [`githubUpstreamLogin`](#githubupstreamlogin)
 - `src/remote/handler.ts`: [`jsonResponse`](#jsonresponse), [`pageSecurityPolicy`](#pagesecuritypolicy), [`htmlResponse`](#htmlresponse), [`readForm`](#readform), [`readJsonBody`](#readjsonbody), [`loginPageFor`](#loginpagefor), [`redirectWithCode`](#redirectwithcode), [`handleRegister`](#handleregister), [`redirectToUpstream`](#redirecttoupstream), [`handleAuthorizePage`](#handleauthorizepage), [`handleUpstreamCallback`](#handleupstreamcallback), [`handleAuthorizeSubmit`](#handleauthorizesubmit), [`chosenGrants`](#chosengrants), [`renewSecretQuietly`](#renewsecretquietly), [`handleToken`](#handletoken), [`handleMcp`](#handlemcp), [`serveMcpWithStreaming`](#servemcpwithstreaming), [`streamToolQuietly`](#streamtoolquietly), [`handleToolCatalog`](#handletoolcatalog), [`connectorPage`](#connectorpage), [`withCors`](#withcors), [`allowsCors`](#allowscors), [`routeRemoteRequest`](#routeremoterequest), [`createRemoteHandler`](#createremotehandler)
 - `src/remote/login-page.ts`: [`escapeHtml`](#escapehtml), [`renderLoginPage`](#renderloginpage), [`grantCheckbox`](#grantcheckbox)
-- `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse), [`toolsListRequest`](#toolslistrequest), [`serveToolCatalog`](#servetoolcatalog)
+- `src/remote/mcp-endpoint.ts`: [`serveMcpRequest`](#servemcprequest), [`mcpUnauthorizedResponse`](#mcpunauthorizedresponse), [`toolsListRequest`](#toolslistrequest), [`serveToolCatalog`](#servetoolcatalog), [`serveCommonRoute`](#servecommonroute)
 - `src/remote/node-server.ts`: [`readPublicUrl`](#readpublicurl), [`readRemoteServerConfig`](#readremoteserverconfig), [`readNodeBody`](#readnodebody), [`toWebRequest`](#towebrequest), [`writeWebResponse`](#writewebresponse), [`serveNodeRequest`](#servenoderequest), [`startRemoteHttpServer`](#startremotehttpserver)
 - `src/remote/oauth.ts`: [`readOAuthSettings`](#readoauthsettings), [`resolveIssuer`](#resolveissuer), [`oauthError`](#oautherror), [`authorizationServerMetadata`](#authorizationservermetadata), [`protectedResourceMetadata`](#protectedresourcemetadata), [`isAllowedRedirect`](#isallowedredirect), [`pkceChallenge`](#pkcechallenge), [`readRedirectUris`](#readredirecturis), [`registerClient`](#registerclient), [`clientRedirectUris`](#clientredirecturis), [`parseAuthorizeQuery`](#parseauthorizequery), [`readCodeChallenge`](#readcodechallenge)
-- `src/remote/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`copyConsentHeaders`](#copyconsentheaders), [`redirectWith`](#redirectwith), [`authorizationErrorResponse`](#authorizationerrorresponse)
+- `src/remote/pages.ts`: [`pageDocument`](#pagedocument), [`messagePage`](#messagepage), [`copyConsentHeaders`](#copyconsentheaders), [`redirectWith`](#redirectwith), [`authorizationErrorResponse`](#authorizationerrorresponse), [`readConsentForm`](#readconsentform)
 - `src/remote/rate-limit.ts`: [`isRateLimited`](#isratelimited), [`rateLimitedResponse`](#ratelimitedresponse)
 - `src/remote/seal.ts`: [`parseSealKey`](#parsesealkey), [`sealPayload`](#sealpayload), [`unsealPayload`](#unsealpayload), [`openSealed`](#opensealed), [`audienceMatches`](#audiencematches)
 - `src/remote/streamed-tool.ts`: [`asJsonObject`](#asjsonobject), [`parseToolCallRequest`](#parsetoolcallrequest), [`readToolCallRequest`](#readtoolcallrequest), [`streamedResultFrame`](#streamedresultframe), [`streamedToolResponse`](#streamedtoolresponse)
 - `src/remote/tokens.ts`: [`grantFromClaims`](#grantfromclaims), [`sealAuthorizeRequest`](#sealauthorizerequest), [`openAuthorizeRequest`](#openauthorizerequest), [`issueAuthorizationCode`](#issueauthorizationcode), [`issueTokenSet`](#issuetokenset), [`redeemAuthorizationCode`](#redeemauthorizationcode), [`redeemRefreshToken`](#redeemrefreshtoken), [`redeemTokenRequest`](#redeemtokenrequest), [`readAccessGrant`](#readaccessgrant)
-- `src/remote/worker-kit.ts`: [`randomToken`](#randomtoken), [`sha256Hex`](#sha256hex), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`configErrorResponse`](#configerrorresponse), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath)
+- `src/remote/worker-kit.ts`: [`randomToken`](#randomtoken), [`sha256Hex`](#sha256hex), [`requiredSecret`](#requiredsecret), [`readConsentSecret`](#readconsentsecret), [`configErrorResponse`](#configerrorresponse), [`checkClientRegistration`](#checkclientregistration), [`publicOrigin`](#publicorigin), [`clientIpKey`](#clientipkey), [`isMcpPath`](#ismcppath), [`oauthErrorCode`](#oautherrorcode), [`buildOrConfigError`](#buildorconfigerror)
 - `tools/bundle/bundle.ts`: [`listConnectors`](#listconnectors), [`isRemoteMcpUrl`](#isremotemcpurl), [`mcpServerProblems`](#mcpserverproblems), [`pluginMcpProblems`](#pluginmcpproblems), [`bundleOptions`](#bundleoptions)
 - `tools/bundle/cli.ts`: [`buildPlanSkill`](#buildplanskill), [`buildConnector`](#buildconnector), [`runBuildCli`](#runbuildcli)
 - `tools/bundle/plan-skill.ts`: [`hasPlanSkill`](#hasplanskill), [`planCliBundleOptions`](#planclibundleoptions), [`planRuntimeBundleOptions`](#planruntimebundleoptions), [`inlinePlanRuntime`](#inlineplanruntime), [`buildPlanTemplate`](#buildplantemplate)
@@ -2251,8 +2281,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/env.ts`
 - **Signature:** `envValue(env: EnvVars, key: string): string | null`
-- **Used by:** `containerEnvVars()`, `publicOrigin()`, `readAllowedEmails()`, `readCanvasRemoteSettings()`, `readGmailSettings()`, `readIntInRange()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `readSendAllowlist()`, `readSendSettings()`, `readSleepAfter()`, `readWhatsAppSettings()`, `requiredSecret()`, `requireEnv()`, `resolveIssuer()`
-- **Processes:** P08, P10, P12, P13, P17, P19
+- **Used by:** `containerEnvVars()`, `publicOrigin()`, `readAllowedEmails()`, `readCanvasRemoteSettings()`, `readGmailSettings()`, `readIntInRange()`, `readOAuthSettings()`, `readPublicUrl()`, `readRemoteServerConfig()`, `readSendAllowlist()`, `readSendSettings()`, `readSleepAfter()`, `readSpotifySettings()`, `readWhatsAppSettings()`, `requiredSecret()`, `requireEnv()`, `resolveIssuer()`
+- **Processes:** P08, P10, P12, P13, P17, P19, P22
 
 <!-- generated:end -->
 
@@ -2285,8 +2315,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/env.ts`
 - **Signature:** `toEnvVars(env: Readonly<Record<string, unknown>>): EnvVars`
-- **Used by:** `connectors/whatsapp/src/container.ts (module)`, `createGmailDeps()`, `handleWhatsAppFetch()`, `handleWorkerFetch()`, `publicOrigin()`, `runScheduledSync()`
-- **Processes:** P08, P10, P12, P13, P17, P19
+- **Used by:** `connectors/whatsapp/src/container.ts (module)`, `createGmailDeps()`, `createSpotifyDeps()`, `handleWhatsAppFetch()`, `handleWorkerFetch()`, `publicOrigin()`, `runScheduledSync()`
+- **Processes:** P08, P10, P12, P13, P17, P19, P22
 
 <!-- generated:end -->
 
@@ -2510,8 +2540,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/core/http.ts`
 - **Signature:** `buildUrl(base: string, path: string, params: QueryParams = {}): URL`
-- **Used by:** `sendCanvasRequest()`
-- **Processes:** P03, P08, P09
+- **Used by:** `sendCanvasRequest()`, `sendSpotifyAttempt()`
+- **Processes:** P03, P08, P09, P22, P23
 
 <!-- generated:end -->
 
@@ -2546,7 +2576,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `defineTool(def: ToolDefinition<C, S>): ToolSpec<C>`
-- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`, `connectors/canvas-puc/src/tools-read.ts (module)`, `connectors/canvas-puc/src/tools-write.ts (module)`, `connectors/gmail/src/draft-tools.ts (module)`, `connectors/gmail/src/mailbox-tools.ts (module)`, `connectors/gmail/src/send-tools.ts (module)`, `connectors/gmail/src/tools.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `replyTool()`
+- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`, `connectors/canvas-puc/src/tools-read.ts (module)`, `connectors/canvas-puc/src/tools-write.ts (module)`, `connectors/gmail/src/draft-tools.ts (module)`, `connectors/gmail/src/mailbox-tools.ts (module)`, `connectors/gmail/src/send-tools.ts (module)`, `connectors/gmail/src/tools.ts (module)`, `connectors/spotify/src/tools-account.ts (module)`, `connectors/spotify/src/tools-backup.ts (module)`, `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-library.ts (module)`, `connectors/spotify/src/tools-organize.ts (module)`, `connectors/spotify/src/tools-player.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`, `connectors/spotify/src/tools-smart.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `playerCommandTool()`, `replyTool()`
 - **Processes:** P03
 
 <!-- generated:end -->
@@ -2564,7 +2594,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `textResult(data: unknown, notes: readonly string[] = []): CallToolResult`
 - **Used by:** `connectors/canvas-puc/src/tools-read.ts (module)`, `listFilesWithLinked()`, `toToolResult()`, `withCheckedAt()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19, P22
 
 <!-- generated:end -->
 
@@ -2581,7 +2611,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `errorResult(error: unknown): CallToolResult`
 - **Used by:** `runToolSafely()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19, P22
 
 <!-- generated:end -->
 
@@ -2598,7 +2628,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `async runToolSafely(spec: ToolSpec<C>, ctx: C, rawArgs: unknown): Promise<CallToolResult>`
 - **Used by:** `registerToolSpecs()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19, P22
 
 <!-- generated:end -->
 
@@ -2614,8 +2644,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `registerToolSpecs(server: McpServer, specs: readonly ToolSpec<C>[], ctx: C): void`
-- **Used by:** `createCanvasMcpServer()`, `createGmailServer()`, `createWhatsAppCatalogServer()`, `createWhatsAppMcpServer()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
+- **Used by:** `createCanvasMcpServer()`, `createGmailServer()`, `createSpotifyServer()`, `createWhatsAppCatalogServer()`, `createWhatsAppMcpServer()`
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19, P22
 
 <!-- generated:end -->
 
@@ -2649,7 +2679,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tools.ts`
 - **Signature:** `toToolResult(data: unknown): CallToolResult`
 - **Used by:** `runToolSafely()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P19, P22
 
 <!-- generated:end -->
 
@@ -3045,8 +3075,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/handler.ts`
 - **Signature:** `htmlResponse(html: string, status = 200, formTarget: string | null = null): Response`
-- **Used by:** `consentPage()`, `expiredWriteAccessPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `linkConfirmPage()`, `loginPageFor()`, `messagePage()`, `pairPage()`, `routePairRequest()`, `showWriteAccess()`, `submitWriteAccess()`
-- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19
+- **Used by:** `consentPage()`, `credentialsPage()`, `expiredWriteAccessPage()`, `handleAuthorizePage()`, `handleAuthorizeSubmit()`, `handlePairCallback()`, `handlePairPost()`, `handleUpstreamCallback()`, `linkConfirmPage()`, `loginPageFor()`, `messagePage()`, `pairPage()`, `routePairRequest()`, `showWriteAccess()`, `submitWriteAccess()`
+- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19, P21, P22
 
 <!-- generated:end -->
 
@@ -3062,8 +3092,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/handler.ts`
 - **Signature:** `async readForm(request: Request): Promise<URLSearchParams>`
-- **Used by:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`, `redeemConfirmedTicket()`, `submitAuthorize()`, `submitWriteAccess()`
-- **Processes:** P03, P08, P09, P10, P11, P13, P15
+- **Used by:** `handleAuthorizeSubmit()`, `handlePairPost()`, `handleToken()`, `readConsentForm()`, `redeemConfirmedTicket()`, `submitWriteAccess()`
+- **Processes:** P03, P08, P09, P10, P11, P13, P15, P21
 
 <!-- generated:end -->
 
@@ -3267,7 +3297,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/handler.ts`
 - **Signature:** `pageSecurityPolicy(formTarget: string | null): string`
 - **Used by:** `htmlResponse()`
-- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19
+- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19, P21, P22
 
 <!-- generated:end -->
 
@@ -3438,8 +3468,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/login-page.ts`
 - **Signature:** `escapeHtml(value: string): string`
-- **Used by:** `alertHtml()`, `consentPageBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`, `renderWriteAccessPage()`
-- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19
+- **Used by:** `alertHtml()`, `appSetupSteps()`, `consentPageBody()`, `credentialsBody()`, `grantCheckbox()`, `handlePairCallback()`, `handleUpstreamCallback()`, `linkConfirmBody()`, `messagePage()`, `pageDocument()`, `pairForm()`, `pairingSection()`, `renderLoginPage()`, `renderPairPage()`, `renderWriteAccessPage()`
+- **Processes:** P03, P08, P09, P10, P11, P13, P15, P19, P21, P22
 
 <!-- generated:end -->
 
@@ -3491,8 +3521,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/mcp-endpoint.ts`
 - **Signature:** `async serveMcpRequest(server: McpServer, request: Request): Promise<Response>`
-- **Used by:** `handleMcpApi()`, `serveMcpWithStreaming()`, `serveToolCatalog()`
-- **Processes:** P09, P10, P12, P14, P19
+- **Used by:** `handleMcpApi()`, `handleSpotifyMcp()`, `serveMcpWithStreaming()`, `serveToolCatalog()`
+- **Processes:** P09, P10, P12, P14, P19, P22
 
 <!-- generated:end -->
 
@@ -3526,7 +3556,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/mcp-endpoint.ts`
 - **Signature:** `toolsListRequest(origin: string): Request`
 - **Used by:** `serveToolCatalog()`
-- **Processes:** P10, P19
+- **Processes:** P10, P19, P22
 
 <!-- generated:end -->
 
@@ -3542,8 +3572,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/mcp-endpoint.ts`
 - **Signature:** `serveToolCatalog(server: McpServer, origin: string): Promise<Response>`
-- **Used by:** `handleDefaultRequest()`, `handleToolCatalog()`
-- **Processes:** P10, P19
+- **Used by:** `handleToolCatalog()`, `serveCommonRoute()`
+- **Processes:** P10, P19, P22
 
 <!-- generated:end -->
 
@@ -3552,6 +3582,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `Response` with the JSON-RPC `tools/list` result.
 - **Effects:** Like `serveMcpRequest()`: connects and closes the server in process.
 - **Errors:** None (failures become MCP responses).
+
+### `serveCommonRoute`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/mcp-endpoint.ts`
+- **Signature:** `serveCommonRoute(request: Request, catalogServer: () => McpServer): Promise<Response> | null`
+- **Used by:** `handleDefaultRequest()`, `handleSpotifyDefault()`
+- **Processes:** P10, P19, P22
+
+<!-- generated:end -->
+
+- **Does:** Serves the public routes every Worker connector shares: `GET /` (health) and `GET /tools` (catalog); null otherwise.
+- **Input:** `request`: the incoming request; `catalogServer`: builds a list-only MCP server for the catalog.
+- **Output:** `ok` for `/`, the tool catalog for `/tools`, or null for every other route or method.
+- **Effects:** None (the catalog server is created and closed per request).
+- **Errors:** None.
 
 ## `src/remote/node-server.ts`
 
@@ -3734,7 +3781,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/oauth.ts`
 - **Signature:** `isAllowedRedirect(uri: string, hosts: readonly string[]): boolean`
 - **Used by:** `checkClientRegistration()`, `registerClient()`
-- **Processes:** P08, P10
+- **Processes:** P08, P10, P21, P22
 
 <!-- generated:end -->
 
@@ -3768,7 +3815,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/oauth.ts`
 - **Signature:** `readRedirectUris(body: unknown): string[] | null`
 - **Used by:** `checkClientRegistration()`, `clientRedirectUris()`, `registerClient()`
-- **Processes:** P08, P10, P13
+- **Processes:** P08, P10, P13, P21, P22
 
 <!-- generated:end -->
 
@@ -3888,8 +3935,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/seal.ts`
 - **Signature:** `parseSealKey(raw: string | null, name = 'SEAL_KEY'): Buffer`
-- **Used by:** `readGmailSettings()`, `readOAuthSettings()`
-- **Processes:** P08, P10, P12, P13, P19
+- **Used by:** `readGmailSettings()`, `readOAuthSettings()`, `readSpotifySettings()`
+- **Processes:** P08, P10, P12, P13, P19, P22
 
 <!-- generated:end -->
 
@@ -3905,8 +3952,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/seal.ts`
 - **Signature:** `sealPayload(payload: unknown, key: Buffer): string`
-- **Used by:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `showLinkConfirmation()`, `startPairLogin()`, `storeLinkRequest()`, `writeAccessUrl()`
-- **Processes:** P03, P08, P09, P10, P11, P12, P13, P15, P18
+- **Used by:** `issueAuthorizationCode()`, `issueLinkUrl()`, `issuePairCsrf()`, `issueTokenSet()`, `openPairSession()`, `registerClient()`, `sealAuthorizeRequest()`, `sealOwnerAccounts()`, `sealPendingApp()`, `showLinkConfirmation()`, `startPairLogin()`, `storeLinkRequest()`, `writeAccessUrl()`, `writeVault()`
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P15, P18, P21, P22, P23, P24
 
 <!-- generated:end -->
 
@@ -3923,7 +3970,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/seal.ts`
 - **Signature:** `unsealPayload(sealed: string, key: Buffer): Record<string, unknown> | null`
 - **Used by:** `openSealed()`
-- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18, P21, P22, P23, P24
 
 <!-- generated:end -->
 
@@ -3939,8 +3986,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/seal.ts`
 - **Signature:** `openSealed(sealed: string, key: Buffer, expected: SealExpectation): SealedClaims | null`
-- **Used by:** `clientRedirectUris()`, `isConfirmedInThisBrowser()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openLinkTicket()`, `openOwnerAccounts()`, `openWriteTicket()`, `readAccessGrant()`, `readPairSession()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `takeLinkRequest()`
-- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18
+- **Used by:** `clientRedirectUris()`, `isConfirmedInThisBrowser()`, `isTrustedPost()`, `isValidPairLogin()`, `openAuthorizeRequest()`, `openLinkTicket()`, `openOwnerAccounts()`, `openPendingApp()`, `openWriteTicket()`, `readAccessGrant()`, `readPairSession()`, `readVault()`, `redeemAuthorizationCode()`, `redeemRefreshToken()`, `takeLinkRequest()`
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18, P21, P22, P23, P24
 
 <!-- generated:end -->
 
@@ -3957,7 +4004,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/remote/seal.ts`
 - **Signature:** `audienceMatches(claims: Readonly<Record<string, unknown>>, expected: SealExpectation): boolean`
 - **Used by:** `openSealed()`
-- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P15, P18, P21, P22, P23, P24
 
 <!-- generated:end -->
 
@@ -5457,23 +5504,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** Throws `GoogleTokenError` (`invalid_response`) if the access token is missing.
 
-### `googleErrorCode`
-
-<!-- generated:start -->
-
-- **File:** `connectors/gmail/src/google-oauth.ts`
-- **Signature:** `async googleErrorCode(response: Response): Promise<string>`
-- **Used by:** `postGoogleToken()`
-- **Processes:** P10, P11, P12, P18
-
-<!-- generated:end -->
-
-- **Does:** Extracts the OAuth error code from a Google failure response.
-- **Input:** `response`: failed HTTP response.
-- **Output:** The body's `error` field; `http_<status>` if the body is not JSON or has no `error`.
-- **Effects:** Consumes the response body.
-- **Errors:** None.
-
 ### `postGoogleToken`
 
 <!-- generated:start -->
@@ -6416,8 +6446,6 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** HTML `Response` 200.
 - **Effects:** None.
 - **Errors:** None.
-
-## `connectors/gmail/src/rate-limit.ts`
 
 ## `connectors/gmail/src/search.ts`
 
@@ -10528,7 +10556,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/annotations.ts`
 - **Signature:** `toolAnnotations(title: string, hints: ToolHints): RequiredToolAnnotations`
-- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`, `connectors/canvas-puc/src/tools-read.ts (module)`, `connectors/canvas-puc/src/tools-write.ts (module)`, `connectors/gmail/src/draft-tools.ts (module)`, `connectors/gmail/src/mailbox-tools.ts (module)`, `connectors/gmail/src/send-tools.ts (module)`, `connectors/gmail/src/tools.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `replyTool()`
+- **Used by:** `connectors/canvas-puc/src/tools-inbox.ts (module)`, `connectors/canvas-puc/src/tools-read.ts (module)`, `connectors/canvas-puc/src/tools-write.ts (module)`, `connectors/gmail/src/draft-tools.ts (module)`, `connectors/gmail/src/mailbox-tools.ts (module)`, `connectors/gmail/src/send-tools.ts (module)`, `connectors/gmail/src/tools.ts (module)`, `connectors/spotify/src/tools-account.ts (module)`, `connectors/spotify/src/tools-backup.ts (module)`, `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-library.ts (module)`, `connectors/spotify/src/tools-organize.ts (module)`, `connectors/spotify/src/tools-player.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`, `connectors/spotify/src/tools-smart.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`, `playerCommandTool()`, `replyTool()`
 - **Processes:** P03, P18
 
 <!-- generated:end -->
@@ -10547,7 +10575,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/server-version.ts`
 - **Signature:** `manifestVersion(manifest: unknown): string`
-- **Used by:** `connectors/canvas-puc/src/tools.ts (module)`, `connectors/gmail/src/worker.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`
+- **Used by:** `connectors/canvas-puc/src/tools.ts (module)`, `connectors/gmail/src/worker.ts (module)`, `connectors/spotify/src/worker.ts (module)`, `connectors/whatsapp/src/tools.ts (module)`
 - **Processes:** P03
 
 <!-- generated:end -->
@@ -10670,8 +10698,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/streamed-tool.ts`
 - **Signature:** `asJsonObject(value: unknown): Record<string, unknown> | null`
-- **Used by:** `parseToolCallRequest()`
-- **Processes:** P09, P14
+- **Used by:** `catalogExtras()`, `catalogItemOutput()`, `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-library.ts (module)`, `connectors/spotify/src/tools-player.ts (module)`, `cursorAfter()`, `deviceOutput()`, `isLoading()`, `nowPlayingOutput()`, `parseAddedTrack()`, `parseArtistRefs()`, `parsePlaylist()`, `parseToolCallRequest()`, `parseTrack()`, `playlistTotal()`, `readPagingObject()`, `trackAlbum()`
+- **Processes:** P09, P14, P22, P23
 
 <!-- generated:end -->
 
@@ -11671,7 +11699,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/core/redact.ts`
 - **Signature:** `redactSecrets(text: string): string`
 - **Used by:** `errorResult()`, `handleUpstreamCallback()`, `loginPageFor()`, `messagePage()`, `redactForLog()`
-- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P16, P19
+- **Processes:** P03, P08, P09, P10, P11, P12, P13, P14, P16, P19, P21, P22
 
 <!-- generated:end -->
 
@@ -11705,7 +11733,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/core/redact.ts`
 - **Signature:** `errorMessage(error: unknown): string`
 - **Used by:** `attachmentUploadError()`, `conversationFolderId()`, `errorResult()`, `fetchAttachmentFile()`, `handleAuthorizeSubmit()`, `handleUpstreamCallback()`, `logWarning()`, `sweepPeerReviews()`
-- **Processes:** P03, P08, P09, P10, P12, P13, P14, P16, P19
+- **Processes:** P03, P08, P09, P10, P12, P13, P14, P16, P19, P22
 
 <!-- generated:end -->
 
@@ -12259,7 +12287,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **File:** `src/mcp/tool-gate.ts`
 - **Signature:** `refuseListOnlyUse(): never`
 - **Used by:** `listOnlyContext()`
-- **Processes:** P03, P08, P09, P10, P13, P19
+- **Processes:** P03, P08, P09, P10, P13, P19, P22
 
 <!-- generated:end -->
 
@@ -12275,8 +12303,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/mcp/tool-gate.ts`
 - **Signature:** `listOnlyContext(): never`
-- **Used by:** `canvasRemoteConnector()`, `createWhatsAppCatalogServer()`, `handleDefaultRequest()`
-- **Processes:** P03, P08, P09, P10, P13, P19
+- **Used by:** `canvasRemoteConnector()`, `createWhatsAppCatalogServer()`, `handleDefaultRequest()`, `handleSpotifyDefault()`
+- **Processes:** P03, P08, P09, P10, P13, P19, P22
 
 <!-- generated:end -->
 
@@ -15281,8 +15309,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/pages.ts`
 - **Signature:** `pageDocument(title: string, body: string): string`
-- **Used by:** `consentPage()`, `linkConfirmPage()`, `messagePage()`
-- **Processes:** P10, P11, P19
+- **Used by:** `consentPage()`, `credentialsPage()`, `linkConfirmPage()`, `messagePage()`
+- **Processes:** P10, P11, P19, P21, P22
 
 <!-- generated:end -->
 
@@ -15298,8 +15326,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/pages.ts`
 - **Signature:** `messagePage(title: string, message: string, status = 200): Response`
-- **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `finishAccountLink()`, `handleDefaultRequest()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`, `notOwnerPage()`, `verifyOwnerThenLink()`
-- **Processes:** P10, P11, P19
+- **Used by:** `accessDeniedPage()`, `authorizationErrorResponse()`, `expiredConnectionPage()`, `finishAccountLink()`, `handleDefaultRequest()`, `handleSpotifyDefault()`, `invalidTicketPage()`, `linkFromCode()`, `linkSafely()`, `notOwnerPage()`, `spotifyFailurePage()`, `verifyOwnerThenLink()`
+- **Processes:** P10, P11, P19, P21, P22
 
 <!-- generated:end -->
 
@@ -15315,8 +15343,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/pages.ts`
 - **Signature:** `copyConsentHeaders(response: Response, headers: Headers): Response`
-- **Used by:** `consentPage()`
-- **Processes:** P10
+- **Used by:** `consentPage()`, `credentialsPage()`
+- **Processes:** P10, P21
 
 <!-- generated:end -->
 
@@ -15332,8 +15360,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/pages.ts`
 - **Signature:** `redirectWith(location: string, headers: Headers = new Headers()): Response`
-- **Used by:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `beginLinkStage()`, `finishSignIn()`, `submitAuthorize()`
-- **Processes:** P10, P11
+- **Used by:** `authorizationErrorResponse()`, `beginGoogleSignIn()`, `beginLinkStage()`, `beginSpotifyAuthorization()`, `finishSignIn()`, `readConsentForm()`, `resumeSpotifySignIn()`
+- **Processes:** P10, P11, P21
 
 <!-- generated:end -->
 
@@ -15349,8 +15377,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/pages.ts`
 - **Signature:** `authorizationErrorResponse(error: unknown): Response`
-- **Used by:** `finishSignIn()`, `showAuthorize()`, `submitAuthorize()`
-- **Processes:** P10
+- **Used by:** `finishSignIn()`, `showAuthorize()`, `showSpotifyAuthorize()`, `spotifyFailurePage()`, `submitAuthorize()`, `submitSpotifyAuthorize()`
+- **Processes:** P10, P21
 
 <!-- generated:end -->
 
@@ -15360,6 +15388,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** None.
 
+### `readConsentForm`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/pages.ts`
+- **Signature:** `async readConsentForm(oauth: OAuthHelpers, request: Request): Promise<ConsentForm>`
+- **Used by:** `submitAuthorize()`, `submitSpotifyAuthorize()`
+- **Processes:** P10, P21
+
+<!-- generated:end -->
+
+- **Does:** Reads a consent form; anything but `decision=approve` denies the consent and redirects back to the client.
+- **Input:** `oauth`: the OAuth library helpers; `request`: the posted form (read from a clone).
+- **Output:** `ConsentForm`: fields, handle and `denied` (the redirect back) or null when approved.
+- **Effects:** Reads the request body; on denial, the OAuth library's consent state (cookie, KV).
+- **Errors:** Throws the library's `AuthorizationError` when the handle is missing, unbound, expired or used.
+
 ## `src/remote/rate-limit.ts`
 
 ### `isRateLimited`
@@ -15368,8 +15413,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/rate-limit.ts`
 - **Signature:** `async isRateLimited(limiter: RateLimiter | undefined, key: string): Promise<boolean>`
-- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`
-- **Processes:** P10, P12
+- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyMcp()`, `handleSpotifyWorkerFetch()`
+- **Processes:** P10, P12, P22
 
 <!-- generated:end -->
 
@@ -15385,8 +15430,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/rate-limit.ts`
 - **Signature:** `rateLimitedResponse(): Response`
-- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`
-- **Processes:** P10, P12
+- **Used by:** `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyMcp()`, `handleSpotifyWorkerFetch()`
+- **Processes:** P10, P12, P22
 
 <!-- generated:end -->
 
@@ -15404,8 +15449,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/worker-kit.ts`
 - **Signature:** `randomToken(bytes = 32): string`
-- **Used by:** `beginGoogleSignIn()`, `beginLinkStage()`, `completeSignIn()`, `issueLinkUrl()`, `mimeBoundary()`, `showLinkConfirmation()`, `storeLinkRequest()`
-- **Processes:** P10, P11, P18
+- **Used by:** `beginGoogleSignIn()`, `beginLinkStage()`, `completeSignIn()`, `completeSpotifySignIn()`, `createPlan()`, `issueLinkUrl()`, `mimeBoundary()`, `saveBackup()`, `showLinkConfirmation()`, `storeLinkRequest()`
+- **Processes:** P10, P11, P18, P21, P23, P24
 
 <!-- generated:end -->
 
@@ -15421,8 +15466,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/worker-kit.ts`
 - **Signature:** `sha256Hex(text: string): string`
-- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerKey()`, `showLinkConfirmation()`, `storeLinkRequest()`, `takeLinkRequest()`, `usedTicketKey()`
-- **Processes:** P10, P11, P12, P18
+- **Used by:** `isConfirmedInThisBrowser()`, `linkRequestKey()`, `ownerHash()`, `ownerKey()`, `showLinkConfirmation()`, `storeLinkRequest()`, `takeLinkRequest()`, `usedTicketKey()`
+- **Processes:** P10, P11, P12, P18, P21, P22, P23, P24, P25
 
 <!-- generated:end -->
 
@@ -15472,8 +15517,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/worker-kit.ts`
 - **Signature:** `configErrorResponse(error: unknown): Response`
-- **Used by:** `handleDefaultRequest()`, `handleMcpApi()`
-- **Processes:** P10, P12, P19
+- **Used by:** `buildOrConfigError()`
+- **Processes:** P10, P12, P19, P22
 
 <!-- generated:end -->
 
@@ -15489,8 +15534,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/worker-kit.ts`
 - **Signature:** `checkClientRegistration(options: ClientRegistrationCallbackOptions): ClientRegistrationCallbackResult | undefined`
-- **Used by:** `createGmailProvider()`
-- **Processes:** P10
+- **Used by:** `createGmailProvider()`, `createSpotifyProvider()`
+- **Processes:** P10, P21, P22
 
 <!-- generated:end -->
 
@@ -15506,8 +15551,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/worker-kit.ts`
 - **Signature:** `publicOrigin(env: Readonly<Record<string, unknown>>, request: Request): string`
-- **Used by:** `handleDefaultRequest()`, `handleGmailWorkerFetch()`, `handleMcpApi()`
-- **Processes:** P10, P12, P19
+- **Used by:** `handleDefaultRequest()`, `handleGmailWorkerFetch()`, `handleMcpApi()`, `handleSpotifyDefault()`, `handleSpotifyWorkerFetch()`, `spotifyOwnerDeps()`
+- **Processes:** P10, P12, P19, P22
 
 <!-- generated:end -->
 
@@ -15523,8 +15568,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/worker-kit.ts`
 - **Signature:** `clientIpKey(request: Request): string`
-- **Used by:** `handleGmailWorkerFetch()`
-- **Processes:** P10
+- **Used by:** `handleGmailWorkerFetch()`, `handleSpotifyWorkerFetch()`
+- **Processes:** P10, P22
 
 <!-- generated:end -->
 
@@ -15540,8 +15585,8 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `src/remote/worker-kit.ts`
 - **Signature:** `isMcpPath(request: Request): boolean`
-- **Used by:** `handleGmailWorkerFetch()`
-- **Processes:** P10
+- **Used by:** `handleGmailWorkerFetch()`, `handleSpotifyWorkerFetch()`
+- **Processes:** P10, P22
 
 <!-- generated:end -->
 
@@ -15551,244 +15596,4109 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** None.
 
+### `oauthErrorCode`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `async oauthErrorCode(response: Response): Promise<string>`
+- **Used by:** `postGoogleToken()`, `postSpotifyToken()`
+- **Processes:** P10, P11, P12, P18, P21, P22, P23
+
+<!-- generated:end -->
+
+- **Does:** OAuth error code of a failed token-endpoint response (`error` field), or `http_<status>`.
+- **Input:** `response`: the failed token-endpoint response.
+- **Output:** The `error` text, or `http_<status>` when the body is not JSON or has no `error`.
+- **Effects:** Reads the response body.
+- **Errors:** None (a non-JSON body falls back to the status).
+
+### `buildOrConfigError`
+
+<!-- generated:start -->
+
+- **File:** `src/remote/worker-kit.ts`
+- **Signature:** `buildOrConfigError(build: () => T): T | Response`
+- **Used by:** `handleDefaultRequest()`, `handleMcpApi()`, `handleSpotifyDefault()`, `handleSpotifyMcp()`
+- **Processes:** P10, P12, P19, P22
+
+<!-- generated:end -->
+
+- **Does:** Runs a dependency builder; an invalid configuration becomes the 500 page instead of an exception.
+- **Input:** `build`: function that builds the dependencies (may throw on missing secrets).
+- **Output:** The built value, or the `configErrorResponse()` 500 response.
+- **Effects:** None (pure apart from what `build` does).
+- **Errors:** None (the builder's error becomes the response).
+
+## `connectors/spotify/src/access-token.ts`
+
+### `forgetSpotifyAccessToken`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `forgetSpotifyAccessToken(owner: string): void`
+- **Used by:** `connectors/spotify/src/tools-account.ts (module)`, `connectSpotifyAccount()`, `spotifyCall()`
+- **Processes:** P21, P22, P23, P25
+
+<!-- generated:end -->
+
+- **Does:** Forgets the user's cached access token (after a 401, a new connection or a disconnect).
+- **Input:** `owner`: `string`.
+- **Output:** Nothing.
+- **Effects:** Reads/updates the isolate's access-token cache.
+- **Errors:** None.
+
+### `clearSpotifyTokenCache`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `clearSpotifyTokenCache(): void`
+- **Used by:** —
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Forgets every cached access token.
+- **Input:** None.
+- **Output:** Nothing.
+- **Effects:** Reads/updates the isolate's access-token cache.
+- **Errors:** None.
+
+### `notConnectedError`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `notConnectedError(): Error`
+- **Used by:** `requireAccount()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Error for a user with no connected account.
+- **Input:** None.
+- **Output:** `Error`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `reconnectError`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `reconnectError(code: string): Error`
+- **Used by:** `renewSpotifyAccessToken()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Error for an authorization Spotify no longer accepts (expired after 6 months, revoked or app changed).
+- **Input:** `code`: `string`.
+- **Output:** `Error`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `requireAccount`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `async requireAccount(deps: OwnerDeps): Promise<SpotifyAccount>`
+- **Used by:** `connectors/spotify/src/tools-account.ts (module)`, `currentUserId()`, `renewSpotifyAccessToken()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Loads the user's account or throws the not-connected error.
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<SpotifyAccount>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** Throws the not-connected error (asks the user to reconnect) when the user has no stored account.
+
+### `renewSpotifyAccessToken`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `async renewSpotifyAccessToken(deps: OwnerDeps): Promise<string>`
+- **Used by:** `getSpotifyAccessToken()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Refreshes the access token, saving a rotated refresh token; terminal token errors become reconnect errors.
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<string>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault).
+- **Errors:** Throws the reconnect error on `invalid_grant`/`invalid_client`/`unauthorized_client` (expired after 6 months, revoked or app changed); other `SpotifyTokenError`s and network errors propagate; `BudgetExhaustedError` when the budget is used up; the not-connected error without an account.
+
+### `isTerminalTokenError`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `isTerminalTokenError(code: string): boolean`
+- **Used by:** `renewSpotifyAccessToken()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether a token error code means the stored authorization can never work again.
+- **Input:** `code`: `string`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `getSpotifyAccessToken`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `async getSpotifyAccessToken(deps: OwnerDeps): Promise<string>`
+- **Used by:** `sendSpotifyAttempt()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** A valid access token for the user: from memory, or refreshed.
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<string>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+## `connectors/spotify/src/account-store.ts`
+
+### `toSpotifyAccount`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/account-store.ts`
+- **Signature:** `toSpotifyAccount(value: unknown): SpotifyAccount | null`
+- **Used by:** `loadAccount()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Validates a stored account (all fields present); null otherwise.
+- **Input:** `value`: `unknown`.
+- **Output:** `SpotifyAccount | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `loadAccount`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/account-store.ts`
+- **Signature:** `async loadAccount(deps: VaultDeps, owner: string): Promise<SpotifyAccount | null>`
+- **Used by:** `requireAccount()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Reads the user's account; null when they never connected or disconnected.
+- **Input:** `deps`: `VaultDeps`; `owner`: `string`.
+- **Output:** `Promise<SpotifyAccount | null>` (null as the JSDoc says).
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `saveAccount`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/account-store.ts`
+- **Signature:** `async saveAccount(deps: VaultDeps, owner: string, account: SpotifyAccount): Promise<void>`
+- **Used by:** `connectSpotifyAccount()`, `renewSpotifyAccessToken()`
+- **Processes:** P21, P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Stores (or replaces) the user's account.
+- **Input:** `deps`: `VaultDeps`; `owner`: `string`; `account`: `SpotifyAccount`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `deleteAccount`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/account-store.ts`
+- **Signature:** `async deleteAccount(deps: VaultDeps, owner: string): Promise<void>`
+- **Used by:** —
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Deletes the user's account record.
+- **Input:** `deps`: `VaultDeps`; `owner`: `string`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `refreshExpiryIso`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/account-store.ts`
+- **Signature:** `refreshExpiryIso(account: SpotifyAccount): string`
+- **Used by:** `connectors/spotify/src/tools-account.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Estimated instant (ISO 8601) the refresh token stops working.
+- **Input:** `account`: `SpotifyAccount`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `maskCredential`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/account-store.ts`
+- **Signature:** `maskCredential(text: string): string`
+- **Used by:** `connectors/spotify/src/tools-account.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Masks a credential for display: only the first 4 characters.
+- **Input:** `text`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/apply.ts`
+
+### `advancePlan`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `advancePlan(plan: Plan, count: number): Plan`
+- **Used by:** `reconcilePlan()`, `runAddChunk()`, `runCreateChunk()`, `runPlanChunk()`, `runReplaceChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Moves the plan's progress by `count` items, going to the next step when the current one is done.
+- **Input:** `plan`: `Plan`; `count`: `number`.
+- **Output:** `Plan`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `playlistItemCount`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async playlistItemCount(deps: OwnerDeps, playlistId: string): Promise<number>`
+- **Used by:** `reconcilePlan()`, `runAddChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Number of items now in a playlist (one request).
+- **Input:** `deps`: `OwnerDeps`; `playlistId`: `string`.
+- **Output:** `Promise<number>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `addPlaylistUris`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async addPlaylistUris(deps: OwnerDeps, playlistId: string, uris: readonly string[]): Promise<void>`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`, `runAddChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Appends items to a playlist (one request, ≤ `PLAYLIST_BATCH`).
+- **Input:** `deps`: `OwnerDeps`; `playlistId`: `string`; `uris`: `readonly string[]`.
+- **Output:** Nothing.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `createUserPlaylist`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async createUserPlaylist(deps: OwnerDeps, details: { readonly name: string; readonly description: string; readonly isPublic: boolean }): Promise<string>`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`, `runCreateChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Creates a playlist for the current user and returns its id.
+- **Input:** `deps`: `OwnerDeps`; `details`: `{ readonly name: string; readonly description: string; readonly isPublic: boolean }`.
+- **Output:** `Promise<string>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `Error` "Spotify did not return the new playlist id."; `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `currentStep`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `currentStep(plan: Plan): PlanStep`
+- **Used by:** `runAddChunk()`, `runPlanChunk()`, `runReplaceChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** The step the plan is at (throws when the plan already finished).
+- **Input:** `plan`: `Plan`.
+- **Output:** `PlanStep`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "The plan has no step left to run.".
+
+### `currentChunk`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `currentChunk(plan: Plan, step: PlanStep): string[]`
+- **Used by:** `runAddChunk()`, `runPlanChunk()`, `runReplaceChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** The next chunk of the current step.
+- **Input:** `plan`: `Plan`; `step`: `PlanStep`.
+- **Output:** `string[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `runAddChunk`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async runAddChunk(deps: OwnerDeps, plan: Plan, playlistId: string): Promise<Plan>`
+- **Used by:** `runCreateChunk()`, `runPlanChunk()`, `runReplaceChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Runs one chunk of a playlist addition (recording the base count first).
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`; `playlistId`: `string`.
+- **Output:** `Promise<Plan>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `runReplaceChunk`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async runReplaceChunk(deps: OwnerDeps, plan: Plan, playlistId: string): Promise<Plan>`
+- **Used by:** `runPlanChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Runs one chunk of a replacement: the first chunk replaces everything, the rest are appended.
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`; `playlistId`: `string`.
+- **Output:** `Promise<Plan>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `runCreateChunk`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async runCreateChunk(deps: OwnerDeps, plan: Plan, step: Extract<PlanStep, { kind: 'playlist_create' }>): Promise<Plan>`
+- **Used by:** `runPlanChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Runs one chunk of a creation: first creates the playlist, then adds items to it.
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`; `step`: `Extract<PlanStep, { kind: 'playlist_create' }>`.
+- **Output:** `Promise<Plan>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `runPlanChunk`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async runPlanChunk(deps: OwnerDeps, plan: Plan): Promise<Plan>`
+- **Used by:** `runPlan()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Runs one chunk of the current step.
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`.
+- **Output:** `Promise<Plan>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `resumedPlaylistId`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `resumedPlaylistId(plan: Plan): string | null`
+- **Used by:** `reconcilePlan()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Playlist a resumed step writes to (null for library steps or before creation/replacement started).
+- **Input:** `plan`: `Plan`.
+- **Output:** `string | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `reconcilePlan`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async reconcilePlan(deps: OwnerDeps, plan: Plan): Promise<Plan>`
+- **Used by:** `runPlan()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Re-reads the item count of a resumed playlist step, so additions that already happened are not repeated.
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`.
+- **Output:** `Promise<Plan>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `backupBeforeApply`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async backupBeforeApply(deps: OwnerDeps, plan: Plan): Promise<Plan>`
+- **Used by:** `runPlan()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Saves the plan's "before" data as a backup when it removes or replaces something and has none yet.
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`.
+- **Output:** `Promise<Plan>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `touchedSources`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `touchedSources(plan: Plan): SourceRef[]`
+- **Used by:** `forgetTouchedSources()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Sources a plan changes: Liked Songs for library steps, each playlist it writes to.
+- **Input:** `plan`: `Plan`.
+- **Output:** `SourceRef[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `forgetTouchedSources`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async forgetTouchedSources(deps: OwnerDeps, plan: Plan): Promise<void>`
+- **Used by:** `runPlan()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Forgets the snapshots of every source the plan changed.
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `runPlan`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async runPlan(deps: OwnerDeps, plan: Plan): Promise<ApplyOutcome>`
+- **Used by:** `applyOutput()`, `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Runs a plan until it finishes, the budget runs out or an error stops it (progress is kept either way).
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`.
+- **Output:** `Promise<ApplyOutcome>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Spotify failures it does not handle propagate (`SpotifyApiError`, `SpotifyTokenError`).
+
+## `connectors/spotify/src/backups.ts`
+
+### `toBackupTrack`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `toBackupTrack(track: AddedTrack): BackupTrack`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`, `likedBefore()`, `playlistBefore()`, `toBackupPlaylist()`
+- **Processes:** P23, P24
+
+<!-- generated:end -->
+
+- **Does:** A track as a backup keeps it.
+- **Input:** `track`: `AddedTrack`.
+- **Output:** `BackupTrack`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `toBackupPlaylist`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `toBackupPlaylist(info: PlaylistInfo, tracks: readonly AddedTrack[]): BackupPlaylist`
+- **Used by:** —
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** A playlist and its items as a backup keeps them.
+- **Input:** `info`: `PlaylistInfo`; `tracks`: `readonly AddedTrack[]`.
+- **Output:** `BackupPlaylist`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `backupEntry`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `backupEntry(id: string, content: BackupContent, createdAt: string): BackupEntry`
+- **Used by:** `saveBackup()`
+- **Processes:** P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Index entry of a backup content.
+- **Input:** `id`: `string`; `content`: `BackupContent`; `createdAt`: `string`.
+- **Output:** `BackupEntry`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `listBackups`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `async listBackups(deps: OwnerDeps): Promise<BackupEntry[]>`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`, `deleteAllBackups()`, `deleteBackup()`, `saveBackup()`
+- **Processes:** P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Reads the user's backup index (newest last).
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<BackupEntry[]>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `saveBackup`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `async saveBackup(deps: OwnerDeps, content: BackupContent): Promise<BackupEntry>`
+- **Used by:** `backupBeforeApply()`, `connectors/spotify/src/tools-backup.ts (module)`
+- **Processes:** P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Saves a backup, prunes the oldest beyond `MAX_BACKUPS` and returns its entry.
+- **Input:** `deps`: `OwnerDeps`; `content`: `BackupContent`.
+- **Output:** `Promise<BackupEntry>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault); randomness.
+- **Errors:** None.
+
+### `requireBackup`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `async requireBackup(deps: OwnerDeps, id: string): Promise<StoredBackup>`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`
+- **Processes:** P24
+
+<!-- generated:end -->
+
+- **Does:** Reads a backup by id or explains that it does not exist.
+- **Input:** `deps`: `OwnerDeps`; `id`: `string`.
+- **Output:** `Promise<StoredBackup>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** Throws `Error` "Backup ${id} does not exist. Use list_backups to see the ids.".
+
+### `deleteBackup`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `async deleteBackup(deps: OwnerDeps, id: string): Promise<boolean>`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Deletes one backup and its index entry.
+- **Input:** `deps`: `OwnerDeps`; `id`: `string`.
+- **Output:** `Promise<boolean>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `deleteAllBackups`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `async deleteAllBackups(deps: OwnerDeps): Promise<number>`
+- **Used by:** —
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Deletes every backup of the user (used by `disconnect`); returns how many.
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<number>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `backupPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `backupPage(backup: StoredBackup, page: BackupPageRequest): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`
+- **Processes:** P24
+
+<!-- generated:end -->
+
+- **Does:** One page of a backup's content as JSON-ready data (`section` = liked, playlists or library).
+- **Input:** `backup`: `StoredBackup`; `page`: `{ readonly section: 'liked' | 'playlists' | 'library'; readonly offset: number; readonly limit: number; }`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/catalog.ts`
+
+### `textField`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `textField(item: Readonly<Record<string, unknown>>, name: string, fallback = ''): string`
+- **Used by:** `catalogExtras()`, `catalogItemOutput()`, `deviceOutput()`, `parseAddedTrack()`, `parseArtistRefs()`, `parsePlaylist()`, `parseTrack()`, `trackAlbum()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Text field of an object, or the fallback.
+- **Input:** `item`: `Readonly<Record<string, unknown>>`; `name`: `string`; `fallback`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `parseArtistRefs`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `parseArtistRefs(value: unknown): ArtistRef[]`
+- **Used by:** `catalogItemOutput()`, `parseTrack()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** The artists of a track or album (id and name).
+- **Input:** `value`: `unknown`.
+- **Output:** `ArtistRef[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `trackAlbum`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `trackAlbum(item: Readonly<Record<string, unknown>>): AlbumAndDate`
+- **Used by:** `parseTrack()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Album name and release date of a track (episodes use the show name and their own date).
+- **Input:** `item`: `Readonly<Record<string, unknown>>`.
+- **Output:** `{ album: string; date: string; }`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `parseTrack`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `parseTrack(value: unknown): TrackInfo | null`
+- **Used by:** `catalogItemOutput()`, `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-player.ts (module)`, `firstTrackPerQuery()`, `nowPlayingOutput()`, `parseAddedTrack()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Parses a track or episode; null for anything without a URI (removed items, null entries).
+- **Input:** `value`: `unknown`.
+- **Output:** `TrackInfo | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `parseAddedTrack`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `parseAddedTrack(value: unknown): AddedTrack | null`
+- **Used by:** `advanceSnapshot()`, `connectors/spotify/src/tools-library.ts (module)`, `fetchLastAdded()`, `playlistItemsPage()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Parses a saved or playlist entry (`{added_at, item|track}`); null when its item is gone.
+- **Input:** `value`: `unknown`.
+- **Output:** `AddedTrack | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `playlistTotal`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `playlistTotal(item: Readonly<Record<string, unknown>>): number`
+- **Used by:** `parsePlaylist()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Total of a playlist's items (`items.total`, or the deprecated `tracks.total`).
+- **Input:** `item`: `Readonly<Record<string, unknown>>`.
+- **Output:** `number`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `parsePlaylist`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `parsePlaylist(value: unknown): PlaylistInfo | null`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`, `fetchAllPlaylists()`, `fetchPlaylistInfo()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Parses a playlist object; null without an id.
+- **Input:** `value`: `unknown`.
+- **Output:** `PlaylistInfo | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `releaseYear`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `releaseYear(date: string): number | null`
+- **Used by:** `matchesYear()`, `trackKeyValue()`, `trackOutput()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Release year of a Spotify date (`YYYY`, `YYYY-MM` or `YYYY-MM-DD`), or null.
+- **Input:** `date`: `string`.
+- **Output:** `number | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `trackOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `trackOutput(track: TrackInfo): Record<string, unknown>`
+- **Used by:** `addedTrackOutput()`, `catalogItemOutput()`, `connectors/spotify/src/tools-player.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`, `nowPlayingOutput()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Compact JSON of a track for tool results.
+- **Input:** `track`: `TrackInfo`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `addedTrackOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `addedTrackOutput(track: AddedTrack): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-library.ts (module)`, `playlistItemsPage()`, `trackSample()`, `withGenres()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Compact JSON of an added track (with the date it was added).
+- **Input:** `track`: `AddedTrack`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `playlistOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `playlistOutput(playlist: PlaylistInfo, userId: string): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Compact JSON of a playlist for tool results, saying whether the user owns it.
+- **Input:** `playlist`: `PlaylistInfo`; `userId`: `string`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `catalogExtras`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `catalogExtras(item: Readonly<Record<string, unknown>>): Record<string, unknown>`
+- **Used by:** `catalogItemOutput()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Optional descriptive fields of a non-track catalog object (owner, publisher, release date, genres).
+- **Input:** `item`: `Readonly<Record<string, unknown>>`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `catalogItemOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/catalog.ts`
+- **Signature:** `catalogItemOutput(value: unknown): Record<string, unknown> | null`
+- **Used by:** `artistReleases()`, `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-library.ts (module)`, `searchOutput()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Compact JSON of any catalog object found by search (artist, album, show, audiobook...).
+- **Input:** `value`: `unknown`.
+- **Output:** `Record<string, unknown> | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/config.ts`
+
+### `parseCallBudget`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/config.ts`
+- **Signature:** `parseCallBudget(raw: string | null): number`
+- **Used by:** `readSpotifySettings()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Reads `SPOTIFY_CALL_BUDGET` (optional): the default when absent; throws outside 5..`MAX_CALL_BUDGET`.
+- **Input:** `raw`: `string | null`.
+- **Output:** `number`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "SPOTIFY_CALL_BUDGET must be an integer from 5 to ${MAX_CALL_BUDGET}.".
+
+### `readSpotifySettings`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/config.ts`
+- **Signature:** `readSpotifySettings(env: EnvVars): SpotifySettings`
+- **Used by:** `createSpotifyDeps()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Builds the settings from the Worker environment.
+- **Input:** `env`: `EnvVars`.
+- **Output:** `SpotifySettings`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `isSpotifyAppCredential`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/config.ts`
+- **Signature:** `isSpotifyAppCredential(text: string): boolean`
+- **Used by:** `credentialsProblem()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the text looks like a Spotify app Client ID or Client Secret (32 hexadecimal characters).
+- **Input:** `text`: `string`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/genres.ts`
+
+### `loadGenreCache`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/genres.ts`
+- **Signature:** `async loadGenreCache(deps: OwnerDeps): Promise<GenreMap>`
+- **Used by:** `ensureGenres()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Reads the user's genre cache (empty when none).
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<GenreMap>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `saveGenreCache`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/genres.ts`
+- **Signature:** `async saveGenreCache(deps: OwnerDeps, cache: GenreMap): Promise<void>`
+- **Used by:** `ensureGenres()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Stores the cache, trimmed to `MAX_CACHED_ARTISTS`.
+- **Input:** `deps`: `OwnerDeps`; `cache`: `GenreMap`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `fetchArtistGenres`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/genres.ts`
+- **Signature:** `async fetchArtistGenres(deps: OwnerDeps, artistId: string): Promise<string[]>`
+- **Used by:** `ensureGenres()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Genres of one artist from `GET /artists/{id}` (empty when Spotify returns none).
+- **Input:** `deps`: `OwnerDeps`; `artistId`: `string`.
+- **Output:** `Promise<string[]>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `missingArtistIds`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/genres.ts`
+- **Signature:** `missingArtistIds(ids: readonly string[], cache: GenreMap): string[]`
+- **Used by:** `ensureGenres()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Artist ids not in the cache yet (unique, ignoring empty ids).
+- **Input:** `ids`: `readonly string[]`; `cache`: `GenreMap`.
+- **Output:** `string[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `ensureGenres`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/genres.ts`
+- **Signature:** `async ensureGenres(deps: OwnerDeps, artistIds: readonly string[]): Promise<{ genres: GenreMap; missing: number }>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`, `readySource()`, `withGenres()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Fills the cache for the given artists within the budget and saves it; returns the cache and how many artists are still missing (0 = complete).
+- **Input:** `deps`: `OwnerDeps`; `artistIds`: `readonly string[]`.
+- **Output:** `Promise<{ genres: GenreMap; missing: number }>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Stops quietly when the call budget runs out (reports `missing`); other Spotify errors (`SpotifyApiError`) propagate.
+
+## `connectors/spotify/src/library-write.ts`
+
+### `isArtistUri`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/library-write.ts`
+- **Signature:** `isArtistUri(uri: string): boolean`
+- **Used by:** `writeLibraryChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether a URI is an artist URI.
+- **Input:** `uri`: `string`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `uriId`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/library-write.ts`
+- **Signature:** `uriId(uri: string): string`
+- **Used by:** `writeArtistFollows()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Bare id of a URI (`spotify:artist:abc` → `abc`).
+- **Input:** `uri`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `writeLibraryUris`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/library-write.ts`
+- **Signature:** `async writeLibraryUris(deps: OwnerDeps, action: LibraryAction, uris: readonly string[]): Promise<void>`
+- **Used by:** `writeArtistFollows()`, `writeLibraryChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Saves or removes URIs through `/me/library` (one request, at most `LIBRARY_BATCH`).
+- **Input:** `deps`: `OwnerDeps`; `action`: `LibraryAction`; `uris`: `readonly string[]`.
+- **Output:** Nothing.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `writeArtistFollows`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/library-write.ts`
+- **Signature:** `async writeArtistFollows(deps: OwnerDeps, action: LibraryAction, uris: readonly string[]): Promise<void>`
+- **Used by:** `writeLibraryChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Follows or unfollows artists: `/me/library` first, `/me/following?type=artist` if that answers 400.
+- **Input:** `deps`: `OwnerDeps`; `action`: `LibraryAction`; `uris`: `readonly string[]`.
+- **Output:** Nothing.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` for anything but a 400 from `/me/library`, or when the `/me/following` fallback fails; `BudgetExhaustedError` when the budget is used up.
+
+### `writeLibraryChunk`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/library-write.ts`
+- **Signature:** `async writeLibraryChunk(deps: OwnerDeps, action: LibraryAction, uris: readonly string[]): Promise<void>`
+- **Used by:** `connectors/spotify/src/tools-library.ts (module)`, `runPlanChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Writes one chunk (≤ `LIBRARY_BATCH`) of mixed URIs: artists apart from the rest.
+- **Input:** `deps`: `OwnerDeps`; `action`: `LibraryAction`; `uris`: `readonly string[]`.
+- **Output:** Nothing.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `libraryContains`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/library-write.ts`
+- **Signature:** `async libraryContains(deps: OwnerDeps, uris: readonly string[]): Promise<boolean[]>`
+- **Used by:** `connectors/spotify/src/tools-library.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Checks which URIs are in the library (`/me/library/contains`, ≤ `LIBRARY_BATCH`).
+- **Input:** `deps`: `OwnerDeps`; `uris`: `readonly string[]`.
+- **Output:** `Promise<boolean[]>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `chunkList`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/library-write.ts`
+- **Signature:** `chunkList(items: readonly T[], size: number): T[][]`
+- **Used by:** —
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Splits a list into chunks of `size`.
+- **Input:** `items`: `readonly T[]`; `size`: `number`.
+- **Output:** `T[][]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/pages.ts`
+
+### `appSetupSteps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/pages.ts`
+- **Signature:** `appSetupSteps(redirectUri: string): string`
+- **Used by:** `credentialsBody()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Steps to create the Spotify app, with the exact Redirect URI.
+- **Input:** `redirectUri`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `credentialsBody`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/pages.ts`
+- **Signature:** `credentialsBody(view: CredentialsView): string`
+- **Used by:** `credentialsPage()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Body of the credentials page: who gets access, the steps and the form.
+- **Input:** `view`: `CredentialsView`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `credentialsPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/pages.ts`
+- **Signature:** `credentialsPage(view: CredentialsView, headers: Headers): Response`
+- **Used by:** `credentialsRetryPage()`, `showSpotifyAuthorize()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** The credentials page; the form may go on to Spotify (approve) or back to the client (deny).
+- **Input:** `view`: `CredentialsView`; `headers`: `Headers`.
+- **Output:** `Response`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/paging.ts`
+
+### `readPagingObject`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/paging.ts`
+- **Signature:** `readPagingObject(body: unknown, key?: string): { items: unknown[]; total: number; hasNext: boolean }`
+- **Used by:** `artistReleases()`, `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-library.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`, `fetchLastAdded()`, `fetchOffsetPage()`, `firstTrackPerQuery()`, `playlistItemsPage()`, `searchOutput()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Reads a paging object (`items`, `total`, `next`), optionally nested under `key` (search, following).
+- **Input:** `body`: `unknown`; `key`: `string`.
+- **Output:** `{ items: unknown[]; total: number; hasNext: boolean }`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `cursorAfter`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/paging.ts`
+- **Signature:** `cursorAfter(body: unknown, key: string): string | null`
+- **Used by:** `connectors/spotify/src/tools-library.ts (module)`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** The `after` cursor of a cursor-paged object nested under `key` (null at the end).
+- **Input:** `body`: `unknown`; `key`: `string`.
+- **Output:** `string | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `nextPageOffset`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/paging.ts`
+- **Signature:** `nextPageOffset(offset: number, count: number, total: number): number | null`
+- **Used by:** `connectors/spotify/src/tools-library.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`, `playlistItemsPage()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Offset of the next page after reading `count` items from `offset` (null at the end).
+- **Input:** `offset`: `number`; `count`: `number`; `total`: `number`.
+- **Output:** `number | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `fetchOffsetPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/paging.ts`
+- **Signature:** `async fetchOffsetPage(deps: OwnerDeps, request: OffsetRequest, offset: number): Promise<OffsetResult>`
+- **Used by:** `collectOffsetPages()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Reads one offset page.
+- **Input:** `deps`: `OwnerDeps`; `request`: `OffsetRequest`; `offset`: `number`.
+- **Output:** `Promise<OffsetResult>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `collectOffsetPages`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/paging.ts`
+- **Signature:** `async collectOffsetPages(deps: OwnerDeps, request: OffsetRequest): Promise<OffsetResult>`
+- **Used by:** `advanceSnapshot()`, `fetchAllPlaylists()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Reads pages from `offset` until the end, `maxItems` or the budget; rethrows only if nothing was read.
+- **Input:** `deps`: `OwnerDeps`; `request`: `OffsetRequest`.
+- **Output:** `Promise<OffsetResult>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Stops quietly when the budget runs out after reading something; rethrows `BudgetExhaustedError` when nothing was read, and any `SpotifyApiError`.
+
+## `connectors/spotify/src/plans.ts`
+
+### `isDestructiveStep`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `isDestructiveStep(step: PlanStep): boolean`
+- **Used by:** `backupBeforeApply()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether a step removes or overwrites something (and so needs a backup first).
+- **Input:** `step`: `PlanStep`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `planItemCount`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `planItemCount(steps: readonly PlanStep[]): number`
+- **Used by:** `applyOutput()`, `previewDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Number of items a plan touches.
+- **Input:** `steps`: `readonly PlanStep[]`.
+- **Output:** `number`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `loadPlans`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `async loadPlans(deps: OwnerDeps): Promise<Plan[]>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`, `createPlan()`, `requirePlan()`, `storePlan()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Reads the user's pending plans, dropping expired ones.
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<Plan[]>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `savePlans`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `async savePlans(deps: OwnerDeps, plans: readonly Plan[]): Promise<void>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`, `createPlan()`, `storePlan()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Stores the pending plans (the record expires with the last plan).
+- **Input:** `deps`: `OwnerDeps`; `plans`: `readonly Plan[]`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `createPlan`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `async createPlan(deps: OwnerDeps, draft: PlanInput): Promise<Plan>`
+- **Used by:** `previewDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Creates and stores a plan; returns it.
+- **Input:** `deps`: `OwnerDeps`; `draft`: `{ readonly title: string; readonly steps: readonly PlanStep[]; readonly before: BackupContent | null; }`.
+- **Output:** `Promise<Plan>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault); randomness.
+- **Errors:** None.
+
+### `requirePlan`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `async requirePlan(deps: OwnerDeps, planId: string): Promise<Plan>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Finds a pending plan by id or explains that it expired.
+- **Input:** `deps`: `OwnerDeps`; `planId`: `string`.
+- **Output:** `Promise<Plan>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** Throws `Error` "Plan ${planId} does not exist or expired (plans last ${PLAN_TTL_MINUTES} minutes). Run the…".
+
+### `storePlan`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `async storePlan(deps: OwnerDeps, plan: Plan, finished: boolean): Promise<void>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Replaces (or, when finished, removes) a plan in the store, renewing its validity.
+- **Input:** `deps`: `OwnerDeps`; `plan`: `Plan`; `finished`: `boolean`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `previewOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `previewOutput(plan: Plan, details: Readonly<Record<string, unknown>>): Record<string, unknown>`
+- **Used by:** `previewDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** The preview answer: plan id, validity, counts and a sample, plus notes.
+- **Input:** `plan`: `Plan`; `details`: `Readonly<Record<string, unknown>>`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/rules.ts`
+
+### `foldText`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `foldText(text: string): string`
+- **Used by:** `matchesArtist()`, `matchesGenre()`, `songKey()`, `songTitleKey()`, `sortTracks()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Lowercase text without accents or extra spaces, for comparisons.
+- **Input:** `text`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `matchesArtist`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `matchesArtist(track: AddedTrack, names: readonly string[]): boolean`
+- **Used by:** `matchesWho()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether any of the track's artists is one of the names (exact, ignoring case and accents).
+- **Input:** `track`: `AddedTrack`; `names`: `readonly string[]`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `trackGenres`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `trackGenres(track: AddedTrack, genres: GenreMap): string[]`
+- **Used by:** `matchesGenre()`, `trackKeyValue()`, `withGenres()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Genres of the track's artists, from the cache.
+- **Input:** `track`: `AddedTrack`; `genres`: `GenreMap`.
+- **Output:** `string[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `matchesGenre`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `matchesGenre(track: AddedTrack, terms: readonly string[], genres: GenreMap): boolean`
+- **Used by:** `matchesWho()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether a genre of the track contains one of the terms (`electronic` matches `electronica`).
+- **Input:** `track`: `AddedTrack`; `terms`: `readonly string[]`; `genres`: `GenreMap`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `matchesWho`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `matchesWho(track: AddedTrack, filter: TrackFilter, genres: GenreMap): boolean`
+- **Used by:** `matchesFilter()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the artist/genre part of the filter matches (true when it names neither).
+- **Input:** `track`: `AddedTrack`; `filter`: `TrackFilter`; `genres`: `GenreMap`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `matchesYear`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `matchesYear(track: AddedTrack, filter: TrackFilter): boolean`
+- **Used by:** `matchesFilter()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the release year is inside the filter's range (unknown years never match a range).
+- **Input:** `track`: `AddedTrack`; `filter`: `TrackFilter`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `matchesAdded`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `matchesAdded(track: AddedTrack, filter: TrackFilter): boolean`
+- **Used by:** `matchesFilter()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the date added is inside the filter's range (ISO dates compare as text).
+- **Input:** `track`: `AddedTrack`; `filter`: `TrackFilter`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `matchesFilter`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `matchesFilter(track: AddedTrack, filter: TrackFilter, genres: GenreMap): boolean`
+- **Used by:** `copiedTracks()`, `tracksToRemove()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the track matches every part of the filter.
+- **Input:** `track`: `AddedTrack`; `filter`: `TrackFilter`; `genres`: `GenreMap`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `needsGenres`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `needsGenres(filter: TrackFilter): boolean`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`, `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Tells whether the filter needs artist genres.
+- **Input:** `filter`: `TrackFilter`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `songTitleKey`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `songTitleKey(title: string): string`
+- **Used by:** `songKey()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Title without version tags in brackets or after " - ", folded.
+- **Input:** `title`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `songKey`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `songKey(track: AddedTrack): string`
+- **Used by:** `findDuplicates()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Key that two versions of the same song share: first artist and the title without version tags.
+- **Input:** `track`: `AddedTrack`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `preferredCopy`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `preferredCopy(a: AddedTrack, b: AddedTrack): number`
+- **Used by:** `findDuplicates()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Orders copies by preference: playable first, then the one added earliest (or first in the playlist).
+- **Input:** `a`: `AddedTrack`; `b`: `AddedTrack`.
+- **Output:** `number`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `findDuplicates`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `findDuplicates(tracks: readonly AddedTrack[]): DuplicateSplit`
+- **Used by:** `dedupeDraft()`, `mergeDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Splits tracks into the copy to keep and the duplicates (same URI, or another version of the same song).
+- **Input:** `tracks`: `readonly AddedTrack[]`.
+- **Output:** `{ keep: AddedTrack[]; extra: AddedTrack[]; }`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `trackKeyValue`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `trackKeyValue(track: AddedTrack, key: TrackKey, genres: GenreMap): string`
+- **Used by:** `groupTracks()`, `sortTracks()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Value of a track for grouping or sorting (`genre` = first genre of its artists, or "unknown").
+- **Input:** `track`: `AddedTrack`; `key`: `TrackKey`; `genres`: `GenreMap`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `sortTracks`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `sortTracks(tracks: readonly AddedTrack[], by: { readonly key: TrackKey; readonly descending: boolean; readonly genres: GenreMap }): AddedTrack[]`
+- **Used by:** `copiedTracks()`, `sortDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Sorts tracks by a key (stable; ties keep their order).
+- **Input:** `tracks`: `readonly AddedTrack[]`; `by`: `{ readonly key: TrackKey; readonly descending: boolean; readonly genres: GenreMap }`.
+- **Output:** `AddedTrack[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `groupTracks`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `groupTracks(tracks: readonly AddedTrack[], key: TrackKey, genres: GenreMap): { name: string; tracks: AddedTrack[] }[]`
+- **Used by:** `splitGroups()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Groups tracks by a key, largest groups first.
+- **Input:** `tracks`: `readonly AddedTrack[]`; `key`: `TrackKey`; `genres`: `GenreMap`.
+- **Output:** `{ name: string; tracks: AddedTrack[] }[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `artistIdsOf`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/rules.ts`
+- **Signature:** `artistIdsOf(tracks: readonly AddedTrack[]): string[]`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`, `readySource()`, `withGenres()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Every artist id of the tracks (for the genre cache).
+- **Input:** `tracks`: `readonly AddedTrack[]`.
+- **Output:** `string[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/sign-in.ts`
+
+### `credentialsProblem`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `credentialsProblem(clientId: string, clientSecret: string): string | null`
+- **Used by:** `submitSpotifyAuthorize()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Validates the pasted credentials; returns an error message or null.
+- **Input:** `clientId`: `string`; `clientSecret`: `string`.
+- **Output:** `string | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `pageTargets`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `pageTargets(deps: SpotifyDeps, request: Request): { redirectUri: string; action: string }`
+- **Used by:** `credentialsRetryPage()`, `showSpotifyAuthorize()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Redirect URI to register and form action (`/authorize` with the request's query).
+- **Input:** `deps`: `SpotifyDeps`; `request`: `Request`.
+- **Output:** `{ redirectUri: string; action: string }`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `showSpotifyAuthorize`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async showSpotifyAuthorize(deps: SpotifyDeps, oauth: OAuthHelpers, request: Request): Promise<Response>`
+- **Used by:** `connectors/spotify/src/worker.ts (module)`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** `GET /authorize`: validates Claude's request and shows the credentials page.
+- **Input:** `deps`: `SpotifyDeps`; `oauth`: `OAuthHelpers`; `request`: `Request`.
+- **Output:** `Promise<Response>`.
+- **Effects:** The OAuth library's state (OAUTH_KV, cookies).
+- **Errors:** None.
+
+### `sealPendingApp`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `sealPendingApp(deps: SpotifyDeps, app: AppCredentials): string`
+- **Used by:** `beginSpotifyAuthorization()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Seals the app credentials for the Spotify round trip.
+- **Input:** `deps`: `SpotifyDeps`; `app`: `AppCredentials`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `openPendingApp`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `openPendingApp(deps: SpotifyDeps, sealed: unknown): AppCredentials | null`
+- **Used by:** `resumeSpotifySignIn()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Opens the sealed app credentials (null when tampered with or expired).
+- **Input:** `deps`: `SpotifyDeps`; `sealed`: `unknown`.
+- **Output:** `AppCredentials | null` (null as the JSDoc says).
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `credentialsRetryPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async credentialsRetryPage(deps: SpotifyDeps, oauth: OAuthHelpers, retry: { readonly request: Request; readonly handle: string; readonly error: string }): Promise<Response>`
+- **Used by:** `submitSpotifyAuthorize()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Re-shows the page with an error, keeping the same (still unused) consent handle.
+- **Input:** `deps`: `SpotifyDeps`; `oauth`: `OAuthHelpers`; `retry`: `{ readonly request: Request; readonly handle: string; readonly error: string }`.
+- **Output:** `Promise<Response>`.
+- **Effects:** The OAuth library's state (OAUTH_KV, cookies).
+- **Errors:** None.
+
+### `beginSpotifyAuthorization`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async beginSpotifyAuthorization(deps: SpotifyDeps, oauth: OAuthHelpers, form: { readonly request: Request; readonly handle: string; readonly app: AppCredentials }): Promise<Response>`
+- **Used by:** `submitSpotifyAuthorize()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Approves the consent and sends the browser to Spotify with the user's own Client ID.
+- **Input:** `deps`: `SpotifyDeps`; `oauth`: `OAuthHelpers`; `form`: `{ readonly request: Request; readonly handle: string; readonly app: AppCredentials }`.
+- **Output:** `Promise<Response>`.
+- **Effects:** The OAuth library's state (OAUTH_KV, cookies).
+- **Errors:** None.
+
+### `submitSpotifyAuthorize`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async submitSpotifyAuthorize(deps: SpotifyDeps, oauth: OAuthHelpers, request: Request): Promise<Response>`
+- **Used by:** `connectors/spotify/src/worker.ts (module)`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** `POST /authorize`: cancel goes back to Claude; valid credentials go to Spotify; invalid ones re-show the page.
+- **Input:** `deps`: `SpotifyDeps`; `oauth`: `OAuthHelpers`; `request`: `Request`.
+- **Output:** `Promise<Response>`.
+- **Effects:** The OAuth library's state (OAUTH_KV, cookies).
+- **Errors:** None.
+
+### `fetchSpotifyIdentity`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async fetchSpotifyIdentity(deps: SpotifyDeps, accessToken: string): Promise<SpotifyIdentity>`
+- **Used by:** `connectSpotifyAccount()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Reads `/me` with a fresh access token: the stable account id (`account_id`, else `id`) and the name.
+- **Input:** `deps`: `SpotifyDeps`; `accessToken`: `string`.
+- **Output:** `Promise<SpotifyIdentity>`.
+- **Effects:** Network (Spotify accounts service or Web API).
+- **Errors:** Throws `Error` "not_allowlisted"; `Error` "Spotify /me answered ${response.status}."; `Error` "Spotify /me returned no account id."; `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `expiredConnectionPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `expiredConnectionPage(): Response`
+- **Used by:** `resumeSpotifySignIn()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Page for a Spotify return after the sealed credentials expired.
+- **Input:** None.
+- **Output:** `Response`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `spotifyFailurePage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `spotifyFailurePage(error: unknown): Response`
+- **Used by:** `finishSpotifySignIn()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Page for a failed Spotify return, with what to fix.
+- **Input:** `error`: `unknown`.
+- **Output:** `Response`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `connectSpotifyAccount`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async connectSpotifyAccount(deps: SpotifyDeps, app: AppCredentials, code: string): Promise<SpotifyIdentity>`
+- **Used by:** `completeSpotifySignIn()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Exchanges the code, identifies the account and stores it sealed in the user's vault.
+- **Input:** `deps`: `SpotifyDeps`; `app`: `AppCredentials`; `code`: `string`.
+- **Output:** `Promise<SpotifyIdentity>`.
+- **Effects:** Network (Spotify accounts service or Web API); reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault).
+- **Errors:** Throws `Error` "Spotify did not return a refresh token."; `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `completeSpotifySignIn`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async completeSpotifySignIn(deps: SpotifyDeps, oauth: OAuthHelpers, resumed: { readonly request: AuthRequest; readonly app: AppCredentials; readonly code: string }): Promise<string>`
+- **Used by:** `resumeSpotifySignIn()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Completes Claude's authorization for the Spotify account that just connected.
+- **Input:** `deps`: `SpotifyDeps`; `oauth`: `OAuthHelpers`; `resumed`: `{ readonly request: AuthRequest; readonly app: AppCredentials; readonly code: string }`.
+- **Output:** `Promise<string>`.
+- **Effects:** Network (Spotify accounts service or Web API); reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); the OAuth library's state (OAUTH_KV, cookies); randomness.
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `resumeSpotifySignIn`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async resumeSpotifySignIn(deps: SpotifyDeps, oauth: OAuthHelpers, request: Request): Promise<Response>`
+- **Used by:** `finishSpotifySignIn()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Resumes the transaction at Spotify's return and finishes it (refusal → `access_denied` for Claude).
+- **Input:** `deps`: `SpotifyDeps`; `oauth`: `OAuthHelpers`; `request`: `Request`.
+- **Output:** `Promise<Response>`.
+- **Effects:** Network (Spotify accounts service or Web API); reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); the OAuth library's state (OAUTH_KV, cookies).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `finishSpotifySignIn`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sign-in.ts`
+- **Signature:** `async finishSpotifySignIn(deps: SpotifyDeps, oauth: OAuthHelpers, request: Request): Promise<Response>`
+- **Used by:** `connectors/spotify/src/worker.ts (module)`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** `GET /spotify/callback`: Spotify's return; failures become a page saying what to fix.
+- **Input:** `deps`: `SpotifyDeps`; `oauth`: `OAuthHelpers`; `request`: `Request`.
+- **Output:** `Promise<Response>`.
+- **Effects:** Network (Spotify accounts service or Web API); reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); the OAuth library's state (OAUTH_KV, cookies).
+- **Errors:** Spotify failures it does not handle propagate (`SpotifyApiError`, `SpotifyTokenError`).
+
+## `connectors/spotify/src/smart.ts`
+
+### `planDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `planDraft(title: string, steps: readonly PlanStep[], extra: PlanDraftExtra): PlanDraft`
+- **Used by:** `dedupeDraft()`, `filterLikedDraft()`, `mergeDraft()`, `splitDraft()`, `staleDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Builds a plan draft.
+- **Input:** `title`: `string`; `steps`: `readonly PlanStep[]`; `extra`: `{ readonly before: BackupContent | null; readonly details: Readonly<Record<string, unknown>>; }`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `trackSample`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `trackSample(tracks: readonly AddedTrack[]): Record<string, unknown>[]`
+- **Used by:** `copyLikedDraft()`, `dedupeDraft()`, `filterLikedDraft()`, `sortDraft()`, `unavailableDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** A sample of tracks for a preview.
+- **Input:** `tracks`: `readonly AddedTrack[]`.
+- **Output:** `Record<string, unknown>[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `hasCriteria`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `hasCriteria(filter: TrackFilter): boolean`
+- **Used by:** `copiedTracks()`, `filterLikedDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether a filter names at least one criterion.
+- **Input:** `filter`: `TrackFilter`.
+- **Output:** `boolean`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `tracksToRemove`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `tracksToRemove(tracks: readonly AddedTrack[], rule: FilterRule): AddedTrack[]`
+- **Used by:** `filterLikedDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tracks to remove for a filter: `keep` removes what does not match, `remove` removes what matches.
+- **Input:** `tracks`: `readonly AddedTrack[]`; `rule`: `FilterRule`.
+- **Output:** `AddedTrack[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `filterLikedDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `filterLikedDraft(snapshot: SourceSnapshot, rule: FilterRule): PlanDraft`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Liked Songs to unlike for a filter, with counts and samples of what goes and what stays.
+- **Input:** `snapshot`: `SourceSnapshot`; `rule`: `FilterRule`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "Give at least one criterion (artists, genres, years, dates or unavailable_only).".
+
+### `likedRemoval`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `likedRemoval(tracks: readonly AddedTrack[]): PlanStep`
+- **Used by:** `dedupeDraft()`, `filterLikedDraft()`, `unavailableDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Step that unlikes the given tracks.
+- **Input:** `tracks`: `readonly AddedTrack[]`.
+- **Output:** `PlanStep`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `likedBefore`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `likedBefore(label: string, tracks: readonly AddedTrack[]): BackupContent`
+- **Used by:** `dedupeDraft()`, `filterLikedDraft()`, `unavailableDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Backup content of removed Liked Songs.
+- **Input:** `label`: `string`; `tracks`: `readonly AddedTrack[]`.
+- **Output:** `BackupContent`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `playlistBefore`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `playlistBefore(snapshot: SourceSnapshot, playlistId: string, label: string): BackupContent`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`, `dedupeDraft()`, `sortDraft()`, `unavailableDraft()`
+- **Processes:** P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Backup content of a whole playlist snapshot.
+- **Input:** `snapshot`: `SourceSnapshot`; `playlistId`: `string`; `label`: `string`.
+- **Output:** `BackupContent`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `checkNoLocalFiles`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `checkNoLocalFiles(snapshot: SourceSnapshot): void`
+- **Used by:** `dedupeDraft()`, `sortDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Refuses rewriting a playlist that has local files (the Web API cannot add them back).
+- **Input:** `snapshot`: `SourceSnapshot`.
+- **Output:** Nothing.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "".
+
+### `dedupeDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `dedupeDraft(snapshot: SourceSnapshot, playlistId: string | null): PlanDraft`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Duplicates of a source: Liked Songs lose the extra copies; a playlist is rewritten without them.
+- **Input:** `snapshot`: `SourceSnapshot`; `playlistId`: `string | null`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `unavailableDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `unavailableDraft(snapshot: SourceSnapshot, playlistId: string | null): PlanDraft`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Unavailable (not playable in the user's market) tracks of a source to remove.
+- **Input:** `snapshot`: `SourceSnapshot`; `playlistId`: `string | null`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `splitGroups`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `splitGroups(tracks: readonly AddedTrack[], split: { readonly key: TrackKey; readonly genres: GenreMap; readonly minSize: number }): { name: string; tracks: AddedTrack[] }[]`
+- **Used by:** `splitDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Groups for a split: the largest ones, with small groups merged into "Other".
+- **Input:** `tracks`: `readonly AddedTrack[]`; `split`: `{ readonly key: TrackKey; readonly genres: GenreMap; readonly minSize: number }`.
+- **Output:** `{ name: string; tracks: AddedTrack[] }[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `uniqueTrackUris`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `uniqueTrackUris(tracks: readonly AddedTrack[]): string[]`
+- **Used by:** `splitDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** URIs of the tracks without repeats, in order.
+- **Input:** `tracks`: `readonly AddedTrack[]`.
+- **Output:** `string[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `createStep`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `createStep(name: string, description: string, uris: readonly string[]): PlanStep`
+- **Used by:** `mergeDraft()`, `splitDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Step that creates a private playlist.
+- **Input:** `name`: `string`; `description`: `string`; `uris`: `readonly string[]`.
+- **Output:** `PlanStep`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `splitDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `splitDraft(snapshot: SourceSnapshot, split: SplitOptions): PlanDraft`
+- **Used by:** `sourcePreviewDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** New playlists, one per group of a key.
+- **Input:** `snapshot`: `SourceSnapshot`; `split`: `{ readonly key: TrackKey; readonly genres: GenreMap; readonly prefix: string; readonly minSize: number; }`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `mergeDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `mergeDraft(snapshots: readonly SourceSnapshot[], merge: { readonly name: string; readonly dedupe: boolean }): PlanDraft`
+- **Used by:** `mergePreviewDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** A new playlist with every track of the sources, optionally without duplicates (same song).
+- **Input:** `snapshots`: `readonly SourceSnapshot[]`; `merge`: `{ readonly name: string; readonly dedupe: boolean }`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/sources.ts`
+
+### `sourceKey`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `sourceKey(ref: SourceRef): string`
+- **Used by:** `emptySnapshot()`, `forgetSource()`, `loadSource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Vault id of a source.
+- **Input:** `ref`: `SourceRef`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `sourceRequest`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `sourceRequest(ref: SourceRef): { path: string; query: Record<string, string> }`
+- **Used by:** `advanceSnapshot()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Web API path and query of a source's items (`market=from_token` fills `is_playable`).
+- **Input:** `ref`: `SourceRef`.
+- **Output:** `{ path: string; query: Record<string, string> }`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `fetchPlaylistInfo`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `async fetchPlaylistInfo(deps: OwnerDeps, id: string): Promise<PlaylistInfo>`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`, `sourceVersion()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Reads a playlist's details (one request).
+- **Input:** `deps`: `OwnerDeps`; `id`: `string`.
+- **Output:** `Promise<PlaylistInfo>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `Error` "Spotify returned no playlist for id ${id}."; `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `isSnapshotReusable`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `isSnapshotReusable(saved: SourceSnapshot | null, current: { readonly snapshotId: string; readonly now: number }): saved is SourceSnapshot`
+- **Used by:** `loadSource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether a saved snapshot can be continued or reused (same playlist version, or fresh Liked Songs).
+- **Input:** `saved`: `SourceSnapshot | null`; `current`: `{ readonly snapshotId: string; readonly now: number }`.
+- **Output:** `saved is SourceSnapshot`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `emptySnapshot`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `emptySnapshot(ref: SourceRef, info: { readonly name: string; readonly snapshotId: string; readonly now: number }): SourceSnapshot`
+- **Used by:** `loadSource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** An empty snapshot to start reading a source.
+- **Input:** `ref`: `SourceRef`; `info`: `{ readonly name: string; readonly snapshotId: string; readonly now: number }`.
+- **Output:** `SourceSnapshot`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `advanceSnapshot`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `async advanceSnapshot(deps: OwnerDeps, ref: SourceRef, snapshot: SourceSnapshot): Promise<SourceSnapshot>`
+- **Used by:** `loadSource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Reads the next pages of a source within the budget and returns the grown snapshot.
+- **Input:** `deps`: `OwnerDeps`; `ref`: `SourceRef`; `snapshot`: `SourceSnapshot`.
+- **Output:** `Promise<SourceSnapshot>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `sourceVersion`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `async sourceVersion(deps: OwnerDeps, ref: SourceRef): Promise<{ name: string; snapshotId: string }>`
+- **Used by:** `loadSource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Current version and name of a source (Liked Songs have no version: one request saved).
+- **Input:** `deps`: `OwnerDeps`; `ref`: `SourceRef`.
+- **Output:** `Promise<{ name: string; snapshotId: string }>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `loadSource`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `async loadSource(deps: OwnerDeps, ref: SourceRef, refresh = false): Promise<SourceSnapshot>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`, `loadCompleteSource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Loads (and continues) a source snapshot, saving progress; `refresh` starts over.
+- **Input:** `deps`: `OwnerDeps`; `ref`: `SourceRef`; `refresh`: `boolean`.
+- **Output:** `Promise<SourceSnapshot>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `loadingStatus`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `loadingStatus(snapshot: SourceSnapshot): LoadingStatus`
+- **Used by:** `loadCompleteSource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Loading answer for an incomplete snapshot.
+- **Input:** `snapshot`: `SourceSnapshot`.
+- **Output:** `LoadingStatus`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `loadCompleteSource`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `async loadCompleteSource(deps: OwnerDeps, ref: SourceRef, refresh = false): Promise<SourceSnapshot | LoadingStatus>`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`, `loadMergeSources()`, `readySource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Loads a source and returns it only when complete; otherwise the loading answer.
+- **Input:** `deps`: `OwnerDeps`; `ref`: `SourceRef`; `refresh`: `boolean`.
+- **Output:** `Promise<SourceSnapshot | LoadingStatus>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `isLoading`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `isLoading(value: unknown): value is LoadingStatus`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`, `connectors/spotify/src/tools-organize.ts (module)`, `connectors/spotify/src/tools-smart.ts (module)`, `loadMergeSources()`, `previewSourceDraft()`, `readySource()`, `sourcePreviewDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Tells whether a value is the loading answer.
+- **Input:** `value`: `unknown`.
+- **Output:** `value is LoadingStatus`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `forgetSource`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/sources.ts`
+- **Signature:** `async forgetSource(deps: OwnerDeps, ref: SourceRef): Promise<void>`
+- **Used by:** `forgetTouchedSources()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Forgets a source snapshot (after changes, so the next preview reads Spotify again).
+- **Input:** `deps`: `OwnerDeps`; `ref`: `SourceRef`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+## `connectors/spotify/src/spotify-api.ts`
+
+### `retryAfterSeconds`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-api.ts`
+- **Signature:** `retryAfterSeconds(response: Response): number`
+- **Used by:** `retryableDecision()`, `spotifyCall()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Seconds of `Retry-After` (1 when absent or invalid).
+- **Input:** `response`: `Response`.
+- **Output:** `number`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `decideRetry`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-api.ts`
+- **Signature:** `decideRetry(response: Response, attempt: number): RetryDecision`
+- **Used by:** `spotifyCall()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Decides the next step for a response on the given attempt (1-based). Pure.
+- **Input:** `response`: `Response`; `attempt`: `number`.
+- **Output:** `RetryDecision`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `retryableDecision`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-api.ts`
+- **Signature:** `retryableDecision(response: Response): RetryDecision`
+- **Used by:** `decideRetry()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Retry decision for a status that may be retried: 429 waits for `Retry-After`, 5xx waits briefly.
+- **Input:** `response`: `Response`.
+- **Output:** `RetryDecision`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `rateLimitDecision`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-api.ts`
+- **Signature:** `rateLimitDecision(seconds: number): RetryDecision`
+- **Used by:** `retryableDecision()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Waits for a short `Retry-After`; fails on a long one (the message then says how long).
+- **Input:** `seconds`: `number`.
+- **Output:** `RetryDecision`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `spotifyRequestInit`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-api.ts`
+- **Signature:** `spotifyRequestInit(call: SpotifyCall, token: string): RequestInit`
+- **Used by:** `sendSpotifyAttempt()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Request init for a call with the access token.
+- **Input:** `call`: `SpotifyCall`; `token`: `string`.
+- **Output:** `RequestInit`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `sendSpotifyAttempt`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-api.ts`
+- **Signature:** `async sendSpotifyAttempt(deps: OwnerDeps, call: SpotifyCall): Promise<Response>`
+- **Used by:** `spotifyCall()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Sends one attempt (spending one unit of the budget).
+- **Input:** `deps`: `OwnerDeps`; `call`: `SpotifyCall`.
+- **Output:** `Promise<Response>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `readSpotifyBody`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-api.ts`
+- **Signature:** `async readSpotifyBody(response: Response): Promise<unknown>`
+- **Used by:** `spotifyCall()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Reads a response body: JSON, or null when empty or not JSON (204, 202...).
+- **Input:** `response`: `Response`.
+- **Output:** `Promise<unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `spotifyCall`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-api.ts`
+- **Signature:** `async spotifyCall(deps: OwnerDeps, call: SpotifyCall): Promise<unknown>`
+- **Used by:** `addPlaylistUris()`, `artistReleases()`, `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-library.ts (module)`, `connectors/spotify/src/tools-player.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`, `createUserPlaylist()`, `fetchArtistGenres()`, `fetchLastAdded()`, `fetchOffsetPage()`, `fetchPlaylistInfo()`, `firstTrackPerQuery()`, `libraryContains()`, `playerCommandTool()`, `playlistItemCount()`, `playlistItemsPage()`, `runPlanChunk()`, `runReplaceChunk()`, `writeArtistFollows()`, `writeLibraryUris()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Makes a Web API request with renewal and retries; returns the parsed body (null when empty).
+- **Input:** `deps`: `OwnerDeps`; `call`: `SpotifyCall`.
+- **Output:** `Promise<unknown>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` (actionable message per status: 400, 401, 403 Premium/ownership/allowlist, 404 device/id, 429 with the wait, 5xx) after the retries; `BudgetExhaustedError` when the call budget is used up; token errors from `getSpotifyAccessToken`.
+
+## `connectors/spotify/src/spotify-errors.ts`
+
+### `spendCall`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-errors.ts`
+- **Signature:** `spendCall(budget: CallBudget): void`
+- **Used by:** `renewSpotifyAccessToken()`, `sendSpotifyAttempt()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Takes one request from the budget; throws `BudgetExhaustedError` when none is left.
+- **Input:** `budget`: `CallBudget`.
+- **Output:** Nothing.
+- **Effects:** Spends the call's request budget.
+- **Errors:** Throws `BudgetExhaustedError`; `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `spotifyErrorDetail`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-errors.ts`
+- **Signature:** `spotifyErrorDetail(body: unknown): { message: string; reason: string }`
+- **Used by:** `spotifyHttpError()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Spotify's error detail (`error.message`, `error.reason`) from a failure body; empty when absent.
+- **Input:** `body`: `unknown`.
+- **Output:** `{ message: string; reason: string }`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `forbiddenMessage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-errors.ts`
+- **Signature:** `forbiddenMessage(path: string, detail: string): string`
+- **Used by:** `spotifyHttpError()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Message for a 403: Premium for playback, otherwise the usual causes in development mode.
+- **Input:** `path`: `string`; `detail`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `notFoundMessage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-errors.ts`
+- **Signature:** `notFoundMessage(path: string, detail: string): string`
+- **Used by:** `spotifyHttpError()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Message for a 404: no active device for playback, otherwise a wrong id.
+- **Input:** `path`: `string`; `detail`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `rateLimitMessage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-errors.ts`
+- **Signature:** `rateLimitMessage(reason: string, retryAfter: number): string`
+- **Used by:** `spotifyHttpError()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Message for a 429: the developer quota, or a short rate limit with the wait.
+- **Input:** `reason`: `string`; `retryAfter`: `number`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `spotifyHttpError`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-errors.ts`
+- **Signature:** `spotifyHttpError(status: number, path: string, extra: { readonly body: unknown; readonly retryAfter: number }): SpotifyApiError`
+- **Used by:** `spotifyCall()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Builds the error for a failed Spotify response (status, path and parsed body).
+- **Input:** `status`: `number`; `path`: `string`; `extra`: `{ readonly body: unknown; readonly retryAfter: number }`.
+- **Output:** `SpotifyApiError`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/spotify-oauth.ts`
+
+### `spotifyRedirectUri`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-oauth.ts`
+- **Signature:** `spotifyRedirectUri(origin: string): string`
+- **Used by:** `exchangeSpotifyCode()`, `pageTargets()`, `spotifyAuthorizeUrl()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** The Redirect URI for the Worker origin.
+- **Input:** `origin`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `spotifyAuthorizeUrl`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-oauth.ts`
+- **Signature:** `spotifyAuthorizeUrl(clientId: string, origin: string, state: string): string`
+- **Used by:** `beginSpotifyAuthorization()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Builds the authorization URL (always shows the dialog, so the user sees which account they authorize).
+- **Input:** `clientId`: `string`; `origin`: `string`; `state`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `parseSpotifyTokens`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-oauth.ts`
+- **Signature:** `parseSpotifyTokens(body: unknown): SpotifyTokens`
+- **Used by:** `postSpotifyToken()`
+- **Processes:** P21, P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Validates the token endpoint JSON; throws if the access token is missing.
+- **Input:** `body`: `unknown`.
+- **Output:** `SpotifyTokens`.
+- **Effects:** None (pure).
+- **Errors:** Throws `SpotifyTokenError("invalid_response")` when the body has no `access_token`.
+
+### `postSpotifyToken`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-oauth.ts`
+- **Signature:** `async postSpotifyToken(deps: SpotifyDeps, app: AppCredentials, form: Readonly<Record<string, string>>): Promise<SpotifyTokens>`
+- **Used by:** `exchangeSpotifyCode()`, `refreshSpotifyToken()`
+- **Processes:** P21, P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Posts a form to the token endpoint authenticated with the user's app (HTTP Basic).
+- **Input:** `deps`: `SpotifyDeps`; `app`: `AppCredentials`; `form`: `Readonly<Record<string, string>>`.
+- **Output:** `Promise<SpotifyTokens>`.
+- **Effects:** Network (Spotify accounts service or Web API).
+- **Errors:** Throws `SpotifyTokenError` with Spotify's OAuth error code (e.g. `invalid_grant`, `invalid_client`) or `http_<status>`; network errors propagate.
+
+### `exchangeSpotifyCode`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-oauth.ts`
+- **Signature:** `exchangeSpotifyCode(deps: SpotifyDeps, app: AppCredentials, code: string): Promise<SpotifyTokens>`
+- **Used by:** `connectSpotifyAccount()`
+- **Processes:** P21
+
+<!-- generated:end -->
+
+- **Does:** Exchanges the authorization code for tokens.
+- **Input:** `deps`: `SpotifyDeps`; `app`: `AppCredentials`; `code`: `string`.
+- **Output:** `Promise<SpotifyTokens>`.
+- **Effects:** Network (Spotify accounts service or Web API).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `refreshSpotifyToken`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/spotify-oauth.ts`
+- **Signature:** `refreshSpotifyToken(deps: SpotifyDeps, app: AppCredentials, refreshToken: string): Promise<SpotifyTokens>`
+- **Used by:** `renewSpotifyAccessToken()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Gets a new access token with the stored refresh token.
+- **Input:** `deps`: `SpotifyDeps`; `app`: `AppCredentials`; `refreshToken`: `string`.
+- **Output:** `Promise<SpotifyTokens>`.
+- **Effects:** Network (Spotify accounts service or Web API).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+## `connectors/spotify/src/stale.ts`
+
+### `fetchAllPlaylists`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/stale.ts`
+- **Signature:** `async fetchAllPlaylists(deps: OwnerDeps): Promise<{ playlists: PlaylistInfo[]; complete: boolean }>`
+- **Used by:** `scanOwnPlaylists()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Every playlist in the user's library (within the budget; throws if not even one page fits).
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<{ playlists: PlaylistInfo[]; complete: boolean }>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `fetchLastAdded`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/stale.ts`
+- **Signature:** `async fetchLastAdded(deps: OwnerDeps, playlist: PlaylistInfo): Promise<string>`
+- **Used by:** `fillLastAdded()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Newest `added_at` among the last 50 items of a playlist (empty text when it has none).
+- **Input:** `deps`: `OwnerDeps`; `playlist`: `PlaylistInfo`.
+- **Output:** `Promise<string>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `fillLastAdded`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/stale.ts`
+- **Signature:** `async fillLastAdded(deps: OwnerDeps, playlists: readonly PlaylistInfo[], cache: LastAddedCache): Promise<number>`
+- **Used by:** `scanOwnPlaylists()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Fills the cache for the given playlists within the budget; returns how many are still unknown.
+- **Input:** `deps`: `OwnerDeps`; `playlists`: `readonly PlaylistInfo[]`; `cache`: `LastAddedCache`.
+- **Output:** `Promise<number>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Stops quietly when the budget runs out (returns how many are left); other Spotify errors (`SpotifyApiError`) propagate.
+
+### `scanOwnPlaylists`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/stale.ts`
+- **Signature:** `async scanOwnPlaylists(deps: OwnerDeps, userId: string): Promise<{ own: PlaylistInfo[]; cache: LastAddedCache; missing: number }>`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Reads the cache, fills it for the user's own playlists and saves it; returns playlists, cache and what is missing.
+- **Input:** `deps`: `OwnerDeps`; `userId`: `string`.
+- **Output:** `Promise<{ own: PlaylistInfo[]; cache: LastAddedCache; missing: number }>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `Error` "Could not list all your playlists within one call; raise SPOTIFY_CALL_BUDGET on the Worker…"; `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `stalePlaylists`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/stale.ts`
+- **Signature:** `stalePlaylists(own: readonly PlaylistInfo[], scan: { readonly cache: LastAddedCache; readonly cutoff: string; readonly includeEmpty: boolean }): { playlist: PlaylistInfo; lastAdded: string }[]`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Own playlists older than the cutoff (ISO), and empty ones when asked. Pure.
+- **Input:** `own`: `readonly PlaylistInfo[]`; `scan`: `{ readonly cache: LastAddedCache; readonly cutoff: string; readonly includeEmpty: boolean }`.
+- **Output:** `{ playlist: PlaylistInfo; lastAdded: string }[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/tool-kit.ts`
+
+### `toTrackFilter`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tool-kit.ts`
+- **Signature:** `toTrackFilter(args: FilterArgs): TrackFilter`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`, `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Filter arguments → domain filter.
+- **Input:** `args`: `FilterArgs`.
+- **Output:** `TrackFilter`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `spotifyIdOf`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tool-kit.ts`
+- **Signature:** `spotifyIdOf(ref: string, type: string): string`
+- **Used by:** `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`, `mergePreviewDraft()`, `sourceRefOf()`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Extracts a bare id of the given type from an id, URI or open.spotify.com link; throws when it is not one.
+- **Input:** `ref`: `string`; `type`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "".
+
+### `sourceRefOf`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tool-kit.ts`
+- **Signature:** `sourceRefOf(args: SourceArgs): SourceRef`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`, `connectors/spotify/src/tools-smart.ts (module)`, `sourcePreviewDraft()`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Source arguments → source reference.
+- **Input:** `args`: `{ readonly source: 'liked' | 'playlist'; readonly playlist_id?: string | undefined; }`.
+- **Output:** `SourceRef`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "Pass playlist_id when source is ".
+
+### `currentUserId`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tool-kit.ts`
+- **Signature:** `async currentUserId(deps: OwnerDeps): Promise<string>`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** The connected user's Spotify user id (to tell their own playlists apart).
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<string>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+## `connectors/spotify/src/tools-account.ts`
+
+### `revokeClaudeGrants`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-account.ts`
+- **Signature:** `async revokeClaudeGrants(deps: OwnerDeps): Promise<number>`
+- **Used by:** `connectors/spotify/src/tools-account.ts (module)`
+- **Processes:** P25
+
+<!-- generated:end -->
+
+- **Does:** Revokes every Claude grant of the user on this connector; returns how many.
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `Promise<number>`.
+- **Effects:** The OAuth library's state (OAUTH_KV, cookies).
+- **Errors:** None.
+
+## `connectors/spotify/src/tools-backup.ts`
+
+### `restoreSteps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-backup.ts`
+- **Signature:** `restoreSteps(backup: StoredBackup): PlanStep[]`
+- **Used by:** `restoreDraft()`
+- **Processes:** P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Restore steps of a backup: re-save liked and library items; recreate each playlist as a NEW playlist.
+- **Input:** `backup`: `StoredBackup`.
+- **Output:** `PlanStep[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `restoreDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-backup.ts`
+- **Signature:** `restoreDraft(backup: StoredBackup): PlanDraft`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Restore plan draft of a backup, with what comes back and the caveats.
+- **Input:** `backup`: `StoredBackup`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/tools-catalog.ts`
+
+### `searchOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-catalog.ts`
+- **Signature:** `searchOutput(body: unknown, types: readonly string[]): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-catalog.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Compact results of a search body, grouped by type.
+- **Input:** `body`: `unknown`; `types`: `readonly string[]`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `artistReleases`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-catalog.ts`
+- **Signature:** `async artistReleases(deps: OwnerDeps, artistId: string): Promise<unknown[]>`
+- **Used by:** `connectors/spotify/src/tools-catalog.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Latest releases of an artist (albums and singles); empty when Spotify refuses the listing.
+- **Input:** `deps`: `OwnerDeps`; `artistId`: `string`.
+- **Output:** `Promise<unknown[]>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `nowPlayingOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-catalog.ts`
+- **Signature:** `nowPlayingOutput(body: unknown): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-catalog.ts (module)`, `connectors/spotify/src/tools-player.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Compact JSON of `/me/player/currently-playing` (null body = nothing playing).
+- **Input:** `body`: `unknown`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/tools-library.ts`
+
+### `withGenres`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-library.ts`
+- **Signature:** `async withGenres(deps: OwnerDeps, tracks: readonly AddedTrack[]): Promise<{ items: Record<string, unknown>[]; genresMissing: number }>`
+- **Used by:** `connectors/spotify/src/tools-library.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Liked tracks of a page with their artists' genres (genres fetched within the budget).
+- **Input:** `deps`: `OwnerDeps`; `tracks`: `readonly AddedTrack[]`.
+- **Output:** `Promise<{ items: Record<string, unknown>[]; genresMissing: number }>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+## `connectors/spotify/src/tools-organize.ts`
+
+### `copiedTracks`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-organize.ts`
+- **Signature:** `copiedTracks(ready: ReadySource, options: CopyOptions): AddedTrack[]`
+- **Used by:** `copyLikedDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** The Liked Songs a copy takes: filtered, capped (newest first) and optionally sorted. Pure.
+- **Input:** `ready`: `ReadySource`; `options`: `CopyOptions`.
+- **Output:** `AddedTrack[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `copyLikedDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-organize.ts`
+- **Signature:** `copyLikedDraft(ready: ReadySource, options: CopyOptions): PlanDraft`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Plan draft of a copy of Liked Songs into a new playlist.
+- **Input:** `ready`: `ReadySource`; `options`: `CopyOptions`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `loadMergeSources`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-organize.ts`
+- **Signature:** `async loadMergeSources(deps: OwnerDeps, ids: readonly string[]): Promise<SourceSnapshot[] | LoadingStatus>`
+- **Used by:** `mergePreviewDraft()`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Loads every playlist to merge; the first one still loading is returned instead.
+- **Input:** `deps`: `OwnerDeps`; `ids`: `readonly string[]`.
+- **Output:** `Promise<SourceSnapshot[] | LoadingStatus>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `sortDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-organize.ts`
+- **Signature:** `sortDraft(snapshot: SourceSnapshot, sort: SortOptions): PlanDraft`
+- **Used by:** `sourcePreviewDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Sort plan of one playlist (rewritten in the new order, after a backup).
+- **Input:** `snapshot`: `SourceSnapshot`; `sort`: `{ readonly playlistId: string; readonly key: TrackKey; readonly descending: boolean; readonly genres: GenreMap; }`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `mergePreviewDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-organize.ts`
+- **Signature:** `async mergePreviewDraft(deps: OwnerDeps, args: OrganizeArgs): Promise<PlanDraft | LoadingStatus>`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Merge draft: every listed playlist loaded (or the loading answer).
+- **Input:** `deps`: `OwnerDeps`; `args`: `OrganizeArgs`.
+- **Output:** `Promise<PlanDraft | LoadingStatus>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `Error` "merge needs playlist_ids with 2 to 10 playlists."; `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `sourcePreviewDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-organize.ts`
+- **Signature:** `async sourcePreviewDraft(deps: OwnerDeps, args: OrganizeArgs): Promise<PlanDraft | LoadingStatus>`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Sort or split draft of one source (or the loading answer).
+- **Input:** `deps`: `OwnerDeps`; `args`: `OrganizeArgs`.
+- **Output:** `Promise<PlanDraft | LoadingStatus>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `Error` with `LIKED_SORT_REFUSAL` when asked to sort Liked Songs; `SpotifyApiError` on Spotify failures (e.g. 403 for a playlist that is not yours).
+
+### `staleDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-organize.ts`
+- **Signature:** `staleDraft(stale: readonly { readonly playlist: PlaylistInfo; readonly lastAdded: string }[], info: { readonly ownCount: number; readonly cutoff: string }): PlanDraft`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Plan draft that removes stale playlists from the library (backed up as library items). Pure.
+- **Input:** `stale`: `readonly { readonly playlist: PlaylistInfo; readonly lastAdded: string }[]`; `info`: `{ readonly ownCount: number; readonly cutoff: string }`.
+- **Output:** `PlanDraft`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+## `connectors/spotify/src/tools-player.ts`
+
+### `deviceQuery`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-player.ts`
+- **Signature:** `deviceQuery(deviceId: string | undefined): Record<string, string>`
+- **Used by:** `connectors/spotify/src/tools-player.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Query with the optional device id.
+- **Input:** `deviceId`: `string | undefined`.
+- **Output:** `Record<string, string>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `deviceOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-player.ts`
+- **Signature:** `deviceOutput(value: unknown): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-player.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Compact JSON of a device.
+- **Input:** `value`: `unknown`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `playBody`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-player.ts`
+- **Signature:** `playBody(args: PlayArgs): Record<string, unknown> | undefined`
+- **Used by:** `connectors/spotify/src/tools-player.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Body of `play`: a context (album/playlist/artist) with an optional start, or a list of tracks.
+- **Input:** `args`: `{ readonly context_uri?: string | undefined; readonly uris?: string[] | undefined; readonly offset_position?: number | undefined; }`.
+- **Output:** `Record<string, unknown> | undefined`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "Pass context_uri or uris, not both.".
+
+### `playerCommandTool`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-player.ts`
+- **Signature:** `playerCommandTool(spec: PlayerCommandSpec<S>): ToolSpec<OwnerDeps>`
+- **Used by:** `connectors/spotify/src/tools-player.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** A simple player command tool (no body): name, title, description, method, path and query builder.
+- **Input:** `spec`: `{ readonly name: string; readonly title: string; readonly description: string; readonly shape: S; readonly command: (args: z.infer<z.ZodObje`.
+- **Output:** `ToolSpec<OwnerDeps>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+## `connectors/spotify/src/tools-playlists.ts`
+
+### `playlistItemsPage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-playlists.ts`
+- **Signature:** `async playlistItemsPage(deps: OwnerDeps, id: string, page: { readonly offset: number; readonly limit: number }): Promise<Record<string, unknown>>`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** One page of a playlist's items as tool output.
+- **Input:** `deps`: `OwnerDeps`; `id`: `string`; `page`: `{ readonly offset: number; readonly limit: number }`.
+- **Output:** `Promise<Record<string, unknown>>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `playlistDetailsBody`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-playlists.ts`
+- **Signature:** `playlistDetailsBody(args: PlaylistDetailsArgs): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Applies the collaborative rule: collaborative playlists are private.
+- **Input:** `args`: `{ readonly name?: string | undefined; readonly description?: string | undefined; readonly public?: boolean | undefined; readonly collaborati`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "A collaborative playlist must be private: pass public: false (or omit public).".
+
+### `firstTrackPerQuery`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-playlists.ts`
+- **Signature:** `async firstTrackPerQuery(deps: OwnerDeps, queries: readonly string[]): Promise<ReturnType<typeof parseTrack>[]>`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Runs each query with `limit=1` and returns the first track found (null when none), within the budget.
+- **Input:** `deps`: `OwnerDeps`; `queries`: `readonly string[]`.
+- **Output:** `Promise<ReturnType<typeof parseTrack>[]>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `checkCoverImage`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-playlists.ts`
+- **Signature:** `checkCoverImage(base64: string): string`
+- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Validates a base64 JPEG cover (size and JPEG signature); returns the cleaned base64.
+- **Input:** `base64`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** Throws `Error` "The cover must be at most 256 KB of base64 JPEG."; `Error` "The cover must be a JPEG image (base64).".
+
+## `connectors/spotify/src/tools-smart.ts`
+
+### `genresLoading`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-smart.ts`
+- **Signature:** `genresLoading(missing: number): LoadingStatus`
+- **Used by:** `readySource()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Loading answer while artist genres are still being fetched.
+- **Input:** `missing`: `number`.
+- **Output:** `LoadingStatus`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `readySource`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-smart.ts`
+- **Signature:** `async readySource(deps: OwnerDeps, ref: SourceRef, withGenres: boolean): Promise<ReadySource | LoadingStatus>`
+- **Used by:** `connectors/spotify/src/tools-organize.ts (module)`, `connectors/spotify/src/tools-smart.ts (module)`, `previewSourceDraft()`, `sourcePreviewDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Loads a complete source and, when asked, the genres of all its artists; otherwise the loading answer.
+- **Input:** `deps`: `OwnerDeps`; `ref`: `SourceRef`; `withGenres`: `boolean`.
+- **Output:** `Promise<ReadySource | LoadingStatus>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `previewDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-smart.ts`
+- **Signature:** `async previewDraft(deps: OwnerDeps, draft: PlanDraft): Promise<Record<string, unknown>>`
+- **Used by:** `connectors/spotify/src/tools-backup.ts (module)`, `connectors/spotify/src/tools-organize.ts (module)`, `connectors/spotify/src/tools-smart.ts (module)`, `previewSourceDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Stores a draft as a plan and answers the preview (or says there is nothing to do).
+- **Input:** `deps`: `OwnerDeps`; `draft`: `PlanDraft`.
+- **Output:** `Promise<Record<string, unknown>>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `applyOutput`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-smart.ts`
+- **Signature:** `applyOutput(outcome: Awaited<ReturnType<typeof runPlan>>): Record<string, unknown>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Answer of an apply call.
+- **Input:** `outcome`: `Awaited<ReturnType<typeof runPlan>>`.
+- **Output:** `Record<string, unknown>`.
+- **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `previewSourceDraft`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/tools-smart.ts`
+- **Signature:** `async previewSourceDraft(deps: OwnerDeps, ref: SourceRef, build: (snapshot: SourceSnapshot, playlistId: string | null) => PlanDraft): Promise<unknown>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** Loads a source (no genres) and previews the draft a builder makes of it (`playlistId` null for Liked Songs).
+- **Input:** `deps`: user dependencies; `ref`: Liked Songs or a playlist; `build`: pure draft builder.
+- **Output:** The loading answer while the source is incomplete, otherwise the preview (or `nothing_to_do`).
+- **Effects:** Network (Spotify Web API, within the budget); reads/writes Workers KV (snapshot and plan).
+- **Errors:** Throws `SpotifyApiError` on Spotify failures (e.g. 403 for a playlist that is not yours) and what `build` throws.
+
+## `connectors/spotify/src/vault.ts`
+
+### `ownerHash`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/vault.ts`
+- **Signature:** `ownerHash(owner: string): string`
+- **Used by:** `eraseOwner()`, `vaultKey()`
+- **Processes:** P21, P22, P23, P24, P25
+
+<!-- generated:end -->
+
+- **Does:** Hash of the owner used in every KV key (never the owner itself).
+- **Input:** `owner`: `string`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `vaultKey`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/vault.ts`
+- **Signature:** `vaultKey(ref: VaultRef): string`
+- **Used by:** `deleteVault()`, `readVault()`, `writeVault()`
+- **Processes:** P21, P22, P23, P24
+
+<!-- generated:end -->
+
+- **Does:** KV key of a record: type, hash of the owner and optional id (never the owner itself).
+- **Input:** `ref`: `VaultRef`.
+- **Output:** `string`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `readVault`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/vault.ts`
+- **Signature:** `async readVault(deps: VaultDeps, ref: VaultRef): Promise<unknown>`
+- **Used by:** `listBackups()`, `loadAccount()`, `loadGenreCache()`, `loadPlans()`, `loadSource()`, `requireBackup()`, `scanOwnPlaylists()`
+- **Processes:** P22, P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Reads and opens a record; null when missing, expired, tampered with or owned by someone else.
+- **Input:** `deps`: `VaultDeps`; `ref`: `VaultRef`.
+- **Output:** `Promise<unknown>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `writeVault`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/vault.ts`
+- **Signature:** `async writeVault(deps: VaultDeps, ref: VaultRef & { readonly ttlSeconds?: number }, data: unknown): Promise<void>`
+- **Used by:** `deleteBackup()`, `loadSource()`, `saveAccount()`, `saveBackup()`, `saveGenreCache()`, `savePlans()`, `scanOwnPlaylists()`
+- **Processes:** P21, P22, P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Seals and stores a record; with `ttlSeconds` it also expires in KV.
+- **Input:** `deps`: `VaultDeps`; `ref`: `VaultRef & { readonly ttlSeconds?: number }`; `data`: `unknown`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `deleteVault`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/vault.ts`
+- **Signature:** `async deleteVault(deps: VaultDeps, ref: VaultRef): Promise<void>`
+- **Used by:** `deleteAccount()`, `deleteAllBackups()`, `deleteBackup()`, `forgetSource()`, `saveBackup()`
+- **Processes:** P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Deletes a record.
+- **Input:** `deps`: `VaultDeps`; `ref`: `VaultRef`.
+- **Output:** Nothing.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `vaultOf`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/vault.ts`
+- **Signature:** `vaultOf(deps: VaultSource): VaultDeps`
+- **Used by:** `connectSpotifyAccount()`, `deleteAllBackups()`, `deleteBackup()`, `forgetSource()`, `listBackups()`, `loadGenreCache()`, `loadPlans()`, `loadSource()`, `renewSpotifyAccessToken()`, `requireAccount()`, `requireBackup()`, `saveBackup()`, `saveGenreCache()`, `savePlans()`, `scanOwnPlaylists()`
+- **Processes:** P21, P22, P23, P24
+
+<!-- generated:end -->
+
+- **Does:** Vault dependencies from the connector dependencies.
+- **Input:** `deps`: `{ readonly kv: ListableKv; readonly settings: { readonly tokenKey: Buffer }; readonly now: () => number; }`.
+- **Output:** `VaultDeps`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `deletePrefix`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/vault.ts`
+- **Signature:** `async deletePrefix(kv: ListableKv, prefix: string): Promise<number>`
+- **Used by:** `eraseOwner()`
+- **Processes:** P25
+
+<!-- generated:end -->
+
+- **Does:** Deletes every key under a prefix (all pages); returns how many.
+- **Input:** `kv`: `ListableKv`; `prefix`: `string`.
+- **Output:** `Promise<number>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+### `eraseOwner`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/vault.ts`
+- **Signature:** `async eraseOwner(kv: ListableKv, owner: string): Promise<number>`
+- **Used by:** `connectors/spotify/src/tools-account.ts (module)`
+- **Processes:** P25
+
+<!-- generated:end -->
+
+- **Does:** Erases every record a user owns, of every type; returns how many keys were deleted.
+- **Input:** `kv`: `ListableKv`; `owner`: `string`.
+- **Output:** `Promise<number>`.
+- **Effects:** Reads/writes Workers KV (the user's sealed vault).
+- **Errors:** None.
+
+## `connectors/spotify/src/worker.ts`
+
+### `createSpotifyDeps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `createSpotifyDeps(env: SpotifyWorkerEnv, origin: string): SpotifyDeps`
+- **Used by:** `handleSpotifyDefault()`, `spotifyOwnerDeps()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Builds the request dependencies; throws if the configuration (secrets) is incomplete.
+- **Input:** `env`: `SpotifyWorkerEnv`; `origin`: `string`.
+- **Output:** `SpotifyDeps`.
+- **Effects:** Network (Spotify accounts service or Web API); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `createSpotifyServer`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `createSpotifyServer(deps: OwnerDeps): McpServer`
+- **Used by:** `handleSpotifyDefault()`, `handleSpotifyMcp()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Creates the MCP server with the Spotify tools bound to the dependencies.
+- **Input:** `deps`: `OwnerDeps`.
+- **Output:** `McpServer`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `handleSpotifyMcp`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `async handleSpotifyMcp(request: Request, env: SpotifyWorkerEnv, ctx: ExecutionContext): Promise<Response>`
+- **Used by:** `createSpotifyProvider()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** `/mcp` already authenticated by the library: per-session limit, then the MCP server for this user.
+- **Input:** `request`: `Request`; `env`: `SpotifyWorkerEnv`; `ctx`: `ExecutionContext`.
+- **Output:** `Promise<Response>`.
+- **Effects:** Network (Spotify accounts service or Web API); may wait (Retry-After).
+- **Errors:** Spotify failures it does not handle propagate (`SpotifyApiError`, `SpotifyTokenError`).
+
+### `handleSpotifyDefault`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `async handleSpotifyDefault(request: Request, env: SpotifyWorkerEnv): Promise<Response>`
+- **Used by:** `createSpotifyProvider()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Serves the routes that are neither `/mcp` nor library OAuth endpoints.
+- **Input:** `request`: `Request`; `env`: `SpotifyWorkerEnv`.
+- **Output:** `Promise<Response>`.
+- **Effects:** Network (Spotify accounts service or Web API); may wait (Retry-After).
+- **Errors:** Spotify failures it does not handle propagate (`SpotifyApiError`, `SpotifyTokenError`).
+
+### `createSpotifyProvider`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `createSpotifyProvider(origin: string): OAuthProvider<SpotifyWorkerEnv>`
+- **Used by:** `handleSpotifyWorkerFetch()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Creates the OAuth provider that wraps the whole Worker, with the origin's `/mcp` as the resource.
+- **Input:** `origin`: `string`.
+- **Output:** `OAuthProvider<SpotifyWorkerEnv>`.
+- **Effects:** Network (Spotify accounts service or Web API); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `handleSpotifyWorkerFetch`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `async handleSpotifyWorkerFetch(request: Request, env: SpotifyWorkerEnv, ctx: ExecutionContext): Promise<Response>`
+- **Used by:** `connectors/spotify/src/index.ts (module)`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Worker `fetch`: per-IP limit outside `/mcp`, then the public-origin provider.
+- **Input:** `request`: `Request`; `env`: `SpotifyWorkerEnv`; `ctx`: `ExecutionContext`.
+- **Output:** `Promise<Response>`.
+- **Effects:** Network (Spotify accounts service or Web API); may wait (Retry-After).
+- **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
+
+### `spotifySleep`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `spotifySleep(ms: number): Promise<void>`
+- **Used by:** `createSpotifyDeps()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** Waits the given milliseconds (used to honour `Retry-After`).
+- **Input:** `ms`: milliseconds to wait.
+- **Output:** A promise that resolves after the wait.
+- **Effects:** Timer (`setTimeout`).
+- **Errors:** None.
+
+### `spotifyOwnerDeps`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/worker.ts`
+- **Signature:** `spotifyOwnerDeps(env: SpotifyWorkerEnv, request: Request, props: GrantProps): OwnerDeps`
+- **Used by:** `handleSpotifyMcp()`
+- **Processes:** P22
+
+<!-- generated:end -->
+
+- **Does:** The authenticated user's dependencies, with a fresh request budget and the OAuth helpers.
+- **Input:** `env`: Worker bindings and secrets; `request`: the `/mcp` request (for the public origin); `props`: Claude's grant (`owner`, `sid`).
+- **Output:** `OwnerDeps` for that user, with `budget.remaining` = `SPOTIFY_CALL_BUDGET`.
+- **Effects:** None (reads the environment).
+- **Errors:** Throws when `TOKEN_ENC_KEY` or `SPOTIFY_CALL_BUDGET` is invalid (turned into a 500 by `buildOrConfigError()`).
+
 ## Data and constants
 
-| Name                              | File                                                    | What it is                                                                                                                                                                                   |
-| --------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `CANVAS_USER_AGENT`               | `connectors/canvas-puc/src/remote.ts`                   | User-Agent of the remote mode's calls to Canvas (Canvas returns 403 without a User-Agent).                                                                                                   |
-| `TOKEN_RENEWAL_SECONDS`           | `connectors/canvas-puc/src/remote.ts`                   | How much each renewal extends the Canvas token: 30 days minus 1 hour (Canvas refuses more than 30 days ahead).                                                                               |
-| `TEST_EXCEPTIONS`                 | `src/test-exceptions.ts`                                | Single list of functions without automated tests, with reason and manual test.                                                                                                               |
-| `DEFAULT_DOCS_CONFIG`             | `tools/docs/config.ts`                                  | Default `docs:check` configuration; `docs.config.json` overrides it.                                                                                                                         |
-| `MODULE_SCOPE_SUFFIX`             | `tools/docs/ast.ts`                                     | Suffix of the label for a reference made outside a function (`arquivo (module)`).                                                                                                            |
-| `WALK_IGNORED_DIRS`               | `tools/docs/inventory.ts`                               | Folders skipped when walking the disk without git.                                                                                                                                           |
-| `GENERATED_START`                 | `tools/docs/markdown.ts`                                | Start marker of the generated block in FUNCTIONS.md.                                                                                                                                         |
-| `GENERATED_END`                   | `tools/docs/markdown.ts`                                | End marker of the generated block.                                                                                                                                                           |
-| `INDEX_START`                     | `tools/docs/markdown.ts`                                | Start marker of the per-module index.                                                                                                                                                        |
-| `INDEX_END`                       | `tools/docs/markdown.ts`                                | End marker of the per-module index.                                                                                                                                                          |
-| `PLACEHOLDER`                     | `tools/docs/markdown.ts`                                | `_fill_in_` text left in new manual fields.                                                                                                                                                  |
-| `MANUAL_FIELDS`                   | `tools/docs/render.ts`                                  | Fixed order of the manual fields (Does, Input, Output, Effects, Errors).                                                                                                                     |
-| `HTML_SKIPPED_TAGS`               | `src/core/html.ts`                                      | Tags whose content never reaches the text (`script`, `style`, `noscript`, `template`, `head`, `title`).                                                                                      |
-| `HTML_BLOCK_TAGS`                 | `src/core/html.ts`                                      | Tags whose closing ends a line (`p`, `div`, `li`, `h1`–`h6`, `tr`).                                                                                                                          |
-| `HTML_MEDIA_TAGS`                 | `src/core/html.ts`                                      | Media tags collected as references and the attribute holding their URL.                                                                                                                      |
-| `HTML_KEPT_ATTRS`                 | `src/core/html.ts`                                      | Attributes kept on each reference (`title`, `alt`, `data-api-endpoint`, `data-media-id`...).                                                                                                 |
-| `HTML_TEXT_CLEANUPS`              | `src/core/html.ts`                                      | Final cleanups of the text: non-breaking spaces, trailing spaces, repeated blank lines.                                                                                                      |
-| `LIST_FILES_HINT`                 | `connectors/canvas-puc/src/linked-files.ts`             | Note added to every `list_files` answer: students do not see hidden files; use `links` or `list_linked_files`.                                                                               |
-| `VIDEO_PROVIDERS`                 | `connectors/canvas-puc/src/links.ts`                    | Followable video providers (YouTube, Vimeo, Panopto, Stream, SharePoint and Drive, the last two only embedded).                                                                              |
-| `PLAYER_TAGS`                     | `connectors/canvas-puc/src/links.ts`                    | Tags that play media (`iframe`, `video`, `audio`, `source`, `embed`).                                                                                                                        |
-| `CANVAS_PATH_PATTERNS`            | `connectors/canvas-puc/src/links.ts`                    | Canvas URL paths (files, media, pages, assignments...) and the ids each one carries.                                                                                                         |
-| `fileRefShape`                    | `connectors/canvas-puc/src/tools-read.ts`               | File arguments of `download_file` and `read_file_text`: `file_id`, `url`, `course_id`.                                                                                                       |
-| `CFB_SIGNATURE`                   | `src/core/cfb.ts`                                       | The first 8 bytes of every OLE/CFB file (the .doc container).                                                                                                                                |
-| `CP1252_HIGH`                     | `src/core/word.ts`                                      | Windows-1252 characters 0x80 to 0x9F, used when decoding the .doc's 8-bit text.                                                                                                              |
-| `WORD_TEXT_REPLACEMENTS`          | `src/core/word.ts`                                      | Replacements (regex → text) applied in order by `cleanWordText` to Word marks.                                                                                                               |
-| `MAX_DOWNLOAD_BYTES`              | `connectors/canvas-puc/src/files.ts`                    | Largest file `download_file` brings into the conversation (70 MB, in parts — ADR 0023, 0024).                                                                                                |
-| `MAX_DOWNLOAD_MB`                 | `connectors/canvas-puc/src/files.ts`                    | The same limit in MB (70), used in the tool description and refusals.                                                                                                                        |
-| `MAX_UPLOAD_BYTES`                | `connectors/canvas-puc/src/upload.ts`                   | Largest file `submit_file_assignment` accepts (5 MB — ADR 0026).                                                                                                                             |
-| `MAX_UPLOAD_MB`                   | `connectors/canvas-puc/src/upload.ts`                   | The same limit in MB (5), used in the tool description and refusals.                                                                                                                         |
-| `MAX_CHUNK_BYTES`                 | `connectors/canvas-puc/src/chunks.ts`                   | Largest part `download_file` returns per call (8 MB; ADR 0024).                                                                                                                              |
-| `downloadFileShape`               | `connectors/canvas-puc/src/tools-read.ts`               | Arguments of `download_file` (`fileRefShape` plus `offset`, `length`), shared with `streamCanvasTool()`.                                                                                     |
-| `MAX_TEXT_CHARS`                  | `connectors/canvas-puc/src/files.ts`                    | Largest text returned by `read_file_text` (100,000 characters).                                                                                                                              |
-| `CONNECTORS_DIR`                  | `tools/bundle/bundle.ts`                                | Connectors folder relative to the root (`connectors`).                                                                                                                                       |
-| `PLUGIN_DIR`                      | `tools/bundle/bundle.ts`                                | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                                                                                                       |
-| `PLUGIN_MANIFEST_PATH`            | `tools/bundle/bundle.ts`                                | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.                                                                                    |
-| `PLUGIN_MCP_CONFIG_PATH`          | `tools/bundle/bundle.ts`                                | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                                                                                           |
-| `CANVAS_PAGE_SIZE`                | `connectors/canvas-puc/src/client.ts`                   | Items per page requested from Canvas (`per_page`, the API maximum).                                                                                                                          |
-| `CANVAS_TIMEOUT_MS`               | `connectors/canvas-puc/src/client.ts`                   | Time limit of each Canvas API call (30 s); a timeout becomes a clear 504 error.                                                                                                              |
-| `CANVAS_GRAPHQL_PATH`             | `connectors/canvas-puc/src/client.ts`                   | Canvas GraphQL endpoint (`/api/graphql`, outside `/api/v1`), used only for read-only queries.                                                                                                |
-| `PLANNER_TYPE_NAMES`              | `connectors/canvas-puc/src/format.ts`                   | Planner types renamed for the model (`assessment_request` → `peer_review`).                                                                                                                  |
-| `CANVAS_TIME_ZONE`                | `connectors/canvas-puc/src/helpers.ts`                  | Time zone of PUC Minas (`America/Sao_Paulo`): the planner window starts at 00:00 here.                                                                                                       |
-| `PEER_REVIEWS_QUERY`              | `connectors/canvas-puc/src/peer-reviews.ts`             | GraphQL query of an assignment with `assessmentRequestsForCurrentUser` (peer reviews the student must do).                                                                                   |
-| `PEER_REVIEW_CONCURRENCY`         | `connectors/canvas-puc/src/peer-reviews.ts`             | Canvas calls running at once per level of the peer-review sweep (courses, then assignments).                                                                                                 |
-| `canvasIdSchema`                  | `connectors/canvas-puc/src/peer-reviews.ts`             | Zod schema of a numeric Canvas id (string of digits or positive integer).                                                                                                                    |
-| `CONVERSATION_PREVIEW_LENGTH`     | `connectors/canvas-puc/src/inbox.ts`                    | Maximum length of the last-message preview in `list_conversations`.                                                                                                                          |
-| `changedSinceArg`                 | `connectors/canvas-puc/src/changes.ts`                  | Optional `changed_since` argument (ISO with offset) of `list_assignments`, `list_announcements`, `list_discussions` and `list_conversations`.                                                |
-| `MAX_MESSAGE_RECIPIENTS`          | `connectors/canvas-puc/src/tools-inbox.ts`              | Maximum recipients of one `send_message` (user IDs only).                                                                                                                                    |
-| `CANVAS_INBOX_READ_TOOLS`         | `connectors/canvas-puc/src/tools-inbox.ts`              | Inbox read tools: `find_recipients`, `list_conversations`, `get_conversation`.                                                                                                               |
-| `CANVAS_INBOX_WRITE_TOOLS`        | `connectors/canvas-puc/src/tools-inbox.ts`              | Inbox send tools `send_message`, `reply_message` (with attachments); always listed, refusing with the reason when writing is off for the user.                                               |
-| `DEFAULT_MAX_ITEMS`               | `connectors/canvas-puc/src/client.ts`                   | Default limit of items summed across pages in `getAll`.                                                                                                                                      |
-| `DEFAULT_CANVAS_URL`              | `connectors/canvas-puc/src/remote.ts`                   | PUC Minas Canvas URL, used without `CANVAS_BASE_URL`.                                                                                                                                        |
-| `MAX_TEXT_LENGTH`                 | `connectors/canvas-puc/src/format.ts`                   | Maximum length of long texts returned to the model by `shortText`.                                                                                                                           |
-| `ASSIGNMENT_BUCKETS`              | `connectors/canvas-puc/src/helpers.ts`                  | `list_assignments` filters → Canvas API `bucket` (`all` does not filter).                                                                                                                    |
-| `CANVAS_READ_TOOLS`               | `connectors/canvas-puc/src/tools-read.ts`               | Canvas read MCP tools (courses, assignments, grades, announcements etc.).                                                                                                                    |
-| `CANVAS_WRITE_TOOLS`              | `connectors/canvas-puc/src/tools-write.ts`              | Write MCP tools (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`); destructive; always listed, refusing with the reason when writing is off for the user.          |
-| `CANVAS_SERVER_INFO`              | `connectors/canvas-puc/src/tools.ts`                    | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                                     |
-| `REMOTE_ENTRY`                    | `tools/bundle/bundle.ts`                                | Entry of a connector's Node remote server (`src/remote-main.ts`).                                                                                                                            |
-| `REMOTE_BUNDLE_PATH`              | `tools/bundle/bundle.ts`                                | Remote server bundle (`server/remote.js`), used by the Dockerfile.                                                                                                                           |
-| `SEAL_KEY_BYTES`                  | `src/remote/seal.ts`                                    | Size of `SEAL_KEY` (32 bytes, AES-256).                                                                                                                                                      |
-| `CLIENT_TTL_SECONDS`              | `src/remote/oauth.ts`                                   | Lifetime of the registered `client_id` (10 years).                                                                                                                                           |
-| `PENDING_TTL_SECONDS`             | `src/remote/tokens.ts`                                  | Lifetime of the request sealed in the login form (15 minutes).                                                                                                                               |
-| `CODE_TTL_SECONDS`                | `src/remote/tokens.ts`                                  | Lifetime of the authorization code (5 minutes).                                                                                                                                              |
-| `ACCESS_TTL_SECONDS`              | `src/remote/tokens.ts`                                  | Lifetime of the access token (1 hour).                                                                                                                                                       |
-| `REFRESH_TTL_SECONDS`             | `src/remote/tokens.ts`                                  | Lifetime of the refresh token (30 days, like the PUC token).                                                                                                                                 |
-| `REVOKED_SECRET_DESCRIPTION`      | `src/remote/handler.ts`                                 | `error_description` of the `invalid_grant` answered when the connector says the credential was revoked.                                                                                      |
-| `LOGIN_PAGE_CSS`                  | `src/remote/login-page.ts`                              | Style of the authorization page, with the tokens from `docs/UI.md`.                                                                                                                          |
-| `CORS_HEADERS`                    | `src/remote/handler.ts`                                 | CORS headers of the remote endpoints (any origin; there are no cookies).                                                                                                                     |
-| `REMOTE_ROUTES`                   | `src/remote/handler.ts`                                 | Table `MÉTODO caminho` → remote server function.                                                                                                                                             |
-| `DEFAULT_REDIRECT_HOSTS`          | `src/remote/oauth.ts`                                   | OAuth redirect hosts accepted by default (`claude.ai`, `claude.com`, `localhost`).                                                                                                           |
-| `MAX_BODY_BYTES`                  | `src/remote/node-server.ts`                             | Largest request body accepted by the remote server (1 MB).                                                                                                                                   |
-| `PDF_ESCAPES`                     | `src/core/pdf.ts`                                       | Letter escapes of PDF literal strings (`\n`, `\t`...).                                                                                                                                       |
-| `TJ_SPACE_THRESHOLD`              | `src/core/pdf.ts`                                       | `TJ` adjustment from which it counts as a space between words.                                                                                                                               |
-| `PDF_TEXT_OPERATORS`              | `src/core/pdf.ts`                                       | PDF text operator → the text it produces.                                                                                                                                                    |
-| `ACCESS_TOKEN_MARGIN_MS`          | `connectors/gmail/src/access-token.ts`                  | Margin before expiry at which the Google access token is renewed.                                                                                                                            |
-| `MAX_ATTACHMENT_BYTES`            | `connectors/gmail/src/attachments.ts`                   | Largest attachment read as text (5 MB).                                                                                                                                                      |
-| `MAX_ATTACHMENT_CHARS`            | `connectors/gmail/src/attachments.ts`                   | Largest text returned from an attachment.                                                                                                                                                    |
-| `GMAIL_MODIFY_SCOPE`              | `connectors/gmail/src/config.ts`                        | The `gmail.modify` scope, the only data scope requested (read, send, organize; no permanent deletion).                                                                                       |
-| `MIN_CONSENT_SECRET_CHARS`        | `connectors/gmail/src/config.ts`                        | Minimum length of `CONSENT_SECRET`.                                                                                                                                                          |
-| `UPSTREAM_USER_AGENT`             | `connectors/gmail/src/context.ts`                       | User-Agent sent to Google and the Gmail API.                                                                                                                                                 |
-| `GMAIL_API_BASE`                  | `connectors/gmail/src/gmail-api.ts`                     | Gmail API base for the token's account.                                                                                                                                                      |
-| `GMAIL_STATUS_MESSAGES`           | `connectors/gmail/src/gmail-api.ts`                     | Actionable message per Gmail API HTTP status.                                                                                                                                                |
-| `GOOGLE_AUTHORIZE_URL`            | `connectors/gmail/src/google-oauth.ts`                  | Google authorization endpoint.                                                                                                                                                               |
-| `GOOGLE_TOKEN_URL`                | `connectors/gmail/src/google-oauth.ts`                  | Google token endpoint.                                                                                                                                                                       |
-| `GOOGLE_CALLBACK_PATH`            | `connectors/gmail/src/google-oauth.ts`                  | Google callback path (`/google/callback`).                                                                                                                                                   |
-| `GOOGLE_JWKS_URL`                 | `connectors/gmail/src/id-token.ts`                      | Public keys that sign Google's `id_token`.                                                                                                                                                   |
-| `GOOGLE_ISSUERS`                  | `connectors/gmail/src/id-token.ts`                      | Issuers accepted in the `id_token`.                                                                                                                                                          |
-| `CLOCK_SKEW_SECONDS`              | `connectors/gmail/src/id-token.ts`                      | Clock skew tolerated in the `id_token` validity.                                                                                                                                             |
-| `LINK_STATE_PREFIX`               | `connectors/gmail/src/link-flow.ts`                     | Prefix of the account-link `state` (`link.`).                                                                                                                                                |
-| `LINK_COOKIE`                     | `connectors/gmail/src/link-flow.ts`                     | `__Host-` cookie that binds the link to the browser.                                                                                                                                         |
-| `LINK_TTL_SECONDS`                | `connectors/gmail/src/link-flow.ts`                     | Lifetime of the link request (10 minutes).                                                                                                                                                   |
-| `LINK_REQUEST_TYP`                | `connectors/gmail/src/link-flow.ts`                     | Seal type of the link request.                                                                                                                                                               |
-| `MAX_MESSAGE_CHARS`               | `connectors/gmail/src/message-format.ts`                | Largest message body returned.                                                                                                                                                               |
-| `MAX_THREAD_CHARS`                | `connectors/gmail/src/message-format.ts`                | Largest sum of a thread's bodies.                                                                                                                                                            |
-| `MIN_MESSAGE_CHARS`               | `connectors/gmail/src/message-format.ts`                | Smallest slice per message in a long thread.                                                                                                                                                 |
-| `MESSAGE_HEADERS`                 | `connectors/gmail/src/message-format.ts`                | Headers returned for each message.                                                                                                                                                           |
-| `UNTRUSTED_NOTICE`                | `connectors/gmail/src/message-format.ts`                | Notice of untrusted email content (prompt injection).                                                                                                                                        |
-| `GOOGLE_ACCOUNTS_ORIGIN`          | `connectors/gmail/src/pages.ts`                         | Google origin allowed in the consent page's `form-action`.                                                                                                                                   |
-| `RATE_LIMIT_RETRY_SECONDS`        | `connectors/gmail/src/rate-limit.ts`                    | `Retry-After` seconds in the 429 response.                                                                                                                                                   |
-| `GMAIL_ID`                        | `connectors/gmail/src/tools.ts`                         | Zod schema of a Gmail API id (only URL-safe characters).                                                                                                                                     |
-| `listAccountsTool`                | `connectors/gmail/src/tools.ts`                         | The `list_accounts` tool.                                                                                                                                                                    |
-| `searchThreadsTool`               | `connectors/gmail/src/tools.ts`                         | The `search_threads` tool.                                                                                                                                                                   |
-| `getThreadTool`                   | `connectors/gmail/src/tools.ts`                         | The `get_thread` tool.                                                                                                                                                                       |
-| `getMessageTool`                  | `connectors/gmail/src/tools.ts`                         | The `get_message` tool.                                                                                                                                                                      |
-| `listLabelsTool`                  | `connectors/gmail/src/tools.ts`                         | The `list_labels` tool.                                                                                                                                                                      |
-| `getAttachmentTextTool`           | `connectors/gmail/src/tools.ts`                         | The `get_attachment_text` tool.                                                                                                                                                              |
-| `GMAIL_TOOLS`                     | `connectors/gmail/src/tool-list.ts`                     | All Gmail tools, in the order shown to Claude.                                                                                                                                               |
-| `MAX_QUOTED_CHARS`                | `connectors/gmail/src/compose.ts`                       | Largest excerpt of the original quoted in a reply (20 thousand characters).                                                                                                                  |
-| `FORWARD_SEPARATOR`               | `connectors/gmail/src/compose.ts`                       | Line that opens the forwarded email block.                                                                                                                                                   |
-| `DRAFT_SHAPE`                     | `connectors/gmail/src/draft-tools.ts`                   | Parameters of a draft's content (create and replace).                                                                                                                                        |
-| `listDraftsTool`                  | `connectors/gmail/src/draft-tools.ts`                   | The `list_drafts` tool.                                                                                                                                                                      |
-| `createDraftTool`                 | `connectors/gmail/src/draft-tools.ts`                   | The `create_draft` tool.                                                                                                                                                                     |
-| `updateDraftTool`                 | `connectors/gmail/src/draft-tools.ts`                   | The `update_draft` tool.                                                                                                                                                                     |
-| `sendDraftTool`                   | `connectors/gmail/src/draft-tools.ts`                   | The `send_draft` tool.                                                                                                                                                                       |
-| `deleteDraftTool`                 | `connectors/gmail/src/draft-tools.ts`                   | The `delete_draft` tool.                                                                                                                                                                     |
-| `MAX_GMAIL_ERROR_DETAIL`          | `connectors/gmail/src/gmail-api.ts`                     | Largest Gmail error detail passed to the model (200 characters).                                                                                                                             |
-| `TARGET_SHAPE`                    | `connectors/gmail/src/mailbox-tools.ts`                 | Target parameters of the organizing tools (`message_ids`, `thread_ids`).                                                                                                                     |
-| `markReadTool`                    | `connectors/gmail/src/mailbox-tools.ts`                 | The `mark_read` tool.                                                                                                                                                                        |
-| `archiveTool`                     | `connectors/gmail/src/mailbox-tools.ts`                 | The `archive` tool.                                                                                                                                                                          |
-| `starTool`                        | `connectors/gmail/src/mailbox-tools.ts`                 | The `star` tool.                                                                                                                                                                             |
-| `updateLabelsTool`                | `connectors/gmail/src/mailbox-tools.ts`                 | The `update_labels` tool.                                                                                                                                                                    |
-| `trashTool`                       | `connectors/gmail/src/mailbox-tools.ts`                 | The `trash` tool.                                                                                                                                                                            |
-| `untrashTool`                     | `connectors/gmail/src/mailbox-tools.ts`                 | The `untrash` tool.                                                                                                                                                                          |
-| `MAX_TARGET_MESSAGES`             | `connectors/gmail/src/mailbox.ts`                       | Maximum messages per call of the organizing tools (50).                                                                                                                                      |
-| `MAX_TARGET_THREADS`              | `connectors/gmail/src/mailbox.ts`                       | Maximum threads per call of the organizing tools (20).                                                                                                                                       |
-| `MAILBOX_ACTIONS`                 | `connectors/gmail/src/mailbox.ts`                       | System labels each action adds and removes (read, archive, star).                                                                                                                            |
-| `MAX_ENCODED_WORD_BYTES`          | `connectors/gmail/src/mime.ts`                          | Largest UTF-8 chunk of an RFC 2047 word (45 bytes, word ≤ 75).                                                                                                                               |
-| `MAX_BODY_CHARS`                  | `connectors/gmail/src/send-tools.ts`                    | Largest email body accepted (100 thousand characters).                                                                                                                                       |
-| `RECIPIENTS`                      | `connectors/gmail/src/send-tools.ts`                    | Zod schema of a recipient list.                                                                                                                                                              |
-| `BODY`                            | `connectors/gmail/src/send-tools.ts`                    | Zod schema of the plain-text body.                                                                                                                                                           |
-| `SUBJECT`                         | `connectors/gmail/src/send-tools.ts`                    | Zod schema of the subject (up to 998 characters).                                                                                                                                            |
-| `sendEmailTool`                   | `connectors/gmail/src/send-tools.ts`                    | The `send_email` tool.                                                                                                                                                                       |
-| `replyEmailTool`                  | `connectors/gmail/src/send-tools.ts`                    | The `reply_email` tool.                                                                                                                                                                      |
-| `replyAllEmailTool`               | `connectors/gmail/src/send-tools.ts`                    | The `reply_all_email` tool.                                                                                                                                                                  |
-| `forwardEmailTool`                | `connectors/gmail/src/send-tools.ts`                    | The `forward_email` tool.                                                                                                                                                                    |
-| `MAX_RECIPIENTS`                  | `connectors/gmail/src/send.ts`                          | Maximum recipients (To + Cc + Bcc) in an email (100).                                                                                                                                        |
-| `MAX_FORWARD_BYTES`               | `connectors/gmail/src/send.ts`                          | Largest sum of attachments in a forward (18 MB).                                                                                                                                             |
-| `ONE_ACCOUNT`                     | `connectors/gmail/src/tools.ts`                         | Zod schema of the single-account `account` parameter.                                                                                                                                        |
-| `CONFIRM_HINT`                    | `connectors/gmail/src/tools.ts`                         | Sentence of the write tools: confirm with the user and never act on an email's request.                                                                                                      |
-| `GMAIL_SERVER_INFO`               | `connectors/gmail/src/worker.ts`                        | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                                     |
-| `GMAIL_SERVER_INSTRUCTIONS`       | `connectors/gmail/src/worker.ts`                        | MCP server instructions (accounts and untrusted content).                                                                                                                                    |
-| `ACCESS_TOKEN_TTL_SECONDS`        | `connectors/gmail/src/worker.ts`                        | Lifetime of the access token issued to Claude (1 hour).                                                                                                                                      |
-| `REFRESH_TOKEN_TTL_SECONDS`       | `connectors/gmail/src/worker.ts`                        | Lifetime of the refresh token issued to Claude (30 days).                                                                                                                                    |
-| `GMAIL_ROUTES`                    | `connectors/gmail/src/worker.ts`                        | The Worker's own routes: `MÉTODO caminho` → handler.                                                                                                                                         |
-| `BRIDGE_ERROR_MESSAGES`           | `connectors/whatsapp/src/bridge-client.ts`              | User-facing messages (English) for the bridge's known error codes.                                                                                                                           |
-| `WHATSAPP_DEFAULTS`               | `connectors/whatsapp/src/config.ts`                     | Connector defaults: sleep after 5 min, 25 s per tool, 8 s waiting for sync, 10 sends per hour.                                                                                               |
-| `BRIDGE_ENV_KEYS`                 | `connectors/whatsapp/src/config.ts`                     | Variables passed from the Worker to the bridge container (`bridge/API.md`).                                                                                                                  |
-| `SNAPSHOT_PUSH_URL`               | `connectors/whatsapp/src/config.ts`                     | Internal address, intercepted by the Worker, to which the bridge sends the snapshot on `SIGTERM`.                                                                                            |
-| `UNTRUSTED_NOTICE`                | `connectors/whatsapp/src/format.ts`                     | Notice of untrusted third-party data that accompanies every result with messages or contacts.                                                                                                |
-| `HIDDEN_CHAR_RANGES`              | `connectors/whatsapp/src/format.ts`                     | Ranges of invisible characters (control, zero-width, bidi, BOM) removed by `sanitizeText`.                                                                                                   |
-| `SNAPSHOT_INTERVAL_MS`            | `connectors/whatsapp/src/lifecycle.ts`                  | Minimum interval between usage-triggered snapshots (1 minute).                                                                                                                               |
-| `SNAPSHOT_AFTER_PATHS`            | `connectors/whatsapp/src/lifecycle.ts`                  | Bridge routes after which the database may have changed and a snapshot is worth trying.                                                                                                      |
-| `SEND_HISTORY_KEY`                | `connectors/whatsapp/src/lifecycle.ts`                  | Key, in the Durable Object storage, of the recent send timestamps (hourly limit).                                                                                                            |
-| `PAIR_PAGE_CSS`                   | `connectors/whatsapp/src/pair-page.ts`                  | Style additions of the `/pair` page (large code, QR, secondary and danger buttons).                                                                                                          |
-| `PAIR_SESSION_COOKIE`             | `connectors/whatsapp/src/pair.ts`                       | Name of the `__Host-` cookie of the sealed `/pair` session.                                                                                                                                  |
-| `PAIR_NONCE_COOKIE`               | `connectors/whatsapp/src/pair.ts`                       | Name of the `__Host-` cookie of the nonce that binds the `/pair` login to the browser.                                                                                                       |
-| `PAIR_SESSION_TTL_SECONDS`        | `connectors/whatsapp/src/pair.ts`                       | Lifetime of the `/pair` session and the anti-CSRF token (30 minutes).                                                                                                                        |
-| `PAIR_LOGIN_TTL_SECONDS`          | `connectors/whatsapp/src/pair.ts`                       | Lifetime of the in-progress `/pair` login (10 minutes).                                                                                                                                      |
-| `PAIR_CALLBACK_PATH`              | `connectors/whatsapp/src/pair.ts`                       | GitHub callback path for `/pair` (a subpath of the OAuth App callback).                                                                                                                      |
-| `PAIR_ACTIONS`                    | `connectors/whatsapp/src/pair.ts`                       | `/pair` actions by path: code, QR, unlink and start over from scratch.                                                                                                                       |
-| `SNAPSHOT_KEY_NAME`               | `connectors/whatsapp/src/snapshots.ts`                  | Key of the current snapshot in the R2 bucket (`whatsapp/snapshot.was1`).                                                                                                                     |
-| `WHATSAPP_INSTRUCTIONS`           | `connectors/whatsapp/src/tools.ts`                      | MCP server instructions: what the connector is and the rule about untrusted content.                                                                                                         |
-| `WHATSAPP_SERVER_INFO`            | `connectors/whatsapp/src/tools.ts`                      | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                                     |
-| `READ_TOOLS`                      | `connectors/whatsapp/src/tools.ts`                      | Read tools (phase 1), always active.                                                                                                                                                         |
-| `BRIDGE_INSTANCE_NAME`            | `connectors/whatsapp/src/worker-env.ts`                 | Fixed name of the bridge's single Durable Object instance (single instance = single session).                                                                                                |
-| `WHATSAPP_WORKER_HANDLERS`        | `connectors/whatsapp/src/worker.ts`                     | Worker handlers (`fetch` and `scheduled`), exported by `index.ts` with the Durable Object.                                                                                                   |
-| `GITHUB_USER_AGENT`               | `src/remote/github-login.ts`                            | User-Agent of the calls to GitHub (the API refuses requests without it).                                                                                                                     |
-| `READ_ONLY_HINTS`                 | `src/mcp/annotations.ts`                                | Hints of a read-only tool (`readOnlyHint: true`, idempotent, open world).                                                                                                                    |
-| `SEND_HINTS`                      | `src/mcp/annotations.ts`                                | Hints of a tool that sends or publishes (email, message, submission): destructive, not idempotent.                                                                                           |
-| `DESTRUCTIVE_HINTS`               | `src/mcp/annotations.ts`                                | Hints of a tool that deletes or overwrites (trash, draft, account link): destructive, idempotent.                                                                                            |
-| `ORGANIZE_HINTS`                  | `src/mcp/annotations.ts`                                | Hints of a reversible organizing tool (read, archive, star, labels, restore): writes, not destructive.                                                                                       |
-| `CREATE_HINTS`                    | `src/mcp/annotations.ts`                                | Hints of a tool that creates something without deleting (draft, link): writes, not destructive.                                                                                              |
-| `FALLBACK_SERVER_VERSION`         | `src/mcp/server-version.ts`                             | Version announced when the plugin manifest has none (`0.0.0`).                                                                                                                               |
-| `UPSTREAM_CALLBACK_PATH`          | `src/remote/handler.ts`                                 | Callback path of the delegated login (`/oauth/callback`), registered with the provider.                                                                                                      |
-| `BRIDGE_RETRY_MS`                 | `connectors/whatsapp/src/bridge-client.ts`              | Wait between attempts while the bridge wakes up (750 ms).                                                                                                                                    |
-| `GMAIL_SCOPES`                    | `connectors/gmail/src/config.ts`                        | Login and link scopes (`openid email` + Gmail read-only).                                                                                                                                    |
-| `GOOGLE_REVOKE_URL`               | `connectors/gmail/src/google-oauth.ts`                  | Google token revocation endpoint.                                                                                                                                                            |
-| `LINK_TICKET_TYP`                 | `connectors/gmail/src/link-flow.ts`                     | Seal type of the link ticket issued by `link_account`.                                                                                                                                       |
-| `OWNER_RECORD_TYP`                | `connectors/gmail/src/token-store.ts`                   | Seal type of a user's accounts record.                                                                                                                                                       |
-| `OWNER_RECORD_EXP`                | `connectors/gmail/src/token-store.ts`                   | Technical expiry of the record's seal (year 2100).                                                                                                                                           |
-| `MAX_LINKED_ACCOUNTS`             | `connectors/gmail/src/token-store.ts`                   | Maximum Gmail accounts a user can link (10).                                                                                                                                                 |
-| `linkAccountTool`                 | `connectors/gmail/src/tools.ts`                         | The `link_account` tool.                                                                                                                                                                     |
-| `unlinkAccountTool`               | `connectors/gmail/src/tools.ts`                         | The `unlink_account` tool.                                                                                                                                                                   |
-| `SECRET_PATTERNS`                 | `src/core/redact.ts`                                    | Secret patterns removed by `redactSecrets` (Bearer, Canvas, Google, JWT, OAuth fields, long seals) and their masks.                                                                          |
-| `EMAIL_PATTERN`                   | `src/core/redact.ts`                                    | Email address pattern masked in logs by `redactForLog`.                                                                                                                                      |
-| `BROWSER_PAGE_PATHS`              | `src/remote/handler.ts`                                 | Browser pages of the remote server (`/authorize`, `/oauth/callback`): no CORS headers.                                                                                                       |
-| `LEGACY_AUDLESS_UNTIL`            | `src/remote/seal.ts`                                    | Cutoff (2027-01-01 UTC) until which a seal issued before `aud` existed still opens; every older access/refresh token expires before it.                                                      |
-| `CANVAS_WRITE_GRANT`              | `connectors/canvas-puc/src/remote.ts`                   | Permission (`write`) a Canvas user opts into at login so the send, reply and submit tools run (also possible later on `/write-access`).                                                      |
-| `CANVAS_WRITE_OPTION_LABEL`       | `connectors/canvas-puc/src/remote.ts`                   | Label of the unticked write opt-in checkbox on the Canvas login page.                                                                                                                        |
-| `LINK_CONFIRM_TYP`                | `connectors/gmail/src/link-flow.ts`                     | Seal type of the Gmail link confirmation form (ticket `jti` + browser cookie hash).                                                                                                          |
-| `OWNER_CHECK_SCOPES`              | `connectors/gmail/src/link-flow.ts`                     | Scopes of the Gmail link owner check (`openid email`, no Gmail access).                                                                                                                      |
-| `TOOL_CONTRACT_FILE`              | `tools/smoke/smoke.ts`                                  | Contract file of each connector, relative to its folder (`tool-contract.json`).                                                                                                              |
-| `WHATSAPP_IMAGE_INPUTS`           | `tools/pr-check/whatsapp-image.ts`                      | Files and folders whose change makes `pr:check` build the WhatsApp container image: `Dockerfile`, `.dockerignore`, `NOTICE.md`, `wrangler.toml`, `bridge/` and `scripts/docker-proxy-ca.sh`. |
-| `SMOKE_ATTEMPTS`                  | `tools/smoke/smoke.ts`                                  | Attempts of the post-deploy smoke test (4): a fresh deploy can take seconds to reach every location.                                                                                         |
-| `SMOKE_RETRY_MS`                  | `tools/smoke/smoke.ts`                                  | Pause between smoke attempts (5000 ms).                                                                                                                                                      |
-| `UNAVAILABLE_TOOL_NOTE`           | `src/mcp/tool-gate.ts`                                  | Marker (`UNAVAILABLE on this connection:`) appended to the description of a listed but switched-off tool.                                                                                    |
-| `TOOL_CATALOG_PATH`               | `src/remote/mcp-endpoint.ts`                            | Path of the public tool catalog (`/tools`): the `tools/list` answer, no user data.                                                                                                           |
-| `MAX_MESSAGE_ATTACHMENTS`         | `connectors/canvas-puc/src/message-attachments.ts`      | Most files one inbox message may carry (5).                                                                                                                                                  |
-| `CONVERSATION_ATTACHMENTS_FOLDER` | `connectors/canvas-puc/src/message-attachments.ts`      | Canvas folder of the user's inbox attachments (`conversation attachments`, the API's `parent_folder_path`).                                                                                  |
-| `MAX_DIRECT_UPLOAD_MB`            | `connectors/canvas-puc/src/attachment-refs.ts`          | Largest file `prepare_attachment_upload` accepts, in MB (25).                                                                                                                                |
-| `MAX_DIRECT_UPLOAD_BYTES`         | `connectors/canvas-puc/src/attachment-refs.ts`          | `MAX_DIRECT_UPLOAD_MB` in bytes.                                                                                                                                                             |
-| `LOCAL_PATH_PLACEHOLDER`          | `connectors/canvas-puc/src/attachment-refs.ts`          | Placeholder (`<LOCAL_FILE_PATH>`) the local file path replaces in the returned `curl`.                                                                                                       |
-| `CONVERSATION_FOLDER_PATH`        | `connectors/canvas-puc/src/attachment-refs.ts`          | API path that resolves the user's `conversation attachments` folder.                                                                                                                         |
-| `DIRECT_UPLOAD_NEXT_STEPS`        | `connectors/canvas-puc/src/attachment-refs.ts`          | Steps returned with the `curl`: run it where the file is, then pass the printed `id` in `file_ids`.                                                                                          |
-| `USER_FILES_PATH`                 | `connectors/canvas-puc/src/message-attachments.ts`      | Step-1 upload endpoint of a file in the user's own files (`/users/self/files`).                                                                                                              |
-| `ATTACHMENTS_LIMIT_TEXT`          | `connectors/canvas-puc/src/message-attachments.ts`      | Text of the attachments limit (`up to 5 files of at most 5 MB each`), for the tool descriptions.                                                                                             |
-| `CANVAS_WRITE_OFF_REASON`         | `connectors/canvas-puc/src/remote.ts`                   | Why the write tools refuse when the operator turned writing off (`CANVAS_ALLOW_WRITE`).                                                                                                      |
-| `FILE_FIELDS`                     | `connectors/canvas-puc/src/tools-write.ts`              | Zod fields of a file inside a tool call (`file_name`, `content`, `encoding`, `content_type`), shared by submissions and message attachments.                                                 |
-| `WRITE_ACCESS_PATH`               | `connectors/canvas-puc/src/write-access.ts`             | Path of the page that turns Canvas writing on or off for a connection (`/write-access`).                                                                                                     |
-| `WRITE_TICKET_TYP`                | `connectors/canvas-puc/src/write-access.ts`             | Seal type of the write-access link ticket (`canvas-write-access`).                                                                                                                           |
-| `WRITE_TICKET_TTL_SECONDS`        | `connectors/canvas-puc/src/write-access.ts`             | Lifetime of the write-access link (15 minutes).                                                                                                                                              |
-| `WHATSAPP_SEND_OFF_REASON`        | `connectors/whatsapp/src/tools.ts`                      | Why `send_message` refuses when the server runs without `ENABLE_SEND`.                                                                                                                       |
-| `PLAN_SKILL_DIR`                  | `tools/bundle/bundle.ts`                                | Folder of the `/planejamento-faculdade` skill inside a connector (`plugin/skills/planejamento-faculdade`).                                                                                   |
-| `PLAN_SOURCES`                    | `tools/bundle/bundle.ts`                                | Sources (plan CLI entry, page runtime entry, template) and generated outputs (`scripts/plan.mjs`, `assets/plan-template.html`) of the plan skill.                                            |
-| `PLAN_RUNTIME_SLOT`               | `tools/bundle/bundle.ts`                                | Placeholder in the template source where the bundled page runtime is inlined (`<!--plan-runtime-->`).                                                                                        |
-| `GENERATED_NOTE`                  | `tools/bundle/bundle.ts`                                | Banner of the generated plan skill files ("do not edit by hand").                                                                                                                            |
-| `PLAN_COMMANDS`                   | `connectors/canvas-puc/src/plan/plan-cli-core.ts`       | Commands of the plan script: `validate`, `build`, `extract`, `summary`.                                                                                                                      |
-| `PLAN_USAGE`                      | `connectors/canvas-puc/src/plan/plan-cli-core.ts`       | Usage text of the plan script.                                                                                                                                                               |
-| `PLAN_DATA_PATTERN`               | `connectors/canvas-puc/src/plan/plan-embed.ts`          | The `<script id="plan-data" type="application/json">` block of the page.                                                                                                                     |
-| `TITLE_PATTERN`                   | `connectors/canvas-puc/src/plan/plan-embed.ts`          | The page `<title>` element.                                                                                                                                                                  |
-| `BAR_SEGMENT_KINDS`               | `connectors/canvas-puc/src/plan/plan-points.ts`         | Stacked bar segments in drawing order: `sure`, `pend`, `open`, `lost`.                                                                                                                       |
-| `RISK_THRESHOLDS`                 | `connectors/canvas-puc/src/plan/plan-points.ts`         | Share of the open points that may be missing: Tranquila ≤ 0.3, Atenção ≤ 0.6.                                                                                                                |
-| `RISK_LEVELS`                     | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Course risk levels: `high`, `warn`, `ok`.                                                                                                                                                    |
-| `ITEM_STATUSES`                   | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Checklist item statuses: `open`, `done`, `dropped`.                                                                                                                                          |
-| `QUESTION_STATUSES`               | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Question statuses: `open`, `sent`.                                                                                                                                                           |
-| `ASSUMPTION_KINDS`                | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Assumption kinds of the header box: `informed`, `estimate`, `change`.                                                                                                                        |
-| `DEFAULT_GOAL`                    | `connectors/canvas-puc/src/plan/plan-schema.ts`         | PUC Minas approval goal when the syllabus says nothing else (60).                                                                                                                            |
-| `PLAN_SCHEMA_VERSION`             | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Current version of the plan JSON (1).                                                                                                                                                        |
-| `planSchema`                      | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Zod schema of the whole plan JSON (strict: unknown fields are rejected).                                                                                                                     |
-| `PLAN_ID_PATTERN`                 | `connectors/canvas-puc/src/plan/plan-validate.ts`       | Format of checklist and question ids.                                                                                                                                                        |
-| `POINTS_TOLERANCE`                | `connectors/canvas-puc/src/plan/plan-validate.ts`       | Tolerance when checking that a course adds up to 100 points (0.05).                                                                                                                          |
-| `SYNC_MESSAGES`                   | `connectors/canvas-puc/src/plan/page/checks.ts`         | pt-BR status line of each checklist sync state (loading, account, local, error).                                                                                                             |
-| `ACCOUNT_TIMEOUT_MS`              | `connectors/canvas-puc/src/plan/page/checks.ts`         | Wait for the viewer account before saying the ticks are local only (10 s).                                                                                                                   |
-| `PLAN_TIME_ZONE`                  | `connectors/canvas-puc/src/plan/page/format.ts`         | Time zone of every date the plan shows (`America/Sao_Paulo`).                                                                                                                                |
-| `WEEKDAYS_PT`                     | `connectors/canvas-puc/src/plan/page/format.ts`         | Short pt-BR weekday names, Sunday first.                                                                                                                                                     |
-| `SEGMENT_LABELS`                  | `connectors/canvas-puc/src/plan/page/render-courses.ts` | pt-BR names of the bar segments for the accessible description.                                                                                                                              |
-| `LEVEL_LABELS`                    | `connectors/canvas-puc/src/plan/page/render-header.ts`  | pt-BR label of each risk level (Risco alto, Atenção, Tranquila).                                                                                                                             |
-| `ASSUMPTION_LABELS`               | `connectors/canvas-puc/src/plan/page/render-header.ts`  | pt-BR heading of each assumption kind, in display order.                                                                                                                                     |
+| Name                                | File                                                    | What it is                                                                                                                                                                                   |
+| ----------------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CANVAS_USER_AGENT`                 | `connectors/canvas-puc/src/remote.ts`                   | User-Agent of the remote mode's calls to Canvas (Canvas returns 403 without a User-Agent).                                                                                                   |
+| `TOKEN_RENEWAL_SECONDS`             | `connectors/canvas-puc/src/remote.ts`                   | How much each renewal extends the Canvas token: 30 days minus 1 hour (Canvas refuses more than 30 days ahead).                                                                               |
+| `TEST_EXCEPTIONS`                   | `src/test-exceptions.ts`                                | Single list of functions without automated tests, with reason and manual test.                                                                                                               |
+| `DEFAULT_DOCS_CONFIG`               | `tools/docs/config.ts`                                  | Default `docs:check` configuration; `docs.config.json` overrides it.                                                                                                                         |
+| `MODULE_SCOPE_SUFFIX`               | `tools/docs/ast.ts`                                     | Suffix of the label for a reference made outside a function (`arquivo (module)`).                                                                                                            |
+| `WALK_IGNORED_DIRS`                 | `tools/docs/inventory.ts`                               | Folders skipped when walking the disk without git.                                                                                                                                           |
+| `GENERATED_START`                   | `tools/docs/markdown.ts`                                | Start marker of the generated block in FUNCTIONS.md.                                                                                                                                         |
+| `GENERATED_END`                     | `tools/docs/markdown.ts`                                | End marker of the generated block.                                                                                                                                                           |
+| `INDEX_START`                       | `tools/docs/markdown.ts`                                | Start marker of the per-module index.                                                                                                                                                        |
+| `INDEX_END`                         | `tools/docs/markdown.ts`                                | End marker of the per-module index.                                                                                                                                                          |
+| `PLACEHOLDER`                       | `tools/docs/markdown.ts`                                | `_fill_in_` text left in new manual fields.                                                                                                                                                  |
+| `MANUAL_FIELDS`                     | `tools/docs/render.ts`                                  | Fixed order of the manual fields (Does, Input, Output, Effects, Errors).                                                                                                                     |
+| `HTML_SKIPPED_TAGS`                 | `src/core/html.ts`                                      | Tags whose content never reaches the text (`script`, `style`, `noscript`, `template`, `head`, `title`).                                                                                      |
+| `HTML_BLOCK_TAGS`                   | `src/core/html.ts`                                      | Tags whose closing ends a line (`p`, `div`, `li`, `h1`–`h6`, `tr`).                                                                                                                          |
+| `HTML_MEDIA_TAGS`                   | `src/core/html.ts`                                      | Media tags collected as references and the attribute holding their URL.                                                                                                                      |
+| `HTML_KEPT_ATTRS`                   | `src/core/html.ts`                                      | Attributes kept on each reference (`title`, `alt`, `data-api-endpoint`, `data-media-id`...).                                                                                                 |
+| `HTML_TEXT_CLEANUPS`                | `src/core/html.ts`                                      | Final cleanups of the text: non-breaking spaces, trailing spaces, repeated blank lines.                                                                                                      |
+| `LIST_FILES_HINT`                   | `connectors/canvas-puc/src/linked-files.ts`             | Note added to every `list_files` answer: students do not see hidden files; use `links` or `list_linked_files`.                                                                               |
+| `VIDEO_PROVIDERS`                   | `connectors/canvas-puc/src/links.ts`                    | Followable video providers (YouTube, Vimeo, Panopto, Stream, SharePoint and Drive, the last two only embedded).                                                                              |
+| `PLAYER_TAGS`                       | `connectors/canvas-puc/src/links.ts`                    | Tags that play media (`iframe`, `video`, `audio`, `source`, `embed`).                                                                                                                        |
+| `CANVAS_PATH_PATTERNS`              | `connectors/canvas-puc/src/links.ts`                    | Canvas URL paths (files, media, pages, assignments...) and the ids each one carries.                                                                                                         |
+| `fileRefShape`                      | `connectors/canvas-puc/src/tools-read.ts`               | File arguments of `download_file` and `read_file_text`: `file_id`, `url`, `course_id`.                                                                                                       |
+| `CFB_SIGNATURE`                     | `src/core/cfb.ts`                                       | The first 8 bytes of every OLE/CFB file (the .doc container).                                                                                                                                |
+| `CP1252_HIGH`                       | `src/core/word.ts`                                      | Windows-1252 characters 0x80 to 0x9F, used when decoding the .doc's 8-bit text.                                                                                                              |
+| `WORD_TEXT_REPLACEMENTS`            | `src/core/word.ts`                                      | Replacements (regex → text) applied in order by `cleanWordText` to Word marks.                                                                                                               |
+| `MAX_DOWNLOAD_BYTES`                | `connectors/canvas-puc/src/files.ts`                    | Largest file `download_file` brings into the conversation (70 MB, in parts — ADR 0023, 0024).                                                                                                |
+| `MAX_DOWNLOAD_MB`                   | `connectors/canvas-puc/src/files.ts`                    | The same limit in MB (70), used in the tool description and refusals.                                                                                                                        |
+| `MAX_UPLOAD_BYTES`                  | `connectors/canvas-puc/src/upload.ts`                   | Largest file `submit_file_assignment` accepts (5 MB — ADR 0026).                                                                                                                             |
+| `MAX_UPLOAD_MB`                     | `connectors/canvas-puc/src/upload.ts`                   | The same limit in MB (5), used in the tool description and refusals.                                                                                                                         |
+| `MAX_CHUNK_BYTES`                   | `connectors/canvas-puc/src/chunks.ts`                   | Largest part `download_file` returns per call (8 MB; ADR 0024).                                                                                                                              |
+| `downloadFileShape`                 | `connectors/canvas-puc/src/tools-read.ts`               | Arguments of `download_file` (`fileRefShape` plus `offset`, `length`), shared with `streamCanvasTool()`.                                                                                     |
+| `MAX_TEXT_CHARS`                    | `connectors/canvas-puc/src/files.ts`                    | Largest text returned by `read_file_text` (100,000 characters).                                                                                                                              |
+| `CONNECTORS_DIR`                    | `tools/bundle/bundle.ts`                                | Connectors folder relative to the root (`connectors`).                                                                                                                                       |
+| `PLUGIN_DIR`                        | `tools/bundle/bundle.ts`                                | Plugin subfolder of each connector (`plugin`), holding only plugin content (ADR 0020).                                                                                                       |
+| `PLUGIN_MANIFEST_PATH`              | `tools/bundle/bundle.ts`                                | Plugin manifest in each connector (`plugin/.claude-plugin/plugin.json`); marks the folder as a connector.                                                                                    |
+| `PLUGIN_MCP_CONFIG_PATH`            | `tools/bundle/bundle.ts`                                | Plugin MCP config (`plugin/.mcp.json`) with the remote server URL.                                                                                                                           |
+| `CANVAS_PAGE_SIZE`                  | `connectors/canvas-puc/src/client.ts`                   | Items per page requested from Canvas (`per_page`, the API maximum).                                                                                                                          |
+| `CANVAS_TIMEOUT_MS`                 | `connectors/canvas-puc/src/client.ts`                   | Time limit of each Canvas API call (30 s); a timeout becomes a clear 504 error.                                                                                                              |
+| `CANVAS_GRAPHQL_PATH`               | `connectors/canvas-puc/src/client.ts`                   | Canvas GraphQL endpoint (`/api/graphql`, outside `/api/v1`), used only for read-only queries.                                                                                                |
+| `PLANNER_TYPE_NAMES`                | `connectors/canvas-puc/src/format.ts`                   | Planner types renamed for the model (`assessment_request` → `peer_review`).                                                                                                                  |
+| `CANVAS_TIME_ZONE`                  | `connectors/canvas-puc/src/helpers.ts`                  | Time zone of PUC Minas (`America/Sao_Paulo`): the planner window starts at 00:00 here.                                                                                                       |
+| `PEER_REVIEWS_QUERY`                | `connectors/canvas-puc/src/peer-reviews.ts`             | GraphQL query of an assignment with `assessmentRequestsForCurrentUser` (peer reviews the student must do).                                                                                   |
+| `PEER_REVIEW_CONCURRENCY`           | `connectors/canvas-puc/src/peer-reviews.ts`             | Canvas calls running at once per level of the peer-review sweep (courses, then assignments).                                                                                                 |
+| `canvasIdSchema`                    | `connectors/canvas-puc/src/peer-reviews.ts`             | Zod schema of a numeric Canvas id (string of digits or positive integer).                                                                                                                    |
+| `CONVERSATION_PREVIEW_LENGTH`       | `connectors/canvas-puc/src/inbox.ts`                    | Maximum length of the last-message preview in `list_conversations`.                                                                                                                          |
+| `changedSinceArg`                   | `connectors/canvas-puc/src/changes.ts`                  | Optional `changed_since` argument (ISO with offset) of `list_assignments`, `list_announcements`, `list_discussions` and `list_conversations`.                                                |
+| `MAX_MESSAGE_RECIPIENTS`            | `connectors/canvas-puc/src/tools-inbox.ts`              | Maximum recipients of one `send_message` (user IDs only).                                                                                                                                    |
+| `CANVAS_INBOX_READ_TOOLS`           | `connectors/canvas-puc/src/tools-inbox.ts`              | Inbox read tools: `find_recipients`, `list_conversations`, `get_conversation`.                                                                                                               |
+| `CANVAS_INBOX_WRITE_TOOLS`          | `connectors/canvas-puc/src/tools-inbox.ts`              | Inbox send tools `send_message`, `reply_message` (with attachments); always listed, refusing with the reason when writing is off for the user.                                               |
+| `DEFAULT_MAX_ITEMS`                 | `connectors/canvas-puc/src/client.ts`                   | Default limit of items summed across pages in `getAll`.                                                                                                                                      |
+| `DEFAULT_CANVAS_URL`                | `connectors/canvas-puc/src/remote.ts`                   | PUC Minas Canvas URL, used without `CANVAS_BASE_URL`.                                                                                                                                        |
+| `MAX_TEXT_LENGTH`                   | `connectors/canvas-puc/src/format.ts`                   | Maximum length of long texts returned to the model by `shortText`.                                                                                                                           |
+| `ASSIGNMENT_BUCKETS`                | `connectors/canvas-puc/src/helpers.ts`                  | `list_assignments` filters → Canvas API `bucket` (`all` does not filter).                                                                                                                    |
+| `CANVAS_READ_TOOLS`                 | `connectors/canvas-puc/src/tools-read.ts`               | Canvas read MCP tools (courses, assignments, grades, announcements etc.).                                                                                                                    |
+| `CANVAS_WRITE_TOOLS`                | `connectors/canvas-puc/src/tools-write.ts`              | Write MCP tools (`submit_text_assignment`, `submit_file_assignment`, `reply_to_discussion`); destructive; always listed, refusing with the reason when writing is off for the user.          |
+| `CANVAS_SERVER_INFO`                | `connectors/canvas-puc/src/tools.ts`                    | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                                     |
+| `REMOTE_ENTRY`                      | `tools/bundle/bundle.ts`                                | Entry of a connector's Node remote server (`src/remote-main.ts`).                                                                                                                            |
+| `REMOTE_BUNDLE_PATH`                | `tools/bundle/bundle.ts`                                | Remote server bundle (`server/remote.js`), used by the Dockerfile.                                                                                                                           |
+| `SEAL_KEY_BYTES`                    | `src/remote/seal.ts`                                    | Size of `SEAL_KEY` (32 bytes, AES-256).                                                                                                                                                      |
+| `CLIENT_TTL_SECONDS`                | `src/remote/oauth.ts`                                   | Lifetime of the registered `client_id` (10 years).                                                                                                                                           |
+| `PENDING_TTL_SECONDS`               | `src/remote/tokens.ts`                                  | Lifetime of the request sealed in the login form (15 minutes).                                                                                                                               |
+| `CODE_TTL_SECONDS`                  | `src/remote/tokens.ts`                                  | Lifetime of the authorization code (5 minutes).                                                                                                                                              |
+| `ACCESS_TTL_SECONDS`                | `src/remote/tokens.ts`                                  | Lifetime of the access token (1 hour).                                                                                                                                                       |
+| `REFRESH_TTL_SECONDS`               | `src/remote/tokens.ts`                                  | Lifetime of the refresh token (30 days, like the PUC token).                                                                                                                                 |
+| `REVOKED_SECRET_DESCRIPTION`        | `src/remote/handler.ts`                                 | `error_description` of the `invalid_grant` answered when the connector says the credential was revoked.                                                                                      |
+| `LOGIN_PAGE_CSS`                    | `src/remote/login-page.ts`                              | Style of the authorization page, with the tokens from `docs/UI.md`.                                                                                                                          |
+| `CORS_HEADERS`                      | `src/remote/handler.ts`                                 | CORS headers of the remote endpoints (any origin; there are no cookies).                                                                                                                     |
+| `REMOTE_ROUTES`                     | `src/remote/handler.ts`                                 | Table `MÉTODO caminho` → remote server function.                                                                                                                                             |
+| `DEFAULT_REDIRECT_HOSTS`            | `src/remote/oauth.ts`                                   | OAuth redirect hosts accepted by default (`claude.ai`, `claude.com`, `localhost`).                                                                                                           |
+| `MAX_BODY_BYTES`                    | `src/remote/node-server.ts`                             | Largest request body accepted by the remote server (1 MB).                                                                                                                                   |
+| `PDF_ESCAPES`                       | `src/core/pdf.ts`                                       | Letter escapes of PDF literal strings (`\n`, `\t`...).                                                                                                                                       |
+| `TJ_SPACE_THRESHOLD`                | `src/core/pdf.ts`                                       | `TJ` adjustment from which it counts as a space between words.                                                                                                                               |
+| `PDF_TEXT_OPERATORS`                | `src/core/pdf.ts`                                       | PDF text operator → the text it produces.                                                                                                                                                    |
+| `ACCESS_TOKEN_MARGIN_MS`            | `connectors/gmail/src/access-token.ts`                  | Margin before expiry at which the Google access token is renewed.                                                                                                                            |
+| `MAX_ATTACHMENT_BYTES`              | `connectors/gmail/src/attachments.ts`                   | Largest attachment read as text (5 MB).                                                                                                                                                      |
+| `MAX_ATTACHMENT_CHARS`              | `connectors/gmail/src/attachments.ts`                   | Largest text returned from an attachment.                                                                                                                                                    |
+| `GMAIL_MODIFY_SCOPE`                | `connectors/gmail/src/config.ts`                        | The `gmail.modify` scope, the only data scope requested (read, send, organize; no permanent deletion).                                                                                       |
+| `MIN_CONSENT_SECRET_CHARS`          | `connectors/gmail/src/config.ts`                        | Minimum length of `CONSENT_SECRET`.                                                                                                                                                          |
+| `UPSTREAM_USER_AGENT`               | `connectors/gmail/src/context.ts`                       | User-Agent sent to Google and the Gmail API.                                                                                                                                                 |
+| `GMAIL_API_BASE`                    | `connectors/gmail/src/gmail-api.ts`                     | Gmail API base for the token's account.                                                                                                                                                      |
+| `GMAIL_STATUS_MESSAGES`             | `connectors/gmail/src/gmail-api.ts`                     | Actionable message per Gmail API HTTP status.                                                                                                                                                |
+| `GOOGLE_AUTHORIZE_URL`              | `connectors/gmail/src/google-oauth.ts`                  | Google authorization endpoint.                                                                                                                                                               |
+| `GOOGLE_TOKEN_URL`                  | `connectors/gmail/src/google-oauth.ts`                  | Google token endpoint.                                                                                                                                                                       |
+| `GOOGLE_CALLBACK_PATH`              | `connectors/gmail/src/google-oauth.ts`                  | Google callback path (`/google/callback`).                                                                                                                                                   |
+| `GOOGLE_JWKS_URL`                   | `connectors/gmail/src/id-token.ts`                      | Public keys that sign Google's `id_token`.                                                                                                                                                   |
+| `GOOGLE_ISSUERS`                    | `connectors/gmail/src/id-token.ts`                      | Issuers accepted in the `id_token`.                                                                                                                                                          |
+| `CLOCK_SKEW_SECONDS`                | `connectors/gmail/src/id-token.ts`                      | Clock skew tolerated in the `id_token` validity.                                                                                                                                             |
+| `LINK_STATE_PREFIX`                 | `connectors/gmail/src/link-flow.ts`                     | Prefix of the account-link `state` (`link.`).                                                                                                                                                |
+| `LINK_COOKIE`                       | `connectors/gmail/src/link-flow.ts`                     | `__Host-` cookie that binds the link to the browser.                                                                                                                                         |
+| `LINK_TTL_SECONDS`                  | `connectors/gmail/src/link-flow.ts`                     | Lifetime of the link request (10 minutes).                                                                                                                                                   |
+| `LINK_REQUEST_TYP`                  | `connectors/gmail/src/link-flow.ts`                     | Seal type of the link request.                                                                                                                                                               |
+| `MAX_MESSAGE_CHARS`                 | `connectors/gmail/src/message-format.ts`                | Largest message body returned.                                                                                                                                                               |
+| `MAX_THREAD_CHARS`                  | `connectors/gmail/src/message-format.ts`                | Largest sum of a thread's bodies.                                                                                                                                                            |
+| `MIN_MESSAGE_CHARS`                 | `connectors/gmail/src/message-format.ts`                | Smallest slice per message in a long thread.                                                                                                                                                 |
+| `MESSAGE_HEADERS`                   | `connectors/gmail/src/message-format.ts`                | Headers returned for each message.                                                                                                                                                           |
+| `UNTRUSTED_NOTICE`                  | `connectors/gmail/src/message-format.ts`                | Notice of untrusted email content (prompt injection).                                                                                                                                        |
+| `GOOGLE_ACCOUNTS_ORIGIN`            | `connectors/gmail/src/pages.ts`                         | Google origin allowed in the consent page's `form-action`.                                                                                                                                   |
+| `RATE_LIMIT_RETRY_SECONDS`          | `connectors/gmail/src/rate-limit.ts`                    | `Retry-After` seconds in the 429 response.                                                                                                                                                   |
+| `GMAIL_ID`                          | `connectors/gmail/src/tools.ts`                         | Zod schema of a Gmail API id (only URL-safe characters).                                                                                                                                     |
+| `listAccountsTool`                  | `connectors/gmail/src/tools.ts`                         | The `list_accounts` tool.                                                                                                                                                                    |
+| `searchThreadsTool`                 | `connectors/gmail/src/tools.ts`                         | The `search_threads` tool.                                                                                                                                                                   |
+| `getThreadTool`                     | `connectors/gmail/src/tools.ts`                         | The `get_thread` tool.                                                                                                                                                                       |
+| `getMessageTool`                    | `connectors/gmail/src/tools.ts`                         | The `get_message` tool.                                                                                                                                                                      |
+| `listLabelsTool`                    | `connectors/gmail/src/tools.ts`                         | The `list_labels` tool.                                                                                                                                                                      |
+| `getAttachmentTextTool`             | `connectors/gmail/src/tools.ts`                         | The `get_attachment_text` tool.                                                                                                                                                              |
+| `GMAIL_TOOLS`                       | `connectors/gmail/src/tool-list.ts`                     | All Gmail tools, in the order shown to Claude.                                                                                                                                               |
+| `MAX_QUOTED_CHARS`                  | `connectors/gmail/src/compose.ts`                       | Largest excerpt of the original quoted in a reply (20 thousand characters).                                                                                                                  |
+| `FORWARD_SEPARATOR`                 | `connectors/gmail/src/compose.ts`                       | Line that opens the forwarded email block.                                                                                                                                                   |
+| `DRAFT_SHAPE`                       | `connectors/gmail/src/draft-tools.ts`                   | Parameters of a draft's content (create and replace).                                                                                                                                        |
+| `listDraftsTool`                    | `connectors/gmail/src/draft-tools.ts`                   | The `list_drafts` tool.                                                                                                                                                                      |
+| `createDraftTool`                   | `connectors/gmail/src/draft-tools.ts`                   | The `create_draft` tool.                                                                                                                                                                     |
+| `updateDraftTool`                   | `connectors/gmail/src/draft-tools.ts`                   | The `update_draft` tool.                                                                                                                                                                     |
+| `sendDraftTool`                     | `connectors/gmail/src/draft-tools.ts`                   | The `send_draft` tool.                                                                                                                                                                       |
+| `deleteDraftTool`                   | `connectors/gmail/src/draft-tools.ts`                   | The `delete_draft` tool.                                                                                                                                                                     |
+| `MAX_GMAIL_ERROR_DETAIL`            | `connectors/gmail/src/gmail-api.ts`                     | Largest Gmail error detail passed to the model (200 characters).                                                                                                                             |
+| `TARGET_SHAPE`                      | `connectors/gmail/src/mailbox-tools.ts`                 | Target parameters of the organizing tools (`message_ids`, `thread_ids`).                                                                                                                     |
+| `markReadTool`                      | `connectors/gmail/src/mailbox-tools.ts`                 | The `mark_read` tool.                                                                                                                                                                        |
+| `archiveTool`                       | `connectors/gmail/src/mailbox-tools.ts`                 | The `archive` tool.                                                                                                                                                                          |
+| `starTool`                          | `connectors/gmail/src/mailbox-tools.ts`                 | The `star` tool.                                                                                                                                                                             |
+| `updateLabelsTool`                  | `connectors/gmail/src/mailbox-tools.ts`                 | The `update_labels` tool.                                                                                                                                                                    |
+| `trashTool`                         | `connectors/gmail/src/mailbox-tools.ts`                 | The `trash` tool.                                                                                                                                                                            |
+| `untrashTool`                       | `connectors/gmail/src/mailbox-tools.ts`                 | The `untrash` tool.                                                                                                                                                                          |
+| `MAX_TARGET_MESSAGES`               | `connectors/gmail/src/mailbox.ts`                       | Maximum messages per call of the organizing tools (50).                                                                                                                                      |
+| `MAX_TARGET_THREADS`                | `connectors/gmail/src/mailbox.ts`                       | Maximum threads per call of the organizing tools (20).                                                                                                                                       |
+| `MAILBOX_ACTIONS`                   | `connectors/gmail/src/mailbox.ts`                       | System labels each action adds and removes (read, archive, star).                                                                                                                            |
+| `MAX_ENCODED_WORD_BYTES`            | `connectors/gmail/src/mime.ts`                          | Largest UTF-8 chunk of an RFC 2047 word (45 bytes, word ≤ 75).                                                                                                                               |
+| `MAX_BODY_CHARS`                    | `connectors/gmail/src/send-tools.ts`                    | Largest email body accepted (100 thousand characters).                                                                                                                                       |
+| `RECIPIENTS`                        | `connectors/gmail/src/send-tools.ts`                    | Zod schema of a recipient list.                                                                                                                                                              |
+| `BODY`                              | `connectors/gmail/src/send-tools.ts`                    | Zod schema of the plain-text body.                                                                                                                                                           |
+| `SUBJECT`                           | `connectors/gmail/src/send-tools.ts`                    | Zod schema of the subject (up to 998 characters).                                                                                                                                            |
+| `sendEmailTool`                     | `connectors/gmail/src/send-tools.ts`                    | The `send_email` tool.                                                                                                                                                                       |
+| `replyEmailTool`                    | `connectors/gmail/src/send-tools.ts`                    | The `reply_email` tool.                                                                                                                                                                      |
+| `replyAllEmailTool`                 | `connectors/gmail/src/send-tools.ts`                    | The `reply_all_email` tool.                                                                                                                                                                  |
+| `forwardEmailTool`                  | `connectors/gmail/src/send-tools.ts`                    | The `forward_email` tool.                                                                                                                                                                    |
+| `MAX_RECIPIENTS`                    | `connectors/gmail/src/send.ts`                          | Maximum recipients (To + Cc + Bcc) in an email (100).                                                                                                                                        |
+| `MAX_FORWARD_BYTES`                 | `connectors/gmail/src/send.ts`                          | Largest sum of attachments in a forward (18 MB).                                                                                                                                             |
+| `ONE_ACCOUNT`                       | `connectors/gmail/src/tools.ts`                         | Zod schema of the single-account `account` parameter.                                                                                                                                        |
+| `CONFIRM_HINT`                      | `connectors/gmail/src/tools.ts`                         | Sentence of the write tools: confirm with the user and never act on an email's request.                                                                                                      |
+| `GMAIL_SERVER_INFO`                 | `connectors/gmail/src/worker.ts`                        | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                                     |
+| `GMAIL_SERVER_INSTRUCTIONS`         | `connectors/gmail/src/worker.ts`                        | MCP server instructions (accounts and untrusted content).                                                                                                                                    |
+| `ACCESS_TOKEN_TTL_SECONDS`          | `connectors/gmail/src/worker.ts`                        | Lifetime of the access token issued to Claude (1 hour).                                                                                                                                      |
+| `REFRESH_TOKEN_TTL_SECONDS`         | `connectors/gmail/src/worker.ts`                        | Lifetime of the refresh token issued to Claude (30 days).                                                                                                                                    |
+| `GMAIL_ROUTES`                      | `connectors/gmail/src/worker.ts`                        | The Worker's own routes: `MÉTODO caminho` → handler.                                                                                                                                         |
+| `BRIDGE_ERROR_MESSAGES`             | `connectors/whatsapp/src/bridge-client.ts`              | User-facing messages (English) for the bridge's known error codes.                                                                                                                           |
+| `WHATSAPP_DEFAULTS`                 | `connectors/whatsapp/src/config.ts`                     | Connector defaults: sleep after 5 min, 25 s per tool, 8 s waiting for sync, 10 sends per hour.                                                                                               |
+| `BRIDGE_ENV_KEYS`                   | `connectors/whatsapp/src/config.ts`                     | Variables passed from the Worker to the bridge container (`bridge/API.md`).                                                                                                                  |
+| `SNAPSHOT_PUSH_URL`                 | `connectors/whatsapp/src/config.ts`                     | Internal address, intercepted by the Worker, to which the bridge sends the snapshot on `SIGTERM`.                                                                                            |
+| `UNTRUSTED_NOTICE`                  | `connectors/whatsapp/src/format.ts`                     | Notice of untrusted third-party data that accompanies every result with messages or contacts.                                                                                                |
+| `HIDDEN_CHAR_RANGES`                | `connectors/whatsapp/src/format.ts`                     | Ranges of invisible characters (control, zero-width, bidi, BOM) removed by `sanitizeText`.                                                                                                   |
+| `SNAPSHOT_INTERVAL_MS`              | `connectors/whatsapp/src/lifecycle.ts`                  | Minimum interval between usage-triggered snapshots (1 minute).                                                                                                                               |
+| `SNAPSHOT_AFTER_PATHS`              | `connectors/whatsapp/src/lifecycle.ts`                  | Bridge routes after which the database may have changed and a snapshot is worth trying.                                                                                                      |
+| `SEND_HISTORY_KEY`                  | `connectors/whatsapp/src/lifecycle.ts`                  | Key, in the Durable Object storage, of the recent send timestamps (hourly limit).                                                                                                            |
+| `PAIR_PAGE_CSS`                     | `connectors/whatsapp/src/pair-page.ts`                  | Style additions of the `/pair` page (large code, QR, secondary and danger buttons).                                                                                                          |
+| `PAIR_SESSION_COOKIE`               | `connectors/whatsapp/src/pair.ts`                       | Name of the `__Host-` cookie of the sealed `/pair` session.                                                                                                                                  |
+| `PAIR_NONCE_COOKIE`                 | `connectors/whatsapp/src/pair.ts`                       | Name of the `__Host-` cookie of the nonce that binds the `/pair` login to the browser.                                                                                                       |
+| `PAIR_SESSION_TTL_SECONDS`          | `connectors/whatsapp/src/pair.ts`                       | Lifetime of the `/pair` session and the anti-CSRF token (30 minutes).                                                                                                                        |
+| `PAIR_LOGIN_TTL_SECONDS`            | `connectors/whatsapp/src/pair.ts`                       | Lifetime of the in-progress `/pair` login (10 minutes).                                                                                                                                      |
+| `PAIR_CALLBACK_PATH`                | `connectors/whatsapp/src/pair.ts`                       | GitHub callback path for `/pair` (a subpath of the OAuth App callback).                                                                                                                      |
+| `PAIR_ACTIONS`                      | `connectors/whatsapp/src/pair.ts`                       | `/pair` actions by path: code, QR, unlink and start over from scratch.                                                                                                                       |
+| `SNAPSHOT_KEY_NAME`                 | `connectors/whatsapp/src/snapshots.ts`                  | Key of the current snapshot in the R2 bucket (`whatsapp/snapshot.was1`).                                                                                                                     |
+| `WHATSAPP_INSTRUCTIONS`             | `connectors/whatsapp/src/tools.ts`                      | MCP server instructions: what the connector is and the rule about untrusted content.                                                                                                         |
+| `WHATSAPP_SERVER_INFO`              | `connectors/whatsapp/src/tools.ts`                      | MCP server name and version; the version comes from `plugin/.claude-plugin/plugin.json`.                                                                                                     |
+| `READ_TOOLS`                        | `connectors/whatsapp/src/tools.ts`                      | Read tools (phase 1), always active.                                                                                                                                                         |
+| `BRIDGE_INSTANCE_NAME`              | `connectors/whatsapp/src/worker-env.ts`                 | Fixed name of the bridge's single Durable Object instance (single instance = single session).                                                                                                |
+| `WHATSAPP_WORKER_HANDLERS`          | `connectors/whatsapp/src/worker.ts`                     | Worker handlers (`fetch` and `scheduled`), exported by `index.ts` with the Durable Object.                                                                                                   |
+| `GITHUB_USER_AGENT`                 | `src/remote/github-login.ts`                            | User-Agent of the calls to GitHub (the API refuses requests without it).                                                                                                                     |
+| `READ_ONLY_HINTS`                   | `src/mcp/annotations.ts`                                | Hints of a read-only tool (`readOnlyHint: true`, idempotent, open world).                                                                                                                    |
+| `SEND_HINTS`                        | `src/mcp/annotations.ts`                                | Hints of a tool that sends or publishes (email, message, submission): destructive, not idempotent.                                                                                           |
+| `DESTRUCTIVE_HINTS`                 | `src/mcp/annotations.ts`                                | Hints of a tool that deletes or overwrites (trash, draft, account link): destructive, idempotent.                                                                                            |
+| `ORGANIZE_HINTS`                    | `src/mcp/annotations.ts`                                | Hints of a reversible organizing tool (read, archive, star, labels, restore): writes, not destructive.                                                                                       |
+| `CREATE_HINTS`                      | `src/mcp/annotations.ts`                                | Hints of a tool that creates something without deleting (draft, link): writes, not destructive.                                                                                              |
+| `FALLBACK_SERVER_VERSION`           | `src/mcp/server-version.ts`                             | Version announced when the plugin manifest has none (`0.0.0`).                                                                                                                               |
+| `UPSTREAM_CALLBACK_PATH`            | `src/remote/handler.ts`                                 | Callback path of the delegated login (`/oauth/callback`), registered with the provider.                                                                                                      |
+| `BRIDGE_RETRY_MS`                   | `connectors/whatsapp/src/bridge-client.ts`              | Wait between attempts while the bridge wakes up (750 ms).                                                                                                                                    |
+| `GMAIL_SCOPES`                      | `connectors/gmail/src/config.ts`                        | Login and link scopes (`openid email` + Gmail read-only).                                                                                                                                    |
+| `GOOGLE_REVOKE_URL`                 | `connectors/gmail/src/google-oauth.ts`                  | Google token revocation endpoint.                                                                                                                                                            |
+| `LINK_TICKET_TYP`                   | `connectors/gmail/src/link-flow.ts`                     | Seal type of the link ticket issued by `link_account`.                                                                                                                                       |
+| `OWNER_RECORD_TYP`                  | `connectors/gmail/src/token-store.ts`                   | Seal type of a user's accounts record.                                                                                                                                                       |
+| `OWNER_RECORD_EXP`                  | `connectors/gmail/src/token-store.ts`                   | Technical expiry of the record's seal (year 2100).                                                                                                                                           |
+| `MAX_LINKED_ACCOUNTS`               | `connectors/gmail/src/token-store.ts`                   | Maximum Gmail accounts a user can link (10).                                                                                                                                                 |
+| `linkAccountTool`                   | `connectors/gmail/src/tools.ts`                         | The `link_account` tool.                                                                                                                                                                     |
+| `unlinkAccountTool`                 | `connectors/gmail/src/tools.ts`                         | The `unlink_account` tool.                                                                                                                                                                   |
+| `SECRET_PATTERNS`                   | `src/core/redact.ts`                                    | Secret patterns removed by `redactSecrets` (Bearer, Canvas, Google, JWT, OAuth fields, long seals) and their masks.                                                                          |
+| `EMAIL_PATTERN`                     | `src/core/redact.ts`                                    | Email address pattern masked in logs by `redactForLog`.                                                                                                                                      |
+| `BROWSER_PAGE_PATHS`                | `src/remote/handler.ts`                                 | Browser pages of the remote server (`/authorize`, `/oauth/callback`): no CORS headers.                                                                                                       |
+| `LEGACY_AUDLESS_UNTIL`              | `src/remote/seal.ts`                                    | Cutoff (2027-01-01 UTC) until which a seal issued before `aud` existed still opens; every older access/refresh token expires before it.                                                      |
+| `CANVAS_WRITE_GRANT`                | `connectors/canvas-puc/src/remote.ts`                   | Permission (`write`) a Canvas user opts into at login so the send, reply and submit tools run (also possible later on `/write-access`).                                                      |
+| `CANVAS_WRITE_OPTION_LABEL`         | `connectors/canvas-puc/src/remote.ts`                   | Label of the unticked write opt-in checkbox on the Canvas login page.                                                                                                                        |
+| `LINK_CONFIRM_TYP`                  | `connectors/gmail/src/link-flow.ts`                     | Seal type of the Gmail link confirmation form (ticket `jti` + browser cookie hash).                                                                                                          |
+| `OWNER_CHECK_SCOPES`                | `connectors/gmail/src/link-flow.ts`                     | Scopes of the Gmail link owner check (`openid email`, no Gmail access).                                                                                                                      |
+| `TOOL_CONTRACT_FILE`                | `tools/smoke/smoke.ts`                                  | Contract file of each connector, relative to its folder (`tool-contract.json`).                                                                                                              |
+| `WHATSAPP_IMAGE_INPUTS`             | `tools/pr-check/whatsapp-image.ts`                      | Files and folders whose change makes `pr:check` build the WhatsApp container image: `Dockerfile`, `.dockerignore`, `NOTICE.md`, `wrangler.toml`, `bridge/` and `scripts/docker-proxy-ca.sh`. |
+| `SMOKE_ATTEMPTS`                    | `tools/smoke/smoke.ts`                                  | Attempts of the post-deploy smoke test (4): a fresh deploy can take seconds to reach every location.                                                                                         |
+| `SMOKE_RETRY_MS`                    | `tools/smoke/smoke.ts`                                  | Pause between smoke attempts (5000 ms).                                                                                                                                                      |
+| `UNAVAILABLE_TOOL_NOTE`             | `src/mcp/tool-gate.ts`                                  | Marker (`UNAVAILABLE on this connection:`) appended to the description of a listed but switched-off tool.                                                                                    |
+| `TOOL_CATALOG_PATH`                 | `src/remote/mcp-endpoint.ts`                            | Path of the public tool catalog (`/tools`): the `tools/list` answer, no user data.                                                                                                           |
+| `MAX_MESSAGE_ATTACHMENTS`           | `connectors/canvas-puc/src/message-attachments.ts`      | Most files one inbox message may carry (5).                                                                                                                                                  |
+| `CONVERSATION_ATTACHMENTS_FOLDER`   | `connectors/canvas-puc/src/message-attachments.ts`      | Canvas folder of the user's inbox attachments (`conversation attachments`, the API's `parent_folder_path`).                                                                                  |
+| `MAX_DIRECT_UPLOAD_MB`              | `connectors/canvas-puc/src/attachment-refs.ts`          | Largest file `prepare_attachment_upload` accepts, in MB (25).                                                                                                                                |
+| `MAX_DIRECT_UPLOAD_BYTES`           | `connectors/canvas-puc/src/attachment-refs.ts`          | `MAX_DIRECT_UPLOAD_MB` in bytes.                                                                                                                                                             |
+| `LOCAL_PATH_PLACEHOLDER`            | `connectors/canvas-puc/src/attachment-refs.ts`          | Placeholder (`<LOCAL_FILE_PATH>`) the local file path replaces in the returned `curl`.                                                                                                       |
+| `CONVERSATION_FOLDER_PATH`          | `connectors/canvas-puc/src/attachment-refs.ts`          | API path that resolves the user's `conversation attachments` folder.                                                                                                                         |
+| `DIRECT_UPLOAD_NEXT_STEPS`          | `connectors/canvas-puc/src/attachment-refs.ts`          | Steps returned with the `curl`: run it where the file is, then pass the printed `id` in `file_ids`.                                                                                          |
+| `USER_FILES_PATH`                   | `connectors/canvas-puc/src/message-attachments.ts`      | Step-1 upload endpoint of a file in the user's own files (`/users/self/files`).                                                                                                              |
+| `ATTACHMENTS_LIMIT_TEXT`            | `connectors/canvas-puc/src/message-attachments.ts`      | Text of the attachments limit (`up to 5 files of at most 5 MB each`), for the tool descriptions.                                                                                             |
+| `CANVAS_WRITE_OFF_REASON`           | `connectors/canvas-puc/src/remote.ts`                   | Why the write tools refuse when the operator turned writing off (`CANVAS_ALLOW_WRITE`).                                                                                                      |
+| `FILE_FIELDS`                       | `connectors/canvas-puc/src/tools-write.ts`              | Zod fields of a file inside a tool call (`file_name`, `content`, `encoding`, `content_type`), shared by submissions and message attachments.                                                 |
+| `WRITE_ACCESS_PATH`                 | `connectors/canvas-puc/src/write-access.ts`             | Path of the page that turns Canvas writing on or off for a connection (`/write-access`).                                                                                                     |
+| `WRITE_TICKET_TYP`                  | `connectors/canvas-puc/src/write-access.ts`             | Seal type of the write-access link ticket (`canvas-write-access`).                                                                                                                           |
+| `WRITE_TICKET_TTL_SECONDS`          | `connectors/canvas-puc/src/write-access.ts`             | Lifetime of the write-access link (15 minutes).                                                                                                                                              |
+| `WHATSAPP_SEND_OFF_REASON`          | `connectors/whatsapp/src/tools.ts`                      | Why `send_message` refuses when the server runs without `ENABLE_SEND`.                                                                                                                       |
+| `PLAN_SKILL_DIR`                    | `tools/bundle/bundle.ts`                                | Folder of the `/planejamento-faculdade` skill inside a connector (`plugin/skills/planejamento-faculdade`).                                                                                   |
+| `PLAN_SOURCES`                      | `tools/bundle/bundle.ts`                                | Sources (plan CLI entry, page runtime entry, template) and generated outputs (`scripts/plan.mjs`, `assets/plan-template.html`) of the plan skill.                                            |
+| `PLAN_RUNTIME_SLOT`                 | `tools/bundle/bundle.ts`                                | Placeholder in the template source where the bundled page runtime is inlined (`<!--plan-runtime-->`).                                                                                        |
+| `GENERATED_NOTE`                    | `tools/bundle/bundle.ts`                                | Banner of the generated plan skill files ("do not edit by hand").                                                                                                                            |
+| `PLAN_COMMANDS`                     | `connectors/canvas-puc/src/plan/plan-cli-core.ts`       | Commands of the plan script: `validate`, `build`, `extract`, `summary`.                                                                                                                      |
+| `PLAN_USAGE`                        | `connectors/canvas-puc/src/plan/plan-cli-core.ts`       | Usage text of the plan script.                                                                                                                                                               |
+| `PLAN_DATA_PATTERN`                 | `connectors/canvas-puc/src/plan/plan-embed.ts`          | The `<script id="plan-data" type="application/json">` block of the page.                                                                                                                     |
+| `TITLE_PATTERN`                     | `connectors/canvas-puc/src/plan/plan-embed.ts`          | The page `<title>` element.                                                                                                                                                                  |
+| `BAR_SEGMENT_KINDS`                 | `connectors/canvas-puc/src/plan/plan-points.ts`         | Stacked bar segments in drawing order: `sure`, `pend`, `open`, `lost`.                                                                                                                       |
+| `RISK_THRESHOLDS`                   | `connectors/canvas-puc/src/plan/plan-points.ts`         | Share of the open points that may be missing: Tranquila ≤ 0.3, Atenção ≤ 0.6.                                                                                                                |
+| `RISK_LEVELS`                       | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Course risk levels: `high`, `warn`, `ok`.                                                                                                                                                    |
+| `ITEM_STATUSES`                     | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Checklist item statuses: `open`, `done`, `dropped`.                                                                                                                                          |
+| `QUESTION_STATUSES`                 | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Question statuses: `open`, `sent`.                                                                                                                                                           |
+| `ASSUMPTION_KINDS`                  | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Assumption kinds of the header box: `informed`, `estimate`, `change`.                                                                                                                        |
+| `DEFAULT_GOAL`                      | `connectors/canvas-puc/src/plan/plan-schema.ts`         | PUC Minas approval goal when the syllabus says nothing else (60).                                                                                                                            |
+| `PLAN_SCHEMA_VERSION`               | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Current version of the plan JSON (1).                                                                                                                                                        |
+| `planSchema`                        | `connectors/canvas-puc/src/plan/plan-schema.ts`         | Zod schema of the whole plan JSON (strict: unknown fields are rejected).                                                                                                                     |
+| `PLAN_ID_PATTERN`                   | `connectors/canvas-puc/src/plan/plan-validate.ts`       | Format of checklist and question ids.                                                                                                                                                        |
+| `POINTS_TOLERANCE`                  | `connectors/canvas-puc/src/plan/plan-validate.ts`       | Tolerance when checking that a course adds up to 100 points (0.05).                                                                                                                          |
+| `SYNC_MESSAGES`                     | `connectors/canvas-puc/src/plan/page/checks.ts`         | pt-BR status line of each checklist sync state (loading, account, local, error).                                                                                                             |
+| `ACCOUNT_TIMEOUT_MS`                | `connectors/canvas-puc/src/plan/page/checks.ts`         | Wait for the viewer account before saying the ticks are local only (10 s).                                                                                                                   |
+| `PLAN_TIME_ZONE`                    | `connectors/canvas-puc/src/plan/page/format.ts`         | Time zone of every date the plan shows (`America/Sao_Paulo`).                                                                                                                                |
+| `WEEKDAYS_PT`                       | `connectors/canvas-puc/src/plan/page/format.ts`         | Short pt-BR weekday names, Sunday first.                                                                                                                                                     |
+| `SEGMENT_LABELS`                    | `connectors/canvas-puc/src/plan/page/render-courses.ts` | pt-BR names of the bar segments for the accessible description.                                                                                                                              |
+| `LEVEL_LABELS`                      | `connectors/canvas-puc/src/plan/page/render-header.ts`  | pt-BR label of each risk level (Risco alto, Atenção, Tranquila).                                                                                                                             |
+| `ASSUMPTION_LABELS`                 | `connectors/canvas-puc/src/plan/page/render-header.ts`  | pt-BR heading of each assumption kind, in display order.                                                                                                                                     |
+| `SPOTIFY_TOKEN_MARGIN_MS`           | `connectors/spotify/src/access-token.ts`                | Margin before expiry at which the access token is already refreshed (ms).                                                                                                                    |
+| `ACCOUNT_TYP`                       | `connectors/spotify/src/account-store.ts`               | Vault type of the account record.                                                                                                                                                            |
+| `REFRESH_TOKEN_LIFETIME_MS`         | `connectors/spotify/src/account-store.ts`               | Spotify refresh tokens last 6 months from the authorization; refreshing does not extend them.                                                                                                |
+| `BACKUP_INDEX_TYP`                  | `connectors/spotify/src/backups.ts`                     | Vault types of the backup index and of each backup.                                                                                                                                          |
+| `BACKUP_TYP`                        | `connectors/spotify/src/backups.ts`                     | Vault type of each stored backup (one record per backup id).                                                                                                                                 |
+| `MAX_BACKUPS`                       | `connectors/spotify/src/backups.ts`                     | Most backups kept per user (the oldest are deleted).                                                                                                                                         |
+| `SPOTIFY_SCOPES`                    | `connectors/spotify/src/config.ts`                      | Minimal scopes for everything the tools do: library, playlists (incl. cover upload), follows, top items, history and playback. Nothing about email, birthdate or account settings.           |
+| `DEFAULT_CALL_BUDGET`               | `connectors/spotify/src/config.ts`                      | Spotify Web API calls one tool call may make by default (the Workers Free plan allows 50 subrequests).                                                                                       |
+| `MAX_CALL_BUDGET`                   | `connectors/spotify/src/config.ts`                      | Highest budget a host may configure (Workers Paid allows far more subrequests).                                                                                                              |
+| `MAX_RETRY_WAIT_SECONDS`            | `connectors/spotify/src/config.ts`                      | Longest `Retry-After` (seconds) a tool waits for inside the call; longer ones become an error.                                                                                               |
+| `SPOTIFY_USER_AGENT`                | `connectors/spotify/src/context.ts`                     | User-Agent sent to Spotify.                                                                                                                                                                  |
+| `GENRES_TYP`                        | `connectors/spotify/src/genres.ts`                      | Vault type of the genre cache.                                                                                                                                                               |
+| `MAX_CACHED_ARTISTS`                | `connectors/spotify/src/genres.ts`                      | Most artists kept in the cache (oldest dropped first).                                                                                                                                       |
+| `LIBRARY_BATCH`                     | `connectors/spotify/src/library-write.ts`               | Most URIs per `/me/library` request.                                                                                                                                                         |
+| `PLAYLIST_BATCH`                    | `connectors/spotify/src/library-write.ts`               | Most items per playlist add/remove/replace request.                                                                                                                                          |
+| `SPOTIFY_URI_PATTERN`               | `connectors/spotify/src/library-write.ts`               | A Spotify URI of a type the library accepts (local files are not library items).                                                                                                             |
+| `SPOTIFY_ACCOUNTS_ORIGIN`           | `connectors/spotify/src/pages.ts`                       | Spotify origin the form may redirect to after approval.                                                                                                                                      |
+| `SPOTIFY_DASHBOARD_URL`             | `connectors/spotify/src/pages.ts`                       | Spotify developer dashboard, where each user creates their app.                                                                                                                              |
+| `paths`                             | `connectors/spotify/src/paths.ts`                       | Web API paths built from ids, with each id URL-encoded (ids come from the model and must never change the path). Pure.                                                                       |
+| `PLANS_TYP`                         | `connectors/spotify/src/plans.ts`                       | Vault type of the user's pending plans (one record with all of them).                                                                                                                        |
+| `PLAN_TTL_MINUTES`                  | `connectors/spotify/src/plans.ts`                       | Minutes a plan stays valid after the preview (and after each partial run).                                                                                                                   |
+| `MAX_PENDING_PLANS`                 | `connectors/spotify/src/plans.ts`                       | Most pending plans per user (the oldest is dropped).                                                                                                                                         |
+| `START_PROGRESS`                    | `connectors/spotify/src/plans.ts`                       | Progress of a plan that has not started.                                                                                                                                                     |
+| `PENDING_APP_TYP`                   | `connectors/spotify/src/sign-in.ts`                     | Seal type of the credentials carried through the Spotify round trip.                                                                                                                         |
+| `PENDING_APP_MINUTES`               | `connectors/spotify/src/sign-in.ts`                     | Minutes the user has to finish the Spotify authorization.                                                                                                                                    |
+| `PREVIEW_SAMPLE`                    | `connectors/spotify/src/smart.ts`                       | Tracks shown in a preview sample.                                                                                                                                                            |
+| `MAX_SPLIT_GROUPS`                  | `connectors/spotify/src/smart.ts`                       | Most playlists a split creates.                                                                                                                                                              |
+| `SCAN_TYP`                          | `connectors/spotify/src/sources.ts`                     | Vault type of source snapshots.                                                                                                                                                              |
+| `LIKED_FRESH_MS`                    | `connectors/spotify/src/sources.ts`                     | Age after which a Liked Songs snapshot is read again (ms).                                                                                                                                   |
+| `MAX_SOURCE_ITEMS`                  | `connectors/spotify/src/sources.ts`                     | Most items a snapshot keeps.                                                                                                                                                                 |
+| `LIKED_PAGE_SIZE`                   | `connectors/spotify/src/sources.ts`                     | Page sizes of the Web API (max `limit` of each endpoint).                                                                                                                                    |
+| `PLAYLIST_PAGE_SIZE`                | `connectors/spotify/src/sources.ts`                     | Page size used to read playlist items (the `/playlists/{id}/items` maximum, 50).                                                                                                             |
+| `SPOTIFY_API_BASE`                  | `connectors/spotify/src/spotify-api.ts`                 | Base address of the Web API.                                                                                                                                                                 |
+| `SPOTIFY_MAX_ATTEMPTS`              | `connectors/spotify/src/spotify-api.ts`                 | Attempts per request (first try plus retries).                                                                                                                                               |
+| `SPOTIFY_SERVER_RETRY_MS`           | `connectors/spotify/src/spotify-api.ts`                 | Pause before retrying a 5xx (ms).                                                                                                                                                            |
+| `SPOTIFY_AUTHORIZE_URL`             | `connectors/spotify/src/spotify-oauth.ts`               | Spotify authorization endpoint.                                                                                                                                                              |
+| `SPOTIFY_TOKEN_URL`                 | `connectors/spotify/src/spotify-oauth.ts`               | Spotify token endpoint.                                                                                                                                                                      |
+| `SPOTIFY_CALLBACK_PATH`             | `connectors/spotify/src/spotify-oauth.ts`               | Callback path on this Worker: the Redirect URI each user registers in their Spotify app.                                                                                                     |
+| `STALE_TYP`                         | `connectors/spotify/src/stale.ts`                       | Vault type of the cache of last-added dates (per playlist `snapshot_id`).                                                                                                                    |
+| `MAX_LIBRARY_PLAYLISTS`             | `connectors/spotify/src/stale.ts`                       | Most playlists read from the library.                                                                                                                                                        |
+| `LIBRARY_URI`                       | `connectors/spotify/src/tool-kit.ts`                    | A library URI (track, album, episode, show, audiobook, playlist, artist or user).                                                                                                            |
+| `PLAYABLE_URI`                      | `connectors/spotify/src/tool-kit.ts`                    | A URI that can be queued or added to a playlist (track or episode).                                                                                                                          |
+| `PLAYLIST_REF`                      | `connectors/spotify/src/tool-kit.ts`                    | A playlist reference: id, `spotify:playlist:<id>` or an open.spotify.com link.                                                                                                               |
+| `PAGE_LIMIT`                        | `connectors/spotify/src/tool-kit.ts`                    | Page size (1–50).                                                                                                                                                                            |
+| `PAGE_OFFSET`                       | `connectors/spotify/src/tool-kit.ts`                    | Page start.                                                                                                                                                                                  |
+| `DATE_TEXT`                         | `connectors/spotify/src/tool-kit.ts`                    | A calendar date or instant (`YYYY-MM-DD` or ISO 8601).                                                                                                                                       |
+| `FILTER_SHAPE`                      | `connectors/spotify/src/tool-kit.ts`                    | Filter fields shared by the smart operations.                                                                                                                                                |
+| `SOURCE_SHAPE`                      | `connectors/spotify/src/tool-kit.ts`                    | Source fields: Liked Songs or one of your playlists.                                                                                                                                         |
+| `SPOTIFY_TOOLS`                     | `connectors/spotify/src/tool-list.ts`                   | All Spotify connector tools, in the order Claude sees them.                                                                                                                                  |
+| `SPOTIFY_APPS_PAGE`                 | `connectors/spotify/src/tools-account.ts`               | Where a user removes the app's access on Spotify's side (there is no revocation API).                                                                                                        |
+| `connectionStatusTool`              | `connectors/spotify/src/tools-account.ts`               | `connection_status`: who is connected, with which app, and until when.                                                                                                                       |
+| `disconnectTool`                    | `connectors/spotify/src/tools-account.ts`               | `disconnect`: erases the user's data on this connector and revokes Claude's access.                                                                                                          |
+| `BACKUP_ID`                         | `connectors/spotify/src/tools-backup.ts`                | Backup ids look like this (9 random bytes in base64url).                                                                                                                                     |
+| `createBackupTool`                  | `connectors/spotify/src/tools-backup.ts`                | `create_backup`: backs up Liked Songs or a playlist.                                                                                                                                         |
+| `listBackupsTool`                   | `connectors/spotify/src/tools-backup.ts`                | `list_backups`.                                                                                                                                                                              |
+| `exportBackupTool`                  | `connectors/spotify/src/tools-backup.ts`                | `export_backup`: one page of a backup as JSON.                                                                                                                                               |
+| `previewRestoreTool`                | `connectors/spotify/src/tools-backup.ts`                | `preview_restore`: plans restoring a backup.                                                                                                                                                 |
+| `deleteBackupTool`                  | `connectors/spotify/src/tools-backup.ts`                | `delete_backup`.                                                                                                                                                                             |
+| `SEARCH_TYPES`                      | `connectors/spotify/src/tools-catalog.ts`               | Types `/search` accepts.                                                                                                                                                                     |
+| `SEARCH_MAX_LIMIT`                  | `connectors/spotify/src/tools-catalog.ts`               | Most results per type `/search` returns since 2026.                                                                                                                                          |
+| `spotifySearchTool`                 | `connectors/spotify/src/tools-catalog.ts`               | `search`: the Spotify catalog.                                                                                                                                                               |
+| `getArtistTool`                     | `connectors/spotify/src/tools-catalog.ts`               | `get_artist`: an artist with genres and, optionally, the latest releases.                                                                                                                    |
+| `currentlyPlayingTool`              | `connectors/spotify/src/tools-catalog.ts`               | `currently_playing`: the track or episode playing now.                                                                                                                                       |
+| `recentlyPlayedTool`                | `connectors/spotify/src/tools-catalog.ts`               | `recently_played`: the listening history.                                                                                                                                                    |
+| `topItemsTool`                      | `connectors/spotify/src/tools-catalog.ts`               | `top_items`: the user's top artists or tracks.                                                                                                                                               |
+| `listLikedTracksTool`               | `connectors/spotify/src/tools-library.ts`               | `list_liked_tracks`: one page of Liked Songs.                                                                                                                                                |
+| `listSavedAlbumsTool`               | `connectors/spotify/src/tools-library.ts`               | `list_saved_albums`: saved albums.                                                                                                                                                           |
+| `listFollowedArtistsTool`           | `connectors/spotify/src/tools-library.ts`               | `list_followed_artists`: followed artists (cursor pages).                                                                                                                                    |
+| `saveToLibraryTool`                 | `connectors/spotify/src/tools-library.ts`               | `save_to_library`: like/save or follow up to 40 items.                                                                                                                                       |
+| `removeFromLibraryTool`             | `connectors/spotify/src/tools-library.ts`               | `remove_from_library`: unlike/remove or unfollow up to 40 items.                                                                                                                             |
+| `checkLibraryTool`                  | `connectors/spotify/src/tools-library.ts`               | `check_library`: which items are saved or followed.                                                                                                                                          |
+| `TRACK_KEYS`                        | `connectors/spotify/src/tools-organize.ts`              | Keys to sort or split by.                                                                                                                                                                    |
+| `MAX_BULK_URIS`                     | `connectors/spotify/src/tools-organize.ts`              | Most URIs of one bulk library change.                                                                                                                                                        |
+| `previewCopyLikedTool`              | `connectors/spotify/src/tools-organize.ts`              | `preview_copy_liked_to_playlist`: filtered Liked Songs into a new playlist.                                                                                                                  |
+| `LIKED_SORT_REFUSAL`                | `connectors/spotify/src/tools-organize.ts`              | Why Liked Songs cannot be sorted.                                                                                                                                                            |
+| `previewOrganizeTool`               | `connectors/spotify/src/tools-organize.ts`              | `preview_organize_playlists`: sort, split or merge.                                                                                                                                          |
+| `MONTH_MS`                          | `connectors/spotify/src/tools-organize.ts`              | Average month in milliseconds.                                                                                                                                                               |
+| `previewStalePlaylistsTool`         | `connectors/spotify/src/tools-organize.ts`              | `preview_stale_playlists`: own playlists with nothing added for N months.                                                                                                                    |
+| `previewLibraryChangeTool`          | `connectors/spotify/src/tools-organize.ts`              | `preview_library_change`: like/unlike, save/remove or follow/unfollow many items at once.                                                                                                    |
+| `playbackStateTool`                 | `connectors/spotify/src/tools-player.ts`                | `playback_state`: device, item, shuffle and repeat.                                                                                                                                          |
+| `listDevicesTool`                   | `connectors/spotify/src/tools-player.ts`                | `list_devices`: available devices.                                                                                                                                                           |
+| `playTool`                          | `connectors/spotify/src/tools-player.ts`                | `play`: starts or resumes playback.                                                                                                                                                          |
+| `pauseTool`                         | `connectors/spotify/src/tools-player.ts`                | `pause`.                                                                                                                                                                                     |
+| `skipTool`                          | `connectors/spotify/src/tools-player.ts`                | `skip`: next or previous.                                                                                                                                                                    |
+| `seekTool`                          | `connectors/spotify/src/tools-player.ts`                | `seek`.                                                                                                                                                                                      |
+| `setVolumeTool`                     | `connectors/spotify/src/tools-player.ts`                | `set_volume`.                                                                                                                                                                                |
+| `setShuffleTool`                    | `connectors/spotify/src/tools-player.ts`                | `set_shuffle`.                                                                                                                                                                               |
+| `setRepeatTool`                     | `connectors/spotify/src/tools-player.ts`                | `set_repeat`.                                                                                                                                                                                |
+| `addToQueueTool`                    | `connectors/spotify/src/tools-player.ts`                | `add_to_queue`.                                                                                                                                                                              |
+| `getQueueTool`                      | `connectors/spotify/src/tools-player.ts`                | `get_queue`: what plays now and next.                                                                                                                                                        |
+| `transferPlaybackTool`              | `connectors/spotify/src/tools-player.ts`                | `transfer_playback`: moves playback to another device.                                                                                                                                       |
+| `MAX_COVER_BASE64_BYTES`            | `connectors/spotify/src/tools-playlists.ts`             | Largest cover image Spotify accepts (base64 JPEG payload, bytes).                                                                                                                            |
+| `MAX_PLAYLIST_QUERIES`              | `connectors/spotify/src/tools-playlists.ts`             | Most search queries `create_playlist_from_queries` runs.                                                                                                                                     |
+| `listMyPlaylistsTool`               | `connectors/spotify/src/tools-playlists.ts`             | `list_my_playlists`: the user's playlists (own and followed).                                                                                                                                |
+| `getPlaylistTool`                   | `connectors/spotify/src/tools-playlists.ts`             | `get_playlist`: details and one page of items.                                                                                                                                               |
+| `createPlaylistTool`                | `connectors/spotify/src/tools-playlists.ts`             | `create_playlist`: a new playlist, optionally with items.                                                                                                                                    |
+| `createPlaylistFromQueriesTool`     | `connectors/spotify/src/tools-playlists.ts`             | `create_playlist_from_queries`: builds a playlist from search queries (one track per query).                                                                                                 |
+| `updatePlaylistDetailsTool`         | `connectors/spotify/src/tools-playlists.ts`             | `update_playlist_details`: rename, describe, make public/private or collaborative.                                                                                                           |
+| `addPlaylistItemsTool`              | `connectors/spotify/src/tools-playlists.ts`             | `add_playlist_items`: adds up to 100 items.                                                                                                                                                  |
+| `removePlaylistItemsTool`           | `connectors/spotify/src/tools-playlists.ts`             | `remove_playlist_items`: removes up to 100 items (every occurrence of each URI).                                                                                                             |
+| `reorderPlaylistItemsTool`          | `connectors/spotify/src/tools-playlists.ts`             | `reorder_playlist_items`: moves a block of items.                                                                                                                                            |
+| `setPlaylistCoverTool`              | `connectors/spotify/src/tools-playlists.ts`             | `set_playlist_cover`: uploads a JPEG cover.                                                                                                                                                  |
+| `PLAN_ID`                           | `connectors/spotify/src/tools-smart.ts`                 | Plan ids look like this (12 random bytes in base64url).                                                                                                                                      |
+| `syncLibraryTool`                   | `connectors/spotify/src/tools-smart.ts`                 | `sync_library`: loads (or refreshes) the Liked Songs snapshot used by the previews.                                                                                                          |
+| `previewFilterLikedTool`            | `connectors/spotify/src/tools-smart.ts`                 | `preview_filter_liked`: unlike by artist, genre, year, date added or availability.                                                                                                           |
+| `previewDedupeTool`                 | `connectors/spotify/src/tools-smart.ts`                 | `preview_dedupe`: duplicates in Liked Songs or a playlist.                                                                                                                                   |
+| `previewUnavailableTool`            | `connectors/spotify/src/tools-smart.ts`                 | `preview_unavailable`: tracks no longer playable.                                                                                                                                            |
+| `applyPlanTool`                     | `connectors/spotify/src/tools-smart.ts`                 | `apply_plan`: runs a previewed plan.                                                                                                                                                         |
+| `cancelPlanTool`                    | `connectors/spotify/src/tools-smart.ts`                 | `cancel_plan`: forgets a pending plan.                                                                                                                                                       |
+| `VAULT_TYPES`                       | `connectors/spotify/src/vault.ts`                       | Every vault type, so `disconnect` erases all of them.                                                                                                                                        |
+| `VAULT_FOREVER_EXP`                 | `connectors/spotify/src/vault.ts`                       | Technical seal expiry (year 2100) for records that only end when deleted.                                                                                                                    |
+| `SPOTIFY_SERVER_INFO`               | `connectors/spotify/src/worker.ts`                      | MCP server name and version (the version comes from the plugin manifest).                                                                                                                    |
+| `SPOTIFY_SERVER_INSTRUCTIONS`       | `connectors/spotify/src/worker.ts`                      | MCP server instructions for the model.                                                                                                                                                       |
+| `SPOTIFY_ACCESS_TOKEN_TTL_SECONDS`  | `connectors/spotify/src/worker.ts`                      | Lifetime of Claude's access token (1 hour) and refresh token (180 days, about the Spotify refresh token's 6 months).                                                                         |
+| `SPOTIFY_REFRESH_TOKEN_TTL_SECONDS` | `connectors/spotify/src/worker.ts`                      | Lifetime of Claude's refresh token: 180 days, about the Spotify refresh token's 6 months.                                                                                                    |
+| `SPOTIFY_ROUTES`                    | `connectors/spotify/src/worker.ts`                      | Own routes (outside the library OAuth): `METHOD path` → handler.                                                                                                                             |

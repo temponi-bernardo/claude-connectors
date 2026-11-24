@@ -6,13 +6,15 @@ isolate? Each finding has a test that fails if the isolation breaks.
 
 ## Where each connector keeps the user
 
-| Connector           | Tenancy                     | Who the user is                                                            | Where the user's data lives                                                                                                                     |
-| ------------------- | --------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `canvas-puc-remote` | Public, multi-user          | The Canvas token sealed (AES-256-GCM, `SEAL_KEY`) in the OAuth tokens      | Nowhere on the server: stateless, no KV                                                                                                         |
-| `gmail-remote`      | Public, multi-user          | Google `sub` in the library grant (`ctx.props.owner`)                      | `GMAIL_KV` `owner:sha256(sub)`, sealed with `TOKEN_ENC_KEY` together with the owner; access tokens in an isolate cache keyed by owner + account |
-| `whatsapp-remote`   | Personal, **single tenant** | The owner's GitHub email, checked against `ALLOWED_EMAILS` on every `/mcp` | One Durable Object (`owner`), its bridge container and the R2 snapshots                                                                         |
+| Connector           | Tenancy                                              | Who the user is                                                                                  | Where the user's data lives                                                                                                                                                              |
+| ------------------- | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `canvas-puc-remote` | Public, multi-user                                   | The Canvas token sealed (AES-256-GCM, `SEAL_KEY`) in the OAuth tokens                            | Nowhere on the server: stateless, no KV                                                                                                                                                  |
+| `gmail-remote`      | Public, multi-user                                   | Google `sub` in the library grant (`ctx.props.owner`)                                            | `GMAIL_KV` `owner:sha256(sub)`, sealed with `TOKEN_ENC_KEY` together with the owner; access tokens in an isolate cache keyed by owner + account                                          |
+| `spotify-remote`    | Public, multi-user (each with their own Spotify app) | Spotify `account_id` (else `id`) from `/me` at sign-in, in the library grant (`ctx.props.owner`) | `SPOTIFY_KV` vault: every key is `<type>:sha256(owner)[:id]`, every value sealed with `TOKEN_ENC_KEY` together with type, owner and id; access tokens in an isolate cache keyed by owner |
+| `whatsapp-remote`   | Personal, **single tenant**                          | The owner's GitHub email, checked against `ALLOWED_EMAILS` on every `/mcp`                       | One Durable Object (`owner`), its bridge container and the R2 snapshots                                                                                                                  |
 
-The seal keys are per Worker and distinct: `SEAL_KEY` (Canvas), `SEAL_KEY` (WhatsApp), `TOKEN_ENC_KEY` (Gmail).
+The seal keys are per Worker and distinct: `SEAL_KEY` (Canvas), `SEAL_KEY` (WhatsApp), `TOKEN_ENC_KEY` (Gmail),
+`TOKEN_ENC_KEY` (Spotify, its own value).
 Checked by name with `wrangler secret list` and, without reading any value, by a live probe: a `client_id`
 registered on one Worker is refused (`400 Unknown client`) by the other, in both directions.
 
@@ -47,6 +49,26 @@ grants)`) with a Canvas client bound to that token; `serveMcpRequest()` closes i
    access for the account to add. Someone who opens a forwarded link cannot pass the owner check, so nothing of
    theirs is linked.
 6. **Response/log** — `errorResult()` and `messagePage()` redact secrets.
+
+### Spotify (`connectors/spotify/src/worker.ts`, ADR 0033)
+
+1. **Auth** — `@cloudflare/workers-oauth-provider` validates the token and gives `ctx.props` (`owner`, `sid`).
+   The owner is whatever account Spotify's `/me` returned for a code exchanged with the user's own app: it
+   cannot be chosen by the user.
+2. **Owner** — `handleSpotifyMcp()` builds `OwnerDeps` with that owner and a fresh request budget; per-session
+   rate limit by `sid`.
+3. **Server** — a new `McpServer` per request (`createSpotifyServer()`), closed by `serveMcpRequest()`.
+4. **Storage/cache** — every record (account with the app's Client Secret and refresh token, snapshots, genre
+   cache, plans, backups) goes through `readVault()`/`writeVault()`: the KV key is the type plus a hash of the
+   owner, and the sealed value carries type, owner and id, so a record copied under another user's key, type or
+   id does not open. Plan and backup ids are random and only resolve inside the caller's own vault.
+   `spotifyTokenCache` is keyed by owner. The app credentials cross the browser only sealed inside the library's
+   upstream transaction (15 minutes).
+5. **Erasure** — `disconnect` (`eraseOwner()`) deletes every key under the owner's hash, of every vault type,
+   and revokes the owner's Claude grants.
+6. **Response/log** — `errorResult()` and `messagePage()` redact secrets; Spotify error messages never include
+   tokens or credentials. Tests: `connectors/spotify/src/isolation.test.ts` (concurrent users in one isolate,
+   foreign plans/backups, disconnect scope, token cache) and `vault.test.ts` (copied records).
 
 ### WhatsApp (`connectors/whatsapp/src/worker.ts`)
 

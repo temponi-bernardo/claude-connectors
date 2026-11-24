@@ -7,7 +7,11 @@ computer ([ADR 0013](adr/0013-remote-only-connector-via-marketplace.md)). The **
 (`connectors/gmail/`) follows the same model, with OAuth from the `@cloudflare/workers-oauth-provider` library and
 state in Workers KV ([ADR 0014](adr/0014-on-demand-remote-gmail-on-workers.md)). The **WhatsApp** connector
 (`connectors/whatsapp/`) is a self-host template: Worker + Durable Object + container with a Go bridge, on
-demand, with owner login through GitHub ([ADR 0015](adr/0015-whatsapp-on-cloudflare-containers.md)).
+demand, with owner login through GitHub ([ADR 0015](adr/0015-whatsapp-on-cloudflare-containers.md)). The
+**Spotify** connector (`connectors/spotify/`) reuses the Gmail model, but each user brings their own Spotify app
+(Client ID and Secret pasted on the connector page) and every piece of user state lives in a per-user sealed
+vault in Workers KV; batch changes are two-step plans with automatic backups
+([ADR 0033](adr/0033-spotify-with-each-users-own-app.md)).
 
 ## Layers
 
@@ -66,6 +70,7 @@ as JSON text. Details in [PROCESSES.md](PROCESSES.md) (P03–P05).
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- |
 | Marketplace plugin              | Claude → Add marketplace `temponi-bernardo/claude-connectors`                                                      | ADR 0013 |
 | Server (Cloudflare Worker)      | `npm run worker:deploy` compiles `src/worker.ts` and publishes                                                     | ADR 0010 |
+| Spotify Worker                  | `npm run spotify:deploy` publishes `connectors/spotify` and runs the smoke test                                    | ADR 0033 |
 | Node server (Docker)            | Alternative: `npm run build` generates `server/remote.js`, used by the Dockerfile                                  | ADR 0009 |
 | `/planejamento-faculdade` files | `npm run build` generates `scripts/plan.mjs` and `assets/plan-template.html` in the skill, shipped with the plugin | ADR 0030 |
 
@@ -75,33 +80,36 @@ server.
 
 ## External services
 
-| Service                    | Used for                                           | Where the adapter is                                     | Secret                                                         |
-| -------------------------- | -------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------- |
-| Canvas LMS REST API        | Courses, assignments, grades, announcements...     | `connectors/canvas-puc/src/client.ts`                    | User token, only sealed inside the OAuth tokens                |
-| Canvas access token        | The connector's only credential                    | `connectors/canvas-puc/src/remote.ts`                    | Only sealed inside the OAuth tokens (`SEAL_KEY` on the server) |
-| Cloudflare Workers         | Running the remote connector                       | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml`   | `SEAL_KEY` (Worker secret); deploy with `CLOUDFLARE_API_TOKEN` |
-| GitHub Pages               | Public site (home, privacy, terms)                 | `docs/_config.yml`, `docs/_layouts/site.html`            | None (ADR 0012)                                                |
-| Google OAuth / OIDC        | Owner login and account linking                    | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`    | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (Worker secrets)    |
-| Gmail API (`gmail.modify`) | Read, send, drafts, organize, trash                | `connectors/gmail/src/gmail-api.ts`                      | Refresh token sealed in KV with `TOKEN_ENC_KEY`                |
-| Workers KV / rate limit    | OAuth grants, accounts and limits (Gmail)          | `connectors/gmail/src/worker.ts`, `wrangler.toml`        | `CONSENT_SECRET`; optional `ALLOWED_EMAILS` (private mode)     |
-| Workers KV (`CANVAS_KV`)   | Canvas write opt-ins made after sign-in (ADR 0027) | `connectors/canvas-puc/src/write-access.ts`, `worker.ts` | Key = SHA-256 of the Canvas token, never the token             |
-| GitHub OAuth App           | Owner login (WhatsApp)                             | `src/remote/github-login.ts`                             | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `ALLOWED_EMAILS`   |
-| Cloudflare Containers + DO | On-demand WhatsApp bridge                          | `connectors/whatsapp/src/container.ts`, `lifecycle.ts`   | `BRIDGE_TOKEN` (Worker ↔ bridge)                               |
-| Cloudflare R2              | Encrypted session backup (WhatsApp)                | `connectors/whatsapp/src/snapshots.ts`                   | `SNAPSHOT_KEY` (container only)                                |
-| WhatsApp (whatsmeow)       | Messages of the paired number                      | `connectors/whatsapp/bridge/` (Go)                       | Device session, inside the snapshot                            |
+| Service                    | Used for                                                   | Where the adapter is                                     | Secret                                                                                 |
+| -------------------------- | ---------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Canvas LMS REST API        | Courses, assignments, grades, announcements...             | `connectors/canvas-puc/src/client.ts`                    | User token, only sealed inside the OAuth tokens                                        |
+| Canvas access token        | The connector's only credential                            | `connectors/canvas-puc/src/remote.ts`                    | Only sealed inside the OAuth tokens (`SEAL_KEY` on the server)                         |
+| Cloudflare Workers         | Running the remote connector                               | `connectors/canvas-puc/src/worker.ts`, `wrangler.toml`   | `SEAL_KEY` (Worker secret); deploy with `CLOUDFLARE_API_TOKEN`                         |
+| GitHub Pages               | Public site (home, privacy, terms)                         | `docs/_config.yml`, `docs/_layouts/site.html`            | None (ADR 0012)                                                                        |
+| Google OAuth / OIDC        | Owner login and account linking                            | `connectors/gmail/src/google-oauth.ts`, `id-token.ts`    | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (Worker secrets)                            |
+| Gmail API (`gmail.modify`) | Read, send, drafts, organize, trash                        | `connectors/gmail/src/gmail-api.ts`                      | Refresh token sealed in KV with `TOKEN_ENC_KEY`                                        |
+| Workers KV / rate limit    | OAuth grants, accounts and limits (Gmail)                  | `connectors/gmail/src/worker.ts`, `wrangler.toml`        | `CONSENT_SECRET`; optional `ALLOWED_EMAILS` (private mode)                             |
+| Workers KV (`CANVAS_KV`)   | Canvas write opt-ins made after sign-in (ADR 0027)         | `connectors/canvas-puc/src/write-access.ts`, `worker.ts` | Key = SHA-256 of the Canvas token, never the token                                     |
+| GitHub OAuth App           | Owner login (WhatsApp)                                     | `src/remote/github-login.ts`                             | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `ALLOWED_EMAILS`                           |
+| Cloudflare Containers + DO | On-demand WhatsApp bridge                                  | `connectors/whatsapp/src/container.ts`, `lifecycle.ts`   | `BRIDGE_TOKEN` (Worker ↔ bridge)                                                       |
+| Cloudflare R2              | Encrypted session backup (WhatsApp)                        | `connectors/whatsapp/src/snapshots.ts`                   | `SNAPSHOT_KEY` (container only)                                                        |
+| WhatsApp (whatsmeow)       | Messages of the paired number                              | `connectors/whatsapp/bridge/` (Go)                       | Device session, inside the snapshot                                                    |
+| Spotify accounts service   | OAuth with each user's own app (code, refresh)             | `connectors/spotify/src/spotify-oauth.ts`, `sign-in.ts`  | User's Client ID/Secret and refresh token, sealed in `SPOTIFY_KV` with `TOKEN_ENC_KEY` |
+| Spotify Web API            | Library, playlists, follows, history, playback             | `connectors/spotify/src/spotify-api.ts`, `paging.ts`     | Access token in isolate memory only (per user)                                         |
+| Workers KV (`SPOTIFY_KV`)  | Per-user vault: account, snapshots, genres, plans, backups | `connectors/spotify/src/vault.ts`                        | Keys hold a hash of the user; values sealed AES-256-GCM                                |
 
 No credentials in the repository or on the server: the Canvas token exists only sealed (AES-GCM with the
 `SEAL_KEY`) inside the OAuth tokens that Claude stores.
 
 ## Runtime dependencies
 
-| Package                              | What for                                                         |
-| ------------------------------------ | ---------------------------------------------------------------- |
-| `@modelcontextprotocol/sdk`          | MCP server over Streamable HTTP                                  |
-| `zod` (v3)                           | Tool input schemas                                               |
-| `@cloudflare/workers-oauth-provider` | OAuth 2.1 for the Gmail connector (DCR, PKCE, consent, KV)       |
-| `@cloudflare/containers`             | `Container` class of the WhatsApp bridge's Durable Object        |
-| `htmlparser2`                        | HTML tokenizer for text and links (`src/core/html.ts`, ADR 0025) |
+| Package                              | What for                                                                |
+| ------------------------------------ | ----------------------------------------------------------------------- |
+| `@modelcontextprotocol/sdk`          | MCP server over Streamable HTTP                                         |
+| `zod` (v3)                           | Tool input schemas                                                      |
+| `@cloudflare/workers-oauth-provider` | OAuth 2.1 for the Gmail and Spotify connectors (DCR, PKCE, consent, KV) |
+| `@cloudflare/containers`             | `Container` class of the WhatsApp bridge's Durable Object               |
+| `htmlparser2`                        | HTML tokenizer for text and links (`src/core/html.ts`, ADR 0025)        |
 
 The WhatsApp bridge is a separate Go module (`connectors/whatsapp/bridge/go.mod`: whatsmeow, SQLite), with
 licenses in `connectors/whatsapp/NOTICE.md` (note: `go.mau.fi/libsignal` is GPL-3.0).

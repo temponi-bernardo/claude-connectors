@@ -2,7 +2,8 @@
 
 ## Next task
 
-**F3.2 — WhatsApp: publish on the owner's account and pair the number.** Phase 4 (Anthropic plugin standard and
+**F5.2 — Spotify: publish the Worker and connect the owner's account** (deploy steps in
+[connectors/spotify/README.md](../connectors/spotify/README.md)); F3.2 (WhatsApp publish) is still open. Phase 4 (Anthropic plugin standard and
 English) is done; the Connectors Directory submission steps left for the owner are in
 [DIRECTORY-LISTING.md](DIRECTORY-LISTING.md).
 
@@ -85,6 +86,17 @@ risks in [security/isolation.md](security/isolation.md).
 | Id   | Task                                                                                                                        | Status | Done when                                                                                                                                                                               |
 | ---- | --------------------------------------------------------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | S1.1 | Isolation audit and fixes: seal `aud`, Canvas write opt-in, Gmail link confirmation, single WhatsApp owner, redaction, CORS | ✅     | Isolation tests green (two concurrent users, foreign/tampered/expired tokens, per-owner KV and cache, link ticket, redaction, module state); 3 Workers deployed; live probe 401/200/302 |
+
+## Phase 5 — Spotify (each user's own app)
+
+Decision in [ADR 0033](adr/0033-spotify-with-each-users-own-app.md); API checked in [SPOTIFY-API.md](SPOTIFY-API.md);
+ideas in [SPOTIFY-IDEAS.md](SPOTIFY-IDEAS.md).
+
+| Id   | Task                                                                                         | Status | Done when                                                                                                                        |
+| ---- | -------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| F5.1 | `spotify` connector: own-app sign-in, sealed vault, full library/playlists, plans, backups   | ✅     | `pr:check` green; isolation, crypto, refresh, pagination, 429 and preview/apply tests; ADR 0033 and API validation in `docs/`    |
+| F5.2 | Publish the Spotify Worker and connect the owner's account                                   | ⬜     | KV ids in `wrangler.toml`, `TOKEN_ENC_KEY` set, `npm run spotify:deploy` smoke green, `list_liked_tracks` answering on claude.ai |
+| F5.3 | Run the motivating cleanup for real ("only Chris Cornell + electronic") and tune genre terms | ⬜     | Preview checked by the owner, applied, backup restorable; genre-term notes added to `/limpar-curtidas` if needed                 |
 
 ## Later phases
 

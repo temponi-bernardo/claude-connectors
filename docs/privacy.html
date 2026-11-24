@@ -5,15 +5,15 @@ description: What data the Claude Connectors connectors access, where it is kept
 ---
 
 <h1>Privacy policy</h1>
-<p class="meta">Updated on November 14, 2026.</p>
+<p class="meta">Updated on November 24, 2026.</p>
 
 <p>
   This policy applies to the connectors of the Claude Connectors project, maintained by Bernardo
-  Temponi, currently the <strong>Canvas PUC Minas</strong>, <strong>Gmail</strong> and
-  <strong>WhatsApp</strong> connectors. They run only in the cloud and are used through the
-  marketplace plugin or as a custom connector in claude.ai, Cowork, the mobile app and Claude Code.
-  Canvas and Gmail run on the project's server; WhatsApp runs on a server that each person publishes
-  in their own account (see the WhatsApp section).
+  Temponi, currently the <strong>Canvas PUC Minas</strong>, <strong>Gmail</strong>,
+  <strong>Spotify</strong> and <strong>WhatsApp</strong> connectors. They run only in the cloud and
+  are used through the marketplace plugin or as a custom connector in claude.ai, Cowork, the mobile
+  app and Claude Code. Canvas, Gmail and Spotify run on the project's server; WhatsApp runs on a
+  server that each person publishes in their own account (see the WhatsApp section).
 </p>
 
 <h2>What data is accessed in Canvas</h2>
@@ -64,6 +64,37 @@ description: What data the Claude Connectors connectors access, where it is kept
     >, including the Limited Use requirements. Gmail data is used only to answer what you ask
     Claude; it is not sold, not used for ads or model training and not read by people.
   </li>
+</ul>
+
+<h2>Spotify</h2>
+<ul>
+  <li>
+    <strong>Your own app:</strong> you create a Spotify app in your own developer account and paste
+    its Client ID and Client Secret when connecting. Spotify sees your requests under your app and
+    your quota.
+  </li>
+  <li>
+    <strong>What is accessed:</strong> only when you ask Claude for something — your library (Liked
+    Songs, saved albums, follows), your playlists, listening history and top items, and playback
+    controls; and, if you ask, saving, removing, following, editing playlists and controlling
+    playback. Batch changes are shown first and only run after your confirmation.
+  </li>
+  <li>
+    <strong>What is stored</strong> (in Cloudflare Workers KV), each record encrypted with
+    AES-256-GCM and stored under a hash of your Spotify account: your app's Client ID and Secret,
+    the Spotify refresh token, the date you authorized, temporary copies of your Liked Songs or a
+    playlist used for previews, a cache of artist genres, pending plans (10 minutes) and up to 10
+    backups (track and playlist names, URIs and dates). Access tokens live only in memory.
+  </li>
+  <li><strong>Isolation:</strong> each person only reaches their own records.</li>
+  <li>
+    <strong>How to delete:</strong> ask Claude to <code>disconnect</code>: every record above is
+    erased and Claude's access is revoked. Then remove the app's access at
+    <a href="https://www.spotify.com/account/apps/">spotify.com/account/apps</a> and, if you want,
+    delete your app in the Spotify developer dashboard. Spotify authorizations also end on their own
+    after 6 months.
+  </li>
+  <li>Spotify content is used only to answer what you ask; it is not used to train AI models.</li>
 </ul>
 
 <h2>WhatsApp</h2>
@@ -118,6 +149,10 @@ description: What data the Claude Connectors connectors access, where it is kept
   <li>
     <strong>Google (Gmail):</strong> receives the sign-in with your Google account and the calls
     made on your behalf (reading and, when you ask, sending and organizing the mailbox).
+  </li>
+  <li>
+    <strong>Spotify:</strong> receives the sign-in with your Spotify account and the calls made on
+    your behalf through your own app.
   </li>
   <li>
     <strong>WhatsApp (Meta) and GitHub:</strong> with self-hosted WhatsApp, your server talks to
