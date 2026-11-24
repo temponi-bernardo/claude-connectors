@@ -37,3 +37,4 @@ that marks the old one as "Superseded by NNNN". Template in [0000-template.md](0
 | [0030](0030-semester-plan-skill-with-generated-script.md) | Semester plan skill renders a fixed template from validated JSON  | Accepted                            | 2026-11-23 |
 | [0031](0031-canvas-token-savings-with-change-cursor.md)   | Canvas token savings: compact JSON and a stateless change cursor  | Accepted                            | 2026-11-23 |
 | [0032](0032-canvas-graphql-read-only-peer-reviews.md)     | Read-only Canvas GraphQL for the student's peer reviews           | Accepted                            | 2026-11-23 |
+| [0033](0033-private-source-public-marketplace.md)         | Private source repository, public marketplace repository          | Accepted                            | 2026-11-24 |
