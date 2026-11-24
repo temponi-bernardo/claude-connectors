@@ -1,7 +1,7 @@
 {
   "name": "spotify",
   "version": "0.1.0",
-  "description": "Your Spotify library, straight from the cloud: search, Liked Songs, playlists (read, create, edit, sort, split, merge), follows, history, top items and playback — plus bulk cleanups with preview, automatic backups and restore. Each person uses their own Spotify app: paste its Client ID and Secret when connecting.",
+  "description": "Your Spotify library, straight from the cloud: search, Liked Songs, playlists (read, create, edit, sort, split, merge), follows, history, top items and playback — plus bulk cleanups with preview, automatic backups and restore. Sign in with Spotify when the host listed you (up to 5 people), or connect your own Spotify app by pasting its Client ID and Secret.",
   "icon": "./icon.png",
   "author": {
     "name": "Bernardo Temponi",
