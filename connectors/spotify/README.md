@@ -99,9 +99,10 @@ Prerequisites: Node 22, a Cloudflare account (Free works), this repository.
 git pull && npm ci
 npx wrangler login
 
-# 1. KV namespaces: copy each printed "id" into connectors/spotify/wrangler.toml (OAUTH_KV and SPOTIFY_KV)
-npx wrangler kv namespace create OAUTH_KV --config connectors/spotify/wrangler.toml
-npx wrangler kv namespace create SPOTIFY_KV --config connectors/spotify/wrangler.toml
+# 1. KV namespaces (only on a new account): copy each printed "id" into connectors/spotify/wrangler.toml
+#    (spotify-oauth → OAUTH_KV, spotify-vault → SPOTIFY_KV). Own names, so Gmail's OAUTH_KV is never shared.
+npx wrangler kv namespace create spotify-oauth
+npx wrangler kv namespace create spotify-vault
 
 # 2. First deploy (creates the Worker)
 npm run spotify:deploy

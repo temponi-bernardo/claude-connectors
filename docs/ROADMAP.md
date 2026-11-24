@@ -2,8 +2,10 @@
 
 ## Next task
 
-**F5.2 — Spotify: publish the Worker and connect the owner's account** (deploy steps in
-[connectors/spotify/README.md](../connectors/spotify/README.md)); F3.2 (WhatsApp publish) is still open. Phase 4 (Anthropic plugin standard and
+**F5.2 — Spotify: connect the owner's account.** The Worker is live at
+`https://spotify-remote.bftemponi.workers.dev` (KV, `TOKEN_ENC_KEY` and smoke green, 2026-11-24); left: the owner
+creates their Spotify app (`/setup-spotify`) and `list_liked_tracks` answers on claude.ai. F3.2 (WhatsApp publish)
+is still open. Phase 4 (Anthropic plugin standard and
 English) is done; the Connectors Directory submission steps left for the owner are in
 [DIRECTORY-LISTING.md](DIRECTORY-LISTING.md).
 
@@ -96,7 +98,7 @@ ideas in [SPOTIFY-IDEAS.md](SPOTIFY-IDEAS.md).
 | Id   | Task                                                                                         | Status | Done when                                                                                                                        |
 | ---- | -------------------------------------------------------------------------------------------- | ------ | -------------------------------------------------------------------------------------------------------------------------------- |
 | F5.1 | `spotify` connector: own-app sign-in, sealed vault, full library/playlists, plans, backups   | ✅     | `pr:check` green; isolation, crypto, refresh, pagination, 429 and preview/apply tests; ADR 0034 and API validation in `docs/`    |
-| F5.2 | Publish the Spotify Worker and connect the owner's account                                   | ⬜     | KV ids in `wrangler.toml`, `TOKEN_ENC_KEY` set, `npm run spotify:deploy` smoke green, `list_liked_tracks` answering on claude.ai |
+| F5.2 | Publish the Spotify Worker and connect the owner's account                                   | 🟨     | KV ids in `wrangler.toml`, `TOKEN_ENC_KEY` set, `npm run spotify:deploy` smoke green, `list_liked_tracks` answering on claude.ai |
 | F5.3 | Run the motivating cleanup for real ("only Chris Cornell + electronic") and tune genre terms | ⬜     | Preview checked by the owner, applied, backup restorable; genre-term notes added to `/limpar-curtidas` if needed                 |
 
 ## Later phases
