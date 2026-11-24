@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
+  buildOrConfigError,
   checkClientRegistration,
   clientIpKey,
   configErrorResponse,
   isMcpPath,
   MIN_CONSENT_SECRET_CHARS,
+  oauthErrorCode,
   publicOrigin,
   randomToken,
   readConsentSecret,
@@ -77,5 +79,22 @@ describe('worker-kit responses and routing', () => {
     expect(clientIpKey(new Request('https://x.dev/'))).toBe('ip:unknown');
     expect(isMcpPath(request)).toBe(true);
     expect(isMcpPath(new Request('https://x.dev/mcpx'))).toBe(false);
+  });
+});
+
+describe('worker-kit helpers', () => {
+  it('oauthErrorCode reads the error field or falls back to the status', async () => {
+    expect(await oauthErrorCode(Response.json({ error: 'invalid_grant' }, { status: 400 }))).toBe(
+      'invalid_grant',
+    );
+    expect(await oauthErrorCode(new Response('x', { status: 502 }))).toBe('http_502');
+  });
+
+  it('buildOrConfigError returns the value or the 500 page', () => {
+    expect(buildOrConfigError(() => 7)).toBe(7);
+    const failed = buildOrConfigError(() => {
+      throw new Error('Set the secret X');
+    });
+    expect(failed instanceof Response && failed.status).toBe(500);
   });
 });

@@ -2,9 +2,9 @@
  * HTML pages and redirects shared by the connectors on `@cloudflare/workers-oauth-provider`: the page shell with
  * the `docs/UI.md` tokens and a strict CSP, notice pages, 302 redirects and authorization errors. Pure.
  */
-import { AuthorizationError } from '@cloudflare/workers-oauth-provider';
+import { AuthorizationError, type OAuthHelpers } from '@cloudflare/workers-oauth-provider';
 import { redactSecrets } from '../core/redact.js';
-import { htmlResponse } from './handler.js';
+import { htmlResponse, readForm } from './handler.js';
 import { escapeHtml, LOGIN_PAGE_CSS } from './login-page.js';
 
 /** OAuth library headers the page response must not inherit (the page sets its own). */
@@ -49,4 +49,20 @@ export function authorizationErrorResponse(error: unknown): Response {
   const message =
     error instanceof AuthorizationError ? error.description : 'Invalid authorization request.';
   return messagePage('Could not connect', message, 400);
+}
+
+/** A posted consent form: its fields, the consent handle and, when the user did not approve, the way back. */
+export interface ConsentForm {
+  readonly form: URLSearchParams;
+  readonly handle: string;
+  readonly denied: Response | null;
+}
+
+/** Reads a consent form; anything but `decision=approve` denies the consent and redirects back to the client. */
+export async function readConsentForm(oauth: OAuthHelpers, request: Request): Promise<ConsentForm> {
+  const form = await readForm(request.clone());
+  const handle = form.get('handle') ?? '';
+  if (form.get('decision') === 'approve') return { form, handle, denied: null };
+  const denied = await oauth.denyConsent(request, handle);
+  return { form, handle, denied: redirectWith(denied.redirectTo, denied.headers) };
 }

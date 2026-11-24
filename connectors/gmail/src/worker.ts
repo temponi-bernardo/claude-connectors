@@ -9,11 +9,7 @@ import { toEnvVars } from '../../../src/core/env.js';
 import { manifestVersion } from '../../../src/mcp/server-version.js';
 import { registerToolSpecs } from '../../../src/mcp/tools.js';
 import { listOnlyContext } from '../../../src/mcp/tool-gate.js';
-import {
-  serveMcpRequest,
-  serveToolCatalog,
-  TOOL_CATALOG_PATH,
-} from '../../../src/remote/mcp-endpoint.js';
+import { serveCommonRoute, serveMcpRequest } from '../../../src/remote/mcp-endpoint.js';
 import {
   isRateLimited,
   rateLimitedResponse,
@@ -21,9 +17,9 @@ import {
 } from '../../../src/remote/rate-limit.js';
 import { messagePage } from '../../../src/remote/pages.js';
 import {
+  buildOrConfigError,
   checkClientRegistration,
   clientIpKey,
-  configErrorResponse,
   isMcpPath,
   publicOrigin,
 } from '../../../src/remote/worker-kit.js';
@@ -95,13 +91,12 @@ export async function handleMcpApi(
 ): Promise<Response> {
   const props = ctx.props as GrantProps;
   if (await isRateLimited(env.RATE_LIMITER, props.sid)) return rateLimitedResponse();
-  let deps: OwnerDeps;
-  try {
-    const base = createGmailDeps(env, publicOrigin(env, request));
-    deps = { ...base, owner: props.owner, ownerEmail: props.email };
-  } catch (error) {
-    return configErrorResponse(error);
-  }
+  const deps = buildOrConfigError((): OwnerDeps => ({
+    ...createGmailDeps(env, publicOrigin(env, request)),
+    owner: props.owner,
+    ownerEmail: props.email,
+  }));
+  if (deps instanceof Response) return deps;
   return serveMcpRequest(createGmailServer(deps), request);
 }
 
@@ -124,20 +119,14 @@ export async function handleDefaultRequest(
   request: Request,
   env: GmailWorkerEnv,
 ): Promise<Response> {
+  const common = serveCommonRoute(request, () => createGmailServer(listOnlyContext()));
+  if (common) return common;
   const url = new URL(request.url);
-  if (request.method === 'GET' && url.pathname === '/') return new Response('ok');
-  if (request.method === 'GET' && url.pathname === TOOL_CATALOG_PATH) {
-    return serveToolCatalog(createGmailServer(listOnlyContext()), url.origin);
-  }
   const route = GMAIL_ROUTES[`${request.method} ${url.pathname}`];
   if (!route || !env.OAUTH_PROVIDER)
     return messagePage('Not found', 'This page does not exist.', 404);
-  let deps: GmailDeps;
-  try {
-    deps = createGmailDeps(env, publicOrigin(env, request));
-  } catch (error) {
-    return configErrorResponse(error);
-  }
+  const deps = buildOrConfigError(() => createGmailDeps(env, publicOrigin(env, request)));
+  if (deps instanceof Response) return deps;
   return route(deps, env.OAUTH_PROVIDER, request);
 }
 

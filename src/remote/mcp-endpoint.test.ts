@@ -2,6 +2,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { describe, expect, it } from 'vitest';
 import {
   mcpUnauthorizedResponse,
+  serveCommonRoute,
   serveMcpRequest,
   serveToolCatalog,
   toolsListRequest,
@@ -55,5 +56,19 @@ describe('toolsListRequest and serveToolCatalog', () => {
     const res = await serveToolCatalog(server, 'https://x.dev');
     const body = (await res.json()) as { result: { tools: { name: string }[] } };
     expect(body.result.tools.map((t) => t.name)).toEqual(['listed']);
+  });
+});
+
+describe('serveCommonRoute', () => {
+  it('answers health and catalog on GET only, and null elsewhere', async () => {
+    function server(): McpServer {
+      return new McpServer({ name: 't', version: '1' });
+    }
+    expect(
+      await serveCommonRoute(new Request('https://x.test/'), server)?.then((r) => r.text()),
+    ).toBe('ok');
+    expect((await serveCommonRoute(new Request('https://x.test/tools'), server))?.status).toBe(200);
+    expect(serveCommonRoute(new Request('https://x.test/other'), server)).toBeNull();
+    expect(serveCommonRoute(new Request('https://x.test/', { method: 'POST' }), server)).toBeNull();
   });
 });

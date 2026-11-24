@@ -5,6 +5,7 @@ import {
   copyConsentHeaders,
   messagePage,
   pageDocument,
+  readConsentForm,
   redirectWith,
 } from './pages.js';
 
@@ -57,5 +58,33 @@ describe('shared pages', () => {
     const page = authorizationErrorResponse(new Error('boom'));
     expect(page.status).toBe(400);
     expect(await page.text()).toContain('Invalid authorization request.');
+  });
+});
+
+describe('readConsentForm', () => {
+  function post(fields: Record<string, string>): Request {
+    return new Request('https://x.test/authorize', {
+      method: 'POST',
+      body: new URLSearchParams(fields).toString(),
+      headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    });
+  }
+  const oauth = {
+    denyConsent: () =>
+      Promise.resolve({
+        redirectTo: 'https://claude.ai/cb?error=access_denied',
+        headers: new Headers(),
+      }),
+  } as never;
+
+  it('returns the fields on approve and the redirect otherwise', async () => {
+    const approved = await readConsentForm(
+      oauth,
+      post({ handle: 'h', decision: 'approve', x: '1' }),
+    );
+    expect(approved).toMatchObject({ handle: 'h', denied: null });
+    expect(approved.form.get('x')).toBe('1');
+    const denied = await readConsentForm(oauth, post({ handle: 'h', decision: 'deny' }));
+    expect(denied.denied?.headers.get('location')).toContain('access_denied');
   });
 });

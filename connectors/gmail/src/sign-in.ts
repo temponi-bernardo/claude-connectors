@@ -9,7 +9,6 @@ import {
   type AuthRequest,
   type OAuthHelpers,
 } from '@cloudflare/workers-oauth-provider';
-import { readForm } from '../../../src/remote/handler.js';
 import { pkceChallenge } from '../../../src/remote/oauth.js';
 import { GMAIL_SCOPES, isEmailAllowed } from './config.js';
 import type { GmailDeps } from './context.js';
@@ -25,6 +24,7 @@ import { consentPage } from './pages.js';
 import {
   authorizationErrorResponse,
   messagePage,
+  readConsentForm,
   redirectWith,
 } from '../../../src/remote/pages.js';
 import { randomToken } from '../../../src/remote/worker-kit.js';
@@ -101,12 +101,8 @@ export async function submitAuthorize(
   request: Request,
 ): Promise<Response> {
   try {
-    const form = await readForm(request);
-    const handle = form.get('handle') ?? '';
-    if (form.get('decision') !== 'approve') {
-      const denied = await oauth.denyConsent(request, handle);
-      return redirectWith(denied.redirectTo, denied.headers);
-    }
+    const { handle, denied } = await readConsentForm(oauth, request);
+    if (denied) return denied;
     const approved = await oauth.approveConsent(request, handle, {
       remember: { secret: deps.settings.consentSecret },
     });

@@ -85,3 +85,23 @@ export function isMcpPath(request: Request): boolean {
   const { pathname } = new URL(request.url);
   return pathname === '/mcp' || pathname.startsWith('/mcp/');
 }
+
+/** OAuth error code of a failed token-endpoint response (`error` field), or `http_<status>`. */
+export async function oauthErrorCode(response: Response): Promise<string> {
+  try {
+    const body = (await response.json()) as { error?: unknown };
+    if (typeof body.error === 'string') return body.error;
+  } catch {
+    // body is not JSON: use the status
+  }
+  return `http_${response.status}`;
+}
+
+/** Runs a dependency builder; an invalid configuration becomes the 500 page instead of an exception. */
+export function buildOrConfigError<T>(build: () => T): T | Response {
+  try {
+    return build();
+  } catch (error) {
+    return configErrorResponse(error);
+  }
+}
