@@ -4,7 +4,7 @@
     "name": "Bernardo Temponi"
   },
   "metadata": {
-    "description": "MCP connectors for Claude: PUC Minas Canvas, multi-account Gmail and personal WhatsApp (self-hosted)."
+    "description": "MCP connectors for Claude: PUC Minas Canvas, multi-account Gmail, personal WhatsApp (self-hosted) and Spotify (bring your own app)."
   },
   "plugins": [
     {
@@ -27,6 +27,13 @@
       "description": "Personal WhatsApp (read and send with confirmation) through your own server on Cloudflare Workers + Containers. Requires deploying the template first (see the connector README).",
       "category": "communication",
       "tags": ["whatsapp", "messaging", "self-hosted", "communication"]
+    },
+    {
+      "name": "spotify",
+      "source": "./connectors/spotify/plugin",
+      "description": "Spotify in the cloud with your own Spotify app: search, Liked Songs, playlists (read, create, edit, sort, split, merge), follows, history, top items and playback, plus bulk cleanups with preview, automatic backups and restore. Nothing is installed on your computer.",
+      "category": "entertainment",
+      "tags": ["spotify", "music", "playlists", "library"]
     }
   ]
 }

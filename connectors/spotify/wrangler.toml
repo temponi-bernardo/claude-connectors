@@ -1,0 +1,49 @@
+# Remote Spotify connector on Cloudflare Workers (ADR 0033): each user brings their own Spotify app.
+# On demand: no Containers, Cron Triggers, Durable Object alarms or polling. State lives only in Workers KV.
+# Step-by-step deploy and secrets in connectors/spotify/README.md.
+name = "spotify-remote"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+# Claude's OAuth tokens, clients and grants (managed by @cloudflare/workers-oauth-provider).
+# Replace the id with the one from `npx wrangler kv namespace create OAUTH_KV --config connectors/spotify/wrangler.toml`.
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "00000000000000000000000000000000"
+
+# Per-user vault (app credentials, refresh token, snapshots, genre cache, plans, backups), all sealed with
+# AES-256-GCM (TOKEN_ENC_KEY) and keyed by a hash of the user.
+# Replace the id with the one from `npx wrangler kv namespace create SPOTIFY_KV --config connectors/spotify/wrangler.toml`.
+[[kv_namespaces]]
+binding = "SPOTIFY_KV"
+id = "00000000000000000000000000000001"
+
+# Per-OAuth-session limit on /mcp: 120 requests per minute.
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "2501"
+
+  [ratelimits.simple]
+  limit = 120
+  period = 60
+
+# Per-IP limit on routes without a token (registration, credentials page, callback, /token): 30 per minute.
+[[ratelimits]]
+name = "RATE_LIMITER_PUBLIC"
+namespace_id = "2502"
+
+  [ratelimits.simple]
+  limit = 30
+  period = 60
+
+# PUBLIC_URL (optional): the Worker's canonical URL. Without it, the request origin (*.workers.dev) is used.
+# SPOTIFY_CALL_BUDGET (optional): Spotify requests per tool call (default 40, fits the Workers Free plan's 50
+# subrequests; up to 900 on Workers Paid, which makes big libraries finish in fewer calls).
+# [vars]
+# PUBLIC_URL = "https://spotify-remote.<your-account>.workers.dev"
+# SPOTIFY_CALL_BUDGET = "400"
+
+[observability]
+enabled = true
