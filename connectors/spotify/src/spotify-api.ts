@@ -40,16 +40,20 @@ export function retryAfterSeconds(response: Response): number {
 }
 
 /** Decides the next step for a response on the given attempt (1-based). Pure. */
-export function decideRetry(response: Response, attempt: number): RetryDecision {
+export function decideRetry(response: Response, attempt: number, method = 'GET'): RetryDecision {
   if (response.ok) return { kind: 'done' };
   if (response.status === 401) return attempt === 1 ? { kind: 'renew' } : { kind: 'fail' };
-  return attempt < SPOTIFY_MAX_ATTEMPTS ? retryableDecision(response) : { kind: 'fail' };
+  return attempt < SPOTIFY_MAX_ATTEMPTS ? retryableDecision(response, method) : { kind: 'fail' };
 }
 
-/** Retry decision for a status that may be retried: 429 waits for `Retry-After`, 5xx waits briefly. */
-export function retryableDecision(response: Response): RetryDecision {
+/**
+ * Retry decision for a status that may be retried: 429 waits for `Retry-After`; 5xx waits briefly, except for a
+ * POST, which Spotify may have applied before failing (a retry could create a second playlist or add twice).
+ */
+export function retryableDecision(response: Response, method = 'GET'): RetryDecision {
   if (response.status === 429) return rateLimitDecision(retryAfterSeconds(response));
-  if (response.status >= 500) return { kind: 'wait', ms: SPOTIFY_SERVER_RETRY_MS };
+  if (response.status >= 500 && method !== 'POST')
+    return { kind: 'wait', ms: SPOTIFY_SERVER_RETRY_MS };
   return { kind: 'fail' };
 }
 
@@ -100,7 +104,7 @@ export async function readSpotifyBody(response: Response): Promise<unknown> {
 export async function spotifyCall(deps: OwnerDeps, call: SpotifyCall): Promise<unknown> {
   for (let attempt = 1; ; attempt += 1) {
     const response = await sendSpotifyAttempt(deps, call);
-    const decision = decideRetry(response, attempt);
+    const decision = decideRetry(response, attempt, call.method ?? 'GET');
     if (decision.kind === 'done') return readSpotifyBody(response);
     if (decision.kind === 'fail') {
       const body = await readSpotifyBody(response);

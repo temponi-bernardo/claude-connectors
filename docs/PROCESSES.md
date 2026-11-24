@@ -574,10 +574,12 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      `copyLikedDraft()`, `staleDraft()` (after `scanOwnPlaylists()`), or `restoreDraft()`.
   3. `previewDraft()` stores it with `createPlan()` (10-minute validity) and answers `previewOutput()`: counts,
      sample and `plan_id`. Nothing changed yet.
-  4. After the user's explicit OK, `apply_plan` loads it (`requirePlan()`) and `runPlan()` runs:
+  4. After the user's explicit OK, `apply_plan` loads it (`requirePlan()`), takes a 90-second lease so a parallel call for the same
+     plan is refused (`claimPlan()`), and `runPlan()` runs:
      `backupBeforeApply()` saves the "before" data (`saveBackup()`) when a step removes or rewrites,
      `reconcilePlan()` re-reads the item count of a resumed playlist step (`playlistItemCount()`), and
-     `runPlanChunk()` sends chunks (`writeLibraryChunk()` 40 URIs, `runAddChunk()`, `runReplaceChunk()`,
+     `runPlanChunk()` sends chunks (`writeLibraryChunk()` 40 URIs, `runAddChunk()`, `runReplaceChunk()` (which first checks the playlist is still the previewed version,
+     `checkPlaylistUnchanged()`),
      `runCreateChunk()` 100 items), moving with `advancePlan()`.
   5. `forgetTouchedSources()` drops the snapshots it changed; `storePlan()` keeps the progress (or removes the
      finished plan) and `applyOutput()` answers `done` or `partial`.
@@ -602,10 +604,10 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 
 - **Trigger:** `disconnect` with `confirm: true`, after the user agrees.
 - **Steps:**
-  1. `eraseOwner()` deletes every vault key of the user, of every type in `VAULT_TYPES` (`deletePrefix()` over
+  1. `revokeClaudeGrants()` revokes the user's Claude grants first, then `eraseOwner()` deletes every vault key of the user, of every type in `VAULT_TYPES` (`deletePrefix()` over
      `ownerHash()` prefixes).
-  2. `forgetSpotifyAccessToken()` drops the cached access token; `revokeClaudeGrants()` revokes the user's Claude
-     grants on this connector.
+  2. `forgetSpotifyAccessToken()` drops the cached access token. KV listing is eventually consistent: a record
+     written in the last seconds can survive; snapshots and caches also expire on their own (TTL).
 - **Result:** nothing of the user remains on the connector; the answer points to Spotify's apps page to remove
   the app's access there too (Spotify has no revocation API).
 - **Failures:** none expected; KV errors propagate.

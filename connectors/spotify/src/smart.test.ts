@@ -11,6 +11,7 @@ import {
   likedRemoval,
   mergeDraft,
   planDraft,
+  rewriteStep,
   playlistBefore,
   splitDraft,
   splitGroups,
@@ -91,7 +92,12 @@ describe('dedupe, unavailable, split and merge drafts', () => {
   it('dedupes a playlist by rewriting it after a backup; nothing to do when clean', () => {
     const draft = dedupeDraft(snap(dupes, 'Mix'), 'pl');
     expect(draft.steps).toEqual([
-      { kind: 'playlist_replace', playlistId: 'pl', uris: ['spotify:track:a', 'spotify:track:c'] },
+      {
+        kind: 'playlist_replace',
+        playlistId: 'pl',
+        uris: ['spotify:track:a', 'spotify:track:c'],
+        expectedSnapshotId: '',
+      },
     ]);
     expect(draft.before?.playlists?.[0]?.tracks).toHaveLength(3);
     expect(dedupeDraft(snap([track('z', 'Z')], 'Clean'), 'pl').steps).toEqual([]);
@@ -159,5 +165,11 @@ describe('dedupe, unavailable, split and merge drafts', () => {
       isPublic: false,
     });
     expect(planDraft('t', [], { before: null, details: {} }).title).toBe('t');
+    expect(rewriteStep(snap(LIKED, 'P'), 'p', ['u'])).toEqual({
+      kind: 'playlist_replace',
+      playlistId: 'p',
+      uris: ['u'],
+      expectedSnapshotId: '',
+    });
   });
 });

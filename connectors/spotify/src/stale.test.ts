@@ -11,6 +11,7 @@ import {
   type SpotifyRoute,
 } from './fixtures/fake-spotify.js';
 import {
+  currentVersions,
   fetchAllPlaylists,
   fetchLastAdded,
   fillLastAdded,
@@ -85,5 +86,13 @@ describe('abandoned playlists', () => {
     const deps = await testOwnerDeps(fakeSpotify(ROUTES));
     expect((await fetchAllPlaylists(deps)).complete).toBe(true);
     expect(await fetchLastAdded(deps, parsePlaylist(playlistJson('e'))!)).toBe('');
+  });
+});
+
+describe('currentVersions', () => {
+  it('keeps only entries of the current playlist versions', () => {
+    const own = [parsePlaylist(playlistJson('a', { snapshot_id: 'a2' }))!];
+    expect(currentVersions({ a1: 'old', a2: 'new' }, own)).toEqual({ a2: 'new' });
+    expect(currentVersions(null, own)).toEqual({});
   });
 });

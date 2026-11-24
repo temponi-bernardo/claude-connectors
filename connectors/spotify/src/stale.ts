@@ -15,6 +15,9 @@ import { readVault, vaultOf, writeVault } from './vault.js';
 /** Vault type of the cache of last-added dates (per playlist `snapshot_id`). */
 export const STALE_TYP = 'stale';
 
+/** Seconds the last-added cache stays in KV after its last update. */
+export const STALE_TTL_SECONDS = 30 * 24 * 3600;
+
 /** Most playlists read from the library. */
 export const MAX_LIBRARY_PLAYLISTS = 2000;
 
@@ -81,10 +84,23 @@ export async function scanOwnPlaylists(
   const own = playlists.filter((p) => p.ownerId === userId);
   const vault = vaultOf(deps);
   const ref = { typ: STALE_TYP, owner: deps.owner };
-  const cache = ((await readVault(vault, ref)) ?? {}) as LastAddedCache;
+  const cache = currentVersions((await readVault(vault, ref)) as LastAddedCache | null, own);
   const missing = await fillLastAdded(deps, own, cache);
-  await writeVault(vault, ref, cache);
+  await writeVault(vault, { ...ref, ttlSeconds: STALE_TTL_SECONDS }, cache);
   return { own, cache, missing };
+}
+
+/** Keeps only the cache entries of the playlists' current versions (old versions are dropped). Pure. */
+export function currentVersions(
+  cache: LastAddedCache | null,
+  own: readonly PlaylistInfo[],
+): LastAddedCache {
+  const kept: LastAddedCache = {};
+  for (const playlist of own) {
+    const value = cache?.[playlist.snapshotId];
+    if (value !== undefined) kept[playlist.snapshotId] = value;
+  }
+  return kept;
 }
 
 /** Own playlists older than the cutoff (ISO), and empty ones when asked. Pure. */

@@ -15,6 +15,7 @@ import { runPlan } from './apply.js';
 import type { OwnerDeps } from './context.js';
 import { ensureGenres, type GenreMap } from './genres.js';
 import {
+  claimPlan,
   createPlan,
   loadPlans,
   planItemCount,
@@ -183,8 +184,9 @@ export const applyPlanTool = defineTool({
   shape: { plan_id: PLAN_ID },
   annotations: toolAnnotations('Apply plan', DESTRUCTIVE_HINTS),
   run: async (deps: OwnerDeps, args) => {
-    const outcome = await runPlan(deps, await requirePlan(deps, args.plan_id));
-    await storePlan(deps, outcome.plan, outcome.finished);
+    const plan = await claimPlan(deps, await requirePlan(deps, args.plan_id));
+    const outcome = await runPlan(deps, plan);
+    await storePlan(deps, { ...outcome.plan, runningUntil: 0 }, outcome.finished);
     if (outcome.error !== null)
       throw outcome.error instanceof Error
         ? outcome.error

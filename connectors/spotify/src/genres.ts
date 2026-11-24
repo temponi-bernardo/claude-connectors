@@ -11,6 +11,9 @@ import { readVault, vaultOf, writeVault } from './vault.js';
 /** Vault type of the genre cache. */
 export const GENRES_TYP = 'genres';
 
+/** Seconds the genre cache stays in KV after its last update. */
+export const GENRES_TTL_SECONDS = 30 * 24 * 3600;
+
 /** Most artists kept in the cache (oldest dropped first). */
 export const MAX_CACHED_ARTISTS = 20_000;
 
@@ -27,7 +30,8 @@ export async function loadGenreCache(deps: OwnerDeps): Promise<GenreMap> {
 export async function saveGenreCache(deps: OwnerDeps, cache: GenreMap): Promise<void> {
   const entries = Object.entries(cache);
   const kept = Object.fromEntries(entries.slice(Math.max(0, entries.length - MAX_CACHED_ARTISTS)));
-  await writeVault(vaultOf(deps), { typ: GENRES_TYP, owner: deps.owner }, kept);
+  const ref = { typ: GENRES_TYP, owner: deps.owner, ttlSeconds: GENRES_TTL_SECONDS };
+  await writeVault(vaultOf(deps), ref, kept);
 }
 
 /** Genres of one artist from `GET /artists/{id}` (empty when Spotify returns none). */

@@ -122,8 +122,9 @@ describe('library tools', () => {
       ),
     );
     expect(await saveToLibraryTool.run(deps, { uris: ['spotify:track:a'] })).toEqual({ saved: 1 });
-    expect(await removeFromLibraryTool.run(deps, { uris: ['spotify:album:b'] })).toEqual({
+    expect(await removeFromLibraryTool.run(deps, { uris: ['spotify:album:b'] })).toMatchObject({
       removed: 1,
+      backup_id: expect.any(String) as unknown,
     });
     expect(await checkLibraryTool.run(deps, { uris: ['spotify:track:a'] })).toEqual({
       items: [{ uri: 'spotify:track:a', in_library: true }],

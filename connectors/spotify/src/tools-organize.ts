@@ -22,6 +22,7 @@ import {
   mergeDraft,
   playlistBefore,
   planDraft,
+  rewriteStep,
   splitDraft,
   trackSample,
   type PlanDraft,
@@ -150,8 +151,12 @@ export function sortDraft(snapshot: SourceSnapshot, sort: SortOptions): PlanDraf
     descending: sort.descending,
     genres: sort.genres,
   });
-  const steps: PlanStep[] = [
-    { kind: 'playlist_replace', playlistId: sort.playlistId, uris: sorted.map((t) => t.uri) },
+  const steps = [
+    rewriteStep(
+      snapshot,
+      sort.playlistId,
+      sorted.map((t) => t.uri),
+    ),
   ];
   return {
     title: `Sort "${snapshot.name}" by ${sort.key}`,

@@ -24,6 +24,7 @@ import {
   type PlaylistInfo,
   type TrackInfo,
 } from './catalog.js';
+import { saveBackup, uriBackupTracks } from './backups.js';
 import type { OwnerDeps } from './context.js';
 import { PLAYLIST_BATCH } from './library-write.js';
 import { nextPageOffset, readPagingObject } from './paging.js';
@@ -254,14 +255,26 @@ export const addPlaylistItemsTool = defineTool({
 export const removePlaylistItemsTool = defineTool({
   name: 'remove_playlist_items',
   description:
-    'Removes up to 100 URIs from a playlist you own (every occurrence of each). Confirm with the user first. To remove only duplicate copies or many items, use preview_dedupe or preview_filter_liked-style previews, which back up first.',
+    'Removes up to 100 URIs from a playlist you own (every occurrence of each). Confirm with the user first. The removed URIs are backed up (backup_id; preview_restore recreates them as a new playlist). To remove only duplicate copies or many items, use preview_dedupe or preview_filter_liked-style previews, which back up first.',
   shape: { playlist_id: PLAYLIST_REF, uris: z.array(PLAYABLE_URI).min(1).max(PLAYLIST_BATCH) },
   annotations: toolAnnotations('Remove from playlist', DESTRUCTIVE_HINTS),
   run: async (deps: OwnerDeps, args) => {
     const id = spotifyIdOf(args.playlist_id, 'playlist');
+    const tracks = uriBackupTracks(args.uris);
+    const playlist = {
+      id,
+      name: `Removed from playlist ${id}`,
+      description: '',
+      isPublic: null,
+      tracks,
+    };
+    const backup = await saveBackup(deps, {
+      label: `Removed from playlist ${id}`,
+      playlists: [playlist],
+    });
     const body = { items: args.uris.map((uri) => ({ uri })) };
     await spotifyCall(deps, { method: 'DELETE', path: paths.playlistItems(id), body });
-    return { playlist_id: id, removed: args.uris.length };
+    return { playlist_id: id, removed: args.uris.length, backup_id: backup.id };
   },
 });
 

@@ -3,6 +3,7 @@ import { clearSpotifyTokenCache } from './access-token.js';
 import {
   addPlaylistUris,
   advancePlan,
+  checkPlaylistUnchanged,
   backupBeforeApply,
   createUserPlaylist,
   currentChunk,
@@ -281,5 +282,32 @@ describe('chunk runners', () => {
     const deps = await testOwnerDeps(fakeSpotify([]));
     await forgetTouchedSources(deps, plan([{ kind: 'library_save', uris: [] }]));
     expect(deps.kv.entries.size).toBe(1);
+  });
+});
+
+describe('playlist rewrites check the version first', () => {
+  it('refuses to rewrite a playlist that changed since the preview', async () => {
+    const store = playlistStore({ pl: uris(3) });
+    const routes: SpotifyRoute[] = [
+      [
+        'GET',
+        /\/v1\/playlists\/pl$/,
+        () => Response.json({ id: 'pl', name: 'Mix', snapshot_id: 'v2' }),
+      ],
+      ...store.routes,
+    ];
+    const deps = await testOwnerDeps(fakeSpotify(routes));
+    const step: PlanStep = {
+      kind: 'playlist_replace',
+      playlistId: 'pl',
+      uris: uris(1),
+      expectedSnapshotId: 'v1',
+    };
+    await expect(checkPlaylistUnchanged(deps, step)).rejects.toThrow('changed since the preview');
+    const outcome = await runPlan(deps, plan([step]));
+    expect(String(outcome.error)).toContain('changed since the preview');
+    expect(store.lists.pl).toEqual(uris(3));
+    await checkPlaylistUnchanged(deps, { ...step, expectedSnapshotId: 'v2' });
+    await checkPlaylistUnchanged(deps, { kind: 'library_save', uris: [] });
   });
 });

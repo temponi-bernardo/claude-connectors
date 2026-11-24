@@ -16,6 +16,9 @@ export const SCAN_TYP = 'scan';
 /** Age after which a Liked Songs snapshot is read again (ms). */
 export const LIKED_FRESH_MS = 15 * 60 * 1000;
 
+/** Seconds a snapshot stays in KV (it is only a working copy for previews). */
+export const SCAN_TTL_SECONDS = 24 * 3600;
+
 /** Most items a snapshot keeps. */
 export const MAX_SOURCE_ITEMS = 20_000;
 
@@ -142,7 +145,7 @@ export async function loadSource(
     : emptySnapshot(ref, { ...version, now });
   if (start.nextOffset === null) return start;
   const snapshot = await advanceSnapshot(deps, ref, start);
-  await writeVault(vaultOf(deps), vaultRef, snapshot);
+  await writeVault(vaultOf(deps), { ...vaultRef, ttlSeconds: SCAN_TTL_SECONDS }, snapshot);
   return snapshot;
 }
 

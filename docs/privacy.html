@@ -83,8 +83,9 @@ description: What data the Claude Connectors connectors access, where it is kept
     <strong>What is stored</strong> (in Cloudflare Workers KV), each record encrypted with
     AES-256-GCM and stored under a hash of your Spotify account: your app's Client ID and Secret,
     the Spotify refresh token, the date you authorized, temporary copies of your Liked Songs or a
-    playlist used for previews, a cache of artist genres, pending plans (10 minutes) and up to 10
-    backups (track and playlist names, URIs and dates). Access tokens live only in memory.
+    playlist used for previews (kept 1 day), a cache of artist genres (30 days), pending plans (10
+    minutes) and up to 10 backups (track and playlist names, URIs and dates). Access tokens live
+    only in memory.
   </li>
   <li><strong>Isolation:</strong> each person only reaches their own records.</li>
   <li>

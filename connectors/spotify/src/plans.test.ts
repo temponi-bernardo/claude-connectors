@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { fakeSpotify, testOwnerDeps } from './fixtures/fake-spotify.js';
 import {
+  claimPlan,
   createPlan,
   isDestructiveStep,
   loadPlans,
@@ -60,5 +61,19 @@ describe('plans', () => {
       changes: [{ kind: 'library_remove', items: 2 }],
     });
     expect(String(out.next)).toContain('explicit OK');
+  });
+});
+
+describe('plan lease', () => {
+  it('lets only one apply call hold a plan at a time', async () => {
+    const deps = await testOwnerDeps(fakeSpotify([]));
+    const plan = await createPlan(deps, { title: 't', steps: STEPS, before: null });
+    const claimed = await claimPlan(deps, plan);
+    expect(claimed.runningUntil).toBeGreaterThan(deps.now());
+    await expect(claimPlan(deps, await requirePlan(deps, plan.id))).rejects.toThrow(
+      'being applied by another call',
+    );
+    const later = { ...deps, now: () => deps.now() + 91_000 };
+    await expect(claimPlan(later, await requirePlan(later, plan.id))).resolves.toBeTruthy();
   });
 });

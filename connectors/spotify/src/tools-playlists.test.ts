@@ -166,7 +166,11 @@ describe('playlist tools', () => {
       uris: ['spotify:track:a'],
       position: 0,
     });
-    await removePlaylistItemsTool.run(deps, { playlist_id: 'p', uris: ['spotify:track:a'] });
+    const removed = await removePlaylistItemsTool.run(deps, {
+      playlist_id: 'p',
+      uris: ['spotify:track:a'],
+    });
+    expect(removed).toMatchObject({ removed: 1, backup_id: expect.any(String) as unknown });
     await reorderPlaylistItemsTool.run(deps, {
       playlist_id: 'p',
       range_start: 5,

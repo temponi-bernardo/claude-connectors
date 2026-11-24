@@ -63,9 +63,9 @@ export const disconnectTool = defineTool({
   shape: { confirm: z.literal(true).describe('Must be true: the user confirmed the erasure.') },
   annotations: toolAnnotations('Disconnect and erase data', DESTRUCTIVE_HINTS),
   run: async (deps: OwnerDeps) => {
+    const grants = await revokeClaudeGrants(deps);
     const erased = await eraseOwner(deps.kv, deps.owner);
     forgetSpotifyAccessToken(deps.owner);
-    const grants = await revokeClaudeGrants(deps);
     return {
       erased_records: erased,
       revoked_claude_grants: grants,

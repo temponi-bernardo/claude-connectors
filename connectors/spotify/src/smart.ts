@@ -127,6 +127,15 @@ export function checkNoLocalFiles(snapshot: SourceSnapshot): void {
   }
 }
 
+/** Step that rewrites a playlist with the given order, only if it is still the version the preview read. */
+export function rewriteStep(
+  snapshot: SourceSnapshot,
+  playlistId: string,
+  uris: readonly string[],
+): PlanStep {
+  return { kind: 'playlist_replace', playlistId, uris, expectedSnapshotId: snapshot.snapshotId };
+}
+
 /** Duplicates of a source: Liked Songs lose the extra copies; a playlist is rewritten without them. */
 export function dedupeDraft(snapshot: SourceSnapshot, playlistId: string | null): PlanDraft {
   const { keep, extra } = findDuplicates(snapshot.tracks);
@@ -145,8 +154,7 @@ export function dedupeDraft(snapshot: SourceSnapshot, playlistId: string | null)
   checkNoLocalFiles(snapshot);
   const before = playlistBefore(snapshot, playlistId, `"${snapshot.name}" before dedupe`);
   const uris = keep.map((t) => t.uri);
-  const steps: PlanStep[] =
-    extra.length > 0 ? [{ kind: 'playlist_replace', playlistId, uris }] : [];
+  const steps = extra.length > 0 ? [rewriteStep(snapshot, playlistId, uris)] : [];
   return planDraft(`Remove ${extra.length} duplicates from "${snapshot.name}"`, steps, {
     before,
     details,

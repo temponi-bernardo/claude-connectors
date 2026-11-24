@@ -50,6 +50,15 @@ export async function requireAccount(deps: OwnerDeps): Promise<SpotifyAccount> {
   return account;
 }
 
+/** Saves a rotated refresh token onto the account as it is now (re-read, so a concurrent change is kept). */
+export async function saveRotatedRefreshToken(
+  deps: OwnerDeps,
+  refreshToken: string,
+): Promise<void> {
+  const latest = await loadAccount(vaultOf(deps), deps.owner);
+  if (latest !== null) await saveAccount(vaultOf(deps), deps.owner, { ...latest, refreshToken });
+}
+
 /** Refreshes the access token, saving a rotated refresh token; terminal token errors become reconnect errors. */
 export async function renewSpotifyAccessToken(deps: OwnerDeps): Promise<string> {
   const account = await requireAccount(deps);
@@ -57,10 +66,7 @@ export async function renewSpotifyAccessToken(deps: OwnerDeps): Promise<string> 
   try {
     const tokens = await refreshSpotifyToken(deps, account, account.refreshToken);
     if (tokens.refreshToken !== null && tokens.refreshToken !== account.refreshToken) {
-      await saveAccount(vaultOf(deps), deps.owner, {
-        ...account,
-        refreshToken: tokens.refreshToken,
-      });
+      await saveRotatedRefreshToken(deps, tokens.refreshToken);
     }
     const expiresAt = deps.now() + tokens.expiresIn * 1000 - SPOTIFY_TOKEN_MARGIN_MS;
     spotifyTokenCache.set(deps.owner, { token: tokens.accessToken, expiresAt });

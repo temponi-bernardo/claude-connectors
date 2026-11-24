@@ -68,25 +68,25 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - `connectors/gmail/src/token-store.ts`: [`ownerKey`](#ownerkey), [`toLinkedAccount`](#tolinkedaccount), [`sealOwnerAccounts`](#sealowneraccounts), [`openOwnerAccounts`](#openowneraccounts), [`loadOwnerAccounts`](#loadowneraccounts), [`saveOwnerAccounts`](#saveowneraccounts), [`upsertAccount`](#upsertaccount)
 - `connectors/gmail/src/tools.ts`: [`ownerRefs`](#ownerrefs), [`resolveOwnerAccounts`](#resolveowneraccounts), [`resolveSingleAccount`](#resolvesingleaccount), [`resolveWritableAccount`](#resolvewritableaccount), [`accountBase`](#accountbase), [`accountStatus`](#accountstatus), [`withUntrustedNotice`](#withuntrustednotice), [`accountLabels`](#accountlabels)
 - `connectors/gmail/src/worker.ts`: [`createGmailDeps`](#creategmaildeps), [`createGmailServer`](#creategmailserver), [`handleMcpApi`](#handlemcpapi), [`handleDefaultRequest`](#handledefaultrequest), [`createGmailProvider`](#creategmailprovider), [`handleGmailWorkerFetch`](#handlegmailworkerfetch)
-- `connectors/spotify/src/access-token.ts`: [`forgetSpotifyAccessToken`](#forgetspotifyaccesstoken), [`clearSpotifyTokenCache`](#clearspotifytokencache), [`notConnectedError`](#notconnectederror), [`reconnectError`](#reconnecterror), [`requireAccount`](#requireaccount), [`renewSpotifyAccessToken`](#renewspotifyaccesstoken), [`isTerminalTokenError`](#isterminaltokenerror), [`getSpotifyAccessToken`](#getspotifyaccesstoken)
+- `connectors/spotify/src/access-token.ts`: [`forgetSpotifyAccessToken`](#forgetspotifyaccesstoken), [`clearSpotifyTokenCache`](#clearspotifytokencache), [`notConnectedError`](#notconnectederror), [`reconnectError`](#reconnecterror), [`requireAccount`](#requireaccount), [`saveRotatedRefreshToken`](#saverotatedrefreshtoken), [`renewSpotifyAccessToken`](#renewspotifyaccesstoken), [`isTerminalTokenError`](#isterminaltokenerror), [`getSpotifyAccessToken`](#getspotifyaccesstoken)
 - `connectors/spotify/src/account-store.ts`: [`toSpotifyAccount`](#tospotifyaccount), [`loadAccount`](#loadaccount), [`saveAccount`](#saveaccount), [`deleteAccount`](#deleteaccount), [`refreshExpiryIso`](#refreshexpiryiso), [`maskCredential`](#maskcredential)
-- `connectors/spotify/src/apply.ts`: [`advancePlan`](#advanceplan), [`playlistItemCount`](#playlistitemcount), [`addPlaylistUris`](#addplaylisturis), [`createUserPlaylist`](#createuserplaylist), [`currentStep`](#currentstep), [`currentChunk`](#currentchunk), [`runAddChunk`](#runaddchunk), [`runReplaceChunk`](#runreplacechunk), [`runCreateChunk`](#runcreatechunk), [`runPlanChunk`](#runplanchunk), [`resumedPlaylistId`](#resumedplaylistid), [`reconcilePlan`](#reconcileplan), [`backupBeforeApply`](#backupbeforeapply), [`touchedSources`](#touchedsources), [`forgetTouchedSources`](#forgettouchedsources), [`runPlan`](#runplan)
-- `connectors/spotify/src/backups.ts`: [`toBackupTrack`](#tobackuptrack), [`toBackupPlaylist`](#tobackupplaylist), [`backupEntry`](#backupentry), [`listBackups`](#listbackups), [`saveBackup`](#savebackup), [`requireBackup`](#requirebackup), [`deleteBackup`](#deletebackup), [`deleteAllBackups`](#deleteallbackups), [`backupPage`](#backuppage)
+- `connectors/spotify/src/apply.ts`: [`advancePlan`](#advanceplan), [`playlistItemCount`](#playlistitemcount), [`addPlaylistUris`](#addplaylisturis), [`createUserPlaylist`](#createuserplaylist), [`currentStep`](#currentstep), [`currentChunk`](#currentchunk), [`runAddChunk`](#runaddchunk), [`checkPlaylistUnchanged`](#checkplaylistunchanged), [`runReplaceChunk`](#runreplacechunk), [`runCreateChunk`](#runcreatechunk), [`runPlanChunk`](#runplanchunk), [`resumedPlaylistId`](#resumedplaylistid), [`reconcilePlan`](#reconcileplan), [`backupBeforeApply`](#backupbeforeapply), [`touchedSources`](#touchedsources), [`forgetTouchedSources`](#forgettouchedsources), [`runPlan`](#runplan)
+- `connectors/spotify/src/backups.ts`: [`toBackupTrack`](#tobackuptrack), [`toBackupPlaylist`](#tobackupplaylist), [`backupEntry`](#backupentry), [`listBackups`](#listbackups), [`saveBackup`](#savebackup), [`requireBackup`](#requirebackup), [`deleteBackup`](#deletebackup), [`deleteAllBackups`](#deleteallbackups), [`backupPage`](#backuppage), [`uriBackupTracks`](#uribackuptracks)
 - `connectors/spotify/src/catalog.ts`: [`textField`](#textfield), [`parseArtistRefs`](#parseartistrefs), [`trackAlbum`](#trackalbum), [`parseTrack`](#parsetrack), [`parseAddedTrack`](#parseaddedtrack), [`playlistTotal`](#playlisttotal), [`parsePlaylist`](#parseplaylist), [`releaseYear`](#releaseyear), [`trackOutput`](#trackoutput), [`addedTrackOutput`](#addedtrackoutput), [`playlistOutput`](#playlistoutput), [`catalogExtras`](#catalogextras), [`catalogItemOutput`](#catalogitemoutput)
 - `connectors/spotify/src/config.ts`: [`parseCallBudget`](#parsecallbudget), [`readSpotifySettings`](#readspotifysettings), [`isSpotifyAppCredential`](#isspotifyappcredential)
 - `connectors/spotify/src/genres.ts`: [`loadGenreCache`](#loadgenrecache), [`saveGenreCache`](#savegenrecache), [`fetchArtistGenres`](#fetchartistgenres), [`missingArtistIds`](#missingartistids), [`ensureGenres`](#ensuregenres)
 - `connectors/spotify/src/library-write.ts`: [`isArtistUri`](#isartisturi), [`uriId`](#uriid), [`writeLibraryUris`](#writelibraryuris), [`writeArtistFollows`](#writeartistfollows), [`writeLibraryChunk`](#writelibrarychunk), [`libraryContains`](#librarycontains), [`chunkList`](#chunklist)
 - `connectors/spotify/src/pages.ts`: [`appSetupSteps`](#appsetupsteps), [`credentialsBody`](#credentialsbody), [`credentialsPage`](#credentialspage)
 - `connectors/spotify/src/paging.ts`: [`readPagingObject`](#readpagingobject), [`cursorAfter`](#cursorafter), [`nextPageOffset`](#nextpageoffset), [`fetchOffsetPage`](#fetchoffsetpage), [`collectOffsetPages`](#collectoffsetpages)
-- `connectors/spotify/src/plans.ts`: [`isDestructiveStep`](#isdestructivestep), [`planItemCount`](#planitemcount), [`loadPlans`](#loadplans), [`savePlans`](#saveplans), [`createPlan`](#createplan), [`requirePlan`](#requireplan), [`storePlan`](#storeplan), [`previewOutput`](#previewoutput)
+- `connectors/spotify/src/plans.ts`: [`isDestructiveStep`](#isdestructivestep), [`planItemCount`](#planitemcount), [`loadPlans`](#loadplans), [`savePlans`](#saveplans), [`createPlan`](#createplan), [`requirePlan`](#requireplan), [`storePlan`](#storeplan), [`previewOutput`](#previewoutput), [`claimPlan`](#claimplan)
 - `connectors/spotify/src/rules.ts`: [`foldText`](#foldtext), [`matchesArtist`](#matchesartist), [`trackGenres`](#trackgenres), [`matchesGenre`](#matchesgenre), [`matchesWho`](#matcheswho), [`matchesYear`](#matchesyear), [`matchesAdded`](#matchesadded), [`matchesFilter`](#matchesfilter), [`needsGenres`](#needsgenres), [`songTitleKey`](#songtitlekey), [`songKey`](#songkey), [`preferredCopy`](#preferredcopy), [`findDuplicates`](#findduplicates), [`trackKeyValue`](#trackkeyvalue), [`sortTracks`](#sorttracks), [`groupTracks`](#grouptracks), [`artistIdsOf`](#artistidsof)
 - `connectors/spotify/src/sign-in.ts`: [`credentialsProblem`](#credentialsproblem), [`pageTargets`](#pagetargets), [`showSpotifyAuthorize`](#showspotifyauthorize), [`sealPendingApp`](#sealpendingapp), [`openPendingApp`](#openpendingapp), [`credentialsRetryPage`](#credentialsretrypage), [`beginSpotifyAuthorization`](#beginspotifyauthorization), [`submitSpotifyAuthorize`](#submitspotifyauthorize), [`fetchSpotifyIdentity`](#fetchspotifyidentity), [`expiredConnectionPage`](#expiredconnectionpage), [`spotifyFailurePage`](#spotifyfailurepage), [`connectSpotifyAccount`](#connectspotifyaccount), [`completeSpotifySignIn`](#completespotifysignin), [`resumeSpotifySignIn`](#resumespotifysignin), [`finishSpotifySignIn`](#finishspotifysignin)
-- `connectors/spotify/src/smart.ts`: [`planDraft`](#plandraft), [`trackSample`](#tracksample), [`hasCriteria`](#hascriteria), [`tracksToRemove`](#trackstoremove), [`filterLikedDraft`](#filterlikeddraft), [`likedRemoval`](#likedremoval), [`likedBefore`](#likedbefore), [`playlistBefore`](#playlistbefore), [`checkNoLocalFiles`](#checknolocalfiles), [`dedupeDraft`](#dedupedraft), [`unavailableDraft`](#unavailabledraft), [`splitGroups`](#splitgroups), [`uniqueTrackUris`](#uniquetrackuris), [`createStep`](#createstep), [`splitDraft`](#splitdraft), [`mergeDraft`](#mergedraft)
+- `connectors/spotify/src/smart.ts`: [`planDraft`](#plandraft), [`trackSample`](#tracksample), [`hasCriteria`](#hascriteria), [`tracksToRemove`](#trackstoremove), [`filterLikedDraft`](#filterlikeddraft), [`likedRemoval`](#likedremoval), [`likedBefore`](#likedbefore), [`playlistBefore`](#playlistbefore), [`checkNoLocalFiles`](#checknolocalfiles), [`rewriteStep`](#rewritestep), [`dedupeDraft`](#dedupedraft), [`unavailableDraft`](#unavailabledraft), [`splitGroups`](#splitgroups), [`uniqueTrackUris`](#uniquetrackuris), [`createStep`](#createstep), [`splitDraft`](#splitdraft), [`mergeDraft`](#mergedraft)
 - `connectors/spotify/src/sources.ts`: [`sourceKey`](#sourcekey), [`sourceRequest`](#sourcerequest), [`fetchPlaylistInfo`](#fetchplaylistinfo), [`isSnapshotReusable`](#issnapshotreusable), [`emptySnapshot`](#emptysnapshot), [`advanceSnapshot`](#advancesnapshot), [`sourceVersion`](#sourceversion), [`loadSource`](#loadsource), [`loadingStatus`](#loadingstatus), [`loadCompleteSource`](#loadcompletesource), [`isLoading`](#isloading), [`forgetSource`](#forgetsource)
 - `connectors/spotify/src/spotify-api.ts`: [`retryAfterSeconds`](#retryafterseconds), [`decideRetry`](#decideretry), [`retryableDecision`](#retryabledecision), [`rateLimitDecision`](#ratelimitdecision), [`spotifyRequestInit`](#spotifyrequestinit), [`sendSpotifyAttempt`](#sendspotifyattempt), [`readSpotifyBody`](#readspotifybody), [`spotifyCall`](#spotifycall)
 - `connectors/spotify/src/spotify-errors.ts`: [`spendCall`](#spendcall), [`spotifyErrorDetail`](#spotifyerrordetail), [`forbiddenMessage`](#forbiddenmessage), [`notFoundMessage`](#notfoundmessage), [`rateLimitMessage`](#ratelimitmessage), [`spotifyHttpError`](#spotifyhttperror)
 - `connectors/spotify/src/spotify-oauth.ts`: [`spotifyRedirectUri`](#spotifyredirecturi), [`spotifyAuthorizeUrl`](#spotifyauthorizeurl), [`parseSpotifyTokens`](#parsespotifytokens), [`postSpotifyToken`](#postspotifytoken), [`exchangeSpotifyCode`](#exchangespotifycode), [`refreshSpotifyToken`](#refreshspotifytoken)
-- `connectors/spotify/src/stale.ts`: [`fetchAllPlaylists`](#fetchallplaylists), [`fetchLastAdded`](#fetchlastadded), [`fillLastAdded`](#filllastadded), [`scanOwnPlaylists`](#scanownplaylists), [`stalePlaylists`](#staleplaylists)
+- `connectors/spotify/src/stale.ts`: [`fetchAllPlaylists`](#fetchallplaylists), [`fetchLastAdded`](#fetchlastadded), [`fillLastAdded`](#filllastadded), [`scanOwnPlaylists`](#scanownplaylists), [`currentVersions`](#currentversions), [`stalePlaylists`](#staleplaylists)
 - `connectors/spotify/src/tool-kit.ts`: [`toTrackFilter`](#totrackfilter), [`spotifyIdOf`](#spotifyidof), [`sourceRefOf`](#sourcerefof), [`currentUserId`](#currentuserid)
 - `connectors/spotify/src/tools-account.ts`: [`revokeClaudeGrants`](#revokeclaudegrants)
 - `connectors/spotify/src/tools-backup.ts`: [`restoreSteps`](#restoresteps), [`restoreDraft`](#restoredraft)
@@ -15768,6 +15768,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault).
 - **Errors:** Throws `SpotifyApiError` with an actionable message on Spotify failures; `BudgetExhaustedError` when the call budget is used up.
 
+### `saveRotatedRefreshToken`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/access-token.ts`
+- **Signature:** `async saveRotatedRefreshToken(deps: OwnerDeps, refreshToken: string): Promise<void>`
+- **Used by:** `renewSpotifyAccessToken()`
+- **Processes:** P22, P23
+
+<!-- generated:end -->
+
+- **Does:** Saves a rotated refresh token onto the account as it is now (re-read, so a concurrent change is kept).
+- **Input:** `deps`: user dependencies; `refreshToken`: the new token from Spotify.
+- **Output:** Nothing (no write when the account was erased meanwhile).
+- **Effects:** Reads/writes Workers KV (the user's sealed account).
+- **Errors:** None.
+
 ## `connectors/spotify/src/account-store.ts`
 
 ### `toSpotifyAccount`
@@ -15793,7 +15810,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/spotify/src/account-store.ts`
 - **Signature:** `async loadAccount(deps: VaultDeps, owner: string): Promise<SpotifyAccount | null>`
-- **Used by:** `requireAccount()`
+- **Used by:** `requireAccount()`, `saveRotatedRefreshToken()`
 - **Processes:** P22, P23
 
 <!-- generated:end -->
@@ -15810,7 +15827,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/spotify/src/account-store.ts`
 - **Signature:** `async saveAccount(deps: VaultDeps, owner: string, account: SpotifyAccount): Promise<void>`
-- **Used by:** `connectSpotifyAccount()`, `renewSpotifyAccessToken()`
+- **Used by:** `connectSpotifyAccount()`, `saveRotatedRefreshToken()`
 - **Processes:** P21, P22, P23
 
 <!-- generated:end -->
@@ -16146,6 +16163,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** Network (Spotify accounts service or Web API); spends the call's request budget; reads/updates the isolate's access-token cache; reads/writes Workers KV (the user's sealed vault); may wait (Retry-After).
 - **Errors:** Spotify failures it does not handle propagate (`SpotifyApiError`, `SpotifyTokenError`).
 
+### `checkPlaylistUnchanged`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/apply.ts`
+- **Signature:** `async checkPlaylistUnchanged(deps: OwnerDeps, step: PlanStep): Promise<void>`
+- **Used by:** `runReplaceChunk()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Refuses to rewrite a playlist whose version changed since the preview (it would drop the new items).
+- **Input:** `deps`: user dependencies; `step`: the plan step (only rewrite steps with `expectedSnapshotId` are checked).
+- **Output:** Nothing.
+- **Effects:** Network (one Spotify Web API request, within the budget).
+- **Errors:** Throws `Error` "… changed since the preview; nothing was rewritten" on a different `snapshot_id`; `SpotifyApiError` on Spotify failures.
+
 ## `connectors/spotify/src/backups.ts`
 
 ### `toBackupTrack`
@@ -16222,7 +16256,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/spotify/src/backups.ts`
 - **Signature:** `async saveBackup(deps: OwnerDeps, content: BackupContent): Promise<BackupEntry>`
-- **Used by:** `backupBeforeApply()`, `connectors/spotify/src/tools-backup.ts (module)`
+- **Used by:** `backupBeforeApply()`, `connectors/spotify/src/tools-backup.ts (module)`, `connectors/spotify/src/tools-library.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`
 - **Processes:** P23, P24
 
 <!-- generated:end -->
@@ -16298,6 +16332,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** One page of a backup's content as JSON-ready data (`section` = liked, playlists or library).
 - **Input:** `backup`: `StoredBackup`; `page`: `{ readonly section: 'liked' | 'playlists' | 'library'; readonly offset: number; readonly limit: number; }`.
 - **Output:** `Record<string, unknown>`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `uriBackupTracks`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/backups.ts`
+- **Signature:** `uriBackupTracks(uris: readonly string[]): BackupTrack[]`
+- **Used by:** `connectors/spotify/src/tools-library.ts (module)`, `connectors/spotify/src/tools-playlists.ts (module)`
+- **Processes:** —
+
+<!-- generated:end -->
+
+- **Does:** A backup entry of URIs only (no names), as direct removals keep them.
+- **Input:** `uris`: the removed URIs.
+- **Output:** `BackupTrack[]` with empty names and dates.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -17035,7 +17086,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/spotify/src/plans.ts`
 - **Signature:** `async storePlan(deps: OwnerDeps, plan: Plan, finished: boolean): Promise<void>`
-- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Used by:** `claimPlan()`, `connectors/spotify/src/tools-smart.ts (module)`
 - **Processes:** P23
 
 <!-- generated:end -->
@@ -17062,6 +17113,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Output:** `Record<string, unknown>`.
 - **Effects:** None (pure).
 - **Errors:** None.
+
+### `claimPlan`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/plans.ts`
+- **Signature:** `async claimPlan(deps: OwnerDeps, plan: Plan): Promise<Plan>`
+- **Used by:** `connectors/spotify/src/tools-smart.ts (module)`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Takes the plan for this call, or refuses when another `apply_plan` call is still running it.
+- **Input:** `deps`: user dependencies; `plan`: the plan to run.
+- **Output:** The plan with `runningUntil` = now + `PLAN_LEASE_SECONDS`, already stored.
+- **Effects:** Reads/writes Workers KV (the user's plans record).
+- **Errors:** Throws `Error` "Plan … is being applied by another call" while another call holds the lease.
 
 ## `connectors/spotify/src/rules.ts`
 
@@ -17885,6 +17953,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Effects:** None (pure).
 - **Errors:** None.
 
+### `rewriteStep`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/smart.ts`
+- **Signature:** `rewriteStep(snapshot: SourceSnapshot, playlistId: string, uris: readonly string[]): PlanStep`
+- **Used by:** `dedupeDraft()`, `sortDraft()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Step that rewrites a playlist with the given order, only if it is still the version the preview read.
+- **Input:** `snapshot`: the playlist snapshot the preview used; `playlistId`: its id; `uris`: the new order.
+- **Output:** A `playlist_replace` step carrying `expectedSnapshotId`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
 ## `connectors/spotify/src/sources.ts`
 
 ### `sourceKey`
@@ -17927,7 +18012,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/spotify/src/sources.ts`
 - **Signature:** `async fetchPlaylistInfo(deps: OwnerDeps, id: string): Promise<PlaylistInfo>`
-- **Used by:** `connectors/spotify/src/tools-playlists.ts (module)`, `sourceVersion()`
+- **Used by:** `checkPlaylistUnchanged()`, `connectors/spotify/src/tools-playlists.ts (module)`, `sourceVersion()`
 - **Processes:** P23
 
 <!-- generated:end -->
@@ -18115,7 +18200,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/spotify/src/spotify-api.ts`
-- **Signature:** `decideRetry(response: Response, attempt: number): RetryDecision`
+- **Signature:** `decideRetry(response: Response, attempt: number, method = 'GET'): RetryDecision`
 - **Used by:** `spotifyCall()`
 - **Processes:** P22, P23
 
@@ -18132,7 +18217,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 <!-- generated:start -->
 
 - **File:** `connectors/spotify/src/spotify-api.ts`
-- **Signature:** `retryableDecision(response: Response): RetryDecision`
+- **Signature:** `retryableDecision(response: Response, method = 'GET'): RetryDecision`
 - **Used by:** `decideRetry()`
 - **Processes:** P22, P23
 
@@ -18521,6 +18606,23 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 - **Does:** Own playlists older than the cutoff (ISO), and empty ones when asked. Pure.
 - **Input:** `own`: `readonly PlaylistInfo[]`; `scan`: `{ readonly cache: LastAddedCache; readonly cutoff: string; readonly includeEmpty: boolean }`.
 - **Output:** `{ playlist: PlaylistInfo; lastAdded: string }[]`.
+- **Effects:** None (pure).
+- **Errors:** None.
+
+### `currentVersions`
+
+<!-- generated:start -->
+
+- **File:** `connectors/spotify/src/stale.ts`
+- **Signature:** `currentVersions(cache: LastAddedCache | null, own: readonly PlaylistInfo[]): LastAddedCache`
+- **Used by:** `scanOwnPlaylists()`
+- **Processes:** P23
+
+<!-- generated:end -->
+
+- **Does:** Keeps only the cache entries of the playlists' current versions (old versions are dropped). Pure.
+- **Input:** `cache`: the stored last-added cache (or null); `own`: the user's own playlists.
+- **Output:** A new cache with one entry per current `snapshot_id` already known.
 - **Effects:** None (pure).
 - **Errors:** None.
 
@@ -19162,7 +19264,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 
 - **File:** `connectors/spotify/src/vault.ts`
 - **Signature:** `vaultOf(deps: VaultSource): VaultDeps`
-- **Used by:** `connectSpotifyAccount()`, `deleteAllBackups()`, `deleteBackup()`, `forgetSource()`, `listBackups()`, `loadGenreCache()`, `loadPlans()`, `loadSource()`, `renewSpotifyAccessToken()`, `requireAccount()`, `requireBackup()`, `saveBackup()`, `saveGenreCache()`, `savePlans()`, `scanOwnPlaylists()`
+- **Used by:** `connectSpotifyAccount()`, `deleteAllBackups()`, `deleteBackup()`, `forgetSource()`, `listBackups()`, `loadGenreCache()`, `loadPlans()`, `loadSource()`, `requireAccount()`, `requireBackup()`, `saveBackup()`, `saveGenreCache()`, `savePlans()`, `saveRotatedRefreshToken()`, `scanOwnPlaylists()`
 - **Processes:** P21, P22, P23, P24
 
 <!-- generated:end -->
@@ -19702,3 +19804,7 @@ Template and writing rules: [DOCUMENTATION.md](DOCUMENTATION.md#function).
 | `SPOTIFY_ACCESS_TOKEN_TTL_SECONDS`  | `connectors/spotify/src/worker.ts`                      | Lifetime of Claude's access token (1 hour) and refresh token (180 days, about the Spotify refresh token's 6 months).                                                                         |
 | `SPOTIFY_REFRESH_TOKEN_TTL_SECONDS` | `connectors/spotify/src/worker.ts`                      | Lifetime of Claude's refresh token: 180 days, about the Spotify refresh token's 6 months.                                                                                                    |
 | `SPOTIFY_ROUTES`                    | `connectors/spotify/src/worker.ts`                      | Own routes (outside the library OAuth): `METHOD path` → handler.                                                                                                                             |
+| `GENRES_TTL_SECONDS`                | `connectors/spotify/src/genres.ts`                      | Seconds the genre cache stays in KV after its last update.                                                                                                                                   |
+| `PLAN_LEASE_SECONDS`                | `connectors/spotify/src/plans.ts`                       | Seconds an `apply_plan` call holds a plan (long enough for one call, short enough to recover from a crash).                                                                                  |
+| `SCAN_TTL_SECONDS`                  | `connectors/spotify/src/sources.ts`                     | Seconds a snapshot stays in KV (it is only a working copy for previews).                                                                                                                     |
+| `STALE_TTL_SECONDS`                 | `connectors/spotify/src/stale.ts`                       | Seconds the last-added cache stays in KV after its last update.                                                                                                                              |

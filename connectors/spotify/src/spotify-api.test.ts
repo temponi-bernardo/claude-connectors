@@ -34,6 +34,11 @@ describe('retry decisions', () => {
     expect(decideRetry(new Response('', { status: 502 }), 1)).toEqual({ kind: 'wait', ms: 500 });
     expect(decideRetry(new Response('', { status: 502 }), 3)).toEqual({ kind: 'fail' });
     expect(decideRetry(new Response('', { status: 404 }), 1)).toEqual({ kind: 'fail' });
+    expect(decideRetry(new Response('', { status: 502 }), 1, 'POST')).toEqual({ kind: 'fail' });
+    expect(decideRetry(new Response('', { status: 429 }), 1, 'POST')).toEqual({
+      kind: 'wait',
+      ms: 1000,
+    });
   });
 
   it('fails on a Retry-After longer than the wait cap', () => {

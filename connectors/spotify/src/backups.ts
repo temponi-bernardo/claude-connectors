@@ -140,3 +140,8 @@ export function backupPage(backup: StoredBackup, page: BackupPageRequest): Recor
     next_offset: end < list.length ? end : null,
   };
 }
+
+/** A backup entry of URIs only (no names), as direct removals keep them. */
+export function uriBackupTracks(uris: readonly string[]): BackupTrack[] {
+  return uris.map((uri) => ({ uri, name: '', artists: '', addedAt: '' }));
+}

@@ -61,7 +61,10 @@ Every tool has a `title` and MCP hints: removals, `apply_plan`, `disconnect` and
 library is read over several calls), stores a **plan** for 10 minutes and answers counts, a sample and a
 `plan_id`. `apply_plan` runs it only with that id, **saving a JSON backup first** whenever it removes or rewrites
 something; big plans run over several calls (`status: "partial"`) and resume where they stopped. Library writes
-go in chunks of 40, playlist writes in chunks of 100 (Spotify's maximums).
+go in chunks of 40, playlist writes in chunks of 100 (Spotify's maximums). Only one `apply_plan` call runs a
+plan at a time (90-second lease); a sort or dedupe refuses to rewrite a playlist that changed since the preview;
+POSTs are not retried automatically on 5xx (Spotify may have applied them). The direct `remove_from_library` and
+`remove_playlist_items` also save a backup of the removed URIs first.
 
 **Limits that come from Spotify (2026):** no popularity filter (field removed), genres may be missing (deprecated),
 no recommendations or audio features, items only of playlists you own or collaborate on, liked dates cannot be
@@ -79,6 +82,10 @@ restored, local files cannot be re-added (such playlists are never rewritten).
 - **User:** the Spotify `account_id` (else `id`) answered by `/me` right after the code exchange with the user's
   own app. Each user has a vault in `SPOTIFY_KV`: keys `<type>:sha256(user)[:id]`, values sealed with AES-256-GCM
   (`TOKEN_ENC_KEY`) together with type, user and id.
+- **Retention:** snapshots expire after 1 day, the genre and playlist caches after 30 days without use, plans
+  after 10 minutes; the account and up to 10 backups stay until `disconnect`. `disconnect` revokes Claude's grants
+  and then erases the vault (KV listing is eventually consistent, so a record written seconds before may survive
+  until its TTL). Worker logs (`observability`) may record the single-use `code` of `/spotify/callback`.
 - **Request budget:** each tool call makes at most `SPOTIFY_CALL_BUDGET` Spotify requests (default 40, fits the
   Workers Free plan's 50 subrequests); on Workers Paid raise it (e.g. 400) so big libraries finish in fewer calls.
 - **Rate limits:** `Retry-After` up to 5 s is awaited inside the call; longer waits come back as a clear error.

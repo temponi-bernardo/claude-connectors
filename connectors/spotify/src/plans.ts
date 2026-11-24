@@ -23,6 +23,8 @@ export type PlanStep =
       readonly kind: 'playlist_add' | 'playlist_remove' | 'playlist_replace';
       readonly playlistId: string;
       readonly uris: readonly string[];
+      /** For a rewrite: the playlist version the preview read; a different one aborts the run. */
+      readonly expectedSnapshotId?: string;
     }
   | {
       readonly kind: 'playlist_create';
@@ -78,6 +80,8 @@ export interface Plan {
   readonly backupId: string | null;
   readonly progress: PlanProgress;
   readonly createdPlaylists: readonly string[];
+  /** Instant (Unix ms) until which an `apply_plan` call holds the plan; another call must wait. */
+  readonly runningUntil?: number;
 }
 
 /** Progress of a plan that has not started. */
@@ -170,4 +174,19 @@ export function previewOutput(
     ...details,
     next: `Show this to the user. Only after their explicit OK call apply_plan with plan_id "${plan.id}".`,
   };
+}
+
+/** Seconds an `apply_plan` call holds a plan (long enough for one call, short enough to recover from a crash). */
+export const PLAN_LEASE_SECONDS = 90;
+
+/** Takes the plan for this call, or refuses when another `apply_plan` call is still running it. */
+export async function claimPlan(deps: OwnerDeps, plan: Plan): Promise<Plan> {
+  if ((plan.runningUntil ?? 0) > deps.now()) {
+    throw new Error(
+      `Plan ${plan.id} is being applied by another call; wait a minute and call apply_plan again.`,
+    );
+  }
+  const claimed = { ...plan, runningUntil: deps.now() + PLAN_LEASE_SECONDS * 1000 };
+  await storePlan(deps, claimed, false);
+  return claimed;
 }

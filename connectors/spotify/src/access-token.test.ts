@@ -9,6 +9,7 @@ import {
   reconnectError,
   renewSpotifyAccessToken,
   requireAccount,
+  saveRotatedRefreshToken,
 } from './access-token.js';
 import {
   fakeSpotify,
@@ -86,5 +87,16 @@ describe('Spotify access tokens', () => {
     expect(isTerminalTokenError('http_500')).toBe(false);
     expect(reconnectError('invalid_client').message).toContain('Client Secret was rotated');
     expect(notConnectedError().message).toContain('Disconnect, then Connect');
+  });
+});
+
+describe('saveRotatedRefreshToken', () => {
+  it('writes the new refresh token onto the latest account, and nothing without one', async () => {
+    const deps = await testOwnerDeps(fakeSpotify([]));
+    await saveRotatedRefreshToken(deps, 'r2');
+    expect((await loadAccount(vaultOf(deps), deps.owner))?.refreshToken).toBe('r2');
+    const empty = await testOwnerDeps(fakeSpotify([]), { owner: 'spotify_none', account: null });
+    await saveRotatedRefreshToken(empty, 'r3');
+    expect(await loadAccount(vaultOf(empty), empty.owner)).toBeNull();
   });
 });

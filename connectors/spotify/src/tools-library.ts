@@ -18,6 +18,7 @@ import {
   parseAddedTrack,
   type AddedTrack,
 } from './catalog.js';
+import { saveBackup, uriBackupTracks } from './backups.js';
 import type { OwnerDeps } from './context.js';
 import { ensureGenres } from './genres.js';
 import { LIBRARY_BATCH, libraryContains, writeLibraryChunk } from './library-write.js';
@@ -125,12 +126,16 @@ export const saveToLibraryTool = defineTool({
 export const removeFromLibraryTool = defineTool({
   name: 'remove_from_library',
   description:
-    'Removes up to 40 items from the library by URI (unlike tracks, remove albums/shows/episodes/audiobooks); with artist, playlist or user URIs it UNFOLLOWS them (unfollowing your own playlist deletes it from your library; following it again restores it). Confirm with the user first. For more items use preview_library_change, which backs up first.',
+    'Removes up to 40 items from the library by URI (unlike tracks, remove albums/shows/episodes/audiobooks); with artist, playlist or user URIs it UNFOLLOWS them (unfollowing your own playlist deletes it from your library; following it again restores it). Confirm with the user first. The removed URIs are backed up (backup_id; preview_restore re-saves them). For more items use preview_library_change.',
   shape: { uris: DIRECT_URIS },
   annotations: toolAnnotations('Remove or unfollow', DESTRUCTIVE_HINTS),
   run: async (deps: OwnerDeps, args) => {
+    const backup = await saveBackup(deps, {
+      label: 'Removed with remove_from_library',
+      library: uriBackupTracks(args.uris),
+    });
     await writeLibraryChunk(deps, 'remove', args.uris);
-    return { removed: args.uris.length };
+    return { removed: args.uris.length, backup_id: backup.id };
   },
 });
 

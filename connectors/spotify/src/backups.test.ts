@@ -10,6 +10,7 @@ import {
   saveBackup,
   toBackupPlaylist,
   toBackupTrack,
+  uriBackupTracks,
 } from './backups.js';
 import { parseAddedTrack, parsePlaylist } from './catalog.js';
 import {
@@ -84,5 +85,13 @@ describe('backups', () => {
     const entry = await saveBackup(alice, { label: 'secret' });
     const bob = await testOwnerDeps(fakeSpotify([]), { owner: 'spotify:bob', kv: alice.kv });
     await expect(requireBackup(bob, entry.id)).rejects.toThrow('does not exist');
+  });
+});
+
+describe('uriBackupTracks', () => {
+  it('keeps the URIs with empty names', () => {
+    expect(uriBackupTracks(['spotify:track:a'])).toEqual([
+      { uri: 'spotify:track:a', name: '', artists: '', addedAt: '' },
+    ]);
   });
 });

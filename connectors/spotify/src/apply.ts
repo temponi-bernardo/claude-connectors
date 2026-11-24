@@ -11,7 +11,7 @@ import { paths } from './paths.js';
 import { isDestructiveStep, START_PROGRESS, type Plan, type PlanStep } from './plans.js';
 import { spotifyCall } from './spotify-api.js';
 import { BudgetExhaustedError } from './spotify-errors.js';
-import { forgetSource, type SourceRef } from './sources.js';
+import { fetchPlaylistInfo, forgetSource, type SourceRef } from './sources.js';
 
 /** Outcome of one apply call: the updated plan, whether it finished and the error that stopped it. */
 export interface ApplyOutcome {
@@ -89,6 +89,17 @@ export async function runAddChunk(deps: OwnerDeps, plan: Plan, playlistId: strin
   return advancePlan(plan, chunk.length);
 }
 
+/** Refuses to rewrite a playlist whose version changed since the preview (it would drop the new items). */
+export async function checkPlaylistUnchanged(deps: OwnerDeps, step: PlanStep): Promise<void> {
+  if (!('expectedSnapshotId' in step) || !step.expectedSnapshotId) return;
+  const now = await fetchPlaylistInfo(deps, step.playlistId);
+  if (now.snapshotId !== step.expectedSnapshotId) {
+    throw new Error(
+      `The playlist "${now.name}" changed since the preview; nothing was rewritten. Run the preview again.`,
+    );
+  }
+}
+
 /** Runs one chunk of a replacement: the first chunk replaces everything, the rest are appended. */
 export async function runReplaceChunk(
   deps: OwnerDeps,
@@ -97,6 +108,7 @@ export async function runReplaceChunk(
 ): Promise<Plan> {
   if (plan.progress.replaced) return runAddChunk(deps, plan, playlistId);
   const step = currentStep(plan);
+  await checkPlaylistUnchanged(deps, step);
   const chunk = currentChunk(plan, step);
   await spotifyCall(deps, {
     method: 'PUT',
