@@ -3,13 +3,18 @@
  * anti-CSRF token. Uses the visual tokens of the login page (`docs/UI.md`). Pure.
  */
 import { escapeHtml, LOGIN_PAGE_CSS } from '../../../src/remote/login-page.js';
+import type { AccessEntry, AccessList } from './access.js';
 import type { BridgeStatus } from './format.js';
 
 /** Style additions for `/pair`: large code, QR and secondary buttons. */
 export const PAIR_PAGE_CSS = `.code{font:700 2rem/1.2 ui-monospace,monospace;letter-spacing:.15em;color:var(--text);text-align:center;margin:var(--space) 0}
 .qr{display:block;margin:var(--space) auto;width:256px;height:256px;image-rendering:pixelated;background:#fff;padding:8px;border-radius:8px}
 .ok{color:var(--accent);font-weight:600}.secondary{background:transparent;color:var(--accent);border:1px solid var(--line)}
-.danger{background:var(--danger)}hr{border:0;border-top:1px solid var(--line);margin:calc(var(--space)*1.5) 0}`;
+.danger{background:var(--danger)}hr{border:0;border-top:1px solid var(--line);margin:calc(var(--space)*1.5) 0}
+h2{font-size:1.05rem;margin:0 0 8px}.list{list-style:none;padding:0;margin:0 0 var(--space)}
+.list li{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);padding:8px 0}
+.list li span{overflow-wrap:anywhere}.list small{display:block;color:var(--muted)}.list form{flex:none}
+.list button{margin:0;width:auto;padding:6px 12px}`;
 
 /** What the page shows besides the status. */
 export interface PairPageView {
@@ -20,6 +25,11 @@ export interface PairPageView {
   readonly qrPng?: string;
   readonly message?: string;
   readonly error?: string;
+  /** Owner's chat access list; null if it could not be read. */
+  readonly access?: AccessList | null;
+  /** Results of the last chat search on the page. */
+  readonly candidates?: readonly AccessEntry[];
+  readonly query?: string;
 }
 
 /** Status sentence for the owner. */
@@ -77,6 +87,61 @@ export function maintenanceSection(view: PairPageView): string {
   return `<hr>${logout}${reset}${signout}`;
 }
 
+/** One chat line: name, kind and an action button (or a note when there is nothing to do). */
+export function accessEntryRow(entry: AccessEntry, action: string, view: PairPageView): string {
+  const kind = entry.group ? 'Group' : 'Contact';
+  const label = `<span>${escapeHtml(entry.name)}<small>${kind} · ${escapeHtml(entry.jid)}</small></span>`;
+  if (!action) return `<li>${label}<small>Allowed</small></li>`;
+  const button = action.endsWith('/remove') ? 'Remove' : 'Allow';
+  const fields = `<input type="hidden" name="jid" value="${escapeHtml(entry.jid)}"><input type="hidden" name="name" value="${escapeHtml(entry.name)}"><button class="secondary" type="submit">${button}</button>`;
+  return `<li>${label}${pairForm(action, view.csrf, fields)}</li>`;
+}
+
+/** One radio option of the access mode, checked when it is the current mode. */
+export function accessModeRadio(list: AccessList, mode: AccessList['mode'], text: string): string {
+  const checked = list.mode === mode ? ' checked' : '';
+  return `<label class="option"><input type="radio" name="mode" value="${mode}"${checked}>${text}</label>`;
+}
+
+/** Mode choice: every chat, or only the selected ones. */
+export function accessModeForm(list: AccessList, view: PairPageView): string {
+  const all = accessModeRadio(list, 'all', 'Every chat (no restriction)');
+  const selected = accessModeRadio(list, 'selected', 'Only the chats I allow below');
+  const body = `${all}${selected}<button type="submit">Save access mode</button>`;
+  return pairForm('/pair/access/mode', view.csrf, body);
+}
+
+/** Search form and its results; chats already allowed have no button. */
+export function accessSearchHtml(list: AccessList, view: PairPageView): string {
+  const form = pairForm(
+    '/pair/access/search',
+    view.csrf,
+    `<label for="query">Find a group or contact (empty = most recent chats)</label><input id="query" name="query" maxlength="100" value="${escapeHtml(view.query ?? '')}"><button class="secondary" type="submit">Search</button>`,
+  );
+  if (!view.candidates) return form;
+  if (view.candidates.length === 0) return `${form}<p>No chats or contacts found.</p>`;
+  const allowed = new Set(list.entries.map((entry) => entry.jid));
+  const rows = view.candidates.map((entry) =>
+    accessEntryRow(entry, allowed.has(entry.jid) ? '' : '/pair/access/add', view),
+  );
+  return `${form}<ul class="list">${rows.join('')}</ul>`;
+}
+
+/** Chat access block: mode, allowed chats with remove buttons, and the search to allow more. */
+export function accessSection(view: PairPageView): string {
+  const list = view.access;
+  if (!list) return '<hr><h2>Chat access</h2><p>Could not read the access list right now.</p>';
+  const summary =
+    list.mode === 'all'
+      ? 'Claude can read and message every chat. Choose "Only the chats I allow" to restrict it.'
+      : `Claude can read and message only the chats below (${list.entries.length}); everything else is refused.`;
+  const rows = list.entries.map((entry) => accessEntryRow(entry, '/pair/access/remove', view));
+  const listHtml = rows.length
+    ? `<ul class="list">${rows.join('')}</ul>`
+    : '<p>No chats allowed yet.</p>';
+  return `<hr><h2>Chat access</h2><p>${escapeHtml(summary)}</p>${accessModeForm(list, view)}${listHtml}${accessSearchHtml(list, view)}`;
+}
+
 /** Notice with the result of the last action: error, message or nothing. */
 export function alertHtml(view: PairPageView): string {
   if (view.error) return `<p class="error" role="alert">${escapeHtml(view.error)}</p>`;
@@ -94,6 +159,6 @@ export function renderPairPage(view: PairPageView): string {
 <h1>WhatsApp in Claude</h1>
 <p>Signed in as <strong>${escapeHtml(view.email)}</strong>.</p>
 <p>${escapeHtml(describePairStatus(view.status))}</p>
-${alert}${pairing}${maintenanceSection(view)}
+${alert}${pairing}${accessSection(view)}${maintenanceSection(view)}
 </main></body></html>`;
 }

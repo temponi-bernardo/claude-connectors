@@ -38,7 +38,7 @@ The changelog section names (Adicionado = Added, Corrigido = Fixed, Alterado = C
 `release-please-config.json` and `CHANGELOG.md`.
 
 Allowed scopes (`commitlint.config.js`): `core`, `mcp`, `canvas`, `bundle`, `docs`, `tools`, `ci`, `deps`,
-`skills`, `release`, `config`, `remote`, `site`, `gmail`, `whatsapp`. A new connector gets a scope with its name.
+`skills`, `release`, `config`, `remote`, `site`, `gmail`, `whatsapp`, `spotify`. A new connector gets a scope with its name.
 When you create a new layer or module, add the scope there **and** here in the same PR.
 
 `BREAKING CHANGE:` in the footer (or `!` after the type) produces a major. The `commit-msg` hook validates locally;
@@ -135,6 +135,8 @@ The **remote connector** (ADR 0010) does not depend on a release: after a merge 
 `npm run worker:deploy` on `main` (needs `CLOUDFLARE_API_TOKEN`). To test first, `npm run worker:dev`. The
 **remote Gmail** (ADR 0014) follows the same path with `npm run gmail:deploy` / `npm run gmail:dev`; the first
 deploy (KV, secrets, Google Cloud) is in [connectors/gmail/README.md](../connectors/gmail/README.md).
+The **Spotify** connector (ADR 0034) is the same: `npm run spotify:deploy` / `npm run spotify:dev`; first deploy
+(KV ids and `TOKEN_ENC_KEY`) in [connectors/spotify/README.md](../connectors/spotify/README.md).
 **WhatsApp** (ADR 0015) is published by whoever hosts it: `npm run whatsapp:deploy` (needs Docker for the bridge
 image). `pr:check` runs `npm run bridge:test` (Go 1.26+; with `GOTOOLCHAIN=auto` Go downloads the toolchain) and
 `npm run whatsapp:build` (the Worker bundle, `--containers-rollout=none`, no Docker). It builds the container

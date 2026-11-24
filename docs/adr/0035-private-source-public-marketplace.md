@@ -1,12 +1,12 @@
-# 0033 — Private source repository, public marketplace repository
+# 0035 — Private source repository, public marketplace repository
 
 - **Status:** Accepted
 - **Date:** 2026-11-24
-- **Related:** Phase 5 (F5.1–F5.7), ADR 0006, 0008, 0012, 0013, 0018, 0020, 0022; pauses F3.2
+- **Related:** Phase 6 (F6.1–F6.7), ADR 0006, 0008, 0012, 0013, 0018, 0020, 0022, 0033, 0034; pauses F3.2
 
 ## Context
 
-This repository is public under MIT and holds everything: the shared code (`src/`), the three connectors' servers,
+This repository is public under MIT and holds everything: the shared code (`src/`), the connectors' servers,
 tests, tooling, internal docs, the GitHub Pages site and the marketplace (`.claude-plugin/marketplace.json` pointing
 at `connectors/<name>/plugin/`, ADR 0020). The owner wants to stop publishing the source from now on, while people
 who already use the marketplace keep working with no action on their side.
@@ -31,7 +31,7 @@ Facts that shape the decision:
 ## Decision
 
 Split in two repositories, keeping the public name: **`temponi-bernardo/claude-connectors` stays public as a thin
-marketplace** (marketplace manifest, the `canvas-puc` and `gmail` plugin folders, the Pages site, README, MIT
+marketplace** (marketplace manifest, the `canvas-puc`, `gmail` and `spotify` plugin folders, the Pages site, README, MIT
 license), and **a new private repository `temponi-bernardo/claude-connectors-src` holds the full history and all
 development** (code, tests, tooling, internal docs, Claude Code layer, deploys and releases). A local, tested
 `npm run marketplace:publish` command in the private repository copies the built plugin folders and the site into a
@@ -60,5 +60,5 @@ history rewrite.
   skills and manifests stay public; past history remains public under MIT; cloud sessions must be given the
   private repository; a WhatsApp install on claude.ai depends on the Claude GitHub App on the private repo (fallback:
   add the Worker `/mcp` URL as a custom connector, without the skills).
-- Docs that change: ROADMAP (Phase 5, F3.2 paused); in later tasks CLAUDE.md, README, WORKFLOW, STRUCTURE,
+- Docs that change: ROADMAP (Phase 6, F3.2 paused); in later tasks CLAUDE.md, README, WORKFLOW, STRUCTURE,
   ARCHITECTURE, `/task` and `/release` skills (publish step), `privacy.html` and the plugin READMEs (WhatsApp removed).

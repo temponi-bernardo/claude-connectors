@@ -11,6 +11,7 @@ export default tseslint.config(
       'node_modules/**',
       'tools/**/fixtures/**',
       'connectors/*/src/fixtures/**',
+      'src/**/fixtures/**',
       'connectors/*/server/**',
       // Generated /planejamento-faculdade skill files (npm run build)
       'connectors/*/plugin/skills/*/scripts/**',

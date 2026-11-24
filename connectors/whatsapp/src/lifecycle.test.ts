@@ -6,6 +6,7 @@ import {
   fetchBridge,
   forwardInit,
   guardSend,
+  handleAccessRoute,
   logSnapshotFailure,
   planSend,
   readBridgePhase,
@@ -260,5 +261,39 @@ describe('routeBridgeRequest and createBridgeLifecycle', () => {
     await storeSnapshot(host.bucket, { body: streamOf('x'), length: 1, generation: 1 }, (b) => b);
     expect(await (await resetBridge(host)).json()).toEqual({ reset: true, archived: true });
     expect(stop).toHaveBeenCalledOnce();
+  });
+});
+
+describe('handleAccessRoute', () => {
+  const list = {
+    mode: 'selected',
+    entries: [{ jid: '5531999999999@s.whatsapp.net', name: 'Ana' }],
+  };
+
+  it('reads the open list while nothing was saved and saves a list with PUT, without waking the bridge', async () => {
+    const host = fakeHost(() => Response.json({}));
+    const lifecycle = createBridgeLifecycle(host);
+    const first = await lifecycle.handle(new Request('http://bridge/__access'));
+    expect(await first.json()).toEqual({ mode: 'all', entries: [] });
+    const put = new Request('http://bridge/__access', {
+      method: 'PUT',
+      body: JSON.stringify(list),
+    });
+    const saved = await lifecycle.handle(put);
+    const expected = { mode: 'selected', entries: [{ ...list.entries[0], group: false }] };
+    expect(await saved.json()).toEqual(expected);
+    expect(
+      await (await handleAccessRoute(host, new Request('http://bridge/__access'))).json(),
+    ).toEqual(expected);
+    expect(host.calls).toEqual([]);
+  });
+
+  it('rejects a body that is not a JSON object', async () => {
+    const host = fakeHost(() => Response.json({}));
+    const res = await handleAccessRoute(
+      host,
+      new Request('http://bridge/__access', { method: 'PUT', body: 'null' }),
+    );
+    expect(res.status).toBe(400);
   });
 });

@@ -11,9 +11,19 @@ import { htmlResponse, readForm } from '../../../src/remote/handler.js';
 import { escapeHtml } from '../../../src/remote/login-page.js';
 import type { OAuthSettings } from '../../../src/remote/oauth.js';
 import { openSealed, sealPayload } from '../../../src/remote/seal.js';
-import { bridgeJson, jsonPost, type BridgeFetch } from './bridge-client.js';
+import {
+  accessEntryFrom,
+  fetchAccessList,
+  mergeCandidates,
+  saveAccessList,
+  withAccessEntry,
+  withAccessMode,
+  withoutAccessEntry,
+  type AccessList,
+} from './access.js';
+import { bridgeJson, bridgePath, jsonPost, type BridgeFetch } from './bridge-client.js';
 import { normalizePhone } from './config.js';
-import type { BridgeStatus } from './format.js';
+import type { BridgeChat, BridgeStatus } from './format.js';
 import { renderPairPage, type PairPageView } from './pair-page.js';
 
 /** `/pair` dependencies. */
@@ -179,6 +189,15 @@ export async function fetchPairStatus(app: PairApp): Promise<BridgeStatus | null
   }
 }
 
+/** Reads the access list; null if the Durable Object does not answer in time. */
+export async function fetchPairAccess(app: PairApp): Promise<AccessList | null> {
+  try {
+    return await fetchAccessList(app.bridge, pairDeadline(app));
+  } catch {
+    return null;
+  }
+}
+
 /** Shows the page with the current status and the result of an action (code, QR, message or error). */
 export async function pairPage(
   app: PairApp,
@@ -189,6 +208,7 @@ export async function pairPage(
     email,
     csrf: issuePairCsrf(app, email),
     status: await fetchPairStatus(app),
+    access: await fetchPairAccess(app),
     ...extra,
   };
   return htmlResponse(renderPairPage(view));
@@ -201,6 +221,64 @@ export type PairAction = (app: PairApp, form: URLSearchParams) => Promise<Partia
 export function pairActionError(error: unknown): Partial<PairPageView> {
   return { error: error instanceof Error ? error.message : String(error) };
 }
+
+/** Applies a change to the stored access list and returns the confirmation to show. */
+export async function changeAccess(
+  app: PairApp,
+  change: (list: AccessList) => AccessList,
+  message: string,
+): Promise<Partial<PairPageView>> {
+  const list = await fetchAccessList(app.bridge, pairDeadline(app));
+  await saveAccessList(app.bridge, change(list), pairDeadline(app));
+  return { message };
+}
+
+/** Finds chats (and, with a query, contacts) the owner can allow. */
+export async function searchAccessCandidates(
+  app: PairApp,
+  form: URLSearchParams,
+): Promise<Partial<PairPageView>> {
+  const query = (form.get('query') ?? '').trim().slice(0, 100);
+  const deadline = pairDeadline(app);
+  const chats = await bridgeJson<{ chats: BridgeChat[] }>(
+    app.bridge,
+    bridgePath('/chats', { query, limit: 20 }),
+    { deadline },
+  );
+  const contacts = query
+    ? await bridgeJson<{ contacts: Record<string, string | null>[] }>(
+        app.bridge,
+        bridgePath('/contacts', { query, limit: 20 }),
+        { deadline },
+      )
+    : { contacts: [] };
+  return { query, candidates: mergeCandidates(chats.chats, contacts.contacts) };
+}
+
+/** Chat access actions of the `/pair` page. */
+export const ACCESS_ACTIONS: Readonly<Record<string, PairAction>> = {
+  '/pair/access/mode': async (app, form) => {
+    const mode = form.get('mode');
+    if (mode !== 'all' && mode !== 'selected') return { error: 'Choose an access mode.' };
+    const text =
+      mode === 'all' ? 'Every chat is open again.' : 'Only the allowed chats are open now.';
+    return changeAccess(app, (list) => withAccessMode(list, mode), text);
+  },
+  '/pair/access/add': async (app, form) => {
+    const entry = accessEntryFrom(form);
+    if (!entry) return { error: 'Invalid chat: pick one from the search results.' };
+    return changeAccess(app, (list) => withAccessEntry(list, entry), `Allowed: ${entry.name}.`);
+  },
+  '/pair/access/remove': (app, form) => {
+    const jid = form.get('jid') ?? '';
+    return changeAccess(
+      app,
+      (list) => withoutAccessEntry(list, jid),
+      'Chat removed from the list.',
+    );
+  },
+  '/pair/access/search': searchAccessCandidates,
+};
 
 /** `/pair` actions by path. */
 export const PAIR_ACTIONS: Readonly<Record<string, PairAction>> = {
@@ -236,6 +314,7 @@ export const PAIR_ACTIONS: Readonly<Record<string, PairAction>> = {
     });
     return { message: 'Backup archived. WhatsApp will ask for pairing again.' };
   },
+  ...ACCESS_ACTIONS,
 };
 
 /** Handles an authenticated `/pair` POST: sign out, or run the action and show the page. */

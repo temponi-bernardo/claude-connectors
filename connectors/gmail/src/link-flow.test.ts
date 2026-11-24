@@ -41,7 +41,8 @@ import {
   takeLinkRequest,
   usedTicketKey,
 } from './link-flow.js';
-import { loadOwnerAccounts, saveOwnerAccounts, sha256Hex } from './token-store.js';
+import { loadOwnerAccounts, saveOwnerAccounts } from './token-store.js';
+import { sha256Hex } from '../../../src/remote/worker-kit.js';
 
 const SCOPE = 'openid email https://www.googleapis.com/auth/gmail.modify';
 const TOKENS: GoogleTokens = {

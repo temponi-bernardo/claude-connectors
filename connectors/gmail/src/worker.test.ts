@@ -4,7 +4,7 @@ import manifest from '../plugin/.claude-plugin/plugin.json' with { type: 'json' 
 import { AuthorizationError } from '@cloudflare/workers-oauth-provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { clearAccessTokenCache } from './access-token.js';
-import { FakeKv } from './fixtures/fake-kv.js';
+import { FakeKv } from '../../../src/remote/fixtures/fake-kv.js';
 import {
   countingLimiter,
   fakeFetch,
@@ -13,11 +13,8 @@ import {
   tokenRoute,
   validIdToken,
 } from './fixtures/fake-google.js';
-import { authorizationErrorResponse } from './sign-in.js';
+import { authorizationErrorResponse } from '../../../src/remote/pages.js';
 import {
-  checkClientRegistration,
-  clientIpKey,
-  configErrorResponse,
   createGmailDeps,
   createGmailProvider,
   createGmailServer,
@@ -25,10 +22,15 @@ import {
   handleDefaultRequest,
   handleGmailWorkerFetch,
   handleMcpApi,
-  isMcpPath,
-  publicOrigin,
   type GmailWorkerEnv,
 } from './worker.js';
+import {
+  checkClientRegistration,
+  clientIpKey,
+  configErrorResponse,
+  isMcpPath,
+  publicOrigin,
+} from '../../../src/remote/worker-kit.js';
 
 const ORIGIN = 'https://gmail.test';
 const REDIRECT = 'https://claude.ai/api/mcp/auth_callback';

@@ -16,12 +16,14 @@ import {
   exchangeGoogleCode,
   googleAuthorizeUrl,
   googleRedirectUri,
-  randomToken,
   type GoogleTokens,
 } from './google-oauth.js';
+import { randomToken } from '../../../src/remote/worker-kit.js';
 import { verifyGoogleIdToken } from './id-token.js';
-import { linkConfirmPage, messagePage, redirectWith } from './pages.js';
-import { loadOwnerAccounts, saveOwnerAccounts, sha256Hex, upsertAccount } from './token-store.js';
+import { linkConfirmPage } from './pages.js';
+import { messagePage, redirectWith } from '../../../src/remote/pages.js';
+import { loadOwnerAccounts, saveOwnerAccounts, upsertAccount } from './token-store.js';
+import { sha256Hex } from '../../../src/remote/worker-kit.js';
 
 /** Prefix of the linking `state` (the OAuth library `state` never has a dot). */
 export const LINK_STATE_PREFIX = 'link.';

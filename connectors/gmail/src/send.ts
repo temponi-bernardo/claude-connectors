@@ -8,7 +8,7 @@ import { downloadAttachment } from './attachments.js';
 import { forwardEmail, replyEmail, type PreparedEmail } from './compose.js';
 import type { OwnerDeps } from './context.js';
 import { gmailGet, gmailUrl, gmailWrite } from './gmail-api.js';
-import { randomToken } from './google-oauth.js';
+import { randomToken } from '../../../src/remote/worker-kit.js';
 import { messageAttachments, type GmailMessage } from './message-format.js';
 import {
   buildMimeMessage,

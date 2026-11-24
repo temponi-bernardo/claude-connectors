@@ -5,12 +5,10 @@
  * away. Any Google account may sign in, unless `ALLOWED_EMAILS` restricts it (private mode).
  */
 import {
-  AuthorizationError,
   authorizationErrorRedirect,
   type AuthRequest,
   type OAuthHelpers,
 } from '@cloudflare/workers-oauth-provider';
-import { readForm } from '../../../src/remote/handler.js';
 import { pkceChallenge } from '../../../src/remote/oauth.js';
 import { GMAIL_SCOPES, isEmailAllowed } from './config.js';
 import type { GmailDeps } from './context.js';
@@ -18,12 +16,18 @@ import {
   exchangeGoogleCode,
   googleAuthorizeUrl,
   googleRedirectUri,
-  randomToken,
   type GoogleTokens,
 } from './google-oauth.js';
 import { verifyGoogleIdToken, type GoogleIdentity } from './id-token.js';
 import { linkRefusalReason, storeGoogleAccount } from './link-flow.js';
-import { consentPage, messagePage, redirectWith } from './pages.js';
+import { consentPage } from './pages.js';
+import {
+  authorizationErrorResponse,
+  messagePage,
+  readConsentForm,
+  redirectWith,
+} from '../../../src/remote/pages.js';
+import { randomToken } from '../../../src/remote/worker-kit.js';
 
 /** Data kept (encrypted) by the library between the trip to Google and the return. */
 export interface SignInData {
@@ -45,16 +49,6 @@ export function accessDeniedPage(): Response {
     'This Google account is not authorized for this connector.',
     403,
   );
-}
-
-/** Response to an authorization error: back to the client when the library says where, otherwise a page. */
-export function authorizationErrorResponse(error: unknown): Response {
-  if (error instanceof AuthorizationError && error.redirectTo) {
-    return redirectWith(error.redirectTo);
-  }
-  const message =
-    error instanceof AuthorizationError ? error.description : 'Invalid authorization request.';
-  return messagePage('Could not connect', message, 400);
 }
 
 /** Starts the Google sign-in asking for identity and Gmail (`gmail.modify`) with a refresh token. */
@@ -107,12 +101,8 @@ export async function submitAuthorize(
   request: Request,
 ): Promise<Response> {
   try {
-    const form = await readForm(request);
-    const handle = form.get('handle') ?? '';
-    if (form.get('decision') !== 'approve') {
-      const denied = await oauth.denyConsent(request, handle);
-      return redirectWith(denied.redirectTo, denied.headers);
-    }
+    const { handle, denied } = await readConsentForm(oauth, request);
+    if (denied) return denied;
     const approved = await oauth.approveConsent(request, handle, {
       remember: { secret: deps.settings.consentSecret },
     });

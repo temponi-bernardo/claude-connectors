@@ -1,5 +1,5 @@
 /** In-memory Workers KV for tests (get with `type: 'json'`, put with expiry, delete and list). */
-import type { KvStore } from '../context.js';
+import type { KvStore } from '../worker-kit.js';
 
 /** Read options accepted by the fake KV. */
 interface GetOptions {

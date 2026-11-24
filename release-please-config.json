@@ -93,6 +93,19 @@
           "jsonpath": "$.version"
         }
       ]
+    },
+    "connectors/spotify": {
+      "package-name": "spotify",
+      "component": "spotify",
+      "release-type": "simple",
+      "include-component-in-tag": true,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "plugin/.claude-plugin/plugin.json",
+          "jsonpath": "$.version"
+        }
+      ]
     }
   }
 }

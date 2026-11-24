@@ -4,6 +4,7 @@
  * the hard hourly send limit in the Durable Object storage.
  */
 import { logWarning } from '../../../src/core/redact.js';
+import { ACCESS_LIST_KEY, ACCESS_ROUTE, parseAccessList } from './access.js';
 import { bridgeErrorFrom } from './bridge-client.js';
 import {
   archiveSnapshot,
@@ -217,7 +218,24 @@ export async function resetBridge(host: BridgeHost): Promise<Response> {
   return Response.json({ reset: true, archived });
 }
 
-/** Handles a Worker request: internal routes (`/__snapshot`, `/__reset`) or forwarding to the bridge. */
+/** Access list route (`/__access`): GET reads it, PUT validates and saves it; never wakes the container. */
+export async function handleAccessRoute(host: BridgeHost, request: Request): Promise<Response> {
+  if (request.method !== 'PUT') {
+    return Response.json(parseAccessList(await host.storage.get(ACCESS_LIST_KEY)));
+  }
+  const body: unknown = await request.json().catch(() => null);
+  if (typeof body !== 'object' || body === null) {
+    return Response.json(
+      { error: 'bad_request', message: 'The access list must be a JSON object.' },
+      { status: 400 },
+    );
+  }
+  const list = parseAccessList(body);
+  await host.storage.put(ACCESS_LIST_KEY, list);
+  return Response.json(list);
+}
+
+/** Handles a Worker request: internal routes (`/__snapshot`, `/__reset`, `/__access`) or forwarding to the bridge. */
 export async function routeBridgeRequest(
   router: BridgeRouter,
   request: Request,
@@ -226,6 +244,7 @@ export async function routeBridgeRequest(
   if (url.pathname === '/__snapshot')
     return Response.json({ outcome: await router.scheduler.snapshotNow() });
   if (url.pathname === '/__reset') return resetBridge(router.host);
+  if (url.pathname === ACCESS_ROUTE) return handleAccessRoute(router.host, request);
   await ensureRestored(router.host);
   if (url.pathname === '/send') {
     const refused = await guardSend(router.host);

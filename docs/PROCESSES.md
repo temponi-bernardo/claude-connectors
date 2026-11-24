@@ -352,23 +352,30 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Steps:**
   1. `handleMcp()` opens the access token and checks with `acceptsSecret` whether the email is still on the list; the
      `createServer` builds `createWhatsAppMcpServer()` with `whatsappTools()` (read; sending only with `ENABLE_SEND`).
-  2. The tool runs in `runRead()` with the deadline from `toolDeadline()`: `prepareRead()` calls `waitForSync()`, which
+  2. The owner's chat access list (ADR 0033) comes first: `loadAccess()` reads it with `fetchAccessList()` from the
+     Durable Object (`parseAccessList()`). `runChatRead()` (`get_messages`, `get_media`) calls
+     `requireChatAccess()` (`isChatAllowed()`, `accessRefusal()`) before waking the container;
+     `searchAllowedMessages()` refuses a `chat_jid` outside the list and keeps only allowed chats with
+     `filterAllowedMessages()`, warning with `accessSearchWarning()` when results may be missing; `list_chats` flags chats with `markChatAccess()`; `get_access_list` only shows it.
+  3. The tool runs in `runRead()` with the deadline from `toolDeadline()`: `prepareRead()` calls `waitForSync()`, which
      requests `POST /sync/wait` with the budget from `syncWaitBudget()`, and, if pairing is needed, returns the `/pair`
      address. `withDeadline()` cuts off anything past the ceiling. `whatsapp_status` also calls `waitForSync()` (not
      `GET /status`), so a container that just woke up reports its connection once it reconnects instead of
      `connected: false`; if the wait runs out, `compactStatus()` adds the `warning`.
-  3. Bridge calls go through `bridgeJson()`/`callBridge()` (`bridgePath()`, `jsonPost()`), which use
+  4. Bridge calls go through `bridgeJson()`/`callBridge()` (`bridgePath()`, `jsonPost()`), which use
      `bridgeFetchFor()` over the single stub from `bridgeStub()`. Errors become text with `bridgeErrorFrom()`;
      deadline overruns, `bridgeTimeoutMessage()`.
-  4. In the Durable Object, `routeBridgeRequest()` (built by `createBridgeLifecycle()`) calls `ensureRestored()`:
+  5. In the Durable Object, `routeBridgeRequest()` (built by `createBridgeLifecycle()`) answers `/__access` with
+     `handleAccessRoute()` without waking the container; for the other routes it calls `ensureRestored()`:
      `readBridgePhase()` and, if the bridge just woke up, `restoreRequestInit()` sends the R2 snapshot. Then
      `fetchBridge()` forwards with `withBridgeToken()` and `forwardInit()`.
-  5. The response is reduced by `compactChat()`, `compactMessage()`, `compactContact()` or `compactStatus()` (text
+  6. The response is reduced by `compactChat()`, `compactMessage()`, `compactContact()` or `compactStatus()` (text
      cleaned by `sanitizeText()` and `isHiddenChar()`) and wrapped by `untrusted()`; `partialSyncWarning()` adds the
      partial-result notice. Media becomes an MCP block in `mediaResult()` (`binaryContentBlock()`, `bytesToBase64()`).
 - **Result:** compact response, with ISO dates with time zone and the untrusted-content notice.
 - **Failures:** slow cold start → `Timed out waiting for WhatsApp…: try again in a moment`; a snapshot that does not open → `bad_snapshot` error
-  (the bridge never restarts from scratch on its own); email removed from the list → 403.
+  (the bridge never restarts from scratch on its own); email removed from the list → 403; chat outside the access
+  list → refusal pointing to `/pair`.
 
 ## P15 — Pair the number (`/pair`)
 
@@ -380,14 +387,23 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
      `redirectWithCookies()`). On return, `handlePairCallback()` checks with `isValidPairLogin()`, completes with
      `finishGithubLogin()` and `openPairSession()` stores the session.
   3. `pairPage()` shows `renderPairPage()` with the status from `fetchPairStatus()` (`describePairStatus()`,
-     `pairingSection()`, `maintenanceSection()`, `pairForm()`, `alertHtml()`) and a token from `issuePairCsrf()`.
+     `pairingSection()`, `maintenanceSection()`, `pairForm()`, `alertHtml()`), the access list from
+     `fetchPairAccess()` (`accessSection()`, `accessModeForm()`, `accessModeRadio()`, `accessSearchHtml()`,
+     `accessEntryRow()`) and a token from `issuePairCsrf()`.
   4. Each POST goes through `routePairPost()` and `handlePairPost()`: `isTrustedPost()` checks the token and `Origin`, and the
      `PAIR_ACTIONS` action calls the bridge (`/pair/code` with `normalizePhone()`, `/pair/qr`, `/logout`, or
      `/__reset`, which reaches `resetBridge()` and `archiveSnapshot()`), with the deadline from `pairDeadline()`; a failure becomes
      `pairActionError()`.
-- **Result:** pairing code (or QR) on screen; once typed on the phone, the bridge stays connected.
+  5. Chat access (`ACCESS_ACTIONS`, ADR 0033): `searchAccessCandidates()` asks the bridge for `/chats` and, with a
+     query, `/contacts`, merged by `mergeCandidates()`; Allow, Remove and the mode go through `changeAccess()`, which
+     reads the list, applies `withAccessEntry()` (with `accessEntryFrom()` and `parseAccessEntry()`),
+     `withoutAccessEntry()` or `withAccessMode()` and saves it with `saveAccessList()`; the Durable Object
+     validates it again in `handleAccessRoute()` (`parseAccessEntries()`).
+- **Result:** pairing code (or QR) on screen; once typed on the phone, the bridge stays connected. The access list
+  is saved in the Durable Object and applies to the next tool call.
 - **Failures:** stale form or from another origin → 403; invalid number → notice on the page; bridge not responding →
-  `Could not read the WhatsApp status right now.`.
+  `Could not read the WhatsApp status right now.`; invalid chat or more than `MAX_ACCESS_ENTRIES` → notice on the
+  page.
 
 ## P16 — Save and restore the session (snapshots in R2)
 
@@ -414,19 +430,19 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Trigger:** `send_message` with `confirmed_by_user: true`; or a Cron Trigger equal to `SYNC_CRON`.
 - **Steps:**
   1. Sending: `allowedRecipient()` normalizes the recipient with `normalizeRecipient()` (number, contact, LID or
-     group) and, if `SEND_ALLOWLIST` has items, requires it to be on it; `reply_to_message_id` becomes `reply_to`.
+     group) and, if `SEND_ALLOWLIST` has items, requires it to be on it; then `requireChatAccess()` applies the
+     owner's access list (ADR 0033); `reply_to_message_id` becomes `reply_to`.
      In the Durable Object, `guardSend()` applies `planSend()` with the stored history before forwarding
      `/send`. The bridge checks recipient and allowlist, looks up the quoted message (`GetQuoted`) and applies the limit
      again before sending.
   2. Cron: `runScheduledSync()` only acts if `isSyncCronEnabled()`; wakes the bridge with `/sync/wait`, requests
      `/__snapshot` and lets the container sleep after `SLEEP_AFTER`.
 - **Result:** at most `SEND_MAX_PER_HOUR` sends per hour, to any contact or group (or only the
-  allowlist, if set), each confirmed by the owner; with cron, history stays up to date even without use.
-- **Failures:** invalid recipient or outside the list → refused without calling the bridge; unknown quoted message →
-  `quoted_not_found` without using the quota; limit exceeded → 429 with the wait in seconds.
-- **Result:** at most `SEND_MAX_PER_HOUR` sends per hour, only to the allowlist; with cron, history stays up to date
+  allowlist, if set, and the owner's access list), each confirmed by the owner; with cron, history stays up to date
   even without use.
-- **Failures:** recipient outside the list → refused without calling the bridge; limit exceeded → 429 with the wait in seconds.
+- **Failures:** invalid recipient, outside `SEND_ALLOWLIST` or outside the access list → refused without calling the
+  bridge; unknown quoted message → `quoted_not_found` without using the quota; limit exceeded → 429 with the wait
+  in seconds.
 
 ## P18 — Manage Gmail: send, reply, forward, drafts and organize
 
@@ -510,3 +526,104 @@ Authentication is now only the OAuth of P08. The number stays reserved so the ot
 - **Failures:** Canvas not connected → the skill stops and points to `/setup-canvas`; an invalid plan → `build`
   writes nothing and lists the errors; broken page data → `#plan-error` shows the message; no account → the
   ticks stay in this browser (`local` state).
+
+## P21 — Connect Spotify with your own app (OAuth through the user's Spotify app)
+
+- **Trigger:** the user clicks **Connect** on the `spotify` connector in Claude (ADR 0034).
+- **Steps:**
+  1. Claude registers at `/register` (`checkClientRegistration()` only accepts Claude callbacks) and opens
+     `/authorize`; `showSpotifyAuthorize()` validates the request, starts the consent (`beginConsent`) and renders
+     `credentialsPage()` (`credentialsBody()`, `appSetupSteps()` with the exact Redirect URI from
+     `pageTargets()` / `spotifyRedirectUri()`).
+  2. The user creates their app on the Spotify dashboard, pastes the Client ID and Secret and posts the form.
+     `submitSpotifyAuthorize()` sends a cancel back to Claude (`denyConsent`); otherwise `credentialsProblem()`
+     validates the pair (`isSpotifyAppCredential()`) and an invalid one re-shows the page with the same handle
+     (`credentialsRetryPage()`).
+  3. `beginSpotifyAuthorization()` approves the consent, seals the credentials for 15 minutes
+     (`sealPendingApp()`) inside the library's upstream transaction and redirects to `spotifyAuthorizeUrl()` with
+     the user's Client ID, the minimal `SPOTIFY_SCOPES` and `show_dialog=true`.
+  4. Spotify returns to `/spotify/callback`: `finishSpotifySignIn()` → `resumeSpotifySignIn()` checks the
+     single-use `state` (`finishUpstream`), turns a refusal into `access_denied`, reopens the credentials
+     (`openPendingApp()`) and calls `completeSpotifySignIn()`.
+  5. `connectSpotifyAccount()` exchanges the code with HTTP Basic auth of the user's app (`exchangeSpotifyCode()`
+     → `postSpotifyToken()`), reads `/me` (`fetchSpotifyIdentity()`: owner = `account_id`, else `id`, URL-encoded)
+     and stores the account sealed in the vault (`saveAccount()` → `writeVault()`). `completeAuthorization` issues
+     Claude's grant with `{ owner, sid }`.
+- **Result:** Claude holds a token for this connector user; the user's app credentials and refresh token sit
+  encrypted under a hash of their Spotify account.
+- **Failures:** wrong Redirect URI → Spotify's own error page; wrong credentials → `spotifyFailurePage()` "Wrong
+  app credentials"; account not in the app's User Management (403 on `/me`) → "Account not allowed in your app";
+  forged or replayed `state` → 400; credentials sealed more than 15 minutes ago → `expiredConnectionPage()`.
+
+## P22 — Answer a Spotify tool (token renewal, call budget, retries)
+
+- **Trigger:** Claude calls a tool at `POST /mcp`.
+- **Steps:**
+  1. `handleSpotifyWorkerFetch()` → the library checks the token; `handleSpotifyMcp()` applies the per-session
+     limit (`isRateLimited()`), builds the deps (`createSpotifyDeps()`, `readSpotifySettings()`) with a fresh
+     request budget (`parseCallBudget()`) and serves `createSpotifyServer()`.
+  2. Each Web API request goes through `spotifyCall()`: `sendSpotifyAttempt()` gets a token from
+     `getSpotifyAccessToken()` (memory, keyed by owner, or `renewSpotifyAccessToken()` with the stored refresh
+     token via `refreshSpotifyToken()`, saving a rotated one), spends the budget (`spendCall()`) and sends
+     `spotifyRequestInit()`.
+  3. `decideRetry()` renews once after a 401 (`forgetSpotifyAccessToken()`), waits for a short `Retry-After` on 429
+     (`retryableDecision()`, `rateLimitDecision()`, `retryAfterSeconds()`), retries 5xx, and otherwise
+     `spotifyHttpError()` builds the actionable message (`forbiddenMessage()`, `notFoundMessage()`,
+     `rateLimitMessage()`, `spotifyErrorDetail()`).
+  4. Listings page with `collectOffsetPages()` / `fetchOffsetPage()` (`readPagingObject()`, `nextPageOffset()`,
+     `cursorAfter()`); results are compacted by `trackOutput()`, `playlistOutput()` and `catalogItemOutput()`.
+- **Result:** compact JSON for Claude; long reads return what fit plus where to continue.
+- **Failures:** expired authorization (6 months) or rotated secret → `reconnectError()`; no account →
+  `notConnectedError()`; budget exhausted → `BudgetExhaustedError`, turned into a "loading"/"partial" answer by
+  the smart tools; playback without Premium or device → the 403/404 messages.
+
+## P23 — Smart operation: preview → confirm → apply (with automatic backup)
+
+- **Trigger:** the user asks for a batch change (e.g. "keep only Chris Cornell + electronic").
+- **Steps:**
+  1. The `preview_*` tool loads its source with `readySource()` → `loadCompleteSource()` → `loadSource()`, which
+     reuses or continues a vault snapshot (`isSnapshotReusable()`, `emptySnapshot()`, `sourceVersion()`,
+     `advanceSnapshot()`), answering `loadingStatus()` until complete. Genres come from `ensureGenres()`
+     (per-user cache, `fetchArtistGenres()`).
+  2. A pure draft is built: `filterLikedDraft()` (`matchesFilter()`, `tracksToRemove()`), `dedupeDraft()`
+     (`findDuplicates()`, `songKey()`), `unavailableDraft()`, `splitDraft()`, `mergeDraft()`, `sortDraft()`,
+     `copyLikedDraft()`, `staleDraft()` (after `scanOwnPlaylists()`), or `restoreDraft()`.
+  3. `previewDraft()` stores it with `createPlan()` (10-minute validity) and answers `previewOutput()`: counts,
+     sample and `plan_id`. Nothing changed yet.
+  4. After the user's explicit OK, `apply_plan` loads it (`requirePlan()`), takes a 90-second lease so a parallel call for the same
+     plan is refused (`claimPlan()`), and `runPlan()` runs:
+     `backupBeforeApply()` saves the "before" data (`saveBackup()`) when a step removes or rewrites,
+     `reconcilePlan()` re-reads the item count of a resumed playlist step (`playlistItemCount()`), and
+     `runPlanChunk()` sends chunks (`writeLibraryChunk()` 40 URIs, `runAddChunk()`, `runReplaceChunk()` (which first checks the playlist is still the previewed version,
+     `checkPlaylistUnchanged()`),
+     `runCreateChunk()` 100 items), moving with `advancePlan()`.
+  5. `forgetTouchedSources()` drops the snapshots it changed; `storePlan()` keeps the progress (or removes the
+     finished plan) and `applyOutput()` answers `done` or `partial`.
+- **Result:** the change is applied; the answer carries `backup_id` and created playlists.
+- **Failures:** expired plan → "Run the preview again"; budget exhausted → `partial`, the next call continues;
+  Spotify error → progress kept, error message returned; playlists with local files are never rewritten
+  (`checkNoLocalFiles()`).
+
+## P24 — Back up, export and restore
+
+- **Trigger:** `create_backup`, `export_backup`, `preview_restore` or an automatic backup in P23.
+- **Steps:**
+  1. `create_backup` loads the source (P23 step 1) and saves `toBackupTrack()` / `playlistBefore()` with
+     `saveBackup()`, which keeps the newest `MAX_BACKUPS` (`listBackups()`, `backupEntry()`).
+  2. `export_backup` reads `requireBackup()` and pages it with `backupPage()`.
+  3. `preview_restore` builds `restoreSteps()` (re-like, re-follow, playlists recreated as new ones) and goes
+     through P23 steps 3–5.
+- **Result:** JSON copies of likes and playlists the user can export or restore.
+- **Failures:** unknown or another user's id → "does not exist"; liked dates cannot be restored (Spotify limit).
+
+## P25 — Disconnect and erase
+
+- **Trigger:** `disconnect` with `confirm: true`, after the user agrees.
+- **Steps:**
+  1. `revokeClaudeGrants()` revokes the user's Claude grants first, then `eraseOwner()` deletes every vault key of the user, of every type in `VAULT_TYPES` (`deletePrefix()` over
+     `ownerHash()` prefixes).
+  2. `forgetSpotifyAccessToken()` drops the cached access token. KV listing is eventually consistent: a record
+     written in the last seconds can survive; snapshots and caches also expire on their own (TTL).
+- **Result:** nothing of the user remains on the connector; the answer points to Spotify's apps page to remove
+  the app's access there too (Spotify has no revocation API).
+- **Failures:** none expected; KV errors propagate.

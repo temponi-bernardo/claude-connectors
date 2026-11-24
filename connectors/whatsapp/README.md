@@ -45,6 +45,17 @@ Claude ──OAuth 2.1 + MCP (HTTPS)──▶ Worker ──▶ Durable Object "o
 | `search_contacts` | Contacts by name or number                                                                                         |
 | `get_media`       | Image, audio or document from a message (up to `MAX_MEDIA_BYTES`, 5 MB)                                            |
 | `send_message`    | One text message to a contact or group, optionally quoting another                                                 |
+| `get_access_list` | The chat access list (every chat, or only the allowed ones) and the page where the owner changes it                |
+
+### Chat access
+
+By default Claude can read and message every chat. To narrow it, open `/pair`, sign in with GitHub and use
+**Chat access**: choose **Only the chats I allow below**, search groups and contacts by name and click
+**Allow** (or **Remove**). The list lives in the Durable Object and applies to the next call, no redeploy.
+
+With the restriction on, `get_messages`, `get_media`, `search_messages` and `send_message` refuse any chat
+outside the list; `list_chats` still lists every chat (so you can pick), with `allowed` and without the preview of
+chats outside it. No tool can change the list: only you, on the page (ADR 0033).
 
 Dates in ISO 8601 with time zone (`TIMEZONE`, default `America/Sao_Paulo`). Compact answers, with the warning that
 message content is untrusted third-party data.
@@ -60,6 +71,7 @@ Everyday commands, once set up:
 - **`/whatsapp-summary`** — what happened in chats and groups over a period.
 - **`/whatsapp-pending`** — chats waiting for your reply.
 - **`/search-whatsapp`** — address, PIX key, link, document or media in the messages.
+- **`/whatsapp-access`** — lists your groups and contacts and which ones Claude may access.
 
 ## Deploy (once)
 
@@ -173,7 +185,8 @@ On by default in `wrangler.toml` (`ENABLE_SEND = "true"`), to **any contact or g
   contact JID (`@s.whatsapp.net`, `@lid`) or group JID (`@g.us`, from `list_chats`); status and broadcast lists
   are rejected.
 - **Optional allowlist:** with `SEND_ALLOWLIST = "5531999999999,120363000000000001@g.us"`, only those recipients
-  (checked in the Worker and in the bridge). Empty, anyone goes.
+  (checked in the Worker and in the bridge). Empty, anyone goes. The chat access list on `/pair` applies on
+  top of it, without a redeploy (see "Chat access").
 
 **Reply with a quote** (`reply_to_message_id`): the id of a message from the **same chat**, as `get_messages`
 returns it. The bridge looks the message up in the local database and the reply goes out quoted; an unknown id

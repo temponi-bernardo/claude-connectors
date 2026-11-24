@@ -2,17 +2,10 @@
  * Dependencies injected into the Gmail connector (settings, KV, network and clock), so tests can swap the
  * network and the clock without global mocks.
  */
+import type { Fetcher, KvStore } from '../../../src/remote/worker-kit.js';
 import type { GmailSettings } from './config.js';
 
-/** The subset of Workers KV the connector uses. */
-export interface KvStore {
-  get(key: string): Promise<string | null>;
-  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
-  delete(key: string): Promise<void>;
-}
-
-/** Injectable `fetch`. */
-export type Fetcher = (input: string, init?: RequestInit) => Promise<Response>;
+export type { Fetcher, KvStore };
 
 /** Everything the tools and the linking flows need. */
 export interface GmailDeps {
