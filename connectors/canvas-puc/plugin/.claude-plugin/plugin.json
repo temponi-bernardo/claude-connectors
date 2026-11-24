@@ -6,9 +6,9 @@
     "name": "Bernardo Temponi",
     "url": "https://github.com/temponi-bernardo"
   },
-  "homepage": "https://temponi-bernardo.github.io/claude-connectors/",
+  "homepage": "https://claude-connectors-site.bftemponi.workers.dev/",
   "repository": "https://github.com/temponi-bernardo/claude-connectors",
   "license": "MIT",
   "keywords": ["canvas", "lms", "puc-minas", "education", "assignments", "grades"],
-  "privacyPolicyUrl": "https://temponi-bernardo.github.io/claude-connectors/privacy.html"
+  "privacyPolicyUrl": "https://claude-connectors-site.bftemponi.workers.dev/privacy.html"
 }
