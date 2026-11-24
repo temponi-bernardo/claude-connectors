@@ -2,11 +2,10 @@
 
 ## Next task
 
-**F5.2 — Spotify: connect the owner's account.** The Worker is live at
-`https://spotify-remote.bftemponi.workers.dev` (KV, `TOKEN_ENC_KEY` and smoke green, 2026-11-24); left: the owner
-creates their Spotify app (`/setup-spotify`) and `list_liked_tracks` answers on claude.ai. F3.2 (WhatsApp publish)
-is still open. Phase 4 (Anthropic plugin standard and
-English) is done; the Connectors Directory submission steps left for the owner are in
+**F6.2 — Private source repository with the full history** (Phase 6, ADR 0035). The owner first creates the empty
+private repository `temponi-bernardo/ia-conectors-src` and installs the Claude GitHub App on it. Still open:
+F5.2 (Spotify: the owner creates their Spotify app and `list_liked_tracks` answers on claude.ai). F3.2 (WhatsApp
+publish) is paused by ADR 0035. The Connectors Directory submission steps left for the owner are in
 [DIRECTORY-LISTING.md](DIRECTORY-LISTING.md).
 
 ## How to read
@@ -61,7 +60,7 @@ The MVP is the Canvas connector installed from the marketplace and used day to d
 | Id   | Task                                                                                  | Status | Done when                                                                                       |
 | ---- | ------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------- |
 | F3.1 | `whatsapp` connector: Worker + GitHub OAuth, Go bridge in the container, R2 snapshots | ✅     | `pr:check` green with full read, `/pair`, send behind a flag and ADR 0015 with the measurements |
-| F3.2 | Publish on the owner's account and pair the number                                    | 🟨     | `list_chats` answering on claude.ai; real history-sync RSS recorded in the ADR                  |
+| F3.2 | Publish on the owner's account and pair the number                                    | ⏸️     | `list_chats` answering on claude.ai; real history-sync RSS recorded in the ADR                  |
 | F3.3 | Restrict container egress to WhatsApp hosts (`allowedHosts`)                          | ⬜     | Bridge connects with `enableInternet = false` and only WhatsApp hosts, or an ADR saying why not |
 | F3.4 | Sending enabled to any contact or group, with quoting (ADR 0015)                      | ✅     | `ENABLE_SEND` on, optional allowlist, confirmation and limit kept; Worker and Go tests          |
 | F3.5 | Evaluate sending media over WhatsApp                                                  | ⬜     | Image/document sent with thumbnail and checked type, or an ADR saying why not                   |
@@ -100,6 +99,22 @@ ideas in [SPOTIFY-IDEAS.md](SPOTIFY-IDEAS.md).
 | F5.1 | `spotify` connector: own-app sign-in, sealed vault, full library/playlists, plans, backups   | ✅     | `pr:check` green; isolation, crypto, refresh, pagination, 429 and preview/apply tests; ADR 0034 and API validation in `docs/`    |
 | F5.2 | Publish the Spotify Worker and connect the owner's account                                   | 🟨     | KV ids in `wrangler.toml`, `TOKEN_ENC_KEY` set, `npm run spotify:deploy` smoke green, `list_liked_tracks` answering on claude.ai |
 | F5.3 | Run the motivating cleanup for real ("only Chris Cornell + electronic") and tune genre terms | ⬜     | Preview checked by the owner, applied, backup restorable; genre-term notes added to `/limpar-curtidas` if needed                 |
+
+## Phase 6 — Private source, public marketplace (ADR 0035)
+
+Close the source from now on without breaking current users: same marketplace name, plugin names, Worker URLs,
+OAuth grants and site URLs. WhatsApp becomes private to the owner (F3.2 paused). One PR per task, in order; the
+public repository is only slimmed (F6.5) after F6.2–F6.4 are proven.
+
+| Id   | Task                                                                                                                                                 | Status | Done when                                                                                                                                                        |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| F6.1 | Decision and plan: ADR 0035 and this phase                                                                                                           | ✅     | ADR accepted; F3.2 paused                                                                                                                                        |
+| F6.2 | Private repo `ia-conectors-src` with the full history (`git push --mirror`); Claude GitHub App on it; cloud sessions use it                          | ⬜     | `pr:check` green and `npm run smoke` passing for all four connectors from a clone of the private repo                                                            |
+| F6.3 | `npm run marketplace:publish` in the private repo: build, copy `canvas-puc`/`gmail`/`spotify` plugin folders and the site, public manifest, validate | ⬜     | Tested command produces the public tree; `claude plugin validate --strict` green on it; no source file outside `plugin/` and the site copied                     |
+| F6.4 | WhatsApp private to the owner: private marketplace `claude-connectors-private` in the private repo                                                   | ⬜     | `whatsapp_status` answers on claude.ai after installing from the private marketplace (fallback recorded if only the custom connector URL works)                  |
+| F6.5 | Slim the public repo in one revertible PR: only manifest, Canvas, Gmail and Spotify plugins, site, README, LICENSE; WhatsApp out of `privacy.html`   | ⬜     | `claude plugin validate --strict` green; Pages home, privacy and terms answer 200 at the same URLs; no history rewrite                                           |
+| F6.6 | Compatibility check for current users                                                                                                                | ⬜     | Fresh install and update of an old install both work; existing OAuth connections still answer; Canvas, Gmail and Spotify smoke green; recorded in ADR 0035 notes |
+| F6.7 | Switch the working setup to the private repo: CLAUDE.md, WORKFLOW, STRUCTURE, `/task` and `/release` with the publish step                           | ⬜     | A new session on the private repo runs `/task` end to end, including `marketplace:publish`                                                                       |
 
 ## Later phases
 
