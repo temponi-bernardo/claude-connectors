@@ -3,7 +3,8 @@
 Claude plugin for the PUC Minas Canvas LMS. It connects Claude to the remote MCP server at
 `https://canvas-puc-remote.bftemponi.workers.dev/mcp` (see `.mcp.json`) and adds usage skills in `skills/`.
 Nothing runs on your computer. The service page, privacy policy and terms are on the
-[project site](https://claude-connectors-site.bftemponi.workers.dev/).
+[project site](https://claude-connectors-site.bftemponi.workers.dev/) (privacy policy:
+[privacy.html](https://claude-connectors-site.bftemponi.workers.dev/privacy.html)).
 
 ## Install
 

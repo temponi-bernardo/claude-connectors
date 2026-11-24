@@ -2,7 +2,6 @@
   "name": "canvas-puc",
   "version": "3.3.0",
   "description": "Assignments, deadlines, grades, announcements, modules, files and inbox messages from PUC Minas Canvas, straight from the cloud: sign in with a Canvas access token the first time.",
-  "icon": "./icon.png",
   "author": {
     "name": "Bernardo Temponi",
     "url": "https://github.com/temponi-bernardo"
@@ -10,6 +9,5 @@
   "homepage": "https://claude-connectors-site.bftemponi.workers.dev/",
   "repository": "https://github.com/temponi-bernardo/claude-connectors",
   "license": "MIT",
-  "keywords": ["canvas", "lms", "puc-minas", "education", "assignments", "grades"],
-  "privacyPolicyUrl": "https://claude-connectors-site.bftemponi.workers.dev/privacy.html"
+  "keywords": ["canvas", "lms", "puc-minas", "education", "assignments", "grades"]
 }

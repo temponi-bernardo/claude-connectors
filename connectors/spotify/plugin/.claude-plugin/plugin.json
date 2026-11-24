@@ -2,7 +2,6 @@
   "name": "spotify",
   "version": "0.1.0",
   "description": "Your Spotify library, straight from the cloud: search, Liked Songs, playlists (read, create, edit, sort, split, merge), follows, history, top items and playback — plus bulk cleanups with preview, automatic backups and restore. Sign in with Spotify when the host listed you (up to 5 people), or connect your own Spotify app by pasting its Client ID and Secret.",
-  "icon": "./icon.png",
   "author": {
     "name": "Bernardo Temponi",
     "url": "https://github.com/temponi-bernardo"
@@ -10,6 +9,5 @@
   "homepage": "https://claude-connectors-site.bftemponi.workers.dev/",
   "repository": "https://github.com/temponi-bernardo/claude-connectors",
   "license": "MIT",
-  "keywords": ["spotify", "music", "playlists", "liked-songs", "library"],
-  "privacyPolicyUrl": "https://claude-connectors-site.bftemponi.workers.dev/privacy.html"
+  "keywords": ["spotify", "music", "playlists", "liked-songs", "library"]
 }
